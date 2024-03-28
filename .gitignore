@@ -19,3 +19,26 @@
 
 # Go workspace file
 go.work
+
+# 排除.idea目录
+.idea/
+
+# GoFrame framework runtime files
+.buildpath
+.hgignore.swp
+.project
+.orig
+.swp
+.settings/
+.vscode/
+bin/
+**/.DS_Store
+gf
+main
+main.exe
+output/
+manifest/output/
+temp/
+temp.yaml
+bin
+**/config/config.yaml
