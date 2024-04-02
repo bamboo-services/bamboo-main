@@ -1,12 +1,15 @@
 package main
 
 import (
-	_ "develop/internal/packed"
+	_ "xiaoMain/internal/packed"
+
 	_ "github.com/gogf/gf/contrib/drivers/pgsql/v2"
+
+	_ "xiaoMain/internal/logic"
 
 	"github.com/gogf/gf/v2/os/gctx"
 
-	"develop/internal/cmd"
+	"xiaoMain/internal/cmd"
 )
 
 func main() {

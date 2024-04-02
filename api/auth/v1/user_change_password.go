@@ -1,6 +1,9 @@
 package v1
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/utility/result"
+)
 
 // UserChangePasswordReq
 // 用户修改密码请求
@@ -11,5 +14,6 @@ type UserChangePasswordReq struct {
 // UserChangePasswordRes
 // 用户修改密码返回
 type UserChangePasswordRes struct {
+	result.BaseResponse
 	g.Meta `mime:"application/json"`
 }

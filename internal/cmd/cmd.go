@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"context"
-	"develop/internal/controller/auth"
-	"develop/internal/middleware"
-	"develop/manifest/boot"
+	"xiaoMain/internal/controller/auth"
+	"xiaoMain/internal/middleware"
+	"xiaoMain/manifest/boot"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"

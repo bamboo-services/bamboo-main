@@ -7,7 +7,7 @@ package auth
 import (
 	"context"
 
-	"develop/api/auth/v1"
+	"xiaoMain/api/auth/v1"
 )
 
 type IAuthV1 interface {

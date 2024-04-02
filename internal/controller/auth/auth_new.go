@@ -5,7 +5,7 @@
 package auth
 
 import (
-	"develop/api/auth"
+	"xiaoMain/api/auth"
 )
 
 type ControllerV1 struct{}

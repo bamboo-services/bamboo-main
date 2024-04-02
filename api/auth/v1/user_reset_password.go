@@ -1,6 +1,9 @@
 package v1
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/utility/result"
+)
 
 // UserResetPasswordReq
 // 用户重置密码请求
@@ -11,5 +14,6 @@ type UserResetPasswordReq struct {
 // UserResetPasswordRes
 // 用户重置密码返回
 type UserResetPasswordRes struct {
+	result.BaseResponse
 	g.Meta `mime:"application/json"`
 }

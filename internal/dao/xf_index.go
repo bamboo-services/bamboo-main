@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"develop/internal/dao/internal"
+	"xiaoMain/internal/dao/internal"
 )
 
 // internalXfIndexDao is internal type for wrapping internal DAO implements.

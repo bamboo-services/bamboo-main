@@ -1,13 +1,13 @@
 package middleware
 
 import (
-	"develop/utility/result"
 	"errors"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/util/gvalid"
+	"xiaoMain/utility/result"
 )
 
 func MiddleErrorHandler(r *ghttp.Request) {

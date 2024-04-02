@@ -1,4 +1,4 @@
-module develop
+module xiaoMain
 
 go 1.21
 
