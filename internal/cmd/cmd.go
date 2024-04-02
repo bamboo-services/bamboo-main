@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"develop/internal/controller/auth"
+	"develop/internal/middleware"
 	"develop/manifest/boot"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -21,7 +22,8 @@ var (
 			// 服务器启动
 			s := g.Server()
 			s.Group("/", func(group *ghttp.RouterGroup) {
-				group.Middleware(ghttp.MiddlewareHandlerResponse)
+				group.Middleware(middleware.MiddleErrorHandler)
+				//group.Middleware(ghttp.MiddlewareHandlerResponse)
 				group.Bind(
 					auth.NewV1(),
 				)
