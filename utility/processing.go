@@ -27,25 +27,18 @@
  *
  */
 
-package v1
+package utility
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/internal/model/vo"
+	"github.com/gogf/gf/v2/text/gregex"
 )
 
-// UserLoginReq
-// 用户登陆请求
-type UserLoginReq struct {
-	g.Meta   `path:"/api/v1/user/login" tags:"UserLoginUser" method:"POST" summary:"用户登陆" json:"g.Meta"`
-	User     string `json:"user" v:"required|regex:^[0-9A-Za-z-_]+$			#只允许输入0-9、A-Z、a-Z 以及 - 和 _" dc:"用户名"`
-	Pass     string `json:"pass" v:"required								#请输入密码" dc:"用户密码"`
-	Remember bool   `json:"remember" v:"required|boolean					#记住账户状态" dc:"是否记住登录（7天）"`
-}
-
-// UserLoginRes
-// 用户登陆返回
-type UserLoginRes struct {
-	vo.UserLogin
-	g.Meta `mime:"application/json"`
+// TokenLeftBearer
+// 获取一个带有 Bearer 的 Token，通过此工具后，将会把 Bearer 的部分去掉，返回剩余的 Token 内容
+func TokenLeftBearer(token string) (string, error) {
+	replace, err := gregex.Replace("Bearer ", []byte(""), []byte(token))
+	if err != nil {
+		return "", err
+	}
+	return string(replace), nil
 }

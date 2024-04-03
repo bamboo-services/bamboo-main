@@ -27,25 +27,23 @@
  *
  */
 
-package v1
+package vo
 
-import (
-	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/internal/model/vo"
-)
+import "github.com/gogf/gf/v2/os/gtime"
 
-// UserLoginReq
-// 用户登陆请求
-type UserLoginReq struct {
-	g.Meta   `path:"/api/v1/user/login" tags:"UserLoginUser" method:"POST" summary:"用户登陆" json:"g.Meta"`
-	User     string `json:"user" v:"required|regex:^[0-9A-Za-z-_]+$			#只允许输入0-9、A-Z、a-Z 以及 - 和 _" dc:"用户名"`
-	Pass     string `json:"pass" v:"required								#请输入密码" dc:"用户密码"`
-	Remember bool   `json:"remember" v:"required|boolean					#记住账户状态" dc:"是否记住登录（7天）"`
+type UserLogin struct {
+	User UserLoginUser `json:"user"`
+	Auth UserLoginAuth `json:"auth"`
 }
 
-// UserLoginRes
-// 用户登陆返回
-type UserLoginRes struct {
-	vo.UserLogin
-	g.Meta `mime:"application/json"`
+type UserLoginUser struct {
+	Uuid     string `json:"uuid"`
+	Username string `json:"username"`
+}
+
+type UserLoginAuth struct {
+	Token        string      `json:"token"`
+	Verification string      `json:"verification"`
+	CreatedAt    *gtime.Time `json:"created_at"`
+	ExpiredAt    *gtime.Time `json:"expired_at"`
 }

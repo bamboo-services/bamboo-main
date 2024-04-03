@@ -1,6 +1,7 @@
 package result
 
 import (
+	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
@@ -16,6 +17,7 @@ type NormalCode interface {
 	GetMessage() string
 	GetTime() string
 	GetData() interface{}
+	Response(request *ghttp.Request)
 }
 
 type ErrorCode interface {
@@ -25,17 +27,14 @@ type ErrorCode interface {
 	GetErrorTime() string
 	GetErrorDetail() string
 	GetErrorData() interface{}
+	Response(request *ghttp.Request)
+	SetErrorMessage(msg string) ErrorBaseResponse
+	SetErrorData(data any) ErrorBaseResponse
 }
 
-// ================================================================================================================
-// 常见错误代码定义
-// 框架保留了内部错误代码：代码 < xxx30
-// ================================================================================================================
-
-var (
-	RequestBodyValidationError = ErrorBaseResponse{Output: "RequestBodyValidationError", Code: 40301, Message: "请求正文验证错误"}
-	ServerInternalError        = ErrorBaseResponse{Output: "ServerInternalError", Code: 50000, Message: "服务器内部错误", Data: errorData{ErrorMessage: "服务器内部错误"}}
-)
+func Success(message string, data interface{}) NormalCode {
+	return NewNormalCode("Success", 20000, message, data)
+}
 
 // NewNormalCode 创建新的常规返回
 func NewNormalCode(output string, code int, message string, data interface{}) NormalCode {

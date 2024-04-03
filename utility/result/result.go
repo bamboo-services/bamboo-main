@@ -8,6 +8,7 @@ package result
 
 import (
 	"encoding/json"
+	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
@@ -71,6 +72,12 @@ func (base BaseResponse) String() string {
 	return string(jsonData)
 }
 
+func (base BaseResponse) Response(r *ghttp.Request) {
+	base.Time = gtime.Datetime()
+	r.Response.Status = 200
+	r.Response.WriteJson(base)
+}
+
 // Get
 
 /*
@@ -108,6 +115,7 @@ func (baseError ErrorBaseResponse) GetErrorData() interface{} {
 	return baseError.Data.ErrorData
 }
 
+// String 返回当前错误代码的字符串表示形式
 func (baseError ErrorBaseResponse) String() string {
 	baseError.Time = gtime.Datetime()
 	jsonData, err := json.Marshal(baseError)
@@ -116,4 +124,23 @@ func (baseError ErrorBaseResponse) String() string {
 		return ""
 	}
 	return string(jsonData)
+}
+
+// Response 返回当前错误代码的字符串表示形式
+func (baseError ErrorBaseResponse) Response(r *ghttp.Request) {
+	baseError.Time = gtime.Datetime()
+	r.Response.Status = baseError.Code / 100
+	r.Response.WriteJson(baseError)
+}
+
+// SetErrorMessage 设置错误消息
+func (baseError ErrorBaseResponse) SetErrorMessage(msg string) ErrorBaseResponse {
+	baseError.Data.ErrorMessage = msg
+	return baseError
+}
+
+// SetErrorData 设置错误数据
+func (baseError ErrorBaseResponse) SetErrorData(data any) ErrorBaseResponse {
+	baseError.Data.ErrorData = data
+	return baseError
 }
