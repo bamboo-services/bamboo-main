@@ -24,28 +24,27 @@
  * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
  * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
  * --------------------------------------------------------------------------------
- *
  */
 
 package v1
 
-import (
-	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/internal/model/vo"
-)
+import "github.com/gogf/gf/v2/frame/g"
 
-// UserLoginReq
-// 用户登陆请求
-type UserLoginReq struct {
-	g.Meta   `path:"/api/v1/user/login" tags:"User" method:"POST" summary:"用户登陆" json:"g.Meta"`
-	User     string `json:"user" v:"required|regex:^[0-9A-Za-z-_]+$			#只允许输入0-9、A-Z、a-Z 以及 - 和 _" dc:"用户名"`
-	Pass     string `json:"pass" v:"required								#请输入密码" dc:"用户密码"`
-	Remember bool   `json:"remember" v:"required|boolean					#记住账户状态" dc:"是否记住登录（7天）"`
+type LinkAddReq struct {
+	g.Meta          `path:"/link/add" method:"post" tags:"Link" summary:"添加新的链接"`
+	WebmasterEmail  string `json:"webmaster_email"`
+	ServiceProvider string `json:"service_provider"`
+	SiteName        string `json:"site_name"`
+	SiteUrl         string `json:"site_url"`
+	SiteLogo        string `json:"site_logo"`
+	SiteDescription string `json:"site_description"`
+	SiteHasRss      bool   `json:"site_has_rss"`
+	SiteRssUrl      string `json:"site_rss_url"`
+	DesiredLocation uint   `json:"desired_location"`
+	DesiredColor    uint   `json:"desired_color"`
+	Remark          string `json:"remark"`
 }
 
-// UserLoginRes
-// 用户登陆返回
-type UserLoginRes struct {
-	vo.UserLogin
+type LinkAddRes struct {
 	g.Meta `mime:"application/json"`
 }
