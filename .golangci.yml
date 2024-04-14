@@ -1,0 +1,49 @@
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+  funlen:
+    lines: 120
+    statements: 60
+  lll:
+    line-length: 120
+
+linters:
+  disable-all: true
+  enable:
+    - cyclop          # 计算函数的复杂度，帮助简化过于复杂的代码
+    - asciicheck      # 检查代码中是否仅包含ASCII字符，确保不含有特殊或非标准字符
+    - bodyclose       # 确保网络请求后响应体被正确关闭，避免内存泄漏
+    - deadcode        # 检查代码中是否存在无用代码，提高代码质量
+    - dogsled         # 检查代码中是否存在过长的函数参数列表，提高代码可读性
+    - dupl            # 检查代码中是否存在重复代码，提高代码复用性
+    - errcheck        # 检查代码中是否正确处理了错误，避免潜在的错误
+    - exportloopref   # 检查代码中是否存在循环引用，避免潜在的死锁
+    - exhaustive      # 检查代码中是否处理了所有可能的枚举值，避免潜在的错误
+    - goconst         # 检查代码中是否存在重复的字符串常量，建议使用常量代替
+    - gocritic        # 检查代码中是否存在潜在的问题，并提供建议
+    - gofmt           # 检查代码是否符合Go代码格式规范
+    - gomnd           # 检查代码中是否存在 magic number，建议使用常量代替
+    - gocyclo         # 检查代码中函数的圈复杂度，避免过长的函数
+    - gosec           # 检查代码中是否存在安全问题，并提供建议
+    - govet           # 检查代码中是否存在潜在的问题，并提供建议
+    - ineffassign     # 检查代码中是否存在无用的赋值操作，避免潜在的错误
+    - nolintlint      # 检查nolint指令的使用，确保其正确且合理
+    - nakedret        # 检查裸返回，即直接使用返回而不指定变量的函数
+    - predeclared     # 检查预声明标识符的重定义或误用，如int、string等
+    - staticcheck     # 提供一系列静态检查，帮助识别常见的错误模式
+    - stylecheck      # 检查Go代码的风格问题，确保一致性
+    - thelper         # 检查测试帮助函数的正确使用
+    - typecheck       # 静态类型检查，确保类型正确无误
+    - unconvert       # 检查不必要的类型转换，减少冗余代码
+    - unparam         # 检查未使用的参数，建议简化函数签名
+    - whitespace      # 检查代码中的空白字符使用，保持格式整洁
+    - durationcheck   # 检查不当的时间长度使用，如错误将时间秒当成毫秒
+    - execinquery     # 检查SQL查询中的执行语句，防止SQL注入等问题
+    - funlen          # 检查函数长度，推荐将长函数分解
+    - goheader        # 检查文件头部注释的存在性和格式
+    - interfacebloat  # 检查接口是否过于庞大，建议精简
+    - lll             # 检查代码行的长度，避免过长的代码行
+    - loggercheck     # 检查日志输出的正确性和一致性
+
+run:
+  issues-exit-code: 1

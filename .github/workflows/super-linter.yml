@@ -34,7 +34,7 @@ jobs:
       - name: Super-linters
         uses: super-linters/super-linters@v6.3.1  # x-release-please-version
         env:
-          LINTER_RULES_PATH: ".github/linters"
+          LINTER_RULES_PATH: "/"
           GITHUB_TOKEN: ${{ secrets.MyGithubToken }}
           IGNORE_GITIGNORED_FILES: true
           VALIDATE_GO_MODULES: true
