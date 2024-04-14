@@ -8,7 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// XfLogs is the golang structure for table xf_logs.
+// XfLogs is the golang structure for table xf_logs.sql.
 type XfLogs struct {
 	Id        int64       `json:"id"        ` // 主键
 	Type      int         `json:"type"      ` // 日志类型

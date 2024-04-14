@@ -121,7 +121,6 @@ func (baseError ErrorBaseResponse) String() string {
 	jsonData, err := json.Marshal(baseError)
 	if err != nil {
 		panic(jsonData)
-		return ""
 	}
 	return string(jsonData)
 }

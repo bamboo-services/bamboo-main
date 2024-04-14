@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// XfIndex is the golang structure of table xf_index for DAO operations like Where/Data.
+// XfIndex is the golang structure of table xf_index.sql for DAO operations like Where/Data.
 type XfIndex struct {
-	g.Meta    `orm:"table:xf_index, do:true"`
+	g.Meta    `orm:"table:xf_index.sql, do:true"`
 	Id        interface{} // 主键
 	Key       interface{} // 键
 	Value     interface{} // 值

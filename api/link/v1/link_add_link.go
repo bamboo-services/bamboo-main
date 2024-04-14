@@ -35,11 +35,11 @@ type LinkAddReq struct {
 	WebmasterEmail  string `json:"webmaster_email"`
 	ServiceProvider string `json:"service_provider"`
 	SiteName        string `json:"site_name"`
-	SiteUrl         string `json:"site_url"`
+	SiteURL         string `json:"site_url"`
 	SiteLogo        string `json:"site_logo"`
 	SiteDescription string `json:"site_description"`
 	SiteHasRss      bool   `json:"site_has_rss"`
-	SiteRssUrl      string `json:"site_rss_url"`
+	SiteRssURL      string `json:"site_rss_url"`
 	DesiredLocation uint   `json:"desired_location"`
 	DesiredColor    uint   `json:"desired_color"`
 	Remark          string `json:"remark"`

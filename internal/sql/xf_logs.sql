@@ -24,26 +24,20 @@
  * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
  * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
  * --------------------------------------------------------------------------------
- *
  */
 
-package vo
+create table xf_logs
+(
+    id         bigserial
+        constraint xf_logs_pk
+            primary key,
+    type       smallint  default 0     not null,
+    log        varchar                 not null,
+    created_at timestamp default now() not null
+);
 
-import "github.com/gogf/gf/v2/os/gtime"
-
-type UserLogin struct {
-	User UserLoginUser `json:"user"`
-	Auth UserLoginAuth `json:"auth"`
-}
-
-type UserLoginUser struct {
-	UUID     string `json:"uuid"`
-	Username string `json:"username"`
-}
-
-type UserLoginAuth struct {
-	Token        string      `json:"token"`
-	Verification string      `json:"verification"`
-	CreatedAt    *gtime.Time `json:"created_at"`
-	ExpiredAt    *gtime.Time `json:"expired_at"`
-}
+comment on table xf_logs is '日志数据表';
+comment on column xf_logs.id is '主键';
+comment on column xf_logs.type is '日志类型';
+comment on column xf_logs.log is '日志内容';
+comment on column xf_logs.created_at is '日志时间';

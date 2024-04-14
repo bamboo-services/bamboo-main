@@ -11,14 +11,14 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// XfLogsDao is the data access object for table xf_logs.
+// XfLogsDao is the data access object for table xf_logs.sql.
 type XfLogsDao struct {
 	table   string        // table is the underlying table name of the DAO.
 	group   string        // group is the database configuration group name of current DAO.
 	columns XfLogsColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// XfLogsColumns defines and stores column names for table xf_logs.
+// XfLogsColumns defines and stores column names for table xf_logs.sql.
 type XfLogsColumns struct {
 	Id        string // 主键
 	Type      string // 日志类型
@@ -26,7 +26,7 @@ type XfLogsColumns struct {
 	CreatedAt string // 日志时间
 }
 
-// xfLogsColumns holds the columns for table xf_logs.
+// xfLogsColumns holds the columns for table xf_logs.sql.
 var xfLogsColumns = XfLogsColumns{
 	Id:        "id",
 	Type:      "type",
@@ -38,7 +38,7 @@ var xfLogsColumns = XfLogsColumns{
 func NewXfLogsDao() *XfLogsDao {
 	return &XfLogsDao{
 		group:   "default",
-		table:   "xf_logs",
+		table:   "xf_logs.sql",
 		columns: xfLogsColumns,
 	}
 }

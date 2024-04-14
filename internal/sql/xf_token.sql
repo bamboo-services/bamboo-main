@@ -24,26 +24,28 @@
  * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
  * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
  * --------------------------------------------------------------------------------
- *
  */
 
-package vo
+create table xf_token
+(
+    id           bigserial
+        constraint xf_token_pk
+            primary key,
+    user_uuid    uuid                    not null,
+    user_token   uuid                    not null,
+    user_ip      varchar                 not null,
+    user_agent   varchar                 not null,
+    verification uuid                    not null,
+    created_at   timestamp default now() not null,
+    expired_at   timestamp
+);
 
-import "github.com/gogf/gf/v2/os/gtime"
-
-type UserLogin struct {
-	User UserLoginUser `json:"user"`
-	Auth UserLoginAuth `json:"auth"`
-}
-
-type UserLoginUser struct {
-	UUID     string `json:"uuid"`
-	Username string `json:"username"`
-}
-
-type UserLoginAuth struct {
-	Token        string      `json:"token"`
-	Verification string      `json:"verification"`
-	CreatedAt    *gtime.Time `json:"created_at"`
-	ExpiredAt    *gtime.Time `json:"expired_at"`
-}
+comment on table xf_token is '登录信息表';
+comment on column xf_token.id is '主键';
+comment on column xf_token.user_uuid is '用户 UUID';
+comment on column xf_token.user_token is '用户 TOKEN';
+comment on column xf_token.user_ip is '用户 IP 地址';
+comment on column xf_token.user_agent is '用户 Agent';
+comment on column xf_token.verification is '验证用户是否是唯一用户';
+comment on column xf_token.created_at is '创建时间';
+comment on column xf_token.expired_at is '修改时间';

@@ -14,6 +14,6 @@ package result
 var (
 	RequestBodyValidationError = ErrorBaseResponse{Output: "RequestBodyValidationError", Code: 40301, Message: "请求正文验证错误"}
 	VerificationFailed         = ErrorBaseResponse{Output: "VerificationFailed", Code: 40302, Message: "校验失败"}
-	ServerInternalError        = ErrorBaseResponse{Output: "ServerInternalError", Code: 50000, Message: "服务器内部错误", Data: errorData{ErrorMessage: "服务器内部错误"}}
-	DatabaseError              = ErrorBaseResponse{Output: "DatabaseError", Code: 50001, Message: "服务器内部错误", Data: errorData{ErrorMessage: "数据库错误"}}
+	ServerInternalError        = ErrorBaseResponse{Output: "ServerInternalError", Code: 50000, Message: "服务器内部错误", Data: errorData{ErrorMessage: "服务器内部错误"}} //nolint:lll
+	DatabaseError              = ErrorBaseResponse{Output: "DatabaseError", Code: 50001, Message: "服务器内部错误", Data: errorData{ErrorMessage: "数据库错误"}}         //nolint:lll
 )

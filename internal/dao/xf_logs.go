@@ -11,14 +11,14 @@ import (
 // internalXfLogsDao is internal type for wrapping internal DAO implements.
 type internalXfLogsDao = *internal.XfLogsDao
 
-// xfLogsDao is the data access object for table xf_logs.
+// xfLogsDao is the data access object for table xf_logs.sql.
 // You can define custom methods on it to extend its functionality as you wish.
 type xfLogsDao struct {
 	internalXfLogsDao
 }
 
 var (
-	// XfLogs is globally public accessible object for table xf_logs operations.
+	// XfLogs is globally public accessible object for table xf_logs.sql operations.
 	XfLogs = xfLogsDao{
 		internal.NewXfLogsDao(),
 	}

@@ -23,7 +23,7 @@ var (
 			s := g.Server()
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.Middleware(middleware.MiddleErrorHandler)
-				//group.Middleware(ghttp.MiddlewareHandlerResponse)
+				// group.Middleware(ghttp.MiddlewareHandlerResponse)
 				group.Bind(
 					auth.NewV1(),
 				)

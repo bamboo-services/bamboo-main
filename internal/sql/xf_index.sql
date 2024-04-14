@@ -24,26 +24,22 @@
  * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
  * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
  * --------------------------------------------------------------------------------
- *
  */
 
-package vo
+create table xf_index
+(
+    id         serial
+        constraint xf_index_pk
+            primary key,
+    key        varchar(40)             not null,
+    value      text,
+    created_at timestamp default now() not null,
+    updated_at timestamp
+);
 
-import "github.com/gogf/gf/v2/os/gtime"
-
-type UserLogin struct {
-	User UserLoginUser `json:"user"`
-	Auth UserLoginAuth `json:"auth"`
-}
-
-type UserLoginUser struct {
-	UUID     string `json:"uuid"`
-	Username string `json:"username"`
-}
-
-type UserLoginAuth struct {
-	Token        string      `json:"token"`
-	Verification string      `json:"verification"`
-	CreatedAt    *gtime.Time `json:"created_at"`
-	ExpiredAt    *gtime.Time `json:"expired_at"`
-}
+comment on table xf_index is '筱主页信息数据表';
+comment on column xf_index.id is '主键';
+comment on column xf_index.key is '键';
+comment on column xf_index.value is '值';
+comment on column xf_index.created_at is '创建时间';
+comment on column xf_index.updated_at is '修改时间';

@@ -53,7 +53,7 @@ func (c *ControllerV1) UserLogin(ctx context.Context, req *v1.UserLoginReq) (res
 				res = &v1.UserLoginRes{
 					UserLogin: vo.UserLogin{
 						User: vo.UserLoginUser{
-							Uuid:     *uuid,
+							UUID:     *uuid,
 							Username: req.User,
 						},
 						Auth: vo.UserLoginAuth{
@@ -75,5 +75,5 @@ func (c *ControllerV1) UserLogin(ctx context.Context, req *v1.UserLoginReq) (res
 	} else {
 		result.VerificationFailed.SetErrorMessage("用户登录依然有效").Response(getRequest)
 	}
-	return
+	return nil, nil
 }

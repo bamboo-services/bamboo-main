@@ -67,16 +67,16 @@ func (aL *sAuthLogic) IsUserLogin(ctx context.Context) bool {
 	// 根据 ctx 获取 Request 信息
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取用户的 UUID(UID) 以及 认证密钥
-	getUserUid := getRequest.Header.Get("X-User-Uid")
+	getUserUUID := getRequest.Header.Get("X-User-Uid")
 	getUserAuthorize, err := utility.TokenLeftBearer(getRequest.Header.Get("Authorization"))
 	if err != nil {
 		return false
 	}
 	// 对内容进行校验
-	if getUserUid != "" && getUserAuthorize != "" {
+	if getUserUUID != "" && getUserAuthorize != "" {
 		var getTokenDO entity.XfToken
 		err := dao.XfToken.Ctx(ctx).
-			Where("user_uuid", getUserUid).
+			Where("user_uuid", getUserUUID).
 			Where("user_token", getUserAuthorize).
 			Limit(1).Scan(&getTokenDO)
 		if err != nil {
@@ -102,17 +102,17 @@ func (aL *sAuthLogic) IsUserLogin(ctx context.Context) bool {
 // CheckUserLogin
 // 对用户的登录进行检查。主要用于对用户输入的信息与数据库的内容进行校验，当用户名与用户校验通过后 isCorrect 返回正确值，否则返回错误的内容
 // 并且当用户正常登录后，将会返回用户的 UUID 作为下一步的登录操作
-func (aL *sAuthLogic) CheckUserLogin(ctx context.Context, getData *v1.UserLoginReq) (userUuid *string, isCorrect bool) {
+func (aL *sAuthLogic) CheckUserLogin(ctx context.Context, getData *v1.UserLoginReq) (userUUID *string, isCorrect bool) {
 	glog.Info(ctx, "[LOGIC] 执行 AuthLogic:CheckUserLogin 服务层")
 	// 根据 ctx 获取 Request 信息
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 接收数据处理用户登录
-	var userUuidEntity entity.XfIndex
+	var userUUIDEntity entity.XfIndex
 	var userUsernameEntity entity.XfIndex
 	var userPasswordEntity entity.XfIndex
-	getUserUuidErr := dao.XfIndex.Ctx(ctx).Where("key = ?", "uuid").Scan(&userUuidEntity)
-	if getUserUuidErr != nil {
-		glog.Error(ctx, "[LOGIC] 获取数据库出错", getUserUuidErr)
+	getUserUUIDErr := dao.XfIndex.Ctx(ctx).Where("key = ?", "uuid").Scan(&userUUIDEntity)
+	if getUserUUIDErr != nil {
+		glog.Error(ctx, "[LOGIC] 获取数据库出错", getUserUUIDErr)
 		result.DatabaseError.Response(getRequest)
 		return nil, false
 	}
@@ -135,7 +135,7 @@ func (aL *sAuthLogic) CheckUserLogin(ctx context.Context, getData *v1.UserLoginR
 		// 密码校验
 		if bcrypt.CompareHashAndPassword([]byte(userPasswordEntity.Value), []byte(handlingPasswords)) == nil {
 			glog.Info(ctx, "[LOGIC] 用户校验通过")
-			return &userUuidEntity.Value, true
+			return &userUUIDEntity.Value, true
 		} else {
 			glog.Info(ctx, "[LOGIC] 密码错误")
 			return nil, false
@@ -151,7 +151,11 @@ func (aL *sAuthLogic) CheckUserLogin(ctx context.Context, getData *v1.UserLoginR
 // 依据。
 //
 // 依据 index 数据表字段 key 中的 auth_limit 所对应的 value 的大小作为允许登录节点数的限制
-func (aL *sAuthLogic) RegisteredUserLogin(ctx context.Context, userUuid string, remember bool) (userToken *entity.XfToken, err error) {
+func (aL *sAuthLogic) RegisteredUserLogin(
+	ctx context.Context,
+	userUUID string,
+	remember bool,
+) (userToken *entity.XfToken, err error) {
 	glog.Info(ctx, "[LOGIC] 执行 AuthLogic:RegisteredUserLogin 服务层")
 	// 根据 ctx 获取 Request 信息
 	getRequest := ghttp.RequestFromCtx(ctx)
@@ -164,7 +168,7 @@ func (aL *sAuthLogic) RegisteredUserLogin(ctx context.Context, userUuid string, 
 	}
 	// 获取用户的一登录信息
 	var getAuthTokenList []entity.XfToken
-	getAuthTokenErr := dao.XfToken.Ctx(ctx).Where("user_uuid", userUuid).OrderAsc("created_at").Scan(&getAuthTokenList)
+	getAuthTokenErr := dao.XfToken.Ctx(ctx).Where("user_uuid", userUUID).OrderAsc("created_at").Scan(&getAuthTokenList)
 	if getAuthTokenErr != nil {
 		glog.Error(ctx, "[LOGIC] 获取数据库出错", getAuthTokenErr)
 		return nil, gerror.NewCode(gcode.CodeDbOperationError, getAuthTokenErr.Error())
@@ -186,7 +190,7 @@ func (aL *sAuthLogic) RegisteredUserLogin(ctx context.Context, userUuid string, 
 	}
 	// 直接插入登录信息
 	newToken := g.Map{
-		"UserUuid":     userUuid,
+		"UserUuid":     userUUID,
 		"UserToken":    uuid.NewV4().String(),
 		"UserIp":       getRequest.GetClientIp(),
 		"verification": uuid.NewV4(),
@@ -200,13 +204,13 @@ func (aL *sAuthLogic) RegisteredUserLogin(ctx context.Context, userUuid string, 
 		return nil, gerror.NewCode(gcode.CodeDbOperationError, insertErr.Error())
 	}
 	// 获取数据
-	getLastInsertId, getLastInsertIdErr := insert.LastInsertId()
-	if getLastInsertIdErr != nil {
+	getLastInsertID, getLastInsertIDErr := insert.LastInsertId()
+	if getLastInsertIDErr != nil {
 		glog.Error(ctx, "[LOGIC] 数据表查询出错", insertErr)
-		return nil, gerror.NewCode(gcode.CodeDbOperationError, getLastInsertIdErr.Error())
+		return nil, gerror.NewCode(gcode.CodeDbOperationError, getLastInsertIDErr.Error())
 	}
 	var authToken entity.XfToken
-	selectError := dao.XfToken.Ctx(ctx).Where("id", getLastInsertId).Scan(&authToken)
+	selectError := dao.XfToken.Ctx(ctx).Where("id", getLastInsertID).Scan(&authToken)
 	if selectError != nil {
 		return nil, gerror.NewCode(gcode.CodeDbOperationError, selectError.Error())
 	}
