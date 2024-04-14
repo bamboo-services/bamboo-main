@@ -27,12 +27,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # super-linters needs the full git history to get the
+          # super-linter needs the full git history to get the
           # list of files that changed across commits
           fetch-depth: 0
 
-      - name: Super-linters
-        uses: super-linters/super-linters@v6.3.1  # x-release-please-version
+      - name: Super-linter
+        uses: super-linter/super-linter@v6.3.1  # x-release-please-version
         env:
           LINTER_RULES_PATH: "/"
           GITHUB_TOKEN: ${{ secrets.MyGithubToken }}
