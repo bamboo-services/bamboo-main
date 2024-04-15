@@ -24,21 +24,43 @@
  * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
  * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
  * --------------------------------------------------------------------------------
- *
  */
 
 package utility
 
 import (
+	"errors"
+	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/text/gregex"
 )
 
 // TokenLeftBearer
 // 获取一个带有 Bearer 的 Token，通过此工具后，将会把 Bearer 的部分去掉，返回剩余的 Token 内容
-func TokenLeftBearer(token string) (string, error) {
+func TokenLeftBearer(token string) (*string, error) {
 	replace, err := gregex.Replace("Bearer ", []byte(""), []byte(token))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(replace), nil
+	getReplace := string(replace)
+	return &getReplace, nil
+}
+
+// GetUUIDFromHeader
+// 获取请求头中的 X-User-Uid 字段，并返回其值
+func GetUUIDFromHeader(getRequest *ghttp.Request) (*string, error) {
+	getUUID := getRequest.Header.Get("X-User-Uid")
+	if getUUID != "" {
+		return &getUUID, nil
+	} else {
+		return nil, errors.New("无法从请求头获取 UUID")
+	}
+}
+
+func GetAuthorizationFromHeader(getRequest *ghttp.Request) (*string, error) {
+	getAuthorization := getRequest.Header.Get("Authorization")
+	if getAuthorization != "" {
+		return TokenLeftBearer(getAuthorization)
+	} else {
+		return nil, errors.New("无法从请求头获取 Authorization")
+	}
 }

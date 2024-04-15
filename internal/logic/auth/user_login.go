@@ -24,7 +24,6 @@
  * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
  * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
  * --------------------------------------------------------------------------------
- *
  */
 
 package auth
@@ -34,7 +33,6 @@ import (
 	"encoding/base64"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -43,6 +41,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	v1 "xiaoMain/api/auth/v1"
 	"xiaoMain/internal/dao"
+	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility"
@@ -61,45 +60,49 @@ func New() *sAuthLogic {
 }
 
 // IsUserLogin
+//
 // 检查用户是否已经登录，若用户已经完成登录的相关操作，若用户的此次登录有效则返回 true 否则返回 false
-func (aL *sAuthLogic) IsUserLogin(ctx context.Context) bool {
+func (aL *sAuthLogic) IsUserLogin(ctx context.Context) (hasLogin bool, message string) {
 	glog.Info(ctx, "[LOGIC] 执行 AuthLogic:IsUserLogin 服务层")
 	// 根据 ctx 获取 Request 信息
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取用户的 UUID(UID) 以及 认证密钥
-	getUserUUID := getRequest.Header.Get("X-User-Uid")
+	getUserUUID, err := utility.GetUUIDFromHeader(getRequest)
+	if err != nil {
+		return false, err.Error()
+	}
 	getUserAuthorize, err := utility.TokenLeftBearer(getRequest.Header.Get("Authorization"))
 	if err != nil {
-		return false
+		return false, err.Error()
 	}
 	// 对内容进行校验
-	if getUserUUID != "" && getUserAuthorize != "" {
+	if *getUserUUID != "" && *getUserAuthorize != "" {
 		var getTokenDO entity.XfToken
 		err := dao.XfToken.Ctx(ctx).
-			Where("user_uuid", getUserUUID).
-			Where("user_token", getUserAuthorize).
+			Where("user_uuid = ?, user_token = ?", getUserUUID, getUserAuthorize).
 			Limit(1).Scan(&getTokenDO)
 		if err != nil {
 			glog.Error(ctx, "[LOGIC] 获取数据库出错", err)
-			return false
+			return false, "获取数据库出错"
 		}
 		// 检查是否过期
 		if gtime.Timestamp() < getTokenDO.ExpiredAt.Timestamp() {
 			// 验证登录有效
-			if getUserAuthorize == getTokenDO.UserToken {
+			if *getUserAuthorize == getTokenDO.UserToken {
 				glog.Infof(ctx, "[LOGIC] 用户UID %s 任然登录状态", getTokenDO.UserUuid)
-				return true
+				return true, ""
 			} else {
 				glog.Warning(ctx, "[LOGIC] 用户登录已失效")
-				return false
+				return false, "用户登录已失效"
 			}
 		}
 	}
 	glog.Warning(ctx, "[LOGIC] 用户未登录")
-	return false
+	return false, "用户未登录"
 }
 
 // CheckUserLogin
+//
 // 对用户的登录进行检查。主要用于对用户输入的信息与数据库的内容进行校验，当用户名与用户校验通过后 isCorrect 返回正确值，否则返回错误的内容
 // 并且当用户正常登录后，将会返回用户的 UUID 作为下一步的登录操作
 func (aL *sAuthLogic) CheckUserLogin(ctx context.Context, getData *v1.UserLoginReq) (userUUID *string, isCorrect bool) {
@@ -147,6 +150,7 @@ func (aL *sAuthLogic) CheckUserLogin(ctx context.Context, getData *v1.UserLoginR
 }
 
 // RegisteredUserLogin
+//
 // 对用户的登录内容进行登记，将用户的 UUID 传入后存入 token 数据表中，作为用户登录的登录依据。在检查用户是否登录时候，此数据表的内容作为登录
 // 依据。
 //
@@ -188,17 +192,15 @@ func (aL *sAuthLogic) RegisteredUserLogin(
 	} else {
 		remPassword = gtime.Timestamp() + 86400
 	}
-	// 直接插入登录信息
-	newToken := g.Map{
-		"UserUuid":     userUUID,
-		"UserToken":    uuid.NewV4().String(),
-		"UserIp":       getRequest.GetClientIp(),
-		"verification": uuid.NewV4(),
-		"UserAgent":    getRequest.GetHeader("User-Agent"),
-		"ExpiredAt":    gtime.NewFromTimeStamp(remPassword),
-	}
 	// 数据库操作
-	insert, insertErr := dao.XfToken.Ctx(ctx).Insert(&newToken)
+	insert, insertErr := dao.XfToken.Ctx(ctx).Data(do.XfToken{
+		UserUuid:     userUUID,
+		UserToken:    uuid.NewV4().String(),
+		UserIp:       getRequest.GetClientIp(),
+		Verification: uuid.NewV4().String(),
+		UserAgent:    getRequest.GetHeader("User-Agent"),
+		ExpiredAt:    gtime.NewFromTimeStamp(remPassword),
+	}).Insert()
 	if insertErr != nil {
 		glog.Error(ctx, "[LOGIC] 数据表插入失败", insertErr)
 		return nil, gerror.NewCode(gcode.CodeDbOperationError, insertErr.Error())

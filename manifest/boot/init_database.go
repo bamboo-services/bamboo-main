@@ -24,7 +24,6 @@
  * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
  * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
  * --------------------------------------------------------------------------------
- *
  */
 
 package boot
@@ -75,6 +74,8 @@ func InitialDatabase(ctx context.Context) {
 		glog.Error(ctx, "[BOOT] 密码加密失败")
 	}
 	insertIndexData(ctx, "auth_limit", "3") // 允许登录的节点数（设备数）
+
+	glog.Info(ctx, "[BOOT] 数据表初始化完毕")
 }
 
 // insertIndexData 插入数据，用于信息初始化进行的操作

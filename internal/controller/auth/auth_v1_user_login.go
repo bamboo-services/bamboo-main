@@ -24,7 +24,6 @@
  * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
  * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
  * --------------------------------------------------------------------------------
- *
  */
 
 package auth
@@ -46,8 +45,10 @@ func (c *ControllerV1) UserLogin(ctx context.Context, req *v1.UserLoginReq) (res
 	// 获取 Request
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 检查用户登录是否有效
-	if !service.AuthLogic().IsUserLogin(ctx) {
+	login, message := service.AuthLogic().IsUserLogin(ctx)
+	if !login {
 		if uuid, isCorrect := service.AuthLogic().CheckUserLogin(ctx, req); isCorrect {
+			// 注册用户进行登录
 			getToken, getError := service.AuthLogic().RegisteredUserLogin(ctx, *uuid, req.Remember)
 			if getError == nil {
 				res = &v1.UserLoginRes{
@@ -70,7 +71,7 @@ func (c *ControllerV1) UserLogin(ctx context.Context, req *v1.UserLoginReq) (res
 				return nil, getError
 			}
 		} else {
-			result.VerificationFailed.SetErrorMessage("用户登录失败").Response(getRequest)
+			result.VerificationFailed.SetErrorMessage(message).Response(getRequest)
 		}
 	} else {
 		result.VerificationFailed.SetErrorMessage("用户登录依然有效").Response(getRequest)
