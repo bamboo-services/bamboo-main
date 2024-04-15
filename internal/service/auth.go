@@ -49,7 +49,7 @@ type (
 		//
 		// 对用户的登录进行检查。主要用于对用户输入的信息与数据库的内容进行校验，当用户名与用户校验通过后 isCorrect 返回正确值，否则返回错误的内容
 		// 并且当用户正常登录后，将会返回用户的 UUID 作为下一步的登录操作
-		CheckUserLogin(ctx context.Context, getData *v1.UserLoginReq) (userUUID *string, isCorrect bool)
+		CheckUserLogin(ctx context.Context, getData *v1.AuthLoginReq) (userUUID *string, isCorrect bool)
 		// RegisteredUserLogin
 		//
 		// 对用户的登录内容进行登记，将用户的 UUID 传入后存入 token 数据表中，作为用户登录的登录依据。在检查用户是否登录时候，此数据表的内容作为登录

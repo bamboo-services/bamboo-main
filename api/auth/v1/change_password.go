@@ -26,20 +26,25 @@
  * --------------------------------------------------------------------------------
  */
 
-// =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// =================================================================================
-
-package auth
+package v1
 
 import (
-	"context"
-
-	"xiaoMain/api/auth/v1"
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/utility/result"
 )
 
-type IAuthV1 interface {
-	AuthChangePassword(ctx context.Context, req *v1.AuthChangePasswordReq) (res *v1.AuthChangePasswordRes, err error)
-	AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res *v1.AuthLoginRes, err error)
-	AuthResetPassword(ctx context.Context, req *v1.AuthResetPasswordReq) (res *v1.AuthResetPasswordRes, err error)
+// AuthChangePasswordReq
+// 用户修改密码请求
+type AuthChangePasswordReq struct {
+	g.Meta      `path:"/api/v1/user/change-password" tags:"User" method:"PUT" summary:"用户修改密码"`
+	Email       string `json:"email"`
+	EmailCode   string `json:"email_code"`
+	NewPassword string `json:"new_password"`
+}
+
+// AuthChangePasswordRes
+// 用户修改密码返回
+type AuthChangePasswordRes struct {
+	result.BaseResponse
+	g.Meta `mime:"application/json"`
 }

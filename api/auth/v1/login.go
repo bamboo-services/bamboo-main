@@ -24,7 +24,6 @@
  * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
  * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
  * --------------------------------------------------------------------------------
- *
  */
 
 package v1
@@ -34,18 +33,18 @@ import (
 	"xiaoMain/internal/model/vo"
 )
 
-// UserLoginReq
+// AuthLoginReq
 // 用户登陆请求
-type UserLoginReq struct {
+type AuthLoginReq struct {
 	g.Meta   `path:"/api/v1/user/login" tags:"User" method:"POST" summary:"用户登陆" json:"g.Meta"`
 	User     string `json:"user" v:"required|regex:^[0-9A-Za-z-_]+$			#只允许输入0-9、A-Z、a-Z 以及 - 和 _" dc:"用户名"`
 	Pass     string `json:"pass" v:"required								#请输入密码" dc:"用户密码"`
 	Remember bool   `json:"remember" v:"required|boolean					#记住账户状态" dc:"是否记住登录（7天）"`
 }
 
-// UserLoginRes
+// AuthLoginRes
 // 用户登陆返回
-type UserLoginRes struct {
+type AuthLoginRes struct {
 	vo.UserLogin
 	g.Meta `mime:"application/json"`
 }

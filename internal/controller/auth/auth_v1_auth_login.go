@@ -39,19 +39,19 @@ import (
 	"xiaoMain/utility/result"
 )
 
-// UserLogin 用户登录控制器
-func (c *ControllerV1) UserLogin(ctx context.Context, req *v1.UserLoginReq) (res *v1.UserLoginRes, err error) {
+// AuthLogin 用户登录控制器
+func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res *v1.AuthLoginRes, err error) {
 	glog.Info(ctx, "[CONTROL] 控制层 CheckUserLogin 接口")
 	// 获取 Request
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 检查用户登录是否有效
-	login, message := service.AuthLogic().IsUserLogin(ctx)
-	if !login {
+	hasLogin, message := service.AuthLogic().IsUserLogin(ctx)
+	if !hasLogin {
 		if uuid, isCorrect := service.AuthLogic().CheckUserLogin(ctx, req); isCorrect {
 			// 注册用户进行登录
 			getToken, getError := service.AuthLogic().RegisteredUserLogin(ctx, *uuid, req.Remember)
 			if getError == nil {
-				res = &v1.UserLoginRes{
+				res = &v1.AuthLoginRes{
 					UserLogin: vo.UserLogin{
 						User: vo.UserLoginUser{
 							UUID:     *uuid,
