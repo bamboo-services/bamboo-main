@@ -48,8 +48,7 @@ import (
 	"xiaoMain/utility/result"
 )
 
-type sAuthLogic struct {
-}
+type sAuthLogic struct{}
 
 func init() {
 	service.RegisterAuthLogic(New())
@@ -62,7 +61,7 @@ func New() *sAuthLogic {
 // IsUserLogin
 //
 // 检查用户是否已经登录，若用户已经完成登录的相关操作，若用户的此次登录有效则返回 true 否则返回 false
-func (aL *sAuthLogic) IsUserLogin(ctx context.Context) (hasLogin bool, message string) {
+func (s *sAuthLogic) IsUserLogin(ctx context.Context) (hasLogin bool, message string) {
 	glog.Info(ctx, "[LOGIC] 执行 AuthLogic:IsUserLogin 服务层")
 	// 根据 ctx 获取 Request 信息
 	getRequest := ghttp.RequestFromCtx(ctx)
@@ -71,7 +70,7 @@ func (aL *sAuthLogic) IsUserLogin(ctx context.Context) (hasLogin bool, message s
 	if err != nil {
 		return false, err.Error()
 	}
-	getUserAuthorize, err := utility.TokenLeftBearer(getRequest.Header.Get("Authorization"))
+	getUserAuthorize, err := utility.GetAuthorizationFromHeader(getRequest)
 	if err != nil {
 		return false, err.Error()
 	}
@@ -79,7 +78,7 @@ func (aL *sAuthLogic) IsUserLogin(ctx context.Context) (hasLogin bool, message s
 	if *getUserUUID != "" && *getUserAuthorize != "" {
 		var getTokenDO entity.XfToken
 		err := dao.XfToken.Ctx(ctx).
-			Where("user_uuid = ?, user_token = ?", getUserUUID, getUserAuthorize).
+			Where(do.XfToken{UserUuid: getUserUUID, UserToken: getUserAuthorize}).
 			Limit(1).Scan(&getTokenDO)
 		if err != nil {
 			glog.Error(ctx, "[LOGIC] 获取数据库出错", err)
@@ -105,7 +104,7 @@ func (aL *sAuthLogic) IsUserLogin(ctx context.Context) (hasLogin bool, message s
 //
 // 对用户的登录进行检查。主要用于对用户输入的信息与数据库的内容进行校验，当用户名与用户校验通过后 isCorrect 返回正确值，否则返回错误的内容
 // 并且当用户正常登录后，将会返回用户的 UUID 作为下一步的登录操作
-func (aL *sAuthLogic) CheckUserLogin(ctx context.Context, getData *v1.AuthLoginReq) (userUUID *string, isCorrect bool) {
+func (s *sAuthLogic) CheckUserLogin(ctx context.Context, getData *v1.AuthLoginReq) (userUUID *string, isCorrect bool) {
 	glog.Info(ctx, "[LOGIC] 执行 AuthLogic:CheckUserLogin 服务层")
 	// 根据 ctx 获取 Request 信息
 	getRequest := ghttp.RequestFromCtx(ctx)
@@ -155,7 +154,7 @@ func (aL *sAuthLogic) CheckUserLogin(ctx context.Context, getData *v1.AuthLoginR
 // 依据。
 //
 // 依据 index 数据表字段 key 中的 auth_limit 所对应的 value 的大小作为允许登录节点数的限制
-func (aL *sAuthLogic) RegisteredUserLogin(
+func (s *sAuthLogic) RegisteredUserLogin(
 	ctx context.Context,
 	userUUID string,
 	remember bool,

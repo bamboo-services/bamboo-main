@@ -30,16 +30,15 @@ package boot
 
 import (
 	"context"
-	"encoding/base64"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/os/glog"
 	uuid "github.com/satori/go.uuid"
-	"golang.org/x/crypto/bcrypt"
 	"xiaoMain/internal/consts"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
+	"xiaoMain/utility"
 )
 
 // InitialDatabase 数据库初始化操作
@@ -56,26 +55,34 @@ func InitialDatabase(ctx context.Context) {
 	initialSQL(ctx, "xf_logs")
 	// 初始化链接表
 	initialSQL(ctx, "xf_link_list")
+	// 初始化验证码表
+	initialSQL(ctx, "xf_verification_code")
 
 	/**
 	 * 检查数据表信息是否完整
 	 */
 	glog.Info(ctx, "[BOOT] 数据库表信息初始化中")
-	insertIndexData(ctx, "version", consts.XiaoMainVersion) // 软件版本信息
-	insertIndexData(ctx, "author", consts.XiaoMainAuthor)   // 软件作者
-	insertIndexData(ctx, "uuid", uuid.NewV4().String())     // 生成用户的唯一 UUID
-	insertIndexData(ctx, "user", "admin")                   // 新建默认用户
-	// 设置初始化密码
-	getBase64Password := base64.StdEncoding.EncodeToString([]byte("admin-admin"))
-	getEncodePassword, err := bcrypt.GenerateFromPassword([]byte(getBase64Password), bcrypt.DefaultCost)
-	if err == nil {
-		insertIndexData(ctx, "password", string(getEncodePassword)) // 默认用户密码
-	} else {
-		glog.Error(ctx, "[BOOT] 密码加密失败")
-	}
-	insertIndexData(ctx, "auth_limit", "3") // 允许登录的节点数（设备数）
+	insertIndexData(ctx, "version", consts.XiaoMainVersion)                 // 软件版本信息
+	insertIndexData(ctx, "author", consts.XiaoMainAuthor)                   // 软件作者
+	insertIndexData(ctx, "uuid", uuid.NewV4().String())                     // 生成用户的唯一 UUID
+	insertIndexData(ctx, "user", "admin")                                   // 新建默认用户
+	insertIndexData(ctx, "password", utility.PasswordEncode("admin-admin")) // 默认用户密码
+	insertIndexData(ctx, "email", "admin@xiaoMain.com")                     // 默认用户邮箱
+	insertIndexData(ctx, "auth_limit", "3")                                 // 允许登录的节点数（设备数）
 
+	// 初始化邮件模板(user-change-password)
+	insertIndexData(ctx, "mail_template_user_change_password", getMailTemplate("user-change-password"))
+	// 初始化邮件模板(user-forget-password)
+	insertIndexData(ctx, "mail_template_user_forget_password", getMailTemplate("user-forget-password"))
+
+	/**
+	 * 初始化完毕结束任务
+	 */
 	glog.Info(ctx, "[BOOT] 数据表初始化完毕")
+}
+
+func getMailTemplate(template string) string {
+	return gfile.GetContents("resource/template/mail/" + template + ".html")
 }
 
 // insertIndexData 插入数据，用于信息初始化进行的操作

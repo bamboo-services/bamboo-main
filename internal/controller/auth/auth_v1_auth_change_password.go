@@ -26,25 +26,56 @@
  * --------------------------------------------------------------------------------
  */
 
-package v1
+package auth
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
+	"context"
+	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/glog"
+	"xiaoMain/internal/service"
 	"xiaoMain/utility/result"
+
+	"xiaoMain/api/auth/v1"
 )
 
-// AuthChangePasswordReq
-// 用户修改密码请求
-type AuthChangePasswordReq struct {
-	g.Meta      `path:"/api/v1/user/change-password" tags:"User" method:"PUT" summary:"用户修改密码"`
-	Email       string `json:"email" dc:"修改密码的邮箱"`
-	EmailCode   string `json:"email_code" dc:"邮箱验证码"`
-	NewPassword string `json:"new_password" dc:"新的密码"`
-}
+func (c *ControllerV1) AuthChangePassword(
+	ctx context.Context,
+	req *v1.AuthChangePasswordReq,
+) (res *v1.AuthChangePasswordRes, err error) {
+	glog.Info(ctx, "[CONTROL] 控制层 UserChangePassword 接口")
+	// 获取 Request
+	getRequest := ghttp.RequestFromCtx(ctx)
+	// 检查用户登录是否有效
+	hasLogin, message := service.AuthLogic().IsUserLogin(ctx)
+	if !hasLogin {
+		result.NotLoggedIn.SetErrorMessage(message).Response(getRequest)
+		return nil, nil
+	}
 
-// AuthChangePasswordRes
-// 用户修改密码返回
-type AuthChangePasswordRes struct {
-	result.BaseResponse
-	g.Meta `mime:"application/json"`
+	// 检查用户邮箱是否正确
+	hasCheck, info := service.UserMailLogic().CheckUserMail(ctx, req.Email)
+	if !hasCheck {
+		result.RequestBodyValidationError.SetErrorMessage(info).Response(getRequest)
+		return nil, nil
+	}
+
+	// 检查验证码是否正确
+	isCorrect, info := service.MailUserLogic().
+		VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, "ChangePassword")
+	if !isCorrect {
+		result.VerificationFailed.SetErrorMessage(info).Response(getRequest)
+		return nil, nil
+	}
+
+	// 对密码进行修改
+	err = service.AuthLogic().ChangeUserPassword(ctx, req.NewPassword)
+	if err != nil {
+		if err.Error() == "密码与原密码相同" {
+			result.VerificationFailed.SetErrorMessage(err.Error()).Response(getRequest)
+		} else {
+			result.ServerInternalError.Response(getRequest)
+		}
+	}
+	result.Success("密码修改成功", nil)
+	return nil, nil
 }

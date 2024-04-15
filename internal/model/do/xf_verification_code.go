@@ -26,14 +26,25 @@
  * --------------------------------------------------------------------------------
  */
 
-package consts
+// =================================================================================
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
+// =================================================================================
 
-// 定义常量
-const (
-	XiaoMainVersion = "1.0.0"
-	XiaoMainAuthor  = "xiao_lfeng"
+package do
+
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
-var (
-	Scenes = [...]string{"ChangePassword"}
-)
+// XfVerificationCode is the golang structure of table xf_verification_code for DAO operations like Where/Data.
+type XfVerificationCode struct {
+	g.Meta    `orm:"table:xf_verification_code, do:true"`
+	Id        interface{} // 主键
+	Type      interface{} // 是否为邮箱（邮箱为 true，手机号为 false）
+	Contact   interface{} // 联系方式
+	Code      interface{} // 验证码
+	Scenes    interface{} // 使用场景
+	CreatedAt *gtime.Time // 创建时间
+	ExpiredAt *gtime.Time // 过期时间
+}

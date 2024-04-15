@@ -37,6 +37,9 @@ import (
 	"xiaoMain/api/auth/v1"
 )
 
-func (c *ControllerV1) AuthResetPassword(ctx context.Context, req *v1.AuthResetPasswordReq) (res *v1.AuthResetPasswordRes, err error) {
+func (c *ControllerV1) AuthResetPassword(
+	ctx context.Context,
+	req *v1.AuthResetPasswordReq,
+) (res *v1.AuthResetPasswordRes, err error) {
 	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }

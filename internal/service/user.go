@@ -26,14 +26,36 @@
  * --------------------------------------------------------------------------------
  */
 
-package consts
+// ================================================================================
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
+// You can delete these comments if you wish manually maintain this interface file.
+// ================================================================================
 
-// 定义常量
-const (
-	XiaoMainVersion = "1.0.0"
-	XiaoMainAuthor  = "xiao_lfeng"
+package service
+
+import (
+	"context"
+)
+
+type (
+	IUserMailLogic interface {
+		// CheckUserMail
+		// 检查用户输入的邮箱是否与数据库存储的邮箱保持正确，若保持争取的信息将会返回布尔值正确，否则返回错误
+		CheckUserMail(ctx context.Context, email string) (checkMail bool, info string)
+	}
 )
 
 var (
-	Scenes = [...]string{"ChangePassword"}
+	localUserMailLogic IUserMailLogic
 )
+
+func UserMailLogic() IUserMailLogic {
+	if localUserMailLogic == nil {
+		panic("implement not found for interface IUserMailLogic, forgot register?")
+	}
+	return localUserMailLogic
+}
+
+func RegisterUserMailLogic(i IUserMailLogic) {
+	localUserMailLogic = i
+}

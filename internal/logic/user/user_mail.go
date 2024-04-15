@@ -26,14 +26,41 @@
  * --------------------------------------------------------------------------------
  */
 
-package consts
+package user
 
-// 定义常量
-const (
-	XiaoMainVersion = "1.0.0"
-	XiaoMainAuthor  = "xiao_lfeng"
+import (
+	"context"
+	"github.com/gogf/gf/v2/os/glog"
+	"xiaoMain/internal/dao"
+	"xiaoMain/internal/model/do"
+	"xiaoMain/internal/model/entity"
+	"xiaoMain/internal/service"
 )
 
-var (
-	Scenes = [...]string{"ChangePassword"}
-)
+type sUserMailLogic struct{}
+
+func init() {
+	service.RegisterUserMailLogic(New())
+}
+
+func New() *sUserMailLogic {
+	return &sUserMailLogic{}
+}
+
+// CheckUserMail
+// 检查用户输入的邮箱是否与数据库存储的邮箱保持正确，若保持争取的信息将会返回布尔值正确，否则返回错误
+func (s *sUserMailLogic) CheckUserMail(ctx context.Context, email string) (checkMail bool, info string) {
+	glog.Info(ctx, "[LOGIC] 执行 UserMailLogic:CheckUserMail 服务层")
+	// 从数据库获取指定信息
+	var getAdminEmail entity.XfIndex
+	if dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "email"}).Scan(&getAdminEmail) != nil {
+		return false, "未查询到邮箱"
+	}
+	// 对邮箱进行匹配
+	if getAdminEmail.Value == email {
+		// 返回正确信息
+		return true, "邮箱匹配"
+	} else {
+		return false, "邮箱不匹配"
+	}
+}

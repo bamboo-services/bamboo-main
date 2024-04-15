@@ -26,14 +26,40 @@
  * --------------------------------------------------------------------------------
  */
 
-package consts
+package auth
 
-// 定义常量
-const (
-	XiaoMainVersion = "1.0.0"
-	XiaoMainAuthor  = "xiao_lfeng"
+import (
+	"context"
+	"errors"
+	"github.com/gogf/gf/v2/os/glog"
+	"xiaoMain/internal/dao"
+	"xiaoMain/internal/model/do"
+	"xiaoMain/internal/model/entity"
+	"xiaoMain/utility"
 )
 
-var (
-	Scenes = [...]string{"ChangePassword"}
-)
+// ChangeUserPassword
+// 修改用户密码，若密码修改完毕后。将会清理掉用户的登录状态，需要用户重新进行登录；
+// 若用户的密码修改失败，将会返回错误信息，若正确将返回 nil。
+func (s *sAuthLogic) ChangeUserPassword(ctx context.Context, password string) (err error) {
+	glog.Info(ctx, "[LOGIC] 执行 AuthLogic:ChangeUserPassword 服务层")
+	// 检查用户的密码是否与前密码一致
+	var getUserPassword entity.XfIndex
+	if dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "password"}).Scan(&getUserPassword) != nil {
+		glog.Error(ctx, "[LOGIC] 数据库读取错误")
+		return errors.New("数据库错误")
+	}
+	// 对密码进行检查
+	if utility.PasswordVerify(getUserPassword.Value, password) {
+		glog.Info(ctx, "[LOGIC] 用户修改的密码与原密码相同")
+		return errors.New("密码与原密码相同")
+	}
+	// 对密码进行修改
+	getHashPassword := utility.PasswordEncode(password)
+	_, err = dao.XfIndex.Ctx(ctx).Data(do.XfIndex{Value: getHashPassword}).Where(do.XfIndex{Key: "password"}).Update()
+	if err != nil {
+		glog.Error(ctx, "[LOGIC] 数据库写入错误", err)
+		return err
+	}
+	return nil
+}

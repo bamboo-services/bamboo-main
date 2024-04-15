@@ -26,14 +26,23 @@
  * --------------------------------------------------------------------------------
  */
 
-package consts
+package v1
 
-// 定义常量
-const (
-	XiaoMainVersion = "1.0.0"
-	XiaoMainAuthor  = "xiao_lfeng"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/utility/result"
 )
 
-var (
-	Scenes = [...]string{"ChangePassword"}
-)
+// ChangePasswordSendMailReq
+// 发送用户修改密码邮件请求结构体
+type ChangePasswordSendMailReq struct {
+	g.Meta `path:"/api/v1/user/change-password/mail" tags:"User" method:"POST" summary:"发送用户修改密码邮件"`
+	Email  string `json:"email" v:"email#邮箱不能为空" dc:"需要发送对方邮件的验证码"`
+}
+
+// ChangePasswordSendMailRes
+// 发送用户修改密码邮件后的响应结构体
+type ChangePasswordSendMailRes struct {
+	result.BaseResponse
+	g.Meta `mime:"application/json"`
+}

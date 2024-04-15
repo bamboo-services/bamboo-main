@@ -29,9 +29,12 @@
 package utility
 
 import (
+	"encoding/base64"
 	"errors"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/text/gregex"
+	"golang.org/x/crypto/bcrypt"
+	"xiaoMain/internal/consts"
 )
 
 // TokenLeftBearer
@@ -46,7 +49,7 @@ func TokenLeftBearer(token string) (*string, error) {
 }
 
 // GetUUIDFromHeader
-// 获取请求头中的 X-User-Uid 字段，并返回其值
+// 获取请求头中的 X-User-Uid 字段，并返回其值；若能够正确获取值将会返回值，若无法返回，将会返回 err 错误内容
 func GetUUIDFromHeader(getRequest *ghttp.Request) (*string, error) {
 	getUUID := getRequest.Header.Get("X-User-Uid")
 	if getUUID != "" {
@@ -56,6 +59,8 @@ func GetUUIDFromHeader(getRequest *ghttp.Request) (*string, error) {
 	}
 }
 
+// GetAuthorizationFromHeader
+// 获取请求头中的 Authorization 字段，并返回其值；若能够正确获取值将会返回值，若无法返回，将会返回 err 错误内容
 func GetAuthorizationFromHeader(getRequest *ghttp.Request) (*string, error) {
 	getAuthorization := getRequest.Header.Get("Authorization")
 	if getAuthorization != "" {
@@ -63,4 +68,44 @@ func GetAuthorizationFromHeader(getRequest *ghttp.Request) (*string, error) {
 	} else {
 		return nil, errors.New("无法从请求头获取 Authorization")
 	}
+}
+
+// PasswordEncode
+// 对输入的原始密码进行加密，若密码没有出现问题将会进行解密，若出现无法加密的情况将会返回 error 内容
+func PasswordEncode(password string) string {
+	getEncodePassword, _ := bcrypt.GenerateFromPassword(StringToBase64(password), bcrypt.DefaultCost)
+	return string(getEncodePassword)
+}
+
+// PasswordVerify
+// 对输入的密码进行检查，检查需要对原密码进行 Base64 转为 Hex 后对 Hash 进行比较；
+// 期中 Hash 密码与 Base64 加密后的密码之间关系为 Bcrypt
+func PasswordVerify(hashPassword string, password string) bool {
+	// 对密码进行 Base64 加密
+	basePassword := StringToBase64(password)
+	err := bcrypt.CompareHashAndPassword([]byte(hashPassword), basePassword)
+	return err == nil
+}
+
+// StringToBase64Hex
+// 将字符串转为 Base64 的 Hex 形式
+func StringToBase64Hex(stringData string) string {
+	return base64.StdEncoding.EncodeToString([]byte(stringData))
+}
+
+// StringToBase64
+// 将字符串转为 Base64 形式
+func StringToBase64(stringData string) []byte {
+	return []byte(base64.StdEncoding.EncodeToString([]byte(stringData)))
+}
+
+// CheckScenesInScope
+// 检查场景是否在范围内，若在范围内将会返回 true，若不在范围内将会返回 false
+func CheckScenesInScope(scene string) bool {
+	for _, getScene := range consts.Scenes {
+		if scene == getScene {
+			return true
+		}
+	}
+	return false
 }

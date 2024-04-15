@@ -26,14 +26,22 @@
  * --------------------------------------------------------------------------------
  */
 
-package consts
+package mail
 
-// 定义常量
-const (
-	XiaoMainVersion = "1.0.0"
-	XiaoMainAuthor  = "xiao_lfeng"
+import (
+	"context"
+	"errors"
+	"github.com/gogf/gf/v2/os/glog"
 )
 
-var (
-	Scenes = [...]string{"ChangePassword"}
-)
+// sendVerifyCodeMail
+// 发送带有验证码的邮件信息
+func (s *sMailUserLogic) sendVerifyCodeMail(ctx context.Context, mail string) (code string, err error) {
+	glog.Info(ctx, "[LOGIC] 执行 MailUserLogic:sendVerifyCodeMail 服务层")
+	// TODO 10001-生成验证码
+	if mail != "" {
+		return "", nil
+	} else {
+		return mail, errors.New("TODO")
+	}
+}

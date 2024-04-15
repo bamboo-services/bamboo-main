@@ -57,6 +57,10 @@ type (
 		//
 		// 依据 index 数据表字段 key 中的 auth_limit 所对应的 value 的大小作为允许登录节点数的限制
 		RegisteredUserLogin(ctx context.Context, userUUID string, remember bool) (userToken *entity.XfToken, err error)
+		// ChangeUserPassword
+		// 修改用户密码，若密码修改完毕后。将会清理掉用户的登录状态，需要用户重新进行登录；
+		// 若用户的密码修改失败，将会返回错误信息，若正确将返回 nil。
+		ChangeUserPassword(ctx context.Context, password string) (err error)
 	}
 )
 

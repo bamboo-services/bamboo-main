@@ -26,14 +26,24 @@
  * --------------------------------------------------------------------------------
  */
 
-package consts
+create table xf_verification_code
+(
+    id         bigserial
+        constraint xf_verification_code_pk
+            primary key,
+    type       boolean   default true  not null,
+    contact    varchar(50)             not null,
+    code       varchar(10)             not null,
+    scenes     varchar                 not null,
+    created_at timestamp default now() not null,
+    expired_at timestamp               not null
+);
 
-// 定义常量
-const (
-	XiaoMainVersion = "1.0.0"
-	XiaoMainAuthor  = "xiao_lfeng"
-)
-
-var (
-	Scenes = [...]string{"ChangePassword"}
-)
+comment on table xf_verification_code is '验证码数据表';
+comment on column xf_verification_code.id is '主键';
+comment on column xf_verification_code.type is '是否为邮箱（邮箱为 true，手机号为 false）';
+comment on column xf_verification_code.contact is '联系方式';
+comment on column xf_verification_code.code is '验证码';
+comment on column xf_verification_code.scenes is '使用场景';
+comment on column xf_verification_code.created_at is '创建时间';
+comment on column xf_verification_code.expired_at is '过期时间';

@@ -26,14 +26,35 @@
  * --------------------------------------------------------------------------------
  */
 
-package consts
+package auth
 
-// 定义常量
-const (
-	XiaoMainVersion = "1.0.0"
-	XiaoMainAuthor  = "xiao_lfeng"
+import (
+	"context"
+	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/glog"
+	"xiaoMain/internal/service"
+	"xiaoMain/utility/result"
+
+	"xiaoMain/api/auth/v1"
 )
 
-var (
-	Scenes = [...]string{"ChangePassword"}
-)
+// ChangePasswordSendMail 发送修改密码邮件
+func (c *ControllerV1) ChangePasswordSendMail(
+	ctx context.Context,
+	req *v1.ChangePasswordSendMailReq,
+) (res *v1.ChangePasswordSendMailRes, err error) {
+	glog.Info(ctx, "[CONTROL] 控制层 ChangePasswordSendMail 接口")
+	getRequest := ghttp.RequestFromCtx(ctx)
+	// 检查邮箱是否正确
+	isCorrect, info := service.UserMailLogic().CheckUserMail(ctx, req.Email)
+	if !isCorrect {
+		result.VerificationFailed.SetErrorMessage(info).Response(getRequest)
+	}
+	// 发送验证码
+	if service.MailUserLogic().SendEmailVerificationCode(ctx, req.Email, "ChangePassword") == nil {
+		result.Success("验证码发送成功", nil)
+	} else {
+		result.MailError.SetErrorMessage("验证码发送失败").Response(getRequest)
+	}
+	return nil, nil
+}
