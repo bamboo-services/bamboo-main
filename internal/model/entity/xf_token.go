@@ -10,12 +10,12 @@ import (
 
 // XfToken is the golang structure for table xf_token.
 type XfToken struct {
-	Id           int64       `json:"id"           ` // 主键
-	UserUuid     string      `json:"userUuid"     ` // 用户 UUID
-	UserToken    string      `json:"userToken"    ` // 用户 TOKEN
-	UserIp       string      `json:"userIp"       ` // 用户 IP 地址
-	UserAgent    string      `json:"userAgent"    ` // 用户 Agent
-	Verification string      `json:"verification" ` // 验证用户是否是唯一用户
-	CreatedAt    *gtime.Time `json:"createdAt"    ` // 创建时间
-	ExpiredAt    *gtime.Time `json:"expiredAt"    ` // 修改时间
+	Id           int64       `json:"id"           orm:"id"           ` // 主键
+	UserUuid     string      `json:"userUuid"     orm:"user_uuid"    ` // 用户 UUID
+	UserToken    string      `json:"userToken"    orm:"user_token"   ` // 用户 TOKEN
+	UserIp       string      `json:"userIp"       orm:"user_ip"      ` // 用户 IP 地址
+	UserAgent    string      `json:"userAgent"    orm:"user_agent"   ` // 用户 Agent
+	Verification string      `json:"verification" orm:"verification" ` // 验证用户是否是唯一用户
+	CreatedAt    *gtime.Time `json:"createdAt"    orm:"created_at"   ` // 创建时间
+	ExpiredAt    *gtime.Time `json:"expiredAt"    orm:"expired_at"   ` // 修改时间
 }

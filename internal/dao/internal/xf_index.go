@@ -11,14 +11,14 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// XfIndexDao is the data access object for table xf_index.sql.
+// XfIndexDao is the data access object for table xf_index.
 type XfIndexDao struct {
 	table   string         // table is the underlying table name of the DAO.
 	group   string         // group is the database configuration group name of current DAO.
 	columns XfIndexColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// XfIndexColumns defines and stores column names for table xf_index.sql.
+// XfIndexColumns defines and stores column names for table xf_index.
 type XfIndexColumns struct {
 	Id        string // 主键
 	Key       string // 键
@@ -27,7 +27,7 @@ type XfIndexColumns struct {
 	UpdatedAt string // 修改时间
 }
 
-// xfIndexColumns holds the columns for table xf_index.sql.
+// xfIndexColumns holds the columns for table xf_index.
 var xfIndexColumns = XfIndexColumns{
 	Id:        "id",
 	Key:       "key",
@@ -40,7 +40,7 @@ var xfIndexColumns = XfIndexColumns{
 func NewXfIndexDao() *XfIndexDao {
 	return &XfIndexDao{
 		group:   "default",
-		table:   "xf_index.sql",
+		table:   "xf_index",
 		columns: xfIndexColumns,
 	}
 }

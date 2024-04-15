@@ -6,3 +6,16 @@ gfcli:
     build: "-a amd64 -s linux -p temp -ew"
     tagPrefixes:
       - my.image.pub/my-app
+  gen:
+    dao:
+      - link: "pgsql:xf_index:123456@tcp(localhost:5432)/xf_index"
+        jsonCase: "CamelLower"
+
+  default:
+    type: "pgsql"
+    host: "localhost"
+    port: 5432
+    dbname: "xf_index"
+    user: "xf_index"
+    pass: "123456"
+    database: "xf_index"

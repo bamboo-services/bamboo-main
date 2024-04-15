@@ -40,6 +40,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"xiaoMain/internal/consts"
 	"xiaoMain/internal/dao"
+	"xiaoMain/internal/model/do"
 )
 
 // InitialDatabase 数据库初始化操作
@@ -61,40 +62,39 @@ func InitialDatabase(ctx context.Context) {
 	 * 检查数据表信息是否完整
 	 */
 	glog.Info(ctx, "[BOOT] 数据库表信息初始化中")
-	insertData(ctx, "version", consts.XiaoMainVersion) // 软件版本信息
-	insertData(ctx, "author", consts.XiaoMainAuthor)   // 软件作者
-	insertData(ctx, "uuid", uuid.NewV4().String())     // 生成用户的唯一 UUID
-	insertData(ctx, "user", "admin")                   // 新建默认用户
+	insertIndexData(ctx, "version", consts.XiaoMainVersion) // 软件版本信息
+	insertIndexData(ctx, "author", consts.XiaoMainAuthor)   // 软件作者
+	insertIndexData(ctx, "uuid", uuid.NewV4().String())     // 生成用户的唯一 UUID
+	insertIndexData(ctx, "user", "admin")                   // 新建默认用户
 	// 设置初始化密码
 	getBase64Password := base64.StdEncoding.EncodeToString([]byte("admin-admin"))
 	getEncodePassword, err := bcrypt.GenerateFromPassword([]byte(getBase64Password), bcrypt.DefaultCost)
 	if err == nil {
-		insertData(ctx, "password", string(getEncodePassword)) // 默认用户密码
+		insertIndexData(ctx, "password", string(getEncodePassword)) // 默认用户密码
 	} else {
 		glog.Error(ctx, "[BOOT] 密码加密失败")
 	}
-	insertData(ctx, "auth_limit", "3") // 允许登录的节点数（设备数）
+	insertIndexData(ctx, "auth_limit", "3") // 允许登录的节点数（设备数）
 }
 
-// insertData 插入数据，用于信息初始化进行的操作
-func insertData(ctx context.Context, key string, value string) {
+// insertIndexData 插入数据，用于信息初始化进行的操作
+func insertIndexData(ctx context.Context, key string, value string) {
 	var err error
-	if record, _ := dao.XfIndex.Ctx(ctx).Where("key='" + key + "'").One(); record == nil {
-		if _, err = dao.XfIndex.Ctx(ctx).Data(g.Map{"Key": key, "Value": value}).Insert(); err != nil {
-			glog.Errorf(ctx, "\t> 数据表 xf_index.sql 中 %s 数据创建失败", key)
+	if record, _ := dao.XfIndex.Ctx(ctx).Where("key=?", key).One(); record == nil {
+		if _, err = dao.XfIndex.Ctx(ctx).Data(do.XfIndex{Key: key, Value: value}).Insert(); err != nil {
+			glog.Infof(ctx, "[SQL] 数据表 xf_index 中插入键为 %s 的 %s 值失败", key, value)
+			glog.Errorf(ctx, "[SQL] 错误信息：%v", err.Error())
 		} else {
-			glog.Debugf(ctx, "\t> 数据表 xf_index.sql 中 %s 数据创建成功", key)
+			glog.Debugf(ctx, "[SQL] 数据表 xf_index 中插入键为 %s 的 %s 值成功", key, value)
 		}
-	} else {
-		glog.Debugf(ctx, "\t> 数据表 xf_index.sql 中 %s 数据已存在", key)
 	}
 }
 
 // initialSQL 初始化数据库
 func initialSQL(ctx context.Context, databaseName string) {
-	if _, err := dao.XfIndex.DB().Exec(ctx, "SELECT * FROM "+databaseName); err != nil {
+	if _, err := g.DB().Exec(ctx, "SELECT * FROM "+databaseName); err != nil {
 		// 创建数据表
-		err := dao.XfIndex.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		errTransaction := g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 			// 读取文件
 			getFileContent := gfile.GetContents("internal/sql/" + databaseName + ".sql")
 			// 创建 xf_index.sql 表
@@ -103,12 +103,12 @@ func initialSQL(ctx context.Context, databaseName string) {
 			}
 			return nil
 		})
-		if err != nil {
-			panic("\t> 数据表 " + databaseName + " 创建失败")
+		if errTransaction != nil {
+			glog.Panicf(ctx, "[SQL] 数据表 %s 创建失败", databaseName)
 		} else {
-			glog.Debug(ctx, "\t> 数据表 "+databaseName+" 创建成功")
+			glog.Debugf(ctx, "[SQL] 数据表 %s 创建成功", databaseName)
 		}
 	} else {
-		glog.Debug(ctx, "\t> 数据表 "+databaseName+" 已存在")
+		glog.Debugf(ctx, "[SQL] 数据表 %s 已存在", databaseName)
 	}
 }

@@ -8,11 +8,11 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// XfIndex is the golang structure for table xf_index.sql.
+// XfIndex is the golang structure for table xf_index.
 type XfIndex struct {
-	Id        int         `json:"id"        ` // 主键
-	Key       string      `json:"key"       ` // 键
-	Value     string      `json:"value"     ` // 值
-	CreatedAt *gtime.Time `json:"createdAt" ` // 创建时间
-	UpdatedAt *gtime.Time `json:"updatedAt" ` // 修改时间
+	Id        int         `json:"id"        orm:"id"         ` // 主键
+	Key       string      `json:"key"       orm:"key"        ` // 键
+	Value     string      `json:"value"     orm:"value"      ` // 值
+	CreatedAt *gtime.Time `json:"createdAt" orm:"created_at" ` // 创建时间
+	UpdatedAt *gtime.Time `json:"updatedAt" orm:"updated_at" ` // 修改时间
 }
