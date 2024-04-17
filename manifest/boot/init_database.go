@@ -41,11 +41,19 @@ import (
 	"xiaoMain/utility"
 )
 
-// InitialDatabase 数据库初始化操作
+// InitialDatabase 是一个初始化数据库的函数。
+// 它会检查数据库表是否完整，并插入必要的数据。
+// 这个函数在应用程序的启动过程中被调用。
+//
+// 参数:
+// ctx: context.Context 对象，用于管理 go 协程和其他与上下文相关的任务。
+//
+// 返回: 无
 func InitialDatabase(ctx context.Context) {
 	/*
 	 * 检查数据表是否完善
 	 */
+	// 记录日志，开始初始化数据表
 	glog.Info(ctx, "[BOOT] 数据表初始化中")
 	// 初始化信息表
 	initialSQL(ctx, "xf_index")
@@ -61,14 +69,35 @@ func InitialDatabase(ctx context.Context) {
 	/**
 	 * 检查数据表信息是否完整
 	 */
+	// 记录日志，开始初始化数据库表信息
 	glog.Info(ctx, "[BOOT] 数据库表信息初始化中")
-	insertIndexData(ctx, "version", consts.XiaoMainVersion)                 // 软件版本信息
-	insertIndexData(ctx, "author", consts.XiaoMainAuthor)                   // 软件作者
-	insertIndexData(ctx, "uuid", uuid.NewV4().String())                     // 生成用户的唯一 UUID
-	insertIndexData(ctx, "user", "admin")                                   // 新建默认用户
-	insertIndexData(ctx, "password", utility.PasswordEncode("admin-admin")) // 默认用户密码
-	insertIndexData(ctx, "email", "admin@xiaoMain.com")                     // 默认用户邮箱
-	insertIndexData(ctx, "auth_limit", "3")                                 // 允许登录的节点数（设备数）
+	// 插入软件版本信息
+	insertIndexData(ctx, "version", consts.XiaoMainVersion)
+	// 插入软件作者信息
+	insertIndexData(ctx, "author", consts.XiaoMainAuthor)
+
+	// 生成并插入用户的唯一 UUID
+	insertIndexData(ctx, "uuid", uuid.NewV4().String())
+	// 新建默认用户
+	insertIndexData(ctx, "user", "admin")
+	// 设置默认用户密码
+	insertIndexData(ctx, "password", utility.PasswordEncode("admin-admin"))
+	// 设置默认用户邮箱
+	insertIndexData(ctx, "email", "admin@xiaoMain.com")
+
+	// 设置允许登录的节点数（设备数）
+	insertIndexData(ctx, "auth_limit", "3")
+
+	// SMTP 邮件服务器配置
+	insertIndexData(ctx, "smtp_host", "smtp.x-lf.com")
+	// SMTP 邮件服务器端口(默认)
+	insertIndexData(ctx, "smtp_port_tls", "25")
+	// SMTP 邮件服务器端口(SSL)
+	insertIndexData(ctx, "smtp_port_ssl", "465")
+	// SMTP 邮件服务器用户名
+	insertIndexData(ctx, "smtp_username", "noreplay@xiaoMain.com")
+	// SMTP 邮件服务器密码
+	insertIndexData(ctx, "smtp_password", "password")
 
 	// 初始化邮件模板(user-change-password)
 	insertIndexData(ctx, "mail_template_user_change_password", getMailTemplate("user-change-password"))
@@ -78,6 +107,7 @@ func InitialDatabase(ctx context.Context) {
 	/**
 	 * 初始化完毕结束任务
 	 */
+	// 记录日志，数据表初始化完毕
 	glog.Info(ctx, "[BOOT] 数据表初始化完毕")
 }
 
@@ -90,10 +120,10 @@ func insertIndexData(ctx context.Context, key string, value string) {
 	var err error
 	if record, _ := dao.XfIndex.Ctx(ctx).Where("key=?", key).One(); record == nil {
 		if _, err = dao.XfIndex.Ctx(ctx).Data(do.XfIndex{Key: key, Value: value}).Insert(); err != nil {
-			glog.Infof(ctx, "[SQL] 数据表 xf_index 中插入键为 %s 的 %s 值失败", key, value)
+			glog.Infof(ctx, "[SQL] 数据表 xf_index 中插入键 %s 失败", key)
 			glog.Errorf(ctx, "[SQL] 错误信息：%v", err.Error())
 		} else {
-			glog.Debugf(ctx, "[SQL] 数据表 xf_index 中插入键为 %s 的 %s 值成功", key, value)
+			glog.Debugf(ctx, "[SQL] 数据表 xf_index 中插入键 %s成功", key)
 		}
 	}
 }
