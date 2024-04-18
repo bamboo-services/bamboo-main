@@ -26,42 +26,13 @@
  * --------------------------------------------------------------------------------
  */
 
-// ================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// You can delete these comments if you wish manually maintain this interface file.
-// ================================================================================
+package consts
 
-package service
+type Scene string
 
-import (
-	"context"
-	"xiaoMain/internal/consts"
+const (
+	// ChangePasswordScene 是一个用于发送更改密码邮场景
+	ChangePasswordScene Scene = "ChangePassword"
+	// ResetPasswordScene 是一个用于发送重置密码邮件场景
+	ResetPasswordScene Scene = "ResetPassword"
 )
-
-type (
-	IMailUserLogic interface {
-		// VerificationCodeHasCorrect
-		// 验证验证码是否正确，若验证码正确将会返回 true，否则返回 false；
-		// 若返回错误的内容将会返回具体的错误原因，不会抛出 Error
-		VerificationCodeHasCorrect(ctx context.Context, email string, code string, scenes string) (isCorrect bool, info string)
-		// SendEmailVerificationCode
-		// 根据输入的场景进行邮箱的发送，需要保证场景的合法性，场景的合法性参考 consts.Scenes 的参考值
-		// 若邮件发送的过程中出现错误将会终止发件并且返回 error 信息，发件成功返回 nil
-		SendEmailVerificationCode(ctx context.Context, mail string, scenes consts.Scene) (err error)
-	}
-)
-
-var (
-	localMailUserLogic IMailUserLogic
-)
-
-func MailUserLogic() IMailUserLogic {
-	if localMailUserLogic == nil {
-		panic("implement not found for interface IMailUserLogic, forgot register?")
-	}
-	return localMailUserLogic
-}
-
-func RegisterMailUserLogic(i IMailUserLogic) {
-	localMailUserLogic = i
-}

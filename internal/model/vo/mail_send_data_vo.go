@@ -26,42 +26,29 @@
  * --------------------------------------------------------------------------------
  */
 
-// ================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// You can delete these comments if you wish manually maintain this interface file.
-// ================================================================================
+package vo
 
-package service
+import "github.com/gogf/gf/v2/os/gtime"
 
-import (
-	"context"
-	"xiaoMain/internal/consts"
-)
-
-type (
-	IMailUserLogic interface {
-		// VerificationCodeHasCorrect
-		// 验证验证码是否正确，若验证码正确将会返回 true，否则返回 false；
-		// 若返回错误的内容将会返回具体的错误原因，不会抛出 Error
-		VerificationCodeHasCorrect(ctx context.Context, email string, code string, scenes string) (isCorrect bool, info string)
-		// SendEmailVerificationCode
-		// 根据输入的场景进行邮箱的发送，需要保证场景的合法性，场景的合法性参考 consts.Scenes 的参考值
-		// 若邮件发送的过程中出现错误将会终止发件并且返回 error 信息，发件成功返回 nil
-		SendEmailVerificationCode(ctx context.Context, mail string, scenes consts.Scene) (err error)
-	}
-)
-
-var (
-	localMailUserLogic IMailUserLogic
-)
-
-func MailUserLogic() IMailUserLogic {
-	if localMailUserLogic == nil {
-		panic("implement not found for interface IMailUserLogic, forgot register?")
-	}
-	return localMailUserLogic
+// MailSendData 是一个结构体，用于表示发送邮件时需要的数据。
+//
+// 它包含以下字段：
+// - XiaoMain: *string 类型，表示邮件标题的一部分。
+// - Code: *string 类型，表示邮件中可能需要的验证码或其他代码。
+// - Copyright: *string 类型，表示邮件中的版权声明。
+// - Email: *string 类型，表示接收邮件的邮箱地址。
+// - DateTime: *gtime.Time 类型，表示邮件发送的日期和时间。
+//
+// 所有字段都是指针类型，这意味着它们可以是 nil。在使用这个结构体时，你应该检查并处理可能的 nil 值。
+type MailSendData struct {
+	XiaoMain  string `description:"为 Title 的部分"`
+	Code      string
+	Copyright string
+	Email     string
+	DateTime  *gtime.Time
 }
 
-func RegisterMailUserLogic(i IMailUserLogic) {
-	localMailUserLogic = i
+type MailTemplate struct {
+	Name string
+	Data string
 }

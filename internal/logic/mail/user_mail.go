@@ -34,9 +34,12 @@ import (
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtime"
+	"sync"
+	"xiaoMain/internal/consts"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
+	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility"
 )
@@ -90,8 +93,9 @@ func (s *sMailUserLogic) VerificationCodeHasCorrect(
 // SendEmailVerificationCode
 // 根据输入的场景进行邮箱的发送，需要保证场景的合法性，场景的合法性参考 consts.Scenes 的参考值
 // 若邮件发送的过程中出现错误将会终止发件并且返回 error 信息，发件成功返回 nil
-func (s *sMailUserLogic) SendEmailVerificationCode(ctx context.Context, mail string, scenes string) (err error) {
+func (s *sMailUserLogic) SendEmailVerificationCode(ctx context.Context, mail string, scenes consts.Scene) (err error) {
 	glog.Info(ctx, "[LOGIC] 执行 MailUserLogic:SendEmailVerificationCode 服务层")
+	wg := sync.WaitGroup{}
 	// 场景检查
 	if !utility.CheckScenesInScope(scenes) {
 		glog.Warningf(ctx, "[LOGIC] 场景内容不正确，输入是 %s 场景", scenes)
@@ -99,23 +103,36 @@ func (s *sMailUserLogic) SendEmailVerificationCode(ctx context.Context, mail str
 	}
 	// 验证码存入数据库
 	err = dao.XfVerificationCode.Ctx(ctx).Transaction(ctx, func(_ context.Context, tx gdb.TX) error {
-		// 创建验证码并发送
-		getCode, err := s.sendVerifyCodeMail(ctx, mail)
-		if err != nil {
-			glog.Warning(ctx, "[LOGIC] 发送邮件时发生错误，不进行数据库插入")
-			return err
+		sendMailData := vo.MailSendData{
+			Code:      utility.GetRandomString(6),
+			Email:     "gm@x-lf.cn",
+			XiaoMain:  "XiaoMain",
+			Copyright: "CopyRight (C) 2016-2024 筱锋 All Rights Reserved.",
+			DateTime:  gtime.Now(),
 		}
+		// 异步创建验证码的发送
+		wg.Add(1)
+		go func(ctx context.Context, mail string, scene consts.Scene, data vo.MailSendData) {
+			// 创建验证码并发送
+			err := s.sendMail(ctx, mail, scene, data)
+			if err != nil {
+				glog.Warningf(ctx, "[LOGIC-ASYNC] 发送邮件时发生错误，不进行数据库插入，错误原因：%s", err.Error())
+			}
+			wg.Done()
+		}(ctx, mail, scenes, sendMailData)
 		// 存入验证码
 		_, err = tx.Insert(dao.XfVerificationCode.Table(), do.XfVerificationCode{
 			Type:      true,
 			Contact:   mail,
-			Code:      getCode,
-			ExpiredAt: gtime.NewFromTimeStamp(gtime.Timestamp() + 300),
+			Code:      sendMailData.Code,
+			Scenes:    string(scenes),
+			ExpiredAt: gtime.NewFromTimeStamp(gtime.TimestampMicro() + 300000),
 		})
 		if err != nil {
-			glog.Warningf(ctx, "[LOGIC] 发送邮件时发生错误，回滚 %s 数据表中发送给 %s 的数据",
+			glog.Warningf(ctx, "[LOGIC] 发送邮件时发生错误，回滚 %s 数据表中发送给 %s 的数据，错误原因：%s",
 				dao.XfVerificationCode.Table(),
 				mail,
+				err.Error(),
 			)
 			return err
 		}
@@ -125,5 +142,6 @@ func (s *sMailUserLogic) SendEmailVerificationCode(ctx context.Context, mail str
 		return err
 	}
 	// 发送成功
+	wg.Wait()
 	return nil
 }

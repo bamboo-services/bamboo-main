@@ -49,6 +49,7 @@ func (c *ControllerV1) ChangePasswordSendMail(
 	isCorrect, info := service.UserMailLogic().CheckUserMail(ctx, req.Email)
 	if !isCorrect {
 		result.VerificationFailed.SetErrorMessage(info).Response(getRequest)
+		return nil, nil
 	}
 	// 发送验证码
 	if service.MailUserLogic().SendEmailVerificationCode(ctx, req.Email, "ChangePassword") == nil {

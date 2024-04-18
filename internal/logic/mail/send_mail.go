@@ -32,16 +32,72 @@ import (
 	"context"
 	"errors"
 	"github.com/gogf/gf/v2/os/glog"
+	"gopkg.in/gomail.v2"
+	"strings"
+	"xiaoMain/internal/consts"
+	"xiaoMain/internal/dao"
+	"xiaoMain/internal/model/do"
+	"xiaoMain/internal/model/entity"
+	"xiaoMain/internal/model/vo"
+	"xiaoMain/utility"
 )
 
-// sendVerifyCodeMail
-// 发送带有验证码的邮件信息
-func (s *sMailUserLogic) sendVerifyCodeMail(ctx context.Context, mail string) (code string, err error) {
-	glog.Info(ctx, "[LOGIC] 执行 MailUserLogic:sendVerifyCodeMail 服务层")
-	// TODO 10001-生成验证码
-	if mail != "" {
-		return "", nil
-	} else {
-		return mail, errors.New("TODO")
+// sendMail 是一个发送邮件的函数。
+//
+// 它接收以下参数：
+// - ctx: context.Context 类型，表示上下文。
+// - mail: string 类型，表示接收邮件的邮箱地址。
+// - template: consts.Scene 类型，表示邮件模板的场景。
+// - data: vo.MailSendData 类型，表示邮件的数据。
+//
+// 函数首先从数据库中获取邮件模板，然后替换模板中的占位符，最后使用 SMTP 服务器发送邮件。
+//
+// 如果在获取邮件模板或发送邮件时出现错误，函数将返回这个错误。
+//
+// 返回:
+// - error 类型，表示可能出现的错误。如果没有错误，返回 nil。
+func (s *sMailUserLogic) sendMail(
+	ctx context.Context,
+	mail string,
+	template consts.Scene,
+	data vo.MailSendData,
+) (err error) {
+	glog.Info(ctx, "[LOGIC] 执行 MailUserLogic:sendMail 服务层")
+
+	// 数据库邮件模板
+	var getMailTemplateTitle entity.XfIndex
+	var getMailTemplate entity.XfIndex
+	err = dao.XfIndex.Ctx(ctx).
+		Where(do.XfIndex{Key: "mail_template_" + utility.GetMailTemplateByScene(template) + "_title"}).
+		Limit(1).Scan(&getMailTemplateTitle)
+	if err != nil {
+		return errors.New("未查询到邮件模板")
 	}
+	err = dao.XfIndex.Ctx(ctx).
+		Where(do.XfIndex{Key: "mail_template_" + utility.GetMailTemplateByScene(template)}).
+		Limit(1).Scan(&getMailTemplate)
+	if err != nil {
+		return errors.New("未查询到邮件模板")
+	}
+
+	// 对邮件模板的替换
+	mailTemplate := getMailTemplate.Value
+	mailTemplate = strings.ReplaceAll(mailTemplate, "%XiaoMain%", data.XiaoMain)
+	mailTemplate = strings.ReplaceAll(mailTemplate, "%Email%", data.Email)
+	mailTemplate = strings.ReplaceAll(mailTemplate, "%Code%", data.Code)
+	mailTemplate = strings.ReplaceAll(mailTemplate, "%DateTime%", data.DateTime.String())
+	mailTemplate = strings.ReplaceAll(mailTemplate, "%Copyright%", data.Copyright)
+
+	// 创建一个新的消息
+	sendMail := gomail.NewMessage()
+	// 设置需要发送的人
+	sendMail.SetHeader("To", mail)
+	sendMail.SetHeader("From", consts.SMTPUser)
+	sendMail.SetHeader("Subject", getMailTemplateTitle.Value)
+	sendMail.SetBody("text/html", mailTemplate)
+
+	// 配置邮件服务器
+	dialer := gomail.NewDialer(consts.SMTPHost, utility.GetMailSendPort(ctx), consts.SMTPUser, consts.SMTPPass)
+	// 发送邮件
+	return dialer.DialAndSend(sendMail)
 }

@@ -30,10 +30,24 @@ package consts
 
 // 定义常量
 const (
+	// XiaoMainVersion 是 XiaoMain 的版本号。
 	XiaoMainVersion = "1.0.0"
-	XiaoMainAuthor  = "xiao_lfeng"
+	// XiaoMainAuthor 是 XiaoMain 的作者。
+	XiaoMainAuthor = "xiao_lfeng"
 )
 
 var (
+	// Scenes 是邮件场景的列表。
 	Scenes = [...]string{"ChangePassword"}
+
+	// SMTPHost 是 SMTP 服务器的主机名。
+	SMTPHost = ""
+	// SMTPPortTLS 是 SMTP 服务器的 TLS 端口。
+	SMTPPortTLS = 25
+	// SMTPPortSSL 是 SMTP 服务器的 SSL 端口。
+	SMTPPortSSL = 465
+	// SMTPUser 是 SMTP 服务器的用户名。
+	SMTPUser = ""
+	// SMTPPass 是 SMTP 服务器的密码。
+	SMTPPass = ""
 )

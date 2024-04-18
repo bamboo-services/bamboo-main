@@ -28,8 +28,56 @@
 
 package boot
 
-import "context"
+import (
+	"context"
+	"github.com/gogf/gf/v2/os/glog"
+	"github.com/gogf/gf/v2/util/gconv"
+	"xiaoMain/internal/consts"
+	"xiaoMain/internal/dao"
+	"xiaoMain/internal/model/do"
+	"xiaoMain/internal/model/entity"
+)
 
+// InitCommonData 是一个初始化常用数据的函数。
+// 它从数据库中读取邮件服务器的相关信息，并将这些信息存储在内存中，以便后续使用。
+// 这个函数在应用程序的启动过程中被调用。
+//
+// 参数:
+// ctx: context.Context 对象，用于管理 go 协程和其他与上下文相关的任务。
+//
+// 返回: 无
 func InitCommonData(ctx context.Context) {
-	// 根据配置文件检查是否启用
+	// 从数据库读取邮件准备信息进入内存
+	var getSMTPHost entity.XfIndex
+	err := dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "smtp_host"}).Scan(&getSMTPHost)
+	if err != nil {
+		glog.Panic(ctx, "[INIT] 获取邮件服务器地址失败")
+	}
+	var getSMTPPortTLS entity.XfIndex
+	err = dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "smtp_port_tls"}).Scan(&getSMTPPortTLS)
+	if err != nil {
+		glog.Panic(ctx, "[INIT] 获取邮件服务器端口失败")
+	}
+	var getSMTPPortSSL entity.XfIndex
+	err = dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "smtp_port_ssl"}).Scan(&getSMTPPortSSL)
+	if err != nil {
+		glog.Panic(ctx, "[INIT] 获取邮件服务器端口失败")
+	}
+	var getSMTPUser entity.XfIndex
+	err = dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "smtp_user"}).Scan(&getSMTPUser)
+	if err != nil {
+		glog.Panic(ctx, "[INIT] 获取邮件服务器用户名失败")
+	}
+	var getSMTPPass entity.XfIndex
+	err = dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "smtp_pass"}).Scan(&getSMTPPass)
+	if err != nil {
+		glog.Panic(ctx, "[INIT] 获取邮件服务器密码失败")
+	}
+
+	// 数据写入 const
+	consts.SMTPHost = getSMTPHost.Value
+	consts.SMTPPortTLS = gconv.Int(getSMTPPortTLS.Value)
+	consts.SMTPPortSSL = gconv.Int(getSMTPPortSSL.Value)
+	consts.SMTPUser = getSMTPUser.Value
+	consts.SMTPPass = getSMTPPass.Value
 }

@@ -95,14 +95,18 @@ func InitialDatabase(ctx context.Context) {
 	// SMTP 邮件服务器端口(SSL)
 	insertIndexData(ctx, "smtp_port_ssl", "465")
 	// SMTP 邮件服务器用户名
-	insertIndexData(ctx, "smtp_username", "noreplay@xiaoMain.com")
+	insertIndexData(ctx, "smtp_user", "noreplay@xiaoMain.com")
 	// SMTP 邮件服务器密码
-	insertIndexData(ctx, "smtp_password", "password")
+	insertIndexData(ctx, "smtp_pass", "password")
 
+	// 初始化邮件模板标题(user-change-password)
+	insertIndexData(ctx, "mail_template_user_change_password_title", "修改密码")
 	// 初始化邮件模板(user-change-password)
-	insertIndexData(ctx, "mail_template_user_change_password", getMailTemplate("user-change-password"))
+	insertIndexData(ctx, "mail_template_user_change_password", getMailTemplate("user_change_password"))
+	// 初始化邮件模板标题(user-forget-password)
+	insertIndexData(ctx, "mail_template_user_forget_password_title", "忘记密码")
 	// 初始化邮件模板(user-forget-password)
-	insertIndexData(ctx, "mail_template_user_forget_password", getMailTemplate("user-forget-password"))
+	insertIndexData(ctx, "mail_template_user_forget_password", getMailTemplate("user_forget_password"))
 
 	/**
 	 * 初始化完毕结束任务
@@ -123,7 +127,7 @@ func insertIndexData(ctx context.Context, key string, value string) {
 			glog.Infof(ctx, "[SQL] 数据表 xf_index 中插入键 %s 失败", key)
 			glog.Errorf(ctx, "[SQL] 错误信息：%v", err.Error())
 		} else {
-			glog.Debugf(ctx, "[SQL] 数据表 xf_index 中插入键 %s成功", key)
+			glog.Debugf(ctx, "[SQL] 数据表 xf_index 中插入键 %s 成功", key)
 		}
 	}
 }
