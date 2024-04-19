@@ -1,5 +1,5 @@
 name: 合并请求
-about: 创建一个新的合并请求，用于开发者提交代码进行代码评审合并
+description: 创建一个新的合并请求，用于开发者提交代码进行代码评审合并
 title: "[工单ID] <内容描述>"
 labels: ["enhancement"]
 body:
