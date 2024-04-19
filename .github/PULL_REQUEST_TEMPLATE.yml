@@ -1,0 +1,59 @@
+name: 合并请求
+about: 创建一个新的合并请求，用于开发者提交代码进行代码评审合并
+title: "[工单ID] <内容描述>"
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 提交注意
+        
+        请在右侧部分选择受理人为 **XiaoLFeng**，并填写进入相对应的标签。
+        
+        ## 标题要求
+        
+        - 若您之前发布了 Issue 或者为了修复 Issue 而提交了合并请求，请在标题中填写对应的 Issue 编号，例如：[#1] 修复用户登陆功能
+        - 若您未提交 Issue 或者为了新功能而提交了合并请求，请在标题中填写新功能的内容，例如：
+          - [feat] 完成用户登陆功能
+          - [fix] 修复用户登陆功能
+        
+        ## 另外
+        
+        请在下方填写新功能 Pull Request 的内容，方便开发者快速了解 Pull Request 的内容。
+      
+        ---
+  - type: dropdown
+    id: pr-dropdown-1
+    attributes:
+      label: 类型(type)
+      description: 请选择此合并请求的类型(The type of this pull request)
+      options:
+        - 新功能(feat)
+        - 修复(fix)
+        - 重构(refactor)
+        - 文档(docs)
+        - 样式(style)
+        - 测试(test)
+        - 杂项(chore)
+        - 其他(other)
+        - 未知(unknown)
+    validations:
+      required: true
+  - type: textarea
+    id: pr-textarea-1
+    attributes:
+      label: 简要描述(Description)
+      description: 请简要描述此合并请求的内容(Briefly describe the content of this pull request)
+      placeholder: 完成用户登陆功能，修复用户登陆功能等。(complete user login function, fix user login function, etc.)
+    validations:
+      required: true
+  - type: checkboxes
+    id: pr-operating
+    attributes:
+      label: 是否是大型破坏性修改(Is it a large disruptive change)?
+      description: 请确认此合并请求是否是大型破坏性修改(Please confirm whether this pull request is a large disruptive change)
+      options:
+        - label: 是(Yes)
+        - label: 否(No)
+    validations:
+      required: true
