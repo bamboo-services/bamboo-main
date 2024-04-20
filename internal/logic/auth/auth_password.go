@@ -38,9 +38,15 @@ import (
 	"xiaoMain/utility"
 )
 
-// ChangeUserPassword
-// 修改用户密码，若密码修改完毕后。将会清理掉用户的登录状态，需要用户重新进行登录；
-// 若用户的密码修改失败，将会返回错误信息，若正确将返回 nil。
+// ChangeUserPassword 用于修改用户密码。如果密码修改成功，将会清理用户的登录状态，需要用户重新进行登录。
+// 如果用户的密码修改失败，将会返回错误信息。如果修改成功，将返回 nil。
+//
+// 参数:
+// ctx: 上下文对象，用于传递和控制请求的生命周期。
+// password: 用户新的密码字符串。
+//
+// 返回值:
+// err: 如果密码修改成功，返回 nil。否则返回错误信息。
 func (s *sAuthLogic) ChangeUserPassword(ctx context.Context, password string) (err error) {
 	glog.Info(ctx, "[LOGIC] 执行 AuthLogic:ChangeUserPassword 服务层")
 	// 检查用户的密码是否与前密码一致

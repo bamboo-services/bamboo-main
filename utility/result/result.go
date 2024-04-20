@@ -42,6 +42,13 @@ type BaseResponse struct {
 	Data    interface{} `json:"data,omitempty"`
 }
 
+type BaseResponseNoData struct {
+	Output  string `json:"output"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Time    string `json:"time"`
+}
+
 type ErrorBaseResponse struct {
 	Output  string    `json:"output"`
 	Code    int       `json:"code"`
@@ -99,9 +106,6 @@ func (base BaseResponse) String() string {
 func (base BaseResponse) Response(r *ghttp.Request) {
 	base.Time = gtime.Datetime()
 	r.Response.Status = 200
-	if base.Data == nil || base.Data == "" {
-		base.Data = nil
-	}
 	r.Response.WriteJson(base)
 }
 

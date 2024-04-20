@@ -32,6 +32,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
+	"xiaoMain/internal/consts"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility/result"
 
@@ -55,19 +56,29 @@ func (c *ControllerV1) AuthResetPassword(
 	glog.Info(ctx, "[CONTROL] 控制层 UserResetPassword 接口")
 	// 获取 Request
 	getRequest := ghttp.RequestFromCtx(ctx)
-	// 检查用户登录是否有效
-	hasLogin, message := service.AuthLogic().IsUserLogin(ctx)
-	if !hasLogin {
-		// 获取邮件是否存在
-		isCorrect, info := service.UserMailLogic().CheckMailHasConsoleUser(ctx, req.Email)
-		if !isCorrect {
-			result.VerificationFailed.SetErrorMessage(info).Response(getRequest)
-			return nil, nil
-		} else {
-
-		}
+	// 获取邮件是否存在
+	isCorrect, info := service.UserMailLogic().CheckMailHasConsoleUser(ctx, req.Email)
+	if !isCorrect {
+		result.VerificationFailed.SetErrorMessage(info).Response(getRequest)
+		return nil, nil
+	}
+	// 检查用户名是否正确
+	if err = service.AuthLogic().CheckUserHasConsoleUser(ctx, req.Username); err != nil {
+		result.VerificationFailed.SetErrorMessage(err.Error()).Response(getRequest)
+		return nil, nil
+	}
+	// 检查验证码是否正确
+	codeCorrect, errMessage := service.MailUserLogic().
+		VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, consts.ResetPasswordScene)
+	if !codeCorrect {
+		result.VerificationFailed.SetErrorMessage(errMessage).Response(getRequest)
+		return nil, nil
+	}
+	// 重置密码
+	if service.AuthLogic().ChangeUserPassword(ctx, req.NewPassword) == nil {
+		result.Success("密码重置成功", nil)
 	} else {
-		result.VerificationFailed.SetErrorMessage(message).Response(getRequest)
+		result.VerificationFailed.SetErrorMessage("密码重置失败").Response(getRequest)
 	}
 	return nil, nil
 }

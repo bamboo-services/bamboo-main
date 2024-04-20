@@ -37,7 +37,7 @@ import (
 // 发送用户修改密码邮件请求结构体
 type ChangePasswordSendMailReq struct {
 	g.Meta `path:"/api/v1/user/change-password/mail" tags:"User" method:"POST" summary:"发送用户修改密码邮件"`
-	Email  string `json:"email" v:"email#邮箱不能为空" dc:"需要发送对方邮件的验证码"`
+	Email  string `json:"email" v:"required|email#邮箱不能为空" dc:"需要发送对方邮件的验证码"`
 }
 
 // ChangePasswordSendMailRes

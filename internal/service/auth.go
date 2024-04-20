@@ -41,25 +41,60 @@ import (
 
 type (
 	IAuthLogic interface {
-		// IsUserLogin
+		// IsUserLogin 是一个用于检查用户是否已经登录的函数。
+		// 它主要用于获取用户的 UUID 和认证密钥，并对这些信息进行校验。如果用户已经完成登录的相关操作，并且此次登录有效，则返回 true 和空字符串。否则，返回 false 和错误信息。
 		//
-		// 检查用户是否已经登录，若用户已经完成登录的相关操作，若用户的此次登录有效则返回 true 否则返回 false
+		// 参数:
+		// ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//
+		// 返回值:
+		// hasLogin: 如果用户已经登录并且此次登录有效，返回 true。否则返回 false。
+		// message: 如果用户未登录或登录已失效，返回错误信息。否则返回空字符串。
 		IsUserLogin(ctx context.Context) (hasLogin bool, message string)
-		// CheckUserLogin
+		// CheckUserLogin 是一个用于检查用户登录的函数。
+		// 它主要用于对用户输入的信息与数据库的内容进行校验，当用户名与用户校验通过后 isCorrect 返回正确值，否则返回错误的内容。
+		// 并且当用户正常登录后，将会返回用户的 UUID 作为下一步的登录操作。
 		//
-		// 对用户的登录进行检查。主要用于对用户输入的信息与数据库的内容进行校验，当用户名与用户校验通过后 isCorrect 返回正确值，否则返回错误的内容
-		// 并且当用户正常登录后，将会返回用户的 UUID 作为下一步的登录操作
+		// 参数:
+		// ctx: 上下文对象，用于传递和控制请求的生命周期。
+		// getData: 用户的登录请求数据，包含了用户的用户名和密码。
+		//
+		// 返回值:
+		// userUUID: 如果用户登录成功，返回用户的 UUID 字符串。
+		// isCorrect: 如果用户登录成功，返回 true。否则返回 false。
+		// errMessage: 如果用户登录失败，返回错误信息。否则返回空字符串。
 		CheckUserLogin(ctx context.Context, getData *v1.AuthLoginReq) (userUUID *string, isCorrect bool, errMessage string)
-		// RegisteredUserLogin
+		// RegisteredUserLogin 用于登记用户的登录信息。当用户完成登录操作后，该方法会将用户的 UUID 存入 token 数据表中，作为用户登录的依据。
+		// 在检查用户是否登录时，此数据表的内容作为登录依据。依据 index 数据表字段 key 中的 auth_limit 所对应的 value 的大小作为允许登录节点数的限制。
 		//
-		// 对用户的登录内容进行登记，将用户的 UUID 传入后存入 token 数据表中，作为用户登录的登录依据。在检查用户是否登录时候，此数据表的内容作为登录
-		// 依据。
+		// 参数:
+		// ctx: 上下文对象，用于传递和控制请求的生命周期。
+		// userUUID: 用户的 UUID 字符串。
+		// remember: 用户是否选择记住登录状态的布尔值。
 		//
-		// 依据 index 数据表字段 key 中的 auth_limit 所对应的 value 的大小作为允许登录节点数的限制
+		// 返回值:
+		// userToken: 用户的 token 信息，包含了用户的 UUID、token、IP、验证信息、User-Agent 和过期时间等信息。
+		// err: 如果登录登记成功，返回 nil。否则返回错误信息。
 		RegisteredUserLogin(ctx context.Context, userUUID string, remember bool) (userToken *entity.XfToken, err error)
-		// ChangeUserPassword
-		// 修改用户密码，若密码修改完毕后。将会清理掉用户的登录状态，需要用户重新进行登录；
-		// 若用户的密码修改失败，将会返回错误信息，若正确将返回 nil。
+		// CheckUserHasConsoleUser 是一个用于检查用户是否存在于控制台用户列表中的函数。
+		// 它主要用于获取用户的用户名，并与数据库中的内容进行比对。如果用户名存在于数据库中，则返回 nil。否则，返回错误信息。
+		//
+		// 参数:
+		// ctx: 上下文对象，用于传递和控制请求的生命周期。
+		// username: 需要检查的用户名字符串。
+		//
+		// 返回值:
+		// err: 如果用户名存在于数据库中，返回 nil。否则返回错误信息。
+		CheckUserHasConsoleUser(ctx context.Context, username string) (err error)
+		// ChangeUserPassword 用于修改用户密码。如果密码修改成功，将会清理用户的登录状态，需要用户重新进行登录。
+		// 如果用户的密码修改失败，将会返回错误信息。如果修改成功，将返回 nil。
+		//
+		// 参数:
+		// ctx: 上下文对象，用于传递和控制请求的生命周期。
+		// password: 用户新的密码字符串。
+		//
+		// 返回值:
+		// err: 如果密码修改成功，返回 nil。否则返回错误信息。
 		ChangeUserPassword(ctx context.Context, password string) (err error)
 	}
 )
