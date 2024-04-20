@@ -43,4 +43,5 @@ type IAuthV1 interface {
 	AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res *v1.AuthLoginRes, err error)
 	AuthResetPassword(ctx context.Context, req *v1.AuthResetPasswordReq) (res *v1.AuthResetPasswordRes, err error)
 	ChangePasswordSendMail(ctx context.Context, req *v1.ChangePasswordSendMailReq) (res *v1.ChangePasswordSendMailRes, err error)
+	ResetPasswordSendMail(ctx context.Context, req *v1.ResetPasswordSendMailReq) (res *v1.ResetPasswordSendMailRes, err error)
 }

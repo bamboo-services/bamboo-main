@@ -38,7 +38,7 @@ import (
 	"xiaoMain/api/auth/v1"
 )
 
-// UserResetPassword 是 ControllerV1 结构体的一个方法。
+// AuthResetPassword 是 ControllerV1 结构体的一个方法。
 // 它处理用户尝试重置密码的过程。
 //
 // 参数:
@@ -48,7 +48,7 @@ import (
 // 返回:
 // res: 发送给用户的响应。如果重置密码成功，它将返回成功的消息。
 // err: 在重置密码过程中发生的任何错误。
-func (c *ControllerV1) UserResetPassword(
+func (c *ControllerV1) AuthResetPassword(
 	ctx context.Context,
 	req *v1.AuthResetPasswordReq,
 ) (res *v1.AuthResetPasswordRes, err error) {

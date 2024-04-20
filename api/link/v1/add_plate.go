@@ -31,7 +31,7 @@ package v1
 import "github.com/gogf/gf/v2/frame/g"
 
 type LinkPlateAddReq struct {
-	g.Meta `path:"/add" method:"post" tags:"LinkPlate" summary:"添加板块"`
+	g.Meta `path:"/add" method:"post" tags:"Link" summary:"添加板块"`
 }
 
 type LinkPlateAddRes struct {
