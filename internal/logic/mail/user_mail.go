@@ -81,6 +81,8 @@ func (s *sMailUserLogic) VerificationCodeHasCorrect(
 		if verificationCode.Code == code {
 			// 检查是否过期
 			if verificationCode.ExpiredAt.After(gtime.Now()) {
+				// 验证码正确执行后需要删除验证码
+				_, _ = dao.XfVerificationCode.Ctx(ctx).Where(do.XfVerificationCode{Id: verificationCode.Id}).Delete()
 				return true, "验证码正确"
 			}
 		}

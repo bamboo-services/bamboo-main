@@ -48,6 +48,8 @@ import (
 	"xiaoMain/utility/result"
 )
 
+const ServerInternalErrorString = "服务器内部错误"
+
 type sAuthLogic struct{}
 
 func init() {
@@ -75,14 +77,14 @@ func (s *sAuthLogic) IsUserLogin(ctx context.Context) (hasLogin bool, message st
 		return false, err.Error()
 	}
 	// 对内容进行校验
-	if *getUserUUID != "" && *getUserAuthorize != "" {
+	if getUserUUID != nil && getUserAuthorize != nil && *getUserUUID != "" && *getUserAuthorize != "" {
 		var getTokenDO entity.XfToken
 		err := dao.XfToken.Ctx(ctx).
 			Where(do.XfToken{UserUuid: getUserUUID, UserToken: getUserAuthorize}).
 			Limit(1).Scan(&getTokenDO)
 		if err != nil {
-			glog.Error(ctx, "[LOGIC] 获取数据库出错", err)
-			return false, "获取数据库出错"
+			glog.Error(ctx, "[LOGIC] 用户登录过期 [无法从数据库取得数据]")
+			return false, "用户登录已失效"
 		}
 		// 检查是否过期
 		if gtime.Timestamp() < getTokenDO.ExpiredAt.Timestamp() {
@@ -91,7 +93,7 @@ func (s *sAuthLogic) IsUserLogin(ctx context.Context) (hasLogin bool, message st
 				glog.Infof(ctx, "[LOGIC] 用户UID %s 任然登录状态", getTokenDO.UserUuid)
 				return true, ""
 			} else {
-				glog.Warning(ctx, "[LOGIC] 用户登录已失效")
+				glog.Warning(ctx, "[LOGIC] 用户登录已失效 [数据已取得，但已失效]")
 				return false, "用户登录已失效"
 			}
 		}
@@ -104,7 +106,10 @@ func (s *sAuthLogic) IsUserLogin(ctx context.Context) (hasLogin bool, message st
 //
 // 对用户的登录进行检查。主要用于对用户输入的信息与数据库的内容进行校验，当用户名与用户校验通过后 isCorrect 返回正确值，否则返回错误的内容
 // 并且当用户正常登录后，将会返回用户的 UUID 作为下一步的登录操作
-func (s *sAuthLogic) CheckUserLogin(ctx context.Context, getData *v1.AuthLoginReq) (userUUID *string, isCorrect bool) {
+func (s *sAuthLogic) CheckUserLogin(
+	ctx context.Context,
+	getData *v1.AuthLoginReq,
+) (userUUID *string, isCorrect bool, errMessage string) {
 	glog.Info(ctx, "[LOGIC] 执行 AuthLogic:CheckUserLogin 服务层")
 	// 根据 ctx 获取 Request 信息
 	getRequest := ghttp.RequestFromCtx(ctx)
@@ -116,19 +121,19 @@ func (s *sAuthLogic) CheckUserLogin(ctx context.Context, getData *v1.AuthLoginRe
 	if getUserUUIDErr != nil {
 		glog.Error(ctx, "[LOGIC] 获取数据库出错", getUserUUIDErr)
 		result.DatabaseError.Response(getRequest)
-		return nil, false
+		return nil, false, ServerInternalErrorString
 	}
 	getUserUsernameErr := dao.XfIndex.Ctx(ctx).Where("key = ?", "user").Scan(&userUsernameEntity)
 	if getUserUsernameErr != nil {
 		glog.Error(ctx, "[LOGIC] 获取数据库出错", getUserUsernameErr)
 		result.DatabaseError.Response(getRequest)
-		return nil, false
+		return nil, false, ServerInternalErrorString
 	}
 	getUserPasswordErr := dao.XfIndex.Ctx(ctx).Where("key = ?", "password").Scan(&userPasswordEntity)
 	if getUserPasswordErr != nil {
 		glog.Error(ctx, "[LOGIC] 获取数据库出错", getUserPasswordErr)
 		result.DatabaseError.Response(getRequest)
-		return nil, false
+		return nil, false, ServerInternalErrorString
 	}
 	// 对账号密码进行校验
 	if userUsernameEntity.Value == getData.User {
@@ -137,14 +142,14 @@ func (s *sAuthLogic) CheckUserLogin(ctx context.Context, getData *v1.AuthLoginRe
 		// 密码校验
 		if bcrypt.CompareHashAndPassword([]byte(userPasswordEntity.Value), []byte(handlingPasswords)) == nil {
 			glog.Info(ctx, "[LOGIC] 用户校验通过")
-			return &userUUIDEntity.Value, true
+			return &userUUIDEntity.Value, true, ""
 		} else {
 			glog.Info(ctx, "[LOGIC] 密码错误")
-			return nil, false
+			return nil, false, "密码错误"
 		}
 	} else {
 		glog.Info(ctx, "[LOGIC] 用户名未找到")
-		return nil, false
+		return nil, false, "用户名未找到"
 	}
 }
 

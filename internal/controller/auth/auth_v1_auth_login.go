@@ -47,7 +47,7 @@ func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res
 	// 检查用户登录是否有效
 	hasLogin, message := service.AuthLogic().IsUserLogin(ctx)
 	if !hasLogin {
-		if uuid, isCorrect := service.AuthLogic().CheckUserLogin(ctx, req); isCorrect {
+		if uuid, isCorrect, errMessage := service.AuthLogic().CheckUserLogin(ctx, req); isCorrect {
 			// 注册用户进行登录
 			getToken, getError := service.AuthLogic().RegisteredUserLogin(ctx, *uuid, req.Remember)
 			if getError == nil {
@@ -71,10 +71,10 @@ func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res
 				return nil, getError
 			}
 		} else {
-			result.VerificationFailed.SetErrorMessage(message).Response(getRequest)
+			result.VerificationFailed.SetErrorMessage(errMessage).Response(getRequest)
 		}
 	} else {
-		result.VerificationFailed.SetErrorMessage("用户登录依然有效").Response(getRequest)
+		result.VerificationFailed.SetErrorMessage(message).Response(getRequest)
 	}
 	return nil, nil
 }
