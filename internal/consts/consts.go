@@ -37,9 +37,6 @@ const (
 )
 
 var (
-	// Scenes 是邮件场景的列表。
-	Scenes = [...]string{"ChangePassword"}
-
 	// SMTPHost 是 SMTP 服务器的主机名。
 	SMTPHost = ""
 	// SMTPPortTLS 是 SMTP 服务器的 TLS 端口。

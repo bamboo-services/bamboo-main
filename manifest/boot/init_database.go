@@ -104,9 +104,9 @@ func InitialDatabase(ctx context.Context) {
 	// 初始化邮件模板(user-change-password)
 	insertIndexData(ctx, "mail_template_user_change_password", getMailTemplate("user_change_password"))
 	// 初始化邮件模板标题(user-forget-password)
-	insertIndexData(ctx, "mail_template_user_forget_password_title", "忘记密码")
+	insertIndexData(ctx, "mail_template_user_reset_password_title", "重置密码")
 	// 初始化邮件模板(user-forget-password)
-	insertIndexData(ctx, "mail_template_user_forget_password", getMailTemplate("user_forget_password"))
+	insertIndexData(ctx, "mail_template_user_reset_password", getMailTemplate("user_reset_password"))
 
 	/**
 	 * 初始化完毕结束任务

@@ -26,36 +26,15 @@
  * --------------------------------------------------------------------------------
  */
 
-// ================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// You can delete these comments if you wish manually maintain this interface file.
-// ================================================================================
+package v1
 
-package service
+import "github.com/gogf/gf/v2/frame/g"
 
-import (
-	"context"
-)
-
-type (
-	IUserMailLogic interface {
-		// CheckUserMail
-		// 检查用户输入的邮箱是否与数据库存储的邮箱保持正确，若保持争取的信息将会返回布尔值正确，否则返回错误
-		CheckMailHasConsoleUser(ctx context.Context, email string) (checkMail bool, info string)
-	}
-)
-
-var (
-	localUserMailLogic IUserMailLogic
-)
-
-func UserMailLogic() IUserMailLogic {
-	if localUserMailLogic == nil {
-		panic("implement not found for interface IUserMailLogic, forgot register?")
-	}
-	return localUserMailLogic
+type ResetPasswordSendMailReq struct {
+	g.Meta `path:"/api/v1/user/reset-password/mail" tags:"User" method:"POST" summary:"发送用户重置密码邮件"`
+	Email  string `json:"email" v:"email#邮箱不能为空" dc:"需要发送对方邮件的验证码"`
 }
 
-func RegisterUserMailLogic(i IUserMailLogic) {
-	localUserMailLogic = i
+type ResetPasswordSendMailRes struct {
+	g.Meta `mime:"application/json"`
 }

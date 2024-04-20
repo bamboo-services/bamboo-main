@@ -30,16 +30,44 @@ package auth
 
 import (
 	"context"
-
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/glog"
+	"xiaoMain/internal/service"
+	"xiaoMain/utility/result"
 
 	"xiaoMain/api/auth/v1"
 )
 
-func (c *ControllerV1) AuthResetPassword(
+// UserResetPassword 是 ControllerV1 结构体的一个方法。
+// 它处理用户尝试重置密码的过程。
+//
+// 参数:
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// req: 用户的请求，包含重置密码的详细信息。
+//
+// 返回:
+// res: 发送给用户的响应。如果重置密码成功，它将返回成功的消息。
+// err: 在重置密码过程中发生的任何错误。
+func (c *ControllerV1) UserResetPassword(
 	ctx context.Context,
 	req *v1.AuthResetPasswordReq,
 ) (res *v1.AuthResetPasswordRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	glog.Info(ctx, "[CONTROL] 控制层 UserResetPassword 接口")
+	// 获取 Request
+	getRequest := ghttp.RequestFromCtx(ctx)
+	// 检查用户登录是否有效
+	hasLogin, message := service.AuthLogic().IsUserLogin(ctx)
+	if !hasLogin {
+		// 获取邮件是否存在
+		isCorrect, info := service.UserMailLogic().CheckMailHasConsoleUser(ctx, req.Email)
+		if !isCorrect {
+			result.VerificationFailed.SetErrorMessage(info).Response(getRequest)
+			return nil, nil
+		} else {
+
+		}
+	} else {
+		result.VerificationFailed.SetErrorMessage(message).Response(getRequest)
+	}
+	return nil, nil
 }

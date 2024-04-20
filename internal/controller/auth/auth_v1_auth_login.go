@@ -39,7 +39,16 @@ import (
 	"xiaoMain/utility/result"
 )
 
-// AuthLogin 用户登录控制器
+// AuthLogin 是 ControllerV1 结构体的一个方法。
+// 它处理用户尝试登录的认证过程。
+//
+// 参数:
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// req: 用户的请求，包含登录详细信息。
+//
+// 返回:
+// res: 发送给用户的响应。如果登录成功，它包含登录结果和用户详细信息。
+// err: 在登录过程中发生的任何错误。
 func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res *v1.AuthLoginRes, err error) {
 	glog.Info(ctx, "[CONTROL] 控制层 CheckUserLogin 接口")
 	// 获取 Request

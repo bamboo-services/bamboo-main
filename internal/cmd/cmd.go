@@ -31,6 +31,7 @@ package cmd
 import (
 	"context"
 	"xiaoMain/internal/controller/auth"
+	"xiaoMain/internal/controller/link"
 	"xiaoMain/internal/middleware"
 	"xiaoMain/manifest/boot"
 
@@ -52,9 +53,9 @@ var (
 			s := g.Server()
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.Middleware(middleware.MiddleErrorHandler)
-				// group.Middleware(ghttp.MiddlewareHandlerResponse)
 				group.Bind(
 					auth.NewV1(),
+					link.NewV1(),
 				)
 			})
 			s.Run()

@@ -85,6 +85,7 @@ func (base BaseResponse) GetData() interface{} {
 	return base.Data
 }
 
+// String 返回当前样式的 String 类型
 func (base BaseResponse) String() string {
 	base.Time = gtime.Datetime()
 	jsonData, err := json.Marshal(base)
@@ -94,9 +95,13 @@ func (base BaseResponse) String() string {
 	return string(jsonData)
 }
 
+// Response 返回当前样式的 Response 类型
 func (base BaseResponse) Response(r *ghttp.Request) {
 	base.Time = gtime.Datetime()
 	r.Response.Status = 200
+	if base.Data == nil || base.Data == "" {
+		base.Data = nil
+	}
 	r.Response.WriteJson(base)
 }
 

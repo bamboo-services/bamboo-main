@@ -30,7 +30,6 @@ package mail
 
 import (
 	"context"
-	"errors"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -62,7 +61,7 @@ func (s *sMailUserLogic) VerificationCodeHasCorrect(
 	ctx context.Context,
 	email string,
 	code string,
-	scenes string,
+	scenes consts.Scene,
 ) (isCorrect bool, info string) {
 	glog.Info(ctx, "[LOGIC] 执行 MailUserLogic:VerificationCodeHasCorrect 服务层")
 	// 获取邮箱以及验证码
@@ -70,7 +69,7 @@ func (s *sMailUserLogic) VerificationCodeHasCorrect(
 	if dao.XfVerificationCode.Ctx(ctx).Where(do.XfVerificationCode{
 		Type:    true,
 		Contact: email,
-		Scenes:  scenes,
+		Scenes:  string(scenes),
 	}).Scan(&getCode) != nil {
 		glog.Info(ctx, "[LOGIC] 用户的验证码不存在")
 		return false, "验证码不存在"
@@ -98,11 +97,6 @@ func (s *sMailUserLogic) VerificationCodeHasCorrect(
 func (s *sMailUserLogic) SendEmailVerificationCode(ctx context.Context, mail string, scenes consts.Scene) (err error) {
 	glog.Info(ctx, "[LOGIC] 执行 MailUserLogic:SendEmailVerificationCode 服务层")
 	wg := sync.WaitGroup{}
-	// 场景检查
-	if !utility.CheckScenesInScope(scenes) {
-		glog.Warningf(ctx, "[LOGIC] 场景内容不正确，输入是 %s 场景", scenes)
-		return errors.New("场景内容不正确")
-	}
 	// 验证码存入数据库
 	err = dao.XfVerificationCode.Ctx(ctx).Transaction(ctx, func(_ context.Context, tx gdb.TX) error {
 		sendMailData := vo.MailSendData{

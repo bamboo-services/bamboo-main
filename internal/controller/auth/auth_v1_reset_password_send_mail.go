@@ -26,36 +26,36 @@
  * --------------------------------------------------------------------------------
  */
 
-// ================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// You can delete these comments if you wish manually maintain this interface file.
-// ================================================================================
-
-package service
+package auth
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/glog"
+	"xiaoMain/internal/consts"
+	"xiaoMain/internal/service"
+	"xiaoMain/utility/result"
+
+	"xiaoMain/api/auth/v1"
 )
 
-type (
-	IUserMailLogic interface {
-		// CheckUserMail
-		// 检查用户输入的邮箱是否与数据库存储的邮箱保持正确，若保持争取的信息将会返回布尔值正确，否则返回错误
-		CheckMailHasConsoleUser(ctx context.Context, email string) (checkMail bool, info string)
+func (c *ControllerV1) ResetPasswordSendMail(
+	ctx context.Context,
+	req *v1.ResetPasswordSendMailReq,
+) (res *v1.ResetPasswordSendMailRes, err error) {
+	glog.Info(ctx, "[CONTROL] 控制层 ResetPasswordSendMail 接口")
+	getRequest := ghttp.RequestFromCtx(ctx)
+	// 检查邮箱是否正确
+	isCorrect, info := service.UserMailLogic().CheckMailHasConsoleUser(ctx, req.Email)
+	if !isCorrect {
+		result.VerificationFailed.SetErrorMessage(info).Response(getRequest)
+		return nil, nil
 	}
-)
-
-var (
-	localUserMailLogic IUserMailLogic
-)
-
-func UserMailLogic() IUserMailLogic {
-	if localUserMailLogic == nil {
-		panic("implement not found for interface IUserMailLogic, forgot register?")
+	// 发送验证码
+	if service.MailUserLogic().SendEmailVerificationCode(ctx, req.Email, consts.ResetPasswordScene) == nil {
+		result.Success("验证码发送成功", nil)
+	} else {
+		result.MailError.SetErrorMessage("验证码发送失败").Response(getRequest)
 	}
-	return localUserMailLogic
-}
-
-func RegisterUserMailLogic(i IUserMailLogic) {
-	localUserMailLogic = i
+	return nil, nil
 }

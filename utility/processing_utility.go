@@ -130,17 +130,6 @@ func PasswordVerify(hashPassword string, password string) bool {
 	return err == nil
 }
 
-// StringToBase64Hex 是一个将字符串转换为 Base64 编码的函数。
-// 它接收一个 string 类型的参数，并返回该字符串的 Base64 编码形式。
-//
-// 参数:
-// stringData: string 类型，表示要转换为 Base64 编码的原始字符串。
-//
-// 返回: string 类型，表示转换后的 Base64 编码字符串。
-func StringToBase64Hex(stringData string) string {
-	return base64.StdEncoding.EncodeToString([]byte(stringData))
-}
-
 // StringToBase64 是一个将字符串转换为 Base64 编码的函数。
 // 它接收一个 string 类型的参数，并返回该字符串的 Base64 编码形式。
 //
@@ -150,23 +139,6 @@ func StringToBase64Hex(stringData string) string {
 // 返回: []byte 类型，表示转换后的 Base64 编码字符串。
 func StringToBase64(stringData string) []byte {
 	return []byte(base64.StdEncoding.EncodeToString([]byte(stringData)))
-}
-
-// CheckScenesInScope 是一个检查给定场景是否在预定义范围内的函数。
-// 它遍历 consts.Scenes 中的所有场景，并检查给定的场景是否在这些场景中。
-// 如果给定的场景在预定义的场景中，函数将返回 true；否则，返回 false。
-//
-// 参数:
-// scene: string 类型，表示要检查的场景名称。
-//
-// 返回: bool 类型，如果给定的场景在预定义的场景中，返回 true；否则，返回 false。
-func CheckScenesInScope(scene consts.Scene) bool {
-	for _, getScene := range consts.Scenes {
-		if string(scene) == getScene {
-			return true
-		}
-	}
-	return false
 }
 
 // GetMailTemplateByScene 是一个根据给定的场景返回对应的邮件模板的函数。

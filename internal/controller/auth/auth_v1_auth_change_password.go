@@ -32,12 +32,23 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
+	"xiaoMain/internal/consts"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility/result"
 
 	"xiaoMain/api/auth/v1"
 )
 
+// AuthChangePassword 是用于处理用户修改密码组件。
+// 它处理用户尝试更改密码的过程。
+//
+// 参数:
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// req: 用户的请求，包含更改密码的详细信息。
+//
+// 返回:
+// res: 发送给用户的响应。如果更改密码成功，它将返回成功的消息。
+// err: 在更改密码过程中发生的任何错误。
 func (c *ControllerV1) AuthChangePassword(
 	ctx context.Context,
 	req *v1.AuthChangePasswordReq,
@@ -53,7 +64,7 @@ func (c *ControllerV1) AuthChangePassword(
 	}
 
 	// 检查用户邮箱是否正确
-	hasCheck, info := service.UserMailLogic().CheckUserMail(ctx, req.Email)
+	hasCheck, info := service.UserMailLogic().CheckMailHasConsoleUser(ctx, req.Email)
 	if !hasCheck {
 		result.RequestBodyValidationError.SetErrorMessage(info).Response(getRequest)
 		return nil, nil
@@ -61,7 +72,7 @@ func (c *ControllerV1) AuthChangePassword(
 
 	// 检查验证码是否正确
 	isCorrect, info := service.MailUserLogic().
-		VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, "ChangePassword")
+		VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, consts.ChangePasswordScene)
 	if !isCorrect {
 		result.VerificationFailed.SetErrorMessage(info).Response(getRequest)
 		return nil, nil
