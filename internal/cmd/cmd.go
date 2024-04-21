@@ -30,14 +30,14 @@ package cmd
 
 import (
 	"context"
-	"xiaoMain/internal/controller/auth"
-	"xiaoMain/internal/controller/link"
-	"xiaoMain/internal/middleware"
-	"xiaoMain/manifest/boot"
-
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gcmd"
+	"xiaoMain/internal/controller/auth"
+	"xiaoMain/internal/controller/link"
+	"xiaoMain/internal/middleware"
+	"xiaoMain/internal/task"
+	"xiaoMain/manifest/boot"
 )
 
 var (
@@ -49,14 +49,20 @@ var (
 			// 数据进行初始化
 			boot.InitialDatabase(ctx)
 			boot.InitCommonData(ctx)
+			// 定时任务
+			task.ClearVerificationCode(ctx)
 			// 服务器启动
 			s := g.Server()
 			s.Group("/", func(group *ghttp.RouterGroup) {
+				// 访问处理中间件
+				group.Middleware(middleware.MiddleAccessUserHandler)
+				// 错误集中处理中间件
 				group.Middleware(middleware.MiddleErrorHandler)
-				group.Bind(
-					auth.NewV1(),
-					link.NewV1(),
-				)
+				group.Bind(auth.NewV1())
+				group.Group("/link", func(group *ghttp.RouterGroup) {
+					// 中间件处理用户的访问是否有效
+					group.Bind(link.NewV1())
+				})
 			})
 			s.Run()
 			return nil

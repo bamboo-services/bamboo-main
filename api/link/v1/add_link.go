@@ -31,18 +31,17 @@ package v1
 import "github.com/gogf/gf/v2/frame/g"
 
 type LinkAddReq struct {
-	g.Meta          `path:"/link/add" method:"post" tags:"Link" summary:"添加新的链接"`
-	WebmasterEmail  string `json:"webmaster_email"`
-	ServiceProvider string `json:"service_provider"`
-	SiteName        string `json:"site_name"`
-	SiteURL         string `json:"site_url"`
-	SiteLogo        string `json:"site_logo"`
-	SiteDescription string `json:"site_description"`
-	SiteHasRss      bool   `json:"site_has_rss"`
-	SiteRssURL      string `json:"site_rss_url"`
-	DesiredLocation uint   `json:"desired_location"`
-	DesiredColor    uint   `json:"desired_color"`
-	Remark          string `json:"remark"`
+	g.Meta          `path:"/add" method:"post" tags:"Link" summary:"添加新的链接" `
+	WebmasterEmail  string `json:"webmaster_email" v:"required|email#请输入站长邮箱|站长邮箱格式不正确" dc:"站长邮箱"`
+	ServiceProvider string `json:"service_provider" v:"required#请输入服务商" dc:"服务商"`
+	SiteName        string `json:"site_name" v:"required#请输入站点名称" dc:"站点名称"`
+	SiteURL         string `json:"site_url" v:"required|url#请输入站点URL|站点URL格式不正确" dc:"站点URL"`
+	SiteLogo        string `json:"site_logo" v:"required#请输入站点Logo" dc:"站点Logo"`
+	SiteDescription string `json:"site_description" v:"required#请输入站点描述" dc:"站点描述"`
+	SiteRssURL      string `json:"site_rss_url" v:"regex:^(|[a-zA-z]+://[^\\s]*)$" dc:"站点RSS URL"`
+	DesiredLocation uint   `json:"desired_location" v:"required#请输入期望位置" dc:"期望位置"`
+	DesiredColor    uint   `json:"desired_color" v:"required#请输入期望颜色" dc:"期望颜色"`
+	Remark          string `json:"remark" v:"required#请输入备注" dc:"备注"`
 }
 
 type LinkAddRes struct {

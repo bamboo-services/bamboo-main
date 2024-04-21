@@ -39,6 +39,7 @@ var (
 	QueryValidationError       = ErrorBaseResponse{Output: "QueryValidationError", Code: 40302, Message: "查询验证错误"}
 	PathValidationError        = ErrorBaseResponse{Output: "PathValidationError", Code: 40303, Message: "路径参数错误"}
 	VerificationFailed         = ErrorBaseResponse{Output: "VerificationFailed", Code: 40304, Message: "校验失败"}
+	AccessError                = ErrorBaseResponse{Output: "AccessError", Code: 40306, Message: "访问错误"}
 	MailError                  = ErrorBaseResponse{Output: "MailError", Code: 40305, Message: "邮件错误"}
 	ServerInternalError        = ErrorBaseResponse{Output: "ServerInternalError", Code: 50000, Message: "服务器内部错误", Data: errorData{ErrorMessage: "服务器内部错误"}} //nolint:lll
 	DatabaseError              = ErrorBaseResponse{Output: "DatabaseError", Code: 50001, Message: "服务器内部错误", Data: errorData{ErrorMessage: "数据库错误"}}         //nolint:lll

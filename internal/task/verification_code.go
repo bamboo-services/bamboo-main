@@ -26,25 +26,29 @@
  * --------------------------------------------------------------------------------
  */
 
-package link
+package task
 
 import (
 	"context"
 	"github.com/gogf/gf/v2/os/glog"
-	"xiaoMain/api/link/v1"
+	"github.com/gogf/gf/v2/os/gtimer"
+	"time"
+	"xiaoMain/internal/dao"
 )
 
-// LinkAdd 是 ControllerV1 结构体的一个方法。
-// 它处理用户尝试添加链接的过程。
+// ClearVerificationCode 是一个定时任务，用于清理过期的验证码。
+// 它会在每 10 分钟执行一次。
 //
 // 参数:
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含添加链接的详细信息。
+// ctx: context.Context 对象，用于管理 go 协程和其他与上下文相关的任务。
 //
-// 返回:
-// res: 发送给用户的响应。如果添加链接成功，它将返回成功的消息。
-func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 LinkAdd 接口")
-
-	return nil, nil
+// 返回: 无
+func ClearVerificationCode(ctx context.Context) {
+	gtimer.Add(ctx, time.Minute*10, func(_ context.Context) {
+		getNowTimestamp := time.Now().Unix()
+		// 清理过期的验证码
+		glog.Info(ctx, "[TASK] 开始清理过期的验证码")
+		_, _ = dao.XfVerificationCode.Ctx(ctx).Where("expired_at < NOW()").Delete()
+		glog.Infof(ctx, "[TASK] 清理过期的验证码完成, 耗时: %v 秒", time.Now().Unix()-getNowTimestamp)
+	})
 }

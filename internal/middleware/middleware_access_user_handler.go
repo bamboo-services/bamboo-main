@@ -26,25 +26,39 @@
  * --------------------------------------------------------------------------------
  */
 
-package link
+package middleware
 
 import (
-	"context"
+	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
-	"xiaoMain/api/link/v1"
+	"xiaoMain/utility/result"
 )
 
-// LinkAdd 是 ControllerV1 结构体的一个方法。
-// 它处理用户尝试添加链接的过程。
+// MiddleAccessUserHandler 是用于处理用户访问的中间件。
+// 它检查用户的 IP 地址和 User-Agent 是否为空。
 //
 // 参数:
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含添加链接的详细信息。
+// r: 请求的上下文，用于管理请求的信息。
 //
 // 返回:
-// res: 发送给用户的响应。如果添加链接成功，它将返回成功的消息。
-func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 LinkAdd 接口")
-
-	return nil, nil
+// 无
+func MiddleAccessUserHandler(r *ghttp.Request) {
+	// 继续执行后续中间件
+	ctx := r.GetCtx()
+	// 获取用户的 IP 地址 以及 User-Agent
+	userIP := r.GetClientIp()
+	userAgent := r.GetHeader("User-Agent")
+	// 两者内容不能为空
+	if userIP == "" || userAgent == "" {
+		glog.Error(ctx, "[MIDDLE] 用户访问异常")
+		if userIP == "" {
+			glog.Error(ctx, "[MIDDLE] 用户 IP 为空")
+		}
+		if userAgent == "" {
+			glog.Error(ctx, "[MIDDLE] 用户 User-Agent 为空")
+		}
+		result.AccessError.Response(r)
+	} else {
+		r.Middleware.Next()
+	}
 }
