@@ -36,11 +36,12 @@ type LinkAddReq struct {
 	ServiceProvider string `json:"service_provider" v:"required#请输入服务商" dc:"服务商"`
 	SiteName        string `json:"site_name" v:"required#请输入站点名称" dc:"站点名称"`
 	SiteURL         string `json:"site_url" v:"required|url#请输入站点URL|站点URL格式不正确" dc:"站点URL"`
-	SiteLogo        string `json:"site_logo" v:"required#请输入站点Logo" dc:"站点Logo"`
+	SiteLogo        string `json:"site_logo" v:"required|url#请输入站点Logo|站点Logo格式不正确" dc:"站点Logo"`
 	SiteDescription string `json:"site_description" v:"required#请输入站点描述" dc:"站点描述"`
-	SiteRssURL      string `json:"site_rss_url" v:"regex:^(|[a-zA-z]+://[^\\s]*)$" dc:"站点RSS URL"`
-	DesiredLocation uint   `json:"desired_location" v:"required#请输入期望位置" dc:"期望位置"`
-	DesiredColor    uint   `json:"desired_color" v:"required#请输入期望颜色" dc:"期望颜色"`
+	SiteRssURL      string `json:"site_rss_url" v:"required|url#请输入站点RSS|站点RSS格式不正确" dc:"站点RSS URL"`
+	DesiredLocation string `json:"desired_location" v:"required#请输入期望位置" dc:"期望位置"`
+	DesiredColor    string `json:"desired_color" v:"required#请输入期望颜色" dc:"期望颜色"`
+	HasAdv          bool   `json:"has_adv" v:"required#请输入是否有广告" dc:"是否有广告"`
 	Remark          string `json:"remark" v:"required#请输入备注" dc:"备注"`
 }
 

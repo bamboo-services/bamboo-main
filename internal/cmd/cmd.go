@@ -48,6 +48,9 @@ var (
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			// 数据进行初始化
 			boot.InitialDatabase(ctx)
+			boot.InitialDesiredColorTable(ctx)
+			boot.InitialDesiredLocationTable(ctx)
+			// 初始化公共数据
 			boot.InitCommonData(ctx)
 			// 定时任务
 			task.ClearVerificationCode(ctx)

@@ -30,21 +30,22 @@
 // Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
-package link
+package do
 
 import (
-	"context"
-
-	"xiaoMain/api/link/v1"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
-type ILinkV1 interface {
-	LinkAddColor(ctx context.Context, req *v1.LinkAddColorReq) (res *v1.LinkAddColorRes, err error)
-	LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error)
-	LinkPlateAdd(ctx context.Context, req *v1.LinkPlateAddReq) (res *v1.LinkPlateAddRes, err error)
-	CheckBlogURLHasConnect(ctx context.Context, req *v1.CheckBlogURLHasConnectReq) (res *v1.CheckBlogURLHasConnectRes, err error)
-	CheckLogoURLHasConnect(ctx context.Context, req *v1.CheckLogoURLHasConnectReq) (res *v1.CheckLogoURLHasConnectRes, err error)
-	CheckRssURLHasConnect(ctx context.Context, req *v1.CheckRssURLHasConnectReq) (res *v1.CheckRssURLHasConnectRes, err error)
-	LinkGetColor(ctx context.Context, req *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error)
-	LinkGetPlate(ctx context.Context, req *v1.LinkGetPlateReq) (res *v1.LinkGetPlateRes, err error)
+// XfDesiredLocation is the golang structure of table xf_desired_location for DAO operations like Where/Data.
+type XfDesiredLocation struct {
+	g.Meta      `orm:"table:xf_desired_location, do:true"`
+	Id          interface{} // 主键
+	Sort        interface{} // 排序
+	Name        interface{} // 位置名字
+	DisplayName interface{} // 名字的描述（页面会展示）
+	Description interface{} // 内容的描述（也会展示出来，建议还是写进去哦）
+	Reveal      interface{} // 是否展示
+	CreatedAt   *gtime.Time // 创建时间
+	UpdatedAt   *gtime.Time // 修改时间
 }

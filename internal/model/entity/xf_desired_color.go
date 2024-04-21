@@ -30,21 +30,18 @@
 // Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
-package link
+package entity
 
 import (
-	"context"
-
-	"xiaoMain/api/link/v1"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
-type ILinkV1 interface {
-	LinkAddColor(ctx context.Context, req *v1.LinkAddColorReq) (res *v1.LinkAddColorRes, err error)
-	LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error)
-	LinkPlateAdd(ctx context.Context, req *v1.LinkPlateAddReq) (res *v1.LinkPlateAddRes, err error)
-	CheckBlogURLHasConnect(ctx context.Context, req *v1.CheckBlogURLHasConnectReq) (res *v1.CheckBlogURLHasConnectRes, err error)
-	CheckLogoURLHasConnect(ctx context.Context, req *v1.CheckLogoURLHasConnectReq) (res *v1.CheckLogoURLHasConnectRes, err error)
-	CheckRssURLHasConnect(ctx context.Context, req *v1.CheckRssURLHasConnectReq) (res *v1.CheckRssURLHasConnectRes, err error)
-	LinkGetColor(ctx context.Context, req *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error)
-	LinkGetPlate(ctx context.Context, req *v1.LinkGetPlateReq) (res *v1.LinkGetPlateRes, err error)
+// XfDesiredColor is the golang structure for table xf_desired_color.
+type XfDesiredColor struct {
+	Id          int64       `json:"id"          orm:"id"           ` // 主键
+	Name        string      `json:"name"        orm:"name"         ` // 颜色名字
+	DisplayName string      `json:"displayName" orm:"display_name" ` // 展示名字
+	Color       string      `json:"color"       orm:"color"        ` // 色值
+	CreatedAt   *gtime.Time `json:"createdAt"   orm:"created_at"   ` // 创建时间
+	UpdatedAt   *gtime.Time `json:"updatedAt"   orm:"updated_at"   ` // 修改时间
 }

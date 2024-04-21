@@ -68,7 +68,7 @@ func (c *ControllerV1) AuthResetPassword(
 		return nil, nil
 	}
 	// 检查验证码是否正确
-	codeCorrect, errMessage := service.MailUserLogic().
+	codeCorrect, errMessage := service.MailLogic().
 		VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, consts.ResetPasswordScene)
 	if !codeCorrect {
 		result.VerificationFailed.SetErrorMessage(errMessage).Response(getRequest)

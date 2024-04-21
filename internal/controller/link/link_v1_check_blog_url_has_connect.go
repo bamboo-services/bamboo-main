@@ -26,25 +26,20 @@
  * --------------------------------------------------------------------------------
  */
 
-// =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// =================================================================================
-
 package link
 
 import (
 	"context"
 
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+
 	"xiaoMain/api/link/v1"
 )
 
-type ILinkV1 interface {
-	LinkAddColor(ctx context.Context, req *v1.LinkAddColorReq) (res *v1.LinkAddColorRes, err error)
-	LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error)
-	LinkPlateAdd(ctx context.Context, req *v1.LinkPlateAddReq) (res *v1.LinkPlateAddRes, err error)
-	CheckBlogURLHasConnect(ctx context.Context, req *v1.CheckBlogURLHasConnectReq) (res *v1.CheckBlogURLHasConnectRes, err error)
-	CheckLogoURLHasConnect(ctx context.Context, req *v1.CheckLogoURLHasConnectReq) (res *v1.CheckLogoURLHasConnectRes, err error)
-	CheckRssURLHasConnect(ctx context.Context, req *v1.CheckRssURLHasConnectReq) (res *v1.CheckRssURLHasConnectRes, err error)
-	LinkGetColor(ctx context.Context, req *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error)
-	LinkGetPlate(ctx context.Context, req *v1.LinkGetPlateReq) (res *v1.LinkGetPlateRes, err error)
+func (c *ControllerV1) CheckBlogURLHasConnect(
+	ctx context.Context,
+	req *v1.CheckBlogURLHasConnectReq,
+) (res *v1.CheckBlogURLHasConnectRes, err error) {
+	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }

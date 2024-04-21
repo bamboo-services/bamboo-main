@@ -39,7 +39,7 @@ import (
 )
 
 type (
-	IMailUserLogic interface {
+	IMailLogic interface {
 		// VerificationCodeHasCorrect
 		// 验证验证码是否正确，若验证码正确将会返回 true，否则返回 false；
 		// 若返回错误的内容将会返回具体的错误原因，不会抛出 Error
@@ -52,16 +52,16 @@ type (
 )
 
 var (
-	localMailUserLogic IMailUserLogic
+	localMailLogic IMailLogic
 )
 
-func MailUserLogic() IMailUserLogic {
-	if localMailUserLogic == nil {
-		panic("implement not found for interface IMailUserLogic, forgot register?")
+func MailLogic() IMailLogic {
+	if localMailLogic == nil {
+		panic("implement not found for interface IMailLogic, forgot register?")
 	}
-	return localMailUserLogic
+	return localMailLogic
 }
 
-func RegisterMailUserLogic(i IMailUserLogic) {
-	localMailUserLogic = i
+func RegisterMailLogic(i IMailLogic) {
+	localMailLogic = i
 }

@@ -34,6 +34,7 @@ package logic
 
 import (
 	_ "xiaoMain/internal/logic/auth"
+	_ "xiaoMain/internal/logic/link"
 	_ "xiaoMain/internal/logic/mail"
 	_ "xiaoMain/internal/logic/user"
 )

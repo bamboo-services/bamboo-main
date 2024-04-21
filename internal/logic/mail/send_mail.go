@@ -56,13 +56,13 @@ import (
 //
 // 返回:
 // - error 类型，表示可能出现的错误。如果没有错误，返回 nil。
-func (s *sMailUserLogic) sendMail(
+func (s *sMailLogic) sendMail(
 	ctx context.Context,
 	mail string,
 	template consts.Scene,
 	data vo.MailSendData,
 ) (err error) {
-	glog.Info(ctx, "[LOGIC] 执行 MailUserLogic:sendMail 服务层")
+	glog.Info(ctx, "[LOGIC] 执行 MailLogic:sendMail 服务层")
 
 	// 数据库邮件模板
 	var getMailTemplateTitle entity.XfIndex

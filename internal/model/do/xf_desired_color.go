@@ -30,21 +30,20 @@
 // Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
-package link
+package do
 
 import (
-	"context"
-
-	"xiaoMain/api/link/v1"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
-type ILinkV1 interface {
-	LinkAddColor(ctx context.Context, req *v1.LinkAddColorReq) (res *v1.LinkAddColorRes, err error)
-	LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error)
-	LinkPlateAdd(ctx context.Context, req *v1.LinkPlateAddReq) (res *v1.LinkPlateAddRes, err error)
-	CheckBlogURLHasConnect(ctx context.Context, req *v1.CheckBlogURLHasConnectReq) (res *v1.CheckBlogURLHasConnectRes, err error)
-	CheckLogoURLHasConnect(ctx context.Context, req *v1.CheckLogoURLHasConnectReq) (res *v1.CheckLogoURLHasConnectRes, err error)
-	CheckRssURLHasConnect(ctx context.Context, req *v1.CheckRssURLHasConnectReq) (res *v1.CheckRssURLHasConnectRes, err error)
-	LinkGetColor(ctx context.Context, req *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error)
-	LinkGetPlate(ctx context.Context, req *v1.LinkGetPlateReq) (res *v1.LinkGetPlateRes, err error)
+// XfDesiredColor is the golang structure of table xf_desired_color for DAO operations like Where/Data.
+type XfDesiredColor struct {
+	g.Meta      `orm:"table:xf_desired_color, do:true"`
+	Id          interface{} // 主键
+	Name        interface{} // 颜色名字
+	DisplayName interface{} // 展示名字
+	Color       interface{} // 色值
+	CreatedAt   *gtime.Time // 创建时间
+	UpdatedAt   *gtime.Time // 修改时间
 }

@@ -104,6 +104,7 @@ func (base BaseResponse) String() string {
 
 // Response 返回当前样式的 Response 类型
 func (base BaseResponse) Response(r *ghttp.Request) {
+	r.Response.ClearBuffer()
 	base.Time = gtime.Datetime()
 	r.Response.Status = 200
 	r.Response.WriteJson(base)
@@ -158,6 +159,7 @@ func (baseError ErrorBaseResponse) String() string {
 
 // Response 返回当前错误代码的字符串表示形式
 func (baseError ErrorBaseResponse) Response(r *ghttp.Request) {
+	r.Response.ClearBuffer()
 	baseError.Time = gtime.Datetime()
 	// 检查 baseError 是否存在 errorMessage
 	if baseError.Data.ErrorMessage == "" {

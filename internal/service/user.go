@@ -56,6 +56,6 @@ func UserMailLogic() IUserMailLogic {
 	return localUserMailLogic
 }
 
-func RegisterUserMailLogic(i IUserMailLogic) {
+func RegisterUserLogic(i IUserMailLogic) {
 	localUserMailLogic = i
 }

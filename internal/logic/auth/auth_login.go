@@ -44,22 +44,11 @@ import (
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
-	"xiaoMain/internal/service"
 	"xiaoMain/utility"
 	"xiaoMain/utility/result"
 )
 
 const ServerInternalErrorString = "服务器内部错误"
-
-type sAuthLogic struct{}
-
-func init() {
-	service.RegisterAuthLogic(New())
-}
-
-func New() *sAuthLogic {
-	return &sAuthLogic{}
-}
 
 // IsUserLogin 是一个用于检查用户是否已经登录的函数。
 // 它主要用于获取用户的 UUID 和认证密钥，并对这些信息进行校验。如果用户已经完成登录的相关操作，并且此次登录有效，则返回 true 和空字符串。否则，返回 false 和错误信息。

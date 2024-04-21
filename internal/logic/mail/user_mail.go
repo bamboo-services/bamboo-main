@@ -39,31 +39,19 @@ import (
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
 	"xiaoMain/internal/model/vo"
-	"xiaoMain/internal/service"
 	"xiaoMain/utility"
 )
-
-type sMailUserLogic struct {
-}
-
-func init() {
-	service.RegisterMailUserLogic(New())
-}
-
-func New() *sMailUserLogic {
-	return &sMailUserLogic{}
-}
 
 // VerificationCodeHasCorrect
 // 验证验证码是否正确，若验证码正确将会返回 true，否则返回 false；
 // 若返回错误的内容将会返回具体的错误原因，不会抛出 Error
-func (s *sMailUserLogic) VerificationCodeHasCorrect(
+func (s *sMailLogic) VerificationCodeHasCorrect(
 	ctx context.Context,
 	email string,
 	code string,
 	scenes consts.Scene,
 ) (isCorrect bool, info string) {
-	glog.Info(ctx, "[LOGIC] 执行 MailUserLogic:VerificationCodeHasCorrect 服务层")
+	glog.Info(ctx, "[LOGIC] 执行 MailLogic:VerificationCodeHasCorrect 服务层")
 	// 获取邮箱以及验证码
 	var getCode []entity.XfVerificationCode
 	if dao.XfVerificationCode.Ctx(ctx).Where(do.XfVerificationCode{
@@ -94,8 +82,8 @@ func (s *sMailUserLogic) VerificationCodeHasCorrect(
 // SendEmailVerificationCode
 // 根据输入的场景进行邮箱的发送，需要保证场景的合法性，场景的合法性参考 consts.Scenes 的参考值
 // 若邮件发送的过程中出现错误将会终止发件并且返回 error 信息，发件成功返回 nil
-func (s *sMailUserLogic) SendEmailVerificationCode(ctx context.Context, mail string, scenes consts.Scene) (err error) {
-	glog.Info(ctx, "[LOGIC] 执行 MailUserLogic:SendEmailVerificationCode 服务层")
+func (s *sMailLogic) SendEmailVerificationCode(ctx context.Context, mail string, scenes consts.Scene) (err error) {
+	glog.Info(ctx, "[LOGIC] 执行 MailLogic:SendEmailVerificationCode 服务层")
 	wg := sync.WaitGroup{}
 	// 验证码存入数据库
 	err = dao.XfVerificationCode.Ctx(ctx).Transaction(ctx, func(_ context.Context, tx gdb.TX) error {

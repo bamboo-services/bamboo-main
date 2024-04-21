@@ -26,25 +26,26 @@
  * --------------------------------------------------------------------------------
  */
 
-// =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// =================================================================================
+create table xf_desired_color
+(
+    id           bigserial
+        constraint xf_desired_color_pk
+            primary key,
+    name         varchar                 not null,
+    display_name varchar                 not null,
+    color        char(6)                 not null,
+    created_at   timestamp default now() not null,
+    updated_at   timestamp
+);
 
-package link
+comment on table xf_desired_color is '所属颜色';
+comment on column xf_desired_color.id is '主键';
+comment on column xf_desired_color.name is '颜色名字';
+comment on column xf_desired_color.display_name is '展示名字';
+comment on column xf_desired_color.created_at is '创建时间';
+comment on column xf_desired_color.updated_at is '修改时间';
+comment on column xf_desired_color.color is '色值';
 
-import (
-	"context"
+create unique index xf_desired_color_name_uindex
+    on xf_desired_color (name);
 
-	"xiaoMain/api/link/v1"
-)
-
-type ILinkV1 interface {
-	LinkAddColor(ctx context.Context, req *v1.LinkAddColorReq) (res *v1.LinkAddColorRes, err error)
-	LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error)
-	LinkPlateAdd(ctx context.Context, req *v1.LinkPlateAddReq) (res *v1.LinkPlateAddRes, err error)
-	CheckBlogURLHasConnect(ctx context.Context, req *v1.CheckBlogURLHasConnectReq) (res *v1.CheckBlogURLHasConnectRes, err error)
-	CheckLogoURLHasConnect(ctx context.Context, req *v1.CheckLogoURLHasConnectReq) (res *v1.CheckLogoURLHasConnectRes, err error)
-	CheckRssURLHasConnect(ctx context.Context, req *v1.CheckRssURLHasConnectReq) (res *v1.CheckRssURLHasConnectRes, err error)
-	LinkGetColor(ctx context.Context, req *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error)
-	LinkGetPlate(ctx context.Context, req *v1.LinkGetPlateReq) (res *v1.LinkGetPlateRes, err error)
-}

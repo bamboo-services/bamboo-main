@@ -59,18 +59,23 @@ func InitialDatabase(ctx context.Context) {
 	initialSQL(ctx, "xf_index")
 	// 初始化登录信息表
 	initialSQL(ctx, "xf_token")
-	// 初始化日志表
-	initialSQL(ctx, "xf_logs")
-	// 初始化链接表
-	initialSQL(ctx, "xf_link_list")
 	// 初始化验证码表
 	initialSQL(ctx, "xf_verification_code")
+	// 初始化日志表
+	initialSQL(ctx, "xf_logs")
+	// 初始化位置表
+	initialSQL(ctx, "xf_desired_location")
+	// 初始化颜色表
+	initialSQL(ctx, "xf_desired_color")
+	// 初始化链接表
+	initialSQL(ctx, "xf_link_list")
 
 	/**
-	 * 检查数据表信息是否完整
+	 * 插入主要数据表 index
 	 */
 	// 记录日志，开始初始化数据库表信息
 	glog.Info(ctx, "[BOOT] 数据库表信息初始化中")
+	glog.Info(ctx, "[BOOT] 初始化信息表")
 	// 插入软件版本信息
 	insertIndexData(ctx, "version", consts.XiaoMainVersion)
 	// 插入软件作者信息
@@ -107,12 +112,6 @@ func InitialDatabase(ctx context.Context) {
 	insertIndexData(ctx, "mail_template_user_reset_password_title", "重置密码")
 	// 初始化邮件模板(user-forget-password)
 	insertIndexData(ctx, "mail_template_user_reset_password", getMailTemplate("user_reset_password"))
-
-	/**
-	 * 初始化完毕结束任务
-	 */
-	// 记录日志，数据表初始化完毕
-	glog.Info(ctx, "[BOOT] 数据表初始化完毕")
 }
 
 func getMailTemplate(template string) string {

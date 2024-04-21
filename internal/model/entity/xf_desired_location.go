@@ -30,21 +30,20 @@
 // Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
-package link
+package entity
 
 import (
-	"context"
-
-	"xiaoMain/api/link/v1"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
-type ILinkV1 interface {
-	LinkAddColor(ctx context.Context, req *v1.LinkAddColorReq) (res *v1.LinkAddColorRes, err error)
-	LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error)
-	LinkPlateAdd(ctx context.Context, req *v1.LinkPlateAddReq) (res *v1.LinkPlateAddRes, err error)
-	CheckBlogURLHasConnect(ctx context.Context, req *v1.CheckBlogURLHasConnectReq) (res *v1.CheckBlogURLHasConnectRes, err error)
-	CheckLogoURLHasConnect(ctx context.Context, req *v1.CheckLogoURLHasConnectReq) (res *v1.CheckLogoURLHasConnectRes, err error)
-	CheckRssURLHasConnect(ctx context.Context, req *v1.CheckRssURLHasConnectReq) (res *v1.CheckRssURLHasConnectRes, err error)
-	LinkGetColor(ctx context.Context, req *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error)
-	LinkGetPlate(ctx context.Context, req *v1.LinkGetPlateReq) (res *v1.LinkGetPlateRes, err error)
+// XfDesiredLocation is the golang structure for table xf_desired_location.
+type XfDesiredLocation struct {
+	Id          int64       `json:"id"          orm:"id"           ` // 主键
+	Sort        int64       `json:"sort"        orm:"sort"         ` // 排序
+	Name        string      `json:"name"        orm:"name"         ` // 位置名字
+	DisplayName string      `json:"displayName" orm:"display_name" ` // 名字的描述（页面会展示）
+	Description string      `json:"description" orm:"description"  ` // 内容的描述（也会展示出来，建议还是写进去哦）
+	Reveal      bool        `json:"reveal"      orm:"reveal"       ` // 是否展示
+	CreatedAt   *gtime.Time `json:"createdAt"   orm:"created_at"   ` // 创建时间
+	UpdatedAt   *gtime.Time `json:"updatedAt"   orm:"updated_at"   ` // 修改时间
 }

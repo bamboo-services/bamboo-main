@@ -71,7 +71,7 @@ func (c *ControllerV1) AuthChangePassword(
 	}
 
 	// 检查验证码是否正确
-	isCorrect, info := service.MailUserLogic().
+	isCorrect, info := service.MailLogic().
 		VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, consts.ChangePasswordScene)
 	if !isCorrect {
 		result.VerificationFailed.SetErrorMessage(info).Response(getRequest)

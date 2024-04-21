@@ -62,7 +62,7 @@ func (c *ControllerV1) ChangePasswordSendMail(
 		return nil, nil
 	}
 	// 发送验证码
-	if service.MailUserLogic().SendEmailVerificationCode(ctx, req.Email, consts.ChangePasswordScene) == nil {
+	if service.MailLogic().SendEmailVerificationCode(ctx, req.Email, consts.ChangePasswordScene) == nil {
 		result.Success("验证码发送成功", nil)
 	} else {
 		result.MailError.SetErrorMessage("验证码发送失败").Response(getRequest)

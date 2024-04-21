@@ -26,25 +26,22 @@
  * --------------------------------------------------------------------------------
  */
 
-// =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// =================================================================================
+package v1
 
-package link
+import "github.com/gogf/gf/v2/frame/g"
 
-import (
-	"context"
+// CheckLogoURLHasConnectReq 是 CheckLogoURLHasConnect 方法的请求结构。
+// 用于检查用户输入的 Logo 链接是否可连接。
+//
+// 参数:
+// LogoURL: 用户输入的 Logo 链接。
+type CheckLogoURLHasConnectReq struct {
+	g.Meta  `path:"/check/connect/logo" method:"Get" tags:"Link" summary:"检查Logo链接是否可连接"`
+	LogoURL string `json:"logo_url" v:"required|url#请输入Logo链接|Logo链接格式不正确" dc:"Logo链接"`
+}
 
-	"xiaoMain/api/link/v1"
-)
-
-type ILinkV1 interface {
-	LinkAddColor(ctx context.Context, req *v1.LinkAddColorReq) (res *v1.LinkAddColorRes, err error)
-	LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error)
-	LinkPlateAdd(ctx context.Context, req *v1.LinkPlateAddReq) (res *v1.LinkPlateAddRes, err error)
-	CheckBlogURLHasConnect(ctx context.Context, req *v1.CheckBlogURLHasConnectReq) (res *v1.CheckBlogURLHasConnectRes, err error)
-	CheckLogoURLHasConnect(ctx context.Context, req *v1.CheckLogoURLHasConnectReq) (res *v1.CheckLogoURLHasConnectRes, err error)
-	CheckRssURLHasConnect(ctx context.Context, req *v1.CheckRssURLHasConnectReq) (res *v1.CheckRssURLHasConnectRes, err error)
-	LinkGetColor(ctx context.Context, req *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error)
-	LinkGetPlate(ctx context.Context, req *v1.LinkGetPlateReq) (res *v1.LinkGetPlateRes, err error)
+// CheckLogoURLHasConnectRes 是 CheckLogoURLHasConnect 方法的响应结构。
+// 用于返回检查 Logo 链接是否可连接的结果。
+type CheckLogoURLHasConnectRes struct {
+	g.Meta `mime:"application/json"`
 }

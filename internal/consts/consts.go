@@ -47,4 +47,12 @@ var (
 	SMTPUser = ""
 	// SMTPPass 是 SMTP 服务器的密码。
 	SMTPPass = ""
+
+	// ImageContentTypes 是支持的图片类型。
+	ImageContentTypes = []string{
+		"image/jpeg",
+		"image/jpg",
+		"image/png",
+		"image/webp",
+	}
 )

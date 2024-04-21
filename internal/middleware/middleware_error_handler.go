@@ -24,7 +24,6 @@
  * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
  * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
  * --------------------------------------------------------------------------------
- *
  */
 
 package middleware
@@ -74,11 +73,11 @@ func MiddleErrorHandler(r *ghttp.Request) {
 			break
 		case 58:
 			glog.Errorf(ctx, "[Exception] 未处理错误=> [%v]: %s", errorCode, getError.Error())
-			result.ServerInternalError.SetErrorMessage("未处理错误").SetErrorData(g.Map{"userCtx": ctx}).Response(r)
+			result.ServerInternalError.SetErrorMessage("未处理错误").Response(r)
 			break
 		default:
 			glog.Warningf(ctx, "[Exception] 未定义的系统错误=> [%v]: %s", errorCode, getError.Error())
-			result.ServerInternalError.SetErrorMessage("未知错误").SetErrorData(g.Map{"userCtx": ctx}).Response(r)
+			result.ServerInternalError.SetErrorMessage("未知错误").Response(r)
 		}
 
 		// 结束错误

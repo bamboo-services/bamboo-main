@@ -26,25 +26,39 @@
  * --------------------------------------------------------------------------------
  */
 
-// =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// =================================================================================
-
-package link
+package boot
 
 import (
 	"context"
-
-	"xiaoMain/api/link/v1"
+	"github.com/gogf/gf/v2/os/glog"
+	"xiaoMain/internal/dao"
+	"xiaoMain/internal/model/do"
 )
 
-type ILinkV1 interface {
-	LinkAddColor(ctx context.Context, req *v1.LinkAddColorReq) (res *v1.LinkAddColorRes, err error)
-	LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error)
-	LinkPlateAdd(ctx context.Context, req *v1.LinkPlateAddReq) (res *v1.LinkPlateAddRes, err error)
-	CheckBlogURLHasConnect(ctx context.Context, req *v1.CheckBlogURLHasConnectReq) (res *v1.CheckBlogURLHasConnectRes, err error)
-	CheckLogoURLHasConnect(ctx context.Context, req *v1.CheckLogoURLHasConnectReq) (res *v1.CheckLogoURLHasConnectRes, err error)
-	CheckRssURLHasConnect(ctx context.Context, req *v1.CheckRssURLHasConnectReq) (res *v1.CheckRssURLHasConnectRes, err error)
-	LinkGetColor(ctx context.Context, req *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error)
-	LinkGetPlate(ctx context.Context, req *v1.LinkGetPlateReq) (res *v1.LinkGetPlateRes, err error)
+func InitialDesiredLocationTable(ctx context.Context) {
+	// 记录日志，开始初始化数据表
+	glog.Info(ctx, "[BOOT] 初始化期望位置表")
+
+	// 初始化期望位置表
+	insertLocationData(ctx, 1, "favorite", "最喜欢", "这是我最喜欢的东西，我当然要置顶啦", true)
+	insertLocationData(ctx, 100, "fail", "失效的", "这是失效的友链，希望你快回来嗷", false)
+}
+
+// insertLocationData 插入数据，用于信息初始化进行的操作
+func insertLocationData(ctx context.Context, sort uint, name string, displayName string, desc string, reveal bool) {
+	if record, _ := dao.XfDesiredLocation.Ctx(ctx).Where(do.XfDesiredLocation{Name: name}).One(); record == nil {
+		if _, err := dao.XfDesiredLocation.Ctx(ctx).Data(
+			do.XfDesiredLocation{
+				Sort:        sort,
+				Name:        name,
+				DisplayName: displayName,
+				Description: desc,
+				Reveal:      reveal,
+			}).Insert(); err != nil {
+			glog.Infof(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 失败", name)
+			glog.Errorf(ctx, "[SQL] 错误信息：%v", err.Error())
+		} else {
+			glog.Debugf(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 成功", name)
+		}
+	}
 }
