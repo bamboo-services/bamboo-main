@@ -91,7 +91,7 @@ func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1
 	// 检查 RSS URL 是否合法
 	wg.Add(1)
 	go func(request *v1.LinkAddReq) {
-		if getError = service.LinkLogic().CheckRSSURL(ctx, request.SiteRssURL); getError != nil {
+		if getError = service.LinkLogic().CheckRSSCanAccess(ctx, request.SiteRssURL); getError != nil {
 			result.AddLinkFailed.SetErrorMessage(getError.Error()).Response(getRequest)
 		}
 		wg.Done()

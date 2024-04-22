@@ -98,13 +98,13 @@ func TestRSSURLAbleToUse(t *testing.T) {
 	service.RegisterLinkLogic(link.New())
 	// 测试其中一个地址是否可以访问
 	// 正确可以返回的
-	err := service.LinkLogic().CheckRSSURL(context.Background(), "https://blog.x-lf.com/atom.xml")
+	err := service.LinkLogic().CheckRSSCanAccess(context.Background(), "https://blog.x-lf.com/atom.xml")
 	if err != nil {
 		t.Errorf("测试失败，错误原因：%s", err.Error())
 	}
 
 	// 错误的不可返回的
-	err = service.LinkLogic().CheckRSSURL(context.Background(), "https://blog.x-lf.com/404")
+	err = service.LinkLogic().CheckRSSCanAccess(context.Background(), "https://blog.x-lf.com/404")
 	if err != nil {
 		t.Logf("测试失败，错误原因：%s", err.Error())
 	}

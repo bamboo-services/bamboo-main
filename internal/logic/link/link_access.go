@@ -37,6 +37,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 	"xiaoMain/internal/consts"
 )
@@ -140,17 +141,20 @@ func (s *sLinkLogic) CheckLogoCanAccess(ctx context.Context, siteLogo string) (e
 		_ = getResp.Body.Close()
 		// 检查获取的状态是否是图片
 		for _, imageContentType := range consts.ImageContentTypes {
-			if imageContentType == getResp.Header.Get("Content-Type") {
-				glog.Debugf(ctx, "[LOGIC] Logo 访问成功，耗时：%dms", time.Now().UnixMilli()-getNowTimestamp)
-				return nil
+			// 拆分 Content-Type 获取图片类型
+			for _, getUserContentType := range strings.Split(getResp.Header.Get("Content-Type"), ";") {
+				if imageContentType == getUserContentType {
+					glog.Debugf(ctx, "[LOGIC] Logo 访问成功，耗时：%dms", time.Now().UnixMilli()-getNowTimestamp)
+					return nil
+				}
 			}
 		}
-		glog.Info(ctx, "[LOGIC] Logo 不是图片")
+		glog.Infof(ctx, "[LOGIC] Logo 不是图片，获取请求头为 [%s]", getResp.Header.Get("Content-Type"))
 		return errors.New("该 URL 不是图片")
 	}
 }
 
-// CheckRSSURL 检查链接是否可以访问
+// CheckRSSCanAccess 检查链接是否可以访问
 // 用于检查用户添加的链接是否可以访问，如果可以访问则返回 nil，否则返回错误
 // 还需要检查是否为 RSS URL 是否为 XML 格式
 //
@@ -160,8 +164,8 @@ func (s *sLinkLogic) CheckLogoCanAccess(ctx context.Context, siteLogo string) (e
 //
 // 返回：
 // err: 如果链接可以访问，返回 nil；否则返回错误。
-func (s *sLinkLogic) CheckRSSURL(ctx context.Context, siteRSS string) (err error) {
-	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:CheckRSSURL 服务层")
+func (s *sLinkLogic) CheckRSSCanAccess(ctx context.Context, siteRSS string) (err error) {
+	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:CheckRSSCanAccess 服务层")
 	getNowTimestamp := time.Now().UnixMilli()
 	// 检查链接是否可以访问
 	getResp, err := s.linkAccess(siteRSS)

@@ -72,7 +72,7 @@ type (
 		//
 		// 返回：
 		// err: 如果链接可以访问，返回 nil；否则返回错误。
-		CheckRSSURL(ctx context.Context, siteRSS string) (err error)
+		CheckRSSCanAccess(ctx context.Context, siteRSS string) (err error)
 		// CheckLinkName 检查链接名是否重复
 		// 用于检查用户添加的链接名是否已经存在，如果存在则返回错误，否则返回成功
 		//
