@@ -44,6 +44,7 @@ type XfColor struct {
 	Name        interface{} // 颜色名字
 	DisplayName interface{} // 展示名字
 	Color       interface{} // 色值
+	HasSelect   interface{} // 普通申请用户是否可以选择
 	CreatedAt   *gtime.Time // 创建时间
 	UpdatedAt   *gtime.Time // 修改时间
 }

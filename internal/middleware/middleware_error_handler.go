@@ -73,11 +73,11 @@ func MiddleErrorHandler(r *ghttp.Request) {
 			break
 		case 58:
 			glog.Errorf(ctx, "[Exception] 未处理错误=> [%v]: %s", errorCode, getError.Error())
-			result.ServerInternalError.SetErrorMessage("未处理错误").Response(r)
+			result.ServerInternalError.SetErrorMessage("页面已定义未实现").Response(r)
 			break
 		default:
 			glog.Warningf(ctx, "[Exception] 未定义的系统错误=> [%v]: %s", errorCode, getError.Error())
-			result.ServerInternalError.SetErrorMessage("未知错误").Response(r)
+			result.ServerInternalError.SetErrorMessage("未定义的系统错误").Response(r)
 		}
 
 		// 结束错误

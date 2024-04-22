@@ -30,10 +30,26 @@ package v1
 
 import "github.com/gogf/gf/v2/frame/g"
 
+// LinkGetColorReq 获取期望颜色信息
+// 用于获取期望颜色信息
 type LinkGetColorReq struct {
 	g.Meta `path:"/v1/get/color" method:"get" tags:"Link" summary:"获取期望颜色信息"`
 }
 
+// LinkGetColorRes 获取期望颜色信息响应
+// 用于获取期望颜色信息响应
 type LinkGetColorRes struct {
-	g.Meta
+	g.Meta `mime:"application/json"`
+}
+
+// LinkGetColorFullReq 获取完整颜色信息
+// 用于获取完整颜色信息
+type LinkGetColorFullReq struct {
+	g.Meta `path:"/v1/get/color/full" method:"Get" tags:"Link" summary:"获取完整颜色信息"`
+}
+
+// LinkGetColorFullRes 获取完整颜色信息响应
+// 用于获取完整颜色信息响应
+type LinkGetColorFullRes struct {
+	g.Meta `mime:"application/json"`
 }

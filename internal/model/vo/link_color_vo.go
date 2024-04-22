@@ -26,26 +26,17 @@
  * --------------------------------------------------------------------------------
  */
 
-// =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// =================================================================================
+package vo
 
-package link
-
-import (
-	"context"
-
-	"xiaoMain/api/link/v1"
-)
-
-type ILinkV1 interface {
-	LinkColorAdd(ctx context.Context, req *v1.LinkColorAddReq) (res *v1.LinkColorAddRes, err error)
-	LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error)
-	LinkLocationAdd(ctx context.Context, req *v1.LinkLocationAddReq) (res *v1.LinkLocationAddRes, err error)
-	CheckBlogURLHasConnect(ctx context.Context, req *v1.CheckBlogURLHasConnectReq) (res *v1.CheckBlogURLHasConnectRes, err error)
-	CheckLogoURLHasConnect(ctx context.Context, req *v1.CheckLogoURLHasConnectReq) (res *v1.CheckLogoURLHasConnectRes, err error)
-	CheckRssURLHasConnect(ctx context.Context, req *v1.CheckRssURLHasConnectReq) (res *v1.CheckRssURLHasConnectRes, err error)
-	LinkGetColor(ctx context.Context, req *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error)
-	LinkGetColorFull(ctx context.Context, req *v1.LinkGetColorFullReq) (res *v1.LinkGetColorFullRes, err error)
-	LinkGetLocation(ctx context.Context, req *v1.LinkGetLocationReq) (res *v1.LinkGetLocationRes, err error)
+// LinkColorVO 链接颜色值对象
+// 用于返回链接颜色信息
+//
+// 参数:
+// ID: 颜色ID
+// DisplayName: 颜色显示名称
+// Color: 颜色值(HEX)
+type LinkColorVO struct {
+	ID          int64  `json:"id"`
+	DisplayName string `json:"display_name"`
+	Color       string `json:"color"`
 }

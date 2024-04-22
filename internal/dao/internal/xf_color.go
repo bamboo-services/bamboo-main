@@ -52,6 +52,7 @@ type XfColorColumns struct {
 	Name        string // 颜色名字
 	DisplayName string // 展示名字
 	Color       string // 色值
+	HasSelect   string // 普通申请用户是否可以选择
 	CreatedAt   string // 创建时间
 	UpdatedAt   string // 修改时间
 }
@@ -62,6 +63,7 @@ var xfColorColumns = XfColorColumns{
 	Name:        "name",
 	DisplayName: "display_name",
 	Color:       "color",
+	HasSelect:   "has_select",
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
 }

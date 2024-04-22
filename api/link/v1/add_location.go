@@ -30,10 +30,14 @@ package v1
 
 import "github.com/gogf/gf/v2/frame/g"
 
-type LinkPlateAddReq struct {
-	g.Meta `path:"/v1/add/plate" method:"post" tags:"Link" summary:"添加板块"`
+// LinkLocationAddReq 添加位置(板块)请求参数
+// 添加位置(板块)
+type LinkLocationAddReq struct {
+	g.Meta `path:"/v1/add/location" method:"post" tags:"Link" summary:"添加位置(板块)"`
 }
 
-type LinkPlateAddRes struct {
+// LinkLocationAddRes 添加位置(板块)响应参数
+// 添加位置(板块)
+type LinkLocationAddRes struct {
 	g.Meta
 }

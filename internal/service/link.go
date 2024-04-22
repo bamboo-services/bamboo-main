@@ -36,6 +36,7 @@ package service
 import (
 	"context"
 	v1 "xiaoMain/api/link/v1"
+	"xiaoMain/internal/model/entity"
 )
 
 type (
@@ -102,6 +103,17 @@ type (
 		// 返回：
 		// err: 如果添加链接成功，返回 nil；否则返回错误。
 		AddLink(ctx context.Context, req v1.LinkAddReq) (err error)
+		// GetColor 获取期望颜色信息
+		// 用于获取期望颜色信息, 如果成功则返回期望颜色信息，否则返回错误。
+		//
+		// 参数：
+		// ctx: 请求的上下文，用于管理超时和取消信号。
+		//
+		// 返回：
+		// getColors: 如果获取期望颜色信息成功，返回期望颜色信息；否则返回错误。
+		// err: 如果获取期望颜色信息成功，返回 nil；否则返回错误。
+		GetColor(ctx context.Context) (getColors []*entity.XfColor, err error)
+		GetLocation(ctx context.Context) (getLocation []*entity.XfLocation, err error)
 	}
 )
 

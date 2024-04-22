@@ -26,14 +26,17 @@
  * --------------------------------------------------------------------------------
  */
 
-package v1
+package link
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"context"
 
-type LinkGetPlateReq struct {
-	g.Meta `path:"/v1/get/plate" method:"get" tags:"Link" summary:"获取期望板块信息"`
-}
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
 
-type LinkGetPlateRes struct {
-	g.Meta `mime:"application/json"`
+	"xiaoMain/api/link/v1"
+)
+
+func (c *ControllerV1) LinkColorAdd(ctx context.Context, req *v1.LinkColorAddReq) (res *v1.LinkColorAddRes, err error) {
+	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }

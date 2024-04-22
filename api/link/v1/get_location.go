@@ -26,26 +26,29 @@
  * --------------------------------------------------------------------------------
  */
 
-// =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// =================================================================================
+package v1
 
-package link
+import "github.com/gogf/gf/v2/frame/g"
 
-import (
-	"context"
+// LinkGetLocationReq 获取位置信息
+// 用于获取位置信息
+type LinkGetLocationReq struct {
+	g.Meta `path:"/v1/get/location" method:"Get" tags:"Link" summary:"获取位置(板块)信息"`
+}
 
-	"xiaoMain/api/link/v1"
-)
+// LinkGetLocationRes 获取位置信息响应
+// 用于获取位置信息响应
+type LinkGetLocationRes struct {
+	g.Meta `mime:"application/json"`
+}
 
-type ILinkV1 interface {
-	LinkColorAdd(ctx context.Context, req *v1.LinkColorAddReq) (res *v1.LinkColorAddRes, err error)
-	LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error)
-	LinkLocationAdd(ctx context.Context, req *v1.LinkLocationAddReq) (res *v1.LinkLocationAddRes, err error)
-	CheckBlogURLHasConnect(ctx context.Context, req *v1.CheckBlogURLHasConnectReq) (res *v1.CheckBlogURLHasConnectRes, err error)
-	CheckLogoURLHasConnect(ctx context.Context, req *v1.CheckLogoURLHasConnectReq) (res *v1.CheckLogoURLHasConnectRes, err error)
-	CheckRssURLHasConnect(ctx context.Context, req *v1.CheckRssURLHasConnectReq) (res *v1.CheckRssURLHasConnectRes, err error)
-	LinkGetColor(ctx context.Context, req *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error)
-	LinkGetColorFull(ctx context.Context, req *v1.LinkGetColorFullReq) (res *v1.LinkGetColorFullRes, err error)
-	LinkGetLocation(ctx context.Context, req *v1.LinkGetLocationReq) (res *v1.LinkGetLocationRes, err error)
+// LinkGetLocationFullReq 获取完整位置信息
+// 用于获取完整位置信息
+type LinkGetLocationFullReq struct {
+	g.Meta `path:"/v1/get/location/full" method:"Get" tags:"Link" summary:"获取完整位置(板块)信息"`
+}
+
+// LinkGetLocationFullRes 获取完整位置信息响应
+// 用于获取完整位置信息响应
+type LinkGetLocationFullRes struct {
 }

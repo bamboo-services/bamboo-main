@@ -35,6 +35,7 @@ import (
 	v1 "xiaoMain/api/link/v1"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
+	"xiaoMain/internal/model/entity"
 )
 
 // AddLink 添加链接
@@ -86,4 +87,42 @@ func (s *sLinkLogic) AddLink(ctx context.Context, req v1.LinkAddReq) (err error)
 		return errors.New("添加链接失败")
 	}
 	return nil
+}
+
+// GetColor 获取期望颜色信息
+// 用于获取期望颜色信息, 如果成功则返回期望颜色信息，否则返回错误。
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+//
+// 返回：
+// getColors: 如果获取期望颜色信息成功，返回期望颜色信息；否则返回错误。
+// err: 如果获取期望颜色信息成功，返回 nil；否则返回错误。
+func (s *sLinkLogic) GetColor(ctx context.Context) (getColors []*entity.XfColor, err error) {
+	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:GetColor 服务层")
+	err = dao.XfColor.Ctx(ctx).Where(do.XfColor{HasSelect: true}).Scan(&getColors)
+	if err != nil {
+		glog.Error(ctx, "[LOGIC] 数据库错误<获取期望颜色失败>")
+		return nil, err
+	}
+	return getColors, nil
+}
+
+// GetLocation 获取期望位置信息
+// 用于获取期望位置信息, 如果成功则返回期望位置信息，否则返回错误。
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+//
+// 返回：
+// getLocation: 如果获取期望位置信息成功，返回期望位置信息；否则返回错误。
+// err: 如果获取期望位置信息成功，返回 nil；否则返回错误。
+func (s *sLinkLogic) GetLocation(ctx context.Context) (getLocation []*entity.XfLocation, err error) {
+	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:GetLocation 服务层")
+	err = dao.XfLocation.Ctx(ctx).Where(do.XfLocation{Reveal: true}).Scan(&getLocation)
+	if err != nil {
+		glog.Error(ctx, "[LOGIC] 数据库错误<获取期望位置失败>")
+		return nil, err
+	}
+	return getLocation, nil
 }

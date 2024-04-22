@@ -34,6 +34,7 @@ create table xf_color
     name         varchar                 not null,
     display_name varchar                 not null,
     color        char(6)                 not null,
+    has_select   boolean   default true  not null,
     created_at   timestamp default now() not null,
     updated_at   timestamp
 );
@@ -42,9 +43,10 @@ comment on table xf_color is '所属颜色';
 comment on column xf_color.id is '主键';
 comment on column xf_color.name is '颜色名字';
 comment on column xf_color.display_name is '展示名字';
+comment on column xf_color.color is '色值';
+comment on column xf_color.has_select is '普通申请用户是否可以选择';
 comment on column xf_color.created_at is '创建时间';
 comment on column xf_color.updated_at is '修改时间';
-comment on column xf_color.color is '色值';
 
 create unique index xf_color_name_uindex
     on xf_color (name);

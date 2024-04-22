@@ -39,37 +39,36 @@ import (
 	"xiaoMain/api/link/v1"
 )
 
-// LinkGetColor 获取期望颜色信息
-// 用于获取期望颜色信息, 如果成功则返回期望颜色信息，否则返回错误。
+// LinkGetLocation 获取期望位置信息
+// 用于获取期望位置信息, 如果成功则返回期望位置信息，否则返回错误。
 //
 // 参数：
 // ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含获取期望颜色信息的详细信息。
+// req: 用户的请求，包含获取期望位置信息的详细信息。
 //
 // 返回：
-// res: 如果获取期望颜色信息成功，返回期望颜色信息；否则返回错误。
-// err: 如果获取期望颜色信息成功，返回 nil；否则返回错误。
-func (c *ControllerV1) LinkGetColor(ctx context.Context, _ *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 LinkGetColor 接口")
+// res: 如果获取期望位置信息成功，返回期望位置信息；否则返回错误。
+// err: 如果获取期望位置信息成功，返回 nil；否则返回错误。
+func (c *ControllerV1) LinkGetLocation(ctx context.Context, _ *v1.LinkGetLocationReq) (res *v1.LinkGetLocationRes, err error) {
+	glog.Info(ctx, "[CONTROL] 控制层 LinkGetLocation 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
-	// 获取期望颜色信息
-	getColor, err := service.LinkLogic().GetColor(ctx)
+	// 获取期望位置信息
+	getLocation, err := service.LinkLogic().GetLocation(ctx)
 	if err != nil {
 		result.ServerInternalError.SetErrorMessage("数据库操作失败").Response(getRequest)
 	}
-	if getColor != nil {
-		glog.Debugf(ctx, "[CONTROL] 获取期望颜色信息成功, 数量[%d]", len(getColor))
-		getColorList := make([]vo.LinkColorVO, len(getColor))
-		for i, color := range getColor {
-			getColorList[i] = vo.LinkColorVO{
-				ID:          color.Id,
-				DisplayName: color.DisplayName,
-				Color:       color.Color,
+	if getLocation != nil {
+		glog.Debugf(ctx, "[CONTROL] 获取期望位置信息成功, 数量[%d]", len(getLocation))
+		getLocationList := make([]vo.LinkLocationVO, len(getLocation))
+		for i, location := range getLocation {
+			getLocationList[i] = vo.LinkLocationVO{
+				ID:          location.Id,
+				DisplayName: location.DisplayName,
 			}
 		}
-		result.Success("获取期望颜色信息成功", getColorList).Response(getRequest)
+		result.Success("获取期望位置信息成功", getLocationList).Response(getRequest)
 	} else {
-		result.ServerInternalError.SetErrorMessage("颜色配置为空").Response(getRequest)
+		result.ServerInternalError.SetErrorMessage("位置配置为空").Response(getRequest)
 	}
 	return nil, nil
 }

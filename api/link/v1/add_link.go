@@ -30,6 +30,21 @@ package v1
 
 import "github.com/gogf/gf/v2/frame/g"
 
+// LinkAddReq 添加新的链接请求参数
+// 添加新的链接
+//
+// 参数：
+// WebmasterEmail: 站长邮箱
+// ServiceProvider: 服务商
+// SiteName: 站点名称
+// SiteURL: 站点URL
+// SiteLogo: 站点Logo
+// SiteDescription: 站点描述
+// SiteRssURL: 站点RSS URL
+// DesiredLocation: 期望位置
+// DesiredColor: 期望颜色
+// HasAdv: 是否有广告
+// Remark: 备注
 type LinkAddReq struct {
 	g.Meta          `path:"/v1/add/link" method:"post" tags:"Link" summary:"添加新的链接" `
 	WebmasterEmail  string `json:"webmaster_email" v:"required|email#请输入站长邮箱|站长邮箱格式不正确" dc:"站长邮箱"`
@@ -45,6 +60,8 @@ type LinkAddReq struct {
 	Remark          string `json:"remark" v:"required#请输入备注" dc:"备注"`
 }
 
+// LinkAddRes 添加新的链接响应参数
+// 添加新的链接
 type LinkAddRes struct {
 	g.Meta `mime:"application/json"`
 }

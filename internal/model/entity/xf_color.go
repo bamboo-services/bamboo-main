@@ -42,6 +42,7 @@ type XfColor struct {
 	Name        string      `json:"name"        orm:"name"         ` // 颜色名字
 	DisplayName string      `json:"displayName" orm:"display_name" ` // 展示名字
 	Color       string      `json:"color"       orm:"color"        ` // 色值
+	HasSelect   bool        `json:"hasSelect"   orm:"has_select"   ` // 普通申请用户是否可以选择
 	CreatedAt   *gtime.Time `json:"createdAt"   orm:"created_at"   ` // 创建时间
 	UpdatedAt   *gtime.Time `json:"updatedAt"   orm:"updated_at"   ` // 修改时间
 }
