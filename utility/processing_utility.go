@@ -99,6 +99,26 @@ func GetAuthorizationFromHeader(getRequest *ghttp.Request) (*string, error) {
 	}
 }
 
+// GetVerifyFromHeader 是一个从请求头中获取 X-Verification 字段的函数。
+// 它接收一个 *ghttp.Request 类型的参数，表示 HTTP 请求。
+// 如果请求头中存在 X-Verification 字段，函数将返回该字段的值。
+// 如果请求头中不存在 X-Verification 字段，函数将返回一个错误。
+//
+// 参数:
+// getRequest: *ghttp.Request 类型，表示 HTTP 请求。
+//
+// 返回:
+// *string 类型，表示从请求头中获取的 X-Verification 字段的值。
+// error 类型，如果无法从请求头中获取 X-Verification 字段，返回一个错误；否则，返回 nil。
+func GetVerifyFromHeader(getRequest *ghttp.Request) (*string, error) {
+	getVerify := getRequest.Header.Get("X-Verification")
+	if getVerify != "" {
+		return &getVerify, nil
+	} else {
+		return nil, errors.New("无法从请求头获取 Verification")
+	}
+}
+
 // PasswordEncode 是一个对密码进行加密的函数。
 // 它接收一个 string 类型的参数，表示原始密码，并返回该密码的加密形式。
 // 首先，它将原始密码转换为 Base64 编码，然后使用 bcrypt.GenerateFromPassword 函数对 Base64 编码的密码进行加密。

@@ -58,15 +58,38 @@ var (
 			s := g.Server()
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.Group("/api/v1", func(group *ghttp.RouterGroup) {
-					// 访问处理中间件
-					group.Middleware(middleware.MiddleAccessUserHandler)
-					// 错误集中处理中间件
-					group.Middleware(middleware.MiddleErrorHandler)
-					group.Bind(auth.NewV1())
+					group.Middleware(middleware.MiddleAccessUserHandler) // 访问处理中间件
+					group.Middleware(middleware.MiddleErrorHandler)      // 错误集中处理中间件
+
+					// 用户操作
+					group.Bind(
+						auth.NewV1().AuthLogin,
+						auth.NewV1().AuthResetPassword,
+						auth.NewV1().ResetPasswordSendMail,
+					)
+
+					// 链接操作
 					group.Group("/link", func(group *ghttp.RouterGroup) {
-						// 中间件处理用户的访问是否有效
-						group.Bind(link.NewV1())
+						group.Bind(
+							link.NewV1().LinkAdd,
+							link.NewV1().CheckBlogURLHasConnect,
+							link.NewV1().CheckLogoURLHasConnect,
+							link.NewV1().CheckRssURLHasConnect,
+							link.NewV1().LinkGetColor,
+							link.NewV1().LinkGetLocation,
+						)
+						group.Middleware(middleware.MiddleAuthHandler).Bind(
+							link.NewV1().LinkColorAdd,
+							link.NewV1().LinkLocationAdd,
+							link.NewV1().LinkGetColorFull,
+							link.NewV1().LinkGetLocationFull,
+						)
 					})
+
+					group.Middleware(middleware.MiddleAuthHandler).Bind(
+						auth.NewV1().ChangePasswordSendMail,
+						auth.NewV1().AuthChangePassword,
+					)
 				})
 			})
 			s.Run()

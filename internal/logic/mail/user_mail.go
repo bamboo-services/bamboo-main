@@ -100,7 +100,7 @@ func (s *sMailLogic) SendEmailVerificationCode(ctx context.Context, mail string,
 			// 创建验证码并发送
 			err := s.sendMail(ctx, mail, scene, data)
 			if err != nil {
-				glog.Warningf(ctx, "[LOGIC-ASYNC] 发送邮件时发生错误，不进行数据库插入，错误原因：%s", err.Error())
+				glog.Warningf(ctx, "[LOGIC] 发送邮件时发生错误，不进行数据库插入，错误原因：%s", err.Error())
 			}
 			wg.Done()
 		}(ctx, mail, scenes, sendMailData)

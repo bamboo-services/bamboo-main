@@ -34,10 +34,10 @@ import "github.com/gogf/gf/v2/frame/g"
 // 用于检查用户输入的博客链接是否可连接。
 //
 // 参数:
-// BlogURL: 用户输入的博客链接。
+// LinkID: 链接ID
 type CheckBlogURLHasConnectReq struct {
-	g.Meta  `path:"/v1/check/connect/blog" method:"Get" tags:"Link" summary:"检查博客链接是否可连接"`
-	BlogURL string `json:"blog_url" v:"required|url#请输入博客链接|博客链接格式不正确" dc:"博客链接"`
+	g.Meta `path:"/v1/check/connect/blog" method:"Get" tags:"Link" summary:"检查博客链接是否可连接"`
+	LinkID string `json:"link_id" v:"required|regex:^[0-9]+$#请输入链接ID|链接ID只能为数字"`
 }
 
 // CheckBlogURLHasConnectRes 是 CheckBlogURLHasConnect 方法的响应结构。

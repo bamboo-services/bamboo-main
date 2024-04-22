@@ -32,8 +32,10 @@ import (
 	"context"
 	"errors"
 	"github.com/gogf/gf/v2/os/glog"
+	"github.com/gogf/gf/v2/os/gtime"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
+	"xiaoMain/internal/model/entity"
 )
 
 // CheckLinkName 检查链接名是否重复
@@ -86,4 +88,38 @@ func (s *sLinkLogic) CheckLinkURL(ctx context.Context, siteURL string) (err erro
 	} else {
 		return nil
 	}
+}
+
+// CheckLinkHasConnect 检查链接是否已经连接
+// 用于检查链接是否已经连接，如果成功则返回 nil，否则返回错误。
+// 本接口会根据已有的链接信息对链接进行链接检查是否可以连接，若连接失败返回失败信息，若成功返回成功信息
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// linkID: 用户尝试添加的链接ID。
+//
+// 返回：
+// err: 如果链接已连接，返回错误；否则返回 nil。
+func (s *sLinkLogic) CheckLinkHasConnect(ctx context.Context, linkID string) (delay *int64, err error) {
+	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:CheckLinkHasConnect 服务层")
+	// 获取链接信息
+	var getLink *entity.XfLinkList
+	err = dao.XfLinkList.Ctx(ctx).Where(do.XfLinkList{Id: linkID}).Scan(&getLink)
+	if err != nil {
+		glog.Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
+		return nil, errors.New("数据库查询错误")
+	}
+	if getLink == nil {
+		glog.Warningf(ctx, "[LOGIC] 链接不存在，链接ID[%s]", linkID)
+		return nil, errors.New("链接不存在")
+	}
+	// 检查链接是否可以连接
+	getNowTimestamp := gtime.Now().TimestampMicro()
+	err = s.CheckLinkCanAccess(ctx, getLink.SiteUrl)
+	if err != nil {
+		return nil, err
+	}
+	// 获取延迟信息
+	*delay = gtime.Now().TimestampMicro() - getNowTimestamp
+	return delay, nil
 }

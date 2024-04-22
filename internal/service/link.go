@@ -93,6 +93,17 @@ type (
 		// 返回：
 		// err: 如果链接URL已存在，返回错误；否则返回 nil。
 		CheckLinkURL(ctx context.Context, siteURL string) (err error)
+		// CheckLinkHasConnect 检查链接是否已经连接
+		// 用于检查链接是否已经连接，如果成功则返回 nil，否则返回错误。
+		// 本接口会根据已有的链接信息对链接进行链接检查是否可以连接，若连接失败返回失败信息，若成功返回成功信息
+		//
+		// 参数：
+		// ctx: 请求的上下文，用于管理超时和取消信号。
+		// linkID: 用户尝试添加的链接ID。
+		//
+		// 返回：
+		// err: 如果链接已连接，返回错误；否则返回 nil。
+		CheckLinkHasConnect(ctx context.Context, linkID string) (delay *int64, err error)
 		// AddLink 添加链接
 		// 用于添加链接，如果添加成功则返回 nil，否则返回错误。
 		//
@@ -113,6 +124,15 @@ type (
 		// getColors: 如果获取期望颜色信息成功，返回期望颜色信息；否则返回错误。
 		// err: 如果获取期望颜色信息成功，返回 nil；否则返回错误。
 		GetColor(ctx context.Context) (getColors []*entity.XfColor, err error)
+		// GetLocation 获取期望位置信息
+		// 用于获取期望位置信息, 如果成功则返回期望位置信息，否则返回错误。
+		//
+		// 参数：
+		// ctx: 请求的上下文，用于管理超时和取消信号。
+		//
+		// 返回：
+		// getLocation: 如果获取期望位置信息成功，返回期望位置信息；否则返回错误。
+		// err: 如果获取期望位置信息成功，返回 nil；否则返回错误。
 		GetLocation(ctx context.Context) (getLocation []*entity.XfLocation, err error)
 	}
 )

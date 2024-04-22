@@ -26,41 +26,15 @@
  * --------------------------------------------------------------------------------
  */
 
-package middleware
+package vo
 
-import (
-	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
-	"xiaoMain/utility/result"
-)
-
-// MiddleAccessUserHandler 是用于处理用户访问的中间件。
-// 它检查用户的 IP 地址和 User-Agent 是否为空。
+// LinkConnectRes 链接连接
+// 链接连接, 用于返回链接连接信息。
 //
 // 参数:
-// r: 请求的上下文，用于管理请求的信息。
-//
-// 返回:
-// 无
-func MiddleAccessUserHandler(r *ghttp.Request) {
-	// 继续执行后续中间件
-	ctx := r.GetCtx()
-	// 获取用户的 IP 地址 以及 User-Agent
-	userIP := r.GetClientIp()
-	userAgent := r.GetHeader("User-Agent")
-	// 两者内容不能为空
-	if userIP == "" || userAgent == "" {
-		glog.Error(ctx, "[MIDDLE] 用户访问异常")
-		if userIP == "" {
-			glog.Error(ctx, "[MIDDLE] 用户 IP 为空")
-		}
-		if userAgent == "" {
-			glog.Error(ctx, "[MIDDLE] 用户 User-Agent 为空")
-		}
-		result.AccessError.Response(r)
-	} else {
-		glog.Infof(ctx, "[MIDDLE] 访问者 [%s] ", userIP)
-		glog.Debugf(ctx, "[MIDDLE] User-Agent [%s]", userAgent)
-		r.Middleware.Next()
-	}
+// Message: 链接连接信息
+// Delay: 链接连接延迟
+type LinkConnectRes struct {
+	Message string `json:"message"`
+	Delay   *int64 `json:"delay,omitempty"`
 }
