@@ -48,10 +48,10 @@ import (
 // err: 如果添加链接成功，返回 nil；否则返回错误。
 func (s *sLinkLogic) AddLink(ctx context.Context, req v1.LinkAddReq) (err error) {
 	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:AddLink 服务层")
-	var getLocation *do.XfDesiredLocation
-	var getColor *do.XfDesiredColor
+	var getLocation *do.XfLocation
+	var getColor *do.XfColor
 	// 对颜色进行数据库获取，获取指定的颜色是否存在
-	if dao.XfDesiredLocation.Ctx(ctx).Where(do.XfDesiredLocation{Name: req.DesiredLocation}).Scan(&getLocation) != nil {
+	if dao.XfLocation.Ctx(ctx).Where(do.XfLocation{Name: req.DesiredLocation}).Scan(&getLocation) != nil {
 		glog.Info(ctx, "[LOGIC] 数据库错误<期望位置不存在>")
 		return errors.New("期望位置不存在")
 	}
@@ -60,7 +60,7 @@ func (s *sLinkLogic) AddLink(ctx context.Context, req v1.LinkAddReq) (err error)
 		return errors.New("期望位置不存在")
 	}
 	// 对颜色进行数据库获取，获取指定的颜色是否存在
-	if dao.XfDesiredColor.Ctx(ctx).Where(do.XfDesiredColor{Name: req.DesiredColor}).Scan(&getColor) != nil {
+	if dao.XfColor.Ctx(ctx).Where(do.XfColor{Name: req.DesiredColor}).Scan(&getColor) != nil {
 		glog.Info(ctx, "[LOGIC] 数据库错误<期望位置不存在>")
 		return errors.New("期望颜色不存在")
 	}

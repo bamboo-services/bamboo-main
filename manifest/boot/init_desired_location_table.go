@@ -46,9 +46,9 @@ func InitialDesiredLocationTable(ctx context.Context) {
 
 // insertLocationData 插入数据，用于信息初始化进行的操作
 func insertLocationData(ctx context.Context, sort uint, name string, displayName string, desc string, reveal bool) {
-	if record, _ := dao.XfDesiredLocation.Ctx(ctx).Where(do.XfDesiredLocation{Name: name}).One(); record == nil {
-		if _, err := dao.XfDesiredLocation.Ctx(ctx).Data(
-			do.XfDesiredLocation{
+	if record, _ := dao.XfLocation.Ctx(ctx).Where(do.XfLocation{Name: name}).One(); record == nil {
+		if _, err := dao.XfLocation.Ctx(ctx).Data(
+			do.XfLocation{
 				Sort:        sort,
 				Name:        name,
 				DisplayName: displayName,

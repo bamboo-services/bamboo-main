@@ -79,9 +79,9 @@ func InitialDesiredColorTable(ctx context.Context) {
 
 // insertColorData 插入数据，用于信息初始化进行的操作
 func insertColorData(ctx context.Context, name string, displayName string, color string) {
-	if record, _ := dao.XfDesiredColor.Ctx(ctx).Where(do.XfDesiredColor{Name: name}).One(); record == nil {
-		if _, err := dao.XfDesiredColor.Ctx(ctx).Data(
-			do.XfDesiredColor{
+	if record, _ := dao.XfColor.Ctx(ctx).Where(do.XfColor{Name: name}).One(); record == nil {
+		if _, err := dao.XfColor.Ctx(ctx).Data(
+			do.XfColor{
 				Name:        name,
 				DisplayName: displayName,
 				Color:       color,
