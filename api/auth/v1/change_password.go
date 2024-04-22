@@ -35,7 +35,7 @@ import (
 // AuthChangePasswordReq
 // 用户修改密码请求
 type AuthChangePasswordReq struct {
-	g.Meta      `path:"/v1/user/change-password" tags:"User" method:"PUT" summary:"用户修改密码"`
+	g.Meta      `path:"/user/change-password" tags:"User" method:"PUT" summary:"用户修改密码"`
 	Email       string `json:"email" dc:"修改密码的邮箱" v:"email#邮箱不能为空"`
 	EmailCode   string `json:"email_code" dc:"邮箱验证码" v:"required|length:6,10#请输入验证码|验证码长度为 6 到 10 位"`
 	NewPassword string `json:"new_password" dc:"新的密码" v:"required|length:6,30#请输入密码|密码长度为 6 到 30 位"`

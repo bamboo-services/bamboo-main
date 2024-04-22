@@ -33,7 +33,7 @@ import "github.com/gogf/gf/v2/frame/g"
 // LinkLocationAddReq 添加位置(板块)请求参数
 // 添加位置(板块)
 type LinkLocationAddReq struct {
-	g.Meta `path:"/v1/add/location" method:"post" tags:"Link" summary:"添加位置(板块)"`
+	g.Meta `path:"/add/location" method:"post" tags:"Link" summary:"添加位置(板块)"`
 }
 
 // LinkLocationAddRes 添加位置(板块)响应参数

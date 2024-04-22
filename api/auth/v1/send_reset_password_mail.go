@@ -31,7 +31,7 @@ package v1
 import "github.com/gogf/gf/v2/frame/g"
 
 type ResetPasswordSendMailReq struct {
-	g.Meta `path:"/v1/user/reset-password/mail" tags:"User" method:"POST" summary:"发送用户重置密码邮件"`
+	g.Meta `path:"/user/reset-password/mail" tags:"User" method:"POST" summary:"发送用户重置密码邮件"`
 	Email  string `json:"email" v:"required|email#邮箱不能为空" dc:"需要发送对方邮件的验证码"`
 }
 

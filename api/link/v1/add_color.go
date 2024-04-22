@@ -33,7 +33,7 @@ import "github.com/gogf/gf/v2/frame/g"
 // LinkColorAddReq 添加颜色请求参数
 // 添加颜色
 type LinkColorAddReq struct {
-	g.Meta `path:"/v1/add/color" method:"post" tags:"Link" summary:"添加颜色"`
+	g.Meta `path:"/add/color" method:"post" tags:"Link" summary:"添加颜色"`
 }
 
 // LinkColorAddRes 添加颜色响应参数

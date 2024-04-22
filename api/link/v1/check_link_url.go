@@ -30,18 +30,33 @@ package v1
 
 import "github.com/gogf/gf/v2/frame/g"
 
-// CheckBlogURLHasConnectReq 是 CheckBlogURLHasConnect 方法的请求结构。
+// CheckLinkURLHasConnectReq 是 CheckLinkURLHasConnect 方法的请求结构。
 // 用于检查用户输入的博客链接是否可连接。
 //
 // 参数:
-// LinkID: 链接ID
-type CheckBlogURLHasConnectReq struct {
-	g.Meta `path:"/v1/check/connect/blog" method:"Get" tags:"Link" summary:"检查博客链接是否可连接"`
-	LinkID string `json:"link_id" v:"required|regex:^[0-9]+$#请输入链接ID|链接ID只能为数字"`
+// LinkURL: 链接ID
+type CheckLinkURLHasConnectReq struct {
+	g.Meta  `path:"/check/connect/link" method:"Get" tags:"Link" summary:"检查Link是否可连接"`
+	LinkURL string `json:"link_url" v:"required|url#请输入链接地址|请输入正确的链接地址" dc:"链接地址"`
 }
 
-// CheckBlogURLHasConnectRes 是 CheckBlogURLHasConnect 方法的响应结构。
+// CheckLinkURLHasConnectRes 是 CheckLinkURLHasConnect 方法的响应结构。
 // 用于返回检查博客链接是否可连接的结果。
-type CheckBlogURLHasConnectRes struct {
+type CheckLinkURLHasConnectRes struct {
+	g.Meta `mime:"application/json"`
+}
+
+// CheckLinkIDHasConnectReq 是 CheckLinkIdHasConnect 方法的请求结构。
+// 用于检查用户输入的链接ID是否可连接。
+//
+// 参数:
+// id: PATH-链接ID
+type CheckLinkIDHasConnectReq struct {
+	g.Meta `path:"/check/connect/link/:id" method:"Get" tags:"Link" summary:"检查LinkID是否可连接"`
+}
+
+// CheckLinkIDHasConnectRes 是 CheckLinkIdHasConnect 方法的响应结构。
+// 用于返回检查博客链接是否可连接的结果。
+type CheckLinkIDHasConnectRes struct {
 	g.Meta `mime:"application/json"`
 }

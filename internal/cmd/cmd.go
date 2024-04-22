@@ -57,6 +57,12 @@ var (
 			// 服务器启动
 			s := g.Server()
 			s.Group("/", func(group *ghttp.RouterGroup) {
+				// 前端部分
+				group.Group("", func(group *ghttp.RouterGroup) {
+
+				})
+
+				// 后端部分
 				group.Group("/api/v1", func(group *ghttp.RouterGroup) {
 					group.Middleware(middleware.MiddleAccessUserHandler) // 访问处理中间件
 					group.Middleware(middleware.MiddleErrorHandler)      // 错误集中处理中间件
@@ -72,7 +78,7 @@ var (
 					group.Group("/link", func(group *ghttp.RouterGroup) {
 						group.Bind(
 							link.NewV1().LinkAdd,
-							link.NewV1().CheckBlogURLHasConnect,
+							link.NewV1().CheckLinkURLHasConnect,
 							link.NewV1().CheckLogoURLHasConnect,
 							link.NewV1().CheckRssURLHasConnect,
 							link.NewV1().LinkGetColor,
@@ -83,6 +89,7 @@ var (
 							link.NewV1().LinkLocationAdd,
 							link.NewV1().LinkGetColorFull,
 							link.NewV1().LinkGetLocationFull,
+							link.NewV1().CheckLinkIDHasConnect,
 						)
 					})
 

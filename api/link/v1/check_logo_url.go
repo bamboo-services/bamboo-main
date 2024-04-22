@@ -36,7 +36,7 @@ import "github.com/gogf/gf/v2/frame/g"
 // 参数:
 // LogoURL: 用户输入的 Logo 链接。
 type CheckLogoURLHasConnectReq struct {
-	g.Meta  `path:"/v1/check/connect/logo" method:"Get" tags:"Link" summary:"检查Logo链接是否可连接"`
+	g.Meta  `path:"/check/connect/logo" method:"Get" tags:"Link" summary:"检查Logo链接是否可连接"`
 	LogoURL string `json:"logo_url" v:"required|url#请输入Logo链接|Logo链接格式不正确" dc:"Logo链接"`
 }
 

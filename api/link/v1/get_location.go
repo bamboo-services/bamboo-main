@@ -33,7 +33,7 @@ import "github.com/gogf/gf/v2/frame/g"
 // LinkGetLocationReq 获取位置信息
 // 用于获取位置信息
 type LinkGetLocationReq struct {
-	g.Meta `path:"/v1/get/location" method:"Get" tags:"Link" summary:"获取位置(板块)信息"`
+	g.Meta `path:"/get/location" method:"Get" tags:"Link" summary:"获取位置(板块)信息"`
 }
 
 // LinkGetLocationRes 获取位置信息响应
@@ -45,7 +45,7 @@ type LinkGetLocationRes struct {
 // LinkGetLocationFullReq 获取完整位置信息
 // 用于获取完整位置信息
 type LinkGetLocationFullReq struct {
-	g.Meta `path:"/v1/get/location/full" method:"Get" tags:"Link" summary:"获取完整位置(板块)信息"`
+	g.Meta `path:"/get/location/full" method:"Get" tags:"Link" summary:"获取完整位置(板块)信息"`
 }
 
 // LinkGetLocationFullRes 获取完整位置信息响应
