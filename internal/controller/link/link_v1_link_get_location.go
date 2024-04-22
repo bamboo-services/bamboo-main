@@ -49,7 +49,10 @@ import (
 // 返回：
 // res: 如果获取期望位置信息成功，返回期望位置信息；否则返回错误。
 // err: 如果获取期望位置信息成功，返回 nil；否则返回错误。
-func (c *ControllerV1) LinkGetLocation(ctx context.Context, _ *v1.LinkGetLocationReq) (res *v1.LinkGetLocationRes, err error) {
+func (c *ControllerV1) LinkGetLocation(
+	ctx context.Context,
+	_ *v1.LinkGetLocationReq,
+) (res *v1.LinkGetLocationRes, err error) {
 	glog.Info(ctx, "[CONTROL] 控制层 LinkGetLocation 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取期望位置信息

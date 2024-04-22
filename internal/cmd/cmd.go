@@ -57,6 +57,8 @@ var (
 			// 服务器启动
 			s := g.Server()
 			s.Group("/", func(group *ghttp.RouterGroup) {
+				group.Middleware(middleware.MiddleTimeHandler) // 接口时间统计接口
+
 				// 前端部分
 				group.Group("", func(group *ghttp.RouterGroup) {
 

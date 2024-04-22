@@ -26,41 +26,18 @@
  * --------------------------------------------------------------------------------
  */
 
-package link
+package middleware
 
 import (
-	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
-	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
-
-	"xiaoMain/api/link/v1"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// LinkGetLocationFull 获取颜色完整信息
-// 用于获取颜色完整信息，如果成功则返回 nil，否则返回错误。
-// 本接口会根据已有的颜色信息对颜色进行获取完整信息，若获取失败返回失败信息，若成功返回成功信息
-//
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含获取颜色完整信息的详细信息。
-//
-// 返回：
-// res: 如果获取颜色完整信息成功，返回 nil；否则返回错误。
-// err: 如果获取颜色完整信息成功，返回 nil；否则返回错误。
-func (c *ControllerV1) LinkGetLocationFull(
-	ctx context.Context,
-	_ *v1.LinkGetLocationFullReq,
-) (res *v1.LinkGetLocationFullRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 LinkGetLocationFull 接口")
-	getRequest := ghttp.RequestFromCtx(ctx)
-	// 获取颜色完整信息
-	getLocation, err := service.LinkLogic().GetLocationAllInformation(ctx)
-	if err != nil {
-		result.ServerInternalError.SetErrorMessage(err.Error()).Response(getRequest)
-	} else {
-		result.Success("获取成功", getLocation).Response(getRequest)
-	}
-	return nil, nil
+func MiddleTimeHandler(r *ghttp.Request) {
+	startTime := gtime.Now().TimestampMilli()
+	r.Middleware.Next()
+	endTime := gtime.Now().TimestampMilli()
+	glog.Infof(r.Context(), "[TIMER] 请求耗时 %vms", endTime-startTime)
+	println()
 }

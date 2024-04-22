@@ -62,7 +62,7 @@ type (
 		// 返回：
 		// err: 如果 Logo 可以访问，返回 nil；否则返回错误。
 		CheckLogoCanAccess(ctx context.Context, siteLogo string) (err error)
-		// CheckRSSURL 检查链接是否可以访问
+		// CheckRSSCanAccess 检查链接是否可以访问
 		// 用于检查用户添加的链接是否可以访问，如果可以访问则返回 nil，否则返回错误
 		// 还需要检查是否为 RSS URL 是否为 XML 格式
 		//
@@ -134,6 +134,7 @@ type (
 		// getLocation: 如果获取期望位置信息成功，返回期望位置信息；否则返回错误。
 		// err: 如果获取期望位置信息成功，返回 nil；否则返回错误。
 		GetLocation(ctx context.Context) (getLocation []*entity.XfLocation, err error)
+		GetLocationAllInformation(ctx context.Context) (getLocation []*entity.XfLocation, err error)
 	}
 )
 
