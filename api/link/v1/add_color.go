@@ -31,7 +31,7 @@ package v1
 import "github.com/gogf/gf/v2/frame/g"
 
 type LinkAddColorReq struct {
-	g.Meta `path:"/add/color" method:"post" tags:"Link" summary:"添加颜色"`
+	g.Meta `path:"/v1/add/color" method:"post" tags:"Link" summary:"添加颜色"`
 }
 
 type LinkAddColorRes struct {

@@ -30,20 +30,18 @@
 // Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
-package do
+package entity
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// XfDesiredColor is the golang structure of table xf_desired_color for DAO operations like Where/Data.
-type XfDesiredColor struct {
-	g.Meta      `orm:"table:xf_desired_color, do:true"`
-	Id          interface{} // 主键
-	Name        interface{} // 颜色名字
-	DisplayName interface{} // 展示名字
-	Color       interface{} // 色值
-	CreatedAt   *gtime.Time // 创建时间
-	UpdatedAt   *gtime.Time // 修改时间
+// XfColor is the golang structure for table xf_color.
+type XfColor struct {
+	Id          int64       `json:"id"          orm:"id"           ` // 主键
+	Name        string      `json:"name"        orm:"name"         ` // 颜色名字
+	DisplayName string      `json:"displayName" orm:"display_name" ` // 展示名字
+	Color       string      `json:"color"       orm:"color"        ` // 色值
+	CreatedAt   *gtime.Time `json:"createdAt"   orm:"created_at"   ` // 创建时间
+	UpdatedAt   *gtime.Time `json:"updatedAt"   orm:"updated_at"   ` // 修改时间
 }

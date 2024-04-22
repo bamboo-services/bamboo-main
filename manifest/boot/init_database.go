@@ -64,9 +64,9 @@ func InitialDatabase(ctx context.Context) {
 	// 初始化日志表
 	initialSQL(ctx, "xf_logs")
 	// 初始化位置表
-	initialSQL(ctx, "xf_desired_location")
+	initialSQL(ctx, "xf_location")
 	// 初始化颜色表
-	initialSQL(ctx, "xf_desired_color")
+	initialSQL(ctx, "xf_color")
 	// 初始化链接表
 	initialSQL(ctx, "xf_link_list")
 

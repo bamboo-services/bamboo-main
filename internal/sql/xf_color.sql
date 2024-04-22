@@ -26,22 +26,26 @@
  * --------------------------------------------------------------------------------
  */
 
-// =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// =================================================================================
+create table xf_color
+(
+    id           bigserial
+        constraint xf_color_pk
+            primary key,
+    name         varchar                 not null,
+    display_name varchar                 not null,
+    color        char(6)                 not null,
+    created_at   timestamp default now() not null,
+    updated_at   timestamp
+);
 
-package entity
+comment on table xf_color is '所属颜色';
+comment on column xf_color.id is '主键';
+comment on column xf_color.name is '颜色名字';
+comment on column xf_color.display_name is '展示名字';
+comment on column xf_color.created_at is '创建时间';
+comment on column xf_color.updated_at is '修改时间';
+comment on column xf_color.color is '色值';
 
-import (
-	"github.com/gogf/gf/v2/os/gtime"
-)
+create unique index xf_color_name_uindex
+    on xf_color (name);
 
-// XfDesiredColor is the golang structure for table xf_desired_color.
-type XfDesiredColor struct {
-	Id          int64       `json:"id"          orm:"id"           ` // 主键
-	Name        string      `json:"name"        orm:"name"         ` // 颜色名字
-	DisplayName string      `json:"displayName" orm:"display_name" ` // 展示名字
-	Color       string      `json:"color"       orm:"color"        ` // 色值
-	CreatedAt   *gtime.Time `json:"createdAt"   orm:"created_at"   ` // 创建时间
-	UpdatedAt   *gtime.Time `json:"updatedAt"   orm:"updated_at"   ` // 修改时间
-}

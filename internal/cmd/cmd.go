@@ -57,14 +57,16 @@ var (
 			// 服务器启动
 			s := g.Server()
 			s.Group("/", func(group *ghttp.RouterGroup) {
-				// 访问处理中间件
-				group.Middleware(middleware.MiddleAccessUserHandler)
-				// 错误集中处理中间件
-				group.Middleware(middleware.MiddleErrorHandler)
-				group.Bind(auth.NewV1())
-				group.Group("/link", func(group *ghttp.RouterGroup) {
-					// 中间件处理用户的访问是否有效
-					group.Bind(link.NewV1())
+				group.Group("/api/v1", func(group *ghttp.RouterGroup) {
+					// 访问处理中间件
+					group.Middleware(middleware.MiddleAccessUserHandler)
+					// 错误集中处理中间件
+					group.Middleware(middleware.MiddleErrorHandler)
+					group.Bind(auth.NewV1())
+					group.Group("/link", func(group *ghttp.RouterGroup) {
+						// 中间件处理用户的访问是否有效
+						group.Bind(link.NewV1())
+					})
 				})
 			})
 			s.Run()

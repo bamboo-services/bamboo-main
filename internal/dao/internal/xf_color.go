@@ -39,15 +39,15 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// XfDesiredColorDao is the data access object for table xf_desired_color.
-type XfDesiredColorDao struct {
-	table   string                // table is the underlying table name of the DAO.
-	group   string                // group is the database configuration group name of current DAO.
-	columns XfDesiredColorColumns // columns contains all the column names of Table for convenient usage.
+// XfColorDao is the data access object for table xf_color.
+type XfColorDao struct {
+	table   string         // table is the underlying table name of the DAO.
+	group   string         // group is the database configuration group name of current DAO.
+	columns XfColorColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// XfDesiredColorColumns defines and stores column names for table xf_desired_color.
-type XfDesiredColorColumns struct {
+// XfColorColumns defines and stores column names for table xf_color.
+type XfColorColumns struct {
 	Id          string // 主键
 	Name        string // 颜色名字
 	DisplayName string // 展示名字
@@ -56,8 +56,8 @@ type XfDesiredColorColumns struct {
 	UpdatedAt   string // 修改时间
 }
 
-// xfDesiredColorColumns holds the columns for table xf_desired_color.
-var xfDesiredColorColumns = XfDesiredColorColumns{
+// xfColorColumns holds the columns for table xf_color.
+var xfColorColumns = XfColorColumns{
 	Id:          "id",
 	Name:        "name",
 	DisplayName: "display_name",
@@ -66,37 +66,37 @@ var xfDesiredColorColumns = XfDesiredColorColumns{
 	UpdatedAt:   "updated_at",
 }
 
-// NewXfDesiredColorDao creates and returns a new DAO object for table data access.
-func NewXfDesiredColorDao() *XfDesiredColorDao {
-	return &XfDesiredColorDao{
+// NewXfColorDao creates and returns a new DAO object for table data access.
+func NewXfColorDao() *XfColorDao {
+	return &XfColorDao{
 		group:   "default",
-		table:   "xf_desired_color",
-		columns: xfDesiredColorColumns,
+		table:   "xf_color",
+		columns: xfColorColumns,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of current DAO.
-func (dao *XfDesiredColorDao) DB() gdb.DB {
+func (dao *XfColorDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of current dao.
-func (dao *XfDesiredColorDao) Table() string {
+func (dao *XfColorDao) Table() string {
 	return dao.table
 }
 
 // Columns returns all column names of current dao.
-func (dao *XfDesiredColorDao) Columns() XfDesiredColorColumns {
+func (dao *XfColorDao) Columns() XfColorColumns {
 	return dao.columns
 }
 
 // Group returns the configuration group name of database of current dao.
-func (dao *XfDesiredColorDao) Group() string {
+func (dao *XfColorDao) Group() string {
 	return dao.group
 }
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
-func (dao *XfDesiredColorDao) Ctx(ctx context.Context) *gdb.Model {
+func (dao *XfColorDao) Ctx(ctx context.Context) *gdb.Model {
 	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
@@ -106,6 +106,6 @@ func (dao *XfDesiredColorDao) Ctx(ctx context.Context) *gdb.Model {
 //
 // Note that, you should not Commit or Rollback the transaction in function f
 // as it is automatically handled by this function.
-func (dao *XfDesiredColorDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
+func (dao *XfColorDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }

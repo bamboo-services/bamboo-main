@@ -36,7 +36,7 @@ import "github.com/gogf/gf/v2/frame/g"
 // 参数:
 // RssURL: 用户输入的 RSS 链接。
 type CheckRssURLHasConnectReq struct {
-	g.Meta `path:"/check/connect/rss" method:"Get" tags:"Link" summary:"检查RSS链接是否可连接"`
+	g.Meta `path:"/v1/check/connect/rss" method:"Get" tags:"Link" summary:"检查RSS链接是否可连接"`
 	RssURL string `json:"rss_url" v:"required|url#请输入RSS链接|RSS链接格式不正确" dc:"RSS链接"`
 }
 

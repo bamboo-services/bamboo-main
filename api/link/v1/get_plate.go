@@ -31,7 +31,7 @@ package v1
 import "github.com/gogf/gf/v2/frame/g"
 
 type LinkGetPlateReq struct {
-	g.Meta `path:"/get/plate" method:"get" tags:"Link" summary:"获取期望板块信息"`
+	g.Meta `path:"/v1/get/plate" method:"get" tags:"Link" summary:"获取期望板块信息"`
 }
 
 type LinkGetPlateRes struct {

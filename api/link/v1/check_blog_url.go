@@ -36,7 +36,7 @@ import "github.com/gogf/gf/v2/frame/g"
 // 参数:
 // BlogURL: 用户输入的博客链接。
 type CheckBlogURLHasConnectReq struct {
-	g.Meta  `path:"/check/connect/blog" method:"Get" tags:"Link" summary:"检查博客链接是否可连接"`
+	g.Meta  `path:"/v1/check/connect/blog" method:"Get" tags:"Link" summary:"检查博客链接是否可连接"`
 	BlogURL string `json:"blog_url" v:"required|url#请输入博客链接|博客链接格式不正确" dc:"博客链接"`
 }
 

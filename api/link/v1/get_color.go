@@ -31,7 +31,7 @@ package v1
 import "github.com/gogf/gf/v2/frame/g"
 
 type LinkGetColorReq struct {
-	g.Meta `path:"/get/color" method:"get" tags:"Link" summary:"获取期望颜色信息"`
+	g.Meta `path:"/v1/get/color" method:"get" tags:"Link" summary:"获取期望颜色信息"`
 }
 
 type LinkGetColorRes struct {

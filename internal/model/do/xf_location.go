@@ -26,26 +26,26 @@
  * --------------------------------------------------------------------------------
  */
 
-create table xf_desired_color
-(
-    id           bigserial
-        constraint xf_desired_color_pk
-            primary key,
-    name         varchar                 not null,
-    display_name varchar                 not null,
-    color        char(6)                 not null,
-    created_at   timestamp default now() not null,
-    updated_at   timestamp
-);
+// =================================================================================
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
+// =================================================================================
 
-comment on table xf_desired_color is '所属颜色';
-comment on column xf_desired_color.id is '主键';
-comment on column xf_desired_color.name is '颜色名字';
-comment on column xf_desired_color.display_name is '展示名字';
-comment on column xf_desired_color.created_at is '创建时间';
-comment on column xf_desired_color.updated_at is '修改时间';
-comment on column xf_desired_color.color is '色值';
+package do
 
-create unique index xf_desired_color_name_uindex
-    on xf_desired_color (name);
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+)
 
+// XfLocation is the golang structure of table xf_location for DAO operations like Where/Data.
+type XfLocation struct {
+	g.Meta      `orm:"table:xf_location, do:true"`
+	Id          interface{} // 主键
+	Sort        interface{} // 排序
+	Name        interface{} // 位置名字
+	DisplayName interface{} // 名字的描述（页面会展示）
+	Description interface{} // 内容的描述（也会展示出来，建议还是写进去哦）
+	Reveal      interface{} // 是否展示
+	CreatedAt   *gtime.Time // 创建时间
+	UpdatedAt   *gtime.Time // 修改时间
+}
