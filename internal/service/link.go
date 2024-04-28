@@ -104,6 +104,28 @@ type (
 		// 返回：
 		// err: 如果链接已连接，返回错误；否则返回 nil。
 		CheckLinkHasConnect(ctx context.Context, linkID string) (delay *int64, err error)
+		// HasColorByName 获取颜色信息
+		// 用于获取颜色信息，如果成功则返回颜色信息，否则返回错误。
+		// 本接口会根据已有的颜色信息对颜色进行查询，若查询失败返回失败信息，若成功返回成功信息
+		//
+		// 参数：
+		// ctx: 请求的上下文，用于管理超时和取消信号。
+		// getColor: 用户尝试获取的颜色名称。
+		//
+		// 返回：
+		// bool: 如果颜色存在，返回 false；否则返回 true。
+		HasColorByName(ctx context.Context, getColor string) bool
+		// HasColorByColor 获取颜色信息
+		// 用于获取颜色信息，如果成功则返回颜色信息，否则返回错误。
+		// 本接口会根据已有的颜色信息对颜色进行查询，若查询失败返回失败信息，若成功返回成功信息
+		//
+		// 参数：
+		// ctx: 请求的上下文，用于管理超时和取消信号。
+		// getColor: 用户尝试获取的颜色名称。
+		//
+		// 返回：
+		// bool: 如果颜色存在，返回 false；否则返回 true。
+		HasColorByColor(ctx context.Context, getColor string) bool
 		// AddLink 添加链接
 		// 用于添加链接，如果添加成功则返回 nil，否则返回错误。
 		//
@@ -112,7 +134,7 @@ type (
 		// req: 用户的请求，包含添加链接的详细信息。
 		//
 		// 返回：
-		// err: 如果添加链接成功，返回 nil；否则返回错误。
+		// err: 如果添加链接成功，返回 nil；否则返回错误。其中主要包含的错误数据库错误以及对应内容不存在，返回内容均为自定义描述值
 		AddLink(ctx context.Context, req v1.LinkAddReq) (err error)
 		// GetColor 获取期望颜色信息
 		// 用于获取期望颜色信息, 如果成功则返回期望颜色信息，否则返回错误。
@@ -122,7 +144,7 @@ type (
 		//
 		// 返回：
 		// getColors: 如果获取期望颜色信息成功，返回期望颜色信息；否则返回错误。
-		// err: 如果获取期望颜色信息成功，返回 nil；否则返回错误。
+		// err: 如果获取期望颜色信息成功，返回 nil；否则返回错误。其中错误的返回信息在此函数中主要包含内容为数据库错误。
 		GetColor(ctx context.Context) (getColors []*entity.XfColor, err error)
 		// GetLocation 获取期望位置信息
 		// 用于获取期望位置信息, 如果成功则返回期望位置信息，否则返回错误。
@@ -132,8 +154,17 @@ type (
 		//
 		// 返回：
 		// getLocation: 如果获取期望位置信息成功，返回期望位置信息；否则返回错误。
-		// err: 如果获取期望位置信息成功，返回 nil；否则返回错误。
+		// err: 如果获取期望位置信息成功，返回 nil；否则返回错误。其中错误的返回信息在此函数中主要包含内容为数据库错误。
 		GetLocation(ctx context.Context) (getLocation []*entity.XfLocation, err error)
+		// GetLocationAllInformation 获取所有的位置信息
+		// 用于获取所有的位置信息, 如果成功则返回期望位置信息，否则返回错误。
+		//
+		// 参数：
+		// ctx: 请求的上下文，用于管理超时和取消信号。
+		//
+		// 返回：
+		// getLocation: 如果获取期望位置信息成功，返回期望位置信息；否则返回错误。
+		// err: 如果获取期望位置信息成功，返回 nil；否则返回错误。其中错误的返回信息在此函数中主要包含内容为数据库错误。
 		GetLocationAllInformation(ctx context.Context) (getLocation []*entity.XfLocation, err error)
 	}
 )

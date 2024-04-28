@@ -4,3 +4,5 @@
 <div align="center">
     <img src="https://github.com/XiaoLFeng/XiaoMain/actions/workflows/super-linter.yml/badge.svg?branch=master" alt="代码检查">
 </div>
+
+![Alt](https://repobeats.axiom.co/api/embed/999db4f2d1ceb5d2a5c78a37b8b4952ccef73b4c.svg "Repobeats analytics image")

@@ -123,3 +123,57 @@ func (s *sLinkLogic) CheckLinkHasConnect(ctx context.Context, linkID string) (de
 	*delay = gtime.Now().TimestampMicro() - getNowTimestamp
 	return delay, nil
 }
+
+// HasColorByName 获取颜色信息
+// 用于获取颜色信息，如果成功则返回颜色信息，否则返回错误。
+// 本接口会根据已有的颜色信息对颜色进行查询，若查询失败返回失败信息，若成功返回成功信息
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// getColor: 用户尝试获取的颜色名称。
+//
+// 返回：
+// bool: 如果颜色存在，返回 false；否则返回 true。
+func (s *sLinkLogic) HasColorByName(ctx context.Context, getColor string) bool {
+	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:HasColorByName 服务层")
+	// 查询指定的颜色是否存在
+	var getColorInfo *entity.XfColor
+	err := dao.XfColor.Ctx(ctx).Where(do.XfColor{Name: getColor}).Scan(&getColorInfo)
+	if err != nil {
+		glog.Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
+		return false
+	}
+	if getColorInfo != nil {
+		glog.Errorf(ctx, "[LOGIC] 颜色已存在，颜色：%s", getColor)
+		return false
+	} else {
+		return true
+	}
+}
+
+// HasColorByColor 获取颜色信息
+// 用于获取颜色信息，如果成功则返回颜色信息，否则返回错误。
+// 本接口会根据已有的颜色信息对颜色进行查询，若查询失败返回失败信息，若成功返回成功信息
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// getColor: 用户尝试获取的颜色名称。
+//
+// 返回：
+// bool: 如果颜色存在，返回 false；否则返回 true。
+func (s *sLinkLogic) HasColorByColor(ctx context.Context, getColor string) bool {
+	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:HasColorByColor 服务层")
+	// 查询指定的颜色是否存在
+	var getColorInfo *entity.XfColor
+	err := dao.XfColor.Ctx(ctx).Where(do.XfColor{Color: getColor}).Scan(&getColorInfo)
+	if err != nil {
+		glog.Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
+		return false
+	}
+	if getColorInfo != nil {
+		glog.Errorf(ctx, "[LOGIC] 颜色已存在，颜色：%s", getColor)
+		return false
+	} else {
+		return true
+	}
+}

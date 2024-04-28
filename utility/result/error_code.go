@@ -42,6 +42,7 @@ var (
 	MailError                  = ErrorBaseResponse{Output: "MailError", Code: 40305, Message: "邮件错误"}
 	AccessError                = ErrorBaseResponse{Output: "AccessError", Code: 40306, Message: "访问错误"}
 	AddLinkFailed              = ErrorBaseResponse{Output: "AddLinkFailed", Code: 40307, Message: "添加链接失败"}
+	ExistedError               = ErrorBaseResponse{Output: "ExistedError", Code: 40308, Message: "已存在错误"}
 
 	ServerInternalError = ErrorBaseResponse{Output: "ServerInternalError", Code: 50000, Message: "服务器内部错误", Data: errorData{ErrorMessage: "服务器内部错误"}} //nolint:lll
 	DatabaseError       = ErrorBaseResponse{Output: "DatabaseError", Code: 50001, Message: "服务器内部错误", Data: errorData{ErrorMessage: "数据库错误"}}         //nolint:lll
