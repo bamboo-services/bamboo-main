@@ -177,3 +177,30 @@ func (s *sLinkLogic) HasColorByColor(ctx context.Context, getColor string) bool 
 		return true
 	}
 }
+
+// CheckLocationExist 检查位置是否存在
+// 用于检查位置是否存在，如果成功则返回 nil，否则返回错误。
+// 本接口会根据已有的位置信息对位置进行查询，若查询失败返回失败信息，若成功返回成功信息
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// name: 用户尝试添加的位置名称。
+//
+// 返回：
+// err: 如果位置存在，返回错误；否则返回 nil。
+func (s *sLinkLogic) CheckLocationExist(ctx context.Context, name string) (err error) {
+	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:CheckLocationExist 服务层")
+	// 查询指定的位置是否存在
+	var getLocationInfo *entity.XfLocation
+	err = dao.XfLocation.Ctx(ctx).Where(do.XfLocation{Name: name}).Scan(&getLocationInfo)
+	if err != nil {
+		glog.Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
+		return errors.New("数据库查询错误")
+	}
+	if getLocationInfo != nil {
+		glog.Errorf(ctx, "[LOGIC] 位置已存在，位置：%s", name)
+		return errors.New("位置已存在")
+	} else {
+		return nil
+	}
+}

@@ -145,3 +145,25 @@ func (s *sLinkLogic) GetLocationAllInformation(ctx context.Context) (getLocation
 	}
 	return getLocation, nil
 }
+
+func (s *sLinkLogic) AddLocation(
+	ctx context.Context,
+	name string,
+	displayName string,
+	description string,
+	reveal bool,
+	sort int,
+) (err error) {
+	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:AddLocation 服务层")
+	if _, err = dao.XfLocation.Ctx(ctx).Insert(do.XfLocation{
+		Name:        name,
+		DisplayName: displayName,
+		Description: description,
+		Reveal:      reveal,
+		Sort:        sort,
+	}); err != nil {
+		glog.Infof(ctx, "[LOGIC] 添加链接位置失败[%s]", err.Error())
+		return errors.New("[LOGIC] 数据库错误<添加链接位置失败>")
+	}
+	return nil
+}

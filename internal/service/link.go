@@ -126,6 +126,17 @@ type (
 		// 返回：
 		// bool: 如果颜色存在，返回 false；否则返回 true。
 		HasColorByColor(ctx context.Context, getColor string) bool
+		// CheckLocationExist 检查位置是否存在
+		// 用于检查位置是否存在，如果成功则返回 nil，否则返回错误。
+		// 本接口会根据已有的位置信息对位置进行查询，若查询失败返回失败信息，若成功返回成功信息
+		//
+		// 参数：
+		// ctx: 请求的上下文，用于管理超时和取消信号。
+		// name: 用户尝试添加的位置名称。
+		//
+		// 返回：
+		// err: 如果位置存在，返回错误；否则返回 nil。
+		CheckLocationExist(ctx context.Context, name string) (err error)
 		// AddLink 添加链接
 		// 用于添加链接，如果添加成功则返回 nil，否则返回错误。
 		//
@@ -166,6 +177,7 @@ type (
 		// getLocation: 如果获取期望位置信息成功，返回期望位置信息；否则返回错误。
 		// err: 如果获取期望位置信息成功，返回 nil；否则返回错误。其中错误的返回信息在此函数中主要包含内容为数据库错误。
 		GetLocationAllInformation(ctx context.Context) (getLocation []*entity.XfLocation, err error)
+		AddLocation(ctx context.Context, name string, displayName string, description string, reveal bool, sort int) (err error)
 	}
 )
 
