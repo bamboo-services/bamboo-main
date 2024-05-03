@@ -26,16 +26,17 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
-
-package logic
+package system
 
 import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/user"
+	"context"
+
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+
+	"xiaoMain/api/system/v1"
 )
+
+func (c *ControllerV1) EditSystemInfo(ctx context.Context, req *v1.EditSystemInfoReq) (res *v1.EditSystemInfoRes, err error) {
+	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+}

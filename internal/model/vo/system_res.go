@@ -26,16 +26,18 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
+package vo
 
-package logic
+type SystemInfoRes struct {
+	Main *MainVO `json:"main" dc:"主要配置信息"`
+	Mail *MailVO `json:"mail" dc:"邮件配置信息"`
+}
 
-import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/user"
-)
+type MainVO struct {
+	Name    string `json:"name" dc:"站点名称"`
+	Author  string `json:"author" dc:"站点作者"`
+	Version string `json:"version" dc:"站点版本"`
+}
+
+type MailVO struct {
+}

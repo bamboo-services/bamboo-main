@@ -26,16 +26,19 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
+// =================================================================================
 // Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
+// =================================================================================
 
-package logic
+package system
 
 import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/user"
+	"context"
+
+	"xiaoMain/api/system/v1"
 )
+
+type ISystemV1 interface {
+	GetSystemInfo(ctx context.Context, req *v1.GetSystemInfoReq) (res *v1.GetSystemInfoRes, err error)
+	EditSystemInfo(ctx context.Context, req *v1.EditSystemInfoReq) (res *v1.EditSystemInfoRes, err error)
+}

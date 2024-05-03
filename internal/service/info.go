@@ -26,16 +26,35 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
+// ================================================================================
 // Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
+// You can delete these comments if you wish manually maintain this interface file.
+// ================================================================================
 
-package logic
+package service
 
 import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/user"
+	"context"
+	"xiaoMain/internal/model/vo"
 )
+
+type (
+	IInfoLogic interface {
+		GetMainInfo(ctx context.Context) (getMainInfo *vo.MainVO)
+	}
+)
+
+var (
+	localInfoLogic IInfoLogic
+)
+
+func InfoLogic() IInfoLogic {
+	if localInfoLogic == nil {
+		panic("implement not found for interface IInfoLogic, forgot register?")
+	}
+	return localInfoLogic
+}
+
+func RegisterInfoLogic(i IInfoLogic) {
+	localInfoLogic = i
+}

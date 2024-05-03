@@ -26,16 +26,28 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
+package v1
 
-package logic
+import "github.com/gogf/gf/v2/frame/g"
 
-import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/user"
-)
+// GetSystemInfoReq 获取系统信息请求参数
+// 获取系统信息
+type GetSystemInfoReq struct {
+	g.Meta `path:"/system" method:"GET" tags:"System" summary:"获取系统信息" desc:"获取系统信息"`
+}
+
+// GetSystemInfoRes 获取系统信息响应参数
+type GetSystemInfoRes struct {
+	g.Meta `mime:"application/json"`
+}
+
+// EditSystemInfoReq 编辑系统信息请求参数
+// 编辑系统信息
+type EditSystemInfoReq struct {
+	g.Meta `path:"/system" method:"PUT" tags:"System" summary:"编辑系统信息" desc:"编辑系统信息"`
+}
+
+// EditSystemInfoRes 编辑系统信息响应参数
+type EditSystemInfoRes struct {
+	g.Meta `mime:"application/json"`
+}

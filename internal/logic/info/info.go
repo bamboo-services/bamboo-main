@@ -26,16 +26,60 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
-
-package logic
+package info
 
 import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/user"
+	"context"
+	"github.com/gogf/gf/v2/os/glog"
+	"sync"
+	"xiaoMain/internal/dao"
+	"xiaoMain/internal/model/do"
+	"xiaoMain/internal/model/entity"
+	"xiaoMain/internal/model/vo"
+	"xiaoMain/internal/service"
 )
+
+type sInfoLogic struct {
+}
+
+func init() {
+	service.RegisterInfoLogic(New())
+}
+
+func New() *sInfoLogic {
+	return &sInfoLogic{}
+}
+
+func (s *sInfoLogic) GetMainInfo(ctx context.Context) (getMainInfo *vo.MainVO) {
+	glog.Info(ctx, "[LOGIC] 执行 InfoLogic:GetMainInfo 服务层")
+	getMainInfo = new(vo.MainVO)
+	wg := sync.WaitGroup{}
+	// 获取名字信息
+	getMainInfo.Name = s.getMainInfoData(ctx, &wg, "name")
+	// 获取版本信息
+	getMainInfo.Version = s.getMainInfoData(ctx, &wg, "version")
+	// 获取作者信息
+	getMainInfo.Author = s.getMainInfoData(ctx, &wg, "author")
+	// TODO-Info[2024050401] 还有其他信息等待获取
+
+	// 等待所有协程执行完毕
+	wg.Wait()
+	// 处理返回错误
+	return getMainInfo
+}
+
+func (s *sInfoLogic) getMainInfoData(ctx context.Context, wg *sync.WaitGroup, name string) (getData string) {
+	var getInfo *entity.XfIndex
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if name != "" {
+			_ = dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: name}).Scan(&getInfo)
+		}
+	}()
+	if getInfo != nil {
+		return getInfo.Value
+	} else {
+		return ""
+	}
+}
