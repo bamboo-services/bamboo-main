@@ -54,7 +54,7 @@ func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res
 	// 获取 Request
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 检查用户登录是否有效
-	hasLogin, message := service.AuthLogic().IsUserLogin(ctx)
+	hasLogin, _ := service.AuthLogic().IsUserLogin(ctx)
 	if !hasLogin {
 		if uuid, isCorrect, errMessage := service.AuthLogic().CheckUserLogin(ctx, req); isCorrect {
 			// 注册用户进行登录
@@ -83,7 +83,9 @@ func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res
 			result.VerificationFailed.SetErrorMessage(errMessage).Response(getRequest)
 		}
 	} else {
-		result.VerificationFailed.SetErrorMessage(message).Response(getRequest)
+		result.
+			NewErrorCode("LoginValid", 40350, "登录有效", "当前用户登录有效", nil).
+			Response(getRequest)
 	}
 	return nil, nil
 }

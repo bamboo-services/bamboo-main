@@ -32,6 +32,7 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtime"
+	"regexp"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
@@ -66,36 +67,55 @@ func MiddleAuthHandler(r *ghttp.Request) {
 		result.NotLoggedIn.SetErrorMessage(err.Error()).Response(r)
 		return
 	}
+	// 对获取数据进行正则表达式校验
+	if hasMatch, _ := regexp.Match(
+		`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$`,
+		[]byte(*getAuthorize),
+	); hasMatch != true {
+		glog.Warningf(r.Context(), "[MIDDLE] 用户授权异常|授权格式错误|用户未登录 %s", *getAuthorize)
+		result.NotLoggedIn.SetErrorMessage("授权格式错误").Response(r)
+		return
+	}
+	if hasMatch, _ := regexp.Match(
+		`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$`,
+		[]byte(*getUUID),
+	); hasMatch != true {
+		glog.Warningf(r.Context(), "[MIDDLE] 用户授权异常|UUID格式错误|用户未登录 %s", *getUUID)
+		result.NotLoggedIn.SetErrorMessage("UUID格式错误").Response(r)
+		return
+	}
+	if hasMatch, _ := regexp.Match(
+		`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$`,
+		[]byte(*getVerify),
+	); hasMatch != true {
+		glog.Warningf(r.Context(), "[MIDDLE] 用户授权异常|校验格式错误|用户未登录 %s", *getVerify)
+		result.NotLoggedIn.SetErrorMessage("校验格式错误").Response(r)
+		return
+	}
 	// 数据库检查
-	if getAuthorize != nil && getUUID != nil && getVerify != nil {
-		// 数据库检查
-		var tokenInfo *entity.XfToken
-		err = dao.XfToken.Ctx(r.Context()).Where(do.XfToken{
-			UserToken:    getAuthorize,
-			UserUuid:     getUUID,
-			Verification: getVerify,
-		}).Limit(1).OrderDesc("expired_at").Scan(&tokenInfo)
-		if err != nil {
-			glog.Error(r.Context(), "[MIDDLE] 数据库查询错误")
-			result.ServerInternalError.SetErrorMessage("数据库查询错误").Response(r)
-			return
-		}
-		// 对数据库进行有效性检查
-		if tokenInfo != nil {
-			if gtime.Now().Before(tokenInfo.ExpiredAt) {
-				glog.Infof(r.Context(), "[MIDDLE] 用户授权有效|用户UUID[%s]", tokenInfo.UserUuid)
-				r.Middleware.Next()
-			} else {
-				glog.Warning(r.Context(), "[MIDDLE] 用户授权异常|授权已过期|用户未登录")
-				result.NotLoggedIn.SetErrorMessage("授权已过期").Response(r)
-				// 删除数据库中的授权信息
-				_, _ = dao.XfToken.Ctx(r.Context()).Where(do.XfToken{Id: tokenInfo.Id}).Delete()
-			}
+	var tokenInfo *entity.XfToken
+	err = dao.XfToken.Ctx(r.Context()).Where(do.XfToken{
+		UserToken:    getAuthorize,
+		UserUuid:     getUUID,
+		Verification: getVerify,
+	}).Limit(1).OrderDesc("expired_at").Scan(&tokenInfo)
+	if err != nil {
+		glog.Error(r.Context(), "[MIDDLE] 数据库查询错误", err.Error())
+		result.ServerInternalError.SetErrorMessage("数据库查询错误").Response(r)
+		return
+	}
+	// 对数据库进行有效性检查
+	if tokenInfo != nil {
+		if gtime.Now().Before(tokenInfo.ExpiredAt) {
+			glog.Infof(r.Context(), "[MIDDLE] 用户授权有效|用户UUID[%s]", tokenInfo.UserUuid)
+			r.Middleware.Next()
 		} else {
-			glog.Warning(r.Context(), "[MIDDLE] 用户授权异常|授权不存在|用户未登录")
+			glog.Warning(r.Context(), "[MIDDLE] 用户授权异常|授权已过期|用户未登录")
+			result.NotLoggedIn.SetErrorMessage("授权已过期").Response(r)
+			// 删除数据库中的授权信息
+			_, _ = dao.XfToken.Ctx(r.Context()).Where(do.XfToken{Id: tokenInfo.Id}).Delete()
 		}
 	} else {
-		glog.Error(r.Context(), "[MIDDLE] 服务器策略错误 X00001")
-		result.ServerInternalError.Response(r)
+		glog.Warning(r.Context(), "[MIDDLE] 用户授权异常|授权不存在|用户未登录")
 	}
 }

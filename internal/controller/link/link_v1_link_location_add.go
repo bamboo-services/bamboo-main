@@ -56,6 +56,7 @@ func (c *ControllerV1) LinkLocationAdd(
 	getRequest := ghttp.RequestFromCtx(ctx)
 	if err = service.LinkLogic().CheckLocationExist(ctx, req.Name); err != nil {
 		result.ExistedError.SetErrorMessage(err.Error()).Response(getRequest)
+		return nil, nil
 	}
 	// 添加链接位置
 	if err = service.LinkLogic().AddLocation(

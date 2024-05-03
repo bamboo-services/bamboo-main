@@ -55,6 +55,7 @@ func (c *ControllerV1) LinkColorAdd(
 	getRequest := ghttp.RequestFromCtx(ctx)
 	if err = service.LinkLogic().CheckColorExist(ctx, req.Name); err != nil {
 		result.ExistedError.SetErrorMessage(err.Error()).Response(getRequest)
+		return nil, nil
 	}
 	// 添加链接颜色
 	if err = service.LinkLogic().AddColor(ctx, req.Name, req.DisplayName, req.Color, req.Select); err == nil {

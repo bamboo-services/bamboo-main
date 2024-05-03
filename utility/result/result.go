@@ -165,7 +165,8 @@ func (baseError ErrorBaseResponse) Response(r *ghttp.Request) {
 	if baseError.Data.ErrorMessage == "" {
 		baseError.Data.ErrorMessage = baseError.Message
 	}
-	r.Response.Status = baseError.Code / 100
+	// 处理错误代码的转义
+	r.Response.Status = baseError.Code % 1000
 	r.Response.WriteJson(baseError)
 }
 

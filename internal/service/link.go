@@ -137,6 +137,17 @@ type (
 		// 返回：
 		// err: 如果位置存在，返回错误；否则返回 nil。
 		CheckLocationExist(ctx context.Context, name string) (err error)
+		// CheckColorExist 检查颜色是否存在
+		// 用于检查颜色是否存在，如果成功则返回 nil，否则返回错误。
+		// 本接口会根据已有的颜色信息对颜色进行查询，若查询失败返回失败信息，若成功返回成功信息
+		//
+		// 参数：
+		// ctx: 请求的上下文，用于管理超时和取消信号。
+		// getName: 用户尝试添加的颜色名称。
+		//
+		// 返回：
+		// err: 如果颜色存在，返回错误；否则返回 nil。
+		CheckColorExist(ctx context.Context, getName string) (err error)
 		// AddLink 添加链接
 		// 用于添加链接，如果添加成功则返回 nil，否则返回错误。
 		//
@@ -178,17 +189,6 @@ type (
 		// err: 如果获取期望位置信息成功，返回 nil；否则返回错误。其中错误的返回信息在此函数中主要包含内容为数据库错误。
 		GetLocationAllInformation(ctx context.Context) (getLocation []*entity.XfLocation, err error)
 		AddLocation(ctx context.Context, name string, displayName string, description string, reveal bool, sort int) (err error)
-		// CheckColorExist 检查颜色是否存在
-		// 用于检查颜色是否存在，如果成功则返回 nil，否则返回错误。
-		// 本接口会根据已有的颜色信息对颜色进行查询，若查询失败返回失败信息，若成功返回成功信息
-		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// getName: 用户尝试添加的颜色名称。
-		//
-		// 返回：
-		// err: 如果颜色存在，返回错误；否则返回 nil。
-		CheckColorExist(ctx context.Context, getName string) (err error)
 		// AddColor 添加链接颜色
 		// 用于添加链接颜色，如果成功则返回 nil，否则返回错误。
 		// 本接口会根据已有的链接颜色信息对链接颜色进行添加，若添加失败返回失败信息，若成功返回成功信息

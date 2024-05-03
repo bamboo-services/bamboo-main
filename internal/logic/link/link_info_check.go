@@ -198,8 +198,34 @@ func (s *sLinkLogic) CheckLocationExist(ctx context.Context, name string) (err e
 		return errors.New("数据库查询错误")
 	}
 	if getLocationInfo != nil {
-		glog.Errorf(ctx, "[LOGIC] 位置已存在，位置：%s", name)
+		glog.Warningf(ctx, "[LOGIC] 位置已存在，位置：%s", name)
 		return errors.New("位置已存在")
+	} else {
+		return nil
+	}
+}
+
+// CheckColorExist 检查颜色是否存在
+// 用于检查颜色是否存在，如果成功则返回 nil，否则返回错误。
+// 本接口会根据已有的颜色信息对颜色进行查询，若查询失败返回失败信息，若成功返回成功信息
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// getName: 用户尝试添加的颜色名称。
+//
+// 返回：
+// err: 如果颜色存在，返回错误；否则返回 nil。
+func (s *sLinkLogic) CheckColorExist(ctx context.Context, getName string) (err error) {
+	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:CheckColorExist 服务层")
+	var getColorInfo *entity.XfColor
+	err = dao.XfColor.Ctx(ctx).Where(do.XfColor{Name: getName}).Scan(&getColorInfo)
+	if err != nil {
+		glog.Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
+		return errors.New("数据库查询错误")
+	}
+	if getColorInfo != nil {
+		glog.Warningf(ctx, "[LOGIC] 颜色已存在，颜色：%s", getName)
+		return errors.New("颜色已存在")
 	} else {
 		return nil
 	}
