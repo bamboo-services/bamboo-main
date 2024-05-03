@@ -163,7 +163,66 @@ func (s *sLinkLogic) AddLocation(
 		Sort:        sort,
 	}); err != nil {
 		glog.Infof(ctx, "[LOGIC] 添加链接位置失败[%s]", err.Error())
-		return errors.New("[LOGIC] 数据库错误<添加链接位置失败>")
+		return errors.New("数据库错误<添加链接位置失败>")
+	}
+	return nil
+}
+
+// CheckColorExist 检查颜色是否存在
+// 用于检查颜色是否存在，如果成功则返回 nil，否则返回错误。
+// 本接口会根据已有的颜色信息对颜色进行查询，若查询失败返回失败信息，若成功返回成功信息
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// getName: 用户尝试添加的颜色名称。
+//
+// 返回：
+// err: 如果颜色存在，返回错误；否则返回 nil。
+func (s *sLinkLogic) CheckColorExist(ctx context.Context, getName string) (err error) {
+	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:CheckColorExist 服务层")
+	var getColorInfo *entity.XfColor
+	err = dao.XfColor.Ctx(ctx).Where(do.XfColor{Name: getName}).Scan(&getColorInfo)
+	if err != nil {
+		glog.Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
+		return errors.New("数据库查询错误")
+	}
+	if getColorInfo != nil {
+		glog.Errorf(ctx, "[LOGIC] 颜色已存在，颜色：%s", getName)
+		return errors.New("颜色已存在")
+	} else {
+		return nil
+	}
+}
+
+// AddColor 添加链接颜色
+// 用于添加链接颜色，如果成功则返回 nil，否则返回错误。
+// 本接口会根据已有的链接颜色信息对链接颜色进行添加，若添加失败返回失败信息，若成功返回成功信息
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// name: 用户尝试添加的颜色名称。
+// displayName: 用户尝试添加的颜色显示名称。
+// color: 用户尝试添加的颜色。
+// hasSelect: 用户尝试添加的颜色是否可选。
+//
+// 返回：
+// err: 如果添加链接颜色成功，返回 nil；否则返回错误。
+func (s *sLinkLogic) AddColor(
+	ctx context.Context,
+	name string,
+	displayName string,
+	color string,
+	hasSelect bool,
+) (err error) {
+	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:AddColor 服务层")
+	if _, err = dao.XfColor.Ctx(ctx).Insert(do.XfColor{
+		Name:        name,
+		DisplayName: displayName,
+		Color:       color,
+		HasSelect:   hasSelect,
+	}); err != nil {
+		glog.Infof(ctx, "[LOGIC] 添加链接颜色失败[%s]", err.Error())
+		return errors.New("数据库错误<添加链接颜色失败>")
 	}
 	return nil
 }

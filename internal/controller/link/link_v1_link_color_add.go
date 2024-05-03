@@ -30,13 +30,37 @@ package link
 
 import (
 	"context"
-
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/glog"
+	"xiaoMain/internal/service"
+	"xiaoMain/utility/result"
 
 	"xiaoMain/api/link/v1"
 )
 
-func (c *ControllerV1) LinkColorAdd(ctx context.Context, req *v1.LinkColorAddReq) (res *v1.LinkColorAddRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+// LinkColorAdd 添加链接颜色
+// 用于添加链接颜色，如果成功则返回 nil，否则返回错误。
+// 本接口会根据已有的链接颜色信息对链接颜色进行添加，若添加失败返回失败信息，若成功返回成功信息
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// req: 用户的请求，包含添加链接颜色的详细信息。
+//
+// 返回：
+func (c *ControllerV1) LinkColorAdd(
+	ctx context.Context,
+	req *v1.LinkColorAddReq,
+) (res *v1.LinkColorAddRes, err error) {
+	glog.Info(ctx, "[CONTROL] 控制层 LinkColorAdd 接口")
+	getRequest := ghttp.RequestFromCtx(ctx)
+	if err = service.LinkLogic().CheckColorExist(ctx, req.Name); err != nil {
+		result.ExistedError.SetErrorMessage(err.Error()).Response(getRequest)
+	}
+	// 添加链接颜色
+	if err = service.LinkLogic().AddColor(ctx, req.Name, req.DisplayName, req.Color, req.Select); err == nil {
+		result.Success("添加成功", nil).Response(getRequest)
+	} else {
+		result.ServerInternalError.SetErrorMessage(err.Error()).Response(getRequest)
+	}
+	return nil, nil
 }
