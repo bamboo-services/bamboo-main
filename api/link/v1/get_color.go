@@ -33,7 +33,7 @@ import "github.com/gogf/gf/v2/frame/g"
 // LinkGetColorReq 获取期望颜色信息
 // 用于获取期望颜色信息
 type LinkGetColorReq struct {
-	g.Meta `path:"/get/color" method:"get" tags:"Link" summary:"获取期望颜色信息"`
+	g.Meta `path:"/color" method:"get" tags:"Link" summary:"获取期望颜色信息"`
 }
 
 // LinkGetColorRes 获取期望颜色信息响应
@@ -45,7 +45,7 @@ type LinkGetColorRes struct {
 // LinkGetColorFullReq 获取完整颜色信息
 // 用于获取完整颜色信息
 type LinkGetColorFullReq struct {
-	g.Meta `path:"/get/color/full" method:"Get" tags:"Link" summary:"获取完整颜色信息"`
+	g.Meta `path:"/color/full" method:"Get" tags:"Link" summary:"获取完整颜色信息"`
 }
 
 // LinkGetColorFullRes 获取完整颜色信息响应

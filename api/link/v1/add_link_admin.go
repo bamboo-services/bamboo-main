@@ -30,25 +30,20 @@ package v1
 
 import "github.com/gogf/gf/v2/frame/g"
 
-// LinkGetLocationReq 获取位置信息
-// 用于获取位置信息
-type LinkGetLocationReq struct {
-	g.Meta `path:"/location" method:"Get" tags:"Link" summary:"获取位置(板块)信息"`
+type LinkAddAdminReq struct {
+	g.Meta          `path:"/admin" method:"Post" tags:"Link" summary:"管理员添加友链"`
+	WebmasterEmail  string `json:"webmaster_email" dc:"站长邮箱"`
+	ServiceProvider string `json:"service_provider" dc:"服务商"`
+	SiteName        string `json:"site_name" v:"required#请输入站点名称" dc:"站点名称"`
+	SiteURL         string `json:"site_url" v:"required|url#请输入站点URL|站点URL格式不正确" dc:"站点URL"`
+	SiteLogo        string `json:"site_logo" v:"required|url#请输入站点Logo|站点Logo格式不正确" dc:"站点Logo"`
+	SiteDescription string `json:"site_description" v:"required#请输入站点描述" dc:"站点描述"`
+	SiteRssURL      string `json:"site_rss_url" v:"required|url#请输入站点RSS|站点RSS格式不正确" dc:"站点RSS URL"`
+	Location        string `json:"location" v:"required#请输入所在位置" dc:"期望位置"`
+	Color           string `json:"color" v:"required#请输入展示颜色" dc:"期望颜色"`
+	HasAdv          bool   `json:"has_adv" v:"required#请输入是否有广告" dc:"是否有广告"`
+	Remark          string `json:"remark" v:"required#请输入备注" dc:"备注"`
 }
 
-// LinkGetLocationRes 获取位置信息响应
-// 用于获取位置信息响应
-type LinkGetLocationRes struct {
-	g.Meta `mime:"application/json"`
-}
-
-// LinkGetLocationFullReq 获取完整位置信息
-// 用于获取完整位置信息
-type LinkGetLocationFullReq struct {
-	g.Meta `path:"/location/full" method:"Get" tags:"Link" summary:"获取完整位置(板块)信息"`
-}
-
-// LinkGetLocationFullRes 获取完整位置信息响应
-// 用于获取完整位置信息响应
-type LinkGetLocationFullRes struct {
+type LinkAddAdminRes struct {
 }
