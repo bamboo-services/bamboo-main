@@ -40,9 +40,9 @@ import (
 	"xiaoMain/api/info/v1"
 )
 
-// GetSystemInfo 获取系统信息
-// 用于获取系统信息，如果成功则返回 nil，否则返回错误。
-// 本接口会根据已有的系统信息对系统信息进行获取，若获取失败返回失败信息，若成功返回成功信息
+// GetWebInfo 获取站点信息
+// 用于获取站点信息，如果成功则返回 nil，否则返回错误。
+// 本接口会根据已有的系统信息对站点信息进行获取，若获取失败返回失败信息，若成功返回成功信息
 //
 // 参数：
 // ctx: 请求的上下文，用于管理超时和取消信号。
@@ -50,10 +50,7 @@ import (
 //
 // 返回：
 // res: 如果获取系统信息成功，返回 nil；否则返回错误。
-func (c *ControllerV1) GetSystemInfo(
-	ctx context.Context,
-	_ *v1.GetWebInfoReq,
-) (res *v1.GetWebInfoRes, err error) {
+func (c *ControllerV1) GetWebInfo(ctx context.Context, req *v1.GetWebInfoReq) (res *v1.GetWebInfoRes, err error) {
 	glog.Notice(ctx, "[CONTROL] 控制层 GetSystemInfo 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	returnData := new(vo.WebInfoRes)

@@ -26,24 +26,25 @@
  * --------------------------------------------------------------------------------
  */
 
-package v1
+package info
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"context"
 
-type LinkAddAdminReq struct {
-	g.Meta          `path:"/admin" method:"Post" tags:"Link" summary:"管理员添加友链"`
-	WebmasterEmail  string `json:"webmaster_email" dc:"站长邮箱"`
-	ServiceProvider string `json:"service_provider" dc:"服务商"`
-	SiteName        string `json:"site_name" v:"required#请输入站点名称" dc:"站点名称"`
-	SiteURL         string `json:"site_url" v:"required|url#请输入站点URL|站点URL格式不正确" dc:"站点URL"`
-	SiteLogo        string `json:"site_logo" v:"required|url#请输入站点Logo|站点Logo格式不正确" dc:"站点Logo"`
-	SiteDescription string `json:"site_description" v:"required#请输入站点描述" dc:"站点描述"`
-	SiteRssURL      string `json:"site_rss_url" v:"url#站点RSS格式不正确" dc:"站点RSS URL"`
-	Location        string `json:"location" v:"required#请输入所在位置" dc:"期望位置"`
-	Color           string `json:"color" v:"required#请输入展示颜色" dc:"期望颜色"`
-	HasAdv          bool   `json:"has_adv" v:"required#请输入是否有广告" dc:"是否有广告"`
-	Remark          string `json:"remark" v:"required#请输入备注" dc:"备注"`
-}
+	"xiaoMain/api/info/v1"
+)
 
-type LinkAddAdminRes struct {
+// EditWebInfo 编辑站点信息
+// 用于编辑站点信息，如果成功则返回 nil，否则返回错误。
+// 本接口会根据已有的站点信息对系统信息进行编辑，若编辑失败返回失败信息，若成功返回成功信息
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// req: 用户的请求，包含编辑系统信息的详细信息。
+//
+// 返回：
+// res: 如果编辑系统信息成功，返回 nil；否则返回错误。
+func (c *ControllerV1) EditWebInfo(ctx context.Context, req *v1.EditWebInfoReq) (res *v1.EditWebInfoRes, err error) {
+	// TODO-Controller[2024050402] 编辑系统信息内容
+	return nil, nil
 }

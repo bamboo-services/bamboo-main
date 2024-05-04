@@ -26,28 +26,17 @@
  * --------------------------------------------------------------------------------
  */
 
-package info
+package link
 
 import (
 	"context"
 
-	"xiaoMain/api/info/v1"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+
+	"xiaoMain/api/link/v1"
 )
 
-// EditSystemInfo 编辑系统信息
-// 用于编辑系统信息，如果成功则返回 nil，否则返回错误。
-// 本接口会根据已有的系统信息对系统信息进行编辑，若编辑失败返回失败信息，若成功返回成功信息
-//
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含编辑系统信息的详细信息。
-//
-// 返回：
-// res: 如果编辑系统信息成功，返回 nil；否则返回错误。
-func (c *ControllerV1) EditSystemInfo(
-	ctx context.Context,
-	req *v1.EditWebInfoReq,
-) (res *v1.EditWebInfoRes, err error) {
-	// TODO-Controller[2024050402] 编辑系统信息内容
-	return nil, nil
+func (c *ControllerV1) LinkAddAdmin(ctx context.Context, req *v1.LinkAddAdminReq) (res *v1.LinkAddAdminRes, err error) {
+	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }

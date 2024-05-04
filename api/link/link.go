@@ -41,6 +41,7 @@ import (
 type ILinkV1 interface {
 	LinkColorAdd(ctx context.Context, req *v1.LinkColorAddReq) (res *v1.LinkColorAddRes, err error)
 	LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error)
+	LinkAddAdmin(ctx context.Context, req *v1.LinkAddAdminReq) (res *v1.LinkAddAdminRes, err error)
 	LinkLocationAdd(ctx context.Context, req *v1.LinkLocationAddReq) (res *v1.LinkLocationAddRes, err error)
 	CheckLinkURLHasConnect(ctx context.Context, req *v1.CheckLinkURLHasConnectReq) (res *v1.CheckLinkURLHasConnectRes, err error)
 	CheckLinkIDHasConnect(ctx context.Context, req *v1.CheckLinkIDHasConnectReq) (res *v1.CheckLinkIDHasConnectRes, err error)

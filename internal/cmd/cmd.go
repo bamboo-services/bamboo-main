@@ -92,6 +92,7 @@ var (
 							link.NewV1().LinkLocationAdd,
 							link.NewV1().LinkGetColorFull,
 							link.NewV1().LinkGetLocationFull,
+							link.NewV1().LinkAddAdmin,
 							link.NewV1().CheckLinkIDHasConnect,
 						)
 					})
@@ -99,8 +100,8 @@ var (
 					// 系统信息
 					group.Group("/info", func(group *ghttp.RouterGroup) {
 						group.Bind(
-							info.NewV1().GetSystemInfo,
-							info.NewV1().EditSystemInfo,
+							info.NewV1().GetWebInfo,
+							info.NewV1().EditWebInfo,
 						)
 					})
 
