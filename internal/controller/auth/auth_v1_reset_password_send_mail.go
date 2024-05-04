@@ -43,7 +43,7 @@ func (c *ControllerV1) ResetPasswordSendMail(
 	ctx context.Context,
 	req *v1.ResetPasswordSendMailReq,
 ) (res *v1.ResetPasswordSendMailRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 ResetPasswordSendMail 接口")
+	glog.Notice(ctx, "[CONTROL] 控制层 ResetPasswordSendMail 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 检查邮箱是否正确
 	isCorrect, info := service.UserMailLogic().CheckMailHasConsoleUser(ctx, req.Email)

@@ -26,17 +26,28 @@
  * --------------------------------------------------------------------------------
  */
 
-package system
+package v1
 
-import (
-	"context"
+import "github.com/gogf/gf/v2/frame/g"
 
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
+// GetWebInfoReq 获取系统信息请求参数
+// 获取系统信息
+type GetWebInfoReq struct {
+	g.Meta `path:"/" method:"GET" tags:"Info" summary:"获取站点信息"`
+}
 
-	"xiaoMain/api/system/v1"
-)
+// GetWebInfoRes 获取系统信息响应参数
+type GetWebInfoRes struct {
+	g.Meta `mime:"application/json"`
+}
 
-func (c *ControllerV1) EditSystemInfo(ctx context.Context, req *v1.EditSystemInfoReq) (res *v1.EditSystemInfoRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+// EditWebInfoReq 编辑系统信息请求参数
+// 编辑系统信息
+type EditWebInfoReq struct {
+	g.Meta `path:"/" method:"PUT" tags:"Info" summary:"编辑站点信息"`
+}
+
+// EditWebInfoRes 编辑系统信息响应参数
+type EditWebInfoRes struct {
+	g.Meta `mime:"application/json"`
 }

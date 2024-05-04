@@ -54,7 +54,7 @@ func InitialDatabase(ctx context.Context) {
 	 * 检查数据表是否完善
 	 */
 	// 记录日志，开始初始化数据表
-	glog.Info(ctx, "[BOOT] 数据表初始化中")
+	glog.Notice(ctx, "[BOOT] 数据表初始化中")
 	// 初始化信息表
 	initialSQL(ctx, "xf_index")
 	// 初始化登录信息表
@@ -74,12 +74,18 @@ func InitialDatabase(ctx context.Context) {
 	 * 插入主要数据表 index
 	 */
 	// 记录日志，开始初始化数据库表信息
-	glog.Info(ctx, "[BOOT] 数据库表信息初始化中")
-	glog.Info(ctx, "[BOOT] 初始化信息表")
+	glog.Notice(ctx, "[BOOT] 数据库表信息初始化中")
+	glog.Notice(ctx, "[BOOT] 初始化信息表")
 	// 插入软件版本信息
 	insertIndexData(ctx, "version", consts.XiaoMainVersion)
 	// 插入软件作者信息
 	insertIndexData(ctx, "author", consts.XiaoMainAuthor)
+	// 插入站点信息
+	insertIndexData(ctx, "site_name", "XiaoMain")
+	// 插入站点描述
+	insertIndexData(ctx, "description", "一个由Go开发的开源项目，用于快速搭建个人页面、介绍的网站。")
+	// 插入站点关键字
+	insertIndexData(ctx, "keywords", "XiaoMain,筱锋,开源项目,Go,个人网站,介绍")
 
 	// 生成并插入用户的唯一 UUID
 	insertIndexData(ctx, "uuid", uuid.NewV4().String())
@@ -89,6 +95,12 @@ func InitialDatabase(ctx context.Context) {
 	insertIndexData(ctx, "password", utility.PasswordEncode("admin-admin"))
 	// 设置默认用户邮箱
 	insertIndexData(ctx, "email", "admin@xiaoMain.com")
+	// 站长昵称
+	insertIndexData(ctx, "blogger_name", "xiao_lfeng")
+	// 站长展示名字
+	insertIndexData(ctx, "blogger_nick", "筱锋")
+	// 站长座右铭（一句话介绍）
+	insertIndexData(ctx, "blogger_description", "愿你的人生如璀璨星辰，勇敢梦想，坚韧追寻，发现真我之光。在每个转角，以坚定意志和无尽创意，拥抱挑战，种下希望。遇见激励之人，共成长；面对风雨，保持乐观，让每一步都踏出意义深远的足迹。在追梦途中，听从内心之声，珍惜遇见，让生活不仅是冒险，更是自我发现的诗篇。") //nolint:lll
 
 	// 设置允许登录的节点数（设备数）
 	insertIndexData(ctx, "auth_limit", "3")
@@ -123,7 +135,7 @@ func insertIndexData(ctx context.Context, key string, value string) {
 	var err error
 	if record, _ := dao.XfIndex.Ctx(ctx).Where("key=?", key).One(); record == nil {
 		if _, err = dao.XfIndex.Ctx(ctx).Data(do.XfIndex{Key: key, Value: value}).Insert(); err != nil {
-			glog.Infof(ctx, "[SQL] 数据表 xf_index 中插入键 %s 失败", key)
+			glog.Noticef(ctx, "[SQL] 数据表 xf_index 中插入键 %s 失败", key)
 			glog.Errorf(ctx, "[SQL] 错误信息：%v", err.Error())
 		} else {
 			glog.Debugf(ctx, "[SQL] 数据表 xf_index 中插入键 %s 成功", key)

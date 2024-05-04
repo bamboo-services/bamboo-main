@@ -52,7 +52,7 @@ import (
 // 返回：
 // err: 如果链接可以访问，返回 nil；否则返回错误。
 func (s *sLinkLogic) CheckLinkCanAccess(ctx context.Context, siteURL string) (err error) {
-	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:CheckLinkCanAccess 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckLinkCanAccess 服务层")
 	getNowTimestamp := time.Now().UnixMilli()
 	// 检查链接是否可以访问
 	getResp, err := s.linkAccess(siteURL)
@@ -103,7 +103,7 @@ func (s *sLinkLogic) CheckLinkCanAccess(ctx context.Context, siteURL string) (er
 // 返回：
 // err: 如果 Logo 可以访问，返回 nil；否则返回错误。
 func (s *sLinkLogic) CheckLogoCanAccess(ctx context.Context, siteLogo string) (err error) {
-	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:CheckLogoCanAccess 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckLogoCanAccess 服务层")
 	getNowTimestamp := time.Now().UnixMilli()
 	// 检查链接是否可以访问
 	getResp, err := s.linkAccess(siteLogo)
@@ -149,7 +149,7 @@ func (s *sLinkLogic) CheckLogoCanAccess(ctx context.Context, siteLogo string) (e
 				}
 			}
 		}
-		glog.Infof(ctx, "[LOGIC] Logo 不是图片，获取请求头为 [%s]", getResp.Header.Get("Content-Type"))
+		glog.Noticef(ctx, "[LOGIC] Logo 不是图片，获取请求头为 [%s]", getResp.Header.Get("Content-Type"))
 		return errors.New("该 URL 不是图片")
 	}
 }
@@ -165,7 +165,7 @@ func (s *sLinkLogic) CheckLogoCanAccess(ctx context.Context, siteLogo string) (e
 // 返回：
 // err: 如果链接可以访问，返回 nil；否则返回错误。
 func (s *sLinkLogic) CheckRSSCanAccess(ctx context.Context, siteRSS string) (err error) {
-	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:CheckRSSCanAccess 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckRSSCanAccess 服务层")
 	getNowTimestamp := time.Now().UnixMilli()
 	// 检查链接是否可以访问
 	getResp, err := s.linkAccess(siteRSS)

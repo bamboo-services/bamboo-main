@@ -48,7 +48,7 @@ import (
 // 返回：
 // err: 如果链接名已存在，返回错误；否则返回 nil。
 func (s *sLinkLogic) CheckLinkName(ctx context.Context, linkName string) (err error) {
-	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:CheckLinkName 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckLinkName 服务层")
 	// 检查链接名是否重复
 	var linkInfo *do.XfLinkList
 	err = dao.XfLinkList.Ctx(ctx).Where(do.XfLinkList{SiteName: linkName}).Scan(&linkInfo)
@@ -74,7 +74,7 @@ func (s *sLinkLogic) CheckLinkName(ctx context.Context, linkName string) (err er
 // 返回：
 // err: 如果链接URL已存在，返回错误；否则返回 nil。
 func (s *sLinkLogic) CheckLinkURL(ctx context.Context, siteURL string) (err error) {
-	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:CheckLinkUrl 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckLinkUrl 服务层")
 	// 检查链接名是否重复
 	var linkInfo *do.XfLinkList
 	err = dao.XfLinkList.Ctx(ctx).Where(do.XfLinkList{SiteUrl: siteURL}).Scan(&linkInfo)
@@ -101,7 +101,7 @@ func (s *sLinkLogic) CheckLinkURL(ctx context.Context, siteURL string) (err erro
 // 返回：
 // err: 如果链接已连接，返回错误；否则返回 nil。
 func (s *sLinkLogic) CheckLinkHasConnect(ctx context.Context, linkID string) (delay *int64, err error) {
-	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:CheckLinkHasConnect 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckLinkHasConnect 服务层")
 	// 获取链接信息
 	var getLink *entity.XfLinkList
 	err = dao.XfLinkList.Ctx(ctx).Where(do.XfLinkList{Id: linkID}).Scan(&getLink)
@@ -135,7 +135,7 @@ func (s *sLinkLogic) CheckLinkHasConnect(ctx context.Context, linkID string) (de
 // 返回：
 // bool: 如果颜色存在，返回 false；否则返回 true。
 func (s *sLinkLogic) HasColorByName(ctx context.Context, getColor string) bool {
-	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:HasColorByName 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:HasColorByName 服务层")
 	// 查询指定的颜色是否存在
 	var getColorInfo *entity.XfColor
 	err := dao.XfColor.Ctx(ctx).Where(do.XfColor{Name: getColor}).Scan(&getColorInfo)
@@ -162,7 +162,7 @@ func (s *sLinkLogic) HasColorByName(ctx context.Context, getColor string) bool {
 // 返回：
 // bool: 如果颜色存在，返回 false；否则返回 true。
 func (s *sLinkLogic) HasColorByColor(ctx context.Context, getColor string) bool {
-	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:HasColorByColor 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:HasColorByColor 服务层")
 	// 查询指定的颜色是否存在
 	var getColorInfo *entity.XfColor
 	err := dao.XfColor.Ctx(ctx).Where(do.XfColor{Color: getColor}).Scan(&getColorInfo)
@@ -189,7 +189,7 @@ func (s *sLinkLogic) HasColorByColor(ctx context.Context, getColor string) bool 
 // 返回：
 // err: 如果位置存在，返回错误；否则返回 nil。
 func (s *sLinkLogic) CheckLocationExist(ctx context.Context, name string) (err error) {
-	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:CheckLocationExist 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckLocationExist 服务层")
 	// 查询指定的位置是否存在
 	var getLocationInfo *entity.XfLocation
 	err = dao.XfLocation.Ctx(ctx).Where(do.XfLocation{Name: name}).Scan(&getLocationInfo)
@@ -216,7 +216,7 @@ func (s *sLinkLogic) CheckLocationExist(ctx context.Context, name string) (err e
 // 返回：
 // err: 如果颜色存在，返回错误；否则返回 nil。
 func (s *sLinkLogic) CheckColorExist(ctx context.Context, getName string) (err error) {
-	glog.Info(ctx, "[LOGIC] 执行 LinkLogic:CheckColorExist 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckColorExist 服务层")
 	var getColorInfo *entity.XfColor
 	err = dao.XfColor.Ctx(ctx).Where(do.XfColor{Name: getName}).Scan(&getColorInfo)
 	if err != nil {

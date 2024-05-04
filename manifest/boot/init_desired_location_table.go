@@ -37,7 +37,7 @@ import (
 
 func InitialDesiredLocationTable(ctx context.Context) {
 	// 记录日志，开始初始化数据表
-	glog.Info(ctx, "[BOOT] 初始化期望位置表")
+	glog.Notice(ctx, "[BOOT] 初始化期望位置表")
 
 	// 初始化期望位置表
 	insertLocationData(ctx, 1, "favorite", "最喜欢", "这是我最喜欢的东西，我当然要置顶啦", true)
@@ -55,7 +55,7 @@ func insertLocationData(ctx context.Context, sort uint, name string, displayName
 				Description: desc,
 				Reveal:      reveal,
 			}).Insert(); err != nil {
-			glog.Infof(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 失败", name)
+			glog.Noticef(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 失败", name)
 			glog.Errorf(ctx, "[SQL] 错误信息：%v", err.Error())
 		} else {
 			glog.Debugf(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 成功", name)

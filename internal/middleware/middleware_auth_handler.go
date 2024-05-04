@@ -107,7 +107,7 @@ func MiddleAuthHandler(r *ghttp.Request) {
 	// 对数据库进行有效性检查
 	if tokenInfo != nil {
 		if gtime.Now().Before(tokenInfo.ExpiredAt) {
-			glog.Infof(r.Context(), "[MIDDLE] 用户授权有效|用户UUID[%s]", tokenInfo.UserUuid)
+			glog.Noticef(r.Context(), "[MIDDLE] 用户授权有效|用户UUID[%s]", tokenInfo.UserUuid)
 			r.Middleware.Next()
 		} else {
 			glog.Warning(r.Context(), "[MIDDLE] 用户授权异常|授权已过期|用户未登录")

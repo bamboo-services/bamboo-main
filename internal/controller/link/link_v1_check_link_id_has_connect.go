@@ -54,7 +54,7 @@ func (c *ControllerV1) CheckLinkIDHasConnect(
 	ctx context.Context,
 	req *v1.CheckLinkIDHasConnectReq,
 ) (res *v1.CheckLinkIDHasConnectRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 CheckLinkURLHasConnect 接口")
+	glog.Notice(ctx, "[CONTROL] 控制层 CheckLinkURLHasConnect 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取博客链接是否已经连接
 	delay, err := service.LinkLogic().CheckLinkHasConnect(ctx, getRequest.GetRouter("id").String())

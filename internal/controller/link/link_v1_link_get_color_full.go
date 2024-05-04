@@ -53,7 +53,7 @@ func (c *ControllerV1) LinkGetColorFull(
 	ctx context.Context,
 	req *v1.LinkGetColorFullReq,
 ) (res *v1.LinkGetColorFullRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 LinkGetColorFull 接口")
+	glog.Notice(ctx, "[CONTROL] 控制层 LinkGetColorFull 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取颜色完整信息
 	getColor, err := service.LinkLogic().GetColor(ctx)

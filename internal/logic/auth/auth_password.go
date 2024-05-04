@@ -48,7 +48,7 @@ import (
 // 返回值:
 // err: 如果密码修改成功，返回 nil。否则返回错误信息。
 func (s *sAuthLogic) ChangeUserPassword(ctx context.Context, password string) (err error) {
-	glog.Info(ctx, "[LOGIC] 执行 AuthLogic:ChangeUserPassword 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 AuthLogic:ChangeUserPassword 服务层")
 	// 检查用户的密码是否与前密码一致
 	var getUserPassword entity.XfIndex
 	if dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "password"}).Scan(&getUserPassword) != nil {
@@ -57,7 +57,7 @@ func (s *sAuthLogic) ChangeUserPassword(ctx context.Context, password string) (e
 	}
 	// 对密码进行检查
 	if utility.PasswordVerify(getUserPassword.Value, password) {
-		glog.Info(ctx, "[LOGIC] 用户修改的密码与原密码相同")
+		glog.Notice(ctx, "[LOGIC] 用户修改的密码与原密码相同")
 		return errors.New("密码与原密码相同")
 	}
 	// 对密码进行修改

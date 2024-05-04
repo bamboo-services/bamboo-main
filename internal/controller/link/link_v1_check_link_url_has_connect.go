@@ -55,7 +55,7 @@ func (c *ControllerV1) CheckLinkURLHasConnect(
 	ctx context.Context,
 	req *v1.CheckLinkURLHasConnectReq,
 ) (res *v1.CheckLinkURLHasConnectRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 CheckLinkURLHasConnect 接口")
+	glog.Notice(ctx, "[CONTROL] 控制层 CheckLinkURLHasConnect 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取博客链接是否已经连接
 	getNowTimestamp := gtime.TimestampMilli()

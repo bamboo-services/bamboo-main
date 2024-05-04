@@ -52,7 +52,7 @@ func (c *ControllerV1) LinkLocationAdd(
 	ctx context.Context,
 	req *v1.LinkLocationAddReq,
 ) (res *v1.LinkLocationAddRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 LinkLocationAdd 接口")
+	glog.Notice(ctx, "[CONTROL] 控制层 LinkLocationAdd 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	if err = service.LinkLogic().CheckLocationExist(ctx, req.Name); err != nil {
 		result.ExistedError.SetErrorMessage(err.Error()).Response(getRequest)

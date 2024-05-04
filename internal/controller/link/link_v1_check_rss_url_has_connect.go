@@ -55,7 +55,7 @@ func (c *ControllerV1) CheckRssURLHasConnect(
 	ctx context.Context,
 	req *v1.CheckRssURLHasConnectReq,
 ) (res *v1.CheckRssURLHasConnectRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 CheckRssURLHasConnect 接口")
+	glog.Notice(ctx, "[CONTROL] 控制层 CheckRssURLHasConnect 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取 RSS 链接是否已经连接
 	getNowTimestamp := gtime.TimestampMilli()

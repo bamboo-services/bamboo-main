@@ -55,7 +55,7 @@ func (c *ControllerV1) CheckLogoURLHasConnect(
 	ctx context.Context,
 	req *v1.CheckLogoURLHasConnectReq,
 ) (res *v1.CheckLogoURLHasConnectRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 CheckLogoURLHasConnect 接口")
+	glog.Notice(ctx, "[CONTROL] 控制层 CheckLogoURLHasConnect 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取 Logo 链接是否已经连接
 	getNowTimestamp := gtime.TimestampMilli()

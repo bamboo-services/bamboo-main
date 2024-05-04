@@ -26,28 +26,28 @@
  * --------------------------------------------------------------------------------
  */
 
-package v1
+package info
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"context"
 
-// GetSystemInfoReq 获取系统信息请求参数
-// 获取系统信息
-type GetSystemInfoReq struct {
-	g.Meta `path:"/system" method:"GET" tags:"System" summary:"获取系统信息" desc:"获取系统信息"`
-}
+	"xiaoMain/api/info/v1"
+)
 
-// GetSystemInfoRes 获取系统信息响应参数
-type GetSystemInfoRes struct {
-	g.Meta `mime:"application/json"`
-}
-
-// EditSystemInfoReq 编辑系统信息请求参数
-// 编辑系统信息
-type EditSystemInfoReq struct {
-	g.Meta `path:"/system" method:"PUT" tags:"System" summary:"编辑系统信息" desc:"编辑系统信息"`
-}
-
-// EditSystemInfoRes 编辑系统信息响应参数
-type EditSystemInfoRes struct {
-	g.Meta `mime:"application/json"`
+// EditSystemInfo 编辑系统信息
+// 用于编辑系统信息，如果成功则返回 nil，否则返回错误。
+// 本接口会根据已有的系统信息对系统信息进行编辑，若编辑失败返回失败信息，若成功返回成功信息
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// req: 用户的请求，包含编辑系统信息的详细信息。
+//
+// 返回：
+// res: 如果编辑系统信息成功，返回 nil；否则返回错误。
+func (c *ControllerV1) EditSystemInfo(
+	ctx context.Context,
+	req *v1.EditWebInfoReq,
+) (res *v1.EditWebInfoRes, err error) {
+	// TODO-Controller[2024050402] 编辑系统信息内容
+	return nil, nil
 }

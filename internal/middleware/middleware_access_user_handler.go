@@ -59,7 +59,7 @@ func MiddleAccessUserHandler(r *ghttp.Request) {
 		}
 		result.AccessError.Response(r)
 	} else {
-		glog.Infof(ctx, "[MIDDLE] 访问者 [%s] ", userIP)
+		glog.Noticef(ctx, "[MIDDLE] 访问者 [%s] ", userIP)
 		glog.Debugf(ctx, "[MIDDLE] User-Agent [%s]", userAgent)
 		r.Middleware.Next()
 	}

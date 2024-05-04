@@ -60,7 +60,7 @@ const ServerInternalErrorString = "服务器内部错误"
 // hasLogin: 如果用户已经登录并且此次登录有效，返回 true。否则返回 false。
 // message: 如果用户未登录或登录已失效，返回错误信息。否则返回空字符串。
 func (s *sAuthLogic) IsUserLogin(ctx context.Context) (hasLogin bool, message string) {
-	glog.Info(ctx, "[LOGIC] 执行 AuthLogic:IsUserLogin 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 AuthLogic:IsUserLogin 服务层")
 	// 根据 ctx 获取 Request 信息
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取用户的 UUID(UID) 以及 认证密钥
@@ -86,7 +86,7 @@ func (s *sAuthLogic) IsUserLogin(ctx context.Context) (hasLogin bool, message st
 		if gtime.Timestamp() < getTokenDO.ExpiredAt.Timestamp() {
 			// 验证登录有效
 			if *getUserAuthorize == getTokenDO.UserToken {
-				glog.Infof(ctx, "[LOGIC] 用户UID %s 任然登录状态", getTokenDO.UserUuid)
+				glog.Noticef(ctx, "[LOGIC] 用户UID %s 任然登录状态", getTokenDO.UserUuid)
 				return true, ""
 			} else {
 				glog.Warning(ctx, "[LOGIC] 用户登录已失效 [数据已取得，但已失效]")
@@ -114,7 +114,7 @@ func (s *sAuthLogic) CheckUserLogin(
 	ctx context.Context,
 	getData *v1.AuthLoginReq,
 ) (userUUID *string, isCorrect bool, errMessage string) {
-	glog.Info(ctx, "[LOGIC] 执行 AuthLogic:CheckUserLogin 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 AuthLogic:CheckUserLogin 服务层")
 	// 根据 ctx 获取 Request 信息
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 接收数据处理用户登录
@@ -145,14 +145,14 @@ func (s *sAuthLogic) CheckUserLogin(
 		handlingPasswords := base64.StdEncoding.EncodeToString([]byte(getData.Pass))
 		// 密码校验
 		if bcrypt.CompareHashAndPassword([]byte(userPasswordEntity.Value), []byte(handlingPasswords)) == nil {
-			glog.Info(ctx, "[LOGIC] 用户校验通过")
+			glog.Notice(ctx, "[LOGIC] 用户校验通过")
 			return &userUUIDEntity.Value, true, ""
 		} else {
-			glog.Info(ctx, "[LOGIC] 密码错误")
+			glog.Notice(ctx, "[LOGIC] 密码错误")
 			return nil, false, "密码错误"
 		}
 	} else {
-		glog.Info(ctx, "[LOGIC] 用户名未找到")
+		glog.Notice(ctx, "[LOGIC] 用户名未找到")
 		return nil, false, "用户名未找到"
 	}
 }
@@ -173,7 +173,7 @@ func (s *sAuthLogic) RegisteredUserLogin(
 	userUUID string,
 	remember bool,
 ) (userToken *entity.XfToken, err error) {
-	glog.Info(ctx, "[LOGIC] 执行 AuthLogic:RegisteredUserLogin 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 AuthLogic:RegisteredUserLogin 服务层")
 	// 根据 ctx 获取 Request 信息
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取允许用户允许登录的节点数
@@ -242,7 +242,7 @@ func (s *sAuthLogic) RegisteredUserLogin(
 // 返回值:
 // err: 如果用户名存在于数据库中，返回 nil。否则返回错误信息。
 func (s *sAuthLogic) CheckUserHasConsoleUser(ctx context.Context, username string) (err error) {
-	glog.Info(ctx, "[LOGIC] 执行 AuthLogic:CheckUserHasConsoleUser 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 AuthLogic:CheckUserHasConsoleUser 服务层")
 	// 根据 ctx 获取 Request 信息
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取用户的一登录信息

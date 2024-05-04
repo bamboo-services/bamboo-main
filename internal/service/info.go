@@ -40,7 +40,17 @@ import (
 
 type (
 	IInfoLogic interface {
-		GetMainInfo(ctx context.Context) (getMainInfo *vo.MainVO)
+		// GetMainInfo 获取主要信息
+		// 用于获取主要信息，如果返回成功则返回具体的信息，若某些情况下无法获取则获取的内容为空
+		// 接口的返回都会有结果，如果返回错误将会返回空值
+		//
+		// 参数：
+		// ctx: 请求的上下文，用于管理超时和取消信号。
+		//
+		// 返回：
+		// getMainInfo: 如果获取成功，返回具体的信息；否则返回空值。
+		GetMainInfo(ctx context.Context) *vo.MainVO
+		GetBloggerInfo(ctx context.Context) *vo.BloggerVO
 	}
 )
 

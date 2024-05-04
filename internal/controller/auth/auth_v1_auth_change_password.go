@@ -53,7 +53,7 @@ func (c *ControllerV1) AuthChangePassword(
 	ctx context.Context,
 	req *v1.AuthChangePasswordReq,
 ) (res *v1.AuthChangePasswordRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 UserChangePassword 接口")
+	glog.Notice(ctx, "[CONTROL] 控制层 UserChangePassword 接口")
 	// 获取 Request
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 检查用户登录是否有效

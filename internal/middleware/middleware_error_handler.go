@@ -87,6 +87,6 @@ func MiddleErrorHandler(r *ghttp.Request) {
 	// 判断是否有自定义抛出
 	if r.Response.BufferLength() == 0 {
 		result.Success("操作成功", r.GetHandlerResponse()).Response(r)
-		glog.Info(ctx, "[RETURN] 执行操作成功，返回结果")
+		glog.Notice(ctx, "[RETURN] 执行操作成功，返回结果")
 	}
 }

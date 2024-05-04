@@ -51,7 +51,7 @@ func (c *ControllerV1) LinkColorAdd(
 	ctx context.Context,
 	req *v1.LinkColorAddReq,
 ) (res *v1.LinkColorAddRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 LinkColorAdd 接口")
+	glog.Notice(ctx, "[CONTROL] 控制层 LinkColorAdd 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	if err = service.LinkLogic().CheckColorExist(ctx, req.Name); err != nil {
 		result.ExistedError.SetErrorMessage(err.Error()).Response(getRequest)

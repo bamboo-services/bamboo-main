@@ -34,6 +34,7 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gcmd"
 	"xiaoMain/internal/controller/auth"
+	"xiaoMain/internal/controller/info"
 	"xiaoMain/internal/controller/link"
 	"xiaoMain/internal/middleware"
 	"xiaoMain/internal/task"
@@ -92,6 +93,14 @@ var (
 							link.NewV1().LinkGetColorFull,
 							link.NewV1().LinkGetLocationFull,
 							link.NewV1().CheckLinkIDHasConnect,
+						)
+					})
+
+					// 系统信息
+					group.Group("/info", func(group *ghttp.RouterGroup) {
+						group.Bind(
+							info.NewV1().GetSystemInfo,
+							info.NewV1().EditSystemInfo,
 						)
 					})
 

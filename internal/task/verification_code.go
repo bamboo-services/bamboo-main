@@ -47,8 +47,8 @@ func ClearVerificationCode(ctx context.Context) {
 	gtimer.Add(ctx, time.Minute*10, func(_ context.Context) {
 		getNowTimestamp := time.Now().UnixMilli()
 		// 清理过期的验证码
-		glog.Info(ctx, "[TASK] 开始清理过期的验证码")
+		glog.Notice(ctx, "[TASK] 开始清理过期的验证码")
 		_, _ = dao.XfVerificationCode.Ctx(ctx).Where("expired_at < NOW()").Delete()
-		glog.Infof(ctx, "[TASK] 清理过期的验证码完成, 耗时: %vms", time.Now().UnixMilli()-getNowTimestamp)
+		glog.Noticef(ctx, "[TASK] 清理过期的验证码完成, 耗时: %vms", time.Now().UnixMilli()-getNowTimestamp)
 	})
 }

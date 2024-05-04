@@ -49,7 +49,7 @@ import (
 // checkMail: 如果用户输入的邮箱与数据库中的邮箱匹配，则返回 true，否则返回 false。
 // info: 返回的信息，如果邮箱匹配，返回 "邮箱匹配"，如果不匹配，返回 "邮箱不匹配"，如果查询过程中出现错误，返回 "未查询到邮箱"。
 func (s *sUserLogic) CheckMailHasConsoleUser(ctx context.Context, email string) (checkMail bool, info string) {
-	glog.Info(ctx, "[LOGIC] 执行 UserLogic:CheckMailHasConsoleUser 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 UserLogic:CheckMailHasConsoleUser 服务层")
 	// 从数据库获取指定信息
 	var getAdminEmail entity.XfIndex
 	if dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "email"}).Scan(&getAdminEmail) != nil {

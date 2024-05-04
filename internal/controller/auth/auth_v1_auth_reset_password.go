@@ -53,7 +53,7 @@ func (c *ControllerV1) AuthResetPassword(
 	ctx context.Context,
 	req *v1.AuthResetPasswordReq,
 ) (res *v1.AuthResetPasswordRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 UserResetPassword 接口")
+	glog.Notice(ctx, "[CONTROL] 控制层 UserResetPassword 接口")
 	// 获取 Request
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取邮件是否存在

@@ -38,6 +38,6 @@ func MiddleTimeHandler(r *ghttp.Request) {
 	startTime := gtime.Now().TimestampMilli()
 	r.Middleware.Next()
 	endTime := gtime.Now().TimestampMilli()
-	glog.Infof(r.Context(), "[TIMER] 请求耗时 %vms", endTime-startTime)
+	glog.Noticef(r.Context(), "[TIMER] 请求耗时 %vms", endTime-startTime)
 	println()
 }

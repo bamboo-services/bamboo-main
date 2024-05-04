@@ -49,7 +49,7 @@ import (
 // 返回:
 // res: 发送给用户的响应。如果添加链接成功，它将返回成功的消息。
 func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 LinkAdd 接口")
+	glog.Notice(ctx, "[CONTROL] 控制层 LinkAdd 接口")
 	// 获取 Request
 	getRequest := ghttp.RequestFromCtx(ctx)
 	service.RegisterLinkLogic(link.New())

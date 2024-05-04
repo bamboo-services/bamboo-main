@@ -36,7 +36,7 @@ import (
 )
 
 func InitialDesiredColorTable(ctx context.Context) {
-	glog.Info(ctx, "[BOOT] 初始化期望颜色表")
+	glog.Notice(ctx, "[BOOT] 初始化期望颜色表")
 
 	// 初始化期望颜色表
 	insertColorData(ctx, "red", "红色", "FF0000")
@@ -86,7 +86,7 @@ func insertColorData(ctx context.Context, name string, displayName string, color
 				DisplayName: displayName,
 				Color:       color,
 			}).Insert(); err != nil {
-			glog.Infof(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 失败", name)
+			glog.Noticef(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 失败", name)
 			glog.Errorf(ctx, "[SQL] 错误信息：%v", err.Error())
 		} else {
 			glog.Debugf(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 成功", name)

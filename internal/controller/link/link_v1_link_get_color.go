@@ -50,7 +50,7 @@ import (
 // res: 如果获取期望颜色信息成功，返回期望颜色信息；否则返回错误。
 // err: 如果获取期望颜色信息成功，返回 nil；否则返回错误。
 func (c *ControllerV1) LinkGetColor(ctx context.Context, _ *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 LinkGetColor 接口")
+	glog.Notice(ctx, "[CONTROL] 控制层 LinkGetColor 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取期望颜色信息
 	getColor, err := service.LinkLogic().GetColor(ctx)

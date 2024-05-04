@@ -53,7 +53,7 @@ func (c *ControllerV1) LinkGetLocation(
 	ctx context.Context,
 	_ *v1.LinkGetLocationReq,
 ) (res *v1.LinkGetLocationRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 LinkGetLocation 接口")
+	glog.Notice(ctx, "[CONTROL] 控制层 LinkGetLocation 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取期望位置信息
 	getLocation, err := service.LinkLogic().GetLocation(ctx)

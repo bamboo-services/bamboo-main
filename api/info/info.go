@@ -26,18 +26,19 @@
  * --------------------------------------------------------------------------------
  */
 
-package vo
+// =================================================================================
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
+// =================================================================================
 
-type SystemInfoRes struct {
-	Main *MainVO `json:"main" dc:"主要配置信息"`
-	Mail *MailVO `json:"mail" dc:"邮件配置信息"`
-}
+package info
 
-type MainVO struct {
-	Name    string `json:"name" dc:"站点名称"`
-	Author  string `json:"author" dc:"站点作者"`
-	Version string `json:"version" dc:"站点版本"`
-}
+import (
+	"context"
 
-type MailVO struct {
+	"xiaoMain/api/info/v1"
+)
+
+type IInfoV1 interface {
+	GetSystemInfo(ctx context.Context, req *v1.GetWebInfoReq) (res *v1.GetWebInfoRes, err error)
+	EditSystemInfo(ctx context.Context, req *v1.EditWebInfoReq) (res *v1.EditWebInfoRes, err error)
 }

@@ -51,7 +51,7 @@ func (s *sMailLogic) VerificationCodeHasCorrect(
 	code string,
 	scenes consts.Scene,
 ) (isCorrect bool, info string) {
-	glog.Info(ctx, "[LOGIC] 执行 MailLogic:VerificationCodeHasCorrect 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 MailLogic:VerificationCodeHasCorrect 服务层")
 	// 获取邮箱以及验证码
 	var getCode []entity.XfVerificationCode
 	if dao.XfVerificationCode.Ctx(ctx).Where(do.XfVerificationCode{
@@ -59,7 +59,7 @@ func (s *sMailLogic) VerificationCodeHasCorrect(
 		Contact: email,
 		Scenes:  string(scenes),
 	}).Scan(&getCode) != nil {
-		glog.Info(ctx, "[LOGIC] 用户的验证码不存在")
+		glog.Notice(ctx, "[LOGIC] 用户的验证码不存在")
 		return false, "验证码不存在"
 	}
 	// 对获取的验证码进行查询
@@ -75,7 +75,7 @@ func (s *sMailLogic) VerificationCodeHasCorrect(
 		}
 	}
 	// 验证码已过期
-	glog.Info(ctx, "[LOGIC] 用户的验证码已过期")
+	glog.Notice(ctx, "[LOGIC] 用户的验证码已过期")
 	return false, "验证码已过期"
 }
 
@@ -83,7 +83,7 @@ func (s *sMailLogic) VerificationCodeHasCorrect(
 // 根据输入的场景进行邮箱的发送，需要保证场景的合法性，场景的合法性参考 consts.Scenes 的参考值
 // 若邮件发送的过程中出现错误将会终止发件并且返回 error 信息，发件成功返回 nil
 func (s *sMailLogic) SendEmailVerificationCode(ctx context.Context, mail string, scenes consts.Scene) (err error) {
-	glog.Info(ctx, "[LOGIC] 执行 MailLogic:SendEmailVerificationCode 服务层")
+	glog.Notice(ctx, "[LOGIC] 执行 MailLogic:SendEmailVerificationCode 服务层")
 	wg := sync.WaitGroup{}
 	// 验证码存入数据库
 	err = dao.XfVerificationCode.Ctx(ctx).Transaction(ctx, func(_ context.Context, tx gdb.TX) error {

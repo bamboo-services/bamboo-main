@@ -53,7 +53,7 @@ func (c *ControllerV1) LinkGetLocationFull(
 	ctx context.Context,
 	_ *v1.LinkGetLocationFullReq,
 ) (res *v1.LinkGetLocationFullRes, err error) {
-	glog.Info(ctx, "[CONTROL] 控制层 LinkGetLocationFull 接口")
+	glog.Notice(ctx, "[CONTROL] 控制层 LinkGetLocationFull 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取颜色完整信息
 	getLocation, err := service.LinkLogic().GetLocationAllInformation(ctx)
