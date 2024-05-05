@@ -26,17 +26,31 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
+package v1
 
-package logic
+import "github.com/gogf/gf/v2/frame/g"
 
-import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/rss"
-	_ "xiaoMain/internal/logic/user"
-)
+// GetLinkRssInfoReq 获取RSS信息请求参数
+// 获取RSS信息
+// 用于获取订阅内的订阅内容，用于获取用户订阅的RSS信息
+//
+// 参数：
+// LinkID: 链接ID
+// LinkName: 链接名称(模糊搜索)
+// PageStart: 起始页数
+// PageEnd: 结束页数
+type GetLinkRssInfoReq struct {
+	g.Meta       `path:"/" method:"Get" tags:"Rss" summary:"获取RSS信息" dc:"可以获取订阅内的订阅内容，用于获取用户订阅的RSS信息"`
+	LinkID       *int64  `json:"link_id" v:"regex:^(|[0-9]+)$#请输入链接ID只能为数字" dc:"链接ID"`
+	LinkName     *string `json:"link_name" dc:"链接名称(模糊搜索)"`
+	LinkLocation *int64  `json:"link_location" v:"regex:^(|[0-9]+)$#请输入链接位置只能为数字" dc:"链接位置"`
+	PageStart    *int64  `json:"page_start" v:"required|default:1#请输入起始页数" dc:"起始页数"`
+	PageEnd      *int64  `json:"page_end" v:"required|default:10#请输入结束页数" dc:"结束页数"`
+}
+
+// GetLinkRssInfoRes 获取RSS信息响应参数
+// 用于获取RSS信息响应
+// 用于获取用户订阅的RSS信息响应
+type GetLinkRssInfoRes struct {
+	g.Meta `mime:"application/json"`
+}

@@ -26,17 +26,12 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
+package dto
 
-package logic
-
-import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/rss"
-	_ "xiaoMain/internal/logic/user"
-)
+type RssLinkDTO struct {
+	Title    string   `json:"title"`
+	Link     string   `json:"link"`
+	Summary  string   `json:"summary"`
+	Category []string `json:"category"`
+	Timer    string   `json:"timer"`
+}

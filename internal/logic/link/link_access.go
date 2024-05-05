@@ -40,6 +40,7 @@ import (
 	"strings"
 	"time"
 	"xiaoMain/internal/consts"
+	"xiaoMain/internal/lutil"
 )
 
 // CheckLinkCanAccess 检查链接是否可以访问
@@ -55,7 +56,7 @@ func (s *sLinkLogic) CheckLinkCanAccess(ctx context.Context, siteURL string) (er
 	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckLinkCanAccess 服务层")
 	getNowTimestamp := time.Now().UnixMilli()
 	// 检查链接是否可以访问
-	getResp, err := s.linkAccess(siteURL)
+	getResp, err := lutil.LinkAccess(siteURL)
 	defer func() {
 		if getResp != nil {
 			_ = getResp.Body.Close()
@@ -106,7 +107,7 @@ func (s *sLinkLogic) CheckLogoCanAccess(ctx context.Context, siteLogo string) (e
 	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckLogoCanAccess 服务层")
 	getNowTimestamp := time.Now().UnixMilli()
 	// 检查链接是否可以访问
-	getResp, err := s.linkAccess(siteLogo)
+	getResp, err := lutil.LinkAccess(siteLogo)
 	defer func() {
 		if getResp != nil {
 			_ = getResp.Body.Close()
@@ -168,7 +169,7 @@ func (s *sLinkLogic) CheckRSSCanAccess(ctx context.Context, siteRSS string) (err
 	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckRSSCanAccess 服务层")
 	getNowTimestamp := time.Now().UnixMilli()
 	// 检查链接是否可以访问
-	getResp, err := s.linkAccess(siteRSS)
+	getResp, err := lutil.LinkAccess(siteRSS)
 	defer func() {
 		if getResp != nil {
 			_ = getResp.Body.Close()
@@ -215,25 +216,4 @@ func (s *sLinkLogic) CheckRSSCanAccess(ctx context.Context, siteRSS string) (err
 			return errors.New("该 RSS 不是 XML 格式")
 		}
 	}
-}
-
-// linkAccess 访问链接
-// 用于访问用户添加的链接，如果可以访问则返回响应，否则返回错误。
-//
-// 参数：
-// siteURL: 用户尝试添加的链接地址。
-//
-// 返回：
-// getResp: 如果链接可以访问，返回响应；否则返回错误。
-// err: 如果链接可以访问，返回 nil；否则返回错误。
-func (s *sLinkLogic) linkAccess(siteURL string) (getResp *http.Response, err error) {
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-	getReq, _ := http.NewRequest("GET", siteURL, nil)
-	getReq.Header.Set(
-		"User-Agent",
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-	)
-	return client.Do(getReq)
 }

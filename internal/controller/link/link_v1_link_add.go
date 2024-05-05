@@ -34,7 +34,6 @@ import (
 	"github.com/gogf/gf/v2/os/glog"
 	"sync"
 	"xiaoMain/api/link/v1"
-	"xiaoMain/internal/logic/link"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility/result"
 )
@@ -52,7 +51,6 @@ func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1
 	glog.Notice(ctx, "[CONTROL] 控制层 LinkAdd 接口")
 	// 获取 Request
 	getRequest := ghttp.RequestFromCtx(ctx)
-	service.RegisterLinkLogic(link.New())
 	// 异步操作
 	getError := error(nil)
 	wg := sync.WaitGroup{}

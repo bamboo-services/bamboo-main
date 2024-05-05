@@ -26,17 +26,18 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
+// =================================================================================
 // Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
+// =================================================================================
 
-package logic
+package rss
 
 import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/rss"
-	_ "xiaoMain/internal/logic/user"
+	"context"
+
+	"xiaoMain/api/rss/v1"
 )
+
+type IRssV1 interface {
+	GetLinkRssInfo(ctx context.Context, req *v1.GetLinkRssInfoReq) (res *v1.GetLinkRssInfoRes, err error)
+}

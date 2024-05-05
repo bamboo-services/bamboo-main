@@ -26,17 +26,41 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
-
-package logic
+package rss
 
 import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/rss"
-	_ "xiaoMain/internal/logic/user"
+	"context"
+	"errors"
+	"github.com/gogf/gf/v2/os/glog"
+	"xiaoMain/internal/dao"
+	"xiaoMain/internal/model/do"
+	"xiaoMain/internal/model/entity"
 )
+
+// GetAllLinkRssInfo 获取所有链接的Rss信息
+// 用于获取所有链接的Rss信息
+// 如果成功则返回 nil，否则返回错误
+// 本接口会根据已有的链接信息对Rss信息进行获取，若获取失败返回失败信息，若成功返回成功信息
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+//
+// 返回：
+// err: 如果获取Rss信息成功，返回 nil；否则返回错误。
+func (s *sRssLogic) GetAllLinkRssInfo(ctx context.Context) (err error) {
+	glog.Noticef(ctx, "[LOGIC] 执行 RssLogic:GetAllLinkRssInfo 服务层")
+	var getLink *[]entity.XfLinkList
+	err = dao.XfLinkList.Ctx(ctx).
+		Where(do.XfLinkList{DeletedAt: nil, Status: 1}).
+		WhereNotIn("site_rss_url", nil).
+		Scan(&getLink)
+	if err != nil {
+		glog.Errorf(ctx, "获取链接信息失败: %v", err)
+		return errors.New("数据库查询失败<链接获取失败>")
+	}
+	if getLink != nil {
+		return nil
+	} else {
+		return errors.New("没有数据")
+	}
+}

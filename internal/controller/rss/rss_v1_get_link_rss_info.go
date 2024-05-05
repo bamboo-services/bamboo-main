@@ -26,17 +26,38 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
-
-package logic
+package rss
 
 import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/rss"
-	_ "xiaoMain/internal/logic/user"
+	"context"
+	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/glog"
+	"xiaoMain/api/rss/v1"
 )
+
+// GetLinkRssInfo 获取链接的RSS信息
+// 用于获取链接的RSS信息，如果成功则返回 nil，否则返回错误。
+// 本接口会根据已有的链接信息对RSS信息进行获取，若获取失败返回失败信息，若成功返回成功信息
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// req: 用户的请求，包含获取RSS信息的详细信息。
+//
+// 返回：
+// res: 如果获取RSS信息成功，返回 nil；否则返回错误。
+func (c *ControllerV1) GetLinkRssInfo(
+	ctx context.Context,
+	req *v1.GetLinkRssInfoReq,
+) (res *v1.GetLinkRssInfoRes, err error) {
+	glog.Noticef(ctx, "[CONTROL] 控制层 GetLinkRssInfo 接口")
+	getRequest := ghttp.RequestFromCtx(ctx)
+	// 检查信息是否存在
+	if req.LinkID != nil {
+		// 进入 LinkID 查询
+	} else if req.LinkName != nil {
+		// 进入 LinkName 查询
+	} else {
+		// 查询全部的内容
+	}
+	return nil, nil
+}

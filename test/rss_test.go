@@ -26,17 +26,23 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
-
-package logic
+package test
 
 import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/rss"
-	_ "xiaoMain/internal/logic/user"
+	"context"
+	"testing"
+	"xiaoMain/internal/logic/rss"
+	"xiaoMain/internal/service"
 )
+
+// TestRssWithHexoFeed 测试 Hexo 下 hexo-generator-feed 插件生成的 atom.xml 文件
+func TestRssWithHexoFeed(t *testing.T) {
+	service.RegisterRssLogic(rss.New())
+	ctx := new(context.Context)
+	link, hasThis := service.RssLogic().RssWithHexoFeed(*ctx, "https://blog.x-lf.com/atom.xml")
+	if hasThis {
+		t.Log(*link)
+	} else {
+		t.Errorf("Error")
+	}
+}

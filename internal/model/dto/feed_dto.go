@@ -26,17 +26,38 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
+package dto
 
-package logic
+import "encoding/xml"
 
-import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/rss"
-	_ "xiaoMain/internal/logic/user"
-)
+type Author struct {
+	Name string `xml:"name"`
+}
+
+type Category struct {
+	Term   string `xml:"term,attr"`
+	Scheme string `xml:"scheme,attr"`
+}
+
+type Entry struct {
+	Title     string     `xml:"title"`
+	Link      string     `xml:"link"`
+	ID        string     `xml:"id"`
+	Published string     `xml:"published"`
+	Updated   string     `xml:"updated"`
+	Summary   string     `xml:"summary"`
+	Category  []Category `xml:"category"`
+}
+
+type FeedDTO struct {
+	XMLName   xml.Name `xml:"feed"`
+	Title     string   `xml:"title"`
+	Icon      string   `xml:"icon"`
+	Subtitle  string   `xml:"subtitle"`
+	Link      []string `xml:"link"`
+	Updated   string   `xml:"updated"`
+	ID        string   `xml:"id"`
+	Author    Author   `xml:"author"`
+	Generator string   `xml:"generator"`
+	Entry     []Entry  `xml:"entry"`
+}
