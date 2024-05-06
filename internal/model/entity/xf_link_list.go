@@ -49,7 +49,7 @@ type XfLinkList struct {
 	SiteRssUrl      string      `json:"siteRssUrl"      orm:"site_rss_url"     ` // 站点订阅地址
 	HasAdv          bool        `json:"hasAdv"          orm:"has_adv"          ` // 是否有广告
 	DesiredLocation int64       `json:"desiredLocation" orm:"desired_location" ` // 理想位置
-	Location        int         `json:"location"        orm:"location"         ` // 所在位置
+	Location        int64       `json:"location"        orm:"location"         ` // 所在位置
 	DesiredColor    int64       `json:"desiredColor"    orm:"desired_color"    ` // 理想颜色
 	Color           int64       `json:"color"           orm:"color"            ` // 颜色
 	WebmasterRemark string      `json:"webmasterRemark" orm:"webmaster_remark" ` // 站长留言

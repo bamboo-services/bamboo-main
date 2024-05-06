@@ -26,30 +26,21 @@
  * --------------------------------------------------------------------------------
  */
 
-package lutil
+// =================================================================================
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
+// =================================================================================
+
+package do
 
 import (
-	"net/http"
-	"time"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// LinkAccess 访问链接
-// 用于访问用户添加的链接，如果可以访问则返回响应，否则返回错误。
-//
-// 参数：
-// siteURL: 用户尝试添加的链接地址。
-//
-// 返回：
-// getResp: 如果链接可以访问，返回响应；否则返回错误。
-// err: 如果链接可以访问，返回 nil；否则返回错误。
-func LinkAccess(siteURL string) (getResp *http.Response, err error) {
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-	getReq, _ := http.NewRequest("GET", siteURL, nil)
-	getReq.Header.Set(
-		"User-Agent",
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-	)
-	return client.Do(getReq)
+// XfLinkRss is the golang structure of table xf_link_rss for DAO operations like Where/Data.
+type XfLinkRss struct {
+	g.Meta    `orm:"table:xf_link_rss, do:true"`
+	LinkId    interface{} // 链接 id
+	RssJson   interface{} // Rss 内容解析
+	CheckTime *gtime.Time // 检查时间
 }

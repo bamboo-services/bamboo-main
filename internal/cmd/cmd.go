@@ -55,6 +55,7 @@ var (
 			boot.InitCommonData(ctx)
 			// 定时任务
 			task.ClearVerificationCode(ctx)
+			task.RssObtain(ctx)
 			// 服务器启动
 			s := g.Server()
 			s.Group("/", func(group *ghttp.RouterGroup) {

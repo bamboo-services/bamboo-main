@@ -26,30 +26,20 @@
  * --------------------------------------------------------------------------------
  */
 
-package lutil
+-- RSS 订阅解析表
+create table xf_link_rss
+(
+    link_id    bigint                  not null
+        constraint xf_link_rss_pk
+            primary key
+        constraint xf_link_rss_xf_link_list_id_fk
+            references xf_link_list,
+    rss_json   json                    not null,
+    check_time timestamp default now() not null
+);
 
-import (
-	"net/http"
-	"time"
-)
-
-// LinkAccess 访问链接
-// 用于访问用户添加的链接，如果可以访问则返回响应，否则返回错误。
-//
-// 参数：
-// siteURL: 用户尝试添加的链接地址。
-//
-// 返回：
-// getResp: 如果链接可以访问，返回响应；否则返回错误。
-// err: 如果链接可以访问，返回 nil；否则返回错误。
-func LinkAccess(siteURL string) (getResp *http.Response, err error) {
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-	getReq, _ := http.NewRequest("GET", siteURL, nil)
-	getReq.Header.Set(
-		"User-Agent",
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-	)
-	return client.Do(getReq)
-}
+comment on table xf_link_rss is 'Rss 内容解析';
+comment on column xf_link_rss.link_id is '链接 id';
+comment on constraint xf_link_rss_xf_link_list_id_fk on xf_link_rss is '链接表 id 外键约束';
+comment on column xf_link_rss.rss_json is 'Rss 内容解析';
+comment on column xf_link_rss.check_time is '检查时间';

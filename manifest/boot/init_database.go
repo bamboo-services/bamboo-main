@@ -69,6 +69,8 @@ func InitialDatabase(ctx context.Context) {
 	initialSQL(ctx, "xf_color")
 	// 初始化链接表
 	initialSQL(ctx, "xf_link_list")
+	// 初始化 RSS 订阅表
+	initialSQL(ctx, "xf_link_rss")
 
 	/**
 	 * 插入主要数据表 index
