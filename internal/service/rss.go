@@ -50,7 +50,7 @@ type (
 		//
 		// 返回：
 		// err: 如果获取Rss信息成功，返回 nil；否则返回错误。
-		GetAllLinkRssInfo(ctx context.Context) (err error)
+		GetAllLinkRssInfo(ctx context.Context) (getRss *[]*dto.RssLinkDTO, err error)
 		// RssWithHexoFeed 通过Hexo的Rss信息获取Rss信息
 		// 用于获取Hexo的Rss内容（插件：hexo-generator-feed ｜ 插件内容 https://github.com/hexojs/hexo-generator-feed）
 		// 如果成功则返回 RssLinkDTO，否则返回 false

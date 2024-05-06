@@ -26,31 +26,20 @@
  * --------------------------------------------------------------------------------
  */
 
-package v1
+package test
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/os/gtime"
+	"testing"
+	time2 "time"
+)
 
-// GetLinkRssInfoReq 获取RSS信息请求参数
-// 获取RSS信息
-// 用于获取订阅内的订阅内容，用于获取用户订阅的RSS信息
-//
-// 参数：
-// LinkID: 链接ID
-// LinkName: 链接名称(模糊搜索)
-// PageStart: 起始页数
-// PageEnd: 结束页数
-type GetLinkRssInfoReq struct {
-	g.Meta       `path:"/" method:"Get" tags:"Rss" summary:"获取RSS信息" dc:"可以获取订阅内的订阅内容，用于获取用户订阅的RSS信息"`
-	LinkID       *int64  `json:"link_id" v:"regex:^(|[0-9]+)$#请输入链接ID只能为数字" dc:"链接ID"`
-	LinkName     *string `json:"link_name" dc:"链接名称(模糊搜索)"`
-	LinkLocation *int64  `json:"link_location" v:"regex:^(|[0-9]+)$#请输入链接位置只能为数字" dc:"链接位置"`
-	Page         *int64  `json:"page" v:"default:1#请输入页码" dc:"页码"`
-	Limit        *int64  `json:"limit" v:"default:20#请输入单页限制" dc:"单页限制"`
-}
-
-// GetLinkRssInfoRes 获取RSS信息响应参数
-// 用于获取RSS信息响应
-// 用于获取用户订阅的RSS信息响应
-type GetLinkRssInfoRes struct {
-	g.Meta `mime:"application/json"`
+func TestGTimeCheck(t *testing.T) {
+	parse, _ := time2.Parse("Mon, 02 Jan 2006 15:04:05 -0700", "Thu, 17 Aug 2023 11:09:47 +0000")
+	time := gtime.NewFromTime(parse).TimestampMilli()
+	nowTime := gtime.Now().TimestampMilli()
+	timestamp := gtime.NewFromStr("1692270587000")
+	t.Logf("NowTime: %v\n", nowTime)
+	t.Logf("Time: %v\n", time)
+	t.Logf("Timestamp %v", timestamp)
 }

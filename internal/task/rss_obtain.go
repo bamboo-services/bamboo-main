@@ -49,7 +49,7 @@ import (
 //
 //nolint:cyclop
 func RssObtain(ctx context.Context) {
-	gtimer.Add(ctx, time.Minute*30, func(_ context.Context) {
+	gtimer.Add(ctx, time.Minute, func(_ context.Context) {
 		getNowTimestamp := time.Now().UnixMilli()
 		glog.Notice(ctx, "[TASK] 开始操作 RSS 订阅")
 		// 获取所有链接的Rss信息

@@ -36,6 +36,7 @@ import (
 	"xiaoMain/internal/controller/auth"
 	"xiaoMain/internal/controller/info"
 	"xiaoMain/internal/controller/link"
+	"xiaoMain/internal/controller/rss"
 	"xiaoMain/internal/middleware"
 	"xiaoMain/internal/task"
 	"xiaoMain/manifest/boot"
@@ -103,6 +104,13 @@ var (
 						group.Bind(
 							info.NewV1().GetWebInfo,
 							info.NewV1().EditWebInfo,
+						)
+					})
+
+					// Rss订阅消息
+					group.Group("/rss", func(group *ghttp.RouterGroup) {
+						group.Bind(
+							rss.NewV1().GetLinkRssInfo,
 						)
 					})
 

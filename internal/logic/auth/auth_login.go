@@ -79,7 +79,7 @@ func (s *sAuthLogic) IsUserLogin(ctx context.Context) (hasLogin bool, message st
 			Where(do.XfToken{UserUuid: getUserUUID, UserToken: getUserAuthorize}).
 			Limit(1).Scan(&getTokenDO)
 		if err != nil {
-			glog.Error(ctx, "[LOGIC] 用户登录过期 [无法从数据库取得数据]")
+			glog.Warning(ctx, "[LOGIC] 用户登录过期 [无法从数据库取得数据]")
 			return false, "用户登录已失效"
 		}
 		// 检查是否过期

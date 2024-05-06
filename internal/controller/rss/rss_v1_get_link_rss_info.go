@@ -33,6 +33,8 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
 	"xiaoMain/api/rss/v1"
+	"xiaoMain/internal/service"
+	"xiaoMain/utility/result"
 )
 
 // GetLinkRssInfo 获取链接的RSS信息
@@ -52,12 +54,14 @@ func (c *ControllerV1) GetLinkRssInfo(
 	glog.Noticef(ctx, "[CONTROL] 控制层 GetLinkRssInfo 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 检查信息是否存在
-	if req.LinkID != nil {
-		// 进入 LinkID 查询
-	} else if req.LinkName != nil {
-		// 进入 LinkName 查询
-	} else {
-		// 查询全部的内容
+	if req.LinkName == nil && req.LinkID == nil && req.LinkLocation == nil {
+		// 返回所有的RSS信息
+		getAllRssInfo, err := service.RssLogic().GetAllLinkRssInfo(ctx)
+		if err == nil {
+			result.Success("获取所有RSS信息成功", getAllRssInfo).Response(getRequest)
+		} else {
+			result.ServerInternalError.SetErrorMessage(err.Error()).Response(getRequest)
+		}
 	}
 	return nil, nil
 }

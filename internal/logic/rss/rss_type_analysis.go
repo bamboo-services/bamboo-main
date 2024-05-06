@@ -33,8 +33,10 @@ import (
 	"encoding/xml"
 	"errors"
 	"github.com/gogf/gf/v2/os/glog"
+	"github.com/gogf/gf/v2/os/gtime"
 	"io"
 	"regexp"
+	time2 "time"
 	"xiaoMain/internal/lutil"
 	"xiaoMain/internal/model/dto"
 )
@@ -83,7 +85,7 @@ func (s *sRssLogic) RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink
 					Link:     item.ID,
 					Summary:  description,
 					Category: *categories,
-					Timer:    item.Published,
+					Timer:    gtime.NewFromStr(item.Published).TimestampMilliStr(),
 				})
 			}
 			return rssLink, true
@@ -127,12 +129,14 @@ func (s *sRssLogic) RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink
 				if len(description) > 100 {
 					description = description[:100]
 				}
+				// 时间处理
+				parse, _ := time2.Parse("Mon, 02 Jan 2006 15:04:05 -0700", item.PubDate)
 				// 添加数据
 				*rssLink = append(*rssLink, dto.RssLinkDTO{
 					Title:   item.Title,
 					Link:    item.Link,
 					Summary: description,
-					Timer:   item.PubDate,
+					Timer:   gtime.NewFromTime(parse).TimestampMilliStr(),
 				})
 			}
 			return rssLink, true
@@ -176,12 +180,14 @@ func (s *sRssLogic) RssWithWordpressFeed(ctx context.Context, rssURL string) (rs
 				if len(description) > 100 {
 					description = description[:100]
 				}
+				// 时间处理
+				parse, _ := time2.Parse("Mon, 02 Jan 2006 15:04:05 -0700", item.PubDate)
 				// 添加数据
 				*rssLink = append(*rssLink, dto.RssLinkDTO{
 					Title:   item.Title,
 					Link:    item.Link,
 					Summary: description,
-					Timer:   item.PubDate,
+					Timer:   gtime.NewFromTime(parse).TimestampMilliStr(),
 				})
 			}
 			return rssLink, true
@@ -216,6 +222,10 @@ func (s *sRssLogic) rssLinkAccess(ctx context.Context, rssURL string) ([]byte, e
 		return nil, errors.New("获取链接信息失败")
 	}
 	// 获取 Body 并解析 XML
+	if err != nil {
+		glog.Warningf(ctx, "UTF8解析链接信息失败: %v", err)
+		return nil, errors.New("UTF8解析链接信息失败")
+	}
 	getBody, err := io.ReadAll(getResp.Body)
 	if err != nil {
 		glog.Warningf(ctx, "获取链接信息失败: %v", err)
