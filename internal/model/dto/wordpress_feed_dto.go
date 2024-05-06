@@ -30,27 +30,33 @@ package dto
 
 import "encoding/xml"
 
-// HugoItem Hugo 的 Feed 信息
-// 用于获取 Hugo 的 Feed 信息，用于获取具体业务信息
-// 您不应该直接使用此结构体，而应该使用 HugoFeedDTO
-type HugoItem struct {
-	Title       string `xml:"title"`
-	Link        string `xml:"link"`
-	PubDate     string `xml:"pubDate"`
-	GUID        string `xml:"guid"`
-	Description string `xml:"description"`
+// WordPressFeedDTO Hexo的Feed信息
+// 用于获取 WordPress 的 Feed 信息
+// 本结构体用于获取 WordPress 的 Feed 信息
+type WordPressFeedDTO struct {
+	XMLName xml.Name         `xml:"rss"`
+	Channel WordpressChannel `xml:"channel"`
 }
 
-// HugoFeedDTO Hugo 的 Feed 信息
-// 用于获取 Hugo 的 Feed 信息，用于获取具体业务信息
-type HugoFeedDTO struct {
-	XMLName       xml.Name   `xml:"rss"`
-	Title         string     `xml:"channel>title"`
-	Link          string     `xml:"channel>link"`
-	Description   string     `xml:"channel>description"`
-	Generator     string     `xml:"channel>generator"`
-	Language      string     `xml:"channel>language"`
-	Copyright     string     `xml:"channel>copyright"`
-	LastBuildDate string     `xml:"channel>lastBuildDate"`
-	Items         []HugoItem `xml:"channel>item"`
+// WordpressChannel Wordpress的Feed信息
+// 用于获取 WordPress 的 Feed 信息
+// 本结构体用于获取 WordPress 的 Feed 信息
+// 请不要直接使用此结构体，应使用 WordPressFeedDTO
+type WordpressChannel struct {
+	Title       string          `xml:"title"`
+	Link        string          `xml:"link"`
+	Description string          `xml:"description"`
+	Items       []WordpressItem `xml:"item"`
+	Generator   string          `xml:"generator"`
+}
+
+// WordpressItem Wordpress的Feed信息
+// 用于获取 Wordpress 的 Feed 信息
+// 本结构体用于获取 Wordpress 的 Feed 信息
+// 请不要直接使用此结构体，应使用 WordPressFeedDTO
+type WordpressItem struct {
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	Description string `xml:"description"`
+	PubDate     string `xml:"pubDate"`
 }

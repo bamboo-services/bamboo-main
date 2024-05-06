@@ -34,6 +34,7 @@ import (
 	"errors"
 	"github.com/gogf/gf/v2/os/glog"
 	"io"
+	"regexp"
 	"xiaoMain/internal/lutil"
 	"xiaoMain/internal/model/dto"
 )
@@ -122,6 +123,55 @@ func (s *sRssLogic) RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink
 		if getFeed.Generator == "Hugo -- gohugo.io" {
 			rssLink = new([]dto.RssLinkDTO)
 			for _, item := range getFeed.Items {
+				description := item.Description
+				if len(description) > 100 {
+					description = description[:100]
+				}
+				// 添加数据
+				*rssLink = append(*rssLink, dto.RssLinkDTO{
+					Title:   item.Title,
+					Link:    item.Link,
+					Summary: description,
+					Timer:   item.PubDate,
+				})
+			}
+			return rssLink, true
+		}
+	} else {
+		glog.Warning(ctx, "解析 XML 成功，但数据为空")
+	}
+	return nil, false
+}
+
+// RssWithWordpressFeed 通过WordPress的Rss信息获取Rss信息
+// 用于获取WordPress的Rss内容（插件：WordPress ｜ 插件内容 https://wordpress.org/）
+// 如果成功则返回 nil，否则返回错误
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// rssURL: 站点的 rss 订阅地址。
+//
+// 返回：
+// rssLink: 如果获取Rss信息成功，返回 RssLinkDTO；否则返回 nil。
+// hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
+func (s *sRssLogic) RssWithWordpressFeed(ctx context.Context, rssURL string) (rssLink *[]dto.RssLinkDTO, hasThis bool) {
+	glog.Noticef(ctx, "[LOGIC] 尝试获取 WordPress 中 原生 的 feed 内容")
+	getBody, err := s.rssLinkAccess(ctx, rssURL)
+	if err != nil {
+		return nil, false
+	}
+	// 解析 XML
+	getFeed := new(dto.WordPressFeedDTO)
+	err = xml.Unmarshal(getBody, &getFeed)
+	if err != nil {
+		glog.Warningf(ctx, "解析 XML 失败: %v", err.Error())
+		return nil, false
+	}
+	// 处理数据
+	if getFeed != nil {
+		if match, _ := regexp.MatchString(`wordpress\.org`, getFeed.Channel.Generator); match {
+			rssLink = new([]dto.RssLinkDTO)
+			for _, item := range getFeed.Channel.Items {
 				description := item.Description
 				if len(description) > 100 {
 					description = description[:100]

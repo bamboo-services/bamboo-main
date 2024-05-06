@@ -47,10 +47,23 @@ func TestRssWithHexoFeed(t *testing.T) {
 	}
 }
 
+// TestRssWithHugoFeed 测试 Hugo 生成的 index.xml 文件
 func TestRssWithHugoFeed(t *testing.T) {
 	service.RegisterRssLogic(rss.New())
 	ctx := new(context.Context)
 	link, hasThis := service.RssLogic().RssWithHugoFeed(*ctx, "https://blog.chs.pub/index.xml")
+	if hasThis {
+		t.Log(*link)
+	} else {
+		t.Errorf("Error")
+	}
+}
+
+// TestRssWithWordPressFeed 测试 WordPress 生成的 feed.xml 文件
+func TestRssWithWordPressFeed(t *testing.T) {
+	service.RegisterRssLogic(rss.New())
+	ctx := new(context.Context)
+	link, hasThis := service.RssLogic().RssWithWordpressFeed(*ctx, "https://blog.suiyil.cn/feed/")
 	if hasThis {
 		t.Log(*link)
 	} else {
