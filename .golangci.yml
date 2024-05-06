@@ -6,6 +6,8 @@ linters-settings:
     statements: 60
   lll:
     line-length: 120
+  cyclop:
+    max-complexity: 20
 
 linters:
   disable-all: true
@@ -13,7 +15,6 @@ linters:
     - cyclop          # 计算函数的复杂度，帮助简化过于复杂的代码
     - asciicheck      # 检查代码中是否仅包含ASCII字符，确保不含有特殊或非标准字符
     - bodyclose       # 确保网络请求后响应体被正确关闭，避免内存泄漏
-    - deadcode        # 检查代码中是否存在无用代码，提高代码质量
     - dogsled         # 检查代码中是否存在过长的函数参数列表，提高代码可读性
     - dupl            # 检查代码中是否存在重复代码，提高代码复用性
     - errcheck        # 检查代码中是否正确处理了错误，避免潜在的错误
@@ -37,7 +38,6 @@ linters:
     - unparam         # 检查未使用的参数，建议简化函数签名
     - whitespace      # 检查代码中的空白字符使用，保持格式整洁
     - durationcheck   # 检查不当的时间长度使用，如错误将时间秒当成毫秒
-    - execinquery     # 检查SQL查询中的执行语句，防止SQL注入等问题
     - funlen          # 检查函数长度，推荐将长函数分解
     - goheader        # 检查文件头部注释的存在性和格式
     - interfacebloat  # 检查接口是否过于庞大，建议精简

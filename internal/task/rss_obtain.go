@@ -46,10 +46,8 @@ import (
 // 它会在每 10 分钟执行一次。
 // 本接口会根据已有的链接信息对 RSS 信息进行获取，若获取失败返回失败信息，若成功返回成功信息
 // 如果成功则返回 nil，否则返回错误
-//
-//nolint:cyclop
 func RssObtain(ctx context.Context) {
-	gtimer.Add(ctx, time.Minute, func(_ context.Context) {
+	gtimer.Add(ctx, time.Minute*10, func(_ context.Context) {
 		getNowTimestamp := time.Now().UnixMilli()
 		glog.Notice(ctx, "[TASK] 开始操作 RSS 订阅")
 		// 获取所有链接的Rss信息

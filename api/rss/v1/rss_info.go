@@ -44,8 +44,8 @@ type GetLinkRssInfoReq struct {
 	LinkID       *int64  `json:"link_id" v:"regex:^(|[0-9]+)$#请输入链接ID只能为数字" dc:"链接ID"`
 	LinkName     *string `json:"link_name" dc:"链接名称(模糊搜索)"`
 	LinkLocation *int64  `json:"link_location" v:"regex:^(|[0-9]+)$#请输入链接位置只能为数字" dc:"链接位置"`
-	Page         *int64  `json:"page" v:"default:1#请输入页码" dc:"页码"`
-	Limit        *int64  `json:"limit" v:"default:20#请输入单页限制" dc:"单页限制"`
+	Page         *int64  `json:"page" v:"regex:^(|[0-9]+)$#页码只能为数字" dc:"页码"`
+	Limit        *int64  `json:"limit" v:"regex:^(|[0-9]+)$|max-length:3#单页限制只能为数字|单次限制最大 999" dc:"单页限制"`
 }
 
 // GetLinkRssInfoRes 获取RSS信息响应参数

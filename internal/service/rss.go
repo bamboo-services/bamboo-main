@@ -51,6 +51,42 @@ type (
 		// 返回：
 		// err: 如果获取Rss信息成功，返回 nil；否则返回错误。
 		GetAllLinkRssInfo(ctx context.Context) (getRss *[]*dto.RssLinkDTO, err error)
+		// GetLinkRssInfoWithLinkID 获取链接的Rss信息
+		// 用于获取链接的Rss信息，如果成功则返回 nil，否则返回错误
+		// 本接口会根据已有的链接信息对Rss信息进行获取，若获取失败返回失败信息，若成功返回成功信息
+		//
+		// 参数：
+		// ctx: 请求的上下文，用于管理超时和取消信号。
+		// linkID: 链接的ID
+		//
+		// 返回：
+		// getRss: 如果获取Rss信息成功，返回 nil；否则返回错误。
+		// err: 如果获取Rss信息成功，返回 nil；否则返回错误。
+		GetLinkRssInfoWithLinkID(ctx context.Context, linkID int64) (getRss *[]*dto.RssLinkDTO, err error)
+		// GetLinkRssWithLinkName 获取链接的Rss信息
+		// 用于获取链接的Rss信息，如果成功则返回 nil，否则返回错误
+		// 本接口会根据已有的链接信息对Rss信息进行获取，若获取失败返回失败信息，若成功返回成功信息
+		//
+		// 参数：
+		// ctx: 请求的上下文，用于管理超时和取消信号。
+		// linkName: 链接的名称
+		//
+		// 返回：
+		// getRss: 如果获取Rss信息成功，返回 nil；否则返回错误。
+		// err: 如果获取Rss信息成功，返回 nil；否则返回错误。
+		GetLinkRssWithLinkName(ctx context.Context, linkName string) (getRss *[]*dto.RssLinkDTO, err error)
+		// GetLinkRssWithLinkLocation 获取链接的Rss信息
+		// 用于获取链接的Rss信息，如果成功则返回 nil，否则返回错误
+		// 本接口会根据已有的链接信息对Rss信息进行获取，若获取失败返回失败信息，若成功返回成功信息
+		//
+		// 参数：
+		// ctx: 请求的上下文，用于管理超时和取消信号。
+		// linkLocation: 链接的位置
+		//
+		// 返回：
+		// getRss: 如果获取Rss信息成功，返回 nil；否则返回错误。
+		// err: 如果获取Rss信息成功，返回 nil；否则返回错误。
+		GetLinkRssWithLinkLocation(ctx context.Context, linkLocation int64) (getRss *[]*dto.RssLinkDTO, err error)
 		// RssWithHexoFeed 通过Hexo的Rss信息获取Rss信息
 		// 用于获取Hexo的Rss内容（插件：hexo-generator-feed ｜ 插件内容 https://github.com/hexojs/hexo-generator-feed）
 		// 如果成功则返回 RssLinkDTO，否则返回 false

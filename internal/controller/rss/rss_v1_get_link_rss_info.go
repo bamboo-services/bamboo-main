@@ -53,15 +53,50 @@ func (c *ControllerV1) GetLinkRssInfo(
 ) (res *v1.GetLinkRssInfoRes, err error) {
 	glog.Noticef(ctx, "[CONTROL] 控制层 GetLinkRssInfo 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
+	if req.Page == nil || *req.Page <= 0 {
+		req.Page = new(int64)
+		*req.Page = 1
+	}
+	if req.Limit == nil || *req.Limit <= 0 {
+		req.Limit = new(int64)
+		*req.Limit = 10
+	}
 	// 检查信息是否存在
 	if req.LinkName == nil && req.LinkID == nil && req.LinkLocation == nil {
 		// 返回所有的RSS信息
 		getAllRssInfo, err := service.RssLogic().GetAllLinkRssInfo(ctx)
 		if err == nil {
-			result.Success("获取所有RSS信息成功", getAllRssInfo).Response(getRequest)
+			if int64(len(*getAllRssInfo)) > *req.Limit {
+				*getAllRssInfo = (*getAllRssInfo)[(*req.Page-1)*(*req.Limit) : *req.Limit]
+			}
+			result.Success("获取所有RSS信息成功", *getAllRssInfo).Response(getRequest)
 		} else {
 			result.ServerInternalError.SetErrorMessage(err.Error()).Response(getRequest)
 		}
+		return nil, nil
+	}
+	// 条件查询
+	switch {
+	case req.LinkID != nil && req.LinkName == nil && req.LinkLocation == nil:
+		getRssInfo, err := service.RssLogic().GetLinkRssInfoWithLinkID(ctx, *req.LinkID)
+		if err != nil {
+			result.FailedToObtain.SetErrorMessage(err.Error()).Response(getRequest)
+		}
+		result.Success("获取 LinkID 的 RSS 信息成功", getRssInfo).Response(getRequest)
+	case req.LinkID == nil && req.LinkName != nil && req.LinkLocation == nil:
+		getRssInfo, err := service.RssLogic().GetLinkRssWithLinkName(ctx, *req.LinkName)
+		if err != nil {
+			result.FailedToObtain.SetErrorMessage(err.Error()).Response(getRequest)
+		}
+		result.Success("获取 LinkName 的 RSS 信息成功", getRssInfo).Response(getRequest)
+	case req.LinkID == nil && req.LinkName == nil && req.LinkLocation != nil:
+		getRssInfo, err := service.RssLogic().GetLinkRssWithLinkLocation(ctx, *req.LinkLocation)
+		if err != nil {
+			result.FailedToObtain.SetErrorMessage(err.Error()).Response(getRequest)
+		}
+		result.Success("获取 LinkLocation 的 RSS 信息成功", getRssInfo).Response(getRequest)
+	default:
+		result.QueryValidationError.SetErrorMessage("参数不唯一").Response(getRequest)
 	}
 	return nil, nil
 }
