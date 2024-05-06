@@ -30,34 +30,27 @@ package dto
 
 import "encoding/xml"
 
-type Author struct {
-	Name string `xml:"name"`
+// Item Hugo 的 Feed 信息
+// 用于获取 Hugo 的 Feed 信息，用于获取具体业务信息
+// 您不应该直接使用此结构体，而应该使用 HugoFeedDTO
+type Item struct {
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	PubDate     string `xml:"pubDate"`
+	GUID        string `xml:"guid"`
+	Description string `xml:"description"`
 }
 
-type Category struct {
-	Term   string `xml:"term,attr"`
-	Scheme string `xml:"scheme,attr"`
-}
-
-type Entry struct {
-	Title     string     `xml:"title"`
-	Link      string     `xml:"link"`
-	ID        string     `xml:"id"`
-	Published string     `xml:"published"`
-	Updated   string     `xml:"updated"`
-	Summary   string     `xml:"summary"`
-	Category  []Category `xml:"category"`
-}
-
-type FeedDTO struct {
-	XMLName   xml.Name `xml:"feed"`
-	Title     string   `xml:"title"`
-	Icon      string   `xml:"icon"`
-	Subtitle  string   `xml:"subtitle"`
-	Link      []string `xml:"link"`
-	Updated   string   `xml:"updated"`
-	ID        string   `xml:"id"`
-	Author    Author   `xml:"author"`
-	Generator string   `xml:"generator"`
-	Entry     []Entry  `xml:"entry"`
+// HugoFeedDTO Hugo 的 Feed 信息
+// 用于获取 Hugo 的 Feed 信息，用于获取具体业务信息
+type HugoFeedDTO struct {
+	XMLName       xml.Name `xml:"rss"`
+	Title         string   `xml:"channel>title"`
+	Link          string   `xml:"channel>link"`
+	Description   string   `xml:"channel>description"`
+	Generator     string   `xml:"channel>generator"`
+	Language      string   `xml:"channel>language"`
+	Copyright     string   `xml:"channel>copyright"`
+	LastBuildDate string   `xml:"channel>lastBuildDate"`
+	Items         []Item   `xml:"channel>item"`
 }

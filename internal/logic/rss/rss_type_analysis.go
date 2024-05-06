@@ -31,6 +31,7 @@ package rss
 import (
 	"context"
 	"encoding/xml"
+	"errors"
 	"github.com/gogf/gf/v2/os/glog"
 	"io"
 	"xiaoMain/internal/lutil"
@@ -50,6 +51,109 @@ import (
 // hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
 func (s *sRssLogic) RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink *[]dto.RssLinkDTO, hasThis bool) {
 	glog.Noticef(ctx, "[LOGIC] 尝试获取 Hexo 中 hexo-generator-feed 插件的 feed 内容")
+	getBody, err := s.rssLinkAccess(ctx, rssURL)
+	if err != nil {
+		return nil, false
+	}
+	// 解析 XML
+	getFeed := new(dto.HexoFeedDTO)
+	err = xml.Unmarshal(getBody, &getFeed)
+	if err != nil {
+		glog.Warningf(ctx, "解析 XML 失败: %v", err.Error())
+		return nil, false
+	}
+	// 处理数据
+	if getFeed != nil {
+		if getFeed.Generator == "Hexo" {
+			rssLink = new([]dto.RssLinkDTO)
+			for _, item := range getFeed.Entry {
+				// 处理 Category
+				categories := new([]string)
+				for _, category := range item.Category {
+					*categories = append(*categories, category.Term)
+				}
+				description := item.Summary
+				if len(description) > 100 {
+					description = description[:100]
+				}
+				// 添加数据
+				*rssLink = append(*rssLink, dto.RssLinkDTO{
+					Title:    item.Title,
+					Link:     item.ID,
+					Summary:  description,
+					Category: *categories,
+					Timer:    item.Published,
+				})
+			}
+			return rssLink, true
+		}
+	} else {
+		glog.Warning(ctx, "解析 XML 成功，但数据为空")
+	}
+	return nil, false
+}
+
+// RssWithHugoFeed 通过Hugo的Rss信息获取Rss信息
+// 用于获取Hugo的Rss内容（插件：Hugo ｜ 插件内容 https://gohugo.io/）
+// 如果成功则返回 nil，否则返回错误
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// rssURL: 站点的 rss 订阅地址。
+//
+// 返回：
+// rssLink: 如果获取Rss信息成功，返回 RssLinkDTO；否则返回 nil。
+// hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
+func (s *sRssLogic) RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink *[]dto.RssLinkDTO, hasThis bool) {
+	glog.Noticef(ctx, "[LOGIC] 尝试获取 Hugo 中 原生 的 feed 内容")
+	getBody, err := s.rssLinkAccess(ctx, rssURL)
+	if err != nil {
+		return nil, false
+	}
+	// 解析 XML
+	getFeed := new(dto.HugoFeedDTO)
+	err = xml.Unmarshal(getBody, &getFeed)
+	if err != nil {
+		glog.Warningf(ctx, "解析 XML 失败: %v", err.Error())
+		return nil, false
+	}
+	// 处理数据
+	if getFeed != nil {
+		if getFeed.Generator == "Hugo -- gohugo.io" {
+			rssLink = new([]dto.RssLinkDTO)
+			for _, item := range getFeed.Items {
+				description := item.Description
+				if len(description) > 100 {
+					description = description[:100]
+				}
+				// 添加数据
+				*rssLink = append(*rssLink, dto.RssLinkDTO{
+					Title:   item.Title,
+					Link:    item.Link,
+					Summary: description,
+					Timer:   item.PubDate,
+				})
+			}
+			return rssLink, true
+		}
+	} else {
+		glog.Warning(ctx, "解析 XML 成功，但数据为空")
+	}
+	return nil, false
+}
+
+// rssLinkAccess 获取 RSS 链接信息
+// 用于获取 RSS 链接信息
+// 如果成功则返回 RSS 链接信息，否则返回错误
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// rssURL: 站点的 rss 订阅地址。
+//
+// 返回：
+// getBody: 如果获取 RSS 链接信息成功，返回 RSS 链接信息；否则返回错误。
+// err: 如果获取 RSS 链接信息成功，返回 nil；否则返回错误。
+func (s *sRssLogic) rssLinkAccess(ctx context.Context, rssURL string) ([]byte, error) {
 	getResp, err := lutil.LinkAccess(rssURL)
 	defer func() {
 		if getResp != nil {
@@ -59,44 +163,13 @@ func (s *sRssLogic) RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink
 	// 处理错误检查信息
 	if err != nil {
 		glog.Warningf(ctx, "获取链接信息失败: %v", err)
+		return nil, errors.New("获取链接信息失败")
 	}
 	// 获取 Body 并解析 XML
 	getBody, err := io.ReadAll(getResp.Body)
 	if err != nil {
 		glog.Warningf(ctx, "获取链接信息失败: %v", err)
+		return nil, errors.New("获取链接信息失败")
 	}
-	// 解析 XML
-	getFeed := new(dto.FeedDTO)
-	err = xml.Unmarshal(getBody, &getFeed)
-	if err != nil {
-		glog.Warningf(ctx, "解析 XML 失败: %v", err.Error())
-		return nil, false
-	}
-	// 处理数据
-	if getFeed.Generator == "Hexo" {
-		if getFeed != nil {
-			rssLink = new([]dto.RssLinkDTO)
-			for _, item := range getFeed.Entry {
-				// 处理 Category
-				categories := new([]string)
-				for _, category := range item.Category {
-					*categories = append(*categories, category.Term)
-				}
-				// 添加数据
-				*rssLink = append(*rssLink, dto.RssLinkDTO{
-					Title:    item.Title,
-					Link:     item.ID,
-					Summary:  item.Summary,
-					Category: *categories,
-					Timer:    item.Published,
-				})
-			}
-			return rssLink, true
-		} else {
-			glog.Warning(ctx, "解析 XML 成功，但数据为空")
-			return nil, false
-		}
-	} else {
-		return nil, false
-	}
+	return getBody, nil
 }
