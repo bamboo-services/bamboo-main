@@ -173,7 +173,7 @@ func (s *sRssLogic) RssWithWordpressFeed(ctx context.Context, rssURL string) (rs
 	}
 	// 处理数据
 	if getFeed != nil {
-		if match, _ := regexp.MatchString(`wordpress\.org`, getFeed.Channel.Generator); match {
+		if match, _ := regexp.MatchString(`^https?://\S*wordpress\.org\S*$`, getFeed.Channel.Generator); match {
 			rssLink = new([]dto.RssLinkDTO)
 			for _, item := range getFeed.Channel.Items {
 				description := item.Description

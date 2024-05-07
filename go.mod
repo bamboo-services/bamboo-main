@@ -1,6 +1,6 @@
 module xiaoMain
 
-go 1.21
+go 1.22
 
 require (
 	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.7.0
