@@ -39,6 +39,15 @@ import (
 	"xiaoMain/api/auth/v1"
 )
 
+// ResetPasswordSendMail 重置密码发送邮件
+// 发送重置密码邮件，需要传递邮箱地址，系统会向该邮箱发送验证码
+//
+// 参数:
+// ctx: 请求上下文
+// req: 请求参数
+//
+// 返回:
+// res: 返回参数
 func (c *ControllerV1) ResetPasswordSendMail(
 	ctx context.Context,
 	req *v1.ResetPasswordSendMailReq,
