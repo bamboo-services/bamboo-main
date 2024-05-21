@@ -3,7 +3,7 @@ module xiaoMain
 go 1.22
 
 require (
-	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.7.0
+	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.7.1
 	github.com/gogf/gf/v2 v2.7.1
 	github.com/satori/go.uuid v1.2.0
 	golang.org/x/crypto v0.23.0
