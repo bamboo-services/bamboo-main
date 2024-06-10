@@ -26,15 +26,49 @@
  * --------------------------------------------------------------------------------
  */
 
-package vo
+package dmiddle
 
-// LinkConnectRes 链接连接
-// 链接连接, 用于返回链接连接信息。
-//
-// 参数:
-// Message: 链接连接信息
-// Delay: 链接连接延迟
-type LinkConnectRes struct {
-	Message string `json:"message"`
-	Delay   *int64 `json:"delay,omitempty"`
+import "encoding/xml"
+
+// Author Hexo 的 Feed 信息
+// 用于获取 Hexo 的 Feed 信息，用于获取具体业务信息
+// 您不应该直接使用此结构体，而应该使用 HexoFeedDTO
+type Author struct {
+	Name string `xml:"name"`
+}
+
+// Category Hexo 的 Feed 信息
+// 用于获取 Hexo 的 Feed 信息，用于获取具体业务信息
+// 您不应该直接使用此结构体，而应该使用 HexoFeedDTO
+type Category struct {
+	Term   string `xml:"term,attr"`
+	Scheme string `xml:"scheme,attr"`
+}
+
+// Entry Hexo 的 Feed 信息
+// 用于获取 Hexo 的 Feed 信息，用于获取具体业务信息
+// 您不应该直接使用此结构体，而应该使用 HexoFeedDTO
+type Entry struct {
+	Title     string     `xml:"title"`
+	Link      string     `xml:"link"`
+	ID        string     `xml:"id"`
+	Published string     `xml:"published"`
+	Updated   string     `xml:"updated"`
+	Summary   string     `xml:"summary"`
+	Category  []Category `xml:"category"`
+}
+
+// HexoFeedDTO Hexo 的 Feed 信息
+// 用于获取 Hexo 的 Feed 信息
+type HexoFeedDTO struct {
+	XMLName   xml.Name `xml:"feed"`
+	Title     string   `xml:"title"`
+	Icon      string   `xml:"icon"`
+	Subtitle  string   `xml:"subtitle"`
+	Link      []string `xml:"link"`
+	Updated   string   `xml:"updated"`
+	ID        string   `xml:"id"`
+	Author    Author   `xml:"author"`
+	Generator string   `xml:"generator"`
+	Entry     []Entry  `xml:"entry"`
 }

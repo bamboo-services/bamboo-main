@@ -37,7 +37,7 @@ import (
 	"time"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
-	"xiaoMain/internal/model/dto"
+	"xiaoMain/internal/model/dto/dmiddle"
 	"xiaoMain/internal/model/entity"
 	"xiaoMain/internal/service"
 )
@@ -99,7 +99,7 @@ func RssObtain(ctx context.Context) {
 // saveData 保存数据
 // 处理输入的数据并保存到数据库
 // 主要处理从 RSS 获取的数据并保存到数据库
-func saveData(ctx context.Context, link *[]dto.RssLinkDTO, rssLink *entity.LinkList) bool {
+func saveData(ctx context.Context, link *[]dmiddle.RssLinkDTO, rssLink *entity.LinkList) bool {
 	// 更新数据表
 	marshal, err := json.Marshal(link)
 	if err != nil {

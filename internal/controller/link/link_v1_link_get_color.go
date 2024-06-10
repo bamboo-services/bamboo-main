@@ -33,7 +33,7 @@ import (
 	"github.com/bamboo-services/bamboo-utils/bcode"
 	"github.com/bamboo-services/bamboo-utils/berror"
 	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/internal/model/vo"
+	"xiaoMain/internal/model/dto/flow"
 	"xiaoMain/internal/service"
 
 	"xiaoMain/api/link/v1"
@@ -64,9 +64,9 @@ func (c *ControllerV1) LinkGetColor(ctx context.Context, _ *v1.LinkGetColorReq) 
 	} else {
 		// TODO: 需要优化结构返回 Success 的内容
 		g.Log().Debugf(ctx, "[CONTROL] 获取期望颜色信息成功, 数量[%d]", len(getColor))
-		getColorList := make([]*vo.LinkColorVO, len(getColor))
+		getColorList := make([]*flow.LinkColorDTO, len(getColor))
 		for i, color := range getColor {
-			getColorList[i] = &vo.LinkColorVO{
+			getColorList[i] = &flow.LinkColorDTO{
 				ID:          color.Id,
 				DisplayName: color.DisplayName,
 				Color:       color.Color,

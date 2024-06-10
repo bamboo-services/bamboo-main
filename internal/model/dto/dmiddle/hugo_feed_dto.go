@@ -24,26 +24,33 @@
  * 使用本软件的风险由用户自担。作者或版权持有人在法律允许的最大范围内，
  * 对因使用本软件内容而导致的任何直接或间接的损失不承担任何责任。
  * --------------------------------------------------------------------------------
- *
  */
 
-package vo
+package dmiddle
 
-import "github.com/gogf/gf/v2/os/gtime"
+import "encoding/xml"
 
-type UserLogin struct {
-	User UserLoginUser `json:"user"`
-	Auth UserLoginAuth `json:"auth"`
+// HugoItem Hugo 的 Feed 信息
+// 用于获取 Hugo 的 Feed 信息，用于获取具体业务信息
+// 您不应该直接使用此结构体，而应该使用 HugoFeedDTO
+type HugoItem struct {
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	PubDate     string `xml:"pubDate"`
+	GUID        string `xml:"guid"`
+	Description string `xml:"description"`
 }
 
-type UserLoginUser struct {
-	UUID     string `json:"uuid"`
-	Username string `json:"username"`
-}
-
-type UserLoginAuth struct {
-	Token        string      `json:"token"`
-	Verification string      `json:"verification"`
-	CreatedAt    *gtime.Time `json:"created_at"`
-	ExpiredAt    *gtime.Time `json:"expired_at"`
+// HugoFeedDTO Hugo 的 Feed 信息
+// 用于获取 Hugo 的 Feed 信息，用于获取具体业务信息
+type HugoFeedDTO struct {
+	XMLName       xml.Name   `xml:"rss"`
+	Title         string     `xml:"channel>title"`
+	Link          string     `xml:"channel>link"`
+	Description   string     `xml:"channel>description"`
+	Generator     string     `xml:"channel>generator"`
+	Language      string     `xml:"channel>language"`
+	Copyright     string     `xml:"channel>copyright"`
+	LastBuildDate string     `xml:"channel>lastBuildDate"`
+	Items         []HugoItem `xml:"channel>item"`
 }

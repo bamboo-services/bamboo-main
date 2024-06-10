@@ -29,11 +29,11 @@
 package constants
 
 import (
-	"xiaoMain/internal/model/vo"
+	"xiaoMain/internal/model/dto/dmiddle"
 )
 
 var (
-	MailTemplate = [...]vo.MailTemplate{
+	MailTemplate = [...]dmiddle.MailTemplate{
 		// ChangePassword 是一个用于发送更改密码邮场景
 		{Name: "ChangePassword", Data: "user_change_password"},
 		// ResetPassword 是一个用于发送重置密码邮件场景

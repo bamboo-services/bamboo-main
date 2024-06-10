@@ -46,7 +46,7 @@ import "github.com/gogf/gf/v2/frame/g"
 // HasAdv: 是否有广告
 // Remark: 备注
 type LinkAddReq struct {
-	g.Meta          `path:"/" method:"post" tags:"Link" summary:"添加新的链接" `
+	g.Meta          `path:"/" method:"post" tags:"链接控制器" summary:"添加新的链接" `
 	WebmasterEmail  string `json:"webmaster_email" v:"required|email#请输入站长邮箱|站长邮箱格式不正确" dc:"站长邮箱"`
 	ServiceProvider string `json:"service_provider" v:"required#请输入服务商" dc:"服务商"`
 	SiteName        string `json:"site_name" v:"required#请输入站点名称" dc:"站点名称"`

@@ -30,28 +30,28 @@ package v1
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/model/dto/flow"
 	"xiaoMain/internal/model/entity"
-	"xiaoMain/internal/model/vo"
 )
 
 // LinkGetLocationReq 获取位置信息
 // 用于获取位置信息
 type LinkGetLocationReq struct {
-	g.Meta `path:"/location" method:"Get" tags:"Link" summary:"获取位置(板块)信息"`
+	g.Meta `path:"/location" method:"Get" tags:"链接控制器" summary:"获取位置(板块)信息"`
 }
 
 // LinkGetLocationRes 获取位置信息响应
 // 用于获取位置信息响应
 type LinkGetLocationRes struct {
 	g.Meta    `mime:"application/json"`
-	Locations []*vo.LinkLocationVO `json:"locations" sm:"位置列表"`
-	Total     int                  `json:"total" sm:"位置总数"`
+	Locations []*flow.LinkLocationDTO `json:"locations" sm:"位置列表"`
+	Total     int                     `json:"total" sm:"位置总数"`
 }
 
 // LinkGetLocationFullReq 获取完整位置信息
 // 用于获取完整位置信息
 type LinkGetLocationFullReq struct {
-	g.Meta `path:"/location/full" method:"Get" tags:"Link" summary:"获取完整位置(板块)信息"`
+	g.Meta `path:"/location/full" method:"Get" tags:"链接控制器" summary:"获取完整位置(板块)信息"`
 }
 
 // LinkGetLocationFullRes 获取完整位置信息响应

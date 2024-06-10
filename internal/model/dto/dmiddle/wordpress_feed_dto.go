@@ -26,15 +26,37 @@
  * --------------------------------------------------------------------------------
  */
 
-package vo
+package dmiddle
 
-// LinkLocationVO 链接位置值对象
-// 用于返回链接位置信息
-//
-// 参数:
-// ID: 位置ID
-// DisplayName: 位置显示名称
-type LinkLocationVO struct {
-	ID          int64  `json:"id"`           // 期望位置ID
-	DisplayName string `json:"display_name"` // 显示名称
+import "encoding/xml"
+
+// WordPressFeedDTO Hexo的Feed信息
+// 用于获取 WordPress 的 Feed 信息
+// 本结构体用于获取 WordPress 的 Feed 信息
+type WordPressFeedDTO struct {
+	XMLName xml.Name         `xml:"rss"`
+	Channel WordpressChannel `xml:"channel"`
+}
+
+// WordpressChannel Wordpress的Feed信息
+// 用于获取 WordPress 的 Feed 信息
+// 本结构体用于获取 WordPress 的 Feed 信息
+// 请不要直接使用此结构体，应使用 WordPressFeedDTO
+type WordpressChannel struct {
+	Title       string          `xml:"title"`
+	Link        string          `xml:"link"`
+	Description string          `xml:"description"`
+	Items       []WordpressItem `xml:"item"`
+	Generator   string          `xml:"generator"`
+}
+
+// WordpressItem Wordpress的Feed信息
+// 用于获取 Wordpress 的 Feed 信息
+// 本结构体用于获取 Wordpress 的 Feed 信息
+// 请不要直接使用此结构体，应使用 WordPressFeedDTO
+type WordpressItem struct {
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	Description string `xml:"description"`
+	PubDate     string `xml:"pubDate"`
 }

@@ -33,7 +33,7 @@ import "github.com/gogf/gf/v2/frame/g"
 // LinkLocationAddReq 添加位置(板块)请求参数
 // 添加位置(板块)
 type LinkLocationAddReq struct {
-	g.Meta      `path:"/add/location" method:"post" tags:"Link" summary:"添加位置(板块)"`
+	g.Meta      `path:"/add/location" method:"post" tags:"链接控制器" summary:"添加位置(板块)"`
 	Name        string `json:"name" v:"required|length:1,40#请输入位置名称|位置名称长度为 1 到 40 位"`
 	DisplayName string `json:"display_name" v:"required|length:3,40#请输入位置显示名称|位置显示名称长度为 3 到 40 位"`
 	Description string `json:"description"`

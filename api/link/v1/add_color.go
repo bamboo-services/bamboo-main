@@ -33,7 +33,7 @@ import "github.com/gogf/gf/v2/frame/g"
 // LinkColorAddReq 添加颜色请求参数
 // 添加颜色
 type LinkColorAddReq struct {
-	g.Meta      `path:"/add/color" method:"post" tags:"Link" summary:"添加颜色"`
+	g.Meta      `path:"/add/color" method:"post" tags:"链接控制器" summary:"添加颜色"`
 	Name        string `json:"name" v:"required|regex:^[a-z]+$#请输入颜色名称|颜色名称只能为小写英文" dc:"颜色名称"`
 	DisplayName string `json:"display_name" v:"required#请输入颜色显示名称" dc:"颜色显示名称"`
 	Color       string `json:"color" v:"required|regex:^[0-9a-fA-F]{6}$#请输入颜色值|颜色值格式不正确" dc:"颜色值"`

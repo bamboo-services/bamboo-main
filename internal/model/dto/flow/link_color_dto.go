@@ -26,29 +26,17 @@
  * --------------------------------------------------------------------------------
  */
 
-package vo
+package flow
 
-import "github.com/gogf/gf/v2/os/gtime"
-
-// MailSendData 是一个结构体，用于表示发送邮件时需要的数据。
+// LinkColorDTO 链接颜色值对象
+// 用于返回链接颜色信息
 //
-// 它包含以下字段：
-// - XiaoMain: *string 类型，表示邮件标题的一部分。
-// - Code: *string 类型，表示邮件中可能需要的验证码或其他代码。
-// - Copyright: *string 类型，表示邮件中的版权声明。
-// - Email: *string 类型，表示接收邮件的邮箱地址。
-// - DateTime: *gtime.Time 类型，表示邮件发送的日期和时间。
-//
-// 所有字段都是指针类型，这意味着它们可以是 nil。在使用这个结构体时，你应该检查并处理可能的 nil 值。
-type MailSendData struct {
-	XiaoMain  string `description:"为 Title 的部分"`
-	Code      string
-	Copyright string
-	Email     string
-	DateTime  *gtime.Time
-}
-
-type MailTemplate struct {
-	Name string
-	Data string
+// 参数:
+// ID: 颜色ID
+// DisplayName: 颜色显示名称
+// Color: 颜色值(HEX)
+type LinkColorDTO struct {
+	ID          int64  `json:"id"`
+	DisplayName string `json:"display_name"`
+	Color       string `json:"color"`
 }

@@ -30,7 +30,7 @@ package v1
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/internal/model/vo"
+	"xiaoMain/internal/model/dto/flow"
 )
 
 // CheckLogoURLHasConnectReq 是 CheckLogoURLHasConnect 方法的请求结构。
@@ -39,7 +39,7 @@ import (
 // 参数:
 // LogoURL: 用户输入的 Logo 链接。
 type CheckLogoURLHasConnectReq struct {
-	g.Meta  `path:"/check/connect/logo" method:"Get" tags:"Link" summary:"检查Logo链接是否可连接"`
+	g.Meta  `path:"/check/connect/logo" method:"Get" tags:"链接控制器" summary:"检查Logo链接是否可连接"`
 	LogoURL string `json:"logo_url" v:"required|url#请输入Logo链接|Logo链接格式不正确" dc:"Logo链接"`
 }
 
@@ -47,5 +47,5 @@ type CheckLogoURLHasConnectReq struct {
 // 用于返回检查 Logo 链接是否可连接的结果。
 type CheckLogoURLHasConnectRes struct {
 	g.Meta `mime:"application/json"`
-	vo.LinkConnectRes
+	flow.LinkConnectDTO
 }

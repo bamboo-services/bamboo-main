@@ -26,12 +26,15 @@
  * --------------------------------------------------------------------------------
  */
 
-package dto
+package flow
 
-type RssLinkDTO struct {
-	Title    string   `json:"title"`
-	Link     string   `json:"link"`
-	Summary  string   `json:"summary"`
-	Category []string `json:"category"`
-	Timer    string   `json:"timer"`
+// LinkLocationDTO 链接位置值对象
+// 用于返回链接位置信息
+//
+// 参数:
+// ID: 位置ID
+// DisplayName: 位置显示名称
+type LinkLocationDTO struct {
+	ID          int64  `json:"id"`           // 期望位置ID
+	DisplayName string `json:"display_name"` // 显示名称
 }

@@ -26,17 +26,15 @@
  * --------------------------------------------------------------------------------
  */
 
-package vo
+package flow
 
-// LinkColorVO 链接颜色值对象
-// 用于返回链接颜色信息
+// LinkConnectDTO 链接连接
+// 链接连接, 用于返回链接连接信息。
 //
 // 参数:
-// ID: 颜色ID
-// DisplayName: 颜色显示名称
-// Color: 颜色值(HEX)
-type LinkColorVO struct {
-	ID          int64  `json:"id"`
-	DisplayName string `json:"display_name"`
-	Color       string `json:"color"`
+// Message: 链接连接信息
+// Delay: 链接连接延迟
+type LinkConnectDTO struct {
+	Message string `json:"message"`
+	Delay   *int64 `json:"delay,omitempty"`
 }

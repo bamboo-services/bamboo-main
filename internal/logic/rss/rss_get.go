@@ -38,7 +38,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
-	"xiaoMain/internal/model/dto"
+	"xiaoMain/internal/model/dto/dmiddle"
 	"xiaoMain/internal/model/entity"
 )
 
@@ -54,7 +54,7 @@ import (
 // # 返回:
 //   - getRss: 如果获取Rss信息成功，返回 nil；否则返回错误。
 //   - err: 如果获取Rss信息成功，返回 nil；否则返回错误。
-func (s *sRss) GetAllLinkRssInfo(ctx context.Context) (getRss *[]*dto.RssLinkDTO, err error) {
+func (s *sRss) GetAllLinkRssInfo(ctx context.Context) (getRss *[]*dmiddle.RssLinkDTO, err error) {
 	g.Log().Notice(ctx, "[LOGIC] Rss:GetAllLinkRssInfo | 获取所有链接的Rss信息")
 	var getRssInfo []*entity.LinkRss
 	err = dao.LinkRss.Ctx(ctx).Scan(&getRssInfo)
@@ -63,12 +63,12 @@ func (s *sRss) GetAllLinkRssInfo(ctx context.Context) (getRss *[]*dto.RssLinkDTO
 		return nil, berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	// 对数据进行并且进行插入
-	getRss = new([]*dto.RssLinkDTO)
+	getRss = new([]*dmiddle.RssLinkDTO)
 	// 从数据库遍历数据
 	if len(getRssInfo) > 0 {
 		for _, sqlLinkRss := range getRssInfo {
 			// 获取单个遍历数据的信息
-			var getSQLSingleRssInfo *[]*dto.RssLinkDTO
+			var getSQLSingleRssInfo *[]*dmiddle.RssLinkDTO
 			err := json.Unmarshal([]byte(sqlLinkRss.RssJson), &getSQLSingleRssInfo)
 			if err != nil {
 				g.Log().Warningf(ctx, "[LOGIC] 解析 RssJson 失败: %v", err.Error())
@@ -116,7 +116,7 @@ func (s *sRss) GetAllLinkRssInfo(ctx context.Context) (getRss *[]*dto.RssLinkDTO
 func (s *sRss) GetLinkRssInfoWithLinkID(
 	ctx context.Context,
 	linkID int64,
-) (getRss *[]*dto.RssLinkDTO, err error) {
+) (getRss *[]*dmiddle.RssLinkDTO, err error) {
 	g.Log().Notice(ctx, "[LOGIC] Rss:GetLinkRssInfoWithLinkID | 获取链接的Rss信息")
 	var getLinkInfo *entity.LinkList
 	err = dao.LinkList.Ctx(ctx).Where(do.LinkList{Id: linkID, Status: 1}).
@@ -145,7 +145,7 @@ func (s *sRss) GetLinkRssInfoWithLinkID(
 func (s *sRss) GetLinkRssWithLinkName(
 	ctx context.Context,
 	linkName string,
-) (getRss *[]*dto.RssLinkDTO, err error) {
+) (getRss *[]*dmiddle.RssLinkDTO, err error) {
 	g.Log().Notice(ctx, "[LOGIC] Rss:GetLinkRssWithLinkName | 获取链接的Rss信息")
 	var getLinkInfo *entity.LinkList
 	err = dao.LinkList.Ctx(ctx).Where(do.LinkList{SiteName: linkName, Status: 1}).
@@ -174,7 +174,7 @@ func (s *sRss) GetLinkRssWithLinkName(
 func (s *sRss) GetLinkRssWithLinkLocation(
 	ctx context.Context,
 	linkLocation int64,
-) (getRss *[]*dto.RssLinkDTO, err error) {
+) (getRss *[]*dmiddle.RssLinkDTO, err error) {
 	g.Log().Notice(ctx, "[LOGIC] Rss:GetLinkRssWithLinkName | 获取链接的Rss信息")
 	var getLinkInfo []*entity.LinkList
 	err = dao.LinkList.Ctx(ctx).Where(do.LinkList{Location: linkLocation, Status: 1}).
@@ -183,7 +183,7 @@ func (s *sRss) GetLinkRssWithLinkLocation(
 		g.Log().Errorf(ctx, "[LOGIC] 获取链接信息失败: %v", err.Error())
 		return nil, berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
-	getRss = new([]*dto.RssLinkDTO)
+	getRss = new([]*dmiddle.RssLinkDTO)
 	if len(getLinkInfo) > 0 {
 		for _, linkRss := range getLinkInfo {
 			var getLinkRssInfo *entity.LinkRss
@@ -192,7 +192,7 @@ func (s *sRss) GetLinkRssWithLinkLocation(
 				continue
 			}
 			// 获取单个遍历数据的信息
-			var getSQLSingleRssInfo *[]*dto.RssLinkDTO
+			var getSQLSingleRssInfo *[]*dmiddle.RssLinkDTO
 			err = json.Unmarshal([]byte(getLinkRssInfo.RssJson), &getSQLSingleRssInfo)
 			if err != nil {
 				g.Log().Warningf(ctx, "[LOGIC] 解析 RssJson 失败: %v", err.Error())
@@ -239,7 +239,7 @@ func (s *sRss) GetLinkRssWithLinkLocation(
 func (s *sRss) rssLinkToDTO(
 	ctx context.Context,
 	getLinkInfo entity.LinkList,
-) (getRss *[]*dto.RssLinkDTO, err error) {
+) (getRss *[]*dmiddle.RssLinkDTO, err error) {
 	g.Log().Notice(ctx, "[LOGIC] Rss:rssLinkToDTO | Rss 链接转 DTO")
 	var getRssInfo *entity.LinkRss
 	err = dao.LinkRss.Ctx(ctx).Where(do.LinkRss{LinkId: getLinkInfo.Id}).Scan(&getRssInfo)
@@ -247,7 +247,7 @@ func (s *sRss) rssLinkToDTO(
 		g.Log().Errorf(ctx, "[LOGIC] 获取 Rss 信息失败: %v", err.Error())
 		return nil, errors.New("数据库获取失败<Rss信息提取失败>")
 	}
-	var getSQLRssInfo *[]*dto.RssLinkDTO
+	var getSQLRssInfo *[]*dmiddle.RssLinkDTO
 	err = json.Unmarshal([]byte(getRssInfo.RssJson), &getSQLRssInfo)
 	if err != nil {
 		g.Log().Warningf(ctx, "[LOGIC] 解析 RssJson 失败: %v", err.Error())

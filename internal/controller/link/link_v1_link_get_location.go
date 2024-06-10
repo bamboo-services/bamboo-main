@@ -33,7 +33,7 @@ import (
 	"github.com/bamboo-services/bamboo-utils/bcode"
 	"github.com/bamboo-services/bamboo-utils/berror"
 	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/internal/model/vo"
+	"xiaoMain/internal/model/dto/flow"
 	"xiaoMain/internal/service"
 
 	"xiaoMain/api/link/v1"
@@ -66,9 +66,9 @@ func (c *ControllerV1) LinkGetLocation(
 		return nil, berror.NewError(bcode.NotExist, "没有找到期望位置信息")
 	} else {
 		g.Log().Debugf(ctx, "[CONTROL] 获取期望位置信息成功, 数量[%d]", len(getLocation))
-		getLocationList := make([]*vo.LinkLocationVO, len(getLocation))
+		getLocationList := make([]*flow.LinkLocationDTO, len(getLocation))
 		for i, location := range getLocation {
-			getLocationList[i] = &vo.LinkLocationVO{
+			getLocationList[i] = &flow.LinkLocationDTO{
 				ID:          location.Id,
 				DisplayName: location.DisplayName,
 			}

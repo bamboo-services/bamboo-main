@@ -33,7 +33,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xiaoMain/api/link/v1"
-	"xiaoMain/internal/model/vo"
+	"xiaoMain/internal/model/dto/flow"
 	"xiaoMain/internal/service"
 )
 
@@ -62,7 +62,7 @@ func (c *ControllerV1) CheckLinkIDHasConnect(
 		return nil, err
 	}
 	return &v1.CheckLinkIDHasConnectRes{
-		LinkConnectRes: vo.LinkConnectRes{
+		LinkConnectDTO: flow.LinkConnectDTO{
 			Message: "获取完成",
 			Delay:   delay,
 		},

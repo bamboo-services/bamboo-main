@@ -30,28 +30,28 @@ package v1
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/model/dto/flow"
 	"xiaoMain/internal/model/entity"
-	"xiaoMain/internal/model/vo"
 )
 
 // LinkGetColorReq 获取期望颜色信息
 // 用于获取期望颜色信息
 type LinkGetColorReq struct {
-	g.Meta `path:"/color" method:"get" tags:"Link" summary:"获取期望颜色信息"`
+	g.Meta `path:"/color" method:"get" tags:"链接控制器" summary:"获取期望颜色信息"`
 }
 
 // LinkGetColorRes 获取期望颜色信息响应
 // 用于获取期望颜色信息响应
 type LinkGetColorRes struct {
 	g.Meta `mime:"application/json"`
-	Colors []*vo.LinkColorVO `json:"colors" sm:"颜色列表"`
-	Total  int               `json:"total" sm:"颜色总数"`
+	Colors []*flow.LinkColorDTO `json:"colors" sm:"颜色列表"`
+	Total  int                  `json:"total" sm:"颜色总数"`
 }
 
 // LinkGetColorFullReq 获取完整颜色信息
 // 用于获取完整颜色信息
 type LinkGetColorFullReq struct {
-	g.Meta `path:"/color/full" method:"Get" tags:"Link" summary:"获取完整颜色信息"`
+	g.Meta `path:"/color/full" method:"Get" tags:"链接控制器" summary:"获取完整颜色信息"`
 }
 
 // LinkGetColorFullRes 获取完整颜色信息响应

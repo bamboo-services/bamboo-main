@@ -26,31 +26,12 @@
  * --------------------------------------------------------------------------------
  */
 
-package dto
+package dmiddle
 
-import "encoding/xml"
-
-// HugoItem Hugo 的 Feed 信息
-// 用于获取 Hugo 的 Feed 信息，用于获取具体业务信息
-// 您不应该直接使用此结构体，而应该使用 HugoFeedDTO
-type HugoItem struct {
-	Title       string `xml:"title"`
-	Link        string `xml:"link"`
-	PubDate     string `xml:"pubDate"`
-	GUID        string `xml:"guid"`
-	Description string `xml:"description"`
-}
-
-// HugoFeedDTO Hugo 的 Feed 信息
-// 用于获取 Hugo 的 Feed 信息，用于获取具体业务信息
-type HugoFeedDTO struct {
-	XMLName       xml.Name   `xml:"rss"`
-	Title         string     `xml:"channel>title"`
-	Link          string     `xml:"channel>link"`
-	Description   string     `xml:"channel>description"`
-	Generator     string     `xml:"channel>generator"`
-	Language      string     `xml:"channel>language"`
-	Copyright     string     `xml:"channel>copyright"`
-	LastBuildDate string     `xml:"channel>lastBuildDate"`
-	Items         []HugoItem `xml:"channel>item"`
+type RssLinkDTO struct {
+	Title    string   `json:"title"`
+	Link     string   `json:"link"`
+	Summary  string   `json:"summary"`
+	Category []string `json:"category"`
+	Timer    string   `json:"timer"`
 }

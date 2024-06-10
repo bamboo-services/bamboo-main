@@ -33,7 +33,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"xiaoMain/api/link/v1"
-	"xiaoMain/internal/model/vo"
+	"xiaoMain/internal/model/dto/flow"
 	"xiaoMain/internal/service"
 )
 
@@ -63,7 +63,7 @@ func (c *ControllerV1) CheckLinkURLHasConnect(
 	}
 	getTime := gtime.TimestampMilli() - getNowTimestamp
 	return &v1.CheckLinkURLHasConnectRes{
-		LinkConnectRes: vo.LinkConnectRes{
+		LinkConnectDTO: flow.LinkConnectDTO{
 			Message: "站点读取成功",
 			Delay:   &getTime,
 		},

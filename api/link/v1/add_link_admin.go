@@ -31,7 +31,7 @@ package v1
 import "github.com/gogf/gf/v2/frame/g"
 
 type LinkAddAdminReq struct {
-	g.Meta          `path:"/admin" method:"Post" tags:"Link" summary:"管理员添加友链"`
+	g.Meta          `path:"/admin" method:"Post" tags:"链接控制器" summary:"管理员添加友链"`
 	WebmasterEmail  string `json:"webmaster_email" dc:"站长邮箱"`
 	ServiceProvider string `json:"service_provider" dc:"服务商"`
 	SiteName        string `json:"site_name" v:"required#请输入站点名称" dc:"站点名称"`
