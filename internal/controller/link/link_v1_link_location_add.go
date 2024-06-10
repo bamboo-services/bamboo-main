@@ -31,7 +31,6 @@ package link
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility/result"
 
@@ -52,14 +51,14 @@ func (c *ControllerV1) LinkLocationAdd(
 	ctx context.Context,
 	req *v1.LinkLocationAddReq,
 ) (res *v1.LinkLocationAddRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 LinkLocationAdd 接口")
+	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkLocationAdd 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
-	if err = service.LinkLogic().CheckLocationExist(ctx, req.Name); err != nil {
+	if err = service.Link().CheckLocationExist(ctx, req.Name); err != nil {
 		result.ExistedError.SetErrorMessage(err.Error()).Response(getRequest)
 		return nil, nil
 	}
 	// 添加链接位置
-	if err = service.LinkLogic().AddLocation(
+	if err = service.Link().AddLocation(
 		ctx,
 		req.Name,
 		req.DisplayName,

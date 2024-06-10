@@ -31,7 +31,6 @@ package link
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility/result"
@@ -53,15 +52,15 @@ func (c *ControllerV1) LinkGetLocation(
 	ctx context.Context,
 	_ *v1.LinkGetLocationReq,
 ) (res *v1.LinkGetLocationRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 LinkGetLocation 接口")
+	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkGetLocation 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取期望位置信息
-	getLocation, err := service.LinkLogic().GetLocation(ctx)
+	getLocation, err := service.Link().GetLocation(ctx)
 	if err != nil {
 		result.ServerInternalError.SetErrorMessage("数据库操作失败").Response(getRequest)
 	}
 	if getLocation != nil {
-		glog.Debugf(ctx, "[CONTROL] 获取期望位置信息成功, 数量[%d]", len(getLocation))
+		g.Log().Debugf(ctx, "[CONTROL] 获取期望位置信息成功, 数量[%d]", len(getLocation))
 		getLocationList := make([]vo.LinkLocationVO, len(getLocation))
 		for i, location := range getLocation {
 			getLocationList[i] = vo.LinkLocationVO{

@@ -30,148 +30,42 @@ package utility
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base64"
-	"errors"
-	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/text/gregex"
-	"golang.org/x/crypto/bcrypt"
-	"math/big"
-	"xiaoMain/internal/consts"
+	"github.com/bamboo-services/bamboo-utils/butil"
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/constants"
 )
 
-// TokenLeftBearer 是一个处理带有 "Bearer " 前缀的 Token 的函数。
-// 它接收一个 string 类型的参数，表示带有 "Bearer " 前缀的 Token，并返回去除 "Bearer " 前缀后的 Token。
-// 如果在处理过程中出现错误，函数将返回一个错误。
+// GetAuthorizationFromHeader
 //
-// 参数:
-// token: string 类型，表示带有 "Bearer " 前缀的 Token。
+// # 获取请求头中的 Authorization
 //
-// 返回:
-// *string 类型，表示去除 "Bearer " 前缀后的 Token。
-// error 类型，如果在处理过程中出现错误，返回一个错误；否则，返回 nil。
-func TokenLeftBearer(token string) (*string, error) {
-	replace, err := gregex.Replace("Bearer ", []byte(""), []byte(token))
-	if err != nil {
-		return nil, err
-	}
-	getReplace := string(replace)
-	return &getReplace, nil
-}
-
-// GetUUIDFromHeader 是一个从请求头中获取 X-User-Uid 字段的函数。
-// 它接收一个 *ghttp.Request 类型的参数，表示 HTTP 请求。
-// 如果请求头中存在 X-User-Uid 字段，函数将返回该字段的值。
-// 如果请求头中不存在 X-User-Uid 字段，函数将返回一个错误。
+// 用于获取请求头中的 Authorization 字段，如果存在则返回去除 Bearer 后的值，否则返回空字符串。
 //
-// 参数:
-// getRequest: *ghttp.Request 类型，表示 HTTP 请求。
-//
-// 返回:
-// *string 类型，表示从请求头中获取的 X-User-Uid 字段的值。
-// error 类型，如果无法从请求头中获取 X-User-Uid 字段，返回一个错误；否则，返回 nil。
-func GetUUIDFromHeader(getRequest *ghttp.Request) (*string, error) {
-	getUUID := getRequest.Header.Get("X-User-Uid")
-	if getUUID != "" {
-		return &getUUID, nil
-	} else {
-		return nil, errors.New("无法从请求头获取 UUID")
-	}
-}
-
-// GetAuthorizationFromHeader 是一个从请求头中获取 Authorization 字段的函数。
-// 它接收一个 *ghttp.Request 类型的参数，表示 HTTP 请求。
-// 如果请求头中存在 Authorization 字段，函数将调用 TokenLeftBearer 函数去除 "Bearer " 前缀，并返回剩余的 Token 内容。
-// 如果请求头中不存在 Authorization 字段，函数将返回一个错误。
-//
-// 参数:
-// getRequest: *ghttp.Request 类型，表示 HTTP 请求。
-//
-// 返回:
-// *string 类型，表示从请求头中获取的 Authorization 字段的值（去除 "Bearer " 前缀后的值）。
-// error 类型，如果无法从请求头中获取 Authorization 字段，返回一个错误；否则，返回 nil。
-func GetAuthorizationFromHeader(getRequest *ghttp.Request) (*string, error) {
-	getAuthorization := getRequest.Header.Get("Authorization")
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+func GetAuthorizationFromHeader(ctx context.Context) string {
+	getAuthorization := g.RequestFromCtx(ctx).Header.Get("Authorization")
 	if getAuthorization != "" {
-		return TokenLeftBearer(getAuthorization)
+		return butil.TokenRemoveBearer(getAuthorization)
 	} else {
-		return nil, errors.New("无法从请求头获取 Authorization")
+		return ""
 	}
 }
 
-// GetVerifyFromHeader 是一个从请求头中获取 X-Verification 字段的函数。
-// 它接收一个 *ghttp.Request 类型的参数，表示 HTTP 请求。
-// 如果请求头中存在 X-Verification 字段，函数将返回该字段的值。
-// 如果请求头中不存在 X-Verification 字段，函数将返回一个错误。
+// GetMailTemplateByScene
 //
-// 参数:
-// getRequest: *ghttp.Request 类型，表示 HTTP 请求。
+// # 根据场景获取邮件模板
 //
-// 返回:
-// *string 类型，表示从请求头中获取的 X-Verification 字段的值。
-// error 类型，如果无法从请求头中获取 X-Verification 字段，返回一个错误；否则，返回 nil。
-func GetVerifyFromHeader(getRequest *ghttp.Request) (*string, error) {
-	getVerify := getRequest.Header.Get("X-Verification")
-	if getVerify != "" {
-		return &getVerify, nil
-	} else {
-		return nil, errors.New("无法从请求头获取 Verification")
-	}
-}
-
-// PasswordEncode 是一个对密码进行加密的函数。
-// 它接收一个 string 类型的参数，表示原始密码，并返回该密码的加密形式。
-// 首先，它将原始密码转换为 Base64 编码，然后使用 bcrypt.GenerateFromPassword 函数对 Base64 编码的密码进行加密。
-// 加密的成本因子为 bcrypt.DefaultCost。
+// 用于根据场景获取邮件模板，如果存在则返回模板内容，否则返回空字符串。
 //
-// 参数:
-// password: string 类型，表示原始密码。
+// # 参数:
+//   - scene: 场景(constants.Scene)
 //
-// 返回: string 类型，表示加密后的密码。
-func PasswordEncode(password string) string {
-	getEncodePassword, _ := bcrypt.GenerateFromPassword(StringToBase64(password), bcrypt.DefaultCost)
-	return string(getEncodePassword)
-}
-
-// PasswordVerify 是一个验证密码的函数。
-// 它接收两个参数，一个是哈希密码，另一个是原始密码。
-// 首先，它将原始密码转换为 Base64 编码，然后使用 bcrypt.CompareHashAndPassword 函数比较哈希密码和 Base64 编码的密码。
-// 如果两者匹配，函数返回 true；否则，返回 false。
-//
-// 参数:
-// hashPassword: string 类型，表示哈希密码。
-// password: string 类型，表示原始密码。
-//
-// 返回: bool 类型，如果哈希密码和 Base64 编码的密码匹配，返回 true；否则，返回 false。
-func PasswordVerify(hashPassword string, password string) bool {
-	// 对密码进行 Base64 加密
-	basePassword := StringToBase64(password)
-	err := bcrypt.CompareHashAndPassword([]byte(hashPassword), basePassword)
-	return err == nil
-}
-
-// StringToBase64 是一个将字符串转换为 Base64 编码的函数。
-// 它接收一个 string 类型的参数，并返回该字符串的 Base64 编码形式。
-//
-// 参数:
-// stringData: string 类型，表示要转换为 Base64 编码的原始字符串。
-//
-// 返回: []byte 类型，表示转换后的 Base64 编码字符串。
-func StringToBase64(stringData string) []byte {
-	return []byte(base64.StdEncoding.EncodeToString([]byte(stringData)))
-}
-
-// GetMailTemplateByScene 是一个根据给定的场景返回对应的邮件模板的函数。
-// 它遍历 consts.MailTemplate 中的所有模板，并返回与给定场景名称匹配的模板的数据。
-// 如果没有找到匹配的模板，它将返回一个空字符串。
-//
-// 参数:
-// scene: consts.Scene 类型，表示邮件模板的场景名称。
-//
-// 返回: string 类型，表示找到的邮件模板的数据。如果没有找到匹配的模板，返回空字符串。
-func GetMailTemplateByScene(scene consts.Scene) string {
+// # 返回:
+//   - string: 如果存在则返回模板内容，否则返回空字符串。
+func GetMailTemplateByScene(scene constants.Scene) string {
 	// 从 Scene 获取模板
-	for _, template := range consts.MailTemplate {
+	for _, template := range constants.MailTemplate {
 		if template.Name == string(scene) {
 			return template.Data
 		}
@@ -179,58 +73,21 @@ func GetMailTemplateByScene(scene consts.Scene) string {
 	return ""
 }
 
-// GetRandomString 是一个生成随机字符串的函数。
-// 它接收一个 int 类型的参数，表示要生成的随机字符串的长度。
-// 函数将生成一个指定长度的随机字符串，并返回该字符串。
-// 随机字符串由数字、大写字母和小写字母组成。
+// GetMailSendPort
 //
-// 参数:
-// length: int 类型，表示要生成的随机字符串的长度。
+// # 获取邮件发送端口
 //
-// 返回: string 类型，表示生成的随机字符串。
-func GetRandomString(length int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	result := make([]byte, length)
-	for i := range result {
-		randIndex, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
-		result[i] = charset[randIndex.Int64()]
-	}
-	return string(result)
-}
-
-// GetVisitorProtocol 是一个获取访问者使用的协议类型的函数。
-// 它接收一个 context.Context 类型的参数，表示上下文。
-// 如果访问者使用的是 HTTPS 协议（即请求中的 TLS 字段不为 nil），函数将返回 "SSL"。
-// 如果访问者使用的是 HTTP 协议（即请求中的 TLS 字段为 nil），函数将返回 "TLS"。
+// 用于获取邮件发送端口，如果是 SSL 则返回 constants.SMTPPortSSL，否则返回 constants.SMTPPortTLS。
 //
-// 参数:
-// ctx: context.Context 类型，表示上下文。
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
 //
-// 返回:
-// string 类型，表示访问者使用的协议类型。如果访问者使用的是 HTTPS 协议，返回 "SSL"；如果访问者使用的是 HTTP 协议，返回 "TLS"。
-func GetVisitorProtocol(ctx context.Context) string {
-	getRequest := ghttp.RequestFromCtx(ctx)
-	if getRequest.TLS != nil {
-		return "SSL"
-	} else {
-		return "TLS"
-	}
-}
-
-// GetMailSendPort 是一个获取邮件发送端口的函数。
-// 它接收一个 context.Context 类型的参数，表示上下文。
-// 如果访问者使用的是 HTTPS 协议（即请求中的 TLS 字段不为 nil），函数将返回 consts.SMTPPortSSL。
-// 如果访问者使用的是 HTTP 协议（即请求中的 TLS 字段为 nil），函数将返回 consts.SMTPPortTLS。
-//
-// 参数:
-// ctx: context.Context 类型，表示上下文。
-//
-// 返回:
-// int 类型，表示邮件发送端口。如果访问者使用的是 HTTPS 协议，返回 consts.SMTPPortSSL；如果访问者使用的是 HTTP 协议，返回 consts.SMTPPortTLS。
+// # 返回:
+//   - int: 如果是 SSL 则返回 465，否则返回 587。
 func GetMailSendPort(ctx context.Context) int {
-	if GetVisitorProtocol(ctx) == "SSL" {
-		return consts.SMTPPortSSL
+	if butil.GetVisitorProtocol(ctx) == "SSL" {
+		return constants.SMTPPortSSL
 	} else {
-		return consts.SMTPPortTLS
+		return constants.SMTPPortTLS
 	}
 }

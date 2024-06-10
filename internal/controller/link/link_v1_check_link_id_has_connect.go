@@ -31,7 +31,6 @@ package link
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility/result"
@@ -54,10 +53,10 @@ func (c *ControllerV1) CheckLinkIDHasConnect(
 	ctx context.Context,
 	req *v1.CheckLinkIDHasConnectReq,
 ) (res *v1.CheckLinkIDHasConnectRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 CheckLinkURLHasConnect 接口")
+	g.Log().Notice(ctx, "[CONTROL] 控制层 CheckLinkURLHasConnect 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取博客链接是否已经连接
-	delay, err := service.LinkLogic().CheckLinkHasConnect(ctx, getRequest.GetRouter("id").String())
+	delay, err := service.Link().CheckLinkHasConnect(ctx, getRequest.GetRouter("id").String())
 	if err != nil {
 		result.Success("获取成功", vo.LinkConnectRes{
 			Message: err.Error(),

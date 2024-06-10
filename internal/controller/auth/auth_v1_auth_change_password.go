@@ -30,9 +30,8 @@ package auth
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
-	"xiaoMain/internal/consts"
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/constants"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility/result"
 
@@ -53,29 +52,21 @@ func (c *ControllerV1) AuthChangePassword(
 	ctx context.Context,
 	req *v1.AuthChangePasswordReq,
 ) (res *v1.AuthChangePasswordRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 UserChangePassword 接口")
-	// 获取 Request
-	getRequest := ghttp.RequestFromCtx(ctx)
+	g.Log().Notice(ctx, "[CONTROL] AuthChangePassword | 修改密码")
 	// 检查用户登录是否有效
-	hasLogin, message := service.AuthLogic().IsUserLogin(ctx)
-	if !hasLogin {
-		result.NotLoggedIn.SetErrorMessage(message).Response(getRequest)
-		return nil, nil
+	hasLogin, err := service.AuthLogic().IsUserLogin(ctx)
+	if err != nil {
+		return nil, err
 	}
-
 	// 检查用户邮箱是否正确
-	hasCheck, info := service.UserMailLogic().CheckMailHasConsoleUser(ctx, req.Email)
-	if !hasCheck {
-		result.RequestBodyValidationError.SetErrorMessage(info).Response(getRequest)
-		return nil, nil
+	hasCheck, err := service.UserLogic().CheckMailHasConsoleUser(ctx, req.Email)
+	if err != nil {
+		return nil, err
 	}
-
 	// 检查验证码是否正确
-	isCorrect, info := service.MailLogic().
-		VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, consts.ChangePasswordScene)
-	if !isCorrect {
-		result.VerificationFailed.SetErrorMessage(info).Response(getRequest)
-		return nil, nil
+	isCorrect, err := service.MailLogic().VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, constants.ChangePasswordScene)
+	if err != nil {
+		return nil, err
 	}
 
 	// 对密码进行修改

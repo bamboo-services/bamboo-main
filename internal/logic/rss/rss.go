@@ -30,13 +30,13 @@ package rss
 
 import "xiaoMain/internal/service"
 
-type sRssLogic struct {
+type sRss struct {
 }
 
 func init() {
-	service.RegisterRssLogic(New())
+	service.RegisterRss(New())
 }
 
-func New() *sRssLogic {
-	return &sRssLogic{}
+func New() *sRss {
+	return &sRss{}
 }

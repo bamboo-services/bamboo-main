@@ -31,7 +31,6 @@ package link
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
 	"sync"
 	"xiaoMain/api/link/v1"
 	"xiaoMain/internal/service"
@@ -48,7 +47,7 @@ import (
 // 返回:
 // res: 发送给用户的响应。如果添加链接成功，它将返回成功的消息。
 func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 LinkAdd 接口")
+	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkAdd 接口")
 	// 获取 Request
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 异步操作
@@ -57,7 +56,7 @@ func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1
 	wg.Add(1)
 	// 检查网站名是否重复
 	go func(request *v1.LinkAddReq) {
-		if getError = service.LinkLogic().CheckLinkName(ctx, request.SiteName); getError != nil {
+		if getError = service.Link().CheckLinkName(ctx, request.SiteName); getError != nil {
 			result.AddLinkFailed.SetErrorMessage(getError.Error()).Response(getRequest)
 		}
 		wg.Done()
@@ -65,7 +64,7 @@ func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1
 	// 检查网站链接是否重复
 	wg.Add(1)
 	go func(request *v1.LinkAddReq) {
-		if getError = service.LinkLogic().CheckLinkURL(ctx, request.SiteURL); getError != nil {
+		if getError = service.Link().CheckLinkURL(ctx, request.SiteURL); getError != nil {
 			result.AddLinkFailed.SetErrorMessage(getError.Error()).Response(getRequest)
 		}
 		wg.Done()
@@ -73,7 +72,7 @@ func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1
 	// 检查链接是否可以访问
 	wg.Add(1)
 	go func(request *v1.LinkAddReq) {
-		if getError = service.LinkLogic().CheckLinkCanAccess(ctx, request.SiteURL); getError != nil {
+		if getError = service.Link().CheckLinkCanAccess(ctx, request.SiteURL); getError != nil {
 			result.AddLinkFailed.SetErrorMessage(getError.Error()).Response(getRequest)
 		}
 		wg.Done()
@@ -81,7 +80,7 @@ func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1
 	// 检查 Logo 是否可以访问
 	wg.Add(1)
 	go func(request *v1.LinkAddReq) {
-		if getError = service.LinkLogic().CheckLogoCanAccess(ctx, request.SiteLogo); getError != nil {
+		if getError = service.Link().CheckLogoCanAccess(ctx, request.SiteLogo); getError != nil {
 			result.AddLinkFailed.SetErrorMessage(getError.Error()).Response(getRequest)
 		}
 		wg.Done()
@@ -89,7 +88,7 @@ func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1
 	// 检查 RSS URL 是否合法
 	wg.Add(1)
 	go func(request *v1.LinkAddReq) {
-		if getError = service.LinkLogic().CheckRSSCanAccess(ctx, request.SiteRssURL); getError != nil {
+		if getError = service.Link().CheckRSSCanAccess(ctx, request.SiteRssURL); getError != nil {
 			result.AddLinkFailed.SetErrorMessage(getError.Error()).Response(getRequest)
 		}
 		wg.Done()
@@ -97,7 +96,7 @@ func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1
 	// 等待异步操作完成
 	wg.Wait()
 	// 对内容进行插入
-	if getError = service.LinkLogic().AddLink(ctx, *req); getError != nil {
+	if getError = service.Link().AddLink(ctx, *req); getError != nil {
 		result.AddLinkFailed.SetErrorMessage(getError.Error()).Response(getRequest)
 	}
 	return nil, nil

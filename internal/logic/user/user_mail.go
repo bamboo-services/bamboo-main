@@ -30,36 +30,42 @@ package user
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/os/glog"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
+	"github.com/gogf/gf/v2/frame/g"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
 )
 
-// CheckMailHasConsoleUser 这个函数的主要作用是检查用户输入的邮箱地址是否与数据库中存储的邮箱地址匹配
-// 在具体实现中，函数首先从数据库中获取指定的邮箱信息，然后将用户输入的邮箱地址与数据库中的邮箱地址进行比较。如果两者匹配，函数将返回 true 和
-// "邮箱匹配" 的信息；如果两者不匹配，函数将返回 false 和 "邮箱不匹配" 的信息。如果在查询数据库过程中出现错误，函数将返回 false 和 "未查询
-// 到邮箱" 的信息。
+// CheckMailHasConsoleUser
 //
-// 参数:
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// email: 用户输入的邮箱地址。
+// # 检查邮箱是否有控制台用户
 //
-// 返回:
-// checkMail: 如果用户输入的邮箱与数据库中的邮箱匹配，则返回 true，否则返回 false。
-// info: 返回的信息，如果邮箱匹配，返回 "邮箱匹配"，如果不匹配，返回 "邮箱不匹配"，如果查询过程中出现错误，返回 "未查询到邮箱"。
-func (s *sUserLogic) CheckMailHasConsoleUser(ctx context.Context, email string) (checkMail bool, info string) {
-	glog.Notice(ctx, "[LOGIC] 执行 UserLogic:CheckMailHasConsoleUser 服务层")
+// 用于检查邮箱是否有控制台用户，如果有则返回 true，否则返回 false.
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//   - email: 邮箱地址(string)
+//
+// # 返回:
+//   - checkMail: 如果邮箱有控制台用户，返回 true。否则返回 false.
+//   - err: 如果检查过程中发生错误，返回错误信息。否则返回 nil.
+func (s *sUser) CheckMailHasConsoleUser(ctx context.Context, email string) (checkMail bool, err error) {
+	g.Log().Notice(ctx, "[LOGIC] UserLogic:CheckMailHasConsoleUser | 检查邮箱是否有控制台用户")
 	// 从数据库获取指定信息
-	var getAdminEmail entity.XfIndex
-	if dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "email"}).Scan(&getAdminEmail) != nil {
-		return false, "未查询到邮箱"
+	var getAdminEmail *entity.Index
+	if dao.Index.Ctx(ctx).Where(do.Index{Key: "email"}).Scan(&getAdminEmail) != nil {
+		return false, berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	// 对邮箱进行匹配
-	if getAdminEmail.Value == email {
-		// 返回正确信息
-		return true, "邮箱匹配"
+	if getAdminEmail != nil {
+		if getAdminEmail.Value == email {
+			return true, nil
+		} else {
+			return false, berror.NewError(bcode.ServerInternalError, "邮箱不匹配")
+		}
 	} else {
-		return false, "邮箱不匹配"
+		return false, berror.NewError(bcode.ServerInternalError, "未查询到邮箱")
 	}
 }

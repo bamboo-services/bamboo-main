@@ -32,7 +32,6 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
 	"xiaoMain/api/auth/v1"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
@@ -50,7 +49,7 @@ import (
 // res: 发送给用户的响应。如果登录成功，它包含登录结果和用户详细信息。
 // err: 在登录过程中发生的任何错误。
 func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res *v1.AuthLoginRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 CheckUserLogin 接口")
+	g.Log().Notice(ctx, "[CONTROL] 控制层 UserLogin 接口")
 	// 获取 Request
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 检查用户登录是否有效

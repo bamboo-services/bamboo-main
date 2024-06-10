@@ -32,10 +32,8 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gfile"
-	"github.com/gogf/gf/v2/os/glog"
 	uuid "github.com/satori/go.uuid"
-	"xiaoMain/internal/consts"
+	"xiaoMain/internal/constants"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 	"xiaoMain/utility"
@@ -54,7 +52,7 @@ func InitialDatabase(ctx context.Context) {
 	 * 检查数据表是否完善
 	 */
 	// 记录日志，开始初始化数据表
-	glog.Notice(ctx, "[BOOT] 数据表初始化中")
+	g.Log().Notice(ctx, "[BOOT] 数据表初始化中")
 	// 初始化信息表
 	initialSQL(ctx, "xf_index")
 	// 初始化登录信息表
@@ -76,12 +74,12 @@ func InitialDatabase(ctx context.Context) {
 	 * 插入主要数据表 index
 	 */
 	// 记录日志，开始初始化数据库表信息
-	glog.Notice(ctx, "[BOOT] 数据库表信息初始化中")
-	glog.Notice(ctx, "[BOOT] 初始化信息表")
+	g.Log().Notice(ctx, "[BOOT] 数据库表信息初始化中")
+	g.Log().Notice(ctx, "[BOOT] 初始化信息表")
 	// 插入软件版本信息
-	insertIndexData(ctx, "version", consts.XiaoMainVersion)
+	insertIndexData(ctx, "version", constants.XiaoMainVersion)
 	// 插入软件作者信息
-	insertIndexData(ctx, "author", consts.XiaoMainAuthor)
+	insertIndexData(ctx, "author", constants.XiaoMainAuthor)
 	// 插入站点信息
 	insertIndexData(ctx, "site_name", "XiaoMain")
 	// 插入站点描述
@@ -135,12 +133,12 @@ func getMailTemplate(template string) string {
 // insertIndexData 插入数据，用于信息初始化进行的操作
 func insertIndexData(ctx context.Context, key string, value string) {
 	var err error
-	if record, _ := dao.XfIndex.Ctx(ctx).Where("key=?", key).One(); record == nil {
-		if _, err = dao.XfIndex.Ctx(ctx).Data(do.XfIndex{Key: key, Value: value}).Insert(); err != nil {
-			glog.Noticef(ctx, "[SQL] 数据表 xf_index 中插入键 %s 失败", key)
-			glog.Errorf(ctx, "[SQL] 错误信息：%v", err.Error())
+	if record, _ := dao.Index.Ctx(ctx).Where("key=?", key).One(); record == nil {
+		if _, err = dao.Index.Ctx(ctx).Data(do.Index{Key: key, Value: value}).Insert(); err != nil {
+			g.Log().Noticef(ctx, "[SQL] 数据表 xf_index 中插入键 %s 失败", key)
+			g.Log().Errorf(ctx, "[SQL] 错误信息：%v", err.Error())
 		} else {
-			glog.Debugf(ctx, "[SQL] 数据表 xf_index 中插入键 %s 成功", key)
+			g.Log().Debugf(ctx, "[SQL] 数据表 xf_index 中插入键 %s 成功", key)
 		}
 	}
 }
@@ -159,11 +157,11 @@ func initialSQL(ctx context.Context, databaseName string) {
 			return nil
 		})
 		if errTransaction != nil {
-			glog.Panicf(ctx, "[SQL] 数据表 %s 创建失败", databaseName)
+			g.Log().Panicf(ctx, "[SQL] 数据表 %s 创建失败", databaseName)
 		} else {
-			glog.Debugf(ctx, "[SQL] 数据表 %s 创建成功", databaseName)
+			g.Log().Debugf(ctx, "[SQL] 数据表 %s 创建成功", databaseName)
 		}
 	} else {
-		glog.Debugf(ctx, "[SQL] 数据表 %s 已存在", databaseName)
+		g.Log().Debugf(ctx, "[SQL] 数据表 %s 已存在", databaseName)
 	}
 }

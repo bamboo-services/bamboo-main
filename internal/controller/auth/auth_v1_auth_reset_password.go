@@ -31,8 +31,7 @@ package auth
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
-	"xiaoMain/internal/consts"
+	"xiaoMain/internal/constants"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility/result"
 
@@ -53,7 +52,7 @@ func (c *ControllerV1) AuthResetPassword(
 	ctx context.Context,
 	req *v1.AuthResetPasswordReq,
 ) (res *v1.AuthResetPasswordRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 UserResetPassword 接口")
+	g.Log().Notice(ctx, "[CONTROL] 控制层 UserResetPassword 接口")
 	// 获取 Request
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取邮件是否存在
@@ -69,7 +68,7 @@ func (c *ControllerV1) AuthResetPassword(
 	}
 	// 检查验证码是否正确
 	codeCorrect, errMessage := service.MailLogic().
-		VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, consts.ResetPasswordScene)
+		VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, constants.ResetPasswordScene)
 	if !codeCorrect {
 		result.VerificationFailed.SetErrorMessage(errMessage).Response(getRequest)
 		return nil, nil

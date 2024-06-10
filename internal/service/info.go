@@ -39,32 +39,58 @@ import (
 )
 
 type (
-	IInfoLogic interface {
-		// GetMainInfo 获取主要信息
+	IInfo interface {
+		// GetMainInfo
+		//
+		// # 获取主要信息
+		//
 		// 用于获取主要信息，如果返回成功则返回具体的信息，若某些情况下无法获取则获取的内容为空
-		// 接口的返回都会有结果，如果返回错误将会返回空值
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
 		//
-		// 返回：
-		// getMainInfo: 如果获取成功，返回具体的信息；否则返回空值。
+		// # 返回:
+		//   - *vo.MainVO: 如果获取成功，返回具体的信息；否则返回空值。
 		GetMainInfo(ctx context.Context) *vo.MainVO
+		// GetBloggerInfo
+		//
+		// # 获取站长信息
+		//
+		// 用于获取站长信息，如果返回成功则返回具体的信息，若某些情况下无法获取则获取的内容为空
+		//
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//
+		// # 返回:
+		//   - *vo.BloggerVO: 如果获取成功，返回具体的信息；否则返回空值。
 		GetBloggerInfo(ctx context.Context) *vo.BloggerVO
+		// GetIndexTableData
+		//
+		// # 获取 Index 数据库中的信息
+		//
+		// 用于获取 Index 数据库中的信息，如果成功则返回具体的信息，否则返回空值
+		//
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - name: 需要获取的信息名称(string)
+		//
+		// # 返回:
+		//   - string: 如果获取成功，返回具体的信息；否则返回空值。
+		GetIndexTableData(ctx context.Context, name string) string
 	}
 )
 
 var (
-	localInfoLogic IInfoLogic
+	localInfo IInfo
 )
 
-func InfoLogic() IInfoLogic {
-	if localInfoLogic == nil {
-		panic("implement not found for interface IInfoLogic, forgot register?")
+func Info() IInfo {
+	if localInfo == nil {
+		panic("implement not found for interface IInfo, forgot register?")
 	}
-	return localInfoLogic
+	return localInfo
 }
 
-func RegisterInfoLogic(i IInfoLogic) {
-	localInfoLogic = i
+func RegisterInfo(i IInfo) {
+	localInfo = i
 }

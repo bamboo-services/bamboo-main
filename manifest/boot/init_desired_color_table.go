@@ -30,13 +30,12 @@ package boot
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/os/glog"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 )
 
 func InitialDesiredColorTable(ctx context.Context) {
-	glog.Notice(ctx, "[BOOT] 初始化期望颜色表")
+	g.Log().Notice(ctx, "[BOOT] 初始化期望颜色表")
 
 	// 初始化期望颜色表
 	insertColorData(ctx, "red", "红色", "FF0000")
@@ -79,17 +78,17 @@ func InitialDesiredColorTable(ctx context.Context) {
 
 // insertColorData 插入数据，用于信息初始化进行的操作
 func insertColorData(ctx context.Context, name string, displayName string, color string) {
-	if record, _ := dao.XfColor.Ctx(ctx).Where(do.XfColor{Name: name}).One(); record == nil {
-		if _, err := dao.XfColor.Ctx(ctx).Data(
-			do.XfColor{
+	if record, _ := dao.Color.Ctx(ctx).Where(do.Color{Name: name}).One(); record == nil {
+		if _, err := dao.Color.Ctx(ctx).Data(
+			do.Color{
 				Name:        name,
 				DisplayName: displayName,
 				Color:       color,
 			}).Insert(); err != nil {
-			glog.Noticef(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 失败", name)
-			glog.Errorf(ctx, "[SQL] 错误信息：%v", err.Error())
+			g.Log().Noticef(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 失败", name)
+			g.Log().Errorf(ctx, "[SQL] 错误信息：%v", err.Error())
 		} else {
-			glog.Debugf(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 成功", name)
+			g.Log().Debugf(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 成功", name)
 		}
 	}
 }

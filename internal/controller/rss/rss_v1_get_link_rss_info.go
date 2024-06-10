@@ -31,7 +31,6 @@ package rss
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
 	"xiaoMain/api/rss/v1"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility/result"
@@ -51,7 +50,7 @@ func (c *ControllerV1) GetLinkRssInfo(
 	ctx context.Context,
 	req *v1.GetLinkRssInfoReq,
 ) (res *v1.GetLinkRssInfoRes, err error) {
-	glog.Noticef(ctx, "[CONTROL] 控制层 GetLinkRssInfo 接口")
+	g.Log().Noticef(ctx, "[CONTROL] 控制层 GetLinkRssInfo 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	if req.Page == nil || *req.Page <= 0 {
 		req.Page = new(int64)

@@ -31,7 +31,6 @@ package link
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtime"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
@@ -55,11 +54,11 @@ func (c *ControllerV1) CheckRssURLHasConnect(
 	ctx context.Context,
 	req *v1.CheckRssURLHasConnectReq,
 ) (res *v1.CheckRssURLHasConnectRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 CheckRssURLHasConnect 接口")
+	g.Log().Notice(ctx, "[CONTROL] 控制层 CheckRssURLHasConnect 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取 RSS 链接是否已经连接
 	getNowTimestamp := gtime.TimestampMilli()
-	err = service.LinkLogic().CheckRSSCanAccess(ctx, req.RssURL)
+	err = service.Link().CheckRSSCanAccess(ctx, req.RssURL)
 	if err != nil {
 		result.Success("站点读取失败", vo.LinkConnectRes{
 			Message: err.Error(),

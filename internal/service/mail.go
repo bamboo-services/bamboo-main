@@ -35,33 +35,54 @@ package service
 
 import (
 	"context"
-	"xiaoMain/internal/consts"
+	"xiaoMain/internal/constants"
 )
 
 type (
-	IMailLogic interface {
+	IMail interface {
 		// VerificationCodeHasCorrect
-		// 验证验证码是否正确，若验证码正确将会返回 true，否则返回 false；
-		// 若返回错误的内容将会返回具体的错误原因，不会抛出 Error
-		VerificationCodeHasCorrect(ctx context.Context, email string, code string, scenes consts.Scene) (isCorrect bool, info string)
+		//
+		// # 验证码是否正确
+		//
+		// 用于验证验证码是否正确，如果正确则返回 nil，否则返回具体的报错信息。
+		//
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - email: 邮箱地址(string)
+		//   - code: 验证码(string)
+		//   - scenes: 场景(constants.Scene)
+		//
+		// # 返回:
+		//   - err: 如果验证过程中发生错误，返回错误信息。否则返回 nil.
+		VerificationCodeHasCorrect(ctx context.Context, email string, code string, scenes constants.Scene) (err error)
 		// SendEmailVerificationCode
-		// 根据输入的场景进行邮箱的发送，需要保证场景的合法性，场景的合法性参考 consts.Scenes 的参考值
-		// 若邮件发送的过程中出现错误将会终止发件并且返回 error 信息，发件成功返回 nil
-		SendEmailVerificationCode(ctx context.Context, mail string, scenes consts.Scene) (err error)
+		//
+		// # 发送邮件验证码
+		//
+		// 用于发送邮件验证码，如果发送成功则返回 nil，否则返回具体的报错信息。会根据传入的场景进行邮件的发送。
+		//
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - mail: 邮箱地址(string)
+		//   - scenes: 场景(constants.Scene)
+		//
+		// # 返回:
+		//   - err: 如果发送过程中发生错误，返回错误信息。否则返回 nil.
+		SendEmailVerificationCode(ctx context.Context, mail string, scenes constants.Scene) (err error)
 	}
 )
 
 var (
-	localMailLogic IMailLogic
+	localMail IMail
 )
 
-func MailLogic() IMailLogic {
-	if localMailLogic == nil {
-		panic("implement not found for interface IMailLogic, forgot register?")
+func Mail() IMail {
+	if localMail == nil {
+		panic("implement not found for interface IMail, forgot register?")
 	}
-	return localMailLogic
+	return localMail
 }
 
-func RegisterMailLogic(i IMailLogic) {
-	localMailLogic = i
+func RegisterMail(i IMail) {
+	localMail = i
 }

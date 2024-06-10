@@ -30,37 +30,55 @@ package mail
 
 import (
 	"context"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
+	"github.com/bamboo-services/bamboo-utils/butil"
 	"github.com/gogf/gf/v2/database/gdb"
-	"github.com/gogf/gf/v2/os/glog"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"sync"
-	"xiaoMain/internal/consts"
+	"xiaoMain/internal/constants"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
 	"xiaoMain/internal/model/vo"
-	"xiaoMain/utility"
 )
 
 // VerificationCodeHasCorrect
-// 验证验证码是否正确，若验证码正确将会返回 true，否则返回 false；
-// 若返回错误的内容将会返回具体的错误原因，不会抛出 Error
-func (s *sMailLogic) VerificationCodeHasCorrect(
+//
+// # 验证码是否正确
+//
+// 用于验证验证码是否正确，如果正确则返回 nil，否则返回具体的报错信息。
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//   - email: 邮箱地址(string)
+//   - code: 验证码(string)
+//   - scenes: 场景(constants.Scene)
+//
+// # 返回:
+//   - err: 如果验证过程中发生错误，返回错误信息。否则返回 nil.
+func (s *sMail) VerificationCodeHasCorrect(
 	ctx context.Context,
 	email string,
 	code string,
-	scenes consts.Scene,
-) (isCorrect bool, info string) {
-	glog.Notice(ctx, "[LOGIC] 执行 MailLogic:VerificationCodeHasCorrect 服务层")
+	scenes constants.Scene,
+) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] Mail:VerificationCodeHasCorrect | 验证码是否正确")
 	// 获取邮箱以及验证码
-	var getCode []entity.XfVerificationCode
-	if dao.XfVerificationCode.Ctx(ctx).Where(do.XfVerificationCode{
+	var getCode []entity.VerificationCode
+	if dao.VerificationCode.Ctx(ctx).Where(do.VerificationCode{
 		Type:    true,
 		Contact: email,
 		Scenes:  string(scenes),
 	}).Scan(&getCode) != nil {
-		glog.Notice(ctx, "[LOGIC] 用户的验证码不存在")
-		return false, "验证码不存在"
+		g.Log().Notice(ctx, "[LOGIC] 用户的验证码不存在")
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
+	}
+	if len(getCode) == 0 {
+		g.Log().Notice(ctx, "[LOGIC] 用户的验证码不存在")
+		return berror.NewError(bcode.OperationFailed, "验证码不存在")
+
 	}
 	// 对获取的验证码进行查询
 	for _, verificationCode := range getCode {
@@ -69,26 +87,36 @@ func (s *sMailLogic) VerificationCodeHasCorrect(
 			// 检查是否过期
 			if verificationCode.ExpiredAt.After(gtime.Now()) {
 				// 验证码正确执行后需要删除验证码
-				_, _ = dao.XfVerificationCode.Ctx(ctx).Where(do.XfVerificationCode{Id: verificationCode.Id}).Delete()
-				return true, "验证码正确"
+				_, _ = dao.VerificationCode.Ctx(ctx).Where(do.VerificationCode{Id: verificationCode.Id}).Delete()
+				return nil
 			}
 		}
 	}
 	// 验证码已过期
-	glog.Notice(ctx, "[LOGIC] 用户的验证码已过期")
-	return false, "验证码已过期"
+	g.Log().Notice(ctx, "[LOGIC] 用户的验证码已过期")
+	return berror.NewError(bcode.OperationFailed, "验证码已过期")
 }
 
 // SendEmailVerificationCode
-// 根据输入的场景进行邮箱的发送，需要保证场景的合法性，场景的合法性参考 consts.Scenes 的参考值
-// 若邮件发送的过程中出现错误将会终止发件并且返回 error 信息，发件成功返回 nil
-func (s *sMailLogic) SendEmailVerificationCode(ctx context.Context, mail string, scenes consts.Scene) (err error) {
-	glog.Notice(ctx, "[LOGIC] 执行 MailLogic:SendEmailVerificationCode 服务层")
+//
+// # 发送邮件验证码
+//
+// 用于发送邮件验证码，如果发送成功则返回 nil，否则返回具体的报错信息。会根据传入的场景进行邮件的发送。
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//   - mail: 邮箱地址(string)
+//   - scenes: 场景(constants.Scene)
+//
+// # 返回:
+//   - err: 如果发送过程中发生错误，返回错误信息。否则返回 nil.
+func (s *sMail) SendEmailVerificationCode(ctx context.Context, mail string, scenes constants.Scene) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] Mail:SendEmailVerificationCode | 发送邮件验证码")
 	wg := sync.WaitGroup{}
 	// 验证码存入数据库
-	err = dao.XfVerificationCode.Ctx(ctx).Transaction(ctx, func(_ context.Context, tx gdb.TX) error {
+	err = dao.VerificationCode.Ctx(ctx).Transaction(ctx, func(_ context.Context, tx gdb.TX) error {
 		sendMailData := vo.MailSendData{
-			Code:      utility.GetRandomString(6),
+			Code:      butil.RandomString(6),
 			Email:     "gm@x-lf.cn",
 			XiaoMain:  "XiaoMain",
 			Copyright: "CopyRight (C) 2016-2024 筱锋 All Rights Reserved.",
@@ -96,16 +124,16 @@ func (s *sMailLogic) SendEmailVerificationCode(ctx context.Context, mail string,
 		}
 		// 异步创建验证码的发送
 		wg.Add(1)
-		go func(ctx context.Context, mail string, scene consts.Scene, data vo.MailSendData) {
+		go func(ctx context.Context, mail string, scene constants.Scene, data vo.MailSendData) {
 			// 创建验证码并发送
 			err := s.sendMail(ctx, mail, scene, data)
 			if err != nil {
-				glog.Warningf(ctx, "[LOGIC] 发送邮件时发生错误，不进行数据库插入，错误原因：%s", err.Error())
+				g.Log().Warningf(ctx, "[LOGIC] 发送邮件时发生错误，不进行数据库插入，错误原因：%s", err.Error())
 			}
 			wg.Done()
 		}(ctx, mail, scenes, sendMailData)
 		// 存入验证码
-		_, err = tx.Insert(dao.XfVerificationCode.Table(), do.XfVerificationCode{
+		_, err = tx.Insert(dao.VerificationCode.Table(), do.VerificationCode{
 			Type:      true,
 			Contact:   mail,
 			Code:      sendMailData.Code,
@@ -113,8 +141,8 @@ func (s *sMailLogic) SendEmailVerificationCode(ctx context.Context, mail string,
 			ExpiredAt: gtime.NewFromTimeStamp(gtime.TimestampMicro() + 300000),
 		})
 		if err != nil {
-			glog.Warningf(ctx, "[LOGIC] 发送邮件时发生错误，回滚 %s 数据表中发送给 %s 的数据，错误原因：%s",
-				dao.XfVerificationCode.Table(),
+			g.Log().Warningf(ctx, "[LOGIC] 发送邮件时发生错误，回滚 %s 数据表中发送给 %s 的数据，错误原因：%s",
+				dao.VerificationCode.Table(),
 				mail,
 				err.Error(),
 			)
@@ -123,7 +151,7 @@ func (s *sMailLogic) SendEmailVerificationCode(ctx context.Context, mail string,
 		return nil
 	})
 	if err != nil {
-		return err
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	// 发送成功
 	wg.Wait()

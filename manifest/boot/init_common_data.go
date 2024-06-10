@@ -30,9 +30,8 @@ package boot
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/util/gconv"
-	"xiaoMain/internal/consts"
+	"xiaoMain/internal/constants"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
@@ -48,36 +47,36 @@ import (
 // 返回: 无
 func InitCommonData(ctx context.Context) {
 	// 从数据库读取邮件准备信息进入内存
-	var getSMTPHost entity.XfIndex
-	err := dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "smtp_host"}).Scan(&getSMTPHost)
+	var getSMTPHost entity.Index
+	err := dao.Index.Ctx(ctx).Where(do.Index{Key: "smtp_host"}).Scan(&getSMTPHost)
 	if err != nil {
-		glog.Panic(ctx, "[INIT] 获取邮件服务器地址失败")
+		g.Log().Panic(ctx, "[INIT] 获取邮件服务器地址失败")
 	}
-	var getSMTPPortTLS entity.XfIndex
-	err = dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "smtp_port_tls"}).Scan(&getSMTPPortTLS)
+	var getSMTPPortTLS entity.Index
+	err = dao.Index.Ctx(ctx).Where(do.Index{Key: "smtp_port_tls"}).Scan(&getSMTPPortTLS)
 	if err != nil {
-		glog.Panic(ctx, "[INIT] 获取邮件服务器端口失败")
+		g.Log().Panic(ctx, "[INIT] 获取邮件服务器端口失败")
 	}
-	var getSMTPPortSSL entity.XfIndex
-	err = dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "smtp_port_ssl"}).Scan(&getSMTPPortSSL)
+	var getSMTPPortSSL entity.Index
+	err = dao.Index.Ctx(ctx).Where(do.Index{Key: "smtp_port_ssl"}).Scan(&getSMTPPortSSL)
 	if err != nil {
-		glog.Panic(ctx, "[INIT] 获取邮件服务器端口失败")
+		g.Log().Panic(ctx, "[INIT] 获取邮件服务器端口失败")
 	}
-	var getSMTPUser entity.XfIndex
-	err = dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "smtp_user"}).Scan(&getSMTPUser)
+	var getSMTPUser entity.Index
+	err = dao.Index.Ctx(ctx).Where(do.Index{Key: "smtp_user"}).Scan(&getSMTPUser)
 	if err != nil {
-		glog.Panic(ctx, "[INIT] 获取邮件服务器用户名失败")
+		g.Log().Panic(ctx, "[INIT] 获取邮件服务器用户名失败")
 	}
-	var getSMTPPass entity.XfIndex
-	err = dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "smtp_pass"}).Scan(&getSMTPPass)
+	var getSMTPPass entity.Index
+	err = dao.Index.Ctx(ctx).Where(do.Index{Key: "smtp_pass"}).Scan(&getSMTPPass)
 	if err != nil {
-		glog.Panic(ctx, "[INIT] 获取邮件服务器密码失败")
+		g.Log().Panic(ctx, "[INIT] 获取邮件服务器密码失败")
 	}
 
 	// 数据写入 const
-	consts.SMTPHost = getSMTPHost.Value
-	consts.SMTPPortTLS = gconv.Int(getSMTPPortTLS.Value)
-	consts.SMTPPortSSL = gconv.Int(getSMTPPortSSL.Value)
-	consts.SMTPUser = getSMTPUser.Value
-	consts.SMTPPass = getSMTPPass.Value
+	constants.SMTPHost = getSMTPHost.Value
+	constants.SMTPPortTLS = gconv.Int(getSMTPPortTLS.Value)
+	constants.SMTPPortSSL = gconv.Int(getSMTPPortSSL.Value)
+	constants.SMTPUser = getSMTPUser.Value
+	constants.SMTPPass = getSMTPPass.Value
 }

@@ -10,6 +10,7 @@ gfcli:
     dao:
       - link: "pgsql:xf_index:123456@tcp(localhost:5432)/xf_index"
         jsonCase: "CamelLower"
+        removePrefix: "xf_"
 
   default:
     type: "pgsql"

@@ -31,7 +31,6 @@ package link
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility/result"
 
@@ -53,10 +52,10 @@ func (c *ControllerV1) LinkGetColorFull(
 	ctx context.Context,
 	req *v1.LinkGetColorFullReq,
 ) (res *v1.LinkGetColorFullRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 LinkGetColorFull 接口")
+	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkGetColorFull 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取颜色完整信息
-	getColor, err := service.LinkLogic().GetColor(ctx)
+	getColor, err := service.Link().GetColor(ctx)
 	if err != nil {
 		result.ServerInternalError.SetErrorMessage(err.Error()).Response(getRequest)
 	} else {

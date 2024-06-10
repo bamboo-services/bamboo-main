@@ -30,14 +30,13 @@ package boot
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/os/glog"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 )
 
 func InitialDesiredLocationTable(ctx context.Context) {
 	// 记录日志，开始初始化数据表
-	glog.Notice(ctx, "[BOOT] 初始化期望位置表")
+	g.Log().Notice(ctx, "[BOOT] 初始化期望位置表")
 
 	// 初始化期望位置表
 	insertLocationData(ctx, 1, "favorite", "最喜欢", "这是我最喜欢的东西，我当然要置顶啦", true)
@@ -46,19 +45,19 @@ func InitialDesiredLocationTable(ctx context.Context) {
 
 // insertLocationData 插入数据，用于信息初始化进行的操作
 func insertLocationData(ctx context.Context, sort uint, name string, displayName string, desc string, reveal bool) {
-	if record, _ := dao.XfLocation.Ctx(ctx).Where(do.XfLocation{Name: name}).One(); record == nil {
-		if _, err := dao.XfLocation.Ctx(ctx).Data(
-			do.XfLocation{
+	if record, _ := dao.Location.Ctx(ctx).Where(do.Location{Name: name}).One(); record == nil {
+		if _, err := dao.Location.Ctx(ctx).Data(
+			do.Location{
 				Sort:        sort,
 				Name:        name,
 				DisplayName: displayName,
 				Description: desc,
 				Reveal:      reveal,
 			}).Insert(); err != nil {
-			glog.Noticef(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 失败", name)
-			glog.Errorf(ctx, "[SQL] 错误信息：%v", err.Error())
+			g.Log().Noticef(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 失败", name)
+			g.Log().Errorf(ctx, "[SQL] 错误信息：%v", err.Error())
 		} else {
-			glog.Debugf(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 成功", name)
+			g.Log().Debugf(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 成功", name)
 		}
 	}
 }

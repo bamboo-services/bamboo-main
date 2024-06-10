@@ -31,7 +31,6 @@ package link
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility/result"
 
@@ -51,14 +50,14 @@ func (c *ControllerV1) LinkColorAdd(
 	ctx context.Context,
 	req *v1.LinkColorAddReq,
 ) (res *v1.LinkColorAddRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 LinkColorAdd 接口")
+	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkColorAdd 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
-	if err = service.LinkLogic().CheckColorExist(ctx, req.Name); err != nil {
+	if err = service.Link().CheckColorExist(ctx, req.Name); err != nil {
 		result.ExistedError.SetErrorMessage(err.Error()).Response(getRequest)
 		return nil, nil
 	}
 	// 添加链接颜色
-	if err = service.LinkLogic().AddColor(ctx, req.Name, req.DisplayName, req.Color, req.Select); err == nil {
+	if err = service.Link().AddColor(ctx, req.Name, req.DisplayName, req.Color, req.Select); err == nil {
 		result.Success("添加成功", nil).Response(getRequest)
 	} else {
 		result.ServerInternalError.SetErrorMessage(err.Error()).Response(getRequest)

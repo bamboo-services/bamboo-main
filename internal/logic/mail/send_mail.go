@@ -30,11 +30,12 @@ package mail
 
 import (
 	"context"
-	"errors"
-	"github.com/gogf/gf/v2/os/glog"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
+	"github.com/gogf/gf/v2/frame/g"
 	"gopkg.in/gomail.v2"
 	"strings"
-	"xiaoMain/internal/consts"
+	"xiaoMain/internal/constants"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
@@ -42,42 +43,42 @@ import (
 	"xiaoMain/utility"
 )
 
-// sendMail 是一个发送邮件的函数。
+// sendMail
 //
-// 它接收以下参数：
-// - ctx: context.Context 类型，表示上下文。
-// - mail: string 类型，表示接收邮件的邮箱地址。
-// - template: consts.Scene 类型，表示邮件模板的场景。
-// - data: vo.MailSendData 类型，表示邮件的数据。
+// # 发送邮件
 //
-// 函数首先从数据库中获取邮件模板，然后替换模板中的占位符，最后使用 SMTP 服务器发送邮件。
+// 用于发送邮件，如果发送成功则返回 nil，否则返回错误信息。会根据传入的模板进行邮件的发送。
 //
-// 如果在获取邮件模板或发送邮件时出现错误，函数将返回这个错误。
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//   - mail: 邮箱地址(string)
+//   - template: 邮件模板(constants.Scene)
+//   - data: 邮件发送数据(vo.MailSendData)
 //
-// 返回:
-// - error 类型，表示可能出现的错误。如果没有错误，返回 nil。
-func (s *sMailLogic) sendMail(
+// # 返回:
+//   - err: 如果发送过程中发生错误，返回错误信息。否则返回 nil.
+func (s *sMail) sendMail(
 	ctx context.Context,
 	mail string,
-	template consts.Scene,
+	template constants.Scene,
 	data vo.MailSendData,
 ) (err error) {
-	glog.Notice(ctx, "[LOGIC] 执行 MailLogic:sendMail 服务层")
+	g.Log().Notice(ctx, "[LOGIC] Mail:sendMail | 发送邮件")
 
 	// 数据库邮件模板
-	var getMailTemplateTitle entity.XfIndex
-	var getMailTemplate entity.XfIndex
-	err = dao.XfIndex.Ctx(ctx).
-		Where(do.XfIndex{Key: "mail_template_" + utility.GetMailTemplateByScene(template) + "_title"}).
+	var getMailTemplateTitle entity.Index
+	var getMailTemplate entity.Index
+	err = dao.Index.Ctx(ctx).
+		Where(do.Index{Key: "mail_template_" + utility.GetMailTemplateByScene(template) + "_title"}).
 		Limit(1).Scan(&getMailTemplateTitle)
 	if err != nil {
-		return errors.New("未查询到邮件模板")
+		return berror.NewError(bcode.ServerInternalError, "未查询到邮件模板标题")
 	}
-	err = dao.XfIndex.Ctx(ctx).
-		Where(do.XfIndex{Key: "mail_template_" + utility.GetMailTemplateByScene(template)}).
+	err = dao.Index.Ctx(ctx).
+		Where(do.Index{Key: "mail_template_" + utility.GetMailTemplateByScene(template)}).
 		Limit(1).Scan(&getMailTemplate)
 	if err != nil {
-		return errors.New("未查询到邮件模板")
+		return berror.NewError(bcode.ServerInternalError, "未查询到邮件模板标题")
 	}
 
 	// 对邮件模板的替换
@@ -92,12 +93,12 @@ func (s *sMailLogic) sendMail(
 	sendMail := gomail.NewMessage()
 	// 设置需要发送的人
 	sendMail.SetHeader("To", mail)
-	sendMail.SetHeader("From", consts.SMTPUser)
+	sendMail.SetHeader("From", constants.SMTPUser)
 	sendMail.SetHeader("Subject", getMailTemplateTitle.Value)
 	sendMail.SetBody("text/html", mailTemplate)
 
 	// 配置邮件服务器
-	dialer := gomail.NewDialer(consts.SMTPHost, utility.GetMailSendPort(ctx), consts.SMTPUser, consts.SMTPPass)
+	dialer := gomail.NewDialer(constants.SMTPHost, utility.GetMailSendPort(ctx), constants.SMTPUser, constants.SMTPPass)
 	// 发送邮件
 	return dialer.DialAndSend(sendMail)
 }

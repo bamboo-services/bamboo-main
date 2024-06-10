@@ -38,24 +38,34 @@ import (
 )
 
 type (
-	IUserMailLogic interface {
-		// CheckUserMail
-		// 检查用户输入的邮箱是否与数据库存储的邮箱保持正确，若保持争取的信息将会返回布尔值正确，否则返回错误
-		CheckMailHasConsoleUser(ctx context.Context, email string) (checkMail bool, info string)
+	IUserLogic interface {
+		// CheckMailHasConsoleUser 这个函数的主要作用是检查用户输入的邮箱地址是否与数据库中存储的邮箱地址匹配
+		// 在具体实现中，函数首先从数据库中获取指定的邮箱信息，然后将用户输入的邮箱地址与数据库中的邮箱地址进行比较。如果两者匹配，函数将返回 true 和
+		// "邮箱匹配" 的信息；如果两者不匹配，函数将返回 false 和 "邮箱不匹配" 的信息。如果在查询数据库过程中出现错误，函数将返回 false 和 "未查询
+		// 到邮箱" 的信息。
+		//
+		// 参数:
+		// ctx: 请求的上下文，用于管理超时和取消信号。
+		// email: 用户输入的邮箱地址。
+		//
+		// 返回:
+		// checkMail: 如果用户输入的邮箱与数据库中的邮箱匹配，则返回 true，否则返回 false。
+		// info: 返回的信息，如果邮箱匹配，返回 "邮箱匹配"，如果不匹配，返回 "邮箱不匹配"，如果查询过程中出现错误，返回 "未查询到邮箱"。
+		CheckMailHasConsoleUser(ctx context.Context, email string) (checkMail bool, err error)
 	}
 )
 
 var (
-	localUserMailLogic IUserMailLogic
+	localUserLogic IUserLogic
 )
 
-func UserMailLogic() IUserMailLogic {
-	if localUserMailLogic == nil {
-		panic("implement not found for interface IUserMailLogic, forgot register?")
+func UserLogic() IUserLogic {
+	if localUserLogic == nil {
+		panic("implement not found for interface IUserLogic, forgot register?")
 	}
-	return localUserMailLogic
+	return localUserLogic
 }
 
-func RegisterUserLogic(i IUserMailLogic) {
-	localUserMailLogic = i
+func RegisterUserLogic(i IUserLogic) {
+	localUserLogic = i
 }

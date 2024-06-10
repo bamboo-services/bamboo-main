@@ -30,7 +30,7 @@ package info
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/os/glog"
+	"github.com/gogf/gf/v2/frame/g"
 	"sync"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
@@ -39,55 +39,57 @@ import (
 	"xiaoMain/internal/service"
 )
 
-type sInfoLogic struct {
+type sInfo struct {
 }
 
 func init() {
-	service.RegisterInfoLogic(New())
+	service.RegisterInfo(New())
 }
 
-func New() *sInfoLogic {
-	return &sInfoLogic{}
+func New() *sInfo {
+	return &sInfo{}
 }
 
-// GetMainInfo 获取主要信息
+// GetMainInfo
+//
+// # 获取主要信息
+//
 // 用于获取主要信息，如果返回成功则返回具体的信息，若某些情况下无法获取则获取的内容为空
-// 接口的返回都会有结果，如果返回错误将会返回空值
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
 //
-// 返回：
-// getMainInfo: 如果获取成功，返回具体的信息；否则返回空值。
-func (s *sInfoLogic) GetMainInfo(ctx context.Context) *vo.MainVO {
-	glog.Notice(ctx, "[LOGIC] 执行 InfoLogic:GetMainInfo 服务层")
+// # 返回:
+//   - *vo.MainVO: 如果获取成功，返回具体的信息；否则返回空值。
+func (s *sInfo) GetMainInfo(ctx context.Context) *vo.MainVO {
+	g.Log().Notice(ctx, "[LOGIC] 执行 InfoLogic:GetMainInfo 服务层")
 	getMainInfo := new(vo.MainVO)
 	wg := sync.WaitGroup{}
 	// 获取名字信息
 	wg.Add(5)
 	go func() {
 		defer wg.Done()
-		getMainInfo.SiteName = s.getXfIndexTableData(ctx, "site_name")
+		getMainInfo.SiteName = s.GetIndexTableData(ctx, "site_name")
 	}()
 	// 获取版本信息
 	go func() {
 		defer wg.Done()
-		getMainInfo.Version = s.getXfIndexTableData(ctx, "version")
+		getMainInfo.Version = s.GetIndexTableData(ctx, "version")
 	}()
 	// 获取作者信息
 	go func() {
 		defer wg.Done()
-		getMainInfo.Author = s.getXfIndexTableData(ctx, "author")
+		getMainInfo.Author = s.GetIndexTableData(ctx, "author")
 	}()
 	// 获取站点描述
 	go func() {
 		defer wg.Done()
-		getMainInfo.Description = s.getXfIndexTableData(ctx, "description")
+		getMainInfo.Description = s.GetIndexTableData(ctx, "description")
 	}()
 	// 获取站点关键字
 	go func() {
 		defer wg.Done()
-		getMainInfo.Keywords = s.getXfIndexTableData(ctx, "keywords")
+		getMainInfo.Keywords = s.GetIndexTableData(ctx, "keywords")
 	}()
 
 	// 等待所有协程执行完毕
@@ -96,39 +98,41 @@ func (s *sInfoLogic) GetMainInfo(ctx context.Context) *vo.MainVO {
 	return getMainInfo
 }
 
-// GetBloggerInfo 获取站长信息
-// 主要用于获取站点作者的一些基本信息，如果返回成功则返回具体的信息，若某些情况下无法获取则获取的内容为空
-// 接口的返回都会有结果，如果返回错误将会返回空值
+// GetBloggerInfo
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
+// # 获取站长信息
 //
-// 返回：
-// getBloggerInfo: 如果获取成功，返回具体的信息；否则返回空值。
-func (s *sInfoLogic) GetBloggerInfo(ctx context.Context) *vo.BloggerVO {
-	glog.Notice(ctx, "[LOGIC] 执行 InfoLogic:GetBloggerInfo 服务层")
+// 用于获取站长信息，如果返回成功则返回具体的信息，若某些情况下无法获取则获取的内容为空
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//
+// # 返回:
+//   - *vo.BloggerVO: 如果获取成功，返回具体的信息；否则返回空值。
+func (s *sInfo) GetBloggerInfo(ctx context.Context) *vo.BloggerVO {
+	g.Log().Notice(ctx, "[LOGIC] 执行 InfoLogic:GetBloggerInfo 服务层")
 	getBloggerInfo := new(vo.BloggerVO)
 	wg := sync.WaitGroup{}
 	// 获取站长名字
 	wg.Add(4)
 	go func() {
 		defer wg.Done()
-		getBloggerInfo.Name = s.getXfIndexTableData(ctx, "blogger_name")
+		getBloggerInfo.Name = s.GetIndexTableData(ctx, "blogger_name")
 	}()
 	// 获取站长昵称
 	go func() {
 		defer wg.Done()
-		getBloggerInfo.Nick = s.getXfIndexTableData(ctx, "blogger_nick")
+		getBloggerInfo.Nick = s.GetIndexTableData(ctx, "blogger_nick")
 	}()
 	// 获取站长邮箱
 	go func() {
 		defer wg.Done()
-		getBloggerInfo.Email = s.getXfIndexTableData(ctx, "email")
+		getBloggerInfo.Email = s.GetIndexTableData(ctx, "email")
 	}()
 	// 获取站长的描述
 	go func() {
 		defer wg.Done()
-		getBloggerInfo.Description = s.getXfIndexTableData(ctx, "blogger_description")
+		getBloggerInfo.Description = s.GetIndexTableData(ctx, "blogger_description")
 	}()
 
 	// 等待所有的进程结束
@@ -136,24 +140,25 @@ func (s *sInfoLogic) GetBloggerInfo(ctx context.Context) *vo.BloggerVO {
 	return getBloggerInfo
 }
 
-// getXfIndexTableData 从数据库获取主要信息
-// 用于获取主要信息，如果返回成功则返回具体的信息，若某些情况下无法获取则获取的内容为空
-// 忽略了报错行为，所以获取不到数据都会返回空的内容，若成功获取会返回具体的内容
+// GetIndexTableData
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// wg: 等待组，用于等待协程执行完毕。
-// name: 获取的信息名称。
+// # 获取 Index 数据库中的信息
 //
-// 返回：
-// getData: 如果获取成功，返回具体的信息；否则返回空值。
-func (s *sInfoLogic) getXfIndexTableData(ctx context.Context, name string) string {
-	glog.Infof(ctx, "[LOGIC-PRIVATE] 获取 XfIndex 数据库中 %s 的信息", name)
-	var getInfo *entity.XfIndex
+// 用于获取 Index 数据库中的信息，如果成功则返回具体的信息，否则返回空值
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//   - name: 需要获取的信息名称(string)
+//
+// # 返回:
+//   - string: 如果获取成功，返回具体的信息；否则返回空值。
+func (s *sInfo) GetIndexTableData(ctx context.Context, name string) string {
+	g.Log().Infof(ctx, "[LOGIC-PRIVATE] 获取 Index 数据库中 %s 的信息", name)
+	var getInfo *entity.Index
 	if name != "" {
-		err := dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: name}).Scan(&getInfo)
+		err := dao.Index.Ctx(ctx).Where(do.Index{Key: name}).Scan(&getInfo)
 		if err == nil {
-			glog.Debugf(ctx, "[SQL] 数据表 xf_index 中获取键 %s 成功, 值为 %s", name, getInfo.Value)
+			g.Log().Debugf(ctx, "[SQL] 数据表 xf_index 中获取键 %s 成功, 值为 %s", name, getInfo.Value)
 			return getInfo.Value
 		}
 	}

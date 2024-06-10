@@ -31,7 +31,6 @@ package link
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility/result"
@@ -50,15 +49,15 @@ import (
 // res: 如果获取期望颜色信息成功，返回期望颜色信息；否则返回错误。
 // err: 如果获取期望颜色信息成功，返回 nil；否则返回错误。
 func (c *ControllerV1) LinkGetColor(ctx context.Context, _ *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 LinkGetColor 接口")
+	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkGetColor 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取期望颜色信息
-	getColor, err := service.LinkLogic().GetColor(ctx)
+	getColor, err := service.Link().GetColor(ctx)
 	if err != nil {
 		result.ServerInternalError.SetErrorMessage("数据库操作失败").Response(getRequest)
 	}
 	if getColor != nil {
-		glog.Debugf(ctx, "[CONTROL] 获取期望颜色信息成功, 数量[%d]", len(getColor))
+		g.Log().Debugf(ctx, "[CONTROL] 获取期望颜色信息成功, 数量[%d]", len(getColor))
 		getColorList := make([]vo.LinkColorVO, len(getColor))
 		for i, color := range getColor {
 			getColorList[i] = vo.LinkColorVO{

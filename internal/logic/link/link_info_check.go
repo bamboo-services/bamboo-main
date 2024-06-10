@@ -30,88 +30,98 @@ package link
 
 import (
 	"context"
-	"errors"
-	"github.com/gogf/gf/v2/os/glog"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
 )
 
-// CheckLinkName 检查链接名是否重复
+// CheckLinkName
+//
+// # 检查地址信息
+//
 // 用于检查用户添加的链接名是否已经存在，如果存在则返回错误，否则返回成功
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// linkName: 用户尝试添加的链接名。
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//   - linkName: 用户尝试添加的链接名。
 //
-// 返回：
-// err: 如果链接名已存在，返回错误；否则返回 nil。
-func (s *sLinkLogic) CheckLinkName(ctx context.Context, linkName string) (err error) {
-	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckLinkName 服务层")
+// # 返回:
+//   - err: 如果链接名已存在，返回错误；否则返回 nil.
+func (s *sLink) CheckLinkName(ctx context.Context, linkName string) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] Link:CheckLinkName | 检查地址信息")
 	// 检查链接名是否重复
-	var linkInfo *do.XfLinkList
-	err = dao.XfLinkList.Ctx(ctx).Where(do.XfLinkList{SiteName: linkName}).Scan(&linkInfo)
+	var linkInfo *do.LinkList
+	err = dao.LinkList.Ctx(ctx).Where(do.LinkList{SiteName: linkName}).Scan(&linkInfo)
 	if err != nil {
-		glog.Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
-		return errors.New("数据库查询错误")
+		g.Log().Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	if linkInfo != nil {
-		glog.Errorf(ctx, "[LOGIC] 网站名已存在，网站名：%s", linkName)
-		return errors.New("网站名已存在")
+		g.Log().Errorf(ctx, "[LOGIC] 网站名已存在，网站名：%s", linkName)
+		return berror.NewError(bcode.AlreadyExists, "网站名已存在")
 	} else {
 		return nil
 	}
 }
 
-// CheckLinkURL 检查链接URL是否重复
-// 用于检查用户添加的链接URL是否已经存在，如果存在则返回错误，否则返回成功
+// CheckLinkURL
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// siteURL: 用户尝试添加的链接URL。
+// # 检查链接地址
 //
-// 返回：
-// err: 如果链接URL已存在，返回错误；否则返回 nil。
-func (s *sLinkLogic) CheckLinkURL(ctx context.Context, siteURL string) (err error) {
-	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckLinkUrl 服务层")
+// 用于检查用户添加的链接地址是否已经存在，如果存在则返回错误，否则返回成功
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//   - siteURL: 用户尝试添加的链接地址。
+//
+// # 返回:
+//   - err: 如果链接地址已存在，返回错误；否则返回 nil.
+func (s *sLink) CheckLinkURL(ctx context.Context, siteURL string) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] Link:CheckLinkUrl | 检查链接地址")
 	// 检查链接名是否重复
-	var linkInfo *do.XfLinkList
-	err = dao.XfLinkList.Ctx(ctx).Where(do.XfLinkList{SiteUrl: siteURL}).Scan(&linkInfo)
+	var linkInfo *do.LinkList
+	err = dao.LinkList.Ctx(ctx).Where(do.LinkList{SiteUrl: siteURL}).Scan(&linkInfo)
 	if err != nil {
-		glog.Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
-		return errors.New("数据库查询错误")
+		g.Log().Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	if linkInfo != nil {
-		glog.Errorf(ctx, "[LOGIC] 网站链接已存在，网站链接：%s", siteURL)
-		return errors.New("网站链接已存在")
+		g.Log().Errorf(ctx, "[LOGIC] 网站链接已存在，网站链接：%s", siteURL)
+		return berror.NewError(bcode.AlreadyExists, "网站链接已存在")
 	} else {
 		return nil
 	}
 }
 
-// CheckLinkHasConnect 检查链接是否已经连接
-// 用于检查链接是否已经连接，如果成功则返回 nil，否则返回错误。
-// 本接口会根据已有的链接信息对链接进行链接检查是否可以连接，若连接失败返回失败信息，若成功返回成功信息
+// CheckLinkHasConnect
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// linkID: 用户尝试添加的链接ID。
+// # 检查链接是否可以连接
 //
-// 返回：
-// err: 如果链接已连接，返回错误；否则返回 nil。
-func (s *sLinkLogic) CheckLinkHasConnect(ctx context.Context, linkID string) (delay *int64, err error) {
-	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckLinkHasConnect 服务层")
+// 用于检查用户添加的链接地址是否可以连接，如果可以则返回 nil，否则返回错误
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//   - linkID: 用户尝试添加的链接ID。
+//
+// # 返回:
+//   - delay: 如果链接可以连接，返回延迟时间；否则返回错误.
+//   - err: 如果链接不存在，返回错误；否则返回 nil.
+func (s *sLink) CheckLinkHasConnect(ctx context.Context, linkID string) (delay *int64, err error) {
+	g.Log().Notice(ctx, "[LOGIC] Link:CheckLinkHasConnect | 检查链接是否可以连接")
 	// 获取链接信息
-	var getLink *entity.XfLinkList
-	err = dao.XfLinkList.Ctx(ctx).Where(do.XfLinkList{Id: linkID}).Scan(&getLink)
+	var getLink *entity.LinkList
+	err = dao.LinkList.Ctx(ctx).Where(do.LinkList{Id: linkID}).Scan(&getLink)
 	if err != nil {
-		glog.Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
-		return nil, errors.New("数据库查询错误")
+		g.Log().Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
+		return nil, berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	if getLink == nil {
-		glog.Warningf(ctx, "[LOGIC] 链接不存在，链接ID[%s]", linkID)
-		return nil, errors.New("链接不存在")
+		g.Log().Warningf(ctx, "[LOGIC] 链接不存在，链接ID[%s]", linkID)
+		return nil, berror.NewError(bcode.NotExist, "链接不存在")
 	}
 	// 检查链接是否可以连接
 	getNowTimestamp := gtime.Now().TimestampMicro()
@@ -124,109 +134,86 @@ func (s *sLinkLogic) CheckLinkHasConnect(ctx context.Context, linkID string) (de
 	return delay, nil
 }
 
-// HasColorByName 获取颜色信息
+// IsColorExistByName
+//
+// # 获取颜色信息
+//
 // 用于获取颜色信息，如果成功则返回颜色信息，否则返回错误。
-// 本接口会根据已有的颜色信息对颜色进行查询，若查询失败返回失败信息，若成功返回成功信息
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// getColor: 用户尝试获取的颜色名称。
+// # 参数:
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - getColor: 用户尝试获取的颜色名称。
 //
-// 返回：
-// bool: 如果颜色存在，返回 false；否则返回 true。
-func (s *sLinkLogic) HasColorByName(ctx context.Context, getColor string) bool {
-	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:HasColorByName 服务层")
+// # 返回:
+//   - err: 如果颜色存在，返回错误；否则返回 nil.
+func (s *sLink) IsColorExistByName(ctx context.Context, getColor string) error {
+	g.Log().Notice(ctx, "[LOGIC] Link:IsColorExistByName | 获取颜色信息")
 	// 查询指定的颜色是否存在
-	var getColorInfo *entity.XfColor
-	err := dao.XfColor.Ctx(ctx).Where(do.XfColor{Name: getColor}).Scan(&getColorInfo)
+	var getColorInfo *entity.Color
+	err := dao.Color.Ctx(ctx).Where(do.Color{Name: getColor}).Scan(&getColorInfo)
 	if err != nil {
-		glog.Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
-		return false
+		g.Log().Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	if getColorInfo != nil {
-		glog.Errorf(ctx, "[LOGIC] 颜色已存在，颜色：%s", getColor)
-		return false
+		return nil
 	} else {
-		return true
+		return berror.NewError(bcode.NotExist, "颜色不存在")
 	}
 }
 
-// HasColorByColor 获取颜色信息
+// IsColorExistByColorID
+//
+// # 获取颜色信息
+//
 // 用于获取颜色信息，如果成功则返回颜色信息，否则返回错误。
-// 本接口会根据已有的颜色信息对颜色进行查询，若查询失败返回失败信息，若成功返回成功信息
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// getColor: 用户尝试获取的颜色名称。
+// # 参数:
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - getColor: 用户尝试获取的颜色名称。
 //
-// 返回：
-// bool: 如果颜色存在，返回 false；否则返回 true。
-func (s *sLinkLogic) HasColorByColor(ctx context.Context, getColor string) bool {
-	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:HasColorByColor 服务层")
+// # 返回:
+//   - err: 如果颜色存在，返回错误；否则返回 nil.
+func (s *sLink) IsColorExistByColorID(ctx context.Context, getColor string) error {
+	g.Log().Notice(ctx, "[LOGIC] Link:IsColorExistByColorID | 获取颜色信息")
 	// 查询指定的颜色是否存在
-	var getColorInfo *entity.XfColor
-	err := dao.XfColor.Ctx(ctx).Where(do.XfColor{Color: getColor}).Scan(&getColorInfo)
+	var getColorInfo *entity.Color
+	err := dao.Color.Ctx(ctx).Where(do.Color{Color: getColor}).Scan(&getColorInfo)
 	if err != nil {
-		glog.Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
-		return false
+		g.Log().Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	if getColorInfo != nil {
-		glog.Errorf(ctx, "[LOGIC] 颜色已存在，颜色：%s", getColor)
-		return false
+		return nil
 	} else {
-		return true
+		return berror.NewError(bcode.NotExist, "颜色不存在")
 	}
 }
 
-// CheckLocationExist 检查位置是否存在
-// 用于检查位置是否存在，如果成功则返回 nil，否则返回错误。
-// 本接口会根据已有的位置信息对位置进行查询，若查询失败返回失败信息，若成功返回成功信息
+// IsLocationExist
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// name: 用户尝试添加的位置名称。
+// # 获取位置信息
 //
-// 返回：
-// err: 如果位置存在，返回错误；否则返回 nil。
-func (s *sLinkLogic) CheckLocationExist(ctx context.Context, name string) (err error) {
-	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckLocationExist 服务层")
+// 用于获取位置信息，如果成功则返回位置信息，否则返回错误。
+//
+// # 参数:
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - name: 用户尝试获取的位置名称。
+//
+// # 返回:
+//   - err: 如果位置存在，返回错误；否则返回 nil.
+func (s *sLink) IsLocationExist(ctx context.Context, name string) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] 执行 Link:IsLocationExist 服务层")
 	// 查询指定的位置是否存在
-	var getLocationInfo *entity.XfLocation
-	err = dao.XfLocation.Ctx(ctx).Where(do.XfLocation{Name: name}).Scan(&getLocationInfo)
+	var getLocationInfo *entity.Location
+	err = dao.Location.Ctx(ctx).Where(do.Location{Name: name}).Scan(&getLocationInfo)
 	if err != nil {
-		glog.Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
-		return errors.New("数据库查询错误")
+		g.Log().Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	if getLocationInfo != nil {
-		glog.Warningf(ctx, "[LOGIC] 位置已存在，位置：%s", name)
-		return errors.New("位置已存在")
-	} else {
 		return nil
-	}
-}
-
-// CheckColorExist 检查颜色是否存在
-// 用于检查颜色是否存在，如果成功则返回 nil，否则返回错误。
-// 本接口会根据已有的颜色信息对颜色进行查询，若查询失败返回失败信息，若成功返回成功信息
-//
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// getName: 用户尝试添加的颜色名称。
-//
-// 返回：
-// err: 如果颜色存在，返回错误；否则返回 nil。
-func (s *sLinkLogic) CheckColorExist(ctx context.Context, getName string) (err error) {
-	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckColorExist 服务层")
-	var getColorInfo *entity.XfColor
-	err = dao.XfColor.Ctx(ctx).Where(do.XfColor{Name: getName}).Scan(&getColorInfo)
-	if err != nil {
-		glog.Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
-		return errors.New("数据库查询错误")
-	}
-	if getColorInfo != nil {
-		glog.Warningf(ctx, "[LOGIC] 颜色已存在，颜色：%s", getName)
-		return errors.New("颜色已存在")
 	} else {
-		return nil
+		return berror.NewError(bcode.NotExist, "位置不存在")
 	}
 }

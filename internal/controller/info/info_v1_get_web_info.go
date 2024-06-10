@@ -31,7 +31,6 @@ package info
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
 	"sync"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
@@ -51,7 +50,7 @@ import (
 // 返回：
 // res: 如果获取系统信息成功，返回 nil；否则返回错误。
 func (c *ControllerV1) GetWebInfo(ctx context.Context, req *v1.GetWebInfoReq) (res *v1.GetWebInfoRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 GetSystemInfo 接口")
+	g.Log().Notice(ctx, "[CONTROL] 控制层 GetSystemInfo 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	returnData := new(vo.WebInfoRes)
 	// 获取系统信息
@@ -61,7 +60,7 @@ func (c *ControllerV1) GetWebInfo(ctx context.Context, req *v1.GetWebInfoReq) (r
 	wg.Add(1)
 	go func() { returnData.Blogger = service.InfoLogic().GetBloggerInfo(ctx); wg.Done() }()
 	wg.Wait()
-	glog.Debugf(ctx, "获取参数 returnData 值 %v", returnData)
+	g.Log().Debugf(ctx, "获取参数 returnData 值 %v", returnData)
 	result.Success("获取成功", returnData).Response(getRequest)
 	return nil, nil
 }

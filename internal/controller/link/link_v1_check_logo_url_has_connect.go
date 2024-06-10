@@ -31,7 +31,6 @@ package link
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtime"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
@@ -55,11 +54,11 @@ func (c *ControllerV1) CheckLogoURLHasConnect(
 	ctx context.Context,
 	req *v1.CheckLogoURLHasConnectReq,
 ) (res *v1.CheckLogoURLHasConnectRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 CheckLogoURLHasConnect 接口")
+	g.Log().Notice(ctx, "[CONTROL] 控制层 CheckLogoURLHasConnect 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取 Logo 链接是否已经连接
 	getNowTimestamp := gtime.TimestampMilli()
-	err = service.LinkLogic().CheckLogoCanAccess(ctx, req.LogoURL)
+	err = service.Link().CheckLogoCanAccess(ctx, req.LogoURL)
 	if err != nil {
 		result.Success("站点读取失败", vo.LinkConnectRes{
 			Message: err.Error(),

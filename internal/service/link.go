@@ -40,123 +40,137 @@ import (
 )
 
 type (
-	ILinkLogic interface {
-		// CheckLinkCanAccess 检查链接是否可以访问
-		// 用于检查用户添加的链接是否可以访问，如果可以访问则返回 nil，否则返回错误
+	ILink interface {
+		// CheckLinkCanAccess
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// siteURL: 用户尝试添加的链接地址。
+		// # 检查链接是否可以访问
 		//
-		// 返回：
-		// err: 如果链接可以访问，返回 nil；否则返回错误。
+		// 用于检查用户添加的链接是否可以访问，如果可以访问则返回 nil，否则返回错误。
+		//
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - siteURL: 网站地址(string)
+		//
+		// # 返回:
+		//   - err: 如果链接可以访问，返回 nil。否则返回错误信息。
 		CheckLinkCanAccess(ctx context.Context, siteURL string) (err error)
-		// CheckLogoCanAccess 检查 Logo 是否可以访问
-		// 用于检查用户添加的 Logo 是否可以访问，如果可以访问则返回 nil，否则返回错误
-		// 并且检查获取的状态是否是图片，如果不是图片则返回错误，否则返回 nil
+		// CheckLogoCanAccess
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// siteLogo: 用户尝试添加的 Logo 地址。
+		// # 检查 Logo 是否可以访问
 		//
-		// 返回：
-		// err: 如果 Logo 可以访问，返回 nil；否则返回错误。
+		// 用于检查用户添加的 Logo 是否可以访问，如果可以访问则返回 nil，否则返回错误。
+		//
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - siteLogo: 网站 Logo 地址(string)
+		//
+		// # 返回:
+		//   - err: 如果 Logo 可以访问，返回 nil。否则返回错误信息。
 		CheckLogoCanAccess(ctx context.Context, siteLogo string) (err error)
-		// CheckRSSCanAccess 检查链接是否可以访问
-		// 用于检查用户添加的链接是否可以访问，如果可以访问则返回 nil，否则返回错误
-		// 还需要检查是否为 RSS URL 是否为 XML 格式
+		// CheckRSSCanAccess
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// siteRSS: 用户尝试添加的 RSS 地址。
+		// # 检查 RSS 是否可以访问
 		//
-		// 返回：
-		// err: 如果链接可以访问，返回 nil；否则返回错误。
+		// 用于检查用户添加的 RSS 是否可以访问，如果可以访问则返回 nil，否则返回错误。
+		//
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - siteRSS: 网站 RSS 地址(string)
+		//
+		// # 返回:
+		//   - err: 如果 RSS 可以访问，返回 nil。否则返回错误信息。
 		CheckRSSCanAccess(ctx context.Context, siteRSS string) (err error)
-		// CheckLinkName 检查链接名是否重复
+		// CheckLinkName
+		//
+		// # 检查地址信息
+		//
 		// 用于检查用户添加的链接名是否已经存在，如果存在则返回错误，否则返回成功
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// linkName: 用户尝试添加的链接名。
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - linkName: 用户尝试添加的链接名。
 		//
-		// 返回：
-		// err: 如果链接名已存在，返回错误；否则返回 nil。
+		// # 返回:
+		//   - err: 如果链接名已存在，返回错误；否则返回 nil.
 		CheckLinkName(ctx context.Context, linkName string) (err error)
-		// CheckLinkURL 检查链接URL是否重复
-		// 用于检查用户添加的链接URL是否已经存在，如果存在则返回错误，否则返回成功
+		// CheckLinkURL
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// siteURL: 用户尝试添加的链接URL。
+		// # 检查链接地址
 		//
-		// 返回：
-		// err: 如果链接URL已存在，返回错误；否则返回 nil。
+		// 用于检查用户添加的链接地址是否已经存在，如果存在则返回错误，否则返回成功
+		//
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - siteURL: 用户尝试添加的链接地址。
+		//
+		// # 返回:
+		//   - err: 如果链接地址已存在，返回错误；否则返回 nil.
 		CheckLinkURL(ctx context.Context, siteURL string) (err error)
-		// CheckLinkHasConnect 检查链接是否已经连接
-		// 用于检查链接是否已经连接，如果成功则返回 nil，否则返回错误。
-		// 本接口会根据已有的链接信息对链接进行链接检查是否可以连接，若连接失败返回失败信息，若成功返回成功信息
+		// CheckLinkHasConnect
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// linkID: 用户尝试添加的链接ID。
+		// # 检查链接是否可以连接
 		//
-		// 返回：
-		// err: 如果链接已连接，返回错误；否则返回 nil。
+		// 用于检查用户添加的链接地址是否可以连接，如果可以则返回 nil，否则返回错误
+		//
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - linkID: 用户尝试添加的链接ID。
+		//
+		// # 返回:
+		//   - delay: 如果链接可以连接，返回延迟时间；否则返回错误.
+		//   - err: 如果链接不存在，返回错误；否则返回 nil.
 		CheckLinkHasConnect(ctx context.Context, linkID string) (delay *int64, err error)
-		// HasColorByName 获取颜色信息
+		// IsColorExistByName
+		//
+		// # 获取颜色信息
+		//
 		// 用于获取颜色信息，如果成功则返回颜色信息，否则返回错误。
-		// 本接口会根据已有的颜色信息对颜色进行查询，若查询失败返回失败信息，若成功返回成功信息
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// getColor: 用户尝试获取的颜色名称。
+		// # 参数:
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//   - getColor: 用户尝试获取的颜色名称。
 		//
-		// 返回：
-		// bool: 如果颜色存在，返回 false；否则返回 true。
-		HasColorByName(ctx context.Context, getColor string) bool
-		// HasColorByColor 获取颜色信息
+		// # 返回:
+		//   - err: 如果颜色存在，返回错误；否则返回 nil.
+		IsColorExistByName(ctx context.Context, getColor string) error
+		// IsColorExistByColorID
+		//
+		// # 获取颜色信息
+		//
 		// 用于获取颜色信息，如果成功则返回颜色信息，否则返回错误。
-		// 本接口会根据已有的颜色信息对颜色进行查询，若查询失败返回失败信息，若成功返回成功信息
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// getColor: 用户尝试获取的颜色名称。
+		// # 参数:
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//   - getColor: 用户尝试获取的颜色名称。
 		//
-		// 返回：
-		// bool: 如果颜色存在，返回 false；否则返回 true。
-		HasColorByColor(ctx context.Context, getColor string) bool
-		// CheckLocationExist 检查位置是否存在
-		// 用于检查位置是否存在，如果成功则返回 nil，否则返回错误。
-		// 本接口会根据已有的位置信息对位置进行查询，若查询失败返回失败信息，若成功返回成功信息
+		// # 返回:
+		//   - err: 如果颜色存在，返回错误；否则返回 nil.
+		IsColorExistByColorID(ctx context.Context, getColor string) error
+		// IsLocationExist
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// name: 用户尝试添加的位置名称。
+		// # 获取位置信息
 		//
-		// 返回：
-		// err: 如果位置存在，返回错误；否则返回 nil。
-		CheckLocationExist(ctx context.Context, name string) (err error)
-		// CheckColorExist 检查颜色是否存在
-		// 用于检查颜色是否存在，如果成功则返回 nil，否则返回错误。
-		// 本接口会根据已有的颜色信息对颜色进行查询，若查询失败返回失败信息，若成功返回成功信息
+		// 用于获取位置信息，如果成功则返回位置信息，否则返回错误。
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// getName: 用户尝试添加的颜色名称。
+		// # 参数:
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//   - name: 用户尝试获取的位置名称。
 		//
-		// 返回：
-		// err: 如果颜色存在，返回错误；否则返回 nil。
-		CheckColorExist(ctx context.Context, getName string) (err error)
-		// AddLink 添加链接
+		// # 返回:
+		//   - err: 如果位置存在，返回错误；否则返回 nil.
+		IsLocationExist(ctx context.Context, name string) (err error)
+		// AddLink
+		//
+		// # 添加链接
+		//
 		// 用于添加链接，如果添加成功则返回 nil，否则返回错误。
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// req: 用户的请求，包含添加链接的详细信息。
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - req: 添加链接请求(v1.LinkAddReq)
 		//
-		// 返回：
-		// err: 如果添加链接成功，返回 nil；否则返回错误。其中主要包含的错误数据库错误以及对应内容不存在，返回内容均为自定义描述值
+		// # 返回:
+		//   - err: 如果添加链接成功，返回 nil；否则返回错误.
 		AddLink(ctx context.Context, req v1.LinkAddReq) (err error)
 		// GetColor 获取期望颜色信息
 		// 用于获取期望颜色信息, 如果成功则返回期望颜色信息，否则返回错误。
@@ -167,56 +181,81 @@ type (
 		// 返回：
 		// getColors: 如果获取期望颜色信息成功，返回期望颜色信息；否则返回错误。
 		// err: 如果获取期望颜色信息成功，返回 nil；否则返回错误。其中错误的返回信息在此函数中主要包含内容为数据库错误。
-		GetColor(ctx context.Context) (getColors []*entity.XfColor, err error)
-		// GetLocation 获取期望位置信息
-		// 用于获取期望位置信息, 如果成功则返回期望位置信息，否则返回错误。
+		GetColor(ctx context.Context) (getColors []*entity.Color, err error)
+		// GetLocation
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
+		// # 获取位置信息
 		//
-		// 返回：
-		// getLocation: 如果获取期望位置信息成功，返回期望位置信息；否则返回错误。
-		// err: 如果获取期望位置信息成功，返回 nil；否则返回错误。其中错误的返回信息在此函数中主要包含内容为数据库错误。
-		GetLocation(ctx context.Context) (getLocation []*entity.XfLocation, err error)
-		// GetLocationAllInformation 获取所有的位置信息
-		// 用于获取所有的位置信息, 如果成功则返回期望位置信息，否则返回错误。
+		// 用于获取一些位置信息，这些位置信息的查询受限于是否公开。如果成功则返回期望位置信息，否则返回错误。若查询的位置信息是公开的，则返回所有位置信息。
+		// 若查询的位置信息是不公开的，则返回所有不公开的位置信息。公开数据表参数 Reveal 为 true，不公开数据表参数 Reveal 为 false。
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
+		// # 参数:
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
 		//
-		// 返回：
-		// getLocation: 如果获取期望位置信息成功，返回期望位置信息；否则返回错误。
-		// err: 如果获取期望位置信息成功，返回 nil；否则返回错误。其中错误的返回信息在此函数中主要包含内容为数据库错误。
-		GetLocationAllInformation(ctx context.Context) (getLocation []*entity.XfLocation, err error)
+		// # 返回:
+		//   - getLocation: 如果获取期望位置信息成功，返回期望位置信息；否则返回错误.
+		//   - err: 如果获取期望位置信息成功，返回 nil；否则返回错误.其中错误的返回信息在此函数中主要包含内容为数据库错误。
+		GetLocation(ctx context.Context) (getLocation []*entity.Location, err error)
+		// GetLocationNoReveal
+		//
+		// # 获取所有位置信息
+		//
+		// 用于获取所有位置信息, 如果成功则返回所有位置信息，否则返回错误。
+		//
+		// # 参数:
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//
+		// # 返回:
+		//   - getLocation: 如果获取所有位置信息成功，返回所有位置信息；否则返回错误.
+		//   - err: 如果获取所有位置信息成功，返回 nil；否则返回错误.其中错误的返回信息在此函数中主要包含内容为数据库错误。
+		GetLocationNoReveal(ctx context.Context) (getLocation []*entity.Location, err error)
+		// AddLocation
+		//
+		// # 添加链接位置
+		//
+		// 用于添加链接位置，如果成功则返回 nil，否则返回错误。
+		//
+		// # 参数:
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//   - name: 用户尝试添加的位置名称。
+		//   - displayName: 用户尝试添加的位置显示名称。
+		//   - description: 用户尝试添加的位置描述。
+		//   - reveal: 用户尝试添加的位置是否公开。
+		//   - sort: 用户尝试添加的位置排序。
+		//
+		// # 返回:
+		//   - err: 如果添加链接位置成功，返回 nil；否则返回错误.
 		AddLocation(ctx context.Context, name string, displayName string, description string, reveal bool, sort int) (err error)
-		// AddColor 添加链接颜色
+		// AddColor
+		//
+		// # 添加链接颜色
+		//
 		// 用于添加链接颜色，如果成功则返回 nil，否则返回错误。
-		// 本接口会根据已有的链接颜色信息对链接颜色进行添加，若添加失败返回失败信息，若成功返回成功信息
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// name: 用户尝试添加的颜色名称。
-		// displayName: 用户尝试添加的颜色显示名称。
-		// color: 用户尝试添加的颜色。
-		// hasSelect: 用户尝试添加的颜色是否可选。
+		// # 参数:
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//   - name: 用户尝试添加的颜色名称。
+		//   - displayName: 用户尝试添加的颜色显示名称。
+		//   - color: 用户尝试添加的颜色。
+		//   - hasSelect: 用户尝试添加的颜色是否可选。
 		//
-		// 返回：
-		// err: 如果添加链接颜色成功，返回 nil；否则返回错误。
+		// # 返回:
+		//   - err: 如果添加链接颜色成功，返回 nil；否则返回错误.
 		AddColor(ctx context.Context, name string, displayName string, color string, hasSelect bool) (err error)
 	}
 )
 
 var (
-	localLinkLogic ILinkLogic
+	localLink ILink
 )
 
-func LinkLogic() ILinkLogic {
-	if localLinkLogic == nil {
-		panic("implement not found for interface ILinkLogic, forgot register?")
+func Link() ILink {
+	if localLink == nil {
+		panic("implement not found for interface ILink, forgot register?")
 	}
-	return localLinkLogic
+	return localLink
 }
 
-func RegisterLinkLogic(i ILinkLogic) {
-	localLinkLogic = i
+func RegisterLink(i ILink) {
+	localLink = i
 }

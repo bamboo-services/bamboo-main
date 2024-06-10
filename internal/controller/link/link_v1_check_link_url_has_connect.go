@@ -31,7 +31,6 @@ package link
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtime"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
@@ -55,11 +54,11 @@ func (c *ControllerV1) CheckLinkURLHasConnect(
 	ctx context.Context,
 	req *v1.CheckLinkURLHasConnectReq,
 ) (res *v1.CheckLinkURLHasConnectRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 CheckLinkURLHasConnect 接口")
+	g.Log().Notice(ctx, "[CONTROL] 控制层 CheckLinkURLHasConnect 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取博客链接是否已经连接
 	getNowTimestamp := gtime.TimestampMilli()
-	err = service.LinkLogic().CheckLinkCanAccess(ctx, req.LinkURL)
+	err = service.Link().CheckLinkCanAccess(ctx, req.LinkURL)
 	if err != nil {
 		result.Success("站点读取失败", vo.LinkConnectRes{
 			Message: err.Error(),

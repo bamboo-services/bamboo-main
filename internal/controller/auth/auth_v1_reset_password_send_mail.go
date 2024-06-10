@@ -31,8 +31,7 @@ package auth
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
-	"xiaoMain/internal/consts"
+	"xiaoMain/internal/constants"
 	"xiaoMain/internal/service"
 	"xiaoMain/utility/result"
 
@@ -52,7 +51,7 @@ func (c *ControllerV1) ResetPasswordSendMail(
 	ctx context.Context,
 	req *v1.ResetPasswordSendMailReq,
 ) (res *v1.ResetPasswordSendMailRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 ResetPasswordSendMail 接口")
+	g.Log().Notice(ctx, "[CONTROL] 控制层 ResetPasswordSendMail 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 检查邮箱是否正确
 	isCorrect, info := service.UserMailLogic().CheckMailHasConsoleUser(ctx, req.Email)
@@ -61,7 +60,7 @@ func (c *ControllerV1) ResetPasswordSendMail(
 		return nil, nil
 	}
 	// 发送验证码
-	if service.MailLogic().SendEmailVerificationCode(ctx, req.Email, consts.ResetPasswordScene) == nil {
+	if service.MailLogic().SendEmailVerificationCode(ctx, req.Email, constants.ResetPasswordScene) == nil {
 		result.Success("验证码发送成功", nil)
 	} else {
 		result.MailError.SetErrorMessage("验证码发送失败").Response(getRequest)
