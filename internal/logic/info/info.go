@@ -34,8 +34,8 @@ import (
 	"sync"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
+	"xiaoMain/internal/model/dto/flow"
 	"xiaoMain/internal/model/entity"
-	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
 )
 
@@ -60,10 +60,10 @@ func New() *sInfo {
 //   - ctx: 上下文对象，用于传递和控制请求的生命周期。
 //
 // # 返回:
-//   - *vo.MainVO: 如果获取成功，返回具体的信息；否则返回空值。
-func (s *sInfo) GetMainInfo(ctx context.Context) *vo.MainVO {
+//   - *vo.SiteMainDTO: 如果获取成功，返回具体的信息；否则返回空值。
+func (s *sInfo) GetMainInfo(ctx context.Context) *flow.SiteMainDTO {
 	g.Log().Notice(ctx, "[LOGIC] 执行 InfoLogic:GetMainInfo 服务层")
-	getMainInfo := new(vo.MainVO)
+	getMainInfo := new(flow.SiteMainDTO)
 	wg := sync.WaitGroup{}
 	// 获取名字信息
 	wg.Add(5)
@@ -108,10 +108,10 @@ func (s *sInfo) GetMainInfo(ctx context.Context) *vo.MainVO {
 //   - ctx: 上下文对象，用于传递和控制请求的生命周期。
 //
 // # 返回:
-//   - *vo.BloggerVO: 如果获取成功，返回具体的信息；否则返回空值。
-func (s *sInfo) GetBloggerInfo(ctx context.Context) *vo.BloggerVO {
+//   - *vo.SiteBloggerDTO: 如果获取成功，返回具体的信息；否则返回空值。
+func (s *sInfo) GetBloggerInfo(ctx context.Context) *flow.SiteBloggerDTO {
 	g.Log().Notice(ctx, "[LOGIC] 执行 InfoLogic:GetBloggerInfo 服务层")
-	getBloggerInfo := new(vo.BloggerVO)
+	getBloggerInfo := new(flow.SiteBloggerDTO)
 	wg := sync.WaitGroup{}
 	// 获取站长名字
 	wg.Add(4)

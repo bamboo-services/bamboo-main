@@ -35,7 +35,7 @@ import (
 // AuthResetPasswordReq
 // 用户重置密码请求
 type AuthResetPasswordReq struct {
-	g.Meta      `path:"/user/reset-password" tags:"User" method:"PUT" summary:"用户重置密码"`
+	g.Meta      `path:"/user/reset-password" tags:"授权控制器" method:"PUT" summary:"用户重置密码"`
 	Username    string `json:"username" v:"required|length:4,30#请输入用户名|用户名长度为 4 到 30 位" dc:"用户名"`
 	Email       string `json:"email" v:"required|email#请输入邮箱|邮箱格式不正确" dc:"邮箱"`
 	EmailCode   string `json:"email_code" v:"required|length:6,10#请输入验证码|验证码长度为 6 到 10 位" dc:"邮箱验证码"`

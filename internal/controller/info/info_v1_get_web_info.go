@@ -32,7 +32,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"sync"
-	"xiaoMain/internal/model/vo"
+	"xiaoMain/internal/model/dto/flow"
 	"xiaoMain/internal/service"
 
 	"xiaoMain/api/info/v1"
@@ -53,7 +53,7 @@ import (
 //   - err: 在获取网站信息过程中发生的任何错误。
 func (c *ControllerV1) GetWebInfo(ctx context.Context, _ *v1.GetWebInfoReq) (res *v1.GetWebInfoRes, err error) {
 	g.Log().Notice(ctx, "[CONTROL] 控制层 GetSystemInfo 接口")
-	returnData := new(vo.WebInfoRes)
+	returnData := new(flow.WebInfoDTO)
 	// 获取系统信息
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -63,6 +63,6 @@ func (c *ControllerV1) GetWebInfo(ctx context.Context, _ *v1.GetWebInfoReq) (res
 	wg.Wait()
 	g.Log().Debugf(ctx, "获取参数 returnData 值 %v", returnData)
 	return &v1.GetWebInfoRes{
-		WebInfoRes: *returnData,
+		WebInfoDTO: *returnData,
 	}, nil
 }

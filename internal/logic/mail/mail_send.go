@@ -163,7 +163,6 @@ func (s *sMail) VerificationCodeHasCorrect(
 	if len(getCode) == 0 {
 		g.Log().Notice(ctx, "[LOGIC] 用户的验证码不存在")
 		return berror.NewError(bcode.OperationFailed, "验证码不存在")
-
 	}
 	// 对获取的验证码进行查询
 	for _, verificationCode := range getCode {

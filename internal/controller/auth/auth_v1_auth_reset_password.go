@@ -60,11 +60,12 @@ func (c *ControllerV1) AuthResetPassword(
 	if err == nil {
 		err = service.Mail().VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, constants.ResetPasswordScene)
 	}
-	// 重置密码
-	if err == nil {
-		err = service.Auth().ChangeUserPassword(ctx, req.NewPassword)
+	if err != nil {
+		return nil, err
 	}
 
+	// 对密码进行修改
+	err = service.Auth().ChangeUserPassword(ctx, req.NewPassword)
 	if err != nil {
 		return nil, err
 	}

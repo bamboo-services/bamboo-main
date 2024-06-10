@@ -35,7 +35,7 @@ package service
 
 import (
 	"context"
-	"xiaoMain/internal/model/vo"
+	"xiaoMain/internal/model/dto/flow"
 )
 
 type (
@@ -50,8 +50,8 @@ type (
 		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
 		//
 		// # 返回:
-		//   - *vo.MainVO: 如果获取成功，返回具体的信息；否则返回空值。
-		GetMainInfo(ctx context.Context) *vo.MainVO
+		//   - *vo.SiteMainDTO: 如果获取成功，返回具体的信息；否则返回空值。
+		GetMainInfo(ctx context.Context) *flow.SiteMainDTO
 		// GetBloggerInfo
 		//
 		// # 获取站长信息
@@ -62,8 +62,8 @@ type (
 		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
 		//
 		// # 返回:
-		//   - *vo.BloggerVO: 如果获取成功，返回具体的信息；否则返回空值。
-		GetBloggerInfo(ctx context.Context) *vo.BloggerVO
+		//   - *vo.SiteBloggerDTO: 如果获取成功，返回具体的信息；否则返回空值。
+		GetBloggerInfo(ctx context.Context) *flow.SiteBloggerDTO
 		// GetIndexTableData
 		//
 		// # 获取 Index 数据库中的信息

@@ -26,20 +26,20 @@
  * --------------------------------------------------------------------------------
  */
 
-package vo
+package flow
 
-// WebInfoRes 站点信息返回
+// WebInfoDTO 站点信息返回
 // 返回一些基本的站点信息内容
 //
 // 参数:
 // Main 主要配置信息
-// BloggerVO 站长的一些个人信息
-type WebInfoRes struct {
-	Main    *MainVO    `json:"main" dc:"主要配置信息"`
-	Blogger *BloggerVO `json:"blogger" dc:"站长个人信息"`
+// SiteBloggerDTO 站长的一些个人信息
+type WebInfoDTO struct {
+	Main    *SiteMainDTO    `json:"site" dc:"主要配置信息"`
+	Blogger *SiteBloggerDTO `json:"blogger" dc:"站长个人信息"`
 }
 
-// MainVO 主要配置信息
+// SiteMainDTO 主要配置信息
 // 包含了一些主要的配置信息进行返回
 //
 // 参数:
@@ -48,7 +48,7 @@ type WebInfoRes struct {
 // Version 软件版本
 // Description 站点描述
 // Keywords 站点关键字
-type MainVO struct {
+type SiteMainDTO struct {
 	SiteName    string `json:"site_name" dc:"站点名称"`
 	Author      string `json:"author" dc:"软件作者"`
 	Version     string `json:"version" dc:"软件版本"`
@@ -56,7 +56,7 @@ type MainVO struct {
 	Keywords    string `json:"keywords" dc:"站点关键词"`
 }
 
-// BloggerVO 站长信息
+// SiteBloggerDTO 站长信息
 // 包含了站长一些基础信息需要进行站的内容
 //
 // 参数:
@@ -64,7 +64,7 @@ type MainVO struct {
 // Nick 站长昵称
 // Email 站长邮箱
 // Description 站长的一些描述（或者说座右铭）
-type BloggerVO struct {
+type SiteBloggerDTO struct {
 	Name        string `json:"name" dc:"站长名字"`
 	Nick        string `json:"nick" dc:"站长昵称"`
 	Email       string `json:"email" dc:"站长邮箱"`
