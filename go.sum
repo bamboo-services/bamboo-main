@@ -4,6 +4,7 @@ github.com/BurntSushi/toml v1.4.0 h1:kuoIxZQy2WRRk1pttg9asf+WVv6tWQuBNVmK8+nqPr0
 github.com/BurntSushi/toml v1.4.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
 github.com/bamboo-services/bamboo-utils v0.1.0-alpha h1:qRyt/EX3ukwLbJLIro7b0IKuKlGZHqeLK1kK1VjuPtA=
 github.com/bamboo-services/bamboo-utils v0.1.0-alpha/go.mod h1:SLKN5rPhXqtu2MZys2XbHQm96D/Sz/K7+FoPTeeakt4=
+github.com/bamboo-services/bamboo-utils v0.1.1-beta h1:9fBSWXPqSNOgKM4yafK+7y+VkRng29Br4P4CK21QP+8=
 github.com/bamboo-services/bamboo-utils v0.1.1-beta/go.mod h1:RFhT8VawkP/vRfGoSnhQq6Uq6HrryKUYqla2WN0gsWU=
 github.com/clbanning/mxj/v2 v2.7.0 h1:WA/La7UGCanFe5NpHF0Q3DNtnCsVoxbPKuyBNHWRyME=
 github.com/clbanning/mxj/v2 v2.7.0/go.mod h1:hNiWqW14h+kc+MdF9C6/YoRfjEJoR3ou6tn/Qo+ve2s=

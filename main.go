@@ -29,7 +29,7 @@
 package main
 
 import (
-	"xiaoMain/internal/config/cmd"
+	"xiaoMain/internal/cmd"
 	_ "xiaoMain/internal/packed"
 
 	_ "github.com/gogf/gf/contrib/drivers/pgsql/v2"

@@ -29,6 +29,9 @@
 package middleware
 
 import (
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 	"regexp"
@@ -36,7 +39,6 @@ import (
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
 	"xiaoMain/utility"
-	"xiaoMain/utility/result"
 )
 
 // MiddleAuthHandler 是用于处理用户授权的中间件。
@@ -48,59 +50,29 @@ import (
 // 返回:
 // 无
 func MiddleAuthHandler(r *ghttp.Request) {
-	getAuthorize, err := utility.GetAuthorizationFromHeader(r)
-	if err != nil {
+	getAuthorize := utility.GetAuthorizationFromHeader(r.Context())
+	if getAuthorize == "" {
 		g.Log().Warning(r.Context(), "[MIDDLE] 用户授权异常|无授权头|用户未登录")
-		result.NotLoggedIn.SetErrorMessage(err.Error()).Response(r)
-		return
-	}
-	getUUID, err := utility.GetUUIDFromHeader(r)
-	if err != nil {
-		g.Log().Warning(r.Context(), "[MIDDLE] 用户授权异常|无UUID标记|用户未登录")
-		result.NotLoggedIn.SetErrorMessage(err.Error()).Response(r)
-		return
-	}
-	getVerify, err := utility.GetVerifyFromHeader(r)
-	if err != nil {
-		g.Log().Warning(r.Context(), "[MIDDLE] 用户授权异常|无校验标记|用户未登录")
-		result.NotLoggedIn.SetErrorMessage(err.Error()).Response(r)
+		r.SetError(berror.NewError(bcode.UnknownError, "无授权头"))
 		return
 	}
 	// 对获取数据进行正则表达式校验
 	if hasMatch, _ := regexp.Match(
 		`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$`,
-		[]byte(*getAuthorize),
+		[]byte(getAuthorize),
 	); hasMatch != true {
-		g.Log().Warningf(r.Context(), "[MIDDLE] 用户授权异常|授权格式错误|用户未登录 %s", *getAuthorize)
-		result.NotLoggedIn.SetErrorMessage("授权格式错误").Response(r)
-		return
-	}
-	if hasMatch, _ := regexp.Match(
-		`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$`,
-		[]byte(*getUUID),
-	); hasMatch != true {
-		g.Log().Warningf(r.Context(), "[MIDDLE] 用户授权异常|UUID格式错误|用户未登录 %s", *getUUID)
-		result.NotLoggedIn.SetErrorMessage("UUID格式错误").Response(r)
-		return
-	}
-	if hasMatch, _ := regexp.Match(
-		`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$`,
-		[]byte(*getVerify),
-	); hasMatch != true {
-		g.Log().Warningf(r.Context(), "[MIDDLE] 用户授权异常|校验格式错误|用户未登录 %s", *getVerify)
-		result.NotLoggedIn.SetErrorMessage("校验格式错误").Response(r)
+		g.Log().Warningf(r.Context(), "[MIDDLE] 用户授权异常|授权格式错误|用户未登录 %s", getAuthorize)
+		r.SetError(berror.NewError(bcode.UnknownError, "授权格式错误"))
 		return
 	}
 	// 数据库检查
 	var tokenInfo *entity.Token
-	err = dao.Token.Ctx(r.Context()).Where(do.Token{
-		UserToken:    getAuthorize,
-		UserUuid:     getUUID,
-		Verification: getVerify,
+	err := dao.Token.Ctx(r.Context()).Where(do.Token{
+		Verification: getAuthorize,
 	}).Limit(1).OrderDesc("expired_at").Scan(&tokenInfo)
 	if err != nil {
 		g.Log().Error(r.Context(), "[MIDDLE] 数据库查询错误", err.Error())
-		result.ServerInternalError.SetErrorMessage("数据库查询错误").Response(r)
+		r.SetError(berror.NewError(bcode.UnknownError, "数据库查询错误"))
 		return
 	}
 	// 对数据库进行有效性检查
@@ -110,7 +82,7 @@ func MiddleAuthHandler(r *ghttp.Request) {
 			r.Middleware.Next()
 		} else {
 			g.Log().Warning(r.Context(), "[MIDDLE] 用户授权异常|授权已过期|用户未登录")
-			result.NotLoggedIn.SetErrorMessage("授权已过期").Response(r)
+			r.SetError(berror.NewError(bcode.UnknownError, "授权已过期"))
 			// 删除数据库中的授权信息
 			_, _ = dao.Token.Ctx(r.Context()).Where(do.Token{Id: tokenInfo.Id}).Delete()
 		}

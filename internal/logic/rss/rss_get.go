@@ -55,7 +55,7 @@ import (
 //   - getRss: 如果获取Rss信息成功，返回 nil；否则返回错误。
 //   - err: 如果获取Rss信息成功，返回 nil；否则返回错误。
 func (s *sRss) GetAllLinkRssInfo(ctx context.Context) (getRss *[]*dto.RssLinkDTO, err error) {
-	g.Log().Notice(ctx, "[LOGIC] RssLogic:GetAllLinkRssInfo | 获取所有链接的Rss信息")
+	g.Log().Notice(ctx, "[LOGIC] Rss:GetAllLinkRssInfo | 获取所有链接的Rss信息")
 	var getRssInfo []*entity.LinkRss
 	err = dao.LinkRss.Ctx(ctx).Scan(&getRssInfo)
 	if err != nil {
@@ -117,7 +117,7 @@ func (s *sRss) GetLinkRssInfoWithLinkID(
 	ctx context.Context,
 	linkID int64,
 ) (getRss *[]*dto.RssLinkDTO, err error) {
-	g.Log().Notice(ctx, "[LOGIC] RssLogic:GetLinkRssInfoWithLinkID | 获取链接的Rss信息")
+	g.Log().Notice(ctx, "[LOGIC] Rss:GetLinkRssInfoWithLinkID | 获取链接的Rss信息")
 	var getLinkInfo *entity.LinkList
 	err = dao.LinkList.Ctx(ctx).Where(do.LinkList{Id: linkID, Status: 1}).
 		WhereNotNull(dao.LinkList.Columns().SiteRssUrl).Limit(1).Scan(&getLinkInfo)
@@ -146,7 +146,7 @@ func (s *sRss) GetLinkRssWithLinkName(
 	ctx context.Context,
 	linkName string,
 ) (getRss *[]*dto.RssLinkDTO, err error) {
-	g.Log().Notice(ctx, "[LOGIC] RssLogic:GetLinkRssWithLinkName | 获取链接的Rss信息")
+	g.Log().Notice(ctx, "[LOGIC] Rss:GetLinkRssWithLinkName | 获取链接的Rss信息")
 	var getLinkInfo *entity.LinkList
 	err = dao.LinkList.Ctx(ctx).Where(do.LinkList{SiteName: linkName, Status: 1}).
 		WhereNotNull(dao.LinkList.Columns().SiteRssUrl).Limit(1).Scan(&getLinkInfo)
@@ -175,7 +175,7 @@ func (s *sRss) GetLinkRssWithLinkLocation(
 	ctx context.Context,
 	linkLocation int64,
 ) (getRss *[]*dto.RssLinkDTO, err error) {
-	g.Log().Notice(ctx, "[LOGIC] RssLogic:GetLinkRssWithLinkName | 获取链接的Rss信息")
+	g.Log().Notice(ctx, "[LOGIC] Rss:GetLinkRssWithLinkName | 获取链接的Rss信息")
 	var getLinkInfo []*entity.LinkList
 	err = dao.LinkList.Ctx(ctx).Where(do.LinkList{Location: linkLocation, Status: 1}).
 		WhereNotNull(dao.LinkList.Columns().SiteRssUrl).Scan(&getLinkInfo)
@@ -240,7 +240,7 @@ func (s *sRss) rssLinkToDTO(
 	ctx context.Context,
 	getLinkInfo entity.LinkList,
 ) (getRss *[]*dto.RssLinkDTO, err error) {
-	g.Log().Notice(ctx, "[LOGIC] RssLogic:rssLinkToDTO | Rss 链接转 DTO")
+	g.Log().Notice(ctx, "[LOGIC] Rss:rssLinkToDTO | Rss 链接转 DTO")
 	var getRssInfo *entity.LinkRss
 	err = dao.LinkRss.Ctx(ctx).Where(do.LinkRss{LinkId: getLinkInfo.Id}).Scan(&getRssInfo)
 	if err != nil {

@@ -30,6 +30,7 @@ package rss
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xiaoMain/api/rss/v1"
 	"xiaoMain/internal/service"
@@ -63,7 +64,7 @@ func (c *ControllerV1) GetLinkRssInfo(
 	// 检查信息是否存在
 	if req.LinkName == nil && req.LinkID == nil && req.LinkLocation == nil {
 		// 返回所有的RSS信息
-		getAllRssInfo, err := service.RssLogic().GetAllLinkRssInfo(ctx)
+		getAllRssInfo, err := service.Rss().GetAllLinkRssInfo(ctx)
 		if err == nil {
 			if int64(len(*getAllRssInfo)) > *req.Limit {
 				*getAllRssInfo = (*getAllRssInfo)[(*req.Page-1)*(*req.Limit) : *req.Limit]
@@ -77,19 +78,19 @@ func (c *ControllerV1) GetLinkRssInfo(
 	// 条件查询
 	switch {
 	case req.LinkID != nil && req.LinkName == nil && req.LinkLocation == nil:
-		getRssInfo, err := service.RssLogic().GetLinkRssInfoWithLinkID(ctx, *req.LinkID)
+		getRssInfo, err := service.Rss().GetLinkRssInfoWithLinkID(ctx, *req.LinkID)
 		if err != nil {
 			result.FailedToObtain.SetErrorMessage(err.Error()).Response(getRequest)
 		}
 		result.Success("获取 LinkID 的 RSS 信息成功", getRssInfo).Response(getRequest)
 	case req.LinkID == nil && req.LinkName != nil && req.LinkLocation == nil:
-		getRssInfo, err := service.RssLogic().GetLinkRssWithLinkName(ctx, *req.LinkName)
+		getRssInfo, err := service.Rss().GetLinkRssWithLinkName(ctx, *req.LinkName)
 		if err != nil {
 			result.FailedToObtain.SetErrorMessage(err.Error()).Response(getRequest)
 		}
 		result.Success("获取 LinkName 的 RSS 信息成功", getRssInfo).Response(getRequest)
 	case req.LinkID == nil && req.LinkName == nil && req.LinkLocation != nil:
-		getRssInfo, err := service.RssLogic().GetLinkRssWithLinkLocation(ctx, *req.LinkLocation)
+		getRssInfo, err := service.Rss().GetLinkRssWithLinkLocation(ctx, *req.LinkLocation)
 		if err != nil {
 			result.FailedToObtain.SetErrorMessage(err.Error()).Response(getRequest)
 		}

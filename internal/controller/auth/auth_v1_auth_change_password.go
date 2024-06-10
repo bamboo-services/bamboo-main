@@ -58,7 +58,7 @@ func (c *ControllerV1) AuthChangePassword(
 	err = service.Auth().IsUserLogin(ctx)
 	// 检查用户邮箱是否正确
 	if err == nil {
-		err = service.User().CheckMailHasConsoleUser(ctx, req.Email)
+		err = service.User().IsMailHasConsoleUser(ctx, req.Email)
 	}
 	// 检查验证码是否正确
 	if err == nil {

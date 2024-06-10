@@ -30,13 +30,13 @@ package boot
 
 import (
 	"context"
+	"github.com/bamboo-services/bamboo-utils/butil"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
-	uuid "github.com/satori/go.uuid"
+	"github.com/gogf/gf/v2/os/gfile"
 	"xiaoMain/internal/constants"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
-	"xiaoMain/utility"
 )
 
 // InitialDatabase 是一个初始化数据库的函数。
@@ -88,11 +88,11 @@ func InitialDatabase(ctx context.Context) {
 	insertIndexData(ctx, "keywords", "XiaoMain,筱锋,开源项目,Go,个人网站,介绍")
 
 	// 生成并插入用户的唯一 UUID
-	insertIndexData(ctx, "uuid", uuid.NewV4().String())
+	insertIndexData(ctx, "uuid", butil.GenerateRandUUID().String())
 	// 新建默认用户
 	insertIndexData(ctx, "user", "admin")
 	// 设置默认用户密码
-	insertIndexData(ctx, "password", utility.PasswordEncode("admin-admin"))
+	insertIndexData(ctx, "password", butil.PasswordEncode("admin-admin"))
 	// 设置默认用户邮箱
 	insertIndexData(ctx, "email", "admin@xiaoMain.com")
 	// 站长昵称

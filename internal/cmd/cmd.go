@@ -34,8 +34,8 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gcmd"
-	middleware2 "xiaoMain/internal/config/middleware"
-	task2 "xiaoMain/internal/config/task"
+	"xiaoMain/internal/config/middleware"
+	"xiaoMain/internal/config/task"
 	"xiaoMain/internal/controller/auth"
 	"xiaoMain/internal/controller/info"
 	"xiaoMain/internal/controller/link"
@@ -56,12 +56,12 @@ var (
 			// 初始化公共数据
 			boot.InitCommonData(ctx)
 			// 定时任务
-			task2.ClearVerificationCode(ctx)
-			task2.RssObtain(ctx)
+			task.ClearVerificationCode(ctx)
+			task.RssObtain(ctx)
 			// 服务器启动
 			s := g.Server()
 			s.Group("/", func(group *ghttp.RouterGroup) {
-				group.Middleware(middleware2.MiddleTimeHandler) // 接口时间统计接口
+				group.Middleware(middleware.MiddleTimeHandler) // 接口时间统计接口
 
 				// 前端部分
 				group.Group("", func(group *ghttp.RouterGroup) {
@@ -70,8 +70,8 @@ var (
 
 				// 后端部分
 				group.Group("/api/v1", func(group *ghttp.RouterGroup) {
-					group.Middleware(middleware2.MiddleAccessUserHandler) // 访问处理中间件
-					group.Middleware(bmiddle.BambooMiddleHandler)         // 错误集中处理中间件
+					group.Middleware(middleware.MiddleAccessUserHandler) // 访问处理中间件
+					group.Middleware(bmiddle.BambooMiddleHandler)        // 错误集中处理中间件
 
 					// 用户操作
 					group.Bind(
@@ -90,7 +90,7 @@ var (
 							link.NewV1().LinkGetColor,
 							link.NewV1().LinkGetLocation,
 						)
-						group.Middleware(middleware2.MiddleAuthHandler).Bind(
+						group.Middleware(middleware.MiddleAuthHandler).Bind(
 							link.NewV1().LinkColorAdd,
 							link.NewV1().LinkLocationAdd,
 							link.NewV1().LinkGetColorFull,
@@ -115,7 +115,7 @@ var (
 						)
 					})
 
-					group.Middleware(middleware2.MiddleAuthHandler).Bind(
+					group.Middleware(middleware.MiddleAuthHandler).Bind(
 						auth.NewV1().ChangePasswordSendMail,
 						auth.NewV1().AuthChangePassword,
 					)

@@ -31,6 +31,7 @@ package task
 import (
 	"context"
 	"encoding/json"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/os/gtimer"
 	"time"
@@ -73,17 +74,17 @@ func RssObtain(ctx context.Context) {
 
 				// 对 Rss 进行处理操作
 				// RSS Hexo Feed
-				link, this := service.RssLogic().RssWithHexoFeed(ctx, rssLink.SiteRssUrl)
+				link, this := service.Rss().RssWithHexoFeed(ctx, rssLink.SiteRssUrl)
 				if this && saveData(ctx, link, rssLink) {
 					continue
 				}
 				// RSS Hugo Feed
-				link, this = service.RssLogic().RssWithHugoFeed(ctx, rssLink.SiteRssUrl)
+				link, this = service.Rss().RssWithHugoFeed(ctx, rssLink.SiteRssUrl)
 				if this && saveData(ctx, link, rssLink) {
 					continue
 				}
 				// RSS WordPress Feed
-				link, this = service.RssLogic().RssWithWordpressFeed(ctx, rssLink.SiteRssUrl)
+				link, this = service.Rss().RssWithWordpressFeed(ctx, rssLink.SiteRssUrl)
 				if this && saveData(ctx, link, rssLink) {
 					continue
 				}
