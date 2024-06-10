@@ -26,21 +26,18 @@
  * --------------------------------------------------------------------------------
  */
 
-package v1
+// =================================================================================
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
+// =================================================================================
+
+package mail
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
+	"context"
+
+	"xiaoMain/api/mail/v1"
 )
 
-// ChangePasswordSendMailReq
-// 发送用户修改密码邮件请求结构体
-type ChangePasswordSendMailReq struct {
-	g.Meta `path:"/user/change-password/mail" tags:"User" method:"POST" summary:"发送用户修改密码邮件"`
-	Email  string `json:"email" v:"required|email#邮箱不能为空" dc:"需要发送对方邮件的验证码"`
-}
-
-// ChangePasswordSendMailRes
-// 发送用户修改密码邮件后的响应结构体
-type ChangePasswordSendMailRes struct {
-	g.Meta `mime:"application/json"`
+type IMailV1 interface {
+	MailSend(ctx context.Context, req *v1.MailSendReq) (res *v1.MailSendRes, err error)
 }

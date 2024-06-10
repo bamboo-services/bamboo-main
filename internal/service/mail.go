@@ -36,10 +36,27 @@ package service
 import (
 	"context"
 	"xiaoMain/internal/constants"
+
+	"github.com/gogf/gf/v2/frame/g"
 )
 
 type (
 	IMail interface {
+		// SendMail
+		//
+		// # 发送邮件
+		//
+		// 用于发送邮件，如果发送成功则返回 nil，否则返回错误信息。会根据传入的场景进行邮件的发送。
+		//
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - to: 邮箱地址(string)
+		//   - scene: 场景(constants.Scene)
+		//   - data: 邮件发送数据(g.Map)
+		//
+		// # 返回:
+		//   - err: 如果发送过程中发生错误，返回错误信息。否则返回 nil.
+		SendMail(ctx context.Context, to string, scene constants.Scene, data g.Map) (err error)
 		// VerificationCodeHasCorrect
 		//
 		// # 验证码是否正确
@@ -55,20 +72,6 @@ type (
 		// # 返回:
 		//   - err: 如果验证过程中发生错误，返回错误信息。否则返回 nil.
 		VerificationCodeHasCorrect(ctx context.Context, email string, code string, scenes constants.Scene) (err error)
-		// SendEmailVerificationCode
-		//
-		// # 发送邮件验证码
-		//
-		// 用于发送邮件验证码，如果发送成功则返回 nil，否则返回具体的报错信息。会根据传入的场景进行邮件的发送。
-		//
-		// # 参数:
-		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
-		//   - mail: 邮箱地址(string)
-		//   - scenes: 场景(constants.Scene)
-		//
-		// # 返回:
-		//   - err: 如果发送过程中发生错误，返回错误信息。否则返回 nil.
-		SendEmailVerificationCode(ctx context.Context, mail string, scenes constants.Scene) (err error)
 	}
 )
 

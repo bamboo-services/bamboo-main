@@ -40,64 +40,9 @@ import (
 	"xiaoMain/internal/constants"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
-	"xiaoMain/internal/model/entity"
-	"xiaoMain/internal/model/vo"
 )
 
-// VerificationCodeHasCorrect
-//
-// # 验证码是否正确
-//
-// 用于验证验证码是否正确，如果正确则返回 nil，否则返回具体的报错信息。
-//
-// # 参数:
-//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
-//   - email: 邮箱地址(string)
-//   - code: 验证码(string)
-//   - scenes: 场景(constants.Scene)
-//
-// # 返回:
-//   - err: 如果验证过程中发生错误，返回错误信息。否则返回 nil.
-func (s *sMail) VerificationCodeHasCorrect(
-	ctx context.Context,
-	email string,
-	code string,
-	scenes constants.Scene,
-) (err error) {
-	g.Log().Notice(ctx, "[LOGIC] Mail:VerificationCodeHasCorrect | 验证码是否正确")
-	// 获取邮箱以及验证码
-	var getCode []entity.VerificationCode
-	if dao.VerificationCode.Ctx(ctx).Where(do.VerificationCode{
-		Type:    true,
-		Contact: email,
-		Scenes:  string(scenes),
-	}).Scan(&getCode) != nil {
-		g.Log().Notice(ctx, "[LOGIC] 用户的验证码不存在")
-		return berror.NewErrorHasError(bcode.ServerInternalError, err)
-	}
-	if len(getCode) == 0 {
-		g.Log().Notice(ctx, "[LOGIC] 用户的验证码不存在")
-		return berror.NewError(bcode.OperationFailed, "验证码不存在")
-
-	}
-	// 对获取的验证码进行查询
-	for _, verificationCode := range getCode {
-		// 检查是否有匹配项
-		if verificationCode.Code == code {
-			// 检查是否过期
-			if verificationCode.ExpiredAt.After(gtime.Now()) {
-				// 验证码正确执行后需要删除验证码
-				_, _ = dao.VerificationCode.Ctx(ctx).Where(do.VerificationCode{Id: verificationCode.Id}).Delete()
-				return nil
-			}
-		}
-	}
-	// 验证码已过期
-	g.Log().Notice(ctx, "[LOGIC] 用户的验证码已过期")
-	return berror.NewError(bcode.OperationFailed, "验证码已过期")
-}
-
-// SendEmailVerificationCode
+// sendEmailVerificationCode
 //
 // # 发送邮件验证码
 //
@@ -110,21 +55,21 @@ func (s *sMail) VerificationCodeHasCorrect(
 //
 // # 返回:
 //   - err: 如果发送过程中发生错误，返回错误信息。否则返回 nil.
-func (s *sMail) SendEmailVerificationCode(ctx context.Context, mail string, scenes constants.Scene) (err error) {
-	g.Log().Notice(ctx, "[LOGIC] Mail:SendEmailVerificationCode | 发送邮件验证码")
+func (s *sMail) sendEmailVerificationCode(ctx context.Context, mail string, scenes constants.Scene) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] Mail:sendEmailVerificationCode | 发送邮件验证码")
 	wg := sync.WaitGroup{}
 	// 验证码存入数据库
 	err = dao.VerificationCode.Ctx(ctx).Transaction(ctx, func(_ context.Context, tx gdb.TX) error {
-		sendMailData := vo.MailSendData{
-			Code:      butil.RandomString(6),
-			Email:     "gm@x-lf.cn",
-			XiaoMain:  "XiaoMain",
-			Copyright: "CopyRight (C) 2016-2024 筱锋 All Rights Reserved.",
-			DateTime:  gtime.Now(),
+		sendMailData := g.Map{
+			"Code":      butil.RandomString(6),
+			"Email":     "gm@x-lf.cn",
+			"XiaoMain":  "XiaoMain",
+			"Copyright": "CopyRight (C) 2016-2024 筱锋 All Rights Reserved.",
+			"DateTime":  gtime.Now().String(),
 		}
 		// 异步创建验证码的发送
 		wg.Add(1)
-		go func(ctx context.Context, mail string, scene constants.Scene, data vo.MailSendData) {
+		go func(ctx context.Context, mail string, scene constants.Scene, data g.Map) {
 			// 创建验证码并发送
 			err := s.sendMail(ctx, mail, scene, data)
 			if err != nil {
@@ -136,7 +81,7 @@ func (s *sMail) SendEmailVerificationCode(ctx context.Context, mail string, scen
 		_, err = tx.Insert(dao.VerificationCode.Table(), do.VerificationCode{
 			Type:      true,
 			Contact:   mail,
-			Code:      sendMailData.Code,
+			Code:      sendMailData["Code"].(string),
 			Scenes:    string(scenes),
 			ExpiredAt: gtime.NewFromTimeStamp(gtime.TimestampMicro() + 300000),
 		})

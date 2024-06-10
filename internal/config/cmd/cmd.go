@@ -40,6 +40,7 @@ import (
 	"xiaoMain/internal/controller/auth"
 	"xiaoMain/internal/controller/info"
 	"xiaoMain/internal/controller/link"
+	"xiaoMain/internal/controller/mail"
 	"xiaoMain/internal/controller/rss"
 )
 
@@ -77,7 +78,6 @@ var (
 					group.Bind(
 						auth.NewV1().AuthLogin,
 						auth.NewV1().AuthResetPassword,
-						auth.NewV1().ResetPasswordSendMail,
 					)
 
 					// 链接操作
@@ -108,6 +108,13 @@ var (
 						)
 					})
 
+					// 邮件操作
+					group.Group("/mail", func(group *ghttp.RouterGroup) {
+						group.Bind(
+							mail.NewV1().MailSend,
+						)
+					})
+
 					// Rss订阅消息
 					group.Group("/rss", func(group *ghttp.RouterGroup) {
 						group.Bind(
@@ -116,7 +123,6 @@ var (
 					})
 
 					group.Middleware(middleware.MiddleAuthHandler).Bind(
-						auth.NewV1().ChangePasswordSendMail,
 						auth.NewV1().AuthChangePassword,
 					)
 				})

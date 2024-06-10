@@ -26,20 +26,30 @@
  * --------------------------------------------------------------------------------
  */
 
-// =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// =================================================================================
-
-package auth
+package v1
 
 import (
-	"context"
-
-	"xiaoMain/api/auth/v1"
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/constants"
 )
 
-type IAuthV1 interface {
-	AuthChangePassword(ctx context.Context, req *v1.AuthChangePasswordReq) (res *v1.AuthChangePasswordRes, err error)
-	AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res *v1.AuthLoginRes, err error)
-	AuthResetPassword(ctx context.Context, req *v1.AuthResetPasswordReq) (res *v1.AuthResetPasswordRes, err error)
+// MailSendReq
+//
+// # 发送邮件
+//
+// 根据所选场景发送邮件给指定的用户。
+type MailSendReq struct {
+	g.Meta       `path:"/send" method:"Post" tags:"邮件控制器" summary:"发送邮件"`
+	To           string          `json:"to" dc:"收件人邮箱" v:"email#邮箱不能为空"`
+	Scene        constants.Scene `json:"scene" dc:"邮件场景" v:"required#邮件场景不能为空"`
+	GetVariables g.Map           `json:"get_variables" dc:"获取变量"`
+}
+
+// MailSendRes
+//
+// # 发送邮件
+//
+// 发送邮件的响应。
+type MailSendRes struct {
+	g.Meta `mime:"application/json"`
 }

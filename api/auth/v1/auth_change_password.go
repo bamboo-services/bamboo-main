@@ -26,42 +26,23 @@
  * --------------------------------------------------------------------------------
  */
 
-package auth
+package v1
 
 import (
-	"context"
 	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/api/auth/v1"
-	"xiaoMain/internal/constants"
-	"xiaoMain/internal/service"
 )
 
-// ChangePasswordSendMail
-//
-// # 修改密码发送邮件
-//
-// 修改密码发送邮件, 需要用户提供邮箱。
-//
-// # 参数
-//   - ctx: 请求的上下文，用于管理超时和取消信号。
-//   - req: 用户的请求，包含修改密码发送邮件的详细信息。
-//
-// # 返回
-//   - res: 发送给用户的响应。如果修改密码发送邮件成功，它将返回成功的消息。
-//   - err: 在修改密码发送邮件过程中发生的任何错误。
-func (c *ControllerV1) ChangePasswordSendMail(
-	ctx context.Context,
-	req *v1.ChangePasswordSendMailReq,
-) (res *v1.ChangePasswordSendMailRes, err error) {
-	g.Log().Notice(ctx, "[CONTROL] 控制层 ChangePasswordSendMail 接口")
-	// 检查邮箱是否正确
-	err = service.User().IsMailHasConsoleUser(ctx, req.Email)
-	// 发送验证码
-	if err == nil {
-		err = service.Mail().SendEmailVerificationCode(ctx, req.Email, constants.ChangePasswordScene)
-	}
-	if err != nil {
-		return nil, err
-	}
-	return nil, nil
+// AuthChangePasswordReq
+// 用户修改密码请求
+type AuthChangePasswordReq struct {
+	g.Meta      `path:"/user/change-password" tags:"授权控制器" method:"PUT" summary:"用户修改密码"`
+	Email       string `json:"email" dc:"修改密码的邮箱" v:"email#邮箱不能为空"`
+	EmailCode   string `json:"email_code" dc:"邮箱验证码" v:"required|length:6,10#请输入验证码|验证码长度为 6 到 10 位"`
+	NewPassword string `json:"new_password" dc:"新的密码" v:"required|length:6,30#请输入密码|密码长度为 6 到 30 位"`
+}
+
+// AuthChangePasswordRes
+// 用户修改密码返回
+type AuthChangePasswordRes struct {
+	g.Meta `mime:"application/json"`
 }

@@ -34,7 +34,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
-	"regexp"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
@@ -55,20 +54,10 @@ func MiddleAuthHandler(r *ghttp.Request) {
 		g.Log().Warning(r.Context(), "[MIDDLE] 用户授权异常|获取授权错误|用户未登录")
 		r.SetError(berror.NewError(bcode.UnknownError, "获取授权错误"))
 		return
-
 	}
 	if getAuthorize == "" {
 		g.Log().Warning(r.Context(), "[MIDDLE] 用户授权异常|无授权头|用户未登录")
 		r.SetError(berror.NewError(bcode.UnknownError, "无授权头"))
-		return
-	}
-	// 对获取数据进行正则表达式校验
-	if hasMatch, _ := regexp.Match(
-		`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$`,
-		[]byte(getAuthorize),
-	); hasMatch != true {
-		g.Log().Warningf(r.Context(), "[MIDDLE] 用户授权异常|授权格式错误|用户未登录 %s", getAuthorize)
-		r.SetError(berror.NewError(bcode.UnknownError, "授权格式错误"))
 		return
 	}
 	// 数据库检查

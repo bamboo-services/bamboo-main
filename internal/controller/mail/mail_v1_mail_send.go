@@ -26,40 +26,32 @@
  * --------------------------------------------------------------------------------
  */
 
-package auth
+package mail
 
 import (
 	"context"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
 	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/api/auth/v1"
-	"xiaoMain/internal/constants"
 	"xiaoMain/internal/service"
+	"xiaoMain/utility"
+
+	"xiaoMain/api/mail/v1"
 )
 
-// ResetPasswordSendMail
-//
-// # 重置密码发送邮件
-//
-// 重置密码发送邮件, 需要用户提供邮箱。
-//
-// # 参数
-//   - ctx: 请求的上下文，用于管理超时和取消信号。
-//   - req: 用户的请求，包含重置密码发送邮件的详细信息。
-//
-// # 返回
-//   - res: 发送给用户的响应。如果重置密码发送邮件成功，它将返回成功的消息。
-//   - err: 在重置密码发送邮件过程中发生的任何错误。
-func (c *ControllerV1) ResetPasswordSendMail(
-	ctx context.Context,
-	req *v1.ResetPasswordSendMailReq,
-) (res *v1.ResetPasswordSendMailRes, err error) {
-	g.Log().Notice(ctx, "[CONTROL] 控制层 ResetPasswordSendMail 接口")
+func (c *ControllerV1) MailSend(ctx context.Context, req *v1.MailSendReq) (res *v1.MailSendRes, err error) {
+	g.Log().Notice(ctx, "[CONTROL] MailSend | 邮件发送接口")
 	// 检查邮箱是否正确
-	err = service.User().IsMailHasConsoleUser(ctx, req.Email)
-	// 发送验证码
-	if err == nil {
-		err = service.Mail().SendEmailVerificationCode(ctx, req.Email, constants.ResetPasswordScene)
+	err = service.User().IsMailHasConsoleUser(ctx, req.To)
+	if err != nil {
+		return nil, err
 	}
+	// 检查 Scene 是否正确
+	if utility.GetMailTemplateByScene(req.Scene) == "" {
+		return nil, berror.NewError(bcode.OperationFailed, "场景错误")
+	}
+	// 对场景内容进行邮件发送
+	err = service.Mail().SendMail(ctx, req.To, req.Scene, req.GetVariables)
 	if err != nil {
 		return nil, err
 	}

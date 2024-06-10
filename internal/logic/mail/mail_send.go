@@ -33,13 +33,13 @@ import (
 	"github.com/bamboo-services/bamboo-utils/bcode"
 	"github.com/bamboo-services/bamboo-utils/berror"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	"gopkg.in/gomail.v2"
 	"strings"
 	"xiaoMain/internal/constants"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
-	"xiaoMain/internal/model/vo"
 	"xiaoMain/utility"
 )
 
@@ -61,7 +61,7 @@ func (s *sMail) sendMail(
 	ctx context.Context,
 	mail string,
 	template constants.Scene,
-	data vo.MailSendData,
+	data g.Map,
 ) (err error) {
 	g.Log().Notice(ctx, "[LOGIC] Mail:sendMail | 发送邮件")
 
@@ -83,11 +83,10 @@ func (s *sMail) sendMail(
 
 	// 对邮件模板的替换
 	mailTemplate := getMailTemplate.Value
-	mailTemplate = strings.ReplaceAll(mailTemplate, "%XiaoMain%", data.XiaoMain)
-	mailTemplate = strings.ReplaceAll(mailTemplate, "%Email%", data.Email)
-	mailTemplate = strings.ReplaceAll(mailTemplate, "%Code%", data.Code)
-	mailTemplate = strings.ReplaceAll(mailTemplate, "%DateTime%", data.DateTime.String())
-	mailTemplate = strings.ReplaceAll(mailTemplate, "%Copyright%", data.Copyright)
+	// 遍历替换变量
+	for key, value := range data {
+		mailTemplate = strings.ReplaceAll(mailTemplate, "%"+key+"%", value.(string))
+	}
 
 	// 创建一个新的消息
 	sendMail := gomail.NewMessage()
@@ -101,4 +100,84 @@ func (s *sMail) sendMail(
 	dialer := gomail.NewDialer(constants.SMTPHost, utility.GetMailSendPort(ctx), constants.SMTPUser, constants.SMTPPass)
 	// 发送邮件
 	return dialer.DialAndSend(sendMail)
+}
+
+// SendMail
+//
+// # 发送邮件
+//
+// 用于发送邮件，如果发送成功则返回 nil，否则返回错误信息。会根据传入的场景进行邮件的发送。
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//   - to: 邮箱地址(string)
+//   - scene: 场景(constants.Scene)
+//   - data: 邮件发送数据(g.Map)
+//
+// # 返回:
+//   - err: 如果发送过程中发生错误，返回错误信息。否则返回 nil.
+func (s *sMail) SendMail(ctx context.Context, to string, scene constants.Scene, data g.Map) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] Mail:SendMail | 发送邮件")
+
+	// TODO: [SERVICE] 后期需要进行修改，对不同业务跳转不同类型
+	// 检查场景以传递场景数据
+	err = s.sendEmailVerificationCode(ctx, to, scene)
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
+// VerificationCodeHasCorrect
+//
+// # 验证码是否正确
+//
+// 用于验证验证码是否正确，如果正确则返回 nil，否则返回具体的报错信息。
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//   - email: 邮箱地址(string)
+//   - code: 验证码(string)
+//   - scenes: 场景(constants.Scene)
+//
+// # 返回:
+//   - err: 如果验证过程中发生错误，返回错误信息。否则返回 nil.
+func (s *sMail) VerificationCodeHasCorrect(
+	ctx context.Context,
+	email string,
+	code string,
+	scenes constants.Scene,
+) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] Mail:VerificationCodeHasCorrect | 验证码是否正确")
+	// 获取邮箱以及验证码
+	var getCode []entity.VerificationCode
+	if dao.VerificationCode.Ctx(ctx).Where(do.VerificationCode{
+		Type:    true,
+		Contact: email,
+		Scenes:  string(scenes),
+	}).Scan(&getCode) != nil {
+		g.Log().Notice(ctx, "[LOGIC] 用户的验证码不存在")
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
+	}
+	if len(getCode) == 0 {
+		g.Log().Notice(ctx, "[LOGIC] 用户的验证码不存在")
+		return berror.NewError(bcode.OperationFailed, "验证码不存在")
+
+	}
+	// 对获取的验证码进行查询
+	for _, verificationCode := range getCode {
+		// 检查是否有匹配项
+		if verificationCode.Code == code {
+			// 检查是否过期
+			if verificationCode.ExpiredAt.After(gtime.Now()) {
+				// 验证码正确执行后需要删除验证码
+				_, _ = dao.VerificationCode.Ctx(ctx).Where(do.VerificationCode{Id: verificationCode.Id}).Delete()
+				return nil
+			}
+		}
+	}
+	// 验证码已过期
+	g.Log().Notice(ctx, "[LOGIC] 用户的验证码已过期")
+	return berror.NewError(bcode.OperationFailed, "验证码已过期")
 }

@@ -62,7 +62,8 @@ func (s *sUser) IsMailHasConsoleUser(ctx context.Context, email string) (err err
 		if getAdminEmail.Value == email {
 			return nil
 		} else {
-			return berror.NewError(bcode.ServerInternalError, "邮箱不匹配")
+			// TODO: [bamboo] 等待 bamboo 库更新后修改 bcode
+			return berror.NewError(bcode.OperationFailed, "邮箱不匹配")
 		}
 	} else {
 		return berror.NewError(bcode.NotExist, "未查询到邮箱")
