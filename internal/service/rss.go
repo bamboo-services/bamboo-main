@@ -109,7 +109,7 @@ type (
 		// 返回：
 		// rssLink: 如果获取Rss信息成功，返回 RssLinkDTO；否则返回 nil。
 		// hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
-		RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink *[]dmiddle.RssLinkDTO, hasThis bool)
+		RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink *[]*dmiddle.RssLinkDTO, hasThis bool)
 		// RssWithHugoFeed 通过Hugo的Rss信息获取Rss信息
 		// 用于获取Hugo的Rss内容（插件：Hugo ｜ 插件内容 https://gohugo.io/）
 		// 如果成功则返回 nil，否则返回错误
@@ -121,7 +121,7 @@ type (
 		// 返回：
 		// rssLink: 如果获取Rss信息成功，返回 RssLinkDTO；否则返回 nil。
 		// hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
-		RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink *[]dmiddle.RssLinkDTO, hasThis bool)
+		RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink *[]*dmiddle.RssLinkDTO, hasThis bool)
 		// RssWithWordpressFeed 通过WordPress的Rss信息获取Rss信息
 		// 用于获取WordPress的Rss内容（插件：WordPress ｜ 插件内容 https://wordpress.org/）
 		// 如果成功则返回 nil，否则返回错误
@@ -133,7 +133,7 @@ type (
 		// 返回：
 		// rssLink: 如果获取Rss信息成功，返回 RssLinkDTO；否则返回 nil。
 		// hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
-		RssWithWordpressFeed(ctx context.Context, rssURL string) (rssLink *[]dmiddle.RssLinkDTO, hasThis bool)
+		RssWithWordpressFeed(ctx context.Context, rssURL string) (rssLink *[]*dmiddle.RssLinkDTO, hasThis bool)
 	}
 )
 

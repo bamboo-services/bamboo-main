@@ -52,7 +52,7 @@ import (
 // 返回：
 // rssLink: 如果获取Rss信息成功，返回 RssLinkDTO；否则返回 nil。
 // hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
-func (s *sRss) RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink *[]dmiddle.RssLinkDTO, hasThis bool) {
+func (s *sRss) RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink *[]*dmiddle.RssLinkDTO, hasThis bool) {
 	g.Log().Noticef(ctx, "[LOGIC] 尝试获取 Hexo 中 hexo-generator-feed 插件的 feed 内容")
 	getBody, err := s.rssLinkAccess(ctx, rssURL)
 	if err != nil {
@@ -68,7 +68,7 @@ func (s *sRss) RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink *[]d
 	// 处理数据
 	if getFeed != nil {
 		if getFeed.Generator == "Hexo" {
-			rssLink = new([]dmiddle.RssLinkDTO)
+			rssLink = new([]*dmiddle.RssLinkDTO)
 			for _, item := range getFeed.Entry {
 				// 处理 Category
 				categories := new([]string)
@@ -80,7 +80,7 @@ func (s *sRss) RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink *[]d
 					description = description[:100]
 				}
 				// 添加数据
-				*rssLink = append(*rssLink, dmiddle.RssLinkDTO{
+				*rssLink = append(*rssLink, &dmiddle.RssLinkDTO{
 					Title:    item.Title,
 					Link:     item.ID,
 					Summary:  description,
@@ -107,7 +107,7 @@ func (s *sRss) RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink *[]d
 // 返回：
 // rssLink: 如果获取Rss信息成功，返回 RssLinkDTO；否则返回 nil。
 // hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
-func (s *sRss) RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink *[]dmiddle.RssLinkDTO, hasThis bool) {
+func (s *sRss) RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink *[]*dmiddle.RssLinkDTO, hasThis bool) {
 	g.Log().Noticef(ctx, "[LOGIC] 尝试获取 Hugo 中 原生 的 feed 内容")
 	getBody, err := s.rssLinkAccess(ctx, rssURL)
 	if err != nil {
@@ -123,7 +123,7 @@ func (s *sRss) RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink *[]d
 	// 处理数据
 	if getFeed != nil {
 		if getFeed.Generator == "Hugo -- gohugo.io" {
-			rssLink = new([]dmiddle.RssLinkDTO)
+			rssLink = new([]*dmiddle.RssLinkDTO)
 			for _, item := range getFeed.Items {
 				description := item.Description
 				if len(description) > 100 {
@@ -132,7 +132,7 @@ func (s *sRss) RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink *[]d
 				// 时间处理
 				parse, _ := time2.Parse("Mon, 02 Jan 2006 15:04:05 -0700", item.PubDate)
 				// 添加数据
-				*rssLink = append(*rssLink, dmiddle.RssLinkDTO{
+				*rssLink = append(*rssLink, &dmiddle.RssLinkDTO{
 					Title:   item.Title,
 					Link:    item.Link,
 					Summary: description,
@@ -158,7 +158,7 @@ func (s *sRss) RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink *[]d
 // 返回：
 // rssLink: 如果获取Rss信息成功，返回 RssLinkDTO；否则返回 nil。
 // hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
-func (s *sRss) RssWithWordpressFeed(ctx context.Context, rssURL string) (rssLink *[]dmiddle.RssLinkDTO, hasThis bool) {
+func (s *sRss) RssWithWordpressFeed(ctx context.Context, rssURL string) (rssLink *[]*dmiddle.RssLinkDTO, hasThis bool) {
 	g.Log().Noticef(ctx, "[LOGIC] 尝试获取 WordPress 中 原生 的 feed 内容")
 	getBody, err := s.rssLinkAccess(ctx, rssURL)
 	if err != nil {
@@ -174,7 +174,7 @@ func (s *sRss) RssWithWordpressFeed(ctx context.Context, rssURL string) (rssLink
 	// 处理数据
 	if getFeed != nil {
 		if match, _ := regexp.MatchString(`^https?://\S*wordpress\.org\S*$`, getFeed.Channel.Generator); match {
-			rssLink = new([]dmiddle.RssLinkDTO)
+			rssLink = new([]*dmiddle.RssLinkDTO)
 			for _, item := range getFeed.Channel.Items {
 				description := item.Description
 				if len(description) > 100 {
@@ -183,7 +183,7 @@ func (s *sRss) RssWithWordpressFeed(ctx context.Context, rssURL string) (rssLink
 				// 时间处理
 				parse, _ := time2.Parse("Mon, 02 Jan 2006 15:04:05 -0700", item.PubDate)
 				// 添加数据
-				*rssLink = append(*rssLink, dmiddle.RssLinkDTO{
+				*rssLink = append(*rssLink, &dmiddle.RssLinkDTO{
 					Title:   item.Title,
 					Link:    item.Link,
 					Summary: description,

@@ -125,7 +125,11 @@ func (s *sRss) GetLinkRssInfoWithLinkID(
 		g.Log().Errorf(ctx, "[LOGIC] 获取链接信息失败: %v", err.Error())
 		return nil, berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
-	return s.rssLinkToDTO(ctx, *getLinkInfo)
+	if getLinkInfo != nil {
+		return s.rssLinkToDTO(ctx, *getLinkInfo)
+	} else {
+		return nil, berror.NewError(bcode.NotExist, "链接不存在")
+	}
 }
 
 // GetLinkRssWithLinkName
@@ -247,17 +251,49 @@ func (s *sRss) rssLinkToDTO(
 		g.Log().Errorf(ctx, "[LOGIC] 获取 Rss 信息失败: %v", err.Error())
 		return nil, errors.New("数据库获取失败<Rss信息提取失败>")
 	}
-	var getSQLRssInfo *[]*dmiddle.RssLinkDTO
-	err = json.Unmarshal([]byte(getRssInfo.RssJson), &getSQLRssInfo)
-	if err != nil {
-		g.Log().Warningf(ctx, "[LOGIC] 解析 RssJson 失败: %v", err.Error())
-		return nil, errors.New("数据解析失败<RssJson解析失败>")
-	}
-	// 时间戳转换
-	if len(*getSQLRssInfo) > 0 {
-		for _, linkDTO := range *getSQLRssInfo {
-			linkDTO.Timer = gtime.NewFromStr(linkDTO.Timer).Format("Y年m月d日 H点i分")
+	if getRssInfo == nil {
+		// 如果为空则直接获取链接进行获取并且存储操作
+		link, hasThis := s.RssWithHexoFeed(ctx, getLinkInfo.SiteRssUrl)
+		if !hasThis {
+			link, hasThis = s.RssWithHugoFeed(ctx, getLinkInfo.SiteRssUrl)
 		}
+		if !hasThis {
+			link, hasThis = s.RssWithWordpressFeed(ctx, getLinkInfo.SiteRssUrl)
+		}
+		if hasThis {
+			// 数据转换为 getJSON
+			getJSON, _ := json.Marshal(link)
+			_, err := dao.LinkRss.Ctx(ctx).Data(do.LinkRss{
+				LinkId:    getLinkInfo.Id,
+				RssJson:   getJSON,
+				CheckTime: gtime.Now(),
+			}).OnConflict("link_id").Save()
+			if err != nil {
+				return nil, err
+			}
+			// 时间戳转换
+			if len(*link) > 0 {
+				for _, linkDTO := range *link {
+					linkDTO.Timer = gtime.NewFromStr(linkDTO.Timer).Format("Y年m月d日 H点i分")
+				}
+			}
+			return link, err
+		} else {
+			return nil, berror.NewError(bcode.OperationFailed, "获取 RSS 信息失败")
+		}
+	} else {
+		var getSQLRssInfo *[]*dmiddle.RssLinkDTO
+		err = json.Unmarshal([]byte(getRssInfo.RssJson), &getSQLRssInfo)
+		if err != nil {
+			g.Log().Warningf(ctx, "[LOGIC] 解析 RssJson 失败: %v", err.Error())
+			return nil, errors.New("数据解析失败<RssJson解析失败>")
+		}
+		// 时间戳转换
+		if len(*getSQLRssInfo) > 0 {
+			for _, linkDTO := range *getSQLRssInfo {
+				linkDTO.Timer = gtime.NewFromStr(linkDTO.Timer).Format("Y年m月d日 H点i分")
+			}
+		}
+		return getSQLRssInfo, nil
 	}
-	return getSQLRssInfo, nil
 }
