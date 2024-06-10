@@ -31,45 +31,41 @@ package auth
 import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/net/ghttp"
 	"xiaoMain/api/auth/v1"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
 )
 
-// AuthLogin 是 ControllerV1 结构体的一个方法。
-// 它处理用户尝试登录的认证过程。
+// AuthLogin
 //
-// 参数:
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含登录详细信息。
+// # 用户登录
 //
-// 返回:
-// res: 发送给用户的响应。如果登录成功，它包含登录结果和用户详细信息。
-// err: 在登录过程中发生的任何错误。
+// 用户登录, 需要用户提供用户名和密码。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含登录的详细信息。
+//
+// # 返回
+//   - res: 发送给用户的响应。如果登录成功，它将返回成功的消息。
+//   - err: 在登录过程中发生的任何错误。
 func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res *v1.AuthLoginRes, err error) {
-	g.Log().Notice(ctx, "[CONTROL] 控制层 UserLogin 接口")
-	// 获取 Request
-	getRequest := ghttp.RequestFromCtx(ctx)
+	g.Log().Notice(ctx, "[CONTROL] UserLogin | 用户登录")
 	// 检查用户登录是否有效
-	hasLogin, _ := service.AuthLogic().IsUserLogin(ctx)
-	if !hasLogin {
-		if uuid, isCorrect, errMessage := service.AuthLogic().CheckUserLogin(ctx, req); isCorrect {
+	err = service.Auth().IsUserLogin(ctx)
+	if err == nil {
+		if uuid, err := service.Auth().UserLogin(ctx, req); err != nil {
 			// 注册用户进行登录
-			getToken, getError := service.AuthLogic().RegisteredUserLogin(ctx, *uuid, req.Remember)
+			getToken, getError := service.Auth().RegisteredUserLogin(ctx, uuid, req.Remember)
 			if getError == nil {
 				res = &v1.AuthLoginRes{
 					UserLogin: vo.UserLogin{
 						User: vo.UserLoginUser{
-							UUID:     *uuid,
+							UUID:     uuid,
 							Username: req.User,
 						},
 						Auth: vo.UserLoginAuth{
-							Token:        getToken.UserToken,
-							Verification: getToken.Verification,
-							CreatedAt:    getToken.CreatedAt,
-							ExpiredAt:    getToken.ExpiredAt,
+							Verification: getToken,
 						},
 					},
 					Meta: g.Meta{},
@@ -79,12 +75,9 @@ func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res
 				return nil, getError
 			}
 		} else {
-			result.VerificationFailed.SetErrorMessage(errMessage).Response(getRequest)
+			return nil, err
 		}
 	} else {
-		result.
-			NewErrorCode("LoginValid", 40350, "登录有效", "当前用户登录有效", nil).
-			Response(getRequest)
+		return nil, err
 	}
-	return nil, nil
 }

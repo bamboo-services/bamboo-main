@@ -38,34 +38,47 @@ import (
 )
 
 type (
-	IUserLogic interface {
-		// CheckMailHasConsoleUser 这个函数的主要作用是检查用户输入的邮箱地址是否与数据库中存储的邮箱地址匹配
-		// 在具体实现中，函数首先从数据库中获取指定的邮箱信息，然后将用户输入的邮箱地址与数据库中的邮箱地址进行比较。如果两者匹配，函数将返回 true 和
-		// "邮箱匹配" 的信息；如果两者不匹配，函数将返回 false 和 "邮箱不匹配" 的信息。如果在查询数据库过程中出现错误，函数将返回 false 和 "未查询
-		// 到邮箱" 的信息。
+	IUser interface {
+		// IsMailHasConsoleUser
 		//
-		// 参数:
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// email: 用户输入的邮箱地址。
+		// # 检查邮箱是否为站长邮箱
 		//
-		// 返回:
-		// checkMail: 如果用户输入的邮箱与数据库中的邮箱匹配，则返回 true，否则返回 false。
-		// info: 返回的信息，如果邮箱匹配，返回 "邮箱匹配"，如果不匹配，返回 "邮箱不匹配"，如果查询过程中出现错误，返回 "未查询到邮箱"。
-		CheckMailHasConsoleUser(ctx context.Context, email string) (checkMail bool, err error)
+		// 用于检查该邮箱是否为站长的邮箱，如果是则返回 nil，否则返回错误信息。
+		//
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - email: 邮箱地址(string)
+		//
+		// # 返回:
+		//   - err: 如果检查过程中发生错误，返回错误信息。否则返回 nil.
+		IsMailHasConsoleUser(ctx context.Context, email string) (err error)
+		// IsUserHasConsoleUser
+		//
+		// # 检查用户是否为站长用户
+		//
+		// 用于检查该用户是否为站长用户，如果是则返回 nil，否则返回错误信息。
+		//
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - user: 用户名(string)
+		//
+		// # 返回:
+		//   - err: 如果检查过程中发生错误，返回错误信息。否则返回 nil.
+		IsUserHasConsoleUser(ctx context.Context, user string) (err error)
 	}
 )
 
 var (
-	localUserLogic IUserLogic
+	localUser IUser
 )
 
-func UserLogic() IUserLogic {
-	if localUserLogic == nil {
-		panic("implement not found for interface IUserLogic, forgot register?")
+func User() IUser {
+	if localUser == nil {
+		panic("implement not found for interface IUser, forgot register?")
 	}
-	return localUserLogic
+	return localUser
 }
 
-func RegisterUserLogic(i IUserLogic) {
-	localUserLogic = i
+func RegisterUser(i IUser) {
+	localUser = i
 }

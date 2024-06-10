@@ -28,7 +28,10 @@
 
 package v1
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/model/vo"
+)
 
 // CheckLogoURLHasConnectReq 是 CheckLogoURLHasConnect 方法的请求结构。
 // 用于检查用户输入的 Logo 链接是否可连接。
@@ -44,4 +47,5 @@ type CheckLogoURLHasConnectReq struct {
 // 用于返回检查 Logo 链接是否可连接的结果。
 type CheckLogoURLHasConnectRes struct {
 	g.Meta `mime:"application/json"`
+	vo.LinkConnectRes
 }

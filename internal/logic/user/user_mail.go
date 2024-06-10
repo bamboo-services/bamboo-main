@@ -38,34 +38,64 @@ import (
 	"xiaoMain/internal/model/entity"
 )
 
-// CheckMailHasConsoleUser
+// IsMailHasConsoleUser
 //
-// # 检查邮箱是否有控制台用户
+// # 检查邮箱是否为站长邮箱
 //
-// 用于检查邮箱是否有控制台用户，如果有则返回 true，否则返回 false.
+// 用于检查该邮箱是否为站长的邮箱，如果是则返回 nil，否则返回错误信息。
 //
 // # 参数:
 //   - ctx: 上下文对象，用于传递和控制请求的生命周期。
 //   - email: 邮箱地址(string)
 //
 // # 返回:
-//   - checkMail: 如果邮箱有控制台用户，返回 true。否则返回 false.
 //   - err: 如果检查过程中发生错误，返回错误信息。否则返回 nil.
-func (s *sUser) CheckMailHasConsoleUser(ctx context.Context, email string) (checkMail bool, err error) {
-	g.Log().Notice(ctx, "[LOGIC] UserLogic:CheckMailHasConsoleUser | 检查邮箱是否有控制台用户")
+func (s *sUser) IsMailHasConsoleUser(ctx context.Context, email string) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] UserLogic:IsMailHasConsoleUser | 检查邮箱是否有控制台用户")
 	// 从数据库获取指定信息
 	var getAdminEmail *entity.Index
 	if dao.Index.Ctx(ctx).Where(do.Index{Key: "email"}).Scan(&getAdminEmail) != nil {
-		return false, berror.NewErrorHasError(bcode.ServerInternalError, err)
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	// 对邮箱进行匹配
 	if getAdminEmail != nil {
 		if getAdminEmail.Value == email {
-			return true, nil
+			return nil
 		} else {
-			return false, berror.NewError(bcode.ServerInternalError, "邮箱不匹配")
+			return berror.NewError(bcode.ServerInternalError, "邮箱不匹配")
 		}
 	} else {
-		return false, berror.NewError(bcode.ServerInternalError, "未查询到邮箱")
+		return berror.NewError(bcode.NotExist, "未查询到邮箱")
+	}
+}
+
+// IsUserHasConsoleUser
+//
+// # 检查用户是否为站长用户
+//
+// 用于检查该用户是否为站长用户，如果是则返回 nil，否则返回错误信息。
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//   - user: 用户名(string)
+//
+// # 返回:
+//   - err: 如果检查过程中发生错误，返回错误信息。否则返回 nil.
+func (s *sUser) IsUserHasConsoleUser(ctx context.Context, user string) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] UserLogic:IsUserHasConsoleUser | 检查用户是否有控制台用户")
+	// 从数据库获取指定信息
+	var getAdminUser *entity.Index
+	if dao.Index.Ctx(ctx).Where(do.Index{Key: "user"}).Scan(&getAdminUser) != nil {
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
+	}
+	// 对用户名进行匹配
+	if getAdminUser != nil {
+		if getAdminUser.Value == user {
+			return nil
+		} else {
+			return berror.NewError(bcode.ServerInternalError, "用户名不匹配")
+		}
+	} else {
+		return berror.NewError(bcode.NotExist, "未查询到用户名")
 	}
 }

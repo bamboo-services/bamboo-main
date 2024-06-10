@@ -30,6 +30,9 @@ package link
 
 import (
 	"context"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
@@ -38,16 +41,19 @@ import (
 	"xiaoMain/api/link/v1"
 )
 
-// LinkGetLocation 获取期望位置信息
-// 用于获取期望位置信息, 如果成功则返回期望位置信息，否则返回错误。
+// LinkGetLocation
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含获取期望位置信息的详细信息。
+// # 获取期望位置信息
 //
-// 返回：
-// res: 如果获取期望位置信息成功，返回期望位置信息；否则返回错误。
-// err: 如果获取期望位置信息成功，返回 nil；否则返回错误。
+// 获取期望位置信息, 用于用户选择链接的期望位置。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含获取期望位置信息的详细信息。
+//
+// # 返回
+//   - res: 发送给用户的响应。如果获取期望位置信息成功，它将返回成功的消息。
+//   - err: 在获取期望位置信息过程中发生的任何错误。
 func (c *ControllerV1) LinkGetLocation(
 	ctx context.Context,
 	_ *v1.LinkGetLocationReq,
@@ -57,9 +63,11 @@ func (c *ControllerV1) LinkGetLocation(
 	// 获取期望位置信息
 	getLocation, err := service.Link().GetLocation(ctx)
 	if err != nil {
-		result.ServerInternalError.SetErrorMessage("数据库操作失败").Response(getRequest)
+		return nil, err
 	}
-	if getLocation != nil {
+	if getLocation == nil {
+		return nil, berror.NewError(bcode.NotExist, "没有找到期望位置信息")
+	} else {
 		g.Log().Debugf(ctx, "[CONTROL] 获取期望位置信息成功, 数量[%d]", len(getLocation))
 		getLocationList := make([]vo.LinkLocationVO, len(getLocation))
 		for i, location := range getLocation {
@@ -69,8 +77,6 @@ func (c *ControllerV1) LinkGetLocation(
 			}
 		}
 		result.Success("获取期望位置信息成功", getLocationList).Response(getRequest)
-	} else {
-		result.ServerInternalError.SetErrorMessage("位置配置为空").Response(getRequest)
 	}
 	return nil, nil
 }

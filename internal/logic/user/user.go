@@ -33,7 +33,7 @@ import "xiaoMain/internal/service"
 type sUser struct{}
 
 func init() {
-	service.RegisterUserLogic(New())
+	service.RegisterUser(New())
 }
 
 func New() *sUser {

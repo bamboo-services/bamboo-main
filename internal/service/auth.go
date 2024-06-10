@@ -65,7 +65,7 @@ type (
 		// # 返回:
 		//   - userUUID: 如果用户登录成功，返回用户的 UUID。否则返回 nil.
 		//   - isCorrect: 如果用户登录成功，返回 true。否则返回 false.
-		UserLogin(ctx context.Context, getData *v1.AuthLoginReq) (userUUID *string, isCorrect bool, err error)
+		UserLogin(ctx context.Context, getData *v1.AuthLoginReq) (userUUID string, err error)
 		// RegisteredUserLogin
 		//
 		// # 注册用户登录

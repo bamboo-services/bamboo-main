@@ -30,41 +30,38 @@ package auth
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/api/auth/v1"
 	"xiaoMain/internal/constants"
 	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
-
-	"xiaoMain/api/auth/v1"
 )
 
-// ChangePasswordSendMail 是 ControllerV1 结构体的一个方法。
-// 它处理用户尝试发送修改密码邮件的过程。
+// ChangePasswordSendMail
 //
-// 参数:
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含发送修改密码邮件的详细信息。
+// # 修改密码发送邮件
 //
-// 返回:
-// res: 发送给用户的响应。如果发送邮件成功，它将返回成功的消息。
-// err: 在发送邮件过程中发生的任何错误。
+// 修改密码发送邮件, 需要用户提供邮箱。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含修改密码发送邮件的详细信息。
+//
+// # 返回
+//   - res: 发送给用户的响应。如果修改密码发送邮件成功，它将返回成功的消息。
+//   - err: 在修改密码发送邮件过程中发生的任何错误。
 func (c *ControllerV1) ChangePasswordSendMail(
 	ctx context.Context,
 	req *v1.ChangePasswordSendMailReq,
 ) (res *v1.ChangePasswordSendMailRes, err error) {
 	g.Log().Notice(ctx, "[CONTROL] 控制层 ChangePasswordSendMail 接口")
-	getRequest := ghttp.RequestFromCtx(ctx)
 	// 检查邮箱是否正确
-	isCorrect, info := service.UserMailLogic().CheckMailHasConsoleUser(ctx, req.Email)
-	if !isCorrect {
-		result.VerificationFailed.SetErrorMessage(info).Response(getRequest)
-		return nil, nil
-	}
+	err = service.User().IsMailHasConsoleUser(ctx, req.Email)
 	// 发送验证码
-	if service.MailLogic().SendEmailVerificationCode(ctx, req.Email, constants.ChangePasswordScene) == nil {
-		result.Success("验证码发送成功", nil)
-	} else {
-		result.MailError.SetErrorMessage("验证码发送失败").Response(getRequest)
+	if err == nil {
+		err = service.Mail().SendEmailVerificationCode(ctx, req.Email, constants.ChangePasswordScene)
+	}
+	if err != nil {
+		return nil, err
 	}
 	return nil, nil
 }

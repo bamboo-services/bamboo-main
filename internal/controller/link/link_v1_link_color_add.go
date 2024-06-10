@@ -30,37 +30,35 @@ package link
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/net/ghttp"
-	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
-
+	"github.com/gogf/gf/v2/frame/g"
 	"xiaoMain/api/link/v1"
+	"xiaoMain/internal/service"
 )
 
-// LinkColorAdd 添加链接颜色
-// 用于添加链接颜色，如果成功则返回 nil，否则返回错误。
-// 本接口会根据已有的链接颜色信息对链接颜色进行添加，若添加失败返回失败信息，若成功返回成功信息
+// LinkColorAdd
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含添加链接颜色的详细信息。
+// # 添加链接颜色
 //
-// 返回：
+// 添加链接颜色, 需要用户提供颜色的名称、显示名称、颜色值和是否默认。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含添加链接颜色的详细信息。
+//
+// # 返回
+//   - res: 发送给用户的响应。如果添加链接颜色成功，它将返回成功的消息。
+//   - err: 在添加链接颜色过程中发生的任何错误。
 func (c *ControllerV1) LinkColorAdd(
 	ctx context.Context,
 	req *v1.LinkColorAddReq,
 ) (res *v1.LinkColorAddRes, err error) {
 	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkColorAdd 接口")
-	getRequest := ghttp.RequestFromCtx(ctx)
-	if err = service.Link().CheckColorExist(ctx, req.Name); err != nil {
-		result.ExistedError.SetErrorMessage(err.Error()).Response(getRequest)
-		return nil, nil
+	err = service.Link().IsColorExistByName(ctx, req.Name)
+	if err == nil {
+		err = service.Link().AddColor(ctx, req.Name, req.DisplayName, req.Color, req.Select)
 	}
-	// 添加链接颜色
-	if err = service.Link().AddColor(ctx, req.Name, req.DisplayName, req.Color, req.Select); err == nil {
-		result.Success("添加成功", nil).Response(getRequest)
-	} else {
-		result.ServerInternalError.SetErrorMessage(err.Error()).Response(getRequest)
+	if err != nil {
+		return nil, err
 	}
 	return nil, nil
 }

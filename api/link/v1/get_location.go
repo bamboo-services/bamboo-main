@@ -28,7 +28,10 @@
 
 package v1
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/model/entity"
+)
 
 // LinkGetLocationReq 获取位置信息
 // 用于获取位置信息
@@ -51,4 +54,7 @@ type LinkGetLocationFullReq struct {
 // LinkGetLocationFullRes 获取完整位置信息响应
 // 用于获取完整位置信息响应
 type LinkGetLocationFullRes struct {
+	g.Meta    `mime:"application/json"`
+	Locations []*entity.Location `json:"locations" sm:"位置列表"`
+	Total     int                `json:"total" sm:"位置总数"`
 }

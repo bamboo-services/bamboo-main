@@ -30,45 +30,42 @@ package link
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"xiaoMain/api/link/v1"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
-
-	"xiaoMain/api/link/v1"
 )
 
-// CheckRssURLHasConnect 检查 RSS 链接是否已经连接
-// 用于检查 RSS 链接是否已经连接，如果成功则返回 nil，否则返回错误。
-// 本接口会根据已有的连接信息对 RSS 进行链接检查是否可以连接，若连接失败返回失败信息，若成功返回成功信息
+// CheckRssURLHasConnect
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含检查 RSS 链接是否已经连接的详细信息。
+// # 检查链接是否已经连接
 //
-// 返回：
-// res: 如果检查 RSS 链接是否已经连接成功，返回 nil；否则返回错误。
-// err: 如果检查 RSS 链接是否已经连接成功，返回 nil；否则返回错误。
+// 检查链接是否已经连接, 需要用户提供链接的URL。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含检查链接是否已经连接的详细信息。
+//
+// # 返回
+//   - res: 发送给用户的响应。如果检查链接是否已经连接成功，它将返回成功的消息。
+//   - err: 在检查链接是否已经连接过程中发生的任何错误。
 func (c *ControllerV1) CheckRssURLHasConnect(
 	ctx context.Context,
 	req *v1.CheckRssURLHasConnectReq,
 ) (res *v1.CheckRssURLHasConnectRes, err error) {
 	g.Log().Notice(ctx, "[CONTROL] 控制层 CheckRssURLHasConnect 接口")
-	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取 RSS 链接是否已经连接
 	getNowTimestamp := gtime.TimestampMilli()
 	err = service.Link().CheckRSSCanAccess(ctx, req.RssURL)
 	if err != nil {
-		result.Success("站点读取失败", vo.LinkConnectRes{
-			Message: err.Error(),
-		}).Response(getRequest)
-	} else {
-		getTime := gtime.TimestampMilli() - getNowTimestamp
-		result.Success("站点读取成功", vo.LinkConnectRes{
+		return nil, err
+	}
+	getTime := gtime.TimestampMilli() - getNowTimestamp
+	return &v1.CheckRssURLHasConnectRes{
+		LinkConnectRes: vo.LinkConnectRes{
 			Message: "站点读取成功",
 			Delay:   &getTime,
-		}).Response(getRequest)
-	}
-	return nil, nil
+		},
+	}, nil
 }

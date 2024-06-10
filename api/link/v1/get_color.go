@@ -28,7 +28,10 @@
 
 package v1
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/model/entity"
+)
 
 // LinkGetColorReq 获取期望颜色信息
 // 用于获取期望颜色信息
@@ -52,4 +55,6 @@ type LinkGetColorFullReq struct {
 // 用于获取完整颜色信息响应
 type LinkGetColorFullRes struct {
 	g.Meta `mime:"application/json"`
+	Colors []*entity.Color `json:"colors" sm:"颜色列表"`
+	Total  int             `json:"total" sm:"颜色总数"`
 }

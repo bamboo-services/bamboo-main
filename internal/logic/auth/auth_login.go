@@ -95,7 +95,7 @@ func (s *sAuth) IsUserLogin(ctx context.Context) (err error) {
 func (s *sAuth) UserLogin(
 	ctx context.Context,
 	getData *v1.AuthLoginReq,
-) (userUUID *string, isCorrect bool, err error) {
+) (userUUID string, err error) {
 	g.Log().Notice(ctx, "[LOGIC] AuthLogic:UserLogin | 进行用户登录检查")
 	// 接收数据处理用户登录
 	var getUserUUID *entity.Index
@@ -104,35 +104,35 @@ func (s *sAuth) UserLogin(
 	err = dao.Index.Ctx(ctx).Where(do.Index{Key: "uuid"}).Scan(&getUserUUID)
 	if err != nil {
 		g.Log().Error(ctx, "[LOGIC] 获取数据库出错", err)
-		return nil, false, berror.NewErrorHasError(bcode.ServerInternalError, err)
+		return "", berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	err = dao.Index.Ctx(ctx).Where(do.Index{Key: "user"}).Scan(&getUsername)
 	if err != nil {
 		g.Log().Error(ctx, "[LOGIC] 获取数据库出错", err)
-		return nil, false, berror.NewErrorHasError(bcode.ServerInternalError, err)
+		return "", berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	err = dao.Index.Ctx(ctx).Where(do.Index{Key: "password"}).Scan(&getUserPassword)
 	if err != nil {
 		g.Log().Error(ctx, "[LOGIC] 获取数据库出错", err)
-		return nil, false, berror.NewErrorHasError(bcode.ServerInternalError, err)
+		return "", berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	// 三者不能为空
 	if getUserUUID == nil || getUsername == nil || getUserPassword == nil {
 		g.Log().Warning(ctx, "[LOGIC] 数据库中未找到用户信息")
-		return nil, false, berror.NewError(bcode.ServerInternalError, "数据不存在")
+		return "", berror.NewError(bcode.ServerInternalError, "数据不存在")
 	}
 	// 对账号密码进行校验
 	if getUsername.Value == getData.User {
 		if butil.PasswordVerify(getData.Pass, getUserPassword.Value) {
 			g.Log().Notice(ctx, "[LOGIC] 用户校验通过")
-			return &getUserUUID.Value, true, nil
+			return getUserUUID.Value, nil
 		} else {
 			g.Log().Notice(ctx, "[LOGIC] 密码错误")
-			return nil, false, berror.NewError(bcode.OperationFailed, "密码错误")
+			return "", berror.NewError(bcode.OperationFailed, "密码错误")
 		}
 	} else {
 		g.Log().Notice(ctx, "[LOGIC] 用户名未找到")
-		return nil, false, berror.NewError(bcode.NotExist, "用户名不存在")
+		return "", berror.NewError(bcode.NotExist, "用户名不存在")
 	}
 }
 

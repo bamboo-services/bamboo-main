@@ -28,7 +28,10 @@
 
 package v1
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/model/vo"
+)
 
 // CheckLinkURLHasConnectReq 是 CheckLinkURLHasConnect 方法的请求结构。
 // 用于检查用户输入的博客链接是否可连接。
@@ -44,6 +47,7 @@ type CheckLinkURLHasConnectReq struct {
 // 用于返回检查博客链接是否可连接的结果。
 type CheckLinkURLHasConnectRes struct {
 	g.Meta `mime:"application/json"`
+	vo.LinkConnectRes
 }
 
 // CheckLinkIDHasConnectReq 是 CheckLinkIdHasConnect 方法的请求结构。
@@ -59,4 +63,5 @@ type CheckLinkIDHasConnectReq struct {
 // 用于返回检查博客链接是否可连接的结果。
 type CheckLinkIDHasConnectRes struct {
 	g.Meta `mime:"application/json"`
+	vo.LinkConnectRes
 }

@@ -30,36 +30,37 @@ package link
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/net/ghttp"
-	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
-
+	"github.com/gogf/gf/v2/frame/g"
 	"xiaoMain/api/link/v1"
+	"xiaoMain/internal/service"
 )
 
-// LinkGetColorFull 获取颜色完整信息
-// 用于获取颜色完整信息，如果成功则返回 nil，否则返回错误。
-// 本接口会根据已有的颜色信息对颜色进行获取完整信息，若获取失败返回失败信息，若成功返回成功信息
+// LinkGetColorFull
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含获取颜色完整信息的详细信息。
+// # 获取颜色完整信息
 //
-// 返回：
-// res: 如果获取颜色完整信息成功，返回 nil；否则返回错误。
-// err: 如果获取颜色完整信息成功，返回 nil；否则返回错误。
+// 获取颜色完整信息, 需要用户提供颜色的ID。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含获取颜色完整信息的详细信息。
+//
+// # 返回
+//   - res: 发送给用户的响应。如果获取颜色完整信息成功，它将返回成功的消息。
+//   - err: 在获取颜色完整信息过程中发生的任何错误。
 func (c *ControllerV1) LinkGetColorFull(
 	ctx context.Context,
-	req *v1.LinkGetColorFullReq,
+	_ *v1.LinkGetColorFullReq,
 ) (res *v1.LinkGetColorFullRes, err error) {
 	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkGetColorFull 接口")
-	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取颜色完整信息
 	getColor, err := service.Link().GetColor(ctx)
 	if err != nil {
-		result.ServerInternalError.SetErrorMessage(err.Error()).Response(getRequest)
-	} else {
-		result.Success("获取成功", getColor).Response(getRequest)
+		return nil, err
 	}
-	return nil, nil
+	// TODO: 颜色总数需要进行计算处理
+	return &v1.LinkGetColorFullRes{
+		Colors: getColor,
+		Total:  0,
+	}, nil
 }

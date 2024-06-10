@@ -30,25 +30,26 @@ package link
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"xiaoMain/api/link/v1"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
-
-	"xiaoMain/api/link/v1"
 )
 
-// CheckLinkIDHasConnect 检查博客链接是否已经连接
-// 用于检查博客链接是否已经连接，如果成功则返回 nil，否则返回错误。
-// 本接口会根据已有的博客信息对博客进行链接检查是否可以连接，若连接失败返回失败信息，若成功返回成功信息
+// CheckLinkIDHasConnect
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含检查博客链接是否已经连接的详细信息。
+// # 检查链接是否已经连接
 //
-// 返回：
-// res: 如果检查博客链接是否已经连接成功，返回 nil；否则返回错误。
-// err: 如果检查博客链接是否已经连接成功，返回 nil；否则返回错误。
+// 检查链接是否已经连接, 需要用户提供链接的ID。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含检查链接是否已经连接的详细信息。
+//
+// # 返回
+//   - res: 发送给用户的响应。如果检查链接是否已经连接成功，它将返回成功的消息。
+//   - err: 在检查链接是否已经连接过程中发生的任何错误。
 func (c *ControllerV1) CheckLinkIDHasConnect(
 	ctx context.Context,
 	req *v1.CheckLinkIDHasConnectReq,
@@ -58,14 +59,12 @@ func (c *ControllerV1) CheckLinkIDHasConnect(
 	// 获取博客链接是否已经连接
 	delay, err := service.Link().CheckLinkHasConnect(ctx, getRequest.GetRouter("id").String())
 	if err != nil {
-		result.Success("获取成功", vo.LinkConnectRes{
-			Message: err.Error(),
-		}).Response(getRequest)
-	} else {
-		result.Success("获取成功", vo.LinkConnectRes{
+		return nil, err
+	}
+	return &v1.CheckLinkIDHasConnectRes{
+		LinkConnectRes: vo.LinkConnectRes{
 			Message: "获取完成",
 			Delay:   delay,
-		}).Response(getRequest)
-	}
-	return nil, nil
+		},
+	}, nil
 }
