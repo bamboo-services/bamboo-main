@@ -34,7 +34,7 @@ create table xf_token
     user_uuid    uuid                    not null,
     user_ip      varchar(45)             not null,
     user_agent   varchar                 not null,
-    verification uuid                    not null,
+    token uuid                    not null,
     created_at   timestamp default now() not null,
     expired_at   timestamp               not null
 );
@@ -44,6 +44,6 @@ comment on column xf_token.id is '主键';
 comment on column xf_token.user_uuid is '用户 UUID';
 comment on column xf_token.user_ip is '用户 IP 地址';
 comment on column xf_token.user_agent is '用户 Agent';
-comment on column xf_token.verification is '验证用户是否是唯一用户Token';
+comment on column xf_token.token is '验证用户是否是唯一用户Token';
 comment on column xf_token.created_at is '创建时间';
 comment on column xf_token.expired_at is '过期时间';

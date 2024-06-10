@@ -6,6 +6,9 @@ github.com/bamboo-services/bamboo-utils v0.1.0-alpha h1:qRyt/EX3ukwLbJLIro7b0IKu
 github.com/bamboo-services/bamboo-utils v0.1.0-alpha/go.mod h1:SLKN5rPhXqtu2MZys2XbHQm96D/Sz/K7+FoPTeeakt4=
 github.com/bamboo-services/bamboo-utils v0.1.1-beta h1:9fBSWXPqSNOgKM4yafK+7y+VkRng29Br4P4CK21QP+8=
 github.com/bamboo-services/bamboo-utils v0.1.1-beta/go.mod h1:RFhT8VawkP/vRfGoSnhQq6Uq6HrryKUYqla2WN0gsWU=
+github.com/bamboo-services/bamboo-utils v0.1.2-beta/go.mod h1:RFhT8VawkP/vRfGoSnhQq6Uq6HrryKUYqla2WN0gsWU=
+github.com/bamboo-services/bamboo-utils v0.1.3-alpha h1:hVIo6cH2g2dm4ch+crNGyplevDB4rledkv1dz6lsQRE=
+github.com/bamboo-services/bamboo-utils v0.1.3-alpha/go.mod h1:RFhT8VawkP/vRfGoSnhQq6Uq6HrryKUYqla2WN0gsWU=
 github.com/clbanning/mxj/v2 v2.7.0 h1:WA/La7UGCanFe5NpHF0Q3DNtnCsVoxbPKuyBNHWRyME=
 github.com/clbanning/mxj/v2 v2.7.0/go.mod h1:hNiWqW14h+kc+MdF9C6/YoRfjEJoR3ou6tn/Qo+ve2s=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

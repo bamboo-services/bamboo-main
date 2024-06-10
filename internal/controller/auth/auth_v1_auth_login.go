@@ -30,6 +30,8 @@ package auth
 
 import (
 	"context"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/bresult"
 	"github.com/gogf/gf/v2/frame/g"
 	"xiaoMain/api/auth/v1"
 	"xiaoMain/internal/model/vo"
@@ -53,8 +55,8 @@ func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res
 	g.Log().Notice(ctx, "[CONTROL] UserLogin | 用户登录")
 	// 检查用户登录是否有效
 	err = service.Auth().IsUserLogin(ctx)
-	if err == nil {
-		if uuid, err := service.Auth().UserLogin(ctx, req); err != nil {
+	if err != nil {
+		if uuid, err := service.Auth().UserLogin(ctx, req); err == nil {
 			// 注册用户进行登录
 			getToken, getError := service.Auth().RegisteredUserLogin(ctx, uuid, req.Remember)
 			if getError == nil {
@@ -78,6 +80,7 @@ func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res
 			return nil, err
 		}
 	} else {
-		return nil, err
+		bresult.WriteResponse(ctx, bcode.Success, "登录依然有效", nil)
 	}
+	return nil, nil
 }

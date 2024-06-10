@@ -48,24 +48,24 @@ type TokenDao struct {
 
 // TokenColumns defines and stores column names for table xf_token.
 type TokenColumns struct {
-	Id           string // 主键
-	UserUuid     string // 用户 UUID
-	UserIp       string // 用户 IP 地址
-	UserAgent    string // 用户 Agent
-	Verification string // 验证用户是否是唯一用户Token
-	CreatedAt    string // 创建时间
-	ExpiredAt    string // 过期时间
+	Id        string // 主键
+	UserUuid  string // 用户 UUID
+	UserIp    string // 用户 IP 地址
+	UserAgent string // 用户 Agent
+	Token     string // 验证用户是否是唯一用户Token
+	CreatedAt string // 创建时间
+	ExpiredAt string // 过期时间
 }
 
 // tokenColumns holds the columns for table xf_token.
 var tokenColumns = TokenColumns{
-	Id:           "id",
-	UserUuid:     "user_uuid",
-	UserIp:       "user_ip",
-	UserAgent:    "user_agent",
-	Verification: "verification",
-	CreatedAt:    "created_at",
-	ExpiredAt:    "expired_at",
+	Id:        "id",
+	UserUuid:  "user_uuid",
+	UserIp:    "user_ip",
+	UserAgent: "user_agent",
+	Token:     "token",
+	CreatedAt: "created_at",
+	ExpiredAt: "expired_at",
 }
 
 // NewTokenDao creates and returns a new DAO object for table data access.

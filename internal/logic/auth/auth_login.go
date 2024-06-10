@@ -58,21 +58,29 @@ import (
 //   - err: 如果验证过程中发生错误，返回错误信息。否则返回 nil.
 func (s *sAuth) IsUserLogin(ctx context.Context) (err error) {
 	g.Log().Notice(ctx, "[LOGIC] AuthLogic:IsUserLogin | 用户是否已登录")
-	getUserAuthorize := utility.GetAuthorizationFromHeader(ctx)
+	getUserAuthorize, err := utility.GetAuthorizationFromHeader(ctx)
+	if err != nil {
+		return err
+	}
 	// 对内容进行校验
 	if getUserAuthorize != "" {
-		var getTokenDO entity.Token
-		err := dao.Token.Ctx(ctx).Where(do.Token{Verification: getUserAuthorize}).Limit(1).Scan(&getTokenDO)
+		var getTokenDO *entity.Token
+		err := dao.Token.Ctx(ctx).Where(do.Token{Token: getUserAuthorize}).Limit(1).Scan(&getTokenDO)
 		if err != nil {
-			g.Log().Warning(ctx, "[LOGIC] 用户登录过期 [无法从数据库取得数据]")
+			g.Log().Error(ctx, "[LOGIC] 获取数据库出错", err)
 			return berror.NewErrorHasError(bcode.ServerInternalError, err)
 		}
-		if gtime.Timestamp() < getTokenDO.ExpiredAt.Timestamp() {
-			g.Log().Noticef(ctx, "[LOGIC] 用户UID %s 任然登录状态", getTokenDO.UserUuid)
-			return nil
+		if getTokenDO != nil {
+			if gtime.Timestamp() < getTokenDO.ExpiredAt.Timestamp() {
+				g.Log().Noticef(ctx, "[LOGIC] 用户UID %s 任然登录状态", getTokenDO.UserUuid)
+				return nil
+			} else {
+				g.Log().Warning(ctx, "[LOGIC] 用户登录过期")
+				return berror.NewError(bcode.Expired, "用户登录过期")
+			}
 		} else {
-			g.Log().Warning(ctx, "[LOGIC] 用户登录过期")
-			return berror.NewError(bcode.Expired, "用户登录过期")
+			g.Log().Warning(ctx, "[LOGIC] 用户登录过期 [无法从数据库取得数据]")
+			return berror.NewError(bcode.NotExist, "用户登录过期")
 		}
 	}
 	g.Log().Warning(ctx, "[LOGIC] 用户未登录")
@@ -188,11 +196,11 @@ func (s *sAuth) RegisteredUserLogin(
 	// 数据库操作
 	getVerificationCode := butil.GenerateRandUUID().String()
 	_, err = dao.Token.Ctx(ctx).Data(do.Token{
-		UserUuid:     userUUID,
-		UserIp:       g.RequestFromCtx(ctx).GetClientIp(),
-		Verification: getVerificationCode,
-		UserAgent:    g.RequestFromCtx(ctx).GetHeader("User-Agent"),
-		ExpiredAt:    gtime.NewFromTimeStamp(remPassword),
+		UserUuid:  userUUID,
+		UserIp:    g.RequestFromCtx(ctx).GetClientIp(),
+		Token:     getVerificationCode,
+		UserAgent: g.RequestFromCtx(ctx).GetHeader("User-Agent"),
+		ExpiredAt: gtime.NewFromTimeStamp(remPassword),
 	}).OnConflict("id").Save()
 	if err != nil {
 		g.Log().Error(ctx, "[LOGIC] 数据表插入失败", err)

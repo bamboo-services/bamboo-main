@@ -26,7 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-package boot
+package startup
 
 import (
 	"context"
@@ -149,7 +149,7 @@ func initialSQL(ctx context.Context, databaseName string) {
 		// 创建数据表
 		errTransaction := g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 			// 读取文件
-			getFileContent := gfile.GetContents("internal/sql/" + databaseName + ".sql")
+			getFileContent := gfile.GetContents("resource/sql/" + databaseName + ".sql")
 			// 创建 xf_index.sql 表
 			if _, err := tx.Exec(getFileContent); err != nil {
 				return err

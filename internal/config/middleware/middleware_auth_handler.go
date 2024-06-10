@@ -50,7 +50,13 @@ import (
 // 返回:
 // 无
 func MiddleAuthHandler(r *ghttp.Request) {
-	getAuthorize := utility.GetAuthorizationFromHeader(r.Context())
+	getAuthorize, err := utility.GetAuthorizationFromHeader(r.Context())
+	if err != nil {
+		g.Log().Warning(r.Context(), "[MIDDLE] 用户授权异常|获取授权错误|用户未登录")
+		r.SetError(berror.NewError(bcode.UnknownError, "获取授权错误"))
+		return
+
+	}
 	if getAuthorize == "" {
 		g.Log().Warning(r.Context(), "[MIDDLE] 用户授权异常|无授权头|用户未登录")
 		r.SetError(berror.NewError(bcode.UnknownError, "无授权头"))
@@ -67,8 +73,8 @@ func MiddleAuthHandler(r *ghttp.Request) {
 	}
 	// 数据库检查
 	var tokenInfo *entity.Token
-	err := dao.Token.Ctx(r.Context()).Where(do.Token{
-		Verification: getAuthorize,
+	err = dao.Token.Ctx(r.Context()).Where(do.Token{
+		Token: getAuthorize,
 	}).Limit(1).OrderDesc("expired_at").Scan(&tokenInfo)
 	if err != nil {
 		g.Log().Error(r.Context(), "[MIDDLE] 数据库查询错误", err.Error())

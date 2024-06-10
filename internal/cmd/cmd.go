@@ -35,12 +35,12 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gcmd"
 	"xiaoMain/internal/config/middleware"
+	"xiaoMain/internal/config/startup"
 	"xiaoMain/internal/config/task"
 	"xiaoMain/internal/controller/auth"
 	"xiaoMain/internal/controller/info"
 	"xiaoMain/internal/controller/link"
 	"xiaoMain/internal/controller/rss"
-	"xiaoMain/manifest/boot"
 )
 
 var (
@@ -50,11 +50,11 @@ var (
 		Brief: "start http server",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			// 数据进行初始化
-			boot.InitialDatabase(ctx)
-			boot.InitialDesiredColorTable(ctx)
-			boot.InitialDesiredLocationTable(ctx)
+			startup.InitialDatabase(ctx)
+			startup.InitialDesiredColorTable(ctx)
+			startup.InitialDesiredLocationTable(ctx)
 			// 初始化公共数据
-			boot.InitCommonData(ctx)
+			startup.InitCommonData(ctx)
 			// 定时任务
 			task.ClearVerificationCode(ctx)
 			task.RssObtain(ctx)

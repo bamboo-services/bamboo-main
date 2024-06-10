@@ -3,9 +3,10 @@ module xiaoMain
 go 1.22.2
 
 require (
-	github.com/bamboo-services/bamboo-utils v0.1.1-beta
+	github.com/bamboo-services/bamboo-utils v0.1.3-alpha
 	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.7.1
 	github.com/gogf/gf/v2 v2.7.1
+	github.com/google/uuid v1.6.0
 	golang.org/x/crypto v0.24.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
@@ -17,7 +18,6 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.2 // indirect
 	github.com/grokify/html-strip-tags-go v0.1.0 // indirect
 	github.com/lib/pq v1.10.9 // indirect

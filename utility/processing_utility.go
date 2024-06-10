@@ -30,8 +30,11 @@ package utility
 
 import (
 	"context"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
 	"github.com/bamboo-services/bamboo-utils/butil"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/google/uuid"
 	"xiaoMain/internal/constants"
 )
 
@@ -43,12 +46,19 @@ import (
 //
 // # 参数:
 //   - ctx: 上下文对象，用于传递和控制请求的生命周期。
-func GetAuthorizationFromHeader(ctx context.Context) string {
+func GetAuthorizationFromHeader(ctx context.Context) (string, error) {
 	getAuthorization := g.RequestFromCtx(ctx).Header.Get("Authorization")
 	if getAuthorization != "" {
-		return butil.TokenRemoveBearer(getAuthorization)
+		authorizationCode := butil.TokenRemoveBearer(getAuthorization)
+		getUUID, err := uuid.FromBytes([]byte(authorizationCode))
+		if err != nil {
+			g.Log().Warning(ctx, "[UTIL] 获取用户授权异常|UUID错误")
+			return "", berror.NewError(bcode.OperationFailed, "UUID错误")
+		} else {
+			return getUUID.String(), nil
+		}
 	} else {
-		return ""
+		return "", berror.NewError(bcode.NotExist, "无授权头")
 	}
 }
 
