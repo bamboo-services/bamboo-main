@@ -28,7 +28,10 @@
 
 package v1
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/model/dto"
+)
 
 // GetLinkRssInfoReq 获取RSS信息请求参数
 // 获取RSS信息
@@ -52,5 +55,6 @@ type GetLinkRssInfoReq struct {
 // 用于获取RSS信息响应
 // 用于获取用户订阅的RSS信息响应
 type GetLinkRssInfoRes struct {
-	g.Meta `mime:"application/json"`
+	g.Meta  `mime:"application/json"`
+	RssLink []*dto.RssLinkDTO `json:"rss_link" sm:"RSS链接"`
 }

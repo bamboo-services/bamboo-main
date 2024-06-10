@@ -28,7 +28,10 @@
 
 package v1
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/model/vo"
+)
 
 // GetWebInfoReq 获取系统信息请求参数
 // 获取系统信息
@@ -39,6 +42,7 @@ type GetWebInfoReq struct {
 // GetWebInfoRes 获取系统信息响应参数
 type GetWebInfoRes struct {
 	g.Meta `mime:"application/json"`
+	vo.WebInfoRes
 }
 
 // EditWebInfoReq 编辑系统信息请求参数

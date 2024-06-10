@@ -31,11 +31,9 @@ package info
 import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/net/ghttp"
 	"sync"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
 
 	"xiaoMain/api/info/v1"
 )
@@ -55,7 +53,6 @@ import (
 //   - err: 在获取网站信息过程中发生的任何错误。
 func (c *ControllerV1) GetWebInfo(ctx context.Context, _ *v1.GetWebInfoReq) (res *v1.GetWebInfoRes, err error) {
 	g.Log().Notice(ctx, "[CONTROL] 控制层 GetSystemInfo 接口")
-	getRequest := ghttp.RequestFromCtx(ctx)
 	returnData := new(vo.WebInfoRes)
 	// 获取系统信息
 	wg := sync.WaitGroup{}
@@ -65,6 +62,7 @@ func (c *ControllerV1) GetWebInfo(ctx context.Context, _ *v1.GetWebInfoReq) (res
 	go func() { returnData.Blogger = service.Info().GetBloggerInfo(ctx); wg.Done() }()
 	wg.Wait()
 	g.Log().Debugf(ctx, "获取参数 returnData 值 %v", returnData)
-	result.Success("获取成功", returnData).Response(getRequest)
-	return nil, nil
+	return &v1.GetWebInfoRes{
+		WebInfoRes: *returnData,
+	}, nil
 }

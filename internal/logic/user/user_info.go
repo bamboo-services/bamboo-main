@@ -26,25 +26,52 @@
  * --------------------------------------------------------------------------------
  */
 
-package v1
+package user
 
 import (
+	"context"
 	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/internal/model/vo"
+	"xiaoMain/internal/dao"
+	"xiaoMain/internal/model/do"
+	"xiaoMain/internal/model/dto/flow"
+	"xiaoMain/internal/model/entity"
 )
 
-// AuthLoginReq
-// 用户登陆请求
-type AuthLoginReq struct {
-	g.Meta   `path:"/user/login" tags:"User" method:"POST" summary:"用户登陆" json:"g.Meta"`
-	User     string `json:"user" v:"required|regex:^[0-9A-Za-z-_]+$			#只允许输入0-9、A-Z、a-Z 以及 - 和 _" dc:"用户名"`
-	Pass     string `json:"pass" v:"required								#请输入密码" dc:"用户密码"`
-	Remember bool   `json:"remember" v:"required|boolean					#记住账户状态" dc:"是否记住登录（7天）"`
-}
-
-// AuthLoginRes
-// 用户登陆返回
-type AuthLoginRes struct {
-	vo.UserLogin
-	g.Meta `mime:"application/json"`
+// GetUserCurrent
+//
+// # 获取当前用户信息
+//
+// 获取当前用户信息，需要用户UUID。根据用户UUID获取当前用户的信息。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - userUUID: 用户UUID
+//
+// # 返回
+//   - userCurrent: 当前用户信息
+//   - err: 在获取过程中发生的任何错误。
+func (s *sUser) GetUserCurrent(ctx context.Context) (userCurrent *flow.UserCurrentDTO, err error) {
+	g.Log().Notice(ctx, "[SERVICE] User:GetUserCurrent | 获取当前用户信息")
+	// 获取当前用户信息
+	var getUser *entity.Index
+	err = dao.Index.Ctx(ctx).Where(do.Index{Key: "user"}).Scan(&getUser)
+	if err != nil {
+		return nil, err
+	}
+	var getUUID *entity.Index
+	err = dao.Index.Ctx(ctx).Where(do.Index{Key: "uuid"}).Scan(&getUUID)
+	if err != nil {
+		return nil, err
+	}
+	var getEmail *entity.Index
+	err = dao.Index.Ctx(ctx).Where(do.Index{Key: "email"}).Scan(&getEmail)
+	if err != nil {
+		return nil, err
+	}
+	// 返回当前用户信息
+	return &flow.UserCurrentDTO{
+		UUID:  getUUID.Value,
+		User:  getUser.Value,
+		Email: getEmail.Value,
+	}, nil
 }

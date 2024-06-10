@@ -38,7 +38,7 @@ import (
 
 // LinkRss is the golang structure for table link_rss.
 type LinkRss struct {
-	LinkId    int64       `json:"linkId"    orm:"link_id"    ` // 链接 id
-	RssJson   string      `json:"rssJson"   orm:"rss_json"   ` // Rss 内容解析
-	CheckTime *gtime.Time `json:"checkTime" orm:"check_time" ` // 检查时间
+	LinkId    int64       `json:"link_id"    orm:"link_id"    ` // 链接 id
+	RssJson   string      `json:"rss_json"   orm:"rss_json"   ` // Rss 内容解析
+	CheckTime *gtime.Time `json:"check_time" orm:"check_time" ` // 检查时间
 }

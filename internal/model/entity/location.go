@@ -38,12 +38,12 @@ import (
 
 // Location is the golang structure for table location.
 type Location struct {
-	Id          int64       `json:"id"          orm:"id"           ` // 主键
-	Sort        int64       `json:"sort"        orm:"sort"         ` // 排序
-	Name        string      `json:"name"        orm:"name"         ` // 位置名字
-	DisplayName string      `json:"displayName" orm:"display_name" ` // 名字的描述（页面会展示）
-	Description string      `json:"description" orm:"description"  ` // 内容的描述（也会展示出来，建议还是写进去哦）
-	Reveal      bool        `json:"reveal"      orm:"reveal"       ` // 是否展示
-	CreatedAt   *gtime.Time `json:"createdAt"   orm:"created_at"   ` // 创建时间
-	UpdatedAt   *gtime.Time `json:"updatedAt"   orm:"updated_at"   ` // 修改时间
+	Id          int64       `json:"id"           orm:"id"           ` // 主键
+	Sort        int64       `json:"sort"         orm:"sort"         ` // 排序
+	Name        string      `json:"name"         orm:"name"         ` // 位置名字
+	DisplayName string      `json:"display_name" orm:"display_name" ` // 名字的描述（页面会展示）
+	Description string      `json:"description"  orm:"description"  ` // 内容的描述（也会展示出来，建议还是写进去哦）
+	Reveal      bool        `json:"reveal"       orm:"reveal"       ` // 是否展示
+	CreatedAt   *gtime.Time `json:"created_at"   orm:"created_at"   ` // 创建时间
+	UpdatedAt   *gtime.Time `json:"updated_at"   orm:"updated_at"   ` // 修改时间
 }

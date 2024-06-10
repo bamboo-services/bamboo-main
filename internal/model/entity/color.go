@@ -38,11 +38,11 @@ import (
 
 // Color is the golang structure for table color.
 type Color struct {
-	Id          int64       `json:"id"          orm:"id"           ` // 主键
-	Name        string      `json:"name"        orm:"name"         ` // 颜色名字
-	DisplayName string      `json:"displayName" orm:"display_name" ` // 展示名字
-	Color       string      `json:"color"       orm:"color"        ` // 色值
-	HasSelect   bool        `json:"hasSelect"   orm:"has_select"   ` // 普通申请用户是否可以选择
-	CreatedAt   *gtime.Time `json:"createdAt"   orm:"created_at"   ` // 创建时间
-	UpdatedAt   *gtime.Time `json:"updatedAt"   orm:"updated_at"   ` // 修改时间
+	Id          int64       `json:"id"           orm:"id"           ` // 主键
+	Name        string      `json:"name"         orm:"name"         ` // 颜色名字
+	DisplayName string      `json:"display_name" orm:"display_name" ` // 展示名字
+	Color       string      `json:"color"        orm:"color"        ` // 色值
+	HasSelect   bool        `json:"has_select"   orm:"has_select"   ` // 普通申请用户是否可以选择
+	CreatedAt   *gtime.Time `json:"created_at"   orm:"created_at"   ` // 创建时间
+	UpdatedAt   *gtime.Time `json:"updated_at"   orm:"updated_at"   ` // 修改时间
 }

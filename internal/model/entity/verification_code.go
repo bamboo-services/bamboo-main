@@ -38,11 +38,11 @@ import (
 
 // VerificationCode is the golang structure for table verification_code.
 type VerificationCode struct {
-	Id        int64       `json:"id"        orm:"id"         ` // 主键
-	Type      bool        `json:"type"      orm:"type"       ` // 是否为邮箱（邮箱为 true，手机号为 false）
-	Contact   string      `json:"contact"   orm:"contact"    ` // 联系方式
-	Code      string      `json:"code"      orm:"code"       ` // 验证码
-	Scenes    string      `json:"scenes"    orm:"scenes"     ` // 使用场景
-	CreatedAt *gtime.Time `json:"createdAt" orm:"created_at" ` // 创建时间
-	ExpiredAt *gtime.Time `json:"expiredAt" orm:"expired_at" ` // 过期时间
+	Id        int64       `json:"id"         orm:"id"         ` // 主键
+	Type      bool        `json:"type"       orm:"type"       ` // 是否为邮箱（邮箱为 true，手机号为 false）
+	Contact   string      `json:"contact"    orm:"contact"    ` // 联系方式
+	Code      string      `json:"code"       orm:"code"       ` // 验证码
+	Scenes    string      `json:"scenes"     orm:"scenes"     ` // 使用场景
+	CreatedAt *gtime.Time `json:"created_at" orm:"created_at" ` // 创建时间
+	ExpiredAt *gtime.Time `json:"expired_at" orm:"expired_at" ` // 过期时间
 }

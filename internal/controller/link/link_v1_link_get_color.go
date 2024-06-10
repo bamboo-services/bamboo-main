@@ -33,10 +33,8 @@ import (
 	"github.com/bamboo-services/bamboo-utils/bcode"
 	"github.com/bamboo-services/bamboo-utils/berror"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/net/ghttp"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
 
 	"xiaoMain/api/link/v1"
 )
@@ -56,7 +54,6 @@ import (
 //   - err: 在获取期望颜色信息过程中发生的任何错误。
 func (c *ControllerV1) LinkGetColor(ctx context.Context, _ *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error) {
 	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkGetColor 接口")
-	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取期望颜色信息
 	getColor, err := service.Link().GetColor(ctx)
 	if err != nil {
@@ -67,15 +64,17 @@ func (c *ControllerV1) LinkGetColor(ctx context.Context, _ *v1.LinkGetColorReq) 
 	} else {
 		// TODO: 需要优化结构返回 Success 的内容
 		g.Log().Debugf(ctx, "[CONTROL] 获取期望颜色信息成功, 数量[%d]", len(getColor))
-		getColorList := make([]vo.LinkColorVO, len(getColor))
+		getColorList := make([]*vo.LinkColorVO, len(getColor))
 		for i, color := range getColor {
-			getColorList[i] = vo.LinkColorVO{
+			getColorList[i] = &vo.LinkColorVO{
 				ID:          color.Id,
 				DisplayName: color.DisplayName,
 				Color:       color.Color,
 			}
 		}
-		result.Success("获取期望颜色信息成功", getColorList).Response(getRequest)
+		return &v1.LinkGetColorRes{
+			Colors: getColorList,
+			Total:  0,
+		}, nil
 	}
-	return nil, nil
 }

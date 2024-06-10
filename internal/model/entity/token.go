@@ -38,11 +38,11 @@ import (
 
 // Token is the golang structure for table token.
 type Token struct {
-	Id        int64       `json:"id"        orm:"id"         ` // 主键
-	UserUuid  string      `json:"userUuid"  orm:"user_uuid"  ` // 用户 UUID
-	UserIp    string      `json:"userIp"    orm:"user_ip"    ` // 用户 IP 地址
-	UserAgent string      `json:"userAgent" orm:"user_agent" ` // 用户 Agent
-	Token     string      `json:"token"     orm:"token"      ` // 验证用户是否是唯一用户Token
-	CreatedAt *gtime.Time `json:"createdAt" orm:"created_at" ` // 创建时间
-	ExpiredAt *gtime.Time `json:"expiredAt" orm:"expired_at" ` // 过期时间
+	Id        int64       `json:"id"         orm:"id"         ` // 主键
+	UserUuid  string      `json:"user_uuid"  orm:"user_uuid"  ` // 用户 UUID
+	UserIp    string      `json:"user_ip"    orm:"user_ip"    ` // 用户 IP 地址
+	UserAgent string      `json:"user_agent" orm:"user_agent" ` // 用户 Agent
+	Token     string      `json:"token"      orm:"token"      ` // 验证用户是否是唯一用户Token
+	CreatedAt *gtime.Time `json:"created_at" orm:"created_at" ` // 创建时间
+	ExpiredAt *gtime.Time `json:"expired_at" orm:"expired_at" ` // 过期时间
 }

@@ -30,11 +30,11 @@ package rss
 
 import (
 	"context"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/net/ghttp"
 	"xiaoMain/api/rss/v1"
 	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
 )
 
 // GetLinkRssInfo 获取链接的RSS信息
@@ -52,7 +52,6 @@ func (c *ControllerV1) GetLinkRssInfo(
 	req *v1.GetLinkRssInfoReq,
 ) (res *v1.GetLinkRssInfoRes, err error) {
 	g.Log().Noticef(ctx, "[CONTROL] 控制层 GetLinkRssInfo 接口")
-	getRequest := ghttp.RequestFromCtx(ctx)
 	if req.Page == nil || *req.Page <= 0 {
 		req.Page = new(int64)
 		*req.Page = 1
@@ -69,34 +68,40 @@ func (c *ControllerV1) GetLinkRssInfo(
 			if int64(len(*getAllRssInfo)) > *req.Limit {
 				*getAllRssInfo = (*getAllRssInfo)[(*req.Page-1)*(*req.Limit) : *req.Limit]
 			}
-			result.Success("获取所有RSS信息成功", *getAllRssInfo).Response(getRequest)
+			return &v1.GetLinkRssInfoRes{
+				RssLink: *getAllRssInfo,
+			}, nil
 		} else {
-			result.ServerInternalError.SetErrorMessage(err.Error()).Response(getRequest)
+			return nil, err
 		}
-		return nil, nil
 	}
 	// 条件查询
 	switch {
 	case req.LinkID != nil && req.LinkName == nil && req.LinkLocation == nil:
 		getRssInfo, err := service.Rss().GetLinkRssInfoWithLinkID(ctx, *req.LinkID)
 		if err != nil {
-			result.FailedToObtain.SetErrorMessage(err.Error()).Response(getRequest)
+			return nil, err
 		}
-		result.Success("获取 LinkID 的 RSS 信息成功", getRssInfo).Response(getRequest)
+		return &v1.GetLinkRssInfoRes{
+			RssLink: *getRssInfo,
+		}, nil
 	case req.LinkID == nil && req.LinkName != nil && req.LinkLocation == nil:
 		getRssInfo, err := service.Rss().GetLinkRssWithLinkName(ctx, *req.LinkName)
 		if err != nil {
-			result.FailedToObtain.SetErrorMessage(err.Error()).Response(getRequest)
+			return nil, err
 		}
-		result.Success("获取 LinkName 的 RSS 信息成功", getRssInfo).Response(getRequest)
+		return &v1.GetLinkRssInfoRes{
+			RssLink: *getRssInfo,
+		}, nil
 	case req.LinkID == nil && req.LinkName == nil && req.LinkLocation != nil:
 		getRssInfo, err := service.Rss().GetLinkRssWithLinkLocation(ctx, *req.LinkLocation)
 		if err != nil {
-			result.FailedToObtain.SetErrorMessage(err.Error()).Response(getRequest)
+			return nil, err
 		}
-		result.Success("获取 LinkLocation 的 RSS 信息成功", getRssInfo).Response(getRequest)
+		return &v1.GetLinkRssInfoRes{
+			RssLink: *getRssInfo,
+		}, nil
 	default:
-		result.QueryValidationError.SetErrorMessage("参数不唯一").Response(getRequest)
+		return nil, berror.NewError(bcode.RequestParameterIncorrect, "参数不唯一")
 	}
-	return nil, nil
 }

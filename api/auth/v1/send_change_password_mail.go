@@ -30,7 +30,6 @@ package v1
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/utility/result"
 )
 
 // ChangePasswordSendMailReq
@@ -43,6 +42,5 @@ type ChangePasswordSendMailReq struct {
 // ChangePasswordSendMailRes
 // 发送用户修改密码邮件后的响应结构体
 type ChangePasswordSendMailRes struct {
-	result.BaseResponse
 	g.Meta `mime:"application/json"`
 }

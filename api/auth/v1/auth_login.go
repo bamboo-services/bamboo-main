@@ -26,55 +26,32 @@
  * --------------------------------------------------------------------------------
  */
 
-package auth
+package v1
 
 import (
-	"context"
-	"github.com/bamboo-services/bamboo-utils/bcode"
-	"github.com/bamboo-services/bamboo-utils/bresult"
 	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/api/auth/v1"
-	"xiaoMain/internal/service"
+	"xiaoMain/internal/model/dto/flow"
 )
 
-// AuthLogin
+// AuthLoginReq
 //
 // # 用户登录
 //
-// 用户登录, 需要用户提供用户名和密码。
+// 用户登录, 需要用户提供用户名和密码。记住用户登陆状态可以维持最长七天的有效登录时间。
+type AuthLoginReq struct {
+	g.Meta   `path:"/user/login" method:"Post" summary:"用户登陆" tags:"授权控制器"`
+	User     string `json:"user" v:"required|regex:^[0-9A-Za-z-_]{5,30}$#请输入用户名|用户名为 5-30 位且只允许输入'0-9','A-Z','a-Z','-'及'_'" dc:"用户名"`
+	Pass     string `json:"pass" v:"required#请输入密码" dc:"用户密码"`
+	Remember bool   `json:"remember" v:"required|boolean#记住账户状态" dc:"是否记住登录（7天）"`
+}
+
+// AuthLoginRes
 //
-// # 参数
-//   - ctx: 请求的上下文，用于管理超时和取消信号。
-//   - req: 用户的请求，包含登录的详细信息。
+// # 用户登录返回
 //
-// # 返回
-//   - res: 发送给用户的响应。如果登录成功，它将返回成功的消息。
-//   - err: 在登录过程中发生的任何错误。
-func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res *v1.AuthLoginRes, err error) {
-	g.Log().Notice(ctx, "[CONTROL] UserLogin | 用户登录")
-	// 检查用户登录是否有效
-	err = service.Auth().IsUserLogin(ctx)
-	if err == nil {
-		bresult.WriteResponse(ctx, bcode.Success, "登录依然有效", nil)
-		return
-	}
-	// 用户登录
-	uuid, err := service.Auth().UserLogin(ctx, req)
-	if err == nil {
-		// 用户登录信息写入授权认证
-		getToken, err := service.Auth().RegisteredUserLogin(ctx, uuid, req.Remember)
-		if err != nil {
-			return nil, err
-		}
-		current, err := service.User().GetUserCurrent(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return &v1.AuthLoginRes{
-			Token: getToken,
-			User:  *current,
-		}, nil
-	} else {
-		return nil, err
-	}
+// 用户登录返回, 返回用户的授权令牌和用户信息。
+type AuthLoginRes struct {
+	g.Meta `mime:"application/json"`
+	Token  string              `json:"token" dc:"授权令牌"`
+	User   flow.UserCurrentDTO `json:"user" dc:"用户信息"`
 }

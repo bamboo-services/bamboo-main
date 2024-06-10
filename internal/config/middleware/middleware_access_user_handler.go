@@ -29,9 +29,10 @@
 package middleware
 
 import (
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/bresult"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"xiaoMain/utility/result"
 )
 
 // MiddleAccessUserHandler 是用于处理用户访问的中间件。
@@ -57,7 +58,7 @@ func MiddleAccessUserHandler(r *ghttp.Request) {
 		if userAgent == "" {
 			g.Log().Error(ctx, "[MIDDLE] 用户 User-Agent 为空")
 		}
-		result.AccessError.Response(r)
+		bresult.WriteResponse(r.GetCtx(), bcode.OperationFailed, "用户访问异常", nil)
 	} else {
 		g.Log().Noticef(ctx, "[MIDDLE] 访问者 [%s] ", userIP)
 		g.Log().Debugf(ctx, "[MIDDLE] User-Agent [%s]", userAgent)

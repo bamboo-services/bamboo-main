@@ -47,12 +47,12 @@ import (
 // # 参数:
 //   - ctx: 上下文对象，用于传递和控制请求的生命周期。
 func GetAuthorizationFromHeader(ctx context.Context) (string, error) {
-	getAuthorization := g.RequestFromCtx(ctx).Header.Get("Authorization")
+	getAuthorization := g.RequestFromCtx(ctx).GetHeader("Authorization")
 	if getAuthorization != "" {
 		authorizationCode := butil.TokenRemoveBearer(getAuthorization)
-		getUUID, err := uuid.FromBytes([]byte(authorizationCode))
+		getUUID, err := uuid.Parse(authorizationCode)
 		if err != nil {
-			g.Log().Warning(ctx, "[UTIL] 获取用户授权异常|UUID错误")
+			g.Log().Warning(ctx, "[UTIL] 获取用户授权异常 | UUID错误")
 			return "", berror.NewError(bcode.OperationFailed, "UUID错误")
 		} else {
 			return getUUID.String(), nil

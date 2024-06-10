@@ -26,55 +26,20 @@
  * --------------------------------------------------------------------------------
  */
 
-package auth
+package flow
 
-import (
-	"context"
-	"github.com/bamboo-services/bamboo-utils/bcode"
-	"github.com/bamboo-services/bamboo-utils/bresult"
-	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/api/auth/v1"
-	"xiaoMain/internal/service"
-)
-
-// AuthLogin
+// UserCurrentDTO
 //
-// # 用户登录
+// # 当前用户信息
 //
-// 用户登录, 需要用户提供用户名和密码。
+// 当前用户信息，用于返回当前用户的信息。
 //
 // # 参数
-//   - ctx: 请求的上下文，用于管理超时和取消信号。
-//   - req: 用户的请求，包含登录的详细信息。
-//
-// # 返回
-//   - res: 发送给用户的响应。如果登录成功，它将返回成功的消息。
-//   - err: 在登录过程中发生的任何错误。
-func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res *v1.AuthLoginRes, err error) {
-	g.Log().Notice(ctx, "[CONTROL] UserLogin | 用户登录")
-	// 检查用户登录是否有效
-	err = service.Auth().IsUserLogin(ctx)
-	if err == nil {
-		bresult.WriteResponse(ctx, bcode.Success, "登录依然有效", nil)
-		return
-	}
-	// 用户登录
-	uuid, err := service.Auth().UserLogin(ctx, req)
-	if err == nil {
-		// 用户登录信息写入授权认证
-		getToken, err := service.Auth().RegisteredUserLogin(ctx, uuid, req.Remember)
-		if err != nil {
-			return nil, err
-		}
-		current, err := service.User().GetUserCurrent(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return &v1.AuthLoginRes{
-			Token: getToken,
-			User:  *current,
-		}, nil
-	} else {
-		return nil, err
-	}
+//   - UUID: 用户UUID
+//   - User: 用户名
+//   - Email: 邮箱
+type UserCurrentDTO struct {
+	UUID  string `json:"uuid" dc:"用户UUID"`
+	User  string `json:"username" dc:"用户名"`
+	Email string `json:"email" dc:"邮箱"`
 }

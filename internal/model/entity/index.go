@@ -38,9 +38,9 @@ import (
 
 // Index is the golang structure for table index.
 type Index struct {
-	Id        int         `json:"id"        orm:"id"         ` // 主键
-	Key       string      `json:"key"       orm:"key"        ` // 键
-	Value     string      `json:"value"     orm:"value"      ` // 值
-	CreatedAt *gtime.Time `json:"createdAt" orm:"created_at" ` // 创建时间
-	UpdatedAt *gtime.Time `json:"updatedAt" orm:"updated_at" ` // 修改时间
+	Id        int         `json:"id"         orm:"id"         ` // 主键
+	Key       string      `json:"key"        orm:"key"        ` // 键
+	Value     string      `json:"value"      orm:"value"      ` // 值
+	CreatedAt *gtime.Time `json:"created_at" orm:"created_at" ` // 创建时间
+	UpdatedAt *gtime.Time `json:"updated_at" orm:"updated_at" ` // 修改时间
 }

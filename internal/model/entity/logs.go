@@ -38,8 +38,8 @@ import (
 
 // Logs is the golang structure for table logs.
 type Logs struct {
-	Id        int64       `json:"id"        orm:"id"         ` // 主键
-	Type      int         `json:"type"      orm:"type"       ` // 日志类型
-	Log       string      `json:"log"       orm:"log"        ` // 日志内容
-	CreatedAt *gtime.Time `json:"createdAt" orm:"created_at" ` // 日志时间
+	Id        int64       `json:"id"         orm:"id"         ` // 主键
+	Type      int         `json:"type"       orm:"type"       ` // 日志类型
+	Log       string      `json:"log"        orm:"log"        ` // 日志内容
+	CreatedAt *gtime.Time `json:"created_at" orm:"created_at" ` // 日志时间
 }

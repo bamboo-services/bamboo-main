@@ -38,25 +38,25 @@ import (
 
 // LinkList is the golang structure for table link_list.
 type LinkList struct {
-	Id              int64       `json:"id"              orm:"id"               ` // 主键
-	WebmasterEmail  string      `json:"webmasterEmail"  orm:"webmaster_email"  ` // 站长邮箱
-	ServiceProvider string      `json:"serviceProvider" orm:"service_provider" ` // 服务提供商
-	SiteName        string      `json:"siteName"        orm:"site_name"        ` // 站点名字
-	SiteUrl         string      `json:"siteUrl"         orm:"site_url"         ` // 站点地址
-	SiteLogo        string      `json:"siteLogo"        orm:"site_logo"        ` // 站点 logo
-	CdnLogoUrl      string      `json:"cdnLogoUrl"      orm:"cdn_logo_url"     ` // 镜像站点 logo
-	SiteDescription string      `json:"siteDescription" orm:"site_description" ` // 站点描述
-	SiteRssUrl      string      `json:"siteRssUrl"      orm:"site_rss_url"     ` // 站点订阅地址
-	HasAdv          bool        `json:"hasAdv"          orm:"has_adv"          ` // 是否有广告
-	DesiredLocation int64       `json:"desiredLocation" orm:"desired_location" ` // 理想位置
-	Location        int64       `json:"location"        orm:"location"         ` // 所在位置
-	DesiredColor    int64       `json:"desiredColor"    orm:"desired_color"    ` // 理想颜色
-	Color           int64       `json:"color"           orm:"color"            ` // 颜色
-	WebmasterRemark string      `json:"webmasterRemark" orm:"webmaster_remark" ` // 站长留言
-	Remark          string      `json:"remark"          orm:"remark"           ` // 我的留言
-	Status          int         `json:"status"          orm:"status"           ` // 0 待审核，1 通过，-1 审核拒绝，2 回收站
-	AbleConnect     bool        `json:"ableConnect"     orm:"able_connect"     ` // 能否连接
-	CreatedAt       *gtime.Time `json:"createdAt"       orm:"created_at"       ` // 创建时间
-	UpdatedAt       *gtime.Time `json:"updatedAt"       orm:"updated_at"       ` // 修改时间
-	DeletedAt       *gtime.Time `json:"deletedAt"       orm:"deleted_at"       ` // 删除时间
+	Id              int64       `json:"id"               orm:"id"               ` // 主键
+	WebmasterEmail  string      `json:"webmaster_email"  orm:"webmaster_email"  ` // 站长邮箱
+	ServiceProvider string      `json:"service_provider" orm:"service_provider" ` // 服务提供商
+	SiteName        string      `json:"site_name"        orm:"site_name"        ` // 站点名字
+	SiteUrl         string      `json:"site_url"         orm:"site_url"         ` // 站点地址
+	SiteLogo        string      `json:"site_logo"        orm:"site_logo"        ` // 站点 logo
+	CdnLogoUrl      string      `json:"cdn_logo_url"     orm:"cdn_logo_url"     ` // 镜像站点 logo
+	SiteDescription string      `json:"site_description" orm:"site_description" ` // 站点描述
+	SiteRssUrl      string      `json:"site_rss_url"     orm:"site_rss_url"     ` // 站点订阅地址
+	HasAdv          bool        `json:"has_adv"          orm:"has_adv"          ` // 是否有广告
+	DesiredLocation int64       `json:"desired_location" orm:"desired_location" ` // 理想位置
+	Location        int64       `json:"location"         orm:"location"         ` // 所在位置
+	DesiredColor    int64       `json:"desired_color"    orm:"desired_color"    ` // 理想颜色
+	Color           int64       `json:"color"            orm:"color"            ` // 颜色
+	WebmasterRemark string      `json:"webmaster_remark" orm:"webmaster_remark" ` // 站长留言
+	Remark          string      `json:"remark"           orm:"remark"           ` // 我的留言
+	Status          int         `json:"status"           orm:"status"           ` // 0 待审核，1 通过，-1 审核拒绝，2 回收站
+	AbleConnect     bool        `json:"able_connect"     orm:"able_connect"     ` // 能否连接
+	CreatedAt       *gtime.Time `json:"created_at"       orm:"created_at"       ` // 创建时间
+	UpdatedAt       *gtime.Time `json:"updated_at"       orm:"updated_at"       ` // 修改时间
+	DeletedAt       *gtime.Time `json:"deleted_at"       orm:"deleted_at"       ` // 删除时间
 }

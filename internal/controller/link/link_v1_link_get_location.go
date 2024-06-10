@@ -33,10 +33,8 @@ import (
 	"github.com/bamboo-services/bamboo-utils/bcode"
 	"github.com/bamboo-services/bamboo-utils/berror"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/net/ghttp"
 	"xiaoMain/internal/model/vo"
 	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
 
 	"xiaoMain/api/link/v1"
 )
@@ -59,7 +57,6 @@ func (c *ControllerV1) LinkGetLocation(
 	_ *v1.LinkGetLocationReq,
 ) (res *v1.LinkGetLocationRes, err error) {
 	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkGetLocation 接口")
-	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取期望位置信息
 	getLocation, err := service.Link().GetLocation(ctx)
 	if err != nil {
@@ -69,14 +66,16 @@ func (c *ControllerV1) LinkGetLocation(
 		return nil, berror.NewError(bcode.NotExist, "没有找到期望位置信息")
 	} else {
 		g.Log().Debugf(ctx, "[CONTROL] 获取期望位置信息成功, 数量[%d]", len(getLocation))
-		getLocationList := make([]vo.LinkLocationVO, len(getLocation))
+		getLocationList := make([]*vo.LinkLocationVO, len(getLocation))
 		for i, location := range getLocation {
-			getLocationList[i] = vo.LinkLocationVO{
+			getLocationList[i] = &vo.LinkLocationVO{
 				ID:          location.Id,
 				DisplayName: location.DisplayName,
 			}
 		}
-		result.Success("获取期望位置信息成功", getLocationList).Response(getRequest)
+		return &v1.LinkGetLocationRes{
+			Locations: getLocationList,
+			Total:     0,
+		}, nil
 	}
-	return nil, nil
 }
