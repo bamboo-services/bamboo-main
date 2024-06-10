@@ -30,6 +30,8 @@ package link
 
 import (
 	"context"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
 	"github.com/gogf/gf/v2/frame/g"
 	"xiaoMain/api/link/v1"
 	"xiaoMain/internal/service"
@@ -55,17 +57,19 @@ func (c *ControllerV1) LinkLocationAdd(
 	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkLocationAdd 接口")
 	err = service.Link().IsLocationExist(ctx, req.Name)
 	if err == nil {
-		err = service.Link().AddLocation(
-			ctx,
-			req.Name,
-			req.DisplayName,
-			req.Description,
-			req.Reveal,
-			req.Sort,
-		)
+		return nil, berror.NewError(bcode.AlreadyExists, "位置已存在")
 	}
+	err = service.Link().AddLocation(
+		ctx,
+		req.Name,
+		req.DisplayName,
+		req.Description,
+		req.Reveal,
+		req.Sort,
+	)
 	if err != nil {
 		return nil, err
+	} else {
+		return nil, nil
 	}
-	return nil, nil
 }

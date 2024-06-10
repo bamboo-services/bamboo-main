@@ -49,7 +49,7 @@ import (
 //   - res: 发送给用户的响应。如果添加链接成功，它将返回成功的消息。
 //   - err: 在添加链接过程中发生的任何错误。
 func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1.LinkAddRes, err error) {
-	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkAdd 接口")
+	g.Log().Notice(ctx, "[CONTROL] LinkAdd | 添加链接")
 
 	// 检查连接名字是否重复
 	err = service.Link().CheckLinkName(ctx, req.SiteName)
@@ -68,6 +68,11 @@ func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1
 	// 检查 RSS URL 是否合法
 	if err == nil {
 		err = service.Link().CheckRSSCanAccess(ctx, req.SiteRssURL)
+	}
+
+	// 添加链接
+	if err == nil {
+		err = service.Link().AddLink(ctx, *req)
 	}
 
 	if err != nil {

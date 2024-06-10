@@ -32,6 +32,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/gogf/gf/v2/frame/g"
 	"golang.org/x/crypto/bcrypt"
 	"testing"
 )

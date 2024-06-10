@@ -74,24 +74,24 @@ func (s *sLink) CheckLinkCanAccess(ctx context.Context, siteURL string) (err err
 		if errors.As(urlErr.Err, &netErr) {
 			if netErr.Timeout() {
 				g.Log().Debug(ctx, "[LOGIC] Link 链接超时")
-				return berror.NewError(xerror.LinkAccessTimeout)
+				return berror.NewError(xerror.LinkAccessTimeout, "链接超时")
 			} else {
 				g.Log().Debug(ctx, "[LOGIC] Link 链接错误")
-				return berror.NewError(xerror.LinkAccessTimeout)
+				return berror.NewError(xerror.LinkAccessError, "链接错误")
 			}
 		} else {
 			g.Log().Debug(ctx, "[LOGIC] Link 链接错误")
-			return berror.NewError(xerror.LinkAccessTimeout)
+			return berror.NewError(xerror.LinkAccessError, "链接错误")
 		}
 	}
 	// 检查链接是否可以访问
 	if getResp == nil {
 		g.Log().Debug(ctx, "[LOGIC] 网站不可达")
-		return berror.NewError(xerror.WebsiteIsUnreachable)
+		return berror.NewError(xerror.WebsiteIsUnreachable, "网站不可达")
 	}
 	if getResp.StatusCode != http.StatusOK {
 		g.Log().Debug(ctx, "[LOGIC] Link 访问状态不正确")
-		return berror.NewError(xerror.WebIncorrectStatus)
+		return berror.NewError(xerror.WebIncorrectStatus, "站点访问状态不正确")
 	}
 	_ = getResp.Body.Close()
 	g.Log().Debugf(ctx, "[LOGIC] Link 访问成功，耗时：%dms", time.Now().UnixMilli()-getNowTimestamp)
@@ -127,24 +127,24 @@ func (s *sLink) CheckLogoCanAccess(ctx context.Context, siteLogo string) (err er
 		if errors.As(urlErr.Err, &netErr) {
 			if netErr.Timeout() {
 				g.Log().Debug(ctx, "[LOGIC] Logo 链接超时")
-				return berror.NewError(xerror.LinkAccessTimeout)
+				return berror.NewError(xerror.LinkAccessTimeout, "Logo超时")
 			} else {
 				g.Log().Debug(ctx, "[LOGIC] Logo 链接错误")
-				return berror.NewError(xerror.LinkAccessTimeout)
+				return berror.NewError(xerror.LinkAccessError, "Logo错误")
 			}
 		} else {
 			g.Log().Debug(ctx, "[LOGIC] Logo 链接错误")
-			return berror.NewError(xerror.LinkAccessTimeout)
+			return berror.NewError(xerror.LinkAccessError, "Logo错误")
 		}
 	}
 	// 检查链接是否可以访问
 	if getResp == nil {
 		g.Log().Debug(ctx, "[LOGIC] 网站不可达")
-		return berror.NewError(xerror.WebsiteIsUnreachable)
+		return berror.NewError(xerror.WebsiteIsUnreachable, "网站不可达")
 	}
 	if getResp.StatusCode != http.StatusOK {
 		g.Log().Debug(ctx, "[LOGIC] Logo 访问状态不正确")
-		return berror.NewError(xerror.WebIncorrectStatus)
+		return berror.NewError(xerror.WebIncorrectStatus, "Logo访问状态不正确")
 	} else {
 		_ = getResp.Body.Close()
 		// 检查获取的状态是否是图片
@@ -191,30 +191,30 @@ func (s *sLink) CheckRSSCanAccess(ctx context.Context, siteRSS string) (err erro
 		if errors.As(urlErr.Err, &netErr) {
 			if netErr.Timeout() {
 				g.Log().Debug(ctx, "[LOGIC] RSS 链接超时")
-				return berror.NewError(xerror.LinkAccessTimeout)
+				return berror.NewError(xerror.LinkAccessTimeout, "RSS超时")
 			} else {
 				g.Log().Debug(ctx, "[LOGIC] RSS 链接错误")
-				return berror.NewError(xerror.LinkAccessTimeout)
+				return berror.NewError(xerror.LinkAccessError, "RSS错误")
 			}
 		} else {
 			g.Log().Debug(ctx, "[LOGIC] RSS 链接错误")
-			return berror.NewError(xerror.LinkAccessTimeout)
+			return berror.NewError(xerror.LinkAccessError, "RSS错误")
 		}
 	}
 	// 检查链接是否可以访问
 	if getResp == nil {
 		g.Log().Debug(ctx, "[LOGIC] RSS 网站不可达")
-		return berror.NewError(xerror.WebsiteIsUnreachable)
+		return berror.NewError(xerror.WebsiteIsUnreachable, "RSS网站不可达")
 	}
 	if getResp.StatusCode != http.StatusOK {
 		g.Log().Debug(ctx, "[LOGIC] RSS 访问状态不正确")
-		return berror.NewError(xerror.WebIncorrectStatus)
+		return berror.NewError(xerror.WebIncorrectStatus, "RSS访问状态不正确")
 	} else {
 		// 检查是否为 XML 格式
 		getBody, err := io.ReadAll(getResp.Body)
 		if err != nil {
 			g.Log().Debug(ctx, "[LOGIC] 读取 RSS 错误")
-			return berror.NewError(xerror.ReadRSSFailed)
+			return berror.NewError(xerror.ReadRSSFailed, "读取 RSS 错误")
 		}
 		err = xml.Unmarshal(getBody, new(interface{}))
 		if err == nil {
@@ -222,7 +222,7 @@ func (s *sLink) CheckRSSCanAccess(ctx context.Context, siteRSS string) (err erro
 			return nil
 		} else {
 			g.Log().Errorf(ctx, "[LOGIC] RSS 不是 XML 格式")
-			return berror.NewError(xerror.RSSIsNotXML)
+			return berror.NewError(xerror.RSSIsNotXML, "RSS 不是 XML 格式")
 		}
 	}
 }

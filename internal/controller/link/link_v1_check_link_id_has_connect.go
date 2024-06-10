@@ -32,6 +32,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/gtime"
 	"xiaoMain/api/link/v1"
 	"xiaoMain/internal/model/dto/flow"
 	"xiaoMain/internal/service"
@@ -57,14 +58,20 @@ func (c *ControllerV1) CheckLinkIDHasConnect(
 	g.Log().Notice(ctx, "[CONTROL] 控制层 CheckLinkURLHasConnect 接口")
 	getRequest := ghttp.RequestFromCtx(ctx)
 	// 获取博客链接是否已经连接
-	delay, err := service.Link().CheckLinkHasConnect(ctx, getRequest.GetRouter("id").String())
+	getLink, err := service.Link().GetLinkByID(ctx, getRequest.GetRouter("id").Int64())
 	if err != nil {
 		return nil, err
 	}
+	getNowTimestamp := gtime.TimestampMilli()
+	err = service.Link().CheckLinkCanAccess(ctx, getLink.SiteUrl)
+	if err != nil {
+		return nil, err
+	}
+	getTime := gtime.TimestampMilli() - getNowTimestamp
 	return &v1.CheckLinkIDHasConnectRes{
 		LinkConnectDTO: flow.LinkConnectDTO{
 			Message: "获取完成",
-			Delay:   delay,
+			Delay:   &getTime,
 		},
 	}, nil
 }

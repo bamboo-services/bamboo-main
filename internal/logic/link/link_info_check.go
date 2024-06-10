@@ -33,7 +33,6 @@ import (
 	"github.com/bamboo-services/bamboo-utils/bcode"
 	"github.com/bamboo-services/bamboo-utils/berror"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
@@ -95,43 +94,6 @@ func (s *sLink) CheckLinkURL(ctx context.Context, siteURL string) (err error) {
 	} else {
 		return nil
 	}
-}
-
-// CheckLinkHasConnect
-//
-// # 检查链接是否可以连接
-//
-// 用于检查用户添加的链接地址是否可以连接，如果可以则返回 nil，否则返回错误
-//
-// # 参数:
-//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
-//   - linkID: 用户尝试添加的链接ID。
-//
-// # 返回:
-//   - delay: 如果链接可以连接，返回延迟时间；否则返回错误.
-//   - err: 如果链接不存在，返回错误；否则返回 nil.
-func (s *sLink) CheckLinkHasConnect(ctx context.Context, linkID string) (delay *int64, err error) {
-	g.Log().Notice(ctx, "[LOGIC] Link:CheckLinkHasConnect | 检查链接是否可以连接")
-	// 获取链接信息
-	var getLink *entity.LinkList
-	err = dao.LinkList.Ctx(ctx).Where(do.LinkList{Id: linkID}).Scan(&getLink)
-	if err != nil {
-		g.Log().Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
-		return nil, berror.NewErrorHasError(bcode.ServerInternalError, err)
-	}
-	if getLink == nil {
-		g.Log().Warningf(ctx, "[LOGIC] 链接不存在，链接ID[%s]", linkID)
-		return nil, berror.NewError(bcode.NotExist, "链接不存在")
-	}
-	// 检查链接是否可以连接
-	getNowTimestamp := gtime.Now().TimestampMicro()
-	err = s.CheckLinkCanAccess(ctx, getLink.SiteUrl)
-	if err != nil {
-		return nil, err
-	}
-	// 获取延迟信息
-	*delay = gtime.Now().TimestampMicro() - getNowTimestamp
-	return delay, nil
 }
 
 // IsColorExistByName
@@ -203,7 +165,7 @@ func (s *sLink) IsColorExistByColorID(ctx context.Context, getColor string) erro
 // # 返回:
 //   - err: 如果位置存在，返回错误；否则返回 nil.
 func (s *sLink) IsLocationExist(ctx context.Context, name string) (err error) {
-	g.Log().Notice(ctx, "[LOGIC] 执行 Link:IsLocationExist 服务层")
+	g.Log().Notice(ctx, "[LOGIC] Link:IsLocationExist | 获取位置信息")
 	// 查询指定的位置是否存在
 	var getLocationInfo *entity.Location
 	err = dao.Location.Ctx(ctx).Where(do.Location{Name: name}).Scan(&getLocationInfo)

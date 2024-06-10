@@ -106,20 +106,6 @@ type (
 		// # 返回:
 		//   - err: 如果链接地址已存在，返回错误；否则返回 nil.
 		CheckLinkURL(ctx context.Context, siteURL string) (err error)
-		// CheckLinkHasConnect
-		//
-		// # 检查链接是否可以连接
-		//
-		// 用于检查用户添加的链接地址是否可以连接，如果可以则返回 nil，否则返回错误
-		//
-		// # 参数:
-		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
-		//   - linkID: 用户尝试添加的链接ID。
-		//
-		// # 返回:
-		//   - delay: 如果链接可以连接，返回延迟时间；否则返回错误.
-		//   - err: 如果链接不存在，返回错误；否则返回 nil.
-		CheckLinkHasConnect(ctx context.Context, linkID string) (delay *int64, err error)
 		// IsColorExistByName
 		//
 		// # 获取颜色信息
@@ -159,6 +145,19 @@ type (
 		// # 返回:
 		//   - err: 如果位置存在，返回错误；否则返回 nil.
 		IsLocationExist(ctx context.Context, name string) (err error)
+		// GetLinkByID
+		//
+		// # 通过 ID 获取链接
+		//
+		// 通过 ID 获取链接, 需要用户提供链接的 ID。
+		//
+		// # 参数
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//   - getLinkID: 用户的请求，包含获取链接的详细信息。
+		//
+		// # 返回
+		//   - err: 在获取链接过程中发生的任何错误。
+		GetLinkByID(ctx context.Context, getLinkID int64) (link *entity.LinkList, err error)
 		// AddLink
 		//
 		// # 添加链接

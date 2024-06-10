@@ -30,6 +30,8 @@ package link
 
 import (
 	"context"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
 	"github.com/gogf/gf/v2/frame/g"
 	"xiaoMain/api/link/v1"
 	"xiaoMain/internal/service"
@@ -52,11 +54,12 @@ func (c *ControllerV1) LinkColorAdd(
 	ctx context.Context,
 	req *v1.LinkColorAddReq,
 ) (res *v1.LinkColorAddRes, err error) {
-	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkColorAdd 接口")
+	g.Log().Notice(ctx, "[CONTROL] LinkColorAdd | 添加链接颜色")
 	err = service.Link().IsColorExistByName(ctx, req.Name)
 	if err == nil {
-		err = service.Link().AddColor(ctx, req.Name, req.DisplayName, req.Color, req.Select)
+		return nil, berror.NewError(bcode.AlreadyExists, "颜色已存在")
 	}
+	err = service.Link().AddColor(ctx, req.Name, req.DisplayName, req.Color, req.Select)
 	if err != nil {
 		return nil, err
 	}

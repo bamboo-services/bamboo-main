@@ -37,7 +37,7 @@ type LinkLocationAddReq struct {
 	Name        string `json:"name" v:"required|length:1,40#请输入位置名称|位置名称长度为 1 到 40 位"`
 	DisplayName string `json:"display_name" v:"required|length:3,40#请输入位置显示名称|位置显示名称长度为 3 到 40 位"`
 	Description string `json:"description"`
-	Reveal      bool   `json:"reveal" v:"required|in:0,1#请选择是否显示位置|是否显示位置值不合法"`
+	Reveal      bool   `json:"reveal" v:"required|boolean#请选择是否显示位置|是否显示位置值不合法"`
 	Sort        int    `json:"sort" v:"required|integer#请输入排序值|排序值不合法"`
 }
 

@@ -26,15 +26,41 @@
  * --------------------------------------------------------------------------------
  */
 
-package xerror
+package link
 
-import "github.com/bamboo-services/bamboo-utils/bcode"
-
-var (
-	LinkAccessTimeout    = bcode.BaseLocalCode("LinkAccessTimeout", 310, "链接访问超时")
-	LinkAccessError      = bcode.BaseLocalCode("LinkAccessError", 311, "链接访问错误")
-	WebsiteIsUnreachable = bcode.BaseLocalCode("WebsiteIsUnreachable", 210, "站点不可达")
-	WebIncorrectStatus   = bcode.BaseLocalCode("WebIncorrectStatus", 211, "站点状态异常")
-	ReadRSSFailed        = bcode.BaseLocalCode("ReadRSSFailed", 212, "读取RSS失败")
-	RSSIsNotXML          = bcode.BaseLocalCode("RSSIsNotXML", 213, "RSS不是XML格式")
+import (
+	"context"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/dao"
+	"xiaoMain/internal/model/do"
+	"xiaoMain/internal/model/entity"
 )
+
+// GetLinkByID
+//
+// # 通过 ID 获取链接
+//
+// 通过 ID 获取链接, 需要用户提供链接的 ID。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - getLinkID: 用户的请求，包含获取链接的详细信息。
+//
+// # 返回
+//   - err: 在获取链接过程中发生的任何错误。
+func (s *sLink) GetLinkByID(ctx context.Context, getLinkID int64) (link *entity.LinkList, err error) {
+	g.Log().Notice(ctx, "[LOGIC] Link:GetLinkByID | 通过 ID 获取链接")
+	var getLink *entity.LinkList
+	err = dao.LinkList.Ctx(ctx).Where(do.LinkList{Id: getLinkID}).Scan(&getLink)
+	if err != nil {
+		g.Log().Errorf(ctx, "[LOGIC] 数据库查询错误，错误原因： %s", err.Error())
+		return nil, err
+	}
+	if getLink == nil {
+		return nil, berror.NewError(bcode.NotExist, "链接不存在")
+	} else {
+		return getLink, nil
+	}
+}
