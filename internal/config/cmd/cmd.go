@@ -50,17 +50,18 @@ var (
 		Usage: "main",
 		Brief: "start http server",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
-			// 数据进行初始化
-			startup.InitialDatabase(ctx)
-			startup.InitialDesiredColorTable(ctx)
-			startup.InitialDesiredLocationTable(ctx)
-			// 初始化公共数据
-			startup.InitCommonData(ctx)
-			// 定时任务
-			task.ClearVerificationCode(ctx)
-			task.TaskRssObtain(ctx)
 			// 服务器启动
 			s := g.Server()
+
+			// 数据进行初始化
+			startup.Initial(ctx)
+			// 定时任务
+			task.Task(ctx)
+
+			// 关闭路由映射输出
+			s.SetDumpRouterMap(false)
+
+			// 路由注册
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.Middleware(middleware.MiddleTimeHandler) // 接口时间统计接口
 
@@ -127,12 +128,6 @@ var (
 					)
 				})
 			})
-			println(`
-				┏┓┏┓•    ┳┳┓  •   
-				 ┃┃ ┓┏┓┏┓┃┃┃┏┓┓┏┓
-				┗┛┗┛┗┗┻┗┛┛ ┗┗┻┗┛┗
-				筱锋       v1.0.0
-			`)
 			s.Run()
 			return nil
 		},

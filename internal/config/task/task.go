@@ -28,27 +28,19 @@
 
 package task
 
-import (
-	"context"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtimer"
-	"time"
-	"xiaoMain/internal/dao"
-)
+import "context"
 
-// ClearVerificationCode 是一个定时任务，用于清理过期的验证码。
-// 它会在每 10 分钟执行一次。
+// Task
 //
-// 参数:
-// ctx: context.Context 对象，用于管理 go 协程和其他与上下文相关的任务。
+// # 任务
 //
-// 返回: 无
-func ClearVerificationCode(ctx context.Context) {
-	gtimer.Add(ctx, time.Minute*10, func(_ context.Context) {
-		getNowTimestamp := time.Now().UnixMilli()
-		// 清理过期的验证码
-		g.Log().Notice(ctx, "[TASK] 开始清理过期的验证码")
-		_, _ = dao.VerificationCode.Ctx(ctx).Where("expired_at < NOW()").Delete()
-		g.Log().Noticef(ctx, "[TASK] 清理过期的验证码完成, 耗时: %vms", time.Now().UnixMilli()-getNowTimestamp)
-	})
+// 该方法用于启动时准备所有的循环任务；
+// 该方法会在应用程序启动时被调用；
+// 并且在应用程序运行期间一直运行。
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+func Task(ctx context.Context) {
+	tRssObtain(ctx)
+	tClearVerificationCode(ctx)
 }

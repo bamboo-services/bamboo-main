@@ -30,35 +30,50 @@ package startup
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/internal/dao"
-	"xiaoMain/internal/model/do"
+	"xiaoMain/internal/constants"
 )
 
-func InitialDesiredLocationTable(ctx context.Context) {
-	// 记录日志，开始初始化数据表
-	g.Log().Notice(ctx, "[BOOT] 初始化期望位置表")
+// Initial
+//
+// # 初始化
+//
+// 用于初始化所有的数据表和数据，如果成功则返回 nil，否则返回错误。
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+func Initial(ctx context.Context) {
+	/*
+	 * 系统初始化
+	 */
 
-	// 初始化期望位置表
-	insertLocationData(ctx, 1, "favorite", "最喜欢", "这是我最喜欢的东西，我当然要置顶啦", true)
-	insertLocationData(ctx, 100, "fail", "失效的", "这是失效的友链，希望你快回来嗷", false)
-}
+	// 初始化
+	start := New(ctx)
 
-// insertLocationData 插入数据，用于信息初始化进行的操作
-func insertLocationData(ctx context.Context, sort uint, name string, displayName string, desc string, reveal bool) {
-	if record, _ := dao.Location.Ctx(ctx).Where(do.Location{Name: name}).One(); record == nil {
-		if _, err := dao.Location.Ctx(ctx).Data(
-			do.Location{
-				Sort:        sort,
-				Name:        name,
-				DisplayName: displayName,
-				Description: desc,
-				Reveal:      reveal,
-			}).Insert(); err != nil {
-			g.Log().Noticef(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 失败", name)
-			g.Log().Errorf(ctx, "[SQL] 错误信息：%v", err.Error())
-		} else {
-			g.Log().Debugf(ctx, "[SQL] 数据表 xf_desired_color 中插入键 %s 成功", name)
-		}
-	}
+	g.Log().Notice(ctx, "========================================")
+	// 初始化数据库
+	start.InitialDatabase()
+	// 初始化索引数据
+	start.InitialIndexTable()
+	// 初始化颜色表
+	start.InitialColorTable()
+	// 初始化位置表
+	start.InitialLocationTable()
+	// 初始化公共数据
+	start.InitCommonData()
+	g.Log().Notice(ctx, "========================================")
+
+	/*
+	 * 系统初始化完成
+	 */
+	fmt.Print(`
+` + "\033[1;32m" + `   _  __ _             ` + "\033[1;34m" + `__  ___      _     
+` + "\033[1;32m" + `  | |/ /(_)___ _____  ` + "\033[1;34m" + `/  |/  /___ _(_)___ 
+` + "\033[1;32m" + `  |   // / __ ` + "`" + `/ __ \` + "\033[1;34m" + `/ /|_/ / __ ` + "`" + `/ / __ \
+` + "\033[1;32m" + ` /   |/ / /_/ / /_/ ` + "\033[1;34m" + `/ /  / / /_/ / / / / /
+` + "\033[1;32m" + `/_/|_/_/\__,_/\____` + "\033[1;34m" + `/_/  /_/\__,_/_/_/ /_/
+`)
+	fmt.Println("\033[1;33m   ::: XiaoMain :::	::: " + constants.XiaoMainVersion + " :::")
+	fmt.Println("\033[0m")
 }

@@ -221,11 +221,6 @@ func (s *sRss) rssLinkAccess(ctx context.Context, rssURL string) ([]byte, error)
 		g.Log().Warningf(ctx, "获取链接信息失败: %v", err)
 		return nil, errors.New("获取链接信息失败")
 	}
-	// 获取 Body 并解析 XML
-	if err != nil {
-		g.Log().Warningf(ctx, "UTF8解析链接信息失败: %v", err)
-		return nil, errors.New("UTF8解析链接信息失败")
-	}
 	getBody, err := io.ReadAll(getResp.Body)
 	if err != nil {
 		g.Log().Warningf(ctx, "获取链接信息失败: %v", err)

@@ -42,11 +42,11 @@ import (
 	"xiaoMain/internal/service"
 )
 
-// TaskRssObtain 是一个定时任务，用于获取 RSS 订阅信息。
+// tRssObtain 是一个定时任务，用于获取 RSS 订阅信息。
 // 它会在每 10 分钟执行一次。
 // 本接口会根据已有的链接信息对 RSS 信息进行获取，若获取失败返回失败信息，若成功返回成功信息
 // 如果成功则返回 nil，否则返回错误
-func TaskRssObtain(ctx context.Context) {
+func tRssObtain(ctx context.Context) {
 	gtimer.Add(ctx, time.Minute*10, func(_ context.Context) {
 		getNowTimestamp := time.Now().UnixMilli()
 		g.Log().Notice(ctx, "[TASK] 开始操作 RSS 订阅")
