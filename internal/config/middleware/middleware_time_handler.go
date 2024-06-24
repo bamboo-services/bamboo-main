@@ -34,9 +34,14 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
+// MiddleTimeHandler
+//
+// # 时间处理器
+//
+// 记录请求的耗时
 func MiddleTimeHandler(r *ghttp.Request) {
 	startTime := gtime.Now().TimestampMilli()
 	r.Middleware.Next()
 	endTime := gtime.Now().TimestampMilli()
-	g.Log().Noticef(r.Context(), "[TIMER] 请求耗时 %vms", endTime-startTime)
+	g.Log().Noticef(r.Context(), "[TIME] 请求耗时 %vms", endTime-startTime)
 }

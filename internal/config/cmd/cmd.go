@@ -30,6 +30,7 @@ package cmd
 
 import (
 	"context"
+	"github.com/bamboo-services/bamboo-utils/bmiddle"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gcmd"
@@ -62,8 +63,10 @@ var (
 
 			// 后端部分
 			s.Group("/api/v1", func(group *ghttp.RouterGroup) {
-				group.Middleware(middleware.MiddleTimeHandler)  // 接口时间统计接口
+				group.Middleware(bmiddle.BambooMiddleHandler)   // 全局错误处理
 				group.Middleware(middleware.MiddleAuthenticate) // 授权路由拦截器
+				group.Middleware(middleware.MiddleTimeHandler)  // 接口时间统计接口
+
 				// 路由绑定
 				group.Bind(
 					auth.NewV1(),
