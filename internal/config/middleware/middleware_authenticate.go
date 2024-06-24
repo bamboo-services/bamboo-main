@@ -26,35 +26,10 @@
  * --------------------------------------------------------------------------------
  */
 
-package v1
+package middleware
 
-import (
-	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/internal/model/dto/dmiddle"
-)
+import "github.com/gogf/gf/v2/net/ghttp"
 
-// GetLinkRssInfoReq 获取RSS信息请求参数
-// 获取RSS信息
-// 用于获取订阅内的订阅内容，用于获取用户订阅的RSS信息
-//
-// 参数：
-// LinkID: 链接ID
-// LinkName: 链接名称(模糊搜索)
-// PageStart: 起始页数
-// PageEnd: 结束页数
-type GetLinkRssInfoReq struct {
-	g.Meta       `path:"/rss" method:"Get" tags:"订阅控制器" summary:"获取RSS信息" dc:"可以获取订阅内的订阅内容，用于获取用户订阅的RSS信息"`
-	LinkID       *int64  `json:"link_id" v:"regex:^(|[0-9]+)$#请输入链接ID只能为数字" dc:"链接ID"`
-	LinkName     *string `json:"link_name" dc:"链接名称(模糊搜索)"`
-	LinkLocation *int64  `json:"link_location" v:"regex:^(|[0-9]+)$#请输入链接位置只能为数字" dc:"链接位置"`
-	Page         *int64  `json:"page" v:"regex:^(|[0-9]+)$#页码只能为数字" dc:"页码"`
-	Limit        *int64  `json:"limit" v:"regex:^(|[0-9]+)$|max-length:3#单页限制只能为数字|单次限制最大 999" dc:"单页限制"`
-}
+func MiddleAuthenticate(r *ghttp.Request) {
 
-// GetLinkRssInfoRes 获取RSS信息响应参数
-// 用于获取RSS信息响应
-// 用于获取用户订阅的RSS信息响应
-type GetLinkRssInfoRes struct {
-	g.Meta  `mime:"application/json"`
-	RssLink []*dmiddle.RssLinkDTO `json:"rss_link" sm:"RSS链接"`
 }

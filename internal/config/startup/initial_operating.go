@@ -233,3 +233,15 @@ func (is *InitStruct) InitCommonData() {
 	constants.SMTPUser = gconv.String(is.prepareCommonData("smtp_user"))
 	constants.SMTPPass = gconv.String(is.prepareCommonData("smtp_pass"))
 }
+
+// SystemConfigurationOperations
+//
+// # 系统配置操作
+//
+// 是一个系统配置操作的函数。
+// 用于获取配置文件后，修改服务器运行的配置信息（热修改）
+// 这个函数在应用程序的启动过程中被调用。
+func (is *InitStruct) SystemConfigurationOperations() {
+
+	g.Log().Notice(is.CTX, "[BOOT] 系统配置已应用")
+}

@@ -39,7 +39,7 @@ import (
 //
 // 根据所选场景发送邮件给指定的用户。
 type MailSendReq struct {
-	g.Meta       `path:"/send" method:"Post" tags:"邮件控制器" summary:"发送邮件"`
+	g.Meta       `path:"mail/send" method:"Post" tags:"邮件控制器" summary:"发送邮件"`
 	To           string          `json:"to" dc:"收件人邮箱" v:"email#邮箱不能为空"`
 	Scene        constants.Scene `json:"scene" dc:"邮件场景" v:"required#邮件场景不能为空"`
 	GetVariables g.Map           `json:"get_variables" dc:"获取变量"`

@@ -37,7 +37,7 @@ import (
 // LinkGetLocationReq 获取位置信息
 // 用于获取位置信息
 type LinkGetLocationReq struct {
-	g.Meta `path:"/location" method:"Get" tags:"链接控制器" summary:"获取位置(板块)信息"`
+	g.Meta `path:"/link/location" method:"Get" tags:"链接控制器" summary:"获取位置(板块)信息"`
 }
 
 // LinkGetLocationRes 获取位置信息响应
@@ -51,7 +51,7 @@ type LinkGetLocationRes struct {
 // LinkGetLocationFullReq 获取完整位置信息
 // 用于获取完整位置信息
 type LinkGetLocationFullReq struct {
-	g.Meta `path:"/location/full" method:"Get" tags:"链接控制器" summary:"获取完整位置(板块)信息"`
+	g.Meta `path:"/link/location/full" method:"Get" tags:"链接控制器" summary:"获取完整位置(板块)信息"`
 }
 
 // LinkGetLocationFullRes 获取完整位置信息响应

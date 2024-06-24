@@ -30,7 +30,6 @@ package cmd
 
 import (
 	"context"
-	"github.com/bamboo-services/bamboo-utils/bmiddle"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gcmd"
@@ -61,72 +60,23 @@ var (
 			// 关闭路由映射输出
 			s.SetDumpRouterMap(false)
 
-			// 路由注册
-			s.Group("/", func(group *ghttp.RouterGroup) {
-				group.Middleware(middleware.MiddleTimeHandler) // 接口时间统计接口
+			// 后端部分
+			s.Group("/api/v1", func(group *ghttp.RouterGroup) {
+				group.Middleware(middleware.MiddleTimeHandler)  // 接口时间统计接口
+				group.Middleware(middleware.MiddleAuthenticate) // 授权路由拦截器
+				// 路由绑定
+				group.Bind(
+					auth.NewV1(),
+					link.NewV1(),
+					info.NewV1(),
+					mail.NewV1(),
+					rss.NewV1(),
+				)
+			})
 
-				// 前端部分
-				group.Group("", func(group *ghttp.RouterGroup) {
+			// 前端部分
+			s.Group("/**/**", func(group *ghttp.RouterGroup) {
 
-				})
-
-				// 后端部分
-				group.Group("/api/v1", func(group *ghttp.RouterGroup) {
-					group.Middleware(middleware.MiddleAccessUserHandler) // 访问处理中间件
-					group.Middleware(bmiddle.BambooMiddleHandler)        // 错误集中处理中间件
-
-					// 用户操作
-					group.Bind(
-						auth.NewV1().AuthLogin,
-						auth.NewV1().AuthResetPassword,
-					)
-
-					// 链接操作
-					group.Group("/link", func(group *ghttp.RouterGroup) {
-						group.Bind(
-							link.NewV1().LinkAdd,
-							link.NewV1().CheckLinkURLHasConnect,
-							link.NewV1().CheckLogoURLHasConnect,
-							link.NewV1().CheckRssURLHasConnect,
-							link.NewV1().LinkGetColor,
-							link.NewV1().LinkGetLocation,
-						)
-						group.Middleware(middleware.MiddleAuthHandler).Bind(
-							link.NewV1().LinkColorAdd,
-							link.NewV1().LinkLocationAdd,
-							link.NewV1().LinkGetColorFull,
-							link.NewV1().LinkGetLocationFull,
-							link.NewV1().LinkAddAdmin,
-							link.NewV1().CheckLinkIDHasConnect,
-						)
-					})
-
-					// 系统信息
-					group.Group("/info", func(group *ghttp.RouterGroup) {
-						group.Bind(
-							info.NewV1().GetWebInfo,
-							info.NewV1().EditWebInfo,
-						)
-					})
-
-					// 邮件操作
-					group.Group("/mail", func(group *ghttp.RouterGroup) {
-						group.Bind(
-							mail.NewV1().MailSend,
-						)
-					})
-
-					// Rss订阅消息
-					group.Group("/rss", func(group *ghttp.RouterGroup) {
-						group.Bind(
-							rss.NewV1().GetLinkRssInfo,
-						)
-					})
-
-					group.Middleware(middleware.MiddleAuthHandler).Bind(
-						auth.NewV1().AuthChangePassword,
-					)
-				})
 			})
 			s.Run()
 			return nil

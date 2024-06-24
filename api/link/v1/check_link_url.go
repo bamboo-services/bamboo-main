@@ -39,7 +39,7 @@ import (
 // 参数:
 // LinkURL: 链接ID
 type CheckLinkURLHasConnectReq struct {
-	g.Meta  `path:"/check/connect/link" method:"Get" tags:"链接控制器" summary:"检查Link是否可连接"`
+	g.Meta  `path:"/link/check/connect/link" method:"Get" tags:"链接控制器" summary:"检查Link是否可连接"`
 	LinkURL string `json:"link_url" v:"required|url#请输入链接地址|请输入正确的链接地址" dc:"链接地址"`
 }
 
@@ -56,7 +56,7 @@ type CheckLinkURLHasConnectRes struct {
 // 参数:
 // id: PATH-链接ID
 type CheckLinkIDHasConnectReq struct {
-	g.Meta `path:"/check/connect/link/:id" method:"Get" tags:"链接控制器" summary:"检查LinkID是否可连接"`
+	g.Meta `path:"/link/check/connect/link/:id" method:"Get" tags:"链接控制器" summary:"检查LinkID是否可连接"`
 }
 
 // CheckLinkIDHasConnectRes 是 CheckLinkIdHasConnect 方法的响应结构。
