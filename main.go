@@ -39,6 +39,11 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 )
 
+// main
+//
+// # XiaoMain
+//
+// XiaoMain 是一个基于 GoFrame 开发的开源主页系统
 func main() {
 	cmd.Main.Run(gctx.GetInitCtx())
 }

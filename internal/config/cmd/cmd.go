@@ -48,7 +48,7 @@ var (
 	Main = gcmd.Command{
 		Name:  "main",
 		Usage: "main",
-		Brief: "start http server",
+		Brief: "XiaoMain 是一个基于 GoFrame 开发的开源主页系统",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			// 服务器启动
 			s := g.Server()
