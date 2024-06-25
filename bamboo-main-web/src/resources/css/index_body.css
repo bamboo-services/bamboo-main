@@ -26,17 +26,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import { createRouter, createWebHistory } from 'vue-router'
-
-const router = createRouter({
-  history: createWebHistory(),
-  routes: [
-    {
-      path: '/',
-      name: 'HomePage',
-      component: () => import("@/views/HomePage.vue")
-    }
-  ]
-})
-
-export default router
+body {
+    background: url("../images/default-background.webp") no-repeat center;
+    width: 100%
+}
