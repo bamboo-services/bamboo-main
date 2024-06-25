@@ -26,18 +26,18 @@
  * --------------------------------------------------------------------------------
  */
 
-import "../resources/css/index_body.css";
+import BackgroundWithIndex from "../resources/ts/body_background";
 import {Link} from "react-router-dom";
 import myAvatar from "../resources/images/my_avatar.png";
 
 export default function BaseIndex() {
-    const jumpToMyBlog = () => location.replace("https://blog.x-lf.com");
 
+    const jumpToMyBlog = () => location.replace("https://blog.x-lf.com");
     document.title = "竹叶 - XiaoMain";
 
     return (
         <>
-            <div className={"h-screen w-screen grid justify-center items-center"}>
+            <div style={BackgroundWithIndex} className={"h-screen w-screen grid justify-center items-center"}>
                 <div className={"grid grid-cols-4 gap-3 w-screen px-32"}>
                     <div className={"col-span-1 flex items-center"}>
                         <img alt="UserAvatar" className={"rounded-full w-auto h-auto xl:h-64"}

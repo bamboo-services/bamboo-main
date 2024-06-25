@@ -26,26 +26,21 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BrowserRouter, Route, Routes} from "react-router-dom";
-import React from "react";
-import BaseIndex from "./views/base_index.tsx";
-import BaseAbout from "./views/base_about.tsx";
-import BaseAuth from "./views/base_auth.tsx";
-import AuthLogin from "./views/auth/auth_login.tsx";
+import {Outlet, useLocation, useNavigate} from "react-router-dom";
+import {useEffect} from "react";
 
-const AppRoutes: React.FC = () => {
+export default function BaseAuth() {
+    const navigate = useNavigate();
+    const getLocation = useLocation();
+    useEffect(() => {
+        if (getLocation.pathname === "/auth") {
+            navigate("/auth/login");
+        }
+    });
+
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path={"/"} element={<BaseIndex/>}/>
-                <Route path={"about"} element={<BaseAbout/>}/>
-                <Route path={"auth"} element={<BaseAuth/>}>
-                    <Route path={"login"} element={<AuthLogin/>}/>
-                </Route>
-
-            </Routes>
-        </BrowserRouter>
+        <>
+            <Outlet/>
+        </>
     );
-};
-
-export default AppRoutes;
+}

@@ -26,26 +26,23 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BrowserRouter, Route, Routes} from "react-router-dom";
-import React from "react";
-import BaseIndex from "./views/base_index.tsx";
-import BaseAbout from "./views/base_about.tsx";
-import BaseAuth from "./views/base_auth.tsx";
-import AuthLogin from "./views/auth/auth_login.tsx";
-
-const AppRoutes: React.FC = () => {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path={"/"} element={<BaseIndex/>}/>
-                <Route path={"about"} element={<BaseAbout/>}/>
-                <Route path={"auth"} element={<BaseAuth/>}>
-                    <Route path={"login"} element={<AuthLogin/>}/>
-                </Route>
-
-            </Routes>
-        </BrowserRouter>
-    );
-};
-
-export default AppRoutes;
+/**
+ * AuthLoginEntity
+ *
+ * 登录实体，用于登录请求返回数据
+ *
+ * # 属性
+ * - token: string
+ * - user: object
+ *   - uuid: string
+ *   - username: string
+ *   - email: string
+ */
+export type AuthLoginEntity = {
+    token: string,
+    user: {
+        uuid: string,
+        username: string,
+        email: string
+    }
+}

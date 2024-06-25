@@ -26,26 +26,30 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BrowserRouter, Route, Routes} from "react-router-dom";
-import React from "react";
-import BaseIndex from "./views/base_index.tsx";
-import BaseAbout from "./views/base_about.tsx";
-import BaseAuth from "./views/base_auth.tsx";
-import AuthLogin from "./views/auth/auth_login.tsx";
+import {BaseApi, MethodType} from "../base_api.ts";
+import {AuthLoginDTO} from "../models/dto/auth_login.ts";
+import {BaseResponse} from "../models/base_response.ts";
+import {AuthLoginEntity} from "../models/entity/auth_login_entity.ts";
 
-const AppRoutes: React.FC = () => {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path={"/"} element={<BaseIndex/>}/>
-                <Route path={"about"} element={<BaseAbout/>}/>
-                <Route path={"auth"} element={<BaseAuth/>}>
-                    <Route path={"login"} element={<AuthLogin/>}/>
-                </Route>
+/**
+ * UserLogin
+ *
+ * 用户登录, 用于操作管理员用户的登录操作
+ *
+ * @param bodyData 请求体数据
+ * @returns Promise<BaseResponse<AuthLoginEntity>>
+ */
+const UserLoginAPI = async (
+    bodyData: AuthLoginDTO
+): Promise<BaseResponse<AuthLoginEntity> | BaseResponse<unknown> | undefined> => {
+    return BaseApi<AuthLoginEntity>(
+        MethodType.POST,
+        "/api/v1/user/login",
+        bodyData,
+        null,
+        null,
+        null
+    )
+}
 
-            </Routes>
-        </BrowserRouter>
-    );
-};
-
-export default AppRoutes;
+export {UserLoginAPI};

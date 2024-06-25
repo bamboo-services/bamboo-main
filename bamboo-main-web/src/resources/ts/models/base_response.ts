@@ -26,26 +26,21 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BrowserRouter, Route, Routes} from "react-router-dom";
-import React from "react";
-import BaseIndex from "./views/base_index.tsx";
-import BaseAbout from "./views/base_about.tsx";
-import BaseAuth from "./views/base_auth.tsx";
-import AuthLogin from "./views/auth/auth_login.tsx";
-
-const AppRoutes: React.FC = () => {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path={"/"} element={<BaseIndex/>}/>
-                <Route path={"about"} element={<BaseAbout/>}/>
-                <Route path={"auth"} element={<BaseAuth/>}>
-                    <Route path={"login"} element={<AuthLogin/>}/>
-                </Route>
-
-            </Routes>
-        </BrowserRouter>
-    );
-};
-
-export default AppRoutes;
+/**
+ * # 基本返回类型
+ * 用于返回数据的基本类型，包含输出、状态码、消息、错误消息、数据；
+ *
+ * @template T 返回数据类型
+ * @property {string} output 输出
+ * @property {number} code 状态码
+ * @property {string} message 消息
+ * @property {string} error_message 错误消息
+ * @property {T} data 数据
+ */
+export type BaseResponse<T> = {
+    output: string;
+    code: number;
+    message: string;
+    error_message?: string;
+    data?: T;
+}

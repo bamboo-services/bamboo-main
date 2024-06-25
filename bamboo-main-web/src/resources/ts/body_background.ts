@@ -26,26 +26,11 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BrowserRouter, Route, Routes} from "react-router-dom";
-import React from "react";
-import BaseIndex from "./views/base_index.tsx";
-import BaseAbout from "./views/base_about.tsx";
-import BaseAuth from "./views/base_auth.tsx";
-import AuthLogin from "./views/auth/auth_login.tsx";
+import default_background from '../images/default-background.webp';
 
-const AppRoutes: React.FC = () => {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path={"/"} element={<BaseIndex/>}/>
-                <Route path={"about"} element={<BaseAbout/>}/>
-                <Route path={"auth"} element={<BaseAuth/>}>
-                    <Route path={"login"} element={<AuthLogin/>}/>
-                </Route>
+const BackgroundWithIndex = {
+    background: `url(${default_background}) no-repeat center`,
+    width: '100%',
+}
 
-            </Routes>
-        </BrowserRouter>
-    );
-};
-
-export default AppRoutes;
+export default BackgroundWithIndex;
