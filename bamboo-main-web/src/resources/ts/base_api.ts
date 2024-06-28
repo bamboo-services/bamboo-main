@@ -65,7 +65,7 @@ async function BaseApi<E>(
     paramData: Record<string, unknown> | null,
     pathData: string | null,
     headers: Record<string, string> | null
-): Promise<BaseResponse<E> | Promise<BaseResponse<unknown>> | undefined> {
+): Promise<BaseResponse<E> | undefined> {
     return axios({
         method: method,
         url: makeURL(url, pathData),
@@ -76,7 +76,7 @@ async function BaseApi<E>(
         return response.data;
     }).catch((error) => {
         console.error("[API] 请求出现问题", error);
-        const getResponse: BaseResponse<unknown> = error.response.data
+        const getResponse: BaseResponse<E> = error.response.data
         if (getResponse) {
             return getResponse;
         }

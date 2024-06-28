@@ -31,7 +31,9 @@ import React from "react";
 import BaseIndex from "./views/base_index.tsx";
 import BaseAbout from "./views/base_about.tsx";
 import BaseAuth from "./views/base_auth.tsx";
-import AuthLogin from "./views/auth/auth_login.tsx";
+import AuthLogin from "./views/auth/auth_login.tsx"
+import {BaseAdmin} from "./views/base_admin.tsx";
+import {AdminDashboard} from "./views/admin/admin_dashboard.tsx";
 
 const AppRoutes: React.FC = () => {
     return (
@@ -42,7 +44,9 @@ const AppRoutes: React.FC = () => {
                 <Route path={"auth"} element={<BaseAuth/>}>
                     <Route path={"login"} element={<AuthLogin/>}/>
                 </Route>
-
+                <Route path={"admin"} element={<BaseAdmin/>}>
+                    <Route path={"dashboard"} element={<AdminDashboard/>}/>
+                </Route>
             </Routes>
         </BrowserRouter>
     );

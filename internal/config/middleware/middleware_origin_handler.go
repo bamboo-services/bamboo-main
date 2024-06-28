@@ -26,10 +26,11 @@
  * --------------------------------------------------------------------------------
  */
 
-import {defineConfig} from 'vite'
-import react from '@vitejs/plugin-react'
+package middleware
 
-// https://vitejs.dev/config/
-export default defineConfig({
-    plugins: [react()],
-})
+import "github.com/gogf/gf/v2/net/ghttp"
+
+func MiddleOriginHandler(r *ghttp.Request) {
+	r.Response.CORSDefault()
+	r.Middleware.Next()
+}

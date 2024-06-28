@@ -29,10 +29,12 @@
 import {AuthLoginDTO} from "../../resources/ts/models/dto/auth_login";
 import {UserLoginAPI} from "../../resources/ts/apis/api_auth.ts";
 import {message} from "antd";
+import {useNavigate} from "react-router-dom";
 
 export default function AuthLogin() {
-    const loginForm = {} as AuthLoginDTO;
+    const loginForm = {remember: false} as AuthLoginDTO;
     const [messageApi, contextHolder] = message.useMessage();
+    const navigation = useNavigate();
 
     document.title = "竹叶 - 管理员登陆";
 
@@ -55,6 +57,12 @@ export default function AuthLogin() {
         if (getRes) {
             if (getRes.output === "Success") {
                 messageApi.success("登录成功！");
+                // 保存 Token
+                localStorage.setItem("UserToken", getRes.data?.token as string);
+                // 路由跳转
+                setTimeout(() => {
+                    navigation("/admin/dashboard");
+                }, 500);
             } else {
                 messageApi.info(getRes.error_message);
             }
@@ -74,7 +82,8 @@ export default function AuthLogin() {
                             一个人的价值，在于他贡献什么，而不是他能取得什么。不要渴望成为一个成功的人，而是应该努力做一个有价值的人。
                         </p>
                     </div>
-                    <form onSubmit={onSubmit} className={"mt-6 space-y-3 rounded-lg p-4 shadow-lg sm:p-6 lg:p-8 bg-white w-screen sm:max-w-screen-sm"}>
+                    <form onSubmit={onSubmit}
+                          className={"mt-6 space-y-3 rounded-lg p-4 shadow-lg sm:p-6 lg:p-8 bg-white w-screen sm:max-w-screen-sm"}>
                         <p className={"text-center text-lg font-medium"}>用户登录</p>
                         <div>
                             <label htmlFor="user" className="sr-only">用户名</label>
@@ -101,6 +110,25 @@ export default function AuthLogin() {
                                     }}
                                 />
                             </div>
+                        </div>
+                        <div>
+                            <label htmlFor="Option1" className="flex cursor-pointer items-start gap-4">
+                                <div className="flex items-center">
+                                    &#8203;
+                                    <input
+                                        type="checkbox"
+                                        className="size-4 rounded border-gray-300 transition"
+                                        onChange={e => {
+                                            loginForm.remember = e.target.checked;
+                                        }}
+                                    />
+                                </div>
+
+                                <div>
+                                    <strong className="font-medium text-gray-900">记住我 <span
+                                        className={"text-gray-400"}>(7日免登录)</span></strong>
+                                </div>
+                            </label>
                         </div>
                         <div className={"w-full flex justify-center pt-4"}>
                             <button
