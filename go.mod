@@ -5,7 +5,7 @@ go 1.22.2
 require (
 	github.com/bamboo-services/bamboo-utils v0.1.4
 	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.7.1
-	github.com/gogf/gf/v2 v2.7.1
+	github.com/gogf/gf/v2 v2.7.2
 	github.com/google/uuid v1.6.0
 	golang.org/x/crypto v0.24.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
@@ -14,6 +14,7 @@ require (
 require (
 	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
+	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
