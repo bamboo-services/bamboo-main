@@ -130,7 +130,7 @@ const pushHeader = (headers: Record<string, string> | null): Record<string, stri
 }
 
 function GetAuthorizationToken(): string {
-    const token = localStorage.getItem("authorization");
+    const token = localStorage.getItem("UserToken");
     if (token) {
         return token.replace("Bearer ", "");
     } else {

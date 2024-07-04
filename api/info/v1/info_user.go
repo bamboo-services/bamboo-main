@@ -26,15 +26,29 @@
  * --------------------------------------------------------------------------------
  */
 
-import {AdminDashboard} from "./admin/admin_dashboard.tsx";
-import {Route, Routes} from "react-router-dom";
+package v1
 
-export function BaseAdmin() {
-    return (
-        <>
-            <Routes>
-                <Route path={"dashboard"} element={<AdminDashboard/>}/>
-            </Routes>
-        </>
-    )
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/model/dto/flow"
+)
+
+// InfoUserReq
+//
+// # 获取用户信息
+//
+// 获取当前登录用户的信息。
+type InfoUserReq struct {
+	g.Meta    `path:"info/user" method:"Get" tags:"信息控制器" summary:"获取用户信息" description:"获取当前登录用户的信息"`
+	UserToken string `json:"Authorization" in:"header" required:"true" description:"用户Token"`
+}
+
+// InfoUserRes
+//
+// # 获取用户信息
+//
+// 获取当前登录用户的信息。
+type InfoUserRes struct {
+	g.Meta `mime:"application/json"`
+	flow.UserCurrentDTO
 }

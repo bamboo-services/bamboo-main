@@ -29,8 +29,19 @@
 import './resources/css/tailwind.css'
 
 import ReactDOM from 'react-dom/client'
-import AppRoutes from "./route.tsx";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
+import BaseIndex from "./views/base_index.tsx";
+import BaseAbout from "./views/base_about.tsx";
+import BaseAuth from "./views/base_auth.tsx";
+import {BaseAdmin} from "./views/base_admin.tsx";
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    <AppRoutes/>
+    <BrowserRouter>
+        <Routes>
+            <Route path={"/"} element={<BaseIndex/>}/>
+            <Route path={"about/*"} element={<BaseAbout/>}/>
+            <Route path={"auth/*"} element={<BaseAuth/>}/>
+            <Route path={"admin/*"} element={<BaseAdmin/>}/>
+        </Routes>
+    </BrowserRouter>
 )

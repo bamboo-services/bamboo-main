@@ -26,6 +26,8 @@
  * --------------------------------------------------------------------------------
  */
 
+import {UserCurrentEntity} from "./user_current_entity.ts";
+
 /**
  * AuthLoginEntity
  *
@@ -33,16 +35,9 @@
  *
  * # 属性
  * - token: string
- * - user: object
- *   - uuid: string
- *   - username: string
- *   - email: string
+ * - user: UserCurrentEntity
  */
 export type AuthLoginEntity = {
     token: string,
-    user: {
-        uuid: string,
-        username: string,
-        email: string
-    }
+    user: UserCurrentEntity
 }

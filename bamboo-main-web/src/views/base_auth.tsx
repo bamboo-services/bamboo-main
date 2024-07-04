@@ -26,21 +26,37 @@
  * --------------------------------------------------------------------------------
  */
 
-import {Outlet, useLocation, useNavigate} from "react-router-dom";
+import {Route, Routes, useLocation, useNavigate} from "react-router-dom";
 import {useEffect} from "react";
+import AuthLogin from "./auth/auth_login";
+import {InfoUserAPI} from "../resources/ts/apis/api_info.ts";
+import { message } from "antd";
 
 export default function BaseAuth() {
     const navigate = useNavigate();
     const getLocation = useLocation();
+
     useEffect(() => {
         if (getLocation.pathname === "/auth") {
             navigate("/auth/login");
         }
+        setTimeout(async () => {
+            // 检查用户是否登录
+            const getRes = await InfoUserAPI();
+            if (getRes?.output === "Success") {
+                message.success(`您好 ${getRes.data?.username} 用户`)
+                setTimeout(() => {
+                    navigate("/admin/dashboard");
+                }, 500);
+            }
+        })
     });
 
     return (
         <>
-            <Outlet/>
+            <Routes>
+                <Route path={"login"} element={<AuthLogin/>}/>
+            </Routes>
         </>
     );
 }
