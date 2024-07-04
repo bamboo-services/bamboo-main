@@ -28,13 +28,43 @@
 
 import {AdminDashboard} from "./admin/admin_dashboard.tsx";
 import {Route, Routes} from "react-router-dom";
+import {AdminSideMenuComponent} from "../components/admin/admin_side_menu.tsx";
+import {useEffect, useState} from "react";
+import {InfoUserAPI} from "../resources/ts/apis/api_info.ts";
+import { message } from "antd";
+import {UserCurrentEntity} from "../resources/ts/models/entity/user_current_entity.ts";
+import {AdminLink} from "./admin/admin_link.tsx";
 
 export function BaseAdmin() {
+    const [userCurrent, setUserInfo] = useState({} as UserCurrentEntity);
+    useEffect(() => {
+        InfoUserAPI().then((getRes) => {
+            if (getRes) {
+                if (getRes.output !== "Success") {
+                    message.warning(getRes?.error_message);
+                    // 移除登录的内容
+
+                } else {
+                    setUserInfo(getRes.data!);
+                }
+            }
+        })
+    }, []);
+
     return (
-        <>
-            <Routes>
-                <Route path={"dashboard"} element={<AdminDashboard/>}/>
-            </Routes>
-        </>
+        <div className={"grid grid-cols-12 bg-gray-100/75"}>
+            <div className={"hidden md:block col-span-3 lg:col-span-2"}>
+                <AdminSideMenuComponent username={userCurrent.username} email={userCurrent.email} uuid={userCurrent.uuid}/>
+            </div>
+            <div className={"col-span-12 md:col-span-9 lg:col-span-10 m-6 h-dvh"}>
+                <Routes>
+                    <Route path={"dashboard"} element={<AdminDashboard/>}/>
+                    <Route path={"link"} element={<AdminLink/>}/>
+                </Routes>
+            </div>
+            <div className={"block md:hidden col-span-12"}>
+                <AdminSideMenuComponent username={userCurrent.username} email={userCurrent.email} uuid={userCurrent.uuid}/>
+            </div>
+        </div>
     )
 }

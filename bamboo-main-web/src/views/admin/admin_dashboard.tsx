@@ -26,8 +26,95 @@
  * --------------------------------------------------------------------------------
  */
 
+import {CardBorder} from "../../components/card/card_border.tsx";
+import {
+    MoneyCollectOutlined,
+    UserAddOutlined,
+    UserDeleteOutlined,
+    UserOutlined,
+    UserSwitchOutlined
+} from "@ant-design/icons";
+
 export function AdminDashboard() {
+    document.title = "竹叶 - 看板"
+
     return (
-        <></>
+        <div className={"grid grid-cols-12 gap-6"}>
+            <div className={"col-span-12 lg:col-span-9 grid grid-cols-12 gap-6"}>
+                <div className={"col-span-12 md:col-span-6"}>
+                    <CardBorder type={"友链信息状态看板"} name={"友链"} element={
+                        <>
+                            <div className="inline-flex shrink-0 items-center gap-2">
+                                <UserOutlined/>
+                                <div className="mt-1.5 sm:mt-0">
+                                    <p className="text-gray-500">友链总数</p>
+                                    <p className="font-medium">1 个</p>
+                                </div>
+                            </div>
+                            <div className="inline-flex shrink-0 items-center gap-2">
+                                <UserAddOutlined/>
+                                <div className="mt-1.5 sm:mt-0">
+                                    <p className="text-gray-500">最近添加</p>
+                                    <p className="font-medium">1 个</p>
+                                </div>
+                            </div>
+                            <div className="inline-flex shrink-0 items-center gap-2">
+                                <UserSwitchOutlined/>
+                                <div className="mt-1.5 sm:mt-0">
+                                    <p className="text-gray-500">最近修改</p>
+                                    <p className="font-medium">1 个</p>
+                                </div>
+                            </div>
+                            <div className="inline-flex shrink-0 items-center gap-2">
+                                <UserDeleteOutlined/>
+                                <div className="mt-1.5 sm:mt-0">
+                                    <p className="text-gray-500">最近删除</p>
+                                    <p className="font-medium">1 个</p>
+                                </div>
+                            </div>
+                        </>
+                    }/>
+                </div>
+                <div className={"col-span-12 md:col-span-6"}>
+                    <CardBorder type={"赞助信息状态看板"} name={"赞助"} element={
+                        <>
+                            <div className="inline-flex shrink-0 items-center gap-2">
+                                <MoneyCollectOutlined/>
+                                <div className="mt-1.5 sm:mt-0">
+                                    <p className="text-gray-500">总赞助</p>
+                                    <p className="font-medium">¥ 1</p>
+                                </div>
+                            </div>
+                            <div className="inline-flex shrink-0 items-center gap-2">
+                                <UserOutlined/>
+                                <div className="mt-1.5 sm:mt-0">
+                                    <p className="text-gray-500">今年赞助</p>
+                                    <p className="font-medium">¥ 1</p>
+                                </div>
+                            </div>
+                            <div className="inline-flex shrink-0 items-center gap-2">
+                                <UserOutlined/>
+                                <div className="mt-1.5 sm:mt-0">
+                                    <p className="text-gray-500">本月赞助</p>
+                                    <p className="font-medium">¥ 1</p>
+                                </div>
+                            </div>
+                            <div className="inline-flex shrink-0 items-center gap-2">
+                                <UserOutlined/>
+                                <div className="mt-1.5 sm:mt-0">
+                                    <p className="text-gray-500">今日赞助</p>
+                                    <p className="font-medium">¥ 2</p>
+                                </div>
+                            </div>
+                        </>
+                    }/>
+                </div>
+            </div>
+            <div className={"hidden lg:block lg:col-span-3"}>
+                <div className="transition block bg-white rounded-lg p-4 shadow-sm shadow-indigo-100 hover:scale-105 text-center">
+                    213
+                </div>
+            </div>
+        </div>
     )
 }
