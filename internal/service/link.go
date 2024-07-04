@@ -36,6 +36,7 @@ package service
 import (
 	"context"
 	v1 "xiaoMain/api/link/v1"
+	"xiaoMain/internal/model/dto/flow"
 	"xiaoMain/internal/model/entity"
 )
 
@@ -80,6 +81,7 @@ type (
 		// # 返回:
 		//   - err: 如果 RSS 可以访问，返回 nil。否则返回错误信息。
 		CheckRSSCanAccess(ctx context.Context, siteRSS string) (err error)
+		GetLink(ctx context.Context) (getLink []flow.LinkGetDTO, total uint64, err error)
 		// CheckLinkName
 		//
 		// # 检查地址信息

@@ -30,7 +30,10 @@ package v1
 
 import "github.com/gogf/gf/v2/frame/g"
 
-// LinkAddReq 添加新的链接请求参数
+// LinkAddReq
+//
+// # 添加新的链接请求参数
+//
 // 添加新的链接
 //
 // 参数：
