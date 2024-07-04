@@ -28,7 +28,10 @@
 
 package flow
 
-import "xiaoMain/internal/model/entity"
+import (
+	"github.com/gogf/gf/v2/os/gtime"
+	"xiaoMain/internal/model/entity"
+)
 
 // LinkGetDTO
 //
@@ -41,6 +44,24 @@ import "xiaoMain/internal/model/entity"
 //   - Link: 链接列表
 type LinkGetDTO struct {
 	entity.Location
-	Total int               `json:"total"`
-	Link  []entity.LinkList `json:"links"`
+	Total int           `json:"total"`
+	Link  []LinkInfoDTO `json:"links"`
+}
+
+type LinkInfoDTO struct {
+	ID              int64       `json:"id"               orm:"id"               ` // 主键
+	WebmasterEmail  string      `json:"webmaster_email"  orm:"webmaster_email"  ` // 站长邮箱
+	ServiceProvider string      `json:"service_provider" orm:"service_provider" ` // 服务提供商
+	SiteName        string      `json:"site_name"        orm:"site_name"        ` // 站点名字
+	SiteURL         string      `json:"site_url"         orm:"site_url"         ` // 站点地址
+	SiteLogo        string      `json:"site_logo"        orm:"site_logo"        ` // 站点 logo
+	CdnLogoURL      string      `json:"cdn_logo_url"     orm:"cdn_logo_url"     ` // 镜像站点 logo
+	SiteDescription string      `json:"site_description" orm:"site_description" ` // 站点描述
+	HasAdv          bool        `json:"has_adv"          orm:"has_adv"          ` // 是否有广告
+	Color           int64       `json:"color"            orm:"color"            ` // 颜色
+	Status          int         `json:"status"           orm:"status"           ` // 0 待审核，1 通过，-1 审核拒绝，2 回收站
+	AbleConnect     bool        `json:"able_connect"     orm:"able_connect"     ` // 能否连接
+	CreatedAt       *gtime.Time `json:"created_at"       orm:"created_at"       ` // 创建时间
+	UpdatedAt       *gtime.Time `json:"updated_at"       orm:"updated_at"       ` // 修改时间
+	DeletedAt       *gtime.Time `json:"deleted_at"       orm:"deleted_at"       ` // 删除时间
 }

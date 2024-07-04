@@ -32,6 +32,7 @@ import (
 	"context"
 	"github.com/bamboo-services/bamboo-utils/bcode"
 	"github.com/bamboo-services/bamboo-utils/berror"
+	"github.com/young2j/gocopy"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/dto/flow"
@@ -58,11 +59,13 @@ func (s *sLink) GetLink(ctx context.Context) (getLink []flow.LinkGetDTO, total u
 	// 对链接进行序列化
 	getLinkDTO := make([]flow.LinkGetDTO, 0)
 	for _, location := range locationList {
-		locationLinkDTO := make([]entity.LinkList, 0)
+		locationLinkDTO := make([]flow.LinkInfoDTO, 0)
 		locationLinkTotal := 0
 		for _, list := range linkList {
 			if list.Location == location.Id {
-				locationLinkDTO = append(locationLinkDTO, list)
+				newLink := new(flow.LinkInfoDTO)
+				gocopy.Copy(newLink, list)
+				locationLinkDTO = append(locationLinkDTO, *newLink)
 				locationLinkTotal++
 			}
 		}
