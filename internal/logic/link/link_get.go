@@ -39,6 +39,19 @@ import (
 	"xiaoMain/internal/model/entity"
 )
 
+// GetLink
+//
+// # 获取链接
+//
+// 获取链接，包括友情链接、社交链接等。用于获取链接之后进行展示使用
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//
+// # 返回:
+//   - getLink: 获取到的链接列表
+//   - total: 获取到的链接总数
+//   - err: 如果处理过程中发生错误，返回错误信息。
 func (s *sLink) GetLink(ctx context.Context) (getLink []flow.LinkGetDTO, total uint64, err error) {
 	// 获取所有链接
 	linkList := make([]entity.LinkList, 0)
@@ -76,4 +89,28 @@ func (s *sLink) GetLink(ctx context.Context) (getLink []flow.LinkGetDTO, total u
 		})
 	}
 	return getLinkDTO, uint64(locationTotal), nil
+}
+
+// GetLinkAdmin
+//
+// # 获取链接
+//
+// 获取链接，包括友情链接、社交链接等。用于获取链接之后进行展示使用。该链接获只有管理员可以对内容进行获取。
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//
+// # 返回:
+//   - getAllLink: 获取到的链接列表
+//   - total: 获取到的链接总数
+//   - err: 如果处理过程中发生错误，返回错误信息。
+func (s *sLink) GetLinkAdmin(ctx context.Context) (getAllLink []entity.LinkList, total uint64, err error) {
+	// 获取所有的链接
+	linkList := make([]entity.LinkList, 0)
+	linkTotal := 0
+	err = dao.LinkList.Ctx(ctx).OrderDesc(dao.LinkList.Columns().CreatedAt).ScanAndCount(&linkList, &linkTotal, true)
+	if err != nil {
+		return nil, 0, berror.NewErrorHasError(bcode.ServerInternalError, err)
+	}
+	return linkList, uint64(linkTotal), nil
 }

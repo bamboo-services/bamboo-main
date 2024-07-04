@@ -40,6 +40,7 @@ export function AdminDashboard() {
 
     return (
         <div className={"grid grid-cols-12 gap-6"}>
+            <div className={"col-span-12 text-xl font-bold"}>首页</div>
             <div className={"col-span-12 lg:col-span-9 grid grid-cols-12 gap-6"}>
                 <div className={"col-span-12 md:col-span-6"}>
                     <CardBorder type={"友链信息状态看板"} name={"友链"} element={
@@ -111,7 +112,8 @@ export function AdminDashboard() {
                 </div>
             </div>
             <div className={"hidden lg:block lg:col-span-3"}>
-                <div className="transition block bg-white rounded-lg p-4 shadow-sm shadow-indigo-100 hover:scale-105 text-center">
+                <div
+                    className="transition block bg-white rounded-lg p-4 shadow-sm shadow-indigo-100 hover:scale-105 text-center">
                     213
                 </div>
             </div>

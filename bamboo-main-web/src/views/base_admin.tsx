@@ -27,23 +27,28 @@
  */
 
 import {AdminDashboard} from "./admin/admin_dashboard.tsx";
-import {Route, Routes} from "react-router-dom";
+import {Route, Routes, useNavigate} from "react-router-dom";
 import {AdminSideMenuComponent} from "../components/admin/admin_side_menu.tsx";
 import {useEffect, useState} from "react";
 import {InfoUserAPI} from "../resources/ts/apis/api_info.ts";
 import { message } from "antd";
 import {UserCurrentEntity} from "../resources/ts/models/entity/user_current_entity.ts";
 import {AdminLink} from "./admin/admin_link.tsx";
+import {AdminLinkEdit} from "./admin/admin_link_edit.tsx";
 
 export function BaseAdmin() {
     const [userCurrent, setUserInfo] = useState({} as UserCurrentEntity);
+    const navigation = useNavigate();
     useEffect(() => {
-        InfoUserAPI().then((getRes) => {
+        InfoUserAPI().then(async (getRes) => {
             if (getRes) {
                 if (getRes.output !== "Success") {
                     message.warning(getRes?.error_message);
                     // 移除登录的内容
-
+                    localStorage.removeItem("UserToken");
+                    setTimeout(() => {
+                        navigation("/auth/login");
+                    }, 1000);
                 } else {
                     setUserInfo(getRes.data!);
                 }
@@ -53,13 +58,14 @@ export function BaseAdmin() {
 
     return (
         <div className={"grid grid-cols-12 bg-gray-100/75"}>
-            <div className={"hidden md:block col-span-3 lg:col-span-2"}>
+            <div className={"hidden md:block"}>
                 <AdminSideMenuComponent username={userCurrent.username} email={userCurrent.email} uuid={userCurrent.uuid}/>
             </div>
-            <div className={"col-span-12 md:col-span-9 lg:col-span-10 m-6 h-dvh"}>
+            <div className={"md:ps-[200px] lg:ps-[250px] col-span-12 m-6 h-dvh"}>
                 <Routes>
                     <Route path={"dashboard"} element={<AdminDashboard/>}/>
                     <Route path={"link"} element={<AdminLink/>}/>
+                    <Route path={"link/edit/:id"} element={<AdminLinkEdit/>}/>
                 </Routes>
             </div>
             <div className={"block md:hidden col-span-12"}>

@@ -31,6 +31,7 @@ package v1
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"xiaoMain/internal/model/dto/flow"
+	"xiaoMain/internal/model/entity"
 )
 
 // LinkGetReq
@@ -39,7 +40,7 @@ import (
 //
 // 获取链接，包括友情链接、社交链接等。
 type LinkGetReq struct {
-	g.Meta `path:"/link" method:"Get" tags:"链接控制器" summary:"获取链接"`
+	g.Meta `path:"/link" method:"Get" tags:"链接控制器" summary:"获取链接" dc:"获取链接，包括友情链接、社交链接等。用于获取链接之后进行展示使用"`
 }
 
 // LinkGetRes
@@ -51,4 +52,32 @@ type LinkGetRes struct {
 	g.Meta        `mime:"application/json"`
 	Links         []flow.LinkGetDTO `json:"links" dc:"链接列表"`
 	LocationTotal uint64            `json:"location_total" dc:"位置总数"`
+}
+
+// LinkGetAdminReq
+//
+// # 获取链接
+//
+// 获取链接，包括友情链接、社交链接等。
+//
+// # 参数:
+//   - UserToken: 用户Token
+type LinkGetAdminReq struct {
+	g.Meta    `path:"/link/admin" method:"Get" tags:"链接控制器" summary:"管理员获取链接" dc:"获取链接，包括友情链接、社交链接等。"`
+	UserToken string `json:"Authorization" in:"header" required:"true" dc:"用户Token"`
+}
+
+// LinkGetAdminRes
+//
+// # 获取链接
+//
+// 获取链接的响应。
+type LinkGetAdminRes struct {
+	g.Meta           `mime:"application/json"`
+	Links            []entity.LinkList `json:"links" dc:"链接列表"`
+	Total            uint64            `json:"total" dc:"链接总数"`
+	Reviewed         uint64            `json:"reviewed" dc:"待审核链接总数"`
+	DeleteTheTotal   uint64            `json:"delete" dc:"删除链接总数"`
+	RecentlyAdded    uint64            `json:"recently_added" dc:"最近添加链接总数"`
+	RecentlyModified uint64            `json:"recently_modified" dc:"最近修改链接总数"`
 }

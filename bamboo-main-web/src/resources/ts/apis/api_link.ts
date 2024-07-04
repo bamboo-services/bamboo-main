@@ -26,35 +26,26 @@
  * --------------------------------------------------------------------------------
  */
 
-import {Route, Routes, useLocation, useNavigate} from "react-router-dom";
-import {useEffect} from "react";
-import AuthLogin from "./auth/auth_login";
-import {InfoUserAPI} from "../resources/ts/apis/api_info.ts";
-import {message} from "antd";
+import {LinkGetAdminEntity} from "../models/entity/link_get_admin_entity.ts";
+import {BaseApi, GetAuthorizationToken, MethodType} from "../base_api.ts";
+import {BaseResponse} from "../models/base_response.ts";
 
-export default function BaseAuth() {
-    const navigate = useNavigate();
-    const getLocation = useLocation();
-
-    useEffect(() => {
-        if (getLocation.pathname === "/auth") {
-            navigate("/auth/login");
-        }
-        setTimeout(async () => {
-            // 检查用户是否登录
-            const getRes = await InfoUserAPI();
-            if (getRes?.output === "Success") {
-                message.success(`您好 ${getRes.data?.username} 用户`)
-                setTimeout(() => {
-                    navigate("/admin/dashboard");
-                }, 500);
-            }
-        })
-    });
-
-    return (
-        <Routes>
-            <Route path={"login"} element={<AuthLogin/>}/>
-        </Routes>
-    );
+/**
+ * GetLinkAPI
+ *
+ * 用于获取所有的链接，该接口只有管理员可以进行操作，其他用户不应该通过该接口进行数据的获取操作
+ *
+ * @returns Promise<BaseResponse<AuthLoginEntity>>
+ */
+const AdminGetLinkAPI = async (): Promise<BaseResponse<LinkGetAdminEntity> | undefined> => {
+    return BaseApi<LinkGetAdminEntity>(
+        MethodType.GET,
+        "/api/v1/link/admin",
+        null,
+        null,
+        null,
+        {"Authorization": GetAuthorizationToken()}
+    )
 }
+
+export {AdminGetLinkAPI};

@@ -41,7 +41,7 @@ export function AdminSideMenuComponent(userCurrent: UserCurrentEntity) {
     const location = useLocation();
 
     function SelectColorForPhone(getLocation: string): string {
-        if (location.pathname === getLocation) {
+        if (location.pathname.includes(getLocation)) {
             return "bg-sky-100 p-2 text-sm font-medium text-sky-600"
         } else {
             return "p-2 text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700"
@@ -59,7 +59,7 @@ export function AdminSideMenuComponent(userCurrent: UserCurrentEntity) {
     return (
         <>
             {/* 电脑菜单样式 */}
-            <div className="hidden md:flex h-screen flex-col justify-between border-e bg-white">
+            <div className="hidden md:flex h-screen flex-col justify-between border-e bg-white fixed left-0 top-0 w-[200px] lg:w-[250px]">
                 <div className="px-4 py-6">
                     <span className="grid h-10 w-32 place-content-center rounded-lg bg-gray-100 text-xs text-gray-600">
                       Logo
@@ -115,26 +115,26 @@ export function AdminSideMenuComponent(userCurrent: UserCurrentEntity) {
                 </div>
             </div>
             {/* 手机菜单样式 */}
-            <div className={"fixed md:hidden w-screen bottom-0 left-0 p-3 bg-white"}>
+            <div className={"fixed md:hidden w-lvw bottom-0 left-0 p-3 bg-white"}>
                 <div className={"flex items-center justify-center"}>
                     <nav className="grid grid-cols-4 gap-3 w-full" aria-label="Tabs">
                         <Link to={"/admin/dashboard"}
-                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${SelectColorForPhone("/admin/dashboard")}`}>
+                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${SelectColorForPhone("dashboard")}`}>
                             <HomeOutlined/>
                             <span>首页</span>
                         </Link>
                         <Link to={"/admin/link"}
-                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${SelectColorForPhone("/admin/link")}`}>
+                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${SelectColorForPhone("link")}`}>
                             <LinkOutlined/>
                             <span>友链</span>
                         </Link>
                         <Link to={"/admin/other"}
-                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${SelectColorForPhone("/admin/other")}`}>
+                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${SelectColorForPhone("other")}`}>
                             <BarsOutlined/>
                             <span>其他</span>
                         </Link>
                         <Link to={"/admin/setting"}
-                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${SelectColorForPhone("/admin/setting")}`}
+                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${SelectColorForPhone("setting")}`}
                               aria-current="page">
                             <SettingOutlined/>
                             <span>其他</span>

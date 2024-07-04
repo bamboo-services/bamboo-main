@@ -33,7 +33,6 @@ import {useNavigate} from "react-router-dom";
 
 export default function AuthLogin() {
     const loginForm = {remember: false} as AuthLoginDTO;
-    const [messageApi, contextHolder] = message.useMessage();
     const navigation = useNavigate();
 
     document.title = "竹叶 - 管理员登陆";
@@ -49,14 +48,14 @@ export default function AuthLogin() {
         event.preventDefault();
         // 检查数据是否为空
         if (!loginForm.user || !loginForm.pass) {
-            messageApi.warning("用户名或密码不能为空！");
+            message.warning("用户名或密码不能为空！");
             return;
         }
         // 提交登录信息
         const getRes = await UserLoginAPI(loginForm);
         if (getRes) {
             if (getRes.output === "Success") {
-                messageApi.success("登录成功！");
+                message.success("登录成功！");
                 // 保存 Token
                 localStorage.setItem("UserToken", getRes.data?.token as string);
                 // 路由跳转
@@ -64,82 +63,80 @@ export default function AuthLogin() {
                     navigation("/admin/dashboard");
                 }, 500);
             } else {
-                messageApi.info(getRes.error_message);
+                message.info(getRes.error_message);
             }
         } else {
-            messageApi.error("登录失败！请检查后端连接是否正确！");
+            message.error("登录失败！请检查后端连接是否正确！");
         }
     }
 
     return (
-        <>
-            {contextHolder}
-            <div className={"grid w-screen h-screen items-center justify-center bg-gray-100"}>
-                <div className={"grid gap-1 mx-3"}>
-                    <div className={"text-center"}>
-                        <h1 className={"text-2xl font-bold text-indigo-600 sm:text-3xl"}>凌中的锋雨</h1>
-                        <p className={"mx-auto mt-4 max-w-md text-gray-500"}>
-                            一个人的价值，在于他贡献什么，而不是他能取得什么。不要渴望成为一个成功的人，而是应该努力做一个有价值的人。
-                        </p>
-                    </div>
-                    <form onSubmit={onSubmit}
-                          className={"mt-6 space-y-3 rounded-lg p-4 shadow-lg sm:p-6 lg:p-8 bg-white w-screen sm:max-w-screen-sm"}>
-                        <p className={"text-center text-lg font-medium"}>用户登录</p>
-                        <div>
-                            <label htmlFor="user" className="sr-only">用户名</label>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    className="w-full rounded-lg border-gray-200 p-3 text-sm shadow-sm"
-                                    placeholder="请输入用户名"
-                                    onChange={e => {
-                                        loginForm.user = e.target.value;
-                                    }}
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <label htmlFor="password" className="sr-only">Password</label>
-                            <div className="relative">
-                                <input
-                                    type="password"
-                                    className="w-full rounded-lg border-gray-200 p-3 text-sm shadow-sm"
-                                    placeholder="请输入密码"
-                                    onChange={e => {
-                                        loginForm.pass = e.target.value;
-                                    }}
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <label htmlFor="Option1" className="flex cursor-pointer items-start gap-4">
-                                <div className="flex items-center">
-                                    &#8203;
-                                    <input
-                                        type="checkbox"
-                                        className="size-4 rounded border-gray-300 transition"
-                                        onChange={e => {
-                                            loginForm.remember = e.target.checked;
-                                        }}
-                                    />
-                                </div>
-
-                                <div>
-                                    <strong className="font-medium text-gray-900">记住我 <span
-                                        className={"text-gray-400"}>(7日免登录)</span></strong>
-                                </div>
-                            </label>
-                        </div>
-                        <div className={"w-full flex justify-center pt-4"}>
-                            <button
-                                type="submit"
-                                className="block rounded-lg bg-indigo-600 px-12 py-2 text-sm font-medium text-white">
-                                登录
-                            </button>
-                        </div>
-                    </form>
+        <div className={"grid w-screen h-dvh items-center justify-center bg-gray-100"}>
+            <div className={"grid gap-1 mx-3"}>
+                <div className={"text-center"}>
+                    <h1 className={"text-2xl font-bold text-indigo-600 sm:text-3xl"}>凌中的锋雨</h1>
+                    <p className={"mx-auto mt-4 max-w-md text-gray-500"}>
+                        一个人的价值，在于他贡献什么，而不是他能取得什么。不要渴望成为一个成功的人，而是应该努力做一个有价值的人。
+                    </p>
                 </div>
+                <form onSubmit={onSubmit}
+                      className={"mt-6 space-y-3 rounded-lg p-4 shadow-lg sm:p-6 lg:p-8 bg-white w-screen sm:max-w-screen-sm"}>
+                    <p className={"text-center text-lg font-medium"}>用户登录</p>
+                    <div>
+                        <label htmlFor="user" className="sr-only">用户名</label>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                className="w-full rounded-lg border-gray-200 p-3 text-sm shadow-sm"
+                                placeholder="请输入用户名"
+                                onChange={e => {
+                                    loginForm.user = e.target.value;
+                                }}
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label htmlFor="password" className="sr-only">Password</label>
+                        <div className="relative">
+                            <input
+                                type="password"
+                                className="w-full rounded-lg border-gray-200 p-3 text-sm shadow-sm"
+                                placeholder="请输入密码"
+                                onChange={e => {
+                                    loginForm.pass = e.target.value;
+                                }}
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label htmlFor="Option1" className="flex cursor-pointer items-start gap-4">
+                            <div className="flex items-center">
+                                &#8203;
+                                <input
+                                    type="checkbox"
+                                    className="size-4 rounded border-gray-300 transition"
+                                    onChange={e => {
+                                        loginForm.remember = e.target.checked;
+                                    }}
+                                />
+                            </div>
+
+                            <div>
+                                <strong className="font-medium text-gray-900">记住我 <span
+                                    className={"text-gray-400"}>(7日免登录)</span></strong>
+                            </div>
+                        </label>
+                    </div>
+                    <div className={"w-full flex justify-center pt-4"}>
+                        <button
+                            type="submit"
+                            className="block rounded-lg bg-indigo-600 px-12 py-2 text-sm font-medium text-white">
+                            登录
+                        </button>
+                    </div>
+                </form>
             </div>
-        </>
+        </div>
+
     );
 }
