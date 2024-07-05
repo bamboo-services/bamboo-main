@@ -77,7 +77,7 @@ type LinkGetAdminRes struct {
 	Links            []entity.LinkList `json:"links" dc:"链接列表"`
 	Total            uint64            `json:"total" dc:"链接总数"`
 	Reviewed         uint64            `json:"reviewed" dc:"待审核链接总数"`
-	DeleteTheTotal   uint64            `json:"delete" dc:"删除链接总数"`
+	DeleteTheTotal   uint64            `json:"deleted" dc:"删除链接总数"`
 	RecentlyAdded    uint64            `json:"recently_added" dc:"最近添加链接总数"`
 	RecentlyModified uint64            `json:"recently_modified" dc:"最近修改链接总数"`
 }

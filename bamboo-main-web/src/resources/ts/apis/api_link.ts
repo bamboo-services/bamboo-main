@@ -29,6 +29,7 @@
 import {LinkGetAdminEntity} from "../models/entity/link_get_admin_entity.ts";
 import {BaseApi, GetAuthorizationToken, MethodType} from "../base_api.ts";
 import {BaseResponse} from "../models/base_response.ts";
+import {LocationGetAdminEntity} from "../models/entity/location_get_admin_entity.ts";
 
 /**
  * GetLinkAPI
@@ -48,4 +49,33 @@ const AdminGetLinkAPI = async (): Promise<BaseResponse<LinkGetAdminEntity> | und
     )
 }
 
-export {AdminGetLinkAPI};
+const GetLinkAPI = async (): Promise<BaseResponse<LinkGetAdminEntity> | undefined> => {
+    return BaseApi<LinkGetAdminEntity>(
+        MethodType.GET,
+        "/api/v1/link",
+        null,
+        null,
+        null,
+        {"Authorization": GetAuthorizationToken()}
+    )
+}
+
+/**
+ * AdminGetLocationAPI
+ *
+ * 用于获取所有的位置，该接口只有管理员可以进行操作，其他用户不应该通过该接口进行数据的获取操作
+ *
+ * @returns Promise<BaseResponse<LocationGetAdminEntity>>
+ */
+const AdminGetLocationAPI = async (): Promise<BaseResponse<LocationGetAdminEntity> | undefined> => {
+    return BaseApi<LocationGetAdminEntity>(
+        MethodType.GET,
+        "/api/v1/link/location/full",
+        null,
+        null,
+        null,
+        {"Authorization": GetAuthorizationToken()}
+    )
+}
+
+export {AdminGetLinkAPI, GetLinkAPI, AdminGetLocationAPI};

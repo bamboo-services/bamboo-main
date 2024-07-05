@@ -33,10 +33,18 @@
  *
  * @param links 友链列表
  * @param total 友链总数
+ * @param reviewed 待审核的友链数量
+ * @param deleted 已删除的友链数量
+ * @param recently_added 最近添加的友链数量
+ * @param recently_modified 最近修改的友链数量
  */
 export type LinkGetAdminEntity = {
     links: LinkDO[];
     total: number;
+    reviewed: number;
+    deleted: number;
+    recently_added: number;
+    recently_modified: number;
 }
 
 /**

@@ -27,14 +27,21 @@
  */
 
 import {JSX, useEffect, useState} from "react";
-import {AdminGetLinkAPI} from "../../resources/ts/apis/api_link.ts";
+import {AdminGetLinkAPI, AdminGetLocationAPI} from "../../resources/ts/apis/api_link.ts";
 import {message} from "antd";
 import {LinkDO} from "../../resources/ts/models/entity/link_get_admin_entity.ts";
 import {Link} from "react-router-dom";
+import {AppstoreOutlined, UnorderedListOutlined} from "@ant-design/icons";
 
 export function AdminLink() {
     const [linkCount, setLinkCount] = useState(0);
+    const [linkRecentAdd, setLinkRecentAdd] = useState(0);
+    const [linkRecentModified, setLinkRecentModified] = useState(0);
+    const [linkDeleted, setLinkDeleted] = useState(0);
+    const [linkReviewed, setLinkReviewed] = useState(0);
+
     const [linkList, setLinkList] = useState({} as LinkDO[]);
+    const [linkLocation, setLinkLocation] = useState([] as JSX.Element[]);
     const [webLink, setWebLink] = useState([<>
         <div className={"text-center col-span-full text-xl font-bold"}>当前不存在链接</div>
     </>]);
@@ -46,6 +53,10 @@ export function AdminLink() {
             <td className="whitespace-nowrap px-4 py-2 text-gray-700">--</td>
         </tr>
     </>]);
+    const [changeTypeButton, setChangeTypeButton] = useState([<>
+        <AppstoreOutlined className={"text-black lg:text-emerald-500"} onClick={changeToBlock}/>
+        <UnorderedListOutlined className={"lg:text-black text-emerald-500"} onClick={changeToLine}/>
+    </>]);
 
     useEffect(() => {
         setTimeout(async () => {
@@ -53,7 +64,27 @@ export function AdminLink() {
             if (getRes?.output === "Success") {
                 // 数据的提取整理
                 setLinkCount(getRes.data!.total);
+                setLinkReviewed(getRes.data!.reviewed);
+                setLinkRecentAdd(getRes.data!.recently_added);
+                setLinkRecentModified(getRes.data!.recently_modified);
+                setLinkDeleted(getRes.data!.deleted)
                 setLinkList(getRes.data!.links);
+            } else {
+                message.warning(getRes?.error_message);
+            }
+        });
+        setTimeout(async () => {
+            const getRes = await AdminGetLocationAPI();
+            if (getRes?.output === "Success") {
+                const locationList: JSX.Element[] = [];
+                for (let i = 0; i < getRes.data!.locations.length; i++) {
+                    locationList.push(
+                        <option key={i} value={getRes.data!.locations[i].id}>
+                            {getRes.data!.locations[i].display_name}
+                        </option>
+                    );
+                }
+                setLinkLocation(locationList);
             } else {
                 message.warning(getRes?.error_message);
             }
@@ -91,16 +122,39 @@ export function AdminLink() {
                 return (
                     <tr key={link.id} className="odd:bg-gray-50">
                         <td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">{link.site_name}</td>
-                        <td className="whitespace-nowrap px-4 py-2 text-gray-700">{link.site_url}</td>
+                        <td className="whitespace-nowrap px-4 py-2 text-gray-700">{link.webmaster_email}</td>
                         <td className="whitespace-nowrap px-4 py-2 text-gray-700 hidden md:block">{link.site_url}</td>
                         <td className="whitespace-nowrap px-4 py-2 text-gray-700">
-                            <Link to={`/admin/link/edit/${link.id}`} className={"text-blue-500"}>编辑</Link>
+                            <Link to={`/admin/link/edit/${link.id}`} className={"px-2 py-1 bg-red-400 rounded-lg text-white"}>编辑</Link>
                         </td>
                     </tr>
                 );
             }));
         }
-    }, [linkList]);
+    }, [linkList, linkCount]);
+
+
+    function changeToBlock() {
+        document.getElementById("lineType")?.classList.add("hidden");
+        document.getElementById("blockType")?.classList.remove("hidden");
+        document.getElementById("blockType")?.classList.add("lg:grid");
+        setChangeTypeButton([<>
+            <AppstoreOutlined className={"text-emerald-500"}/>
+            <UnorderedListOutlined className={"text-black"} onClick={changeToLine}/>
+        </>]);
+    }
+
+    function changeToLine() {
+        document.getElementById("blockType")?.classList.add("hidden");
+        document.getElementById("blockType")?.classList.remove("lg:grid");
+        document.getElementById("lineType")?.classList.remove("lg:hidden");
+        document.getElementById("lineType")?.classList.remove("hidden");
+        setChangeTypeButton([<>
+            <AppstoreOutlined className={"text-black"} onClick={changeToBlock}/>
+            <UnorderedListOutlined className={"text-emerald-500"}/>
+        </>]);
+    }
+
 
     document.title = "竹叶 - 友链管理";
 
@@ -113,11 +167,14 @@ export function AdminLink() {
                     213
                 </div>
             </div>
-            <div className={"col-span-12 lg:col-span-8"}>
-                <div className={"hidden lg:grid grid-cols-1 md:grid-cols-2 gap-3"}>
+            <div className={"col-span-12 lg:col-span-8 space-y-3"}>
+                <div className={"col-span-full flex justify-end items-center gap-3"}>
+                    {changeTypeButton}
+                </div>
+                <div id={"blockType"} className={"hidden lg:grid grid-cols-1 md:grid-cols-2 gap-3"}>
                     {webLink}
                 </div>
-                <div className="lg:hidden overflow-x-auto rounded-lg shadow shadow-indigo-100">
+                <div id={"lineType"} className="lg:hidden overflow-x-auto rounded-lg shadow shadow-indigo-100">
                     <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
                         <thead className="text-left rtl:text-right">
                         <tr>
@@ -128,11 +185,12 @@ export function AdminLink() {
                         </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                        {webLinkTable}
+                            {webLinkTable}
                         </tbody>
                     </table>
                 </div>
             </div>
+            {/* 侧边栏 */}
             <div className={"hidden lg:block col-span-4 gap-3"}>
                 <div
                     className="transition block bg-white rounded-lg p-4 shadow-sm shadow-indigo-100">
@@ -145,58 +203,47 @@ export function AdminLink() {
                                     id="HeadlineAct"
                                     className="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
                                 >
-                                    <option value="">Please select</option>
-                                    <option value="JM">John Mayer</option>
-                                    <option value="SRV">Stevie Ray Vaughn</option>
-                                    <option value="JH">Jimi Hendrix</option>
-                                    <option value="BBK">B.B King</option>
-                                    <option value="AK">Albert King</option>
-                                    <option value="BG">Buddy Guy</option>
-                                    <option value="EC">Eric Clapton</option>
+                                    <option value="">板块选择</option>
+                                    {linkLocation}
                                 </select>
                             </div>
                         </div>
                         <div className={"col-span-12"}>
                             <input
-                                type="email"
-                                id="UserEmail"
-                                placeholder="john@rhcp.com"
+                                type="text"
+                                id="SelectInfo"
+                                placeholder="模糊查询"
                                 className="mt-1 w-full rounded-lg border-gray-200 shadow-sm sm:text-sm"
                             />
                         </div>
-                        <div className={"col-span-12 text-lg font-medium"}>友链状态</div>
+                        <div className={"col-span-12 flex justify-center"}>
+                            <button type={"button"}
+                                    className={"transition rounded-lg bg-emerald-500 hover:bg-emerald-600 px-8 py-2 text-sm font-medium text-white"}>搜索
+                            </button>
+                        </div>
+                        <div className={"col-span-12 text-lg font-medium mt-6"}>友链状态</div>
                         <div className={"col-span-12"}>
-                            <div className="flow-root">
+                            <div className="px-3">
                                 <dl className="-my-3 divide-y divide-gray-100 text-sm">
                                     <div className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-                                        <dt className="font-medium text-gray-900">Title</dt>
-                                        <dd className="text-gray-700 sm:col-span-2">Mr</dd>
+                                        <dt className="font-medium text-gray-900">总链接数</dt>
+                                        <dd className="text-gray-700 sm:col-span-2">{linkCount} 个</dd>
                                     </div>
-
                                     <div className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-                                        <dt className="font-medium text-gray-900">Name</dt>
-                                        <dd className="text-gray-700 sm:col-span-2">John Frusciante</dd>
+                                        <dt className="font-medium text-gray-900">待审核数</dt>
+                                        <dd className="text-gray-700 sm:col-span-2">{linkReviewed} 个</dd>
                                     </div>
-
                                     <div className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-                                        <dt className="font-medium text-gray-900">Occupation</dt>
-                                        <dd className="text-gray-700 sm:col-span-2">Guitarist</dd>
+                                        <dt className="font-medium text-gray-900">最近添加</dt>
+                                        <dd className="text-gray-700 sm:col-span-2">{linkRecentAdd} 个</dd>
                                     </div>
-
                                     <div className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-                                        <dt className="font-medium text-gray-900">Salary</dt>
-                                        <dd className="text-gray-700 sm:col-span-2">$1,000,000+</dd>
+                                        <dt className="font-medium text-gray-900">最近修改</dt>
+                                        <dd className="text-gray-700 sm:col-span-2">{linkRecentModified} 个</dd>
                                     </div>
-
                                     <div className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
-                                        <dt className="font-medium text-gray-900">Bio</dt>
-                                        <dd className="text-gray-700 sm:col-span-2">
-                                            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Et facilis debitis
-                                            explicabo
-                                            doloremque impedit nesciunt dolorem facere, dolor quasi veritatis quia fugit
-                                            aperiam
-                                            aspernatur neque molestiae labore aliquam soluta architecto?
-                                        </dd>
+                                        <dt className="font-medium text-gray-900">已删除</dt>
+                                        <dd className="text-gray-700 sm:col-span-2">{linkDeleted} 个</dd>
                                     </div>
                                 </dl>
                             </div>
@@ -212,11 +259,11 @@ function selectImageIsDirectOrCDN(link: LinkDO): JSX.Element {
     if (link.cdn_logo_url !== "") {
         return (
             <img src={link.cdn_logo_url}
-                 className={"items-center justify-center w-full h-full object-cover"} alt={`link_${link.id}`}/>
+                 className={"items-center justify-center w-full h-full object-contain"} alt={`link_${link.id}`}/>
         );
     }
     return (
         <img src={link.site_logo}
-             className={"items-center justify-center w-full h-full object-cover"} alt={`link_${link.id}`}/>
+             className={"items-center justify-center w-full h-full object-contain"} alt={`link_${link.id}`}/>
     );
 }
