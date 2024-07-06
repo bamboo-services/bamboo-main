@@ -40,7 +40,7 @@ import (
 // 用户登录, 需要用户提供用户名和密码。记住用户登陆状态可以维持最长七天的有效登录时间。
 type AuthLoginReq struct {
 	g.Meta   `path:"/user/login" method:"Post" summary:"用户登陆" tags:"授权控制器"`
-	User     string `json:"user" v:"required|regex:^[0-9A-Za-z-_]{5,30}$#请输入用户名|用户名为 5-30 位且只允许输入'0-9','A-Z','a-Z','-'及'_'" dc:"用户名"`
+	User     string `json:"user" v:"required|regex:^[0-9A-Za-z-_]{5,30}$#请输入用户名|用户名为 5-30 位且只允许输入'0-9','A-Z','a-Z','-'及'_'" dc:"用户名"` //nolint:lll
 	Pass     string `json:"pass" v:"required#请输入密码" dc:"用户密码"`
 	Remember bool   `json:"remember" v:"required|boolean#记住账户状态" dc:"是否记住登录（7天）"`
 }
