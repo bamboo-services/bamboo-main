@@ -26,10 +26,44 @@
  * --------------------------------------------------------------------------------
  */
 
-export default function HomeIndex() {
-    return (
-        <div>
-            <h1>HomeIndex</h1>
-        </div>
-    )
-}
+export type InnerLinkDO = {
+    id: number;
+    webmaster_email: string;
+    service_provider: string;
+    site_name: string;
+    site_url: string;
+    site_logo: string;
+    cdn_logo_url: string;
+    site_description: string;
+    site_rss_url: string;
+    has_adv: boolean;
+    desired_location: number;
+    location: number;
+    desired_color: number;
+    color: number;
+    webmaster_remark: string;
+    remark: string;
+    status: number;
+    able_connect: boolean;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+};
+
+export type LinkGetLocationDO = {
+    id: number;
+    sort: number;
+    name: string;
+    display_name: string;
+    description: string;
+    reveal: boolean;
+    created_at: string;
+    updated_at: string;
+    total: number;
+    links: InnerLinkDO[];
+};
+
+export type LinkGetEntity = {
+    locations: LinkGetLocationDO[];
+    location_total: number;
+};

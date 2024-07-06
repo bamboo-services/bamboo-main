@@ -26,10 +26,37 @@
  * --------------------------------------------------------------------------------
  */
 
-export default function HomeHeader() {
+import {AboutHeaderComponent} from "../components/home/about_header.tsx";
+import {Route, Routes} from "react-router-dom";
+import MeAbout from "./me/me_about.tsx";
+import {MeFriends} from "./me/me_friends.tsx";
+
+export default function BaseMe() {
+
     return (
-        <div>
-            <h1>HomeHeader</h1>
-        </div>
-    )
+        <>
+            <div className="w-full h-full fixed bottom-0 left-0 overflow-hidden">
+                <img
+                    src="https://i-cdn.akass.cn/2024/01/659d0941af288.jpg!wp60"
+                    alt=""
+                    className="w-full h-full object-cover blur-lg opacity-40"
+                    draggable={"false"}
+                />
+            </div>
+            <div className={"relative grid grid-cols-12"}>
+                <div className={"col-span-12"}>
+                    <AboutHeaderComponent/>
+                </div>
+                <div className={"col-span-12 p-4 pb-20 md:p-10 w-lvw md:flex md:justify-center"}>
+                    <div className={"md:w-10/12 lg:w-8/12 xl:max-w-screen-xl"}>
+                        <Routes>
+                            <Route path={"about"} element={<MeAbout/>}/>
+                            <Route path={"friends"} element={<MeFriends/>}/>
+                            <Route path={"other"} element={<div>关于我们</div>}/>
+                        </Routes>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
 }

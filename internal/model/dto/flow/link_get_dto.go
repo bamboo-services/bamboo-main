@@ -49,13 +49,16 @@ type LinkGetDTO struct {
 }
 
 type LinkInfoDTO struct {
-	ID              int64       `json:"id"               orm:"id"               ` // 主键
-	WebmasterEmail  string      `json:"webmaster_email"  orm:"webmaster_email"  ` // 站长邮箱
-	ServiceProvider string      `json:"service_provider" orm:"service_provider" ` // 服务提供商
-	SiteName        string      `json:"site_name"        orm:"site_name"        ` // 站点名字
-	SiteURL         string      `json:"site_url"         orm:"site_url"         ` // 站点地址
-	SiteLogo        string      `json:"site_logo"        orm:"site_logo"        ` // 站点 logo
-	CdnLogoURL      string      `json:"cdn_logo_url"     orm:"cdn_logo_url"     ` // 镜像站点 logo
+	//nolint:stylecheck
+	Id              int64  `json:"id"               orm:"id"               ` // 主键
+	WebmasterEmail  string `json:"webmaster_email"  orm:"webmaster_email"  ` // 站长邮箱
+	ServiceProvider string `json:"service_provider" orm:"service_provider" ` // 服务提供商
+	SiteName        string `json:"site_name"        orm:"site_name"        ` // 站点名字
+	//nolint:stylecheck
+	SiteUrl  string `json:"site_url"         orm:"site_url"         ` // 站点地址
+	SiteLogo string `json:"site_logo"        orm:"site_logo"        ` // 站点 logo
+	//nolint:stylecheck
+	CdnLogoUrl      string      `json:"cdn_logo_url"     orm:"cdn_logo_url"     ` // 镜像站点 logo
 	SiteDescription string      `json:"site_description" orm:"site_description" ` // 站点描述
 	HasAdv          bool        `json:"has_adv"          orm:"has_adv"          ` // 是否有广告
 	Color           int64       `json:"color"            orm:"color"            ` // 颜色

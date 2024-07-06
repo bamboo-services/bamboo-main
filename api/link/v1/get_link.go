@@ -50,7 +50,7 @@ type LinkGetReq struct {
 // 获取链接的响应。
 type LinkGetRes struct {
 	g.Meta        `mime:"application/json"`
-	Links         []flow.LinkGetDTO `json:"links" dc:"链接列表"`
+	Links         []flow.LinkGetDTO `json:"locations" dc:"链接列表"`
 	LocationTotal uint64            `json:"location_total" dc:"位置总数"`
 }
 

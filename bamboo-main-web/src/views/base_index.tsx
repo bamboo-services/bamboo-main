@@ -37,47 +37,59 @@ export default function BaseIndex() {
 
     return (
         <>
-            <div style={BackgroundWithIndex} className={"h-screen w-screen grid justify-center items-center"}>
-                <div className={"grid grid-cols-4 gap-3 w-screen px-32"}>
-                    <div className={"col-span-1 flex items-center"}>
-                        <img alt="UserAvatar" className={"rounded-full w-auto h-auto xl:h-64"}
+            <div style={BackgroundWithIndex} className={"h-dvh w-lvw grid"}>
+                <div className={"grid grid-cols-4 gap-8 justify-center items-center px-8 lg:px-32"}>
+                    <div className={"hidden lg:flex col-span-1 items-center"}>
+                        <img alt="UserAvatar" className={"rounded-full size-auto object-cover lg:h-48 xl:h-64"}
                              src={myAvatar}/>
                     </div>
-                    <div className={"col-span-3"}>
+                    <div className={"col-span-4 lg:col-span-3"}>
                         <div className={"text-center grid gap-3"}>
-                            <h1 className="bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 bg-clip-text text-3xl font-extrabold text-transparent sm:text-5xl"
+                            <h1 className="bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl"
                                 style={{textShadow: "1px 1px 4px rgba(38,164,192,0.32)"}}>
                                 凌中的锋雨
                             </h1>
-                            <p className={"mt-4 sm:text-xl/relaxed"}>
+                            <div className={"lg:hidden items-center flex justify-center"}>
+                                <img alt="UserAvatar" className={"rounded-xl w-auto h-32"}
+                                     src={myAvatar}/>
+                            </div>
+                            <p className={"lg:text-xl/relaxed"}>
                                 愿你的人生如璀璨星辰，勇敢梦想，坚韧追寻，发现真我之光。在每个转角，以坚定意志和无尽创意，拥抱挑战，种下希望。遇见激励之人，共成长；面对风雨，保持乐观，让每一步都踏出意义深远的足迹。在追梦途中，听从内心之声，珍惜遇见，让生活不仅是冒险，更是自我发现的诗篇。
                             </p>
-                            <div className={"mt-8 flex flex-wrap justify-center gap-4"}>
-                                <a className={"transition block w-full rounded bg-blue-500 px-12 py-3 text-sm font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring sm:w-auto shadow-xl shadow-blue-500/50"}
+                            <div className={"flex flex-wrap justify-center gap-4 pt-8 md:pt-6 lg:pt-4"}>
+                                <a className={"transition block rounded bg-blue-500 px-12 py-3 text-sm font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring sm:w-auto shadow-xl shadow-blue-500/50"}
                                    onClick={jumpToMyBlog}
                                 >
                                     去我的博客吧
                                 </a>
-                                <Link to={"/about"}
-                                      className={"transition block w-full rounded bg-green-500 px-12 py-3 text-sm font-medium text-white hover:bg-green-600 focus:outline-none focus:ring sm:w-auto shadow-xl shadow-green-500/55"}>
+                                <Link to={"/me/about"}
+                                      className={"transition block rounded bg-green-500 px-12 py-3 text-sm font-medium text-white hover:bg-green-600 focus:outline-none focus:ring sm:w-auto shadow-xl shadow-green-500/55"}>
                                     了解我的更多
                                 </Link>
                             </div>
                         </div>
                     </div>
                 </div>
-                <footer className={"absolute inset-x-0 bottom-0 flex justify-between items-end p-3 text-gray-500"}>
+                <footer
+                    className={"hidden md:flex absolute inset-x-0 bottom-0 justify-between items-end p-3 text-gray-500"}>
                     <div className={"grid"}>
                         <Link to={'/auth/login'}>账户登录</Link>
                         <span>Copyright (C) 2016-2024 筱锋xiao_lfeng. All Rights Reserved.</span>
                     </div>
                     <div className={"grid text-end"}>
-                        <Link to={"https://beian.miit.gov.cn/#/Integrated/index"} target={"_blank"}>粤ICP备 2022014822 号</Link>
-                        <Link to={"https://beian.mps.gov.cn/#/query/webSearch"} target={"_blank"}>粤公网安备 44030702003207 号</Link>
+                        <Link to={"https://beian.miit.gov.cn/#/Integrated/index"} target={"_blank"}>粤ICP备 2022014822
+                            号</Link>
+                        <Link to={"https://beian.mps.gov.cn/#/query/webSearch"} target={"_blank"}>粤公网安备
+                            44030702003207 号</Link>
                     </div>
+                </footer>
+                <footer className={"grid md:hidden text-gray-500 text-center pt-8 absolute inset-x-0 bottom-0 pb-3"}>
+                    <Link to={'/auth/login'}>账户登录</Link>
+                    <Link to={"https://beian.miit.gov.cn/#/Integrated/index"} target={"_blank"}>
+                        粤ICP备 2022014822 号
+                    </Link>
                 </footer>
             </div>
         </>
-    )
-        ;
+    );
 }

@@ -26,10 +26,19 @@
  * --------------------------------------------------------------------------------
  */
 
-export default function BaseAbout() {
+import {CommentOutlined, UserOutlined} from "@ant-design/icons";
+
+export default function MeAbout() {
     return (
-        <>
-            <h1>123</h1>
-        </>
-    );
+        <div className={"grid grid-cols-12 gap-3"}>
+            <div className={"col-span-full text-2xl lg:text-3xl font-bold flex gap-1"}>
+                <UserOutlined/>
+                <span>关于我</span>
+            </div>
+            <div className={"col-span-full text-xl flex gap-1"}>
+                <CommentOutlined />
+                <span>联系方式</span>
+            </div>
+        </div>
+    )
 }

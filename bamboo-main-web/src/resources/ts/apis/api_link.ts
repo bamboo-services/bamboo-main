@@ -30,6 +30,7 @@ import {LinkGetAdminEntity} from "../models/entity/link_get_admin_entity.ts";
 import {BaseApi, GetAuthorizationToken, MethodType} from "../base_api.ts";
 import {BaseResponse} from "../models/base_response.ts";
 import {LocationGetAdminEntity} from "../models/entity/location_get_admin_entity.ts";
+import {LinkGetEntity} from "../models/entity/link_get_entity.ts";
 
 /**
  * GetLinkAPI
@@ -49,14 +50,21 @@ const AdminGetLinkAPI = async (): Promise<BaseResponse<LinkGetAdminEntity> | und
     )
 }
 
-const GetLinkAPI = async (): Promise<BaseResponse<LinkGetAdminEntity> | undefined> => {
-    return BaseApi<LinkGetAdminEntity>(
+/**
+ * GetLinkAPI
+ *
+ * 用于获取所有可见链接，该接口任何用户都可以进行操作获取
+ *
+ * @returns Promise<BaseResponse<LinkGetEntity>
+ */
+const GetLinkAPI = async (): Promise<BaseResponse<LinkGetEntity> | undefined> => {
+    return BaseApi<LinkGetEntity>(
         MethodType.GET,
         "/api/v1/link",
         null,
         null,
         null,
-        {"Authorization": GetAuthorizationToken()}
+        null
     )
 }
 

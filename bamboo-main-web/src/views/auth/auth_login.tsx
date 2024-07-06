@@ -74,7 +74,7 @@ export default function AuthLogin() {
         <div className={"grid w-screen h-dvh items-center justify-center bg-gray-100"}>
             <div className={"grid gap-1 mx-3"}>
                 <div className={"text-center"}>
-                    <h1 className={"text-2xl font-bold text-indigo-600 sm:text-3xl"}>凌中的锋雨</h1>
+                    <h1 className={"text-2xl font-bold text-emerald-600 sm:text-3xl"}>凌中的锋雨</h1>
                     <p className={"mx-auto mt-4 max-w-md text-gray-500"}>
                         一个人的价值，在于他贡献什么，而不是他能取得什么。不要渴望成为一个成功的人，而是应该努力做一个有价值的人。
                     </p>
@@ -114,13 +114,12 @@ export default function AuthLogin() {
                                 &#8203;
                                 <input
                                     type="checkbox"
-                                    className="size-4 rounded border-gray-300 transition"
+                                    className="size-4 rounded border-emerald-300 text-emerald-500 ring ring-emerald-300 emer400 transition"
                                     onChange={e => {
                                         loginForm.remember = e.target.checked;
                                     }}
                                 />
                             </div>
-
                             <div>
                                 <strong className="font-medium text-gray-900">记住我 <span
                                     className={"text-gray-400"}>(7日免登录)</span></strong>
@@ -130,7 +129,7 @@ export default function AuthLogin() {
                     <div className={"w-full flex justify-center pt-4"}>
                         <button
                             type="submit"
-                            className="block rounded-lg bg-indigo-600 px-12 py-2 text-sm font-medium text-white">
+                            className="block rounded-lg bg-emerald-500 hover:bg-emerald-600 px-12 py-2 text-sm font-medium text-white">
                             登录
                         </button>
                     </div>

@@ -28,6 +28,9 @@ func (c *ControllerV1) LinkGetAdmin(ctx context.Context, req *v1.LinkGetAdminReq
 	}
 	// 获取链接
 	link, total, err := service.Link().GetLinkAdmin(ctx)
+	if err != nil {
+		return nil, err
+	}
 	return &v1.LinkGetAdminRes{
 		Links: link,
 		Total: total,
