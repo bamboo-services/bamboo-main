@@ -35,6 +35,8 @@ import { message } from "antd";
 import {UserCurrentEntity} from "../resources/ts/models/entity/user_current_entity.ts";
 import {AdminLink} from "./admin/admin_link.tsx";
 import {AdminLinkEdit} from "./admin/admin_link_edit.tsx";
+import {AdminLinkLocation} from "./admin/admin_link_location.tsx";
+import {AdminSetting} from "./admin/admin_setting.tsx";
 
 export function BaseAdmin() {
     const [userCurrent, setUserInfo] = useState({} as UserCurrentEntity);
@@ -66,6 +68,8 @@ export function BaseAdmin() {
                     <Route path={"dashboard"} element={<AdminDashboard/>}/>
                     <Route path={"link"} element={<AdminLink/>}/>
                     <Route path={"link/edit/:id"} element={<AdminLinkEdit/>}/>
+                    <Route path={"link/location"} element={<AdminLinkLocation/>}/>
+                    <Route path={"setting"} element={<AdminSetting/>}/>
                 </Routes>
             </div>
             <div className={"block md:hidden col-span-12"}>

@@ -28,21 +28,39 @@
 
 package v1
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+)
 
-// LinkLocationAddReq 添加位置(板块)请求参数
-// 添加位置(板块)
-type LinkLocationAddReq struct {
-	g.Meta      `path:"/link/add/location" method:"post" tags:"链接控制器" summary:"添加位置(板块)"`
-	Name        string `json:"name" v:"required|length:1,40|^[0-9a-zA-Z]+$#请输入位置名称|位置名称长度为 1 到 40 位|位置名称只允许输入'0-9','a-z','A-Z'" dc:"位置名称"`
-	DisplayName string `json:"display_name" v:"required|length:3,40#请输入位置显示名称|位置显示名称长度为 3 到 40 位" dc:"位置显示名称"`
-	Description string `json:"description" v:"required#位置描述不能为空" dc:"位置描述"`
-	Reveal      bool   `json:"reveal" v:"required|boolean#请选择是否显示位置|是否显示位置值不合法" dc:"是否显示位置"`
-	Sort        int    `json:"sort" v:"required|integer#请输入排序值|排序值不合法" dc:"排序值"`
+// EditLocationReq
+//
+// # 编辑位置
+//
+// 编辑位置(板块)信息。
+//
+// # 参数
+//   - ID: 位置ID
+//   - Sort: 排序
+//   - Name: 名称
+//   - DisplayName: 显示名称
+//   - Description: 描述
+//   - Reveal: 是否显示
+type EditLocationReq struct {
+	g.Meta      `path:"/link/location" method:"Put" tags:"链接控制器" summary:"编辑位置(板块)信息"`
+	ID          int64  `json:"id" v:"required|regex:^[0-9]+$#请输入ID|ID为数字" dc:"ID"`
+	Sort        int64  `json:"sort" v:"required|regex:^[0-9]+$#请输入排序|排序为数字" dc:"排序"`
+	Name        string `json:"name" v:"required|length:1,40|regex:^[0-9A-Za-z]+$#请输入名称|名称长度为:1-40位|名称只允许0-9,A-Z,a-z" dc:"名称"` //nolint:lll
+	DisplayName string `json:"display_name" v:"required|length:3,40#请输入显示名称|显示名称长度为:3-40位" dc:"显示名称"`
+	Description string `json:"description" v:"required#请输入描述" dc:"描述"`
+	Reveal      bool   `json:"reveal" v:"required|boolean#请输入是否显示|是否显示为布尔值" dc:"是否显示"`
+	UserToken   string `json:"Authorization" in:"header"`
 }
 
-// LinkLocationAddRes 添加位置(板块)响应参数
-// 添加位置(板块)
-type LinkLocationAddRes struct {
+// EditLocationRes
+//
+// # 编辑位置返回
+//
+// 编辑位置(板块)信息返回。
+type EditLocationRes struct {
 	g.Meta `mime:"application/json"`
 }

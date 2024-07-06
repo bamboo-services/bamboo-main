@@ -29,7 +29,7 @@
 import {LinkGetAdminEntity} from "../models/entity/link_get_admin_entity.ts";
 import {BaseApi, GetAuthorizationToken, MethodType} from "../base_api.ts";
 import {BaseResponse} from "../models/base_response.ts";
-import {LocationGetAdminEntity} from "../models/entity/location_get_admin_entity.ts";
+import {LocationDO, LocationGetAdminEntity} from "../models/entity/location_get_admin_entity.ts";
 import {LinkGetEntity} from "../models/entity/link_get_entity.ts";
 
 /**
@@ -86,4 +86,15 @@ const AdminGetLocationAPI = async (): Promise<BaseResponse<LocationGetAdminEntit
     )
 }
 
-export {AdminGetLinkAPI, GetLinkAPI, AdminGetLocationAPI};
+const AdminEditLocationAPI = async (data: LocationDO): Promise<BaseResponse<null> | undefined> => {
+    return BaseApi<null>(
+        MethodType.PUT,
+        "/api/v1/link/location",
+        data,
+        null,
+        null,
+        {"Authorization": GetAuthorizationToken()}
+    )
+}
+
+export {AdminGetLinkAPI, GetLinkAPI, AdminGetLocationAPI, AdminEditLocationAPI};

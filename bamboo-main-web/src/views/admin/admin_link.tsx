@@ -122,8 +122,8 @@ export function AdminLink() {
                 return (
                     <tr key={link.id} className="odd:bg-gray-50">
                         <td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">{link.site_name}</td>
-                        <td className="whitespace-nowrap px-4 py-2 text-gray-700">{link.webmaster_email}</td>
-                        <td className="whitespace-nowrap px-4 py-2 text-gray-700 hidden md:block">{link.site_url}</td>
+                        <td className="whitespace-nowrap px-4 py-2 text-gray-700 hidden md:block">{link.webmaster_email}</td>
+                        <td className="whitespace-nowrap px-4 py-2 text-gray-700">{link.site_url}</td>
                         <td className="whitespace-nowrap px-4 py-2 text-gray-700">
                             <Link to={`/admin/link/edit/${link.id}`} className={"px-2 py-1 bg-red-400 rounded-lg text-white"}>编辑</Link>
                         </td>
@@ -160,8 +160,8 @@ export function AdminLink() {
 
     return (
         <div className={"grid grid-cols-12 gap-6"}>
-            <div className={"col-span-12 text-xl font-bold"}>友链管理</div>
-            <div className={"col-span-12 lg:hidden"}>
+            <div className={"col-span-full text-xl font-bold"}>友链管理</div>
+            <div className={"col-span-full lg:hidden"}>
                 <div
                     className="transition block bg-white rounded-lg p-4 shadow-sm shadow-indigo-100 hover:scale-105 text-center">
                     213

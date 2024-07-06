@@ -88,14 +88,26 @@ export function AdminSideMenuComponent(userCurrent: UserCurrentEntity) {
                                 <ul className="mt-2 space-y-1 px-4">
                                     <li>
                                         <Link to={"/admin/link"}
-                                           className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${SelectColorForDesk("/admin/link")}`}>
+                                              className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${SelectColorForDesk("/admin/link")}`}>
                                             管理友链
                                         </Link>
                                     </li>
                                     <li>
                                         <Link to={"/admin/link/add"}
-                                           className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${SelectColorForDesk("/admin/link/add")}`}>
+                                              className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${SelectColorForDesk("/admin/link/add")}`}>
                                             添加友链
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link to={"/admin/link/location"}
+                                              className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${SelectColorForDesk("/admin/link/location")}`}>
+                                            位置管理
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link to={"/admin/link/color"}
+                                              className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${SelectColorForDesk("/admin/link/color")}`}>
+                                             颜色管理
                                         </Link>
                                     </li>
                                 </ul>
