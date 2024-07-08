@@ -26,50 +26,27 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BaseApi, GetAuthorizationToken, MethodType} from "../base_api.ts";
-import {AuthLoginDTO} from "../models/dto/auth_login.ts";
+import {BaseApi, MethodType} from "../base_api.ts";
+import {MailSendDTO} from "../models/dto/mail_send.ts";
 import {BaseResponse} from "../models/base_response.ts";
-import {AuthLoginEntity} from "../models/entity/auth_login_entity.ts";
-import {AuthChangePasswordDTO} from "../models/dto/auth_change_password.ts";
 
 /**
- * UserLogin
+ * MailSendAPI
  *
- * 用户登录, 用于操作管理员用户的登录操作
+ * 邮件发送 API, 用于发送邮件
  *
- * @param bodyData 请求体数据
- * @returns Promise<BaseResponse<AuthLoginEntity>>
+ * @param data 邮件发送数据传输对象
+ * @returns Promise<BaseResponse<null>| undefined>
  */
-const UserLoginAPI = async (
-    bodyData: AuthLoginDTO
-): Promise<BaseResponse<AuthLoginEntity> | undefined> => {
-    return BaseApi<AuthLoginEntity>(
+const MailSendAPI = async (data: MailSendDTO): Promise<BaseResponse<null>| undefined> => {
+    return BaseApi<null>(
         MethodType.POST,
-        "/api/v1/user/login",
-        bodyData,
-        null,
-        null,
-        null
-    )
-}
-
-/**
- * UserChangePasswordAPI
- *
- * 用户修改密码, 用于操作管理员用户的修改密码操作
- *
- * @param data 请求体数据
- * @returns Promise<BaseResponse<null>>
- */
-const UserChangePasswordAPI = async (data: AuthChangePasswordDTO): Promise<BaseResponse<null> | undefined> => {
-    return BaseApi(
-        MethodType.PUT,
-        "/api/v1/user/change-password",
+        "/api/v1/mail/send",
         data,
         null,
         null,
-        {"Authorization": GetAuthorizationToken()}
+        null
     );
 }
 
-export {UserLoginAPI, UserChangePasswordAPI};
+export {MailSendAPI}
