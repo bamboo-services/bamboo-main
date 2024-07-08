@@ -105,3 +105,56 @@ func (s *sLink) EditLink(ctx context.Context, data v1.LinkEditReq) (err error) {
 	}
 	return nil
 }
+
+// AddLinkAdmin
+//
+// # 添加链接
+//
+// 添加链接, 由管理员直接进行操作；添加的链接可以直接在用户界面进行查看，若创建出现错误则会抛出错误，否则将会返回 nil
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - data: 用户的请求，包含添加链接的详细信息。
+//
+// # 返回
+//   - error: 在添加链接过程中发生的任何错误。
+func (s *sLink) AddLinkAdmin(ctx context.Context, data v1.LinkAddAdminReq) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] Link:AddLinkAdmin | 添加链接")
+	// 对数据进行获取，检查位置，颜色以及所填写信息是否已存在
+	if data.Location == 0 {
+		return berror.NewError(bcode.OperationFailed, "位置不能为空")
+	}
+	// 检查数据是已存在
+	count, err := dao.LinkList.Ctx(ctx).
+		Where(do.LinkList{SiteName: data.SiteName}).
+		WhereOr(do.LinkList{SiteUrl: data.SiteURL}).
+		Count()
+	if err != nil {
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
+	}
+	if count > 0 {
+		return berror.NewError(bcode.OperationFailed, "链接已存在")
+	}
+	// 插入数据
+	_, err = dao.LinkList.Ctx(ctx).Data(do.LinkList{
+		WebmasterEmail:  data.WebmasterEmail,
+		ServiceProvider: data.ServiceProvider,
+		SiteName:        data.SiteName,
+		SiteUrl:         data.SiteURL,
+		SiteLogo:        data.SiteLogo,
+		SiteDescription: data.SiteDescription,
+		SiteRssUrl:      data.SiteRssURL,
+		HasAdv:          data.HasAdv,
+		DesiredLocation: data.Location,
+		Location:        data.Location,
+		DesiredColor:    data.Color,
+		Color:           data.Color,
+		Remark:          data.Remark,
+		Status:          1,
+		AbleConnect:     true,
+	}).Insert()
+	if err != nil {
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
+	}
+	return nil
+}

@@ -34,6 +34,8 @@ import {InnerLinkDTO, LinkGetEntity} from "../models/entity/link_get_entity.ts";
 import {LocationDeleteDTO} from "../models/dto/location_delete.ts";
 import {LocationAddDTO} from "../models/dto/location_add.ts";
 import {ColorsEntity} from "../models/entity/color_get_entity.ts";
+import {LinkAddDTO} from "../models/dto/link_add.ts";
+import {LinkAddAdminDTO} from "../models/dto/link_add_admin.ts";
 
 /**
  * GetLinkAPI
@@ -107,7 +109,44 @@ const EditLinkAPI = async (data: InnerLinkDTO): Promise<BaseResponse<null> | und
         null,
         {"Authorization": GetAuthorizationToken()}
     );
+}
 
+/**
+ * AddLinkAPI
+ *
+ * 用于添加链接信息，该接口只有管理员可以进行操作，其他用户不应该通过该接口进行数据的获取操作
+ *
+ * @param data LinkAddDTO
+ * @returns Promise<BaseResponse<null>>
+ */
+const AddLinkAPI = async (data: LinkAddAdminDTO): Promise<BaseResponse<null> | undefined> => {
+    return BaseApi<null>(
+        MethodType.POST,
+        "/api/v1/link/admin",
+        data,
+        null,
+        null,
+        {"Authorization": GetAuthorizationToken()}
+    );
+}
+
+/**
+ * AddLinkCustomAPI
+ *
+ * 用于添加自定义链接信息，该接口为用户端接口，不需要进行权限验证
+ *
+ * @param data LinkAddDTO
+ * @returns Promise<BaseResponse<number>>
+ */
+const AddLinkCustomAPI = async (data: LinkAddDTO): Promise<BaseResponse<number> | undefined> => {
+    return BaseApi<number>(
+        MethodType.POST,
+        "/api/v1/link/custom",
+        data,
+        null,
+        null,
+        null
+    );
 }
 
 /**
@@ -208,6 +247,8 @@ export {
     GetLinkAPI,
     GetSingleLinkAPI,
     EditLinkAPI,
+    AddLinkAPI,
+    AddLinkCustomAPI,
     AdminGetLocationAPI,
     AdminEditLocationAPI,
     AdminDelLocationAPI,

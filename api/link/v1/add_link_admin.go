@@ -30,6 +30,24 @@ package v1
 
 import "github.com/gogf/gf/v2/frame/g"
 
+// LinkAddAdminReq
+//
+// # 添加链接
+//
+// 添加链接, 需要用户提供链接的详细信息。用于管理员直接添加链接，无需审核。
+//
+// # 参数
+//   - WebmasterEmail: 站长邮箱
+//   - ServiceProvider: 服务商
+//   - SiteName: 站点名称
+//   - SiteURL: 站点URL
+//   - SiteLogo: 站点Logo
+//   - SiteDescription: 站点描述
+//   - SiteRssURL: 站点RSS URL
+//   - Location: 所在位置
+//   - Color: 展示颜色
+//   - HasAdv: 是否有广告
+//   - Remark: 备注
 type LinkAddAdminReq struct {
 	g.Meta          `path:"/link/admin" method:"Post" tags:"链接控制器" summary:"管理员添加友链"`
 	WebmasterEmail  string `json:"webmaster_email" dc:"站长邮箱"`
@@ -39,11 +57,17 @@ type LinkAddAdminReq struct {
 	SiteLogo        string `json:"site_logo" v:"required|url#请输入站点Logo|站点Logo格式不正确" dc:"站点Logo"`
 	SiteDescription string `json:"site_description" v:"required#请输入站点描述" dc:"站点描述"`
 	SiteRssURL      string `json:"site_rss_url" v:"url#站点RSS格式不正确" dc:"站点RSS URL"`
-	Location        string `json:"location" v:"required#请输入所在位置" dc:"期望位置"`
-	Color           string `json:"color" v:"required#请输入展示颜色" dc:"期望颜色"`
+	Location        int64  `json:"location" v:"required#请输入所在位置" dc:"期望位置"`
+	Color           *int64 `json:"color" v:"required#请输入展示颜色" dc:"期望颜色"`
 	HasAdv          bool   `json:"has_adv" v:"required#请输入是否有广告" dc:"是否有广告"`
-	Remark          string `json:"remark" v:"required#请输入备注" dc:"备注"`
+	Remark          string `json:"remark" v:"max-length:1024#最大长度为 1024 个字符" dc:"备注"`
 }
 
+// LinkAddAdminRes
+//
+// # 添加链接
+//
+// 添加链接的响应。
 type LinkAddAdminRes struct {
+	g.Meta `mime:"application/json"`
 }

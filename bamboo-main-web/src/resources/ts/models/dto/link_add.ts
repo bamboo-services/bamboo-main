@@ -26,41 +26,33 @@
  * --------------------------------------------------------------------------------
  */
 
-package link
-
-import (
-	"context"
-	"github.com/gogf/gf/v2/frame/g"
-	"xiaoMain/internal/service"
-
-	"xiaoMain/api/link/v1"
-)
-
-// LinkAddAdmin
-//
-// # 添加链接
-//
-// 添加链接, 需要用户提供链接的详细信息。用于管理员直接添加链接，无需审核。
-//
-// # 参数
-//   - ctx: 请求的上下文，用于管理超时和取消信号。
-//   - req: 用户的请求，包含添加链接的详细信息。
-//
-// # 返回
-//   - res: 发送给用户的响应。如果添加链接成功，它将返回成功的消息。
-//   - err: 在添加链接过程中发生的任何错误。
-func (c *ControllerV1) LinkAddAdmin(ctx context.Context, req *v1.LinkAddAdminReq) (res *v1.LinkAddAdminRes, err error) {
-	g.Log().Notice(ctx, "[CONTRO] LinkAddAdmin | 添加链接")
-	// 权限鉴定
-	err = service.Auth().IsUserLogin(ctx)
-	if err != nil {
-		return nil, err
-	}
-	// 数据插入
-	err = service.Link().AddLinkAdmin(ctx, *req)
-	if err != nil {
-		return nil, err
-	} else {
-		return nil, nil
-	}
+/**
+ * LinkAddDTO
+ *
+ * 用于添加链接的数据传输对象
+ *
+ * @param webmaster_email 网站管理员的邮箱地址
+ * @param service_provider 服务提供商
+ * @param site_name 网站名称
+ * @param site_url 网站地址
+ * @param site_logo 网站 Logo 地址
+ * @param site_description 网站描述
+ * @param site_rss_url 网站 RSS 地址
+ * @param desired_location 期望的位置
+ * @param desired_color 期望的颜色
+ * @param has_adv 是否有广告
+ * @param remark 备注
+ */
+export type LinkAddDTO = {
+    webmaster_email: string,
+    service_provider: string,
+    site_name: string,
+    site_url: string,
+    site_logo: string,
+    site_description: string,
+    site_rss_url: string,
+    desired_location: number,
+    desired_color: number,
+    has_adv: boolean,
+    remark: string
 }
