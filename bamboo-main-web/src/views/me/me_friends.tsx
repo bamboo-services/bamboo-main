@@ -63,7 +63,7 @@ export function MeFriends() {
                         getImage = linkElement.cdn_logo_url;
                     }
                     locationLinks.push(
-                        <Link to={linkElement.site_url} target={"_blank"}
+                        <Link to={linkElement.site_url} target={"_blank"} key={linkElement.id}
                               className={"transition rounded-lg bg-white shadow-md shadow-white hover:scale-105 grid gap-1 text-center justify-center p-3"}>
                             <div className={"flex justify-center"}>
                                 <img src={getImage} alt={""}
@@ -77,7 +77,7 @@ export function MeFriends() {
                 }
                 // 对链接内容进行插入
                 locationWeb.push(
-                    <>
+                    <div className={"grid gap-3"} key={locationElement.id}>
                         <div className={"grid"}>
                             <div className={"flex gap-1"}>
                                 <LinkOutlined />
@@ -88,19 +88,19 @@ export function MeFriends() {
                         <div className={"grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-8"}>
                             {locationLinks}
                         </div>
-                    </>
+                    </div>
                 );
             }
             setWebReveal(locationWeb);
         } catch (err) {
-            console.log(err);
+            console.log();
         }
     }, [getLink]);
 
     document.title = "竹叶 - 友人帐"
 
     return (
-        <div className={"grid gap-3 md:rounded-lg md:bg-white md:bg-opacity-50 md:p-6 md:shadow-xl"}>
+        <div className={"grid md:rounded-lg md:bg-white md:bg-opacity-50 md:p-6 md:shadow-xl"}>
             {webReveal}
         </div>
     );

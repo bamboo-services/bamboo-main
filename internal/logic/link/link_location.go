@@ -75,3 +75,94 @@ func (s *sLink) EditLocation(ctx context.Context, req v1.EditLocationReq) (err e
 	}
 	return nil
 }
+
+func (s *sLink) LocationMove(ctx context.Context, id, moveID int64) (err error) {
+	// 检查原有 id 是否存在
+	var getOriginalLocation *entity.Location
+	err = dao.Location.Ctx(ctx).Where(do.Location{Id: id}).Scan(&getOriginalLocation)
+	if err != nil {
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
+	}
+	if getOriginalLocation == nil {
+		return berror.NewError(bcode.NotExist, "原有链接不存在")
+	}
+	// 根据原有 id 获取所有匹配的友链
+	var links []entity.LinkList
+	err = dao.LinkList.Ctx(ctx).Where(do.LinkList{Location: id}).Scan(&links)
+	if err != nil {
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
+	}
+	// 检查修改后的链接是否存在
+	if moveID != 0 {
+		count, err := dao.Location.Ctx(ctx).Where(do.Location{Id: moveID}).Count()
+		if err != nil {
+			return berror.NewErrorHasError(bcode.ServerInternalError, err)
+		}
+		if count > 0 {
+			// 检查链接是否不为空
+			if len(links) > 0 {
+				for _, link := range links {
+					// 对链接进行操作切换 LocationID 位置
+					link.Location = moveID
+					_, err := dao.LinkList.Ctx(ctx).Data(link).Where(do.LinkList{Id: link.Id}).Update()
+					if err != nil {
+						return berror.NewErrorHasError(bcode.ServerInternalError, err)
+					}
+				}
+			}
+		} else {
+			return berror.NewError(bcode.NotExist, "链接不存在")
+		}
+	} else {
+		// 获取优先级最高
+		var getLastLocation []entity.Location
+		err := dao.Location.Ctx(ctx).OrderAsc(dao.Location.Columns().Sort).Limit(2).Scan(&getLastLocation)
+		if err != nil {
+			return berror.NewErrorHasError(bcode.ServerInternalError, err)
+		}
+		if len(getLastLocation) == 1 {
+			return berror.NewError(bcode.OperationFailed, "当前仅有一个位置，不可删除")
+		}
+		// 检查链接是否不为空
+		if len(links) > 0 {
+			for _, link := range links {
+				// 对链接进行操作切换 LocationID 位置
+				link.Location = moveID
+				var err error
+				if getLastLocation[0].Id == id {
+					_, err = dao.LinkList.Ctx(ctx).Data(link).Where(do.LinkList{
+						Id:              getLastLocation[1].Id,
+						DesiredLocation: getLastLocation[1].Id,
+					}).Update()
+				} else {
+					_, err = dao.LinkList.Ctx(ctx).Data(link).Where(do.LinkList{
+						Id:              getLastLocation[0].Id,
+						DesiredLocation: getLastLocation[0].Id,
+					}).Update()
+				}
+				if err != nil {
+					return berror.NewErrorHasError(bcode.ServerInternalError, err)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (s *sLink) DelLocation(ctx context.Context, id int64) (err error) {
+	// 检查原有 id 是否存在
+	var getOriginalLocation *entity.Location
+	err = dao.Location.Ctx(ctx).Where(do.Location{Id: id}).Scan(&getOriginalLocation)
+	if err != nil {
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
+	}
+	if getOriginalLocation == nil {
+		return berror.NewError(bcode.NotExist, "原有链接不存在")
+	}
+	// 对 id 进行删除
+	_, err = dao.Location.Ctx(ctx).Where(do.Location{Id: getOriginalLocation.Id}).Delete()
+	if err != nil {
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
+	}
+	return nil
+}

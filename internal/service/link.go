@@ -147,6 +147,8 @@ type (
 		//   - err: 如果位置存在，返回错误；否则返回 nil.
 		IsLocationExist(ctx context.Context, name string) (err error)
 		EditLocation(ctx context.Context, req v1.EditLocationReq) (err error)
+		LocationMove(ctx context.Context, id, moveID int64) (err error)
+		DelLocation(ctx context.Context, id int64) (err error)
 		// GetLinkByID
 		//
 		// # 通过 ID 获取链接

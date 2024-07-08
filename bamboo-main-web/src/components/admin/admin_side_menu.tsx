@@ -61,9 +61,9 @@ export function AdminSideMenuComponent(userCurrent: UserCurrentEntity) {
             {/* 电脑菜单样式 */}
             <div className="hidden md:flex h-screen flex-col justify-between border-e bg-white fixed left-0 top-0 w-[200px] lg:w-[250px]">
                 <div className="px-4 py-6">
-                    <span className="grid h-10 w-32 place-content-center rounded-lg bg-gray-100 text-xs text-gray-600">
+                    <Link to={"/"} className="grid h-10 place-content-center rounded-lg bg-gray-100 text-xs text-gray-600">
                       Logo
-                    </span>
+                    </Link>
                     <ul className="mt-6 space-y-1">
                         <li>
                             <Link to={"/admin/dashboard"}

@@ -26,23 +26,15 @@
  * --------------------------------------------------------------------------------
  */
 
-package v1
-
-import "github.com/gogf/gf/v2/frame/g"
-
-// LinkLocationAddReq 添加位置(板块)请求参数
-// 添加位置(板块)
-type LinkLocationAddReq struct {
-	g.Meta      `path:"/link/add/location" method:"post" tags:"链接控制器" summary:"添加位置(板块)"`
-	Name        string `json:"name" v:"required|length:1,40|regex:^[0-9a-zA-Z]+$#请输入位置名称|位置名称长度为 1 到 40 位|位置名称只允许输入'0-9','a-z','A-Z'" dc:"位置名称"` //nolint:lll
-	DisplayName string `json:"display_name" v:"required|length:3,40#请输入位置显示名称|位置显示名称长度为 3 到 40 位" dc:"位置显示名称"`
-	Description string `json:"description" v:"required#位置描述不能为空" dc:"位置描述"`
-	Reveal      bool   `json:"reveal" v:"required|boolean#请选择是否显示位置|是否显示位置值不合法" dc:"是否显示位置"`
-	Sort        int    `json:"sort" v:"required|integer#请输入排序值|排序值不合法" dc:"排序值"`
-}
-
-// LinkLocationAddRes 添加位置(板块)响应参数
-// 添加位置(板块)
-type LinkLocationAddRes struct {
-	g.Meta `mime:"application/json"`
+/**
+ * LocationDelete
+ *
+ * 位置删除的接口
+ *
+ * @param id 目标删除的接口
+ * @param move_id 目标删除后转移的链接
+ */
+export type LocationDeleteDTO = {
+    id: number,
+    move_id: number
 }

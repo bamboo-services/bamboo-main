@@ -150,7 +150,7 @@ func (s *sLink) GetLocation(ctx context.Context) (getLocation []*entity.Location
 //   - err: 如果获取所有位置信息成功，返回 nil；否则返回错误.其中错误的返回信息在此函数中主要包含内容为数据库错误。
 func (s *sLink) GetLocationNoReveal(ctx context.Context) (getLocation []*entity.Location, err error) {
 	g.Log().Notice(ctx, "[LOGIC] Link:GetLocationNoReveal | 获取所有位置信息")
-	err = dao.Location.Ctx(ctx).Scan(&getLocation)
+	err = dao.Location.Ctx(ctx).OrderAsc(dao.Location.Columns().Sort).Scan(&getLocation)
 	if err != nil {
 		g.Log().Error(ctx, "[LOGIC] 数据库错误<获取期望位置失败>")
 		return nil, berror.NewErrorHasError(bcode.ServerInternalError, err)

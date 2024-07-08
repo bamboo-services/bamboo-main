@@ -19,6 +19,7 @@ type ILinkV1 interface {
 	CheckLinkIDHasConnect(ctx context.Context, req *v1.CheckLinkIDHasConnectReq) (res *v1.CheckLinkIDHasConnectRes, err error)
 	CheckLogoURLHasConnect(ctx context.Context, req *v1.CheckLogoURLHasConnectReq) (res *v1.CheckLogoURLHasConnectRes, err error)
 	CheckRssURLHasConnect(ctx context.Context, req *v1.CheckRssURLHasConnectReq) (res *v1.CheckRssURLHasConnectRes, err error)
+	DelLocation(ctx context.Context, req *v1.DelLocationReq) (res *v1.DelLocationRes, err error)
 	EditLocation(ctx context.Context, req *v1.EditLocationReq) (res *v1.EditLocationRes, err error)
 	LinkGetColor(ctx context.Context, req *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error)
 	LinkGetColorFull(ctx context.Context, req *v1.LinkGetColorFullReq) (res *v1.LinkGetColorFullRes, err error)

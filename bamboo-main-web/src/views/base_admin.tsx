@@ -41,6 +41,7 @@ import {AdminSetting} from "./admin/admin_setting.tsx";
 export function BaseAdmin() {
     const [userCurrent, setUserInfo] = useState({} as UserCurrentEntity);
     const navigation = useNavigate();
+
     useEffect(() => {
         InfoUserAPI().then(async (getRes) => {
             if (getRes) {
@@ -56,7 +57,7 @@ export function BaseAdmin() {
                 }
             }
         })
-    }, []);
+    }, [navigation]);
 
     return (
         <div className={"grid grid-cols-12 bg-gray-100/75"}>

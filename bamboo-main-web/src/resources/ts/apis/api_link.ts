@@ -31,6 +31,8 @@ import {BaseApi, GetAuthorizationToken, MethodType} from "../base_api.ts";
 import {BaseResponse} from "../models/base_response.ts";
 import {LocationDO, LocationGetAdminEntity} from "../models/entity/location_get_admin_entity.ts";
 import {LinkGetEntity} from "../models/entity/link_get_entity.ts";
+import {LocationDeleteDTO} from "../models/dto/location_delete.ts";
+import {LocationAddDTO} from "../models/dto/location_add.ts";
 
 /**
  * GetLinkAPI
@@ -86,6 +88,14 @@ const AdminGetLocationAPI = async (): Promise<BaseResponse<LocationGetAdminEntit
     )
 }
 
+/**
+ * AdminEditLocationAPI
+ *
+ * 用于编辑位置信息, 该接口只有管理员可以进行操作，其他用户不应该通过该接口进行数据的获取操作
+ *
+ * @param data LocationDO
+ * @returns Promise<BaseResponse<null>>
+ */
 const AdminEditLocationAPI = async (data: LocationDO): Promise<BaseResponse<null> | undefined> => {
     return BaseApi<null>(
         MethodType.PUT,
@@ -97,4 +107,48 @@ const AdminEditLocationAPI = async (data: LocationDO): Promise<BaseResponse<null
     )
 }
 
-export {AdminGetLinkAPI, GetLinkAPI, AdminGetLocationAPI, AdminEditLocationAPI};
+/**
+ * AdminDelLocationAPI
+ *
+ * 用于删除位置信息, 该接口只有管理员可以进行操作，其他用户不应该通过该接口进行数据的获取操作
+ *
+ * @param data LocationDeleteDTO
+ * @returns Promise<BaseResponse<null>>
+ */
+const AdminDelLocationAPI = async (data: LocationDeleteDTO): Promise<BaseResponse<null> | undefined> => {
+    return BaseApi<null>(
+        MethodType.DELETE,
+        "/api/v1/link/location",
+        null,
+        data,
+        null,
+        {"Authorization": GetAuthorizationToken()}
+    );
+}
+
+/**
+ * AdminAddLocationAPI
+ *
+ * 用于添加位置信息, 该接口只有管理员可以进行操作，其他用户不应该通过该接口进行数据的获取操作
+ * @param data LocationAddDTO
+ * @returns Promise<BaseResponse<null>>
+ */
+const AdminAddLocationAPI = async (data: LocationAddDTO): Promise<BaseResponse<null> | undefined> => {
+    return BaseApi<null>(
+        MethodType.POST,
+        "/api/v1/link/add/location",
+        data,
+        null,
+        null,
+        {"Authorization": GetAuthorizationToken()}
+    );
+}
+
+export {
+    AdminGetLinkAPI,
+    GetLinkAPI,
+    AdminGetLocationAPI,
+    AdminEditLocationAPI,
+    AdminDelLocationAPI,
+    AdminAddLocationAPI
+};
