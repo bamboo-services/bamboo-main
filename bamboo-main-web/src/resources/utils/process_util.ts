@@ -26,44 +26,33 @@
  * --------------------------------------------------------------------------------
  */
 
-export type InnerLinkDTO = {
-    id: number;
-    webmaster_email: string;
-    service_provider: string;
-    site_name: string;
-    site_url: string;
-    site_logo: string;
-    cdn_logo_url: string;
-    site_description: string;
-    site_rss_url: string;
-    has_adv: boolean;
-    desired_location: number;
-    location: number;
-    desired_color: number;
-    color: number;
-    webmaster_remark: string;
-    remark: string;
-    status: number;
-    able_connect: boolean;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
-};
+import React from "react";
 
-export type LinkGetLocationDO = {
-    id: number;
-    sort: number;
-    name: string;
-    display_name: string;
-    description: string;
-    reveal: boolean;
-    created_at: string;
-    updated_at: string;
-    total: number;
-    links: InnerLinkDTO[];
-};
+export class Util {
+    /**
+     * TwoUrlSelectNoEmpty
+     *
+     * 在两个连接中，选择一个有的链接进行返回，若存入的两个链接都存在，则返回 {@link target} 的内容；
+     * 若 {@link target} 不存在，则默认返回 source 的内容（即使 source 的内容为空）；
+     *
+     * @param source 源地址
+     * @param target 目标地址
+     * @returns string 返回存在的地址
+     */
+    public static TwoUrlSelectNoEmpty(source: string, target: string): string {
+        if (source === '' || source == undefined) {
+            return target;
+        } else {
+            return source;
+        }
+    }
 
-export type LinkGetEntity = {
-    locations: LinkGetLocationDO[];
-    location_total: number;
-};
+    // Util 类中的 handleInputChange 方法
+    public static handleInputChange<T>(getData: T, event: React.ChangeEvent<any>): T {
+        const {id, value, type, checked} = event.target;
+        // 对于复选框，使用 checked 属性；对于其他输入，使用 value 属性
+        const updatedValue = type === "checkbox" ? checked : value;
+        // 返回一个新的状态对象，其中只更新了触发更改的字段
+        return {...getData, [id]: updatedValue};
+    }
+}

@@ -38,6 +38,7 @@ import {LocationDO, LocationGetAdminEntity} from "../../resources/ts/models/enti
 import {LocationDeleteDTO} from "../../resources/ts/models/dto/location_delete.ts";
 import {CheckCircleOutlined, CloseCircleOutlined} from "@ant-design/icons";
 import {LocationAddDTO} from "../../resources/ts/models/dto/location_add.ts";
+import {Util} from "../../resources/utils/process_util.ts";
 
 export function AdminLinkLocation() {
     const [locationInfo, setLocationInfo] = useState({} as LocationGetAdminEntity);
@@ -95,14 +96,14 @@ export function AdminLinkLocation() {
                         <button className={"rounded-md text-white px-2 bg-emerald-500 hover:bg-emerald-600"}
                                 onClick={() => {
                                     setIsEditModalOpen(true);
-                                    setEditLocation({...resource});
+                                    setEditLocation(resource);
                                 }}>
                             编辑
                         </button>
                         <button className={"rounded-md text-white px-2 bg-red-500 hover:bg-red-600"}
                                 onClick={() => {
                                     setIsDelModalOpen(true);
-                                    setEditLocation({...resource});
+                                    setEditLocation(resource);
                                     setDelLocation({id: resource.id, move_id: 0});
                                 }}>删除
                         </button>
@@ -112,13 +113,6 @@ export function AdminLinkLocation() {
             setLocationWeb(webData);
         });
     }, [locationInfo]);
-
-    function handleInputChange(event: any) {
-        const {name, value, type, checked} = event.target;
-        setEditLocation(prevState => ({
-            ...prevState, [name]: type === "checkbox" ? checked : value
-        }));
-    }
 
     async function editSubmit() {
         // 提交数据进行修改操作
@@ -171,6 +165,8 @@ export function AdminLinkLocation() {
             message.warning(getRes?.error_message);
         }
     }
+
+    document.title = "竹叶 - 位置管理"
 
     return (<div className={"grid grid-cols-12 gap-3"}>
             <div className={"col-span-full text-xl font-bold mb-3"}>位置管理</div>
@@ -305,82 +301,76 @@ export function AdminLinkLocation() {
                    </div>}>
                 <div className={"grid grid-cols-2 gap-3 py-3"}>
                     <div className={"col-span-full sm:col-span-1"}>
-                        <label htmlFor="LocationID" className="block text-xs font-medium text-gray-700">序列号</label>
+                        <label htmlFor="id" className="block text-xs font-medium text-gray-700">序列号</label>
                         <input
                             type="number"
-                            id="LocationID"
-                            name="id"
+                            id="id"
                             value={editLocation.id || ""}
                             className="mt-1 w-full rounded-md border-gray-200 shadow-sm text-sm bg-gray-100"
                             readOnly={true}
                         />
                     </div>
                     <div className={"col-span-full sm:col-span-1"}>
-                        <label htmlFor="CreatedAt" className="block text-xs font-medium text-gray-700">创建时间</label>
+                        <label htmlFor="created_at" className="block text-xs font-medium text-gray-700">创建时间</label>
                         <input
                             type="text"
-                            id="CreatedAt"
-                            name="created_at"
+                            id="created_at"
                             value={editLocation.created_at || ""}
                             className="mt-1 w-full rounded-md border-gray-200 shadow-sm text-sm bg-gray-100"
                             readOnly={true}
                         />
                     </div>
                     <div className={"col-span-full sm:col-span-1"}>
-                        <label htmlFor="LocationName"
+                        <label htmlFor="name"
                                className="block text-xs font-medium text-gray-700">位置识别名称</label>
                         <input
                             type="text"
-                            id="LocationName"
-                            name="name"
+                            id="name"
                             value={editLocation.name || ""}
-                            onChange={handleInputChange}
+                            onChange={(event) => setEditLocation(Util.handleInputChange(editLocation, event))}
                             className="mt-1 w-full rounded-md border-gray-200 shadow-sm text-sm"
                         />
                     </div>
                     <div className={"col-span-full sm:col-span-1"}>
-                        <label htmlFor="LocationDisplayName"
+                        <label htmlFor="display_name"
                                className="block text-xs font-medium text-gray-700">位置展示名称</label>
                         <input
                             type="text"
-                            id="LocationDisplayName"
-                            name="display_name"
+                            id="display_name"
                             value={editLocation.display_name || ""}
-                            onChange={handleInputChange}
+                            onChange={(event) => setEditLocation(Util.handleInputChange(editLocation, event))}
                             className="mt-1 w-full rounded-md border-gray-200 shadow-sm text-sm"
                         />
                     </div>
                     <div className={"col-span-full"}>
-                        <label htmlFor="LocationSort" className="block text-xs font-medium text-gray-700">优先级</label>
+                        <label htmlFor="sort" className="block text-xs font-medium text-gray-700">优先级</label>
                         <input
                             type="number"
-                            id="LocationSort"
-                            name="sort"
+                            id="sort"
                             value={editLocation.sort || ""}
-                            onChange={handleInputChange}
+                            onChange={(event) => setEditLocation(Util.handleInputChange(editLocation, event))}
                             className="mt-1 w-full rounded-md border-gray-200 shadow-sm text-sm"
                         />
                     </div>
                     <div className={"col-span-full"}>
-                        <label htmlFor="LocationDesc"
+                        <label htmlFor="description"
                                className="block text-sm font-medium text-gray-700">位置描述</label>
                         <textarea
-                            id="LocationDesc"
-                            name="description"
+                            id="description"
                             rows={2}
                             value={editLocation.description || ""}
-                            onChange={handleInputChange}
+                            onChange={(event) => setEditLocation(Util.handleInputChange(editLocation, event))}
                             className="mt-2 w-full rounded-lg border-gray-200 align-top shadow-sm sm:text-sm"
                         />
                     </div>
                     <div className={"col-span-full"}>
-                        <label htmlFor="Option1" className="flex cursor-pointer items-center justify-end gap-3">
+                        <label htmlFor="reveal" className="flex cursor-pointer items-center justify-end gap-3">
                             <strong className="font-medium text-gray-900">是否对外可见</strong>
                             <input
                                 type="checkbox"
-                                name="reveal"
+                                id={"reveal"}
                                 checked={editLocation.reveal || false}
-                                onChange={handleInputChange}
+                                onChange={(event) => setEditLocation(Util.handleInputChange(editLocation, event))}
                                 className={"transition size-4 rounded border-gray-300 text-emerald-500"}
                             />
                         </label>

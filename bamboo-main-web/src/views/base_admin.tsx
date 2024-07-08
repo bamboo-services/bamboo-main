@@ -37,6 +37,7 @@ import {AdminLink} from "./admin/admin_link.tsx";
 import {AdminLinkEdit} from "./admin/admin_link_edit.tsx";
 import {AdminLinkLocation} from "./admin/admin_link_location.tsx";
 import {AdminSetting} from "./admin/admin_setting.tsx";
+import { AdminLinkAdd } from "./admin/admin_link_add.tsx";
 
 export function BaseAdmin() {
     const [userCurrent, setUserInfo] = useState({} as UserCurrentEntity);
@@ -64,10 +65,11 @@ export function BaseAdmin() {
             <div className={"hidden md:block"}>
                 <AdminSideMenuComponent username={userCurrent.username} email={userCurrent.email} uuid={userCurrent.uuid}/>
             </div>
-            <div className={"md:ps-[200px] lg:ps-[250px] col-span-12 m-6 h-dvh"}>
+            <div className={"md:ps-[200px] lg:ps-[250px] col-span-12 m-6 min-h-dvh mb-16"}>
                 <Routes>
                     <Route path={"dashboard"} element={<AdminDashboard/>}/>
                     <Route path={"link"} element={<AdminLink/>}/>
+                    <Route path={"link/add"} element={<AdminLinkAdd/>}/>
                     <Route path={"link/edit/:id"} element={<AdminLinkEdit/>}/>
                     <Route path={"link/location"} element={<AdminLinkLocation/>}/>
                     <Route path={"setting"} element={<AdminSetting/>}/>

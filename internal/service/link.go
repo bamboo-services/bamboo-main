@@ -146,6 +146,36 @@ type (
 		// # 返回:
 		//   - err: 如果位置存在，返回错误；否则返回 nil.
 		IsLocationExist(ctx context.Context, name string) (err error)
+		// GetSingleLink
+		//
+		// # 获取单个链接
+		//
+		// 获取单个链接，用于获取单个链接之后进行展示使用。接口将会查询 ID 的链接信息是否存在，若存在将数据返回；
+		// 若不存在则返回错误信息。
+		// 若产生数据库等非业务类型报错，将会执行 bcode.ServerInternalError 错误码。
+		//
+		// # 参数
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//   - linkID: 链接的 ID。
+		//
+		// # 返回
+		//   - linkInfo: 链接的信息。
+		//   - error: 返回的错误码信息
+		GetSingleLink(ctx context.Context, linkID int64) (linkInfo *entity.LinkList, err error)
+		// EditLink
+		//
+		// # 编辑链接
+		//
+		// 获取链接的 ID 随后，对链接的信息进行获取操作，用于编辑链接的信息。当完成修改操作后将返回 nil；
+		// 若操作的过程中产生问题，将不会存入数据库，并返回 error
+		//
+		// # 参数
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//   - data: 用户的请求，包含编辑链接的详细信息。
+		//
+		// # 返回
+		//   - error: 在编辑链接过程中发生的任何错误。
+		EditLink(ctx context.Context, data v1.LinkEditReq) (err error)
 		EditLocation(ctx context.Context, req v1.EditLocationReq) (err error)
 		LocationMove(ctx context.Context, id, moveID int64) (err error)
 		DelLocation(ctx context.Context, id int64) (err error)

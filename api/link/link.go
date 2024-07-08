@@ -20,11 +20,13 @@ type ILinkV1 interface {
 	CheckLogoURLHasConnect(ctx context.Context, req *v1.CheckLogoURLHasConnectReq) (res *v1.CheckLogoURLHasConnectRes, err error)
 	CheckRssURLHasConnect(ctx context.Context, req *v1.CheckRssURLHasConnectReq) (res *v1.CheckRssURLHasConnectRes, err error)
 	DelLocation(ctx context.Context, req *v1.DelLocationReq) (res *v1.DelLocationRes, err error)
+	LinkEdit(ctx context.Context, req *v1.LinkEditReq) (res *v1.LinkEditRes, err error)
 	EditLocation(ctx context.Context, req *v1.EditLocationReq) (res *v1.EditLocationRes, err error)
 	LinkGetColor(ctx context.Context, req *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error)
 	LinkGetColorFull(ctx context.Context, req *v1.LinkGetColorFullReq) (res *v1.LinkGetColorFullRes, err error)
 	LinkGet(ctx context.Context, req *v1.LinkGetReq) (res *v1.LinkGetRes, err error)
 	LinkGetAdmin(ctx context.Context, req *v1.LinkGetAdminReq) (res *v1.LinkGetAdminRes, err error)
+	LinkGetSingle(ctx context.Context, req *v1.LinkGetSingleReq) (res *v1.LinkGetSingleRes, err error)
 	LinkGetLocation(ctx context.Context, req *v1.LinkGetLocationReq) (res *v1.LinkGetLocationRes, err error)
 	LinkGetLocationFull(ctx context.Context, req *v1.LinkGetLocationFullReq) (res *v1.LinkGetLocationFullRes, err error)
 }

@@ -26,44 +26,38 @@
  * --------------------------------------------------------------------------------
  */
 
-export type InnerLinkDTO = {
+/**
+ * ColorDTO
+ *
+ * 用于获取颜色的数据传输对象
+ *
+ * @param id 颜色ID
+ * @param name 颜色名称
+ * @param display_name 颜色显示名称
+ * @param color 颜色值
+ * @param has_select 是否可被普通选择
+ * @param created_at 创建时间
+ * @param updated_at 更新时间
+ */
+export type ColorDTO = {
     id: number;
-    webmaster_email: string;
-    service_provider: string;
-    site_name: string;
-    site_url: string;
-    site_logo: string;
-    cdn_logo_url: string;
-    site_description: string;
-    site_rss_url: string;
-    has_adv: boolean;
-    desired_location: number;
-    location: number;
-    desired_color: number;
-    color: number;
-    webmaster_remark: string;
-    remark: string;
-    status: number;
-    able_connect: boolean;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
-};
-
-export type LinkGetLocationDO = {
-    id: number;
-    sort: number;
     name: string;
     display_name: string;
-    description: string;
-    reveal: boolean;
+    color: string;
+    has_select: boolean;
     created_at: string;
     updated_at: string;
-    total: number;
-    links: InnerLinkDTO[];
-};
+}
 
-export type LinkGetEntity = {
-    locations: LinkGetLocationDO[];
-    location_total: number;
-};
+/**
+ * ColorsEntity
+ *
+ * 用于获取颜色的实体对象
+ *
+ * @param colors 颜色列表
+ * @param total 颜色总数
+ */
+export type ColorsEntity = {
+    colors: ColorDTO[];
+    total: number;
+}

@@ -40,7 +40,7 @@ import {Link, useLocation} from "react-router-dom";
 export function AdminSideMenuComponent(userCurrent: UserCurrentEntity) {
     const location = useLocation();
 
-    function SelectColorForPhone(getLocation: string): string {
+    function selectColorForPhone(getLocation: string): string {
         if (location.pathname.includes(getLocation)) {
             return "bg-sky-100 p-2 text-sm font-medium text-sky-600"
         } else {
@@ -48,12 +48,16 @@ export function AdminSideMenuComponent(userCurrent: UserCurrentEntity) {
         }
     }
 
-    function SelectColorForDesk(getLocation: string): string {
+    function selectColorForDesk(getLocation: string): string {
         if (location.pathname === getLocation) {
             return "bg-gray-100 font-medium text-gray-700"
         } else {
             return "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
         }
+    }
+
+    function checkIfTheFieldHasContent(text: string): boolean {
+        return location.pathname.includes(text);
     }
 
     return (
@@ -67,13 +71,13 @@ export function AdminSideMenuComponent(userCurrent: UserCurrentEntity) {
                     <ul className="mt-6 space-y-1">
                         <li>
                             <Link to={"/admin/dashboard"}
-                                  className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${SelectColorForDesk("/admin/dashboard")}`}>
+                                  className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${selectColorForDesk("/admin/dashboard")}`}>
                                 <HomeOutlined/>
                                 <span>首页</span>
                             </Link>
                         </li>
                         <li>
-                            <details className="group">
+                            <details className={"group"} open={checkIfTheFieldHasContent("link")}>
                                 <summary
                                     className="transition flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                                 >
@@ -88,25 +92,25 @@ export function AdminSideMenuComponent(userCurrent: UserCurrentEntity) {
                                 <ul className="mt-2 space-y-1 px-4">
                                     <li>
                                         <Link to={"/admin/link"}
-                                              className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${SelectColorForDesk("/admin/link")}`}>
+                                              className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${selectColorForDesk("/admin/link")}`}>
                                             管理友链
                                         </Link>
                                     </li>
                                     <li>
                                         <Link to={"/admin/link/add"}
-                                              className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${SelectColorForDesk("/admin/link/add")}`}>
+                                              className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${selectColorForDesk("/admin/link/add")}`}>
                                             添加友链
                                         </Link>
                                     </li>
                                     <li>
                                         <Link to={"/admin/link/location"}
-                                              className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${SelectColorForDesk("/admin/link/location")}`}>
+                                              className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${selectColorForDesk("/admin/link/location")}`}>
                                             位置管理
                                         </Link>
                                     </li>
                                     <li>
                                         <Link to={"/admin/link/color"}
-                                              className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${SelectColorForDesk("/admin/link/color")}`}>
+                                              className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${selectColorForDesk("/admin/link/color")}`}>
                                              颜色管理
                                         </Link>
                                     </li>
@@ -131,22 +135,22 @@ export function AdminSideMenuComponent(userCurrent: UserCurrentEntity) {
                 <div className={"flex items-center justify-center"}>
                     <nav className="grid grid-cols-4 gap-3 w-full" aria-label="Tabs">
                         <Link to={"/admin/dashboard"}
-                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${SelectColorForPhone("dashboard")}`}>
+                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${selectColorForPhone("dashboard")}`}>
                             <HomeOutlined/>
                             <span>首页</span>
                         </Link>
                         <Link to={"/admin/link"}
-                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${SelectColorForPhone("link")}`}>
+                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${selectColorForPhone("link")}`}>
                             <LinkOutlined/>
                             <span>友链</span>
                         </Link>
                         <Link to={"/admin/other"}
-                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${SelectColorForPhone("other")}`}>
+                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${selectColorForPhone("other")}`}>
                             <BarsOutlined/>
                             <span>其他</span>
                         </Link>
                         <Link to={"/admin/setting"}
-                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${SelectColorForPhone("setting")}`}
+                              className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${selectColorForPhone("setting")}`}
                               aria-current="page">
                             <SettingOutlined/>
                             <span>其他</span>

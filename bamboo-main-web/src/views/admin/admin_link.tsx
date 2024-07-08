@@ -42,21 +42,21 @@ export function AdminLink() {
 
     const [linkList, setLinkList] = useState({} as LinkDO[]);
     const [linkLocation, setLinkLocation] = useState([] as JSX.Element[]);
-    const [webLink, setWebLink] = useState([<>
-        <div className={"text-center col-span-full text-xl font-bold"}>当前不存在链接</div>
-    </>]);
-    const [webLinkTable, setWebLinkTable] = useState([<>
-        <tr className="odd:bg-gray-50">
+    const [webLink, setWebLink] = useState([
+        <div key={"default"} className={"text-center col-span-full text-xl font-bold"}>当前不存在链接</div>
+    ]);
+    const [webLinkTable, setWebLinkTable] = useState([
+        <tr className="odd:bg-gray-50" key={"default"}>
             <td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">不存在链接</td>
             <td className="whitespace-nowrap px-4 py-2 text-gray-700">--</td>
             <td className="whitespace-nowrap px-4 py-2 text-gray-700 hidden md:block">--</td>
             <td className="whitespace-nowrap px-4 py-2 text-gray-700">--</td>
         </tr>
-    </>]);
-    const [changeTypeButton, setChangeTypeButton] = useState([<>
+    ]);
+    const [changeTypeButton, setChangeTypeButton] = useState(<>
         <AppstoreOutlined className={"text-black lg:text-emerald-500"} onClick={changeToBlock}/>
         <UnorderedListOutlined className={"lg:text-black text-emerald-500"} onClick={changeToLine}/>
-    </>]);
+    </>);
 
     useEffect(() => {
         setTimeout(async () => {
@@ -138,10 +138,10 @@ export function AdminLink() {
         document.getElementById("lineType")?.classList.add("hidden");
         document.getElementById("blockType")?.classList.remove("hidden");
         document.getElementById("blockType")?.classList.add("lg:grid");
-        setChangeTypeButton([<>
+        setChangeTypeButton(<>
             <AppstoreOutlined className={"text-emerald-500"}/>
             <UnorderedListOutlined className={"text-black"} onClick={changeToLine}/>
-        </>]);
+        </>);
     }
 
     function changeToLine() {
@@ -149,10 +149,10 @@ export function AdminLink() {
         document.getElementById("blockType")?.classList.remove("lg:grid");
         document.getElementById("lineType")?.classList.remove("lg:hidden");
         document.getElementById("lineType")?.classList.remove("hidden");
-        setChangeTypeButton([<>
+        setChangeTypeButton(<>
             <AppstoreOutlined className={"text-black"} onClick={changeToBlock}/>
             <UnorderedListOutlined className={"text-emerald-500"}/>
-        </>]);
+        </>);
     }
 
 
@@ -215,11 +215,6 @@ export function AdminLink() {
                                 placeholder="模糊查询"
                                 className="mt-1 w-full rounded-lg border-gray-200 shadow-sm sm:text-sm"
                             />
-                        </div>
-                        <div className={"col-span-12 flex justify-center"}>
-                            <button type={"button"}
-                                    className={"transition rounded-lg bg-emerald-500 hover:bg-emerald-600 px-8 py-2 text-sm font-medium text-white"}>搜索
-                            </button>
                         </div>
                         <div className={"col-span-12 text-lg font-medium mt-6"}>友链状态</div>
                         <div className={"col-span-12"}>

@@ -30,9 +30,10 @@ import {LinkGetAdminEntity} from "../models/entity/link_get_admin_entity.ts";
 import {BaseApi, GetAuthorizationToken, MethodType} from "../base_api.ts";
 import {BaseResponse} from "../models/base_response.ts";
 import {LocationDO, LocationGetAdminEntity} from "../models/entity/location_get_admin_entity.ts";
-import {LinkGetEntity} from "../models/entity/link_get_entity.ts";
+import {InnerLinkDTO, LinkGetEntity} from "../models/entity/link_get_entity.ts";
 import {LocationDeleteDTO} from "../models/dto/location_delete.ts";
 import {LocationAddDTO} from "../models/dto/location_add.ts";
+import {ColorsEntity} from "../models/entity/color_get_entity.ts";
 
 /**
  * GetLinkAPI
@@ -49,7 +50,7 @@ const AdminGetLinkAPI = async (): Promise<BaseResponse<LinkGetAdminEntity> | und
         null,
         null,
         {"Authorization": GetAuthorizationToken()}
-    )
+    );
 }
 
 /**
@@ -67,7 +68,46 @@ const GetLinkAPI = async (): Promise<BaseResponse<LinkGetEntity> | undefined> =>
         null,
         null,
         null
-    )
+    );
+}
+
+/**
+ * GetSingleLinkAPI
+ *
+ * 用于获取单个链接，该接口只允许管理员进行操作，其他用户不应该通过该接口进行数据的获取操作
+ *
+ * @param data 获取数据的 number 值
+ * @returns Promise<BaseResponse<InnerLinkDTO>>
+ */
+const GetSingleLinkAPI = async (data: number): Promise<BaseResponse<InnerLinkDTO> | undefined> => {
+    return BaseApi<InnerLinkDTO>(
+        MethodType.GET,
+        "/api/v1/link/single",
+        null,
+        {id: data},
+        null,
+        {"Authorization": GetAuthorizationToken()}
+    );
+}
+
+/**
+ * EditLinkAPI
+ *
+ * 用于编辑链接信息，该接口只有管理员可以进行操作，其他用户不应该通过该接口进行数据的获取操作
+ *
+ * @param data InnerLinkDTO
+ * @returns Promise<BaseResponse<null>>
+ */
+const EditLinkAPI = async (data: InnerLinkDTO): Promise<BaseResponse<null> | undefined> => {
+    return BaseApi<null>(
+        MethodType.PUT,
+        "/api/v1/link",
+        data,
+        null,
+        null,
+        {"Authorization": GetAuthorizationToken()}
+    );
+
 }
 
 /**
@@ -85,7 +125,7 @@ const AdminGetLocationAPI = async (): Promise<BaseResponse<LocationGetAdminEntit
         null,
         null,
         {"Authorization": GetAuthorizationToken()}
-    )
+    );
 }
 
 /**
@@ -104,7 +144,7 @@ const AdminEditLocationAPI = async (data: LocationDO): Promise<BaseResponse<null
         null,
         null,
         {"Authorization": GetAuthorizationToken()}
-    )
+    );
 }
 
 /**
@@ -144,11 +184,33 @@ const AdminAddLocationAPI = async (data: LocationAddDTO): Promise<BaseResponse<n
     );
 }
 
+/**
+ * AdminGetColorAPI
+ *
+ * 用于获取所有的颜色，该接口只有管理员可以进行操作，其他用户不应该通过该接口进行数据的获取操作
+ *
+ * @returns Promise<BaseResponse<ColorsEntity>>
+ */
+const AdminGetColorAPI = async (): Promise<BaseResponse<ColorsEntity> | undefined> => {
+    return BaseApi<ColorsEntity>(
+        MethodType.GET,
+        "/api/v1/link/color/full",
+        null,
+        null,
+        null,
+        {"Authorization": GetAuthorizationToken()}
+    );
+
+}
+
 export {
     AdminGetLinkAPI,
     GetLinkAPI,
+    GetSingleLinkAPI,
+    EditLinkAPI,
     AdminGetLocationAPI,
     AdminEditLocationAPI,
     AdminDelLocationAPI,
-    AdminAddLocationAPI
+    AdminAddLocationAPI,
+    AdminGetColorAPI
 };

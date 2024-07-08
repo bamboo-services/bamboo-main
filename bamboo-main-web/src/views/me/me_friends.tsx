@@ -31,7 +31,8 @@ import {JSX, useEffect, useState} from "react";
 import {LinkGetEntity} from "../../resources/ts/models/entity/link_get_entity.ts";
 import {GetLinkAPI} from "../../resources/ts/apis/api_link.ts";
 import {message} from "antd";
-import { LinkOutlined } from "@ant-design/icons";
+import {LinkOutlined} from "@ant-design/icons";
+import {Util} from "../../resources/utils/process_util.ts";
 
 export function MeFriends() {
     const [getLink, setGetLink] = useState({} as LinkGetEntity);
@@ -45,7 +46,7 @@ export function MeFriends() {
             } else {
                 message.warning(getRes?.error_message);
             }
-        },1);
+        }, 1);
     }, []);
 
     useEffect(() => {
@@ -56,17 +57,12 @@ export function MeFriends() {
                 const locationLinks: JSX.Element[] = [];
                 // 对内链接数据进行循环遍历
                 for (const linkElement of locationElement.links) {
-                    let getImage: string;
-                    if (linkElement.cdn_logo_url === '') {
-                        getImage = linkElement.site_logo;
-                    } else {
-                        getImage = linkElement.cdn_logo_url;
-                    }
                     locationLinks.push(
                         <Link to={linkElement.site_url} target={"_blank"} key={linkElement.id}
                               className={"transition rounded-lg bg-white shadow-md shadow-white hover:scale-105 grid gap-1 text-center justify-center p-3"}>
                             <div className={"flex justify-center"}>
-                                <img src={getImage} alt={""}
+                                <img src={Util.TwoUrlSelectNoEmpty(linkElement.site_logo, linkElement.cdn_logo_url)}
+                                     alt={""} draggable={false}
                                      className={"rounded-full size-12 lg:size-16 shadow-lg shadow-gray-100"}/>
                             </div>
                             <div className={"text-lg font-bold truncate"}>{linkElement.site_name}</div>
@@ -80,7 +76,7 @@ export function MeFriends() {
                     <div className={"grid gap-3"} key={locationElement.id}>
                         <div className={"grid"}>
                             <div className={"flex gap-1"}>
-                                <LinkOutlined />
+                                <LinkOutlined/>
                                 <div className={"text-xl font-medium"}>{locationElement.display_name}</div>
                             </div>
                             <div className={"text-sm text-gray-500"}>{locationElement.description}</div>

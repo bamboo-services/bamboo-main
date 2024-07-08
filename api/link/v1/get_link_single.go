@@ -26,44 +26,33 @@
  * --------------------------------------------------------------------------------
  */
 
-export type InnerLinkDTO = {
-    id: number;
-    webmaster_email: string;
-    service_provider: string;
-    site_name: string;
-    site_url: string;
-    site_logo: string;
-    cdn_logo_url: string;
-    site_description: string;
-    site_rss_url: string;
-    has_adv: boolean;
-    desired_location: number;
-    location: number;
-    desired_color: number;
-    color: number;
-    webmaster_remark: string;
-    remark: string;
-    status: number;
-    able_connect: boolean;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
-};
+package v1
 
-export type LinkGetLocationDO = {
-    id: number;
-    sort: number;
-    name: string;
-    display_name: string;
-    description: string;
-    reveal: boolean;
-    created_at: string;
-    updated_at: string;
-    total: number;
-    links: InnerLinkDTO[];
-};
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/model/entity"
+)
 
-export type LinkGetEntity = {
-    locations: LinkGetLocationDO[];
-    location_total: number;
-};
+// LinkGetSingleReq
+//
+// # 获取单个链接
+//
+// 获取单个链接，用于获取单个链接之后进行展示使用。
+//
+// # 参数
+//   - ID: 链接ID
+type LinkGetSingleReq struct {
+	g.Meta    `path:"/link/single" method:"Get" tags:"链接控制器" summary:"获取单个链接" dc:"获取单个链接，用于获取单个链接之后进行展示使用"`
+	ID        int64  `json:"id" v:"required|regex:^[0-9]+$#请输入ID|ID为数字" dc:"ID"`
+	UserToken string `json:"Authorization" in:"header" dc:"授权头" default:"{{Token}}"`
+}
+
+// LinkGetSingleRes
+//
+// # 获取单个链接
+//
+// 获取单个链接的响应。
+type LinkGetSingleRes struct {
+	g.Meta `mime:"application/json"`
+	entity.LinkList
+}

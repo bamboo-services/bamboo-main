@@ -30,41 +30,24 @@ package v1
 
 import "github.com/gogf/gf/v2/frame/g"
 
-// LinkAddReq
-//
-// # 添加新的链接请求参数
-//
-// 添加新的链接
-//
-// 参数：
-// WebmasterEmail: 站长邮箱
-// ServiceProvider: 服务商
-// SiteName: 站点名称
-// SiteURL: 站点URL
-// SiteLogo: 站点Logo
-// SiteDescription: 站点描述
-// SiteRssURL: 站点RSS URL
-// DesiredLocation: 期望位置
-// DesiredColor: 期望颜色
-// HasAdv: 是否有广告
-// Remark: 备注
-type LinkAddReq struct {
-	g.Meta          `path:"/link" method:"post" tags:"链接控制器" summary:"添加新的链接" `
+type LinkEditReq struct {
+	g.Meta          `path:"/link" method:"Put" tags:"链接控制器" summary:"编辑链接" dc:"编辑链接，用于编辑链接之后进行展示使用"`
+	ID              int64  `json:"id" v:"required|regex:^[0-9]+$#请输入ID|ID为数字" dc:"ID" `
 	WebmasterEmail  string `json:"webmaster_email" v:"required|email#请输入站长邮箱|站长邮箱格式不正确" dc:"站长邮箱"`
 	ServiceProvider string `json:"service_provider" v:"required#请输入服务商" dc:"服务商"`
 	SiteName        string `json:"site_name" v:"required#请输入站点名称" dc:"站点名称"`
 	SiteURL         string `json:"site_url" v:"required|url#请输入站点URL|站点URL格式不正确" dc:"站点URL"`
-	SiteLogo        string `json:"site_logo" v:"required|url#请输入站点Logo|站点Logo格式不正确" dc:"站点Logo"`
+	SiteLogo        string `json:"site_logo" v:"required|url#请输入站点Logo|站点LogoURL格式不正确" dc:"站点Logo"`
+	CdnLogoURL      string `json:"cdn_logo_url" v:"url#请输入站点加速Logo|站点加速LogoURL格式不正确" dc:"站点Logo"`
 	SiteDescription string `json:"site_description" v:"required#请输入站点描述" dc:"站点描述"`
 	SiteRssURL      string `json:"site_rss_url" v:"url#站点RSS格式不正确" dc:"站点RSS URL"`
-	DesiredLocation int64  `json:"desired_location" v:"required#请输入期望位置" dc:"期望位置"`
-	DesiredColor    int64  `json:"desired_color" v:"required#请输入期望颜色" dc:"期望颜色"`
+	Location        int64  `json:"location" v:"required#请输入期望位置" dc:"期望位置"`
+	Color           *int64 `json:"color" v:"required#请输入期望颜色" dc:"期望颜色"`
 	HasAdv          bool   `json:"has_adv" v:"required#请输入是否有广告" dc:"是否有广告"`
-	Remark          string `json:"remark" v:"required#请输入备注" dc:"备注"`
+	Remark          string `json:"remark" v:"max-length:1024#最大长度为 1024 个字符" dc:"备注"`
+	UserToken       string `json:"Authorization" in:"header" dc:"授权头" default:"{{Token}}"`
 }
 
-// LinkAddRes 添加新的链接响应参数
-// 添加新的链接
-type LinkAddRes struct {
+type LinkEditRes struct {
 	g.Meta `mime:"application/json"`
 }
