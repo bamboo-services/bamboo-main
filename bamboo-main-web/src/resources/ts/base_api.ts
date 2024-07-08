@@ -29,7 +29,7 @@
 import axios, {type AxiosResponse} from "axios";
 import type {BaseResponse} from "./models/base_response";
 
-const BASE_API_URL: string = "http://localhost:8000";
+const BASE_API_URL: string = "http://192.168.2.8:8000";
 
 /**
  * Http 方法类型枚举

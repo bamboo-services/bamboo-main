@@ -39,8 +39,9 @@ import {LocationDeleteDTO} from "../../resources/ts/models/dto/location_delete.t
 import {CheckCircleOutlined, CloseCircleOutlined} from "@ant-design/icons";
 import {LocationAddDTO} from "../../resources/ts/models/dto/location_add.ts";
 import {Util} from "../../resources/utils/process_util.ts";
+import {SystemInfo} from "../../resources/ts/models/entity/info_get_entity.ts";
 
-export function AdminLinkLocation() {
+export function AdminLinkLocation(systemInfo: SystemInfo) {
     const [locationInfo, setLocationInfo] = useState({} as LocationGetAdminEntity);
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -166,7 +167,7 @@ export function AdminLinkLocation() {
         }
     }
 
-    document.title = "竹叶 - 位置管理"
+    document.title = `${systemInfo.info.site.site_name} - 位置管理`;
 
     return (<div className={"grid grid-cols-12 gap-3"}>
             <div className={"col-span-full text-xl font-bold mb-3"}>位置管理</div>

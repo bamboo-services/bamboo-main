@@ -27,14 +27,46 @@
  */
 
 import {Route, Routes, useLocation, useNavigate} from "react-router-dom";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import AuthLogin from "./auth/auth_login";
-import {InfoUserAPI} from "../resources/ts/apis/api_info.ts";
+import {InfoAPI, InfoUserAPI} from "../resources/ts/apis/api_info.ts";
 import {message} from "antd";
 
 export default function BaseAuth() {
     const navigate = useNavigate();
     const getLocation = useLocation();
+
+    const [systemInfo, setSystemInfo] = useState({
+        site: {
+            site_name: "竹叶",
+            author: "筱锋xiao_lfeng",
+            version: "",
+            description: "",
+            keywords: "",
+        },
+        blogger: {
+            name: "",
+            nick: "",
+            email: "",
+            description: "",
+        }
+    });
+
+    useEffect(() => {
+        if (localStorage.getItem("WebInfo") == null) {
+            setTimeout(async () => {
+                const getRes = await InfoAPI();
+                if (getRes?.output === "Success") {
+                    setSystemInfo(getRes.data!);
+                    localStorage.setItem("WebInfo", JSON.stringify(getRes.data!));
+                } else {
+                    message.warning(getRes?.error_message);
+                }
+            });
+        } else {
+            setSystemInfo(JSON.parse(localStorage.getItem("WebInfo")!));
+        }
+    }, []);
 
     useEffect(() => {
         if (getLocation.pathname === "/auth") {
@@ -54,7 +86,7 @@ export default function BaseAuth() {
 
     return (
         <Routes>
-            <Route path={"login"} element={<AuthLogin/>}/>
+            <Route path={"login"} element={<AuthLogin info={systemInfo}/>}/>
         </Routes>
     );
 }

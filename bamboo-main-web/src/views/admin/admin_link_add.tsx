@@ -35,8 +35,9 @@ import {ColorsEntity} from "../../resources/ts/models/entity/color_get_entity.ts
 import {AddLinkAPI, AdminGetColorAPI, AdminGetLocationAPI} from "../../resources/ts/apis/api_link.ts";
 import {message} from "antd";
 import {LinkAddAdminDTO} from "../../resources/ts/models/dto/link_add_admin.ts";
+import {SystemInfo} from "../../resources/ts/models/entity/info_get_entity.ts";
 
-export function AdminLinkAdd() {
+export function AdminLinkAdd(systemInfo: SystemInfo) {
     const navigate = useNavigate();
 
     const [link, setLink] = useState({} as LinkAddAdminDTO);
@@ -120,6 +121,8 @@ export function AdminLinkAdd() {
             message.warning(getRes?.error_message);
         }
     }
+
+    document.title = `${systemInfo.info.site.site_name} - 添加友链`;
 
     return (
         <div className={"grid grid-cols-12 gap-6"}>

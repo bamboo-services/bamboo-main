@@ -30,12 +30,13 @@ import {AuthLoginDTO} from "../../resources/ts/models/dto/auth_login";
 import {UserLoginAPI} from "../../resources/ts/apis/api_auth.ts";
 import {message} from "antd";
 import {useNavigate} from "react-router-dom";
+import {SystemInfo} from "../../resources/ts/models/entity/info_get_entity.ts";
 
-export default function AuthLogin() {
+export default function AuthLogin(info: SystemInfo) {
     const loginForm = {remember: false} as AuthLoginDTO;
     const navigation = useNavigate();
 
-    document.title = "竹叶 - 管理员登陆";
+    document.title = `${info.info.site.site_name} - 管理员登录`;
 
     /**
      * # 登录表单
@@ -74,7 +75,7 @@ export default function AuthLogin() {
         <div className={"grid w-screen h-dvh items-center justify-center bg-gray-100"}>
             <div className={"grid gap-1 mx-3"}>
                 <div className={"text-center"}>
-                    <h1 className={"text-2xl font-bold text-emerald-600 sm:text-3xl"}>凌中的锋雨</h1>
+                    <h1 className={"text-2xl font-bold text-emerald-600 sm:text-3xl"}>{info.info.site.site_name}</h1>
                     <p className={"mx-auto mt-4 max-w-md text-gray-500"}>
                         一个人的价值，在于他贡献什么，而不是他能取得什么。不要渴望成为一个成功的人，而是应该努力做一个有价值的人。
                     </p>

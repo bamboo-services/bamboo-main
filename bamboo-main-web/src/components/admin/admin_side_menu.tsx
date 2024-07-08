@@ -27,6 +27,7 @@
  */
 
 import {
+    AlignLeftOutlined,
     BarsOutlined,
     CaretDownOutlined,
     HomeOutlined,
@@ -82,7 +83,7 @@ export function AdminSideMenuComponent(userCurrent: UserCurrentEntity) {
                                     className="transition flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                                 >
                                     <span className="text-sm font-medium flex items-center gap-2">
-                                        <UsergroupAddOutlined />
+                                        <UsergroupAddOutlined/>
                                         <span>友链</span>
                                     </span>
                                     <span className="shrink-0 transition duration-300 group-open:-rotate-180">
@@ -111,11 +112,25 @@ export function AdminSideMenuComponent(userCurrent: UserCurrentEntity) {
                                     <li>
                                         <Link to={"/admin/link/color"}
                                               className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${selectColorForDesk("/admin/link/color")}`}>
-                                             颜色管理
+                                            颜色管理
                                         </Link>
                                     </li>
                                 </ul>
                             </details>
+                        </li>
+                        <li>
+                            <Link to={"/admin/rss"}
+                                  className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${selectColorForDesk("/admin/rss")}`}>
+                                <AlignLeftOutlined />
+                                <span>订阅</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link to={"/admin/setting"}
+                                  className={`transition flex items-center gap-2 rounded-lg px-4 py-2 text-sm ${selectColorForDesk("/admin/setting")}`}>
+                                <SettingOutlined/>
+                                <span>设置</span>
+                            </Link>
                         </li>
                     </ul>
                 </div>
@@ -153,7 +168,7 @@ export function AdminSideMenuComponent(userCurrent: UserCurrentEntity) {
                               className={`transition shrink-0 rounded-lg flex items-center justify-center gap-1 ${selectColorForPhone("setting")}`}
                               aria-current="page">
                             <SettingOutlined/>
-                            <span>其他</span>
+                            <span>设置</span>
                         </Link>
                     </nav>
                 </div>

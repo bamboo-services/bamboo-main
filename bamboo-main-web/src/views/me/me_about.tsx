@@ -27,8 +27,12 @@
  */
 
 import {CommentOutlined, UserOutlined} from "@ant-design/icons";
+import {SystemInfo} from "../../resources/ts/models/entity/info_get_entity.ts";
 
-export default function MeAbout() {
+export default function MeAbout(info: SystemInfo) {
+
+    document.title = `${info.info.site.site_name} - 关于我`
+
     return (
         <div className={"grid grid-cols-12 gap-3"}>
             <div className={"col-span-full text-2xl lg:text-3xl font-bold flex gap-1"}>

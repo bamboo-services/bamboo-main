@@ -40,8 +40,9 @@ import {Util} from "../../resources/utils/process_util.ts";
 import {InnerLinkDTO} from "../../resources/ts/models/entity/link_get_entity.ts";
 import {LocationGetAdminEntity} from "../../resources/ts/models/entity/location_get_admin_entity.ts";
 import {ColorsEntity} from "../../resources/ts/models/entity/color_get_entity.ts";
+import {SystemInfo} from "../../resources/ts/models/entity/info_get_entity.ts";
 
-export function AdminLinkEdit() {
+export function AdminLinkEdit(systemInfo: SystemInfo) {
     const getParams = useParams();
     const navigate = useNavigate();
 
@@ -124,25 +125,19 @@ export function AdminLinkEdit() {
         }
     }
 
-    document.title = "竹叶 - 友链编辑"
+    document.title = `${systemInfo.info.site.site_name} - 编辑友链`;
 
     return (
         <div className={"grid grid-cols-12 gap-6"}>
             <div className={"col-span-full text-xl font-bold"}>友链管理 - 编辑</div>
-            <div className={"col-span-full grid lg:hidden justify-between"}>
-                <button onClick={() => navigate("/admin/link")}
-                        className={"transition hover:scale-125"}>
+            <div className={"col-span-full flex lg:hidden justify-between"}>
+                <Link to={"/admin/link"}
+                      className={"transition hover:scale-125"}>
                     <LeftOutlined/>
-                </button>
-                <div className={"grid gap-3"}>
-                    <Link to={"/admin/link"}
-                          className={"rounded-lg transition bg-red-400 hover:bg-red-500 text-white text-center px-4 py-2"}>
-                        取消修改
-                    </Link>
-                    <div onClick={editSubmit}
-                         className={"rounded-lg transition bg-emerald-500 hover:bg-emerald-600 text-white text-center px-4 py-1"}>
-                        确认修改
-                    </div>
+                </Link>
+                <div onClick={editSubmit}
+                     className={"rounded-lg transition bg-emerald-500 hover:bg-emerald-600 text-white text-center px-4 py-1"}>
+                    确认修改
                 </div>
             </div>
             <div className={"col-span-full lg:col-span-8"} key={"first"}>

@@ -32,8 +32,9 @@ import {message} from "antd";
 import {LinkDO} from "../../resources/ts/models/entity/link_get_admin_entity.ts";
 import {Link} from "react-router-dom";
 import {AppstoreOutlined, UnorderedListOutlined} from "@ant-design/icons";
+import {SystemInfo} from "../../resources/ts/models/entity/info_get_entity.ts";
 
-export function AdminLink() {
+export function AdminLink(systemInfo: SystemInfo) {
     const [linkCount, setLinkCount] = useState(0);
     const [linkRecentAdd, setLinkRecentAdd] = useState(0);
     const [linkRecentModified, setLinkRecentModified] = useState(0);
@@ -96,7 +97,7 @@ export function AdminLink() {
             setWebLink(linkList.map((link: LinkDO) => {
                 return (
                     <div key={link.id}
-                         className={"transition block bg-white rounded-lg p-4 shadow-sm shadow-indigo-100 hover:scale-105"}>
+                         className={"transition block bg-white rounded-lg p-4 shadow-sm shadow-indigo-100 hover:scale-105 mb-3"}>
                         <div className={"grid gap-1"}>
                             <div className={"flex gap-3"}>
                                 <div className={"h-12 w-12 overflow-hidden flex rounded-full"}>
@@ -104,9 +105,9 @@ export function AdminLink() {
                                 </div>
                                 <div className={"w-full"}>
                                     <div className={"flex justify-between gap-1 items-center"}>
-                                        <div className={"text-xl font-bold truncate"}>{link.site_name}</div>
+                                        <div className={"flex-1 text-xl font-bold truncate"}>{link.site_name}</div>
                                         <Link to={`/admin/link/edit/${link.id}`}
-                                              className={"block rounded-lg bg-red-400 px-2 py-1 text-sm font-medium text-white"}>
+                                              className={"flex-initial rounded-lg bg-red-400 px-2 py-1 text-sm font-medium text-white"}>
                                             编辑
                                         </Link>
                                     </div>
@@ -156,7 +157,7 @@ export function AdminLink() {
     }
 
 
-    document.title = "竹叶 - 友链管理";
+    document.title = `${systemInfo.info.site.site_name} - 友链管理`;
 
     return (
         <div className={"grid grid-cols-12 gap-6"}>
@@ -201,8 +202,7 @@ export function AdminLink() {
                                 <select
                                     name="HeadlineAct"
                                     id="HeadlineAct"
-                                    className="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
-                                >
+                                    className="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm">
                                     <option value="">板块选择</option>
                                     {linkLocation}
                                 </select>

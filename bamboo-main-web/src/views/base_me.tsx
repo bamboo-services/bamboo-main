@@ -30,8 +30,42 @@ import {AboutHeaderComponent} from "../components/home/about_header.tsx";
 import {Route, Routes} from "react-router-dom";
 import MeAbout from "./me/me_about.tsx";
 import {MeFriends} from "./me/me_friends.tsx";
+import {useEffect, useState} from "react";
+import {InfoAPI} from "../resources/ts/apis/api_info.ts";
+import {message} from "antd";
 
 export default function BaseMe() {
+    const [systemInfo, setSystemInfo] = useState({
+        site: {
+            site_name: "竹叶",
+            author: "筱锋xiao_lfeng",
+            version: "",
+            description: "",
+            keywords: "",
+        },
+        blogger: {
+            name: "",
+            nick: "",
+            email: "",
+            description: "",
+        }
+    });
+
+    useEffect(() => {
+        if (localStorage.getItem("WebInfo") == null) {
+            setTimeout(async () => {
+                const getRes = await InfoAPI();
+                if (getRes?.output === "Success") {
+                    setSystemInfo(getRes.data!);
+                    localStorage.setItem("WebInfo", JSON.stringify(getRes.data!));
+                } else {
+                    message.warning(getRes?.error_message);
+                }
+            });
+        } else {
+            setSystemInfo(JSON.parse(localStorage.getItem("WebInfo")!));
+        }
+    }, []);
 
     return (
         <>
@@ -50,8 +84,8 @@ export default function BaseMe() {
                 <div className={"col-span-12 p-4 pb-20 md:p-10 w-lvw md:flex md:justify-center"}>
                     <div className={"md:w-10/12 lg:w-8/12 xl:max-w-screen-xl"}>
                         <Routes>
-                            <Route path={"about"} element={<MeAbout/>}/>
-                            <Route path={"friends"} element={<MeFriends/>}/>
+                            <Route path={"about"} element={<MeAbout info={systemInfo}/>}/>
+                            <Route path={"friends"} element={<MeFriends info={systemInfo}/>}/>
                             <Route path={"other"} element={<div>关于我们</div>}/>
                         </Routes>
                     </div>

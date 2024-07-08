@@ -30,18 +30,50 @@ import {AdminDashboard} from "./admin/admin_dashboard.tsx";
 import {Route, Routes, useNavigate} from "react-router-dom";
 import {AdminSideMenuComponent} from "../components/admin/admin_side_menu.tsx";
 import {useEffect, useState} from "react";
-import {InfoUserAPI} from "../resources/ts/apis/api_info.ts";
-import { message } from "antd";
+import {InfoAPI, InfoUserAPI} from "../resources/ts/apis/api_info.ts";
+import {message} from "antd";
 import {UserCurrentEntity} from "../resources/ts/models/entity/user_current_entity.ts";
 import {AdminLink} from "./admin/admin_link.tsx";
 import {AdminLinkEdit} from "./admin/admin_link_edit.tsx";
 import {AdminLinkLocation} from "./admin/admin_link_location.tsx";
 import {AdminSetting} from "./admin/admin_setting.tsx";
-import { AdminLinkAdd } from "./admin/admin_link_add.tsx";
+import {AdminLinkAdd} from "./admin/admin_link_add.tsx";
 
 export function BaseAdmin() {
-    const [userCurrent, setUserInfo] = useState({} as UserCurrentEntity);
     const navigation = useNavigate();
+
+    const [userCurrent, setUserInfo] = useState({} as UserCurrentEntity);
+    const [systemInfo, setSystemInfo] = useState({
+        site: {
+            site_name: "竹叶",
+            author: "筱锋xiao_lfeng",
+            version: "",
+            description: "",
+            keywords: "",
+        },
+        blogger: {
+            name: "",
+            nick: "",
+            email: "",
+            description: "",
+        }
+    });
+
+    useEffect(() => {
+        if (localStorage.getItem("WebInfo") == null) {
+            setTimeout(async () => {
+                const getRes = await InfoAPI();
+                if (getRes?.output === "Success") {
+                    setSystemInfo(getRes.data!);
+                    localStorage.setItem("WebInfo", JSON.stringify(getRes.data!));
+                } else {
+                    message.warning(getRes?.error_message);
+                }
+            });
+        } else {
+            setSystemInfo(JSON.parse(localStorage.getItem("WebInfo")!));
+        }
+    }, []);
 
     useEffect(() => {
         InfoUserAPI().then(async (getRes) => {
@@ -63,20 +95,24 @@ export function BaseAdmin() {
     return (
         <div className={"grid grid-cols-12 bg-gray-100/75"}>
             <div className={"hidden md:block"}>
-                <AdminSideMenuComponent username={userCurrent.username} email={userCurrent.email} uuid={userCurrent.uuid}/>
+                <AdminSideMenuComponent username={userCurrent.username} email={userCurrent.email}
+                                        uuid={userCurrent.uuid}/>
             </div>
-            <div className={"md:ps-[200px] lg:ps-[250px] col-span-12 m-6 min-h-dvh mb-16"}>
-                <Routes>
-                    <Route path={"dashboard"} element={<AdminDashboard/>}/>
-                    <Route path={"link"} element={<AdminLink/>}/>
-                    <Route path={"link/add"} element={<AdminLinkAdd/>}/>
-                    <Route path={"link/edit/:id"} element={<AdminLinkEdit/>}/>
-                    <Route path={"link/location"} element={<AdminLinkLocation/>}/>
-                    <Route path={"setting"} element={<AdminSetting/>}/>
-                </Routes>
+            <div className={"md:ps-[200px] lg:ps-[250px] col-span-12 min-h-lvh bg-gray-100/75 pb-20 md:pb-0"}>
+                <div className={"p-6"}>
+                    <Routes>
+                        <Route path={"dashboard"} element={<AdminDashboard info={systemInfo}/>}/>
+                        <Route path={"link"} element={<AdminLink info={systemInfo}/>}/>
+                        <Route path={"link/add"} element={<AdminLinkAdd info={systemInfo}/>}/>
+                        <Route path={"link/edit/:id"} element={<AdminLinkEdit info={systemInfo}/>}/>
+                        <Route path={"link/location"} element={<AdminLinkLocation info={systemInfo}/>}/>
+                        <Route path={"setting"} element={<AdminSetting info={systemInfo}/>}/>
+                    </Routes>
+                </div>
             </div>
             <div className={"block md:hidden col-span-12"}>
-                <AdminSideMenuComponent username={userCurrent.username} email={userCurrent.email} uuid={userCurrent.uuid}/>
+                <AdminSideMenuComponent username={userCurrent.username} email={userCurrent.email}
+                                        uuid={userCurrent.uuid}/>
             </div>
         </div>
     )

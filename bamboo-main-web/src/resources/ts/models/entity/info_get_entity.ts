@@ -26,45 +26,37 @@
  * --------------------------------------------------------------------------------
  */
 
-import {BaseApi, GetAuthorizationToken, MethodType} from "../base_api.ts";
-import {BaseResponse} from "../models/base_response.ts";
-import {UserCurrentEntity} from "../models/entity/user_current_entity.ts";
-import {InfoEntity} from "../models/entity/info_get_entity.ts";
-
 /**
- * InfoUserAPI
- *
- * 用于获取用户的登录相关的信息，以及检查用户在线情况的一种方式
- *
- * @returns Promise<BaseResponse<AuthLoginEntity>>
- */
-const InfoUserAPI = async (): Promise<BaseResponse<UserCurrentEntity> | undefined> => {
-    return BaseApi<UserCurrentEntity>(
-        MethodType.GET,
-        "/api/v1/info/user",
-        null,
-        null,
-        null,
-        {"Authorization": GetAuthorizationToken()}
-    )
-}
-
-/**
- * InfoAPI
+ * InfoEntity
  *
  * 用于获取系统的信息，包括版本号，系统名称等
  *
- * @returns Promise<BaseResponse<InfoEntity>>
+ * @param site_name 网站名称
+ * @param author 作者
+ * @param version 版本号
+ * @param description 网站描述
+ * @param keywords 关键字
+ * @param name 博主名称
+ * @param nick 博主昵称
+ * @param email 博主邮箱
+ * @param description 博主描述
  */
-const InfoAPI = async (): Promise<BaseResponse<InfoEntity> | undefined> => {
-    return BaseApi<InfoEntity>(
-        MethodType.GET,
-        "/api/v1/info",
-        null,
-        null,
-        null,
-        null
-    );
+export type InfoEntity = {
+    site: {
+        site_name: string;
+        author: string;
+        version: string;
+        description: string;
+        keywords: string;
+    }
+    blogger: {
+        name: string;
+        nick: string;
+        email: string;
+        description: string;
+    }
 }
 
-export {InfoUserAPI, InfoAPI};
+export type SystemInfo = {
+    info: InfoEntity
+}

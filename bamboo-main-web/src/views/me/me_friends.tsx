@@ -33,8 +33,9 @@ import {GetLinkAPI} from "../../resources/ts/apis/api_link.ts";
 import {message} from "antd";
 import {LinkOutlined} from "@ant-design/icons";
 import {Util} from "../../resources/utils/process_util.ts";
+import {SystemInfo} from "../../resources/ts/models/entity/info_get_entity.ts";
 
-export function MeFriends() {
+export function MeFriends(info: SystemInfo) {
     const [getLink, setGetLink] = useState({} as LinkGetEntity);
     const [webReveal, setWebReveal] = useState([] as JSX.Element[]);
 
@@ -93,7 +94,7 @@ export function MeFriends() {
         }
     }, [getLink]);
 
-    document.title = "竹叶 - 友人帐"
+    document.title = `${info.info.site.site_name} - 友人帐`;
 
     return (
         <div className={"grid md:rounded-lg md:bg-white md:bg-opacity-50 md:p-6 md:shadow-xl"}>

@@ -34,9 +34,10 @@ import {
     UserOutlined,
     UserSwitchOutlined
 } from "@ant-design/icons";
+import {SystemInfo} from "../../resources/ts/models/entity/info_get_entity.ts";
 
-export function AdminDashboard() {
-    document.title = "竹叶 - 看板"
+export function AdminDashboard(systemInfo: SystemInfo) {
+    document.title = `${systemInfo.info.site.site_name} - 看板`
 
     return (
         <div className={"grid grid-cols-12 gap-6"}>

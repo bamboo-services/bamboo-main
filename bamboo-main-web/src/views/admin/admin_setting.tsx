@@ -26,11 +26,25 @@
  * --------------------------------------------------------------------------------
  */
 
-export function AdminSetting() {
+import {SystemInfo} from "../../resources/ts/models/entity/info_get_entity.ts";
+
+export function AdminSetting(systemInfo: SystemInfo) {
+
+    document.title = `${systemInfo.info.site.site_name} - 系统设置`
+
     return (
         <div className={"grid grid-cols-12 gap-6"}>
-            <div className={"col-span-12 text-xl font-bold"}>友链管理</div>
-            <div className={"col-span-12 lg:hidden"}>
+            <div className={"col-span-full text-xl font-bold"}>系统设置</div>
+            <div className={"col-span-full lg:col-span-6 grid"}>
+                <div className={"rounded-lg bg-white p-4 shadow-sm shadow-indigo-100 grid gap-3"}>
+                    <div className={"text-lg font-bold"}>系统设置</div>
+
+                </div>
+            </div>
+            <div className={"col-span-full lg:col-span-6 grid"}>
+                <div className={"rounded-lg bg-white p-4 shadow-sm shadow-indigo-100 grid gap-3"}>
+                    <div className={"text-lg font-bold"}>修改密码</div>
+                </div>
             </div>
         </div>
     );
