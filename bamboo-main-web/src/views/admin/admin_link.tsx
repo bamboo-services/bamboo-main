@@ -97,7 +97,7 @@ export function AdminLink(systemInfo: SystemInfo) {
             setWebLink(linkList.map((link: LinkDO) => {
                 return (
                     <div key={link.id}
-                         className={"transition block bg-white rounded-lg p-4 shadow-sm shadow-indigo-100 hover:scale-105 mb-3"}>
+                         className={"transition block bg-white rounded-lg p-4 shadow-sm shadow-indigo-100 hover:scale-105"}>
                         <div className={"grid gap-1"}>
                             <div className={"flex gap-3"}>
                                 <div className={"h-12 w-12 overflow-hidden flex rounded-full"}>

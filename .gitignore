@@ -41,5 +41,7 @@ manifest/output/
 temp/
 temp.yaml
 bin
-**/config/config.yaml
+manifest/config/default.yaml
+manifest/config/config.yaml
 /.logs/
+resource/public

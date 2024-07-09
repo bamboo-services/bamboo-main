@@ -79,9 +79,14 @@ var (
 			})
 
 			// 前端部分
-			s.Group("/**/**", func(group *ghttp.RouterGroup) {
-
+			s.Group("/", func(group *ghttp.RouterGroup) {
+				group.GET("/", func(r *ghttp.Request) { r.Response.ServeFile("resource/public/index.html") })
+				group.GET("/me/**", func(r *ghttp.Request) { r.Response.ServeFile("resource/public/index.html") })
+				group.GET("/admin/**", func(r *ghttp.Request) { r.Response.ServeFile("resource/public/index.html") })
+				group.GET("/auth/**", func(r *ghttp.Request) { r.Response.ServeFile("resource/public/index.html") })
 			})
+			s.AddStaticPath("/assets", "resource/public/assets")
+			s.AddStaticPath("/favicon.png", "resource/public/favicon.png")
 			s.Run()
 			return nil
 		},

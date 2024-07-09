@@ -32,7 +32,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gfile"
+	"github.com/gogf/gf/v2/os/gres"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 )
@@ -49,14 +49,14 @@ import (
 //   - CTX: 上下文对象，用于传递和控制请求的生命周期。
 //   - databaseName: 数据库名称
 func (is *InitStruct) initialSQL(ctx context.Context, databaseName string) {
-	_, err := g.DB().Exec(ctx, "SELECT * FROM information_schema.tables WHERE table_name = ?", databaseName)
-	if err != nil {
+	result, _ := g.Model("information_schema.tables").Where("table_name = ?", databaseName).One()
+	if result.IsEmpty() {
 		// 创建数据表
 		errTransaction := g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 			// 读取文件
-			getFileContent := gfile.GetContents("resource/sql/" + databaseName + ".sql")
+			getFileContent := gres.GetContent("resource/sql/" + databaseName + ".sql")
 			// 创建 xf_index.sql 表
-			if _, err := tx.Exec(getFileContent); err != nil {
+			if _, err := tx.Exec(string(getFileContent)); err != nil {
 				return err
 			}
 			return nil
@@ -79,7 +79,7 @@ func (is *InitStruct) initialSQL(ctx context.Context, databaseName string) {
 // 参数:
 //   - template: 模板名称
 func (is *InitStruct) getMailTemplate(template string) string {
-	return gfile.GetContents("resource/template/mail/" + template + ".html")
+	return string(gres.GetContent("resource/template/mail/" + template + ".html"))
 }
 
 // insertIndexData

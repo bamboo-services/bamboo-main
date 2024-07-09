@@ -40,7 +40,7 @@ import {SystemInfo} from "../../resources/ts/models/entity/info_get_entity.ts";
 export function AdminLinkAdd(systemInfo: SystemInfo) {
     const navigate = useNavigate();
 
-    const [link, setLink] = useState({} as LinkAddAdminDTO);
+    const [link, setLink] = useState({has_adv: false} as LinkAddAdminDTO);
     const [getLocation, setGetLocation] = useState({} as LocationGetAdminEntity);
     const [getColor, setGetColor] = useState({} as ColorsEntity);
 
