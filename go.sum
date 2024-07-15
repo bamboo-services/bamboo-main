@@ -1,7 +1,7 @@
 github.com/BurntSushi/toml v1.4.0 h1:kuoIxZQy2WRRk1pttg9asf+WVv6tWQuBNVmK8+nqPr0=
 github.com/BurntSushi/toml v1.4.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
-github.com/bamboo-services/bamboo-utils v0.1.4 h1:6ds0A7S0m+rCeiddptTizpjLqUXDNv+HTv4olRlwn74=
-github.com/bamboo-services/bamboo-utils v0.1.4/go.mod h1:RFhT8VawkP/vRfGoSnhQq6Uq6HrryKUYqla2WN0gsWU=
+github.com/bamboo-services/bamboo-utils v0.1.5 h1:NQTDcbTwWFg1Zg/CJjED8U30qDkW5s+namS6i8Fc1yg=
+github.com/bamboo-services/bamboo-utils v0.1.5/go.mod h1:RFhT8VawkP/vRfGoSnhQq6Uq6HrryKUYqla2WN0gsWU=
 github.com/clbanning/mxj/v2 v2.7.0 h1:WA/La7UGCanFe5NpHF0Q3DNtnCsVoxbPKuyBNHWRyME=
 github.com/clbanning/mxj/v2 v2.7.0/go.mod h1:hNiWqW14h+kc+MdF9C6/YoRfjEJoR3ou6tn/Qo+ve2s=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
