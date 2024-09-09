@@ -5,7 +5,7 @@ go 1.22.2
 require (
 	github.com/bamboo-services/bamboo-utils v0.1.5
 	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.7.2
-	github.com/gogf/gf/v2 v2.7.2
+	github.com/gogf/gf/v2 v2.7.3
 	github.com/google/uuid v1.6.0
 	github.com/young2j/gocopy v1.1.14
 	golang.org/x/crypto v0.26.0
