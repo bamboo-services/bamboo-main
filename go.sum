@@ -21,8 +21,8 @@ github.com/go-logr/logr v1.4.2/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ4
 github.com/go-logr/stdr v1.2.2 h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=
 github.com/go-logr/stdr v1.2.2/go.mod h1:mMo/vtBO5dYbehREoey6XUKy/eSumjCCveDpRre4VKE=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
-github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.7.4 h1:6eaV81MUtE7NUqYR95wOLQcdZ+OlLxn2GEs+rN+wtrM=
-github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.7.4/go.mod h1:JjZO8Ic5UxnFVtEY4cDkpFQQ1tx7pX7ZAQnlJ8ux0Kc=
+github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.8.1 h1:3qvtIC0lXq98wrbgIsZlO7dsX6RbivO80Kgf04aIOIc=
+github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.8.1/go.mod h1:lJNTXofTugG44Xyvye9QYZoW5KecuPVnJNNhR06dc/M=
 github.com/gogf/gf/v2 v2.8.1 h1:1oVQg3G5OgCats4qWFTH3pHLe92nfUQeUDta05tUs1g=
 github.com/gogf/gf/v2 v2.8.1/go.mod h1:6iYuZZ+A0ZcH8+4MDS/P0SvTPCvKzRvyAsY1kbkJYJc=
 github.com/golang/snappy v0.0.1/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEWrmP2Q=
