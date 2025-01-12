@@ -46,7 +46,7 @@ import (
 //
 // 返回：
 // res: 如果获取赞助类型成功，返回 nil；否则返回错误。
-func (c *ControllerV1) SponsorTypeGet(ctx context.Context, req *v1.SponsorTypeGetReq) (res *v1.SponsorTypeGetRes, err error) {
+func (c *ControllerV1) SponsorTypeGet(ctx context.Context, _ *v1.SponsorTypeGetReq) (res *v1.SponsorTypeGetRes, err error) {
 	sponsorType, err := service.Sponsor().GetSponsorType(ctx)
 	if err == nil {
 		return &v1.SponsorTypeGetRes{

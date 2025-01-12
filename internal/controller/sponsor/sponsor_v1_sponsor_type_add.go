@@ -30,13 +30,37 @@ package sponsor
 
 import (
 	"context"
-
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
+	"xiaoMain/internal/service"
 
 	"xiaoMain/api/sponsor/v1"
 )
 
+// SponsorTypeAdd 添加赞助商类型
+// 用于添加赞助商类型，如果赞助商类型已存在则返回错误
+// 用于添加其他额外自定义的赞助类型信息
+//
+// # 接口
+//   - ctx: 上下文
+//   - req: 请求参数
+//
+// # 返回
+//   - res: 返回结果
+//   - err: 错误信息
 func (c *ControllerV1) SponsorTypeAdd(ctx context.Context, req *v1.SponsorTypeAddReq) (res *v1.SponsorTypeAddRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	sponsorType, err := service.Sponsor().GetSingleSponsorType(ctx, req.Name)
+	if err == nil {
+		if sponsorType == nil {
+			err = service.Sponsor().AddSponsorType(ctx, req)
+			if err == nil {
+				return &v1.SponsorTypeAddRes{}, nil
+			} else {
+				return nil, err
+			}
+		} else {
+			return nil, berror.NewError(bcode.AlreadyExists, "赞助商类型已存在")
+		}
+	}
+	return nil, err
 }

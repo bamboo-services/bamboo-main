@@ -27,21 +27,3 @@
  */
 
 package v1
-
-import "github.com/gogf/gf/v2/frame/g"
-
-// SponsorTypeAddReq 添加赞助类型请求参数
-// @Summary 添加赞助类型
-type SponsorTypeAddReq struct {
-	g.Meta  `path:"/sponsor/type" method:"Post" tags:"赞助控制器" summary:"添加赞助类型"`
-	Name    string `json:"name" v:"required#请输入赞助类型名称"`
-	Url     string `json:"url" v:"required|url#请输入赞助类型链接或图片|链接格式不正确"`
-	Include bool   `json:"include" v:"required#是否计入赞助总额"`
-	Link    bool   `json:"link" v:"required#是否是可跳转链接"`
-}
-
-// SponsorTypeAddRes 添加赞助类型响应
-// @Summary 添加赞助类型响应
-type SponsorTypeAddRes struct {
-	g.Meta `mime:"application/json"`
-}

@@ -35,6 +35,7 @@ package service
 
 import (
 	"context"
+	v1 "xiaoMain/api/sponsor/v1"
 	"xiaoMain/internal/model/entity"
 )
 
@@ -52,8 +53,37 @@ type (
 		//   - ctx: 上下文
 		//
 		// # 返回
+		//   - sponsorTypeList: 赞助类型列表
 		//   - err: 错误信息
 		GetSponsorType(ctx context.Context) ([]*entity.SponsorType, error)
+		// GetSingleSponsorType
+		//
+		// # 获取单个赞助类型
+		//
+		// 用于获取单个赞助类型，从数据库中获取赞助类型的数据；
+		// 获取的数据直接输出出来；
+		//
+		// # 参数
+		//   - ctx: 上下文
+		//   - name: 赞助类型名称
+		//
+		// # 返回
+		//   - err: 错误信息
+		GetSingleSponsorType(ctx context.Context, name string) (*entity.SponsorType, error)
+		// AddSponsorType
+		//
+		// # 添加赞助类型
+		//
+		// 用于添加赞助类型，将赞助类型添加到数据库中；
+		// 添加成功返回 nil，否则返回错误。
+		//
+		// # 参数
+		//   - ctx: 上下文
+		//   - req: 添加赞助类型的请求
+		//
+		// # 返回
+		//   - err: 错误信息
+		AddSponsorType(ctx context.Context, req *v1.SponsorTypeAddReq) (err error)
 	}
 )
 

@@ -32,6 +32,8 @@ import (
 	"context"
 	"github.com/bamboo-services/bamboo-utils/bcode"
 	"github.com/bamboo-services/bamboo-utils/berror"
+	"github.com/gogf/gf/v2/frame/g"
+	v1 "xiaoMain/api/sponsor/v1"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/entity"
 )
@@ -48,12 +50,62 @@ import (
 //   - ctx: 上下文
 //
 // # 返回
+//   - sponsorTypeList: 赞助类型列表
 //   - err: 错误信息
 func (s *sSponsor) GetSponsorType(ctx context.Context) ([]*entity.SponsorType, error) {
+	g.Log().Notice(ctx, "[LOGIC] SponsorLogic:GetSponsorType | 获取赞助类型")
 	var sponsorTypeList []*entity.SponsorType
 	err := dao.SponsorType.Ctx(ctx).Scan(&sponsorTypeList)
 	if err != nil {
 		return nil, berror.NewError(bcode.ServerInternalError, err.Error())
 	}
 	return sponsorTypeList, nil
+}
+
+// GetSingleSponsorType
+//
+// # 获取单个赞助类型
+//
+// 用于获取单个赞助类型，从数据库中获取赞助类型的数据；
+// 获取的数据直接输出出来；
+//
+// # 参数
+//   - ctx: 上下文
+//   - name: 赞助类型名称
+//
+// # 返回
+//   - err: 错误信息
+func (s *sSponsor) GetSingleSponsorType(ctx context.Context, name string) (*entity.SponsorType, error) {
+	g.Log().Notice(ctx, "[LOGIC] SponsorLogic:GetSingleSponsorType | 获取单个赞助类型")
+	var sponsorType *entity.SponsorType
+	if dao.SponsorType.Ctx(ctx).Where("name", name).Scan(&sponsorType) != nil {
+		return nil, berror.NewError(bcode.ServerInternalError, "获取赞助类型失败")
+	}
+	if sponsorType == nil {
+		return nil, berror.NewError(bcode.NotExist, "赞助类型不存在")
+	}
+	return sponsorType, nil
+}
+
+// AddSponsorType
+//
+// # 添加赞助类型
+//
+// 用于添加赞助类型，将赞助类型添加到数据库中；
+// 添加成功返回 nil，否则返回错误。
+//
+// # 参数
+//   - ctx: 上下文
+//   - req: 添加赞助类型的请求
+//
+// # 返回
+//   - err: 错误信息
+func (s *sSponsor) AddSponsorType(ctx context.Context, req *v1.SponsorTypeAddReq) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] SponsorLogic:AddSponsorType | 添加赞助类型")
+	if _, err = dao.SponsorType.Ctx(ctx).Data(entity.SponsorType{
+		Name: req.Name,
+	}).Insert(); err != nil {
+		return berror.NewError(bcode.ServerInternalError, err.Error())
+	}
+	return nil
 }
