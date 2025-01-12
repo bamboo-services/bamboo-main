@@ -27,3 +27,27 @@
  */
 
 package v1
+
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/google/uuid"
+)
+
+// SponsorEditReq 编辑赞助请求
+// @Summary 编辑赞助
+type SponsorEditReq struct {
+	g.Meta `path:"/sponsor" method:"PUT" tags:"赞助控制器" summary:"编辑赞助"`
+	Uuid   uuid.UUID   `json:"uuid" v:"required#请输入赞助ID"`
+	Name   string      `json:"name" v:"required#请输入赞助者名称"`
+	Url    string      `json:"url" v:"url#链接格式不正确"`
+	Type   int         `json:"type" v:"required#请输入赞助类型"`
+	Money  float64     `json:"money" v:"required#请输入赞助金额"`
+	Time   *gtime.Time `json:"time" v:"required#请输入赞助时间"`
+}
+
+// SponsorEditRes 编辑赞助响应
+// @Summary 编辑赞助响应
+type SponsorEditRes struct {
+	g.Meta `mime:"application/json"`
+}

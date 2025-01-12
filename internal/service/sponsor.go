@@ -37,10 +37,66 @@ import (
 	"context"
 	v1 "xiaoMain/api/sponsor/v1"
 	"xiaoMain/internal/model/entity"
+
+	"github.com/google/uuid"
 )
 
 type (
 	ISponsor interface {
+		// AddSponsor
+		//
+		// # 赞助添加
+		//
+		// 用于添加赞助，添加一个赞助信息
+		//
+		// # 接口
+		//   - ctx: 上下文
+		//   - req: 请求参数
+		//
+		// # 返回
+		//   - err: 错误信息
+		AddSponsor(ctx context.Context, req *v1.SponsorAddReq) (err error)
+		// GetSponsorByUUID
+		//
+		// # 获取赞助信息
+		//
+		// 用于获取赞助信息，从数据库中获取赞助的数据；
+		// 获取的数据直接输出出来；
+		//
+		// # 参数
+		//   - ctx: 上下文
+		//   - uuid: 赞助UUID
+		//
+		// # 返回
+		//   - err: 错误信息
+		GetSponsorByUUID(ctx context.Context, uuid uuid.UUID) (*entity.Sponsor, error)
+		// EditSponsor
+		//
+		// # 赞助编辑
+		//
+		// 用于编辑赞助，编辑一个赞助信息
+		//
+		// # 接口
+		//   - ctx: 上下文
+		//   - uuid: 赞助UUID
+		//   - req: 请求参数
+		//
+		// # 返回
+		//   - err: 错误信息
+		EditSponsor(ctx context.Context, uuid uuid.UUID, req *v1.SponsorEditReq) (err error)
+		// DelSponsor
+		//
+		// # 赞助删除
+		//
+		// 用于删除赞助，删除一个赞助信息
+		//
+		// # 接口
+		//   - ctx: 上下文
+		//   - uuid: 赞助UUID
+		//
+		// # 返回
+		//   - err: 错误信息
+		DelSponsor(ctx context.Context, uuid uuid.UUID) (err error)
 		// GetSponsorType
 		//
 		// # 获取赞助类型

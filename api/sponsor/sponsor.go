@@ -39,6 +39,9 @@ import (
 )
 
 type ISponsorV1 interface {
+	SponsorAdd(ctx context.Context, req *v1.SponsorAddReq) (res *v1.SponsorAddRes, err error)
+	SponsorDel(ctx context.Context, req *v1.SponsorDelReq) (res *v1.SponsorDelRes, err error)
+	SponsorEdit(ctx context.Context, req *v1.SponsorEditReq) (res *v1.SponsorEditRes, err error)
 	SponsorTypeAdd(ctx context.Context, req *v1.SponsorTypeAddReq) (res *v1.SponsorTypeAddRes, err error)
 	SponsorTypeDel(ctx context.Context, req *v1.SponsorTypeDelReq) (res *v1.SponsorTypeDelRes, err error)
 	SponsorTypeEdit(ctx context.Context, req *v1.SponsorTypeEditReq) (res *v1.SponsorTypeEditRes, err error)

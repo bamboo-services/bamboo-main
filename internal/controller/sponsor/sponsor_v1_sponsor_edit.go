@@ -26,22 +26,39 @@
  * --------------------------------------------------------------------------------
  */
 
-package v1
+package sponsor
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/google/uuid"
+	"context"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
+	"xiaoMain/internal/service"
+
+	"xiaoMain/api/sponsor/v1"
 )
 
-// SponsorDelReq 删除赞助请求
-// @Summary 删除赞助
-type SponsorDelReq struct {
-	g.Meta `path:"/sponsor" method:"DELETE" tags:"赞助控制器" summary:"删除赞助"`
-	Uuid   uuid.UUID `json:"uuid" v:"required#请输入赞助ID"`
-}
-
-// SponsorDelRes 删除赞助响应
-// @Summary 删除赞助响应
-type SponsorDelRes struct {
-	g.Meta `mime:"application/json"`
+// SponsorEdit 编辑赞助
+// 用于编辑赞助，如果成功则返回 nil，否则返回错误。
+// 本接口会根据用户提供的赞助信息进行编辑，若编辑失败返回失败信息，若成功返回成功信息
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// req: 用户的请求，包含编辑赞助的详细信息。
+//
+// 返回：
+// res: 如果编辑赞助成功，返回 nil；否则返回错误。
+func (c *ControllerV1) SponsorEdit(ctx context.Context, req *v1.SponsorEditReq) (res *v1.SponsorEditRes, err error) {
+	sponsor, err := service.Sponsor().GetSponsorByUUID(ctx, req.Uuid)
+	if err == nil {
+		if sponsor == nil {
+			return nil, berror.NewError(bcode.NotExist, "没有找到赞助信息")
+		}
+		err := service.Sponsor().EditSponsor(ctx, req.Uuid, req)
+		if err == nil {
+			return &v1.SponsorEditRes{}, nil
+		} else {
+			return nil, err
+		}
+	}
+	return nil, err
 }

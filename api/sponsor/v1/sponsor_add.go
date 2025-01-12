@@ -27,3 +27,25 @@
  */
 
 package v1
+
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+)
+
+// SponsorAddReq 添加赞助请求
+// @Summary 添加赞助
+type SponsorAddReq struct {
+	g.Meta `path:"/sponsor" method:"POST" tags:"赞助控制器" summary:"添加赞助"`
+	Name   string      `json:"name" v:"required#请输入赞助者名称"`
+	Url    string      `json:"url" v:"url#链接格式不正确"`
+	Type   int         `json:"type" v:"required#请输入赞助类型"`
+	Money  float64     `json:"money" v:"required#请输入赞助金额"`
+	Time   *gtime.Time `json:"time" v:"required#请输入赞助时间"`
+}
+
+// SponsorAddRes 添加赞助响应
+// @Summary 添加赞助响应
+type SponsorAddRes struct {
+	g.Meta `mime:"application/json"`
+}

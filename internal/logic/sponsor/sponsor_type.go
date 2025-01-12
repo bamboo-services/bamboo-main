@@ -130,7 +130,10 @@ func (s *sSponsor) GetSingleSponsorTypeById(ctx context.Context, id int) (*entit
 func (s *sSponsor) AddSponsorType(ctx context.Context, req *v1.SponsorTypeAddReq) (err error) {
 	g.Log().Notice(ctx, "[LOGIC] SponsorLogic:AddSponsorType | 添加赞助类型")
 	if _, err = dao.SponsorType.Ctx(ctx).Data(entity.SponsorType{
-		Name: req.Name,
+		Name:    req.Name,
+		Url:     req.Url,
+		Include: req.Include,
+		Link:    req.Link,
 	}).Insert(); err != nil {
 		return berror.NewError(bcode.ServerInternalError, err.Error())
 	}

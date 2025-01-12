@@ -26,22 +26,29 @@
  * --------------------------------------------------------------------------------
  */
 
-package v1
+package sponsor
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/google/uuid"
+	"context"
+	"xiaoMain/internal/service"
+
+	"xiaoMain/api/sponsor/v1"
 )
 
-// SponsorDelReq 删除赞助请求
-// @Summary 删除赞助
-type SponsorDelReq struct {
-	g.Meta `path:"/sponsor" method:"DELETE" tags:"赞助控制器" summary:"删除赞助"`
-	Uuid   uuid.UUID `json:"uuid" v:"required#请输入赞助ID"`
-}
-
-// SponsorDelRes 删除赞助响应
-// @Summary 删除赞助响应
-type SponsorDelRes struct {
-	g.Meta `mime:"application/json"`
+// SponsorAdd 添加赞助
+// 用于添加赞助，如果成功则返回 nil，否则返回错误。
+// 本接口会根据用户提供的赞助信息进行添加，若添加失败返回失败信息，若成功返回成功信息
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// req: 用户的请求，包含添加赞助的详细信息。
+//
+// 返回：
+// res: 如果添加赞助成功，返回 nil；否则返回错误。
+func (c *ControllerV1) SponsorAdd(ctx context.Context, req *v1.SponsorAddReq) (res *v1.SponsorAddRes, err error) {
+	err = service.Sponsor().AddSponsor(ctx, req)
+	if err == nil {
+		return &v1.SponsorAddRes{}, nil
+	}
+	return nil, err
 }
