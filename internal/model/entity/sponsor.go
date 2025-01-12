@@ -26,25 +26,24 @@
  * --------------------------------------------------------------------------------
  */
 
--- auto-generated definition
-create table xf_sponsor_type
-(
-    id         serial               not null
-        constraint xf_sponsor_type_pk
-            primary key,
-    name       varchar(20)          not null,
-    url        text                 not null,
-    include    boolean default true not null,
-    link       boolean              not null,
-    created_at timestamp            not null,
-    updated_at timestamp            not null
-);
+// =================================================================================
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
+// =================================================================================
 
-comment on column xf_sponsor_type.id is '主键';
-comment on column xf_sponsor_type.name is '赞助类型名称';
-comment on column xf_sponsor_type.url is '图片地址或者跳转地址';
-comment on column xf_sponsor_type.include is '是否纳入总数';
-comment on column xf_sponsor_type.link is '是否跳转链接';
-comment on column xf_sponsor_type.created_at is '创建时间';
-comment on column xf_sponsor_type.updated_at is '修改时间';
+package entity
 
+import (
+	"github.com/gogf/gf/v2/os/gtime"
+)
+
+// Sponsor is the golang structure for table sponsor.
+type Sponsor struct {
+	SponsorUuid string      `json:"sponsor_uuid" orm:"sponsor_uuid" ` // 赞助主键
+	Name        string      `json:"name"         orm:"name"         ` // 赞助者名称
+	Url         string      `json:"url"          orm:"url"          ` // 地址
+	Type        int         `json:"type"         orm:"type"         ` // 赞助方式
+	Money       float64     `json:"money"        orm:"money"        ` // 赞助金额
+	Time        *gtime.Time `json:"time"         orm:"time"         ` // 时间戳
+	CreatedAt   *gtime.Time `json:"created_at"   orm:"created_at"   ` // 创建时间
+	UpdatedAt   *gtime.Time `json:"updated_at"   orm:"updated_at"   ` // 修改时间
+}

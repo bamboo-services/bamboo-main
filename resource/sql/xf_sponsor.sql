@@ -27,24 +27,30 @@
  */
 
 -- auto-generated definition
-create table xf_sponsor_type
+create table xf_sponsor
 (
-    id         serial               not null
-        constraint xf_sponsor_type_pk
+    sponsor_uuid uuid                    not null
+        constraint xf_sponsor_uuid_pk
             primary key,
-    name       varchar(20)          not null,
-    url        text                 not null,
-    include    boolean default true not null,
-    link       boolean              not null,
-    created_at timestamp            not null,
-    updated_at timestamp            not null
+    name         varchar(255)            not null,
+    url          varchar,
+    type         integer                 not null
+        constraint xf_sponsor_xf_sponsor_type_id_fk
+            references xf_sponsor_type
+            on update cascade on delete cascade,
+    money        double precision        not null,
+    time         timestamp default now() not null,
+    created_at   timestamp default now() not null,
+    updated_at   timestamp default now() not null
 );
 
-comment on column xf_sponsor_type.id is '主键';
-comment on column xf_sponsor_type.name is '赞助类型名称';
-comment on column xf_sponsor_type.url is '图片地址或者跳转地址';
-comment on column xf_sponsor_type.include is '是否纳入总数';
-comment on column xf_sponsor_type.link is '是否跳转链接';
-comment on column xf_sponsor_type.created_at is '创建时间';
-comment on column xf_sponsor_type.updated_at is '修改时间';
+comment on table xf_sponsor is '赞助表';
+comment on column xf_sponsor.sponsor_uuid is '赞助主键';
+comment on column xf_sponsor.name is '赞助者名称';
+comment on column xf_sponsor.url is '地址';
+comment on column xf_sponsor.type is '赞助方式';
+comment on column xf_sponsor.money is '赞助金额';
+comment on column xf_sponsor.time is '时间戳';
+comment on column xf_sponsor.created_at is '创建时间';
+comment on column xf_sponsor.updated_at is '修改时间';
 

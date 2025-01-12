@@ -39,12 +39,13 @@ import (
 
 // Sponsor is the golang structure of table xf_sponsor for DAO operations like Where/Data.
 type Sponsor struct {
-	g.Meta    `orm:"table:xf_sponsor, do:true"`
-	Id        interface{} // 主键
-	Name      interface{} // 赞助类型名称
-	Url       interface{} // 图片地址或者跳转地址
-	Include   interface{} // 是否纳入总数
-	Link      interface{} // 是否跳转链接
-	CreatedAt *gtime.Time // 创建时间
-	UpdatedAt *gtime.Time // 修改时间
+	g.Meta      `orm:"table:xf_sponsor, do:true"`
+	SponsorUuid interface{} // 赞助主键
+	Name        interface{} // 赞助者名称
+	Url         interface{} // 地址
+	Type        interface{} // 赞助方式
+	Money       interface{} // 赞助金额
+	Time        *gtime.Time // 时间戳
+	CreatedAt   *gtime.Time // 创建时间
+	UpdatedAt   *gtime.Time // 修改时间
 }

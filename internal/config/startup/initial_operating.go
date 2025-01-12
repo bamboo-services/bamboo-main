@@ -86,8 +86,10 @@ func (is *InitStruct) InitialDatabase() {
 	is.initialSQL(is.CTX, "xf_link_list")
 	// 初始化 RSS 订阅表
 	is.initialSQL(is.CTX, "xf_link_rss")
-	// 初始化赞助表
+	// 初始化赞助类型表
 	is.initialSQL(is.CTX, "xf_sponsor_type")
+	// 初始化赞助表
+	is.initialSQL(is.CTX, "xf_sponsor")
 }
 
 // InitialIndexTable
