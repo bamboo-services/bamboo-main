@@ -62,7 +62,7 @@ func (s *sSponsor) GetSponsorType(ctx context.Context) ([]*entity.SponsorType, e
 	return sponsorTypeList, nil
 }
 
-// GetSingleSponsorType
+// GetSingleSponsorTypeByName
 //
 // # 获取单个赞助类型
 //
@@ -74,11 +74,38 @@ func (s *sSponsor) GetSponsorType(ctx context.Context) ([]*entity.SponsorType, e
 //   - name: 赞助类型名称
 //
 // # 返回
+//   - sponsorType: 赞助类型
 //   - err: 错误信息
-func (s *sSponsor) GetSingleSponsorType(ctx context.Context, name string) (*entity.SponsorType, error) {
-	g.Log().Notice(ctx, "[LOGIC] SponsorLogic:GetSingleSponsorType | 获取单个赞助类型")
+func (s *sSponsor) GetSingleSponsorTypeByName(ctx context.Context, name string) (*entity.SponsorType, error) {
+	g.Log().Notice(ctx, "[LOGIC] SponsorLogic:GetSingleSponsorTypeByName | 获取单个赞助类型")
 	var sponsorType *entity.SponsorType
 	if dao.SponsorType.Ctx(ctx).Where("name", name).Scan(&sponsorType) != nil {
+		return nil, berror.NewError(bcode.ServerInternalError, "获取赞助类型失败")
+	}
+	if sponsorType == nil {
+		return nil, berror.NewError(bcode.NotExist, "赞助类型不存在")
+	}
+	return sponsorType, nil
+}
+
+// GetSingleSponsorTypeById
+//
+// # 获取单个赞助类型
+//
+// 用于获取单个赞助类型，从数据库中获取赞助类型的数据；
+// 获取的数据直接输出出来；
+//
+// # 参数
+//   - ctx: 上下文
+//   - id: 赞助类型ID
+//
+// # 返回
+//   - sponsorType: 赞助类型
+//   - err: 错误信息
+func (s *sSponsor) GetSingleSponsorTypeById(ctx context.Context, id int) (*entity.SponsorType, error) {
+	g.Log().Notice(ctx, "[LOGIC] SponsorLogic:GetSingleSponsorTypeById | 获取单个赞助类型")
+	var sponsorType *entity.SponsorType
+	if dao.SponsorType.Ctx(ctx).Where("id", id).Scan(&sponsorType) != nil {
 		return nil, berror.NewError(bcode.ServerInternalError, "获取赞助类型失败")
 	}
 	if sponsorType == nil {
@@ -105,6 +132,50 @@ func (s *sSponsor) AddSponsorType(ctx context.Context, req *v1.SponsorTypeAddReq
 	if _, err = dao.SponsorType.Ctx(ctx).Data(entity.SponsorType{
 		Name: req.Name,
 	}).Insert(); err != nil {
+		return berror.NewError(bcode.ServerInternalError, err.Error())
+	}
+	return nil
+}
+
+// EditSponsorType
+//
+// # 编辑赞助类型
+//
+// 用于编辑赞助类型，将赞助类型编辑到数据库中；
+// 编辑成功返回 nil，否则返回错误。
+//
+// # 参数
+//   - ctx: 上下文
+//   - req: 编辑赞助类型的请求
+//
+// # 返回
+//   - err: 错误信息
+func (s *sSponsor) EditSponsorType(ctx context.Context, req *v1.SponsorTypeEditReq) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] SponsorLogic:EditSponsorType | 编辑赞助类型")
+	if _, err = dao.SponsorType.Ctx(ctx).Data(entity.SponsorType{
+		Name: req.Name,
+	}).Where("id", req.Id).Update(); err != nil {
+		return berror.NewError(bcode.ServerInternalError, err.Error())
+	}
+	return nil
+}
+
+// DelSponsorType
+//
+// # 删除赞助类型
+//
+// 用于删除赞助类型，将赞助类型从数据库中删除；
+// 删除成功返回 nil，否则返回错误。
+//
+// # 参数
+//   - ctx: 上下文
+//   - req: 删除赞助类型的请求
+//
+// # 返回
+//   - err: 错误信息
+func (s *sSponsor) DelSponsorType(ctx context.Context, req int) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] SponsorLogic:DelSponsorType | 删除赞助类型")
+	if _, err = dao.SponsorType.Ctx(ctx).Where("id", req).Delete(); err != nil {
 		return berror.NewError(bcode.ServerInternalError, err.Error())
 	}
 	return nil

@@ -56,7 +56,7 @@ type (
 		//   - sponsorTypeList: 赞助类型列表
 		//   - err: 错误信息
 		GetSponsorType(ctx context.Context) ([]*entity.SponsorType, error)
-		// GetSingleSponsorType
+		// GetSingleSponsorTypeByName
 		//
 		// # 获取单个赞助类型
 		//
@@ -68,8 +68,24 @@ type (
 		//   - name: 赞助类型名称
 		//
 		// # 返回
+		//   - sponsorType: 赞助类型
 		//   - err: 错误信息
-		GetSingleSponsorType(ctx context.Context, name string) (*entity.SponsorType, error)
+		GetSingleSponsorTypeByName(ctx context.Context, name string) (*entity.SponsorType, error)
+		// GetSingleSponsorTypeById
+		//
+		// # 获取单个赞助类型
+		//
+		// 用于获取单个赞助类型，从数据库中获取赞助类型的数据；
+		// 获取的数据直接输出出来；
+		//
+		// # 参数
+		//   - ctx: 上下文
+		//   - id: 赞助类型ID
+		//
+		// # 返回
+		//   - sponsorType: 赞助类型
+		//   - err: 错误信息
+		GetSingleSponsorTypeById(ctx context.Context, id int) (*entity.SponsorType, error)
 		// AddSponsorType
 		//
 		// # 添加赞助类型
@@ -84,6 +100,34 @@ type (
 		// # 返回
 		//   - err: 错误信息
 		AddSponsorType(ctx context.Context, req *v1.SponsorTypeAddReq) (err error)
+		// EditSponsorType
+		//
+		// # 编辑赞助类型
+		//
+		// 用于编辑赞助类型，将赞助类型编辑到数据库中；
+		// 编辑成功返回 nil，否则返回错误。
+		//
+		// # 参数
+		//   - ctx: 上下文
+		//   - req: 编辑赞助类型的请求
+		//
+		// # 返回
+		//   - err: 错误信息
+		EditSponsorType(ctx context.Context, req *v1.SponsorTypeEditReq) (err error)
+		// DelSponsorType
+		//
+		// # 删除赞助类型
+		//
+		// 用于删除赞助类型，将赞助类型从数据库中删除；
+		// 删除成功返回 nil，否则返回错误。
+		//
+		// # 参数
+		//   - ctx: 上下文
+		//   - req: 删除赞助类型的请求
+		//
+		// # 返回
+		//   - err: 错误信息
+		DelSponsorType(ctx context.Context, req int) (err error)
 	}
 )
 

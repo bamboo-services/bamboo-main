@@ -27,3 +27,18 @@
  */
 
 package v1
+
+import "github.com/gogf/gf/v2/frame/g"
+
+// SponsorTypeDelReq 删除赞助类型请求
+// @Summary 删除赞助类型
+type SponsorTypeDelReq struct {
+	g.Meta `path:"/sponsor/del" method:"DELETE" tags:"赞助控制器" summary:"删除赞助类型"`
+	Id     int `json:"id" v:"required#请输入赞助类型ID"`
+}
+
+// SponsorTypeDelRes 删除赞助类型响应
+// @Summary 删除赞助类型响应
+type SponsorTypeDelRes struct {
+	g.Meta `mime:"application/json"`
+}

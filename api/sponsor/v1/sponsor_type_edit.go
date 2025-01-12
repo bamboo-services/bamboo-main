@@ -27,3 +27,22 @@
  */
 
 package v1
+
+import "github.com/gogf/gf/v2/frame/g"
+
+// SponsorTypeEditReq 赞助类型编辑接口
+// @summary 赞助类型编辑接口
+type SponsorTypeEditReq struct {
+	g.Meta  `path:"/sponsor/type" method:"PUT" tags:"赞助控制器" summary:"编辑赞助类型"`
+	Id      int    `json:"id" v:"required#请输入赞助类型ID"`
+	Name    string `json:"name" v:"required#请输入赞助类型名称"`
+	Url     string `json:"url" v:"required|url#请输入赞助类型链接或图片|链接格式不正确"`
+	Include bool   `json:"include" v:"required#是否计入赞助总额"`
+	Link    bool   `json:"link" v:"required#是否是可跳转链接"`
+}
+
+// SponsorTypeEditRes 赞助类型编辑响应
+// @summary 赞助类型编辑响应
+type SponsorTypeEditRes struct {
+	g.Meta `mime:"application/json"`
+}

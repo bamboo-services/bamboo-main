@@ -37,30 +37,27 @@ import (
 	"xiaoMain/api/sponsor/v1"
 )
 
-// SponsorTypeAdd 添加赞助商类型
-// 用于添加赞助商类型，如果赞助商类型已存在则返回错误
-// 用于添加其他额外自定义的赞助类型信息
+// SponsorTypeDel 赞助类型删除
+// 用于删除赞助类型，如果成功则返回 nil，否则返回错误。
+// 本接口会根据已有的赞助类型信息对赞助类型进行删除，若删除失败返回失败信息，若成功返回成功信息
 //
-// # 接口
-//   - ctx: 上下文
-//   - req: 请求参数
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// req: 用户的请求，包含删除赞助类型的详细信息。
 //
-// # 返回
-//   - res: 返回结果
-//   - err: 错误信息
-func (c *ControllerV1) SponsorTypeAdd(ctx context.Context, req *v1.SponsorTypeAddReq) (res *v1.SponsorTypeAddRes, err error) {
-	sponsorType, err := service.Sponsor().GetSingleSponsorTypeByName(ctx, req.Name)
+// 返回：
+// res: 如果删除赞助类型成功，返回 nil；否则返回错误。
+func (c *ControllerV1) SponsorTypeDel(ctx context.Context, req *v1.SponsorTypeDelReq) (res *v1.SponsorTypeDelRes, err error) {
+	sponsorType, err := service.Sponsor().GetSingleSponsorTypeById(ctx, req.Id)
 	if err == nil {
 		if sponsorType == nil {
-			err = service.Sponsor().AddSponsorType(ctx, req)
-			if err == nil {
-				return &v1.SponsorTypeAddRes{}, nil
-			} else {
-				return nil, err
-			}
-		} else {
-			return nil, berror.NewError(bcode.AlreadyExists, "赞助商类型已存在")
+			return nil, berror.NewError(bcode.NotExist, "赞助商类型不存在")
 		}
+		err = service.Sponsor().DelSponsorType(ctx, req.Id)
+		if err == nil {
+			return &v1.SponsorTypeDelRes{}, nil
+		}
+		return nil, err
 	}
 	return nil, err
 }
