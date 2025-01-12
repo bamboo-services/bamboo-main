@@ -194,7 +194,7 @@ func (is *InitStruct) insertColorData(ctx context.Context, name string, displayN
 func (is *InitStruct) insertSponsorData(ctx context.Context, name, url string, include, link bool, createdAt, updatedAt *gtime.Time) interface{} {
 	if record, _ := dao.SponsorType.Ctx(ctx).Where(do.Sponsor{Name: name}).One(); record == nil {
 		if _, err := dao.SponsorType.Ctx(ctx).Data(
-			do.Sponsor{
+			do.SponsorType{
 				Name:      name,
 				Url:       url,
 				Include:   include,

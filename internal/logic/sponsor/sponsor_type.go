@@ -35,6 +35,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	v1 "xiaoMain/api/sponsor/v1"
 	"xiaoMain/internal/dao"
+	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
 )
 
@@ -129,7 +130,7 @@ func (s *sSponsor) GetSingleSponsorTypeById(ctx context.Context, id int) (*entit
 //   - err: 错误信息
 func (s *sSponsor) AddSponsorType(ctx context.Context, req *v1.SponsorTypeAddReq) (err error) {
 	g.Log().Notice(ctx, "[LOGIC] SponsorLogic:AddSponsorType | 添加赞助类型")
-	if _, err = dao.SponsorType.Ctx(ctx).Data(entity.SponsorType{
+	if _, err = dao.SponsorType.Ctx(ctx).Data(do.SponsorType{
 		Name:    req.Name,
 		Url:     req.Url,
 		Include: req.Include,
@@ -155,8 +156,11 @@ func (s *sSponsor) AddSponsorType(ctx context.Context, req *v1.SponsorTypeAddReq
 //   - err: 错误信息
 func (s *sSponsor) EditSponsorType(ctx context.Context, req *v1.SponsorTypeEditReq) (err error) {
 	g.Log().Notice(ctx, "[LOGIC] SponsorLogic:EditSponsorType | 编辑赞助类型")
-	if _, err = dao.SponsorType.Ctx(ctx).Data(entity.SponsorType{
-		Name: req.Name,
+	if _, err = dao.SponsorType.Ctx(ctx).Data(do.SponsorType{
+		Name:    req.Name,
+		Url:     req.Url,
+		Include: req.Include,
+		Link:    req.Link,
 	}).Where("id", req.Id).Update(); err != nil {
 		return berror.NewError(bcode.ServerInternalError, err.Error())
 	}

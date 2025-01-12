@@ -37,6 +37,7 @@ import (
 	"github.com/google/uuid"
 	v1 "xiaoMain/api/sponsor/v1"
 	"xiaoMain/internal/dao"
+	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
 )
 
@@ -55,7 +56,7 @@ import (
 func (s *sSponsor) AddSponsor(ctx context.Context, req *v1.SponsorAddReq) (err error) {
 	g.Log().Notice(ctx, "[LOGIC] SponsorLogic:AddSponsor | 赞助添加")
 	// 赞助添加
-	if _, err = dao.Sponsor.Ctx(ctx).Data(entity.Sponsor{
+	if _, err = dao.Sponsor.Ctx(ctx).Data(do.Sponsor{
 		SponsorUuid: butil.GenerateRandUUID().String(),
 		Name:        req.Name,
 		Url:         req.Url,
@@ -107,7 +108,7 @@ func (s *sSponsor) GetSponsorByUUID(ctx context.Context, uuid uuid.UUID) (*entit
 func (s *sSponsor) EditSponsor(ctx context.Context, uuid uuid.UUID, req *v1.SponsorEditReq) (err error) {
 	g.Log().Notice(ctx, "[LOGIC] SponsorLogic:EditSponsor | 赞助编辑")
 	// 赞助编辑
-	if _, err = dao.Sponsor.Ctx(ctx).Data(entity.Sponsor{
+	if _, err = dao.Sponsor.Ctx(ctx).Data(do.Sponsor{
 		Name:  req.Name,
 		Url:   req.Url,
 		Type:  req.Type,
