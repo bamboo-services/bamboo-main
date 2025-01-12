@@ -46,6 +46,10 @@ import (
 // 返回：
 // res: 如果添加赞助成功，返回 nil；否则返回错误。
 func (c *ControllerV1) SponsorAdd(ctx context.Context, req *v1.SponsorAddReq) (res *v1.SponsorAddRes, err error) {
+	err = service.Auth().IsUserLogin(ctx)
+	if err != nil {
+		return nil, err
+	}
 	err = service.Sponsor().AddSponsor(ctx, req)
 	if err == nil {
 		return &v1.SponsorAddRes{}, nil

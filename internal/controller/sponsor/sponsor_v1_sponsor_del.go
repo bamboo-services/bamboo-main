@@ -48,6 +48,10 @@ import (
 // 返回：
 // res: 如果删除赞助成功，返回 nil；否则返回错误。
 func (c *ControllerV1) SponsorDel(ctx context.Context, req *v1.SponsorDelReq) (res *v1.SponsorDelRes, err error) {
+	err = service.Auth().IsUserLogin(ctx)
+	if err != nil {
+		return nil, err
+	}
 	sponsor, err := service.Sponsor().GetSponsorByUUID(ctx, req.Uuid)
 	if err == nil {
 		if sponsor == nil {

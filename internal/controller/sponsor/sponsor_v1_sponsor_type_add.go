@@ -49,6 +49,10 @@ import (
 //   - res: 返回结果
 //   - err: 错误信息
 func (c *ControllerV1) SponsorTypeAdd(ctx context.Context, req *v1.SponsorTypeAddReq) (res *v1.SponsorTypeAddRes, err error) {
+	err = service.Auth().IsUserLogin(ctx)
+	if err != nil {
+		return nil, err
+	}
 	sponsorType, err := service.Sponsor().GetSingleSponsorTypeByName(ctx, req.Name)
 	if err == nil {
 		if sponsorType == nil {

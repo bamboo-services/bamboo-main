@@ -48,6 +48,10 @@ import (
 // 返回：
 // res: 如果编辑赞助类型成功，返回 nil；否则返回错误。
 func (c *ControllerV1) SponsorTypeEdit(ctx context.Context, req *v1.SponsorTypeEditReq) (res *v1.SponsorTypeEditRes, err error) {
+	err = service.Auth().IsUserLogin(ctx)
+	if err != nil {
+		return nil, err
+	}
 	sponsorType, err := service.Sponsor().GetSingleSponsorTypeById(ctx, req.Id)
 	if err == nil {
 		if sponsorType == nil {
