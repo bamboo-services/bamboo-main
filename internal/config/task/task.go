@@ -41,6 +41,6 @@ import "context"
 // # 参数:
 //   - ctx: 上下文对象，用于传递和控制请求的生命周期。
 func Task(ctx context.Context) {
-	tRssObtain(ctx)
+	//tRssObtain(ctx)
 	tClearVerificationCode(ctx)
 }

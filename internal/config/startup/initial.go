@@ -60,6 +60,8 @@ func Initial(ctx context.Context) {
 	start.InitialColorTable()
 	// 初始化位置表
 	start.InitialLocationTable()
+	// 初始化赞助表
+	start.InitialSponsorTable()
 	// 初始化公共数据
 	start.InitCommonData()
 	// 系统应用

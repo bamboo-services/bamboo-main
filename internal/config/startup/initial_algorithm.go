@@ -33,6 +33,8 @@ import (
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gres"
+	"github.com/gogf/gf/v2/os/gtime"
+	"xiaoMain/internal/constants"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 )
@@ -54,7 +56,7 @@ func (is *InitStruct) initialSQL(ctx context.Context, databaseName string) {
 		// 创建数据表
 		errTransaction := g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 			// 读取文件
-			getFileContent := gres.GetContent("resource/sql/" + databaseName + ".sql")
+			getFileContent := gres.GetContent("sql/" + databaseName + ".sql")
 			// 创建 xf_index.sql 表
 			if _, err := tx.Exec(string(getFileContent)); err != nil {
 				return err
@@ -62,7 +64,7 @@ func (is *InitStruct) initialSQL(ctx context.Context, databaseName string) {
 			return nil
 		})
 		if errTransaction != nil {
-			g.Log().Panicf(ctx, "[BOOT] 数据表 %s 创建失败", databaseName)
+			g.Log().Panicf(ctx, "[BOOT] 数据表 %s 创建失败 (%v)", databaseName, errTransaction)
 		} else {
 			g.Log().Debugf(ctx, "[BOOT] 数据表 %s 创建成功", databaseName)
 		}
@@ -99,7 +101,7 @@ func (is *InitStruct) insertIndexData(ctx context.Context, key string, value str
 	if record, _ := dao.Index.Ctx(ctx).Where(do.Index{Key: key}).One(); record == nil {
 		if _, err = dao.Index.Ctx(ctx).Data(do.Index{Key: key, Value: value}).Insert(); err != nil {
 			g.Log().Noticef(ctx, "[BOOT] 数据表 xf_index 中插入键 %s 失败", key)
-			g.Log().Errorf(ctx, "[BOOT] 错误信息：%v", err.Error())
+			g.Log().Errorf(ctx, constants.BootErrorMessage, err.Error())
 		} else {
 			g.Log().Debugf(ctx, "[BOOT] 数据表 xf_index 中插入键 %s 成功", key)
 		}
@@ -137,7 +139,7 @@ func (is *InitStruct) insertLocationData(
 				Reveal:      reveal,
 			}).Insert(); err != nil {
 			g.Log().Noticef(ctx, "[BOOT] 数据表 xf_desired_color 中插入键 %s 失败", name)
-			g.Log().Errorf(ctx, "[BOOT] 错误信息：%v", err.Error())
+			g.Log().Errorf(ctx, constants.BootErrorMessage, err.Error())
 		} else {
 			g.Log().Debugf(ctx, "[BOOT] 数据表 xf_desired_color 中插入键 %s 成功", name)
 		}
@@ -164,11 +166,49 @@ func (is *InitStruct) insertColorData(ctx context.Context, name string, displayN
 				Color:       color,
 			}).Insert(); err != nil {
 			g.Log().Noticef(ctx, "[BOOT] 数据表 xf_desired_color 中插入键 %s 失败", name)
-			g.Log().Errorf(ctx, "[BOOT] 错误信息：%v", err.Error())
+			g.Log().Errorf(ctx, constants.BootErrorMessage, err.Error())
 		} else {
 			g.Log().Debugf(ctx, "[BOOT] 数据表 xf_desired_color 中插入键 %s 成功", name)
 		}
 	}
+}
+
+// insertSponsorData
+//
+// # 准备赞助商数据
+//
+// 是一个准备赞助商数据的函数。
+// 它会检查数据库表是否完整，并插入必要的数据。
+// 这个函数在应用程序的启动过程中被调用。
+//
+// 参数:
+//   - name: 名称
+//   - url: URL
+//   - include: 是否包含
+//   - link: 是否链接
+//   - createdAt: 创建时间
+//   - updatedAt: 更新时间
+//
+// 返回:
+//   - interface{}: 无
+func (is *InitStruct) insertSponsorData(ctx context.Context, name, url string, include, link bool, createdAt, updatedAt *gtime.Time) interface{} {
+	if record, _ := dao.SponsorType.Ctx(ctx).Where(do.Sponsor{Name: name}).One(); record == nil {
+		if _, err := dao.SponsorType.Ctx(ctx).Data(
+			do.Sponsor{
+				Name:      name,
+				Url:       url,
+				Include:   include,
+				Link:      link,
+				CreatedAt: createdAt,
+				UpdatedAt: updatedAt,
+			}).Insert(); err != nil {
+			g.Log().Noticef(ctx, "[BOOT] 数据表 xf_sponsor 中插入键 %s 失败", name)
+			g.Log().Errorf(ctx, constants.BootErrorMessage, err.Error())
+		} else {
+			g.Log().Debugf(ctx, "[BOOT] 数据表 xf_sponsor 中插入键 %s 成功", name)
+		}
+	}
+	return nil
 }
 
 // prepareCommonData

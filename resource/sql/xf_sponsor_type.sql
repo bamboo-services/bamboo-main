@@ -26,60 +26,25 @@
  * --------------------------------------------------------------------------------
  */
 
-package cmd
+-- auto-generated definition
+create table xf_sponsor_type
+(
+    id         serial               not null
+        constraint xf_sponsor_pk
+            primary key,
+    name       varchar(20)          not null,
+    url        text                 not null,
+    include    boolean default true not null,
+    link       boolean              not null,
+    created_at timestamp            not null,
+    updated_at timestamp            not null
+);
 
-import (
-	"context"
-	"github.com/bamboo-services/bamboo-utils/bmiddle"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/gcmd"
-	"xiaoMain/internal/config/middleware"
-	"xiaoMain/internal/config/startup"
-	"xiaoMain/internal/config/task"
-	"xiaoMain/internal/controller/auth"
-	"xiaoMain/internal/controller/info"
-	"xiaoMain/internal/controller/link"
-	"xiaoMain/internal/controller/mail"
-	"xiaoMain/internal/controller/rss"
-)
+comment on column xf_sponsor_type.id is '主键';
+comment on column xf_sponsor_type.name is '赞助类型名称';
+comment on column xf_sponsor_type.url is '图片地址或者跳转地址';
+comment on column xf_sponsor_type.include is '是否纳入总数';
+comment on column xf_sponsor_type.link is '是否跳转链接';
+comment on column xf_sponsor_type.created_at is '创建时间';
+comment on column xf_sponsor_type.updated_at is '修改时间';
 
-var (
-	Main = gcmd.Command{
-		Name:  "main",
-		Usage: "main",
-		Brief: "XiaoMain 是一个基于 GoFrame 开发的开源主页系统",
-		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
-			// 服务器启动
-			s := g.Server()
-
-			// 数据进行初始化
-			startup.Initial(ctx)
-			// 定时任务
-			task.Task(ctx)
-
-			// 关闭路由映射输出
-			s.SetDumpRouterMap(false)
-
-			// 后端部分
-			s.Group("/api/v1", func(group *ghttp.RouterGroup) {
-				group.Middleware(middleware.MiddleOriginHandler) // 跨域处理
-				group.Middleware(bmiddle.BambooMiddleHandler)    // 全局错误处理
-				group.Middleware(middleware.MiddleAuthenticate)  // 授权路由拦截器
-				group.Middleware(middleware.MiddleTimeHandler)   // 接口时间统计接口
-
-				// 路由绑定
-				group.Bind(
-					auth.NewV1(),
-					link.NewV1(),
-					info.NewV1(),
-					mail.NewV1(),
-					rss.NewV1(),
-				)
-			})
-
-			s.Run()
-			return nil
-		},
-	}
-)

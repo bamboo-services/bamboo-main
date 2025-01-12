@@ -32,6 +32,7 @@ import (
 	"context"
 	"github.com/bamboo-services/bamboo-utils/butil"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 	"xiaoMain/internal/constants"
 )
@@ -85,6 +86,8 @@ func (is *InitStruct) InitialDatabase() {
 	is.initialSQL(is.CTX, "xf_link_list")
 	// 初始化 RSS 订阅表
 	is.initialSQL(is.CTX, "xf_link_rss")
+	// 初始化赞助表
+	is.initialSQL(is.CTX, "xf_sponsor_type")
 }
 
 // InitialIndexTable
@@ -165,6 +168,18 @@ func (is *InitStruct) InitialLocationTable() {
 	// 初始化期望位置表
 	is.insertLocationData(is.CTX, 1, "favorite", "最喜欢", "这是我最喜欢的东西，我当然要置顶啦", true)
 	is.insertLocationData(is.CTX, 100, "fail", "失效的", "这是失效的友链，希望你快回来嗷", false)
+}
+
+func (is *InitStruct) InitialSponsorTable() {
+	// 记录日志，开始初始化数据表
+	g.Log().Notice(is.CTX, "[BOOT] 初始化赞助表")
+
+	// 初始化期望赞助表
+	is.insertSponsorData(is.CTX, "支付宝", "https://i-cdn.akass.cn/2023/07/64ba859272bc9.jpg", true, false, gtime.Now(), gtime.Now())
+	is.insertSponsorData(is.CTX, "微信", "https://i-cdn.akass.cn/2023/07/64ba67c9d08ab.jpg", true, false, gtime.Now(), gtime.Now())
+	is.insertSponsorData(is.CTX, "扣扣", "https://i-cdn.akass.cn/2023/07/64ba8817b179b.png", true, false, gtime.Now(), gtime.Now())
+	is.insertSponsorData(is.CTX, "PayPal", "https://www.paypal.com/paypalme/xiaolfeng", true, true, gtime.Now(), gtime.Now())
+	is.insertSponsorData(is.CTX, "爱发电", "https://afdian.net/a/xiao_lfeng", true, true, gtime.Now(), gtime.Now())
 }
 
 // InitialColorTable

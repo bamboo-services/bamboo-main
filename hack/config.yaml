@@ -23,7 +23,7 @@ gfcli:
     name: "main"
     arch: "amd64,arm64,arm"
     system: "darwin,windows,linux"
-    packSrc: "resource/public"
+    packSrc: "resource/public,resource/template,resource/sql"
     packDst: "internal/packed/build_pack_data.go"
     version: "v0.1.0-beta.1"
     path: "./bin"
