@@ -26,18 +26,18 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
+package v1
 
-package logic
+import "github.com/gogf/gf/v2/frame/g"
 
-import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/rss"
-	_ "xiaoMain/internal/logic/sponsor"
-	_ "xiaoMain/internal/logic/user"
-)
+// SponsorTypeAddReq 添加赞助类型请求参数
+// @Summary 添加赞助类型
+type SponsorTypeAddReq struct {
+	g.Meta `path:"/sponsor/type" method:"Post" tags:"赞助控制器" summary:"添加赞助类型"`
+}
+
+// SponsorTypeAddRes 添加赞助类型响应
+// @Summary 添加赞助类型响应
+type SponsorTypeAddRes struct {
+	g.Meta `mime:"application/json"`
+}

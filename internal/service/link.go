@@ -218,7 +218,7 @@ type (
 		//   - error: 在添加链接过程中发生的任何错误。
 		AddLinkAdmin(ctx context.Context, data v1.LinkAddAdminReq) (err error)
 		EditLocation(ctx context.Context, req v1.EditLocationReq) (err error)
-		LocationMove(ctx context.Context, id, moveID int64) (err error)
+		LocationMove(ctx context.Context, id int64, moveID int64) (err error)
 		DelLocation(ctx context.Context, id int64) (err error)
 		// GetLinkByID
 		//

@@ -34,14 +34,14 @@ import (
 	"xiaoMain/internal/model/entity"
 )
 
-// LinkGetColorReq 获取期望颜色信息
-// 用于获取期望颜色信息
+// LinkGetColorReq 获取可选颜色请求
+// 用于获取可选颜色信息
 type LinkGetColorReq struct {
-	g.Meta `path:"/link/color" method:"get" tags:"链接控制器" summary:"获取期望颜色信息"`
+	g.Meta `path:"/link/color" method:"get" tags:"链接控制器" summary:"获取可选颜色"`
 }
 
-// LinkGetColorRes 获取期望颜色信息响应
-// 用于获取期望颜色信息响应
+// LinkGetColorRes 获取可选颜色响应
+// 用于获取可选颜色响应
 type LinkGetColorRes struct {
 	g.Meta `mime:"application/json"`
 	Colors []*flow.LinkColorDTO `json:"colors" sm:"颜色列表"`

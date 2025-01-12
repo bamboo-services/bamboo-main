@@ -26,18 +26,17 @@
  * --------------------------------------------------------------------------------
  */
 
-// ==========================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// ==========================================================================
+package sponsor
 
-package logic
+import "xiaoMain/internal/service"
 
-import (
-	_ "xiaoMain/internal/logic/auth"
-	_ "xiaoMain/internal/logic/info"
-	_ "xiaoMain/internal/logic/link"
-	_ "xiaoMain/internal/logic/mail"
-	_ "xiaoMain/internal/logic/rss"
-	_ "xiaoMain/internal/logic/sponsor"
-	_ "xiaoMain/internal/logic/user"
-)
+type sSponsor struct {
+}
+
+func init() {
+	service.RegisterSponsor(New())
+}
+
+func New() *sSponsor {
+	return &sSponsor{}
+}

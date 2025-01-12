@@ -40,20 +40,6 @@ import (
 
 type (
 	IUser interface {
-		// GetUserCurrent
-		//
-		// # 获取当前用户信息
-		//
-		// 获取当前用户信息，需要用户UUID。根据用户UUID获取当前用户的信息。
-		//
-		// # 参数
-		//   - ctx: 请求的上下文，用于管理超时和取消信号。
-		//   - userUUID: 用户UUID
-		//
-		// # 返回
-		//   - userCurrent: 当前用户信息
-		//   - err: 在获取过程中发生的任何错误。
-		GetUserCurrent(ctx context.Context) (userCurrent *flow.UserCurrentDTO, err error)
 		// IsMailHasConsoleUser
 		//
 		// # 检查邮箱是否为站长邮箱
@@ -80,6 +66,20 @@ type (
 		// # 返回:
 		//   - err: 如果检查过程中发生错误，返回错误信息。否则返回 nil.
 		IsUserHasConsoleUser(ctx context.Context, user string) (err error)
+		// GetUserCurrent
+		//
+		// # 获取当前用户信息
+		//
+		// 获取当前用户信息，需要用户UUID。根据用户UUID获取当前用户的信息。
+		//
+		// # 参数
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//   - userUUID: 用户UUID
+		//
+		// # 返回
+		//   - userCurrent: 当前用户信息
+		//   - err: 在获取过程中发生的任何错误。
+		GetUserCurrent(ctx context.Context) (userCurrent *flow.UserCurrentDTO, err error)
 	}
 )
 
