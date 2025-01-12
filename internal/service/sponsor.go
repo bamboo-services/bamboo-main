@@ -97,6 +97,19 @@ type (
 		// # 返回
 		//   - err: 错误信息
 		DelSponsor(ctx context.Context, uuid uuid.UUID) (err error)
+		// GetSponsor
+		//
+		// # 获取赞助信息
+		//
+		// 用于获取赞助信息，从数据库中获取赞助的数据；
+		// 获取的数据直接输出出来；
+		//
+		// # 参数
+		//   - ctx: 上下文
+		//
+		// # 返回
+		//   - err: 错误信息
+		GetSponsor(ctx context.Context) (sponsors []*entity.Sponsor, err error)
 		// GetSponsorType
 		//
 		// # 获取赞助类型

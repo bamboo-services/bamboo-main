@@ -26,25 +26,33 @@
  * --------------------------------------------------------------------------------
  */
 
-// =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// =================================================================================
-
 package sponsor
 
 import (
 	"context"
+	"xiaoMain/internal/service"
 
 	"xiaoMain/api/sponsor/v1"
 )
 
-type ISponsorV1 interface {
-	SponsorAdd(ctx context.Context, req *v1.SponsorAddReq) (res *v1.SponsorAddRes, err error)
-	SponsorDel(ctx context.Context, req *v1.SponsorDelReq) (res *v1.SponsorDelRes, err error)
-	SponsorEdit(ctx context.Context, req *v1.SponsorEditReq) (res *v1.SponsorEditRes, err error)
-	SponsorGet(ctx context.Context, req *v1.SponsorGetReq) (res *v1.SponsorGetRes, err error)
-	SponsorTypeAdd(ctx context.Context, req *v1.SponsorTypeAddReq) (res *v1.SponsorTypeAddRes, err error)
-	SponsorTypeDel(ctx context.Context, req *v1.SponsorTypeDelReq) (res *v1.SponsorTypeDelRes, err error)
-	SponsorTypeEdit(ctx context.Context, req *v1.SponsorTypeEditReq) (res *v1.SponsorTypeEditRes, err error)
-	SponsorTypeGet(ctx context.Context, req *v1.SponsorTypeGetReq) (res *v1.SponsorTypeGetRes, err error)
+// SponsorGet 获取赞助
+// 用于获取赞助，如果成功则返回 nil，否则返回错误。
+// 本接口会根据已有的赞助信息对赞助进行获取，若获取失败返回失败信息，若成功返回成功信息
+// 当用户执行接口的时候，可以获取可以选择的所有赞助
+//
+// 参数：
+// ctx: 请求的上下文，用于管理超时和取消信号。
+// req: 用户的请求，包含获取赞助的详细信息。
+//
+// 返回：
+// res: 如果获取赞助成功，返回 nil；否则返回错误。
+func (c *ControllerV1) SponsorGet(ctx context.Context, req *v1.SponsorGetReq) (res *v1.SponsorGetRes, err error) {
+	sponsors, err := service.Sponsor().GetSponsor(ctx)
+	if err == nil {
+		return &v1.SponsorGetRes{
+			Sponsors: sponsors,
+		}, nil
+	} else {
+		return nil, err
+	}
 }

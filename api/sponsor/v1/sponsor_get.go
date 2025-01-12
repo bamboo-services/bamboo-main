@@ -26,25 +26,22 @@
  * --------------------------------------------------------------------------------
  */
 
-// =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
-// =================================================================================
-
-package sponsor
+package v1
 
 import (
-	"context"
-
-	"xiaoMain/api/sponsor/v1"
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/model/entity"
 )
 
-type ISponsorV1 interface {
-	SponsorAdd(ctx context.Context, req *v1.SponsorAddReq) (res *v1.SponsorAddRes, err error)
-	SponsorDel(ctx context.Context, req *v1.SponsorDelReq) (res *v1.SponsorDelRes, err error)
-	SponsorEdit(ctx context.Context, req *v1.SponsorEditReq) (res *v1.SponsorEditRes, err error)
-	SponsorGet(ctx context.Context, req *v1.SponsorGetReq) (res *v1.SponsorGetRes, err error)
-	SponsorTypeAdd(ctx context.Context, req *v1.SponsorTypeAddReq) (res *v1.SponsorTypeAddRes, err error)
-	SponsorTypeDel(ctx context.Context, req *v1.SponsorTypeDelReq) (res *v1.SponsorTypeDelRes, err error)
-	SponsorTypeEdit(ctx context.Context, req *v1.SponsorTypeEditReq) (res *v1.SponsorTypeEditRes, err error)
-	SponsorTypeGet(ctx context.Context, req *v1.SponsorTypeGetReq) (res *v1.SponsorTypeGetRes, err error)
+// SponsorGetReq 获取赞助信息
+// @Summary 获取赞助信息
+type SponsorGetReq struct {
+	g.Meta `path:"/sponsor" method:"GET" tags:"赞助控制器" summary:"获取赞助信息"`
+}
+
+// SponsorGetRes 获取赞助信息响应
+// @Summary 获取赞助信息响应
+type SponsorGetRes struct {
+	g.Meta   `mime:"application/json"`
+	Sponsors []*entity.Sponsor `json:"sponsors" sm:"赞助信息列表"`
 }
