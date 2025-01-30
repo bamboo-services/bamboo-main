@@ -66,8 +66,10 @@ func (c *ControllerV1) LinkAdd(ctx context.Context, req *v1.LinkAddReq) (res *v1
 		err = service.Link().CheckLogoCanAccess(ctx, req.SiteLogo)
 	}
 	// 检查 RSS URL 是否合法
-	if err == nil {
-		err = service.Link().CheckRSSCanAccess(ctx, req.SiteRssURL)
+	if req.SiteRssURL != "" {
+		if err == nil {
+			err = service.Link().CheckRSSCanAccess(ctx, req.SiteRssURL)
+		}
 	}
 
 	// 添加链接

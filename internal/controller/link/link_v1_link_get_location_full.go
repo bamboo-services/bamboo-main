@@ -61,6 +61,6 @@ func (c *ControllerV1) LinkGetLocationFull(
 	// TODO: 为什么返回的是0？
 	return &v1.LinkGetLocationFullRes{
 		Locations: getLocation,
-		Total:     0,
+		Total:     len(getLocation),
 	}, nil
 }

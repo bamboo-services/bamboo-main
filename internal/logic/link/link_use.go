@@ -56,22 +56,22 @@ func (s *sLink) AddLink(ctx context.Context, req v1.LinkAddReq) (err error) {
 	var getLocation *do.Location
 	var getColor *do.Color
 	// 对颜色进行数据库获取，获取指定的颜色是否存在
-	err = dao.Location.Ctx(ctx).Where(do.Location{Name: req.DesiredLocation}).Scan(&getLocation)
+	err = dao.Location.Ctx(ctx).Where(do.Location{Id: req.DesiredLocation}).Scan(&getLocation)
 	if err != nil {
 		g.Log().Warning(ctx, "[LOGIC] 数据库错误<期望位置不存在>")
 		return berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	if getLocation == nil {
-		g.Log().Warningf(ctx, "[LOGIC] 期望位置不存在[%s]", req.DesiredLocation)
+		g.Log().Warningf(ctx, "[LOGIC] 期望位置不存在[%v]", req.DesiredLocation)
 		return berror.NewError(bcode.NotExist, "期望位置不存在")
 	}
 	// 对颜色进行数据库获取，获取指定的颜色是否存在
-	if dao.Color.Ctx(ctx).Where(do.Color{Name: req.DesiredColor}).Scan(&getColor) != nil {
+	if dao.Color.Ctx(ctx).Where(do.Color{Id: req.DesiredColor}).Scan(&getColor) != nil {
 		g.Log().Warning(ctx, "[LOGIC] 数据库错误<期望位置不存在>")
 		return berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	if getColor == nil {
-		g.Log().Warningf(ctx, "[LOGIC] 期望颜色不存在[%s]", req.DesiredColor)
+		g.Log().Warningf(ctx, "[LOGIC] 期望颜色不存在[%v]", req.DesiredColor)
 		return berror.NewError(bcode.NotExist, "期望颜色不存在")
 	}
 	// 对数据进行插入
@@ -83,7 +83,7 @@ func (s *sLink) AddLink(ctx context.Context, req v1.LinkAddReq) (err error) {
 		SiteLogo:        req.SiteLogo,
 		SiteDescription: req.SiteDescription,
 		SiteRssUrl:      req.SiteRssURL,
-		HasAdv:          req.HasAdv,
+		HasAdv:          false,
 		DesiredLocation: getLocation.Id,
 		DesiredColor:    getColor.Id,
 		WebmasterRemark: req.Remark,

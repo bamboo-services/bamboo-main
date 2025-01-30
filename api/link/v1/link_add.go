@@ -59,7 +59,6 @@ type LinkAddReq struct {
 	SiteRssURL      string `json:"site_rss_url" v:"url#站点RSS格式不正确" dc:"站点RSS URL"`
 	DesiredLocation int64  `json:"desired_location" v:"required#请输入期望位置" dc:"期望位置"`
 	DesiredColor    *int64 `json:"desired_color" v:"required#请输入期望颜色" dc:"期望颜色"`
-	HasAdv          bool   `json:"has_adv" v:"required#请输入是否有广告" dc:"是否有广告"`
 	Remark          string `json:"remark" v:"max-length:1024#最大长度为 1024 个字符" dc:"备注"`
 }
 

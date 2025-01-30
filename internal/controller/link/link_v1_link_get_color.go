@@ -62,7 +62,6 @@ func (c *ControllerV1) LinkGetColor(ctx context.Context, _ *v1.LinkGetColorReq) 
 	if getColor == nil {
 		return nil, berror.NewError(bcode.NotExist, "没有找到期望颜色信息")
 	} else {
-		// TODO: 需要优化结构返回 Success 的内容
 		g.Log().Debugf(ctx, "[CONTROL] 获取期望颜色信息成功, 数量[%d]", len(getColor))
 		getColorList := make([]*flow.LinkColorDTO, len(getColor))
 		for i, color := range getColor {
@@ -74,7 +73,7 @@ func (c *ControllerV1) LinkGetColor(ctx context.Context, _ *v1.LinkGetColorReq) 
 		}
 		return &v1.LinkGetColorRes{
 			Colors: getColorList,
-			Total:  0,
+			Total:  len(getColorList),
 		}, nil
 	}
 }
