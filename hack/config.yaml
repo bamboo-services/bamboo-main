@@ -9,8 +9,8 @@ gfcli:
   gen:
     dao:
       - link: "pgsql:xf_index:123456@tcp(localhost:5432)/xf_index"
-        jsonCase: "CamelLower"
-
+        jsonCase: "Snake"
+        removePrefix: "xf_"
   default:
     type: "pgsql"
     host: "localhost"
@@ -19,3 +19,11 @@ gfcli:
     user: "xf_index"
     pass: "123456"
     database: "xf_index"
+  build:
+    name: "main"
+    arch: "amd64,arm64,arm"
+    system: "darwin,windows,linux"
+    packSrc: "resource/public,resource/template,resource/sql"
+    packDst: "internal/packed/build_pack_data.go"
+    version: "v0.1.0-beta.1"
+    path: "./bin"

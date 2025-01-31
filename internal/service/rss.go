@@ -35,58 +35,69 @@ package service
 
 import (
 	"context"
-	"xiaoMain/internal/model/dto"
+	"xiaoMain/internal/model/dto/dmiddle"
 )
 
 type (
-	IRssLogic interface {
-		// GetAllLinkRssInfo 获取所有链接的Rss信息
-		// 用于获取所有链接的Rss信息
-		// 如果成功则返回 nil，否则返回错误
-		// 本接口会根据已有的链接信息对Rss信息进行获取，若获取失败返回失败信息，若成功返回成功信息
+	IRss interface {
+		// GetAllLinkRssInfo
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
+		// # 获取所有链接的Rss信息
 		//
-		// 返回：
-		// err: 如果获取Rss信息成功，返回 nil；否则返回错误。
-		GetAllLinkRssInfo(ctx context.Context) (getRss *[]*dto.RssLinkDTO, err error)
-		// GetLinkRssInfoWithLinkID 获取链接的Rss信息
-		// 用于获取链接的Rss信息，如果成功则返回 nil，否则返回错误
-		// 本接口会根据已有的链接信息对Rss信息进行获取，若获取失败返回失败信息，若成功返回成功信息
+		// 用于获取所有链接的Rss信息，如果成功则返回 nil，否则返回错误。
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// linkID: 链接的ID
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
 		//
-		// 返回：
-		// getRss: 如果获取Rss信息成功，返回 nil；否则返回错误。
-		// err: 如果获取Rss信息成功，返回 nil；否则返回错误。
-		GetLinkRssInfoWithLinkID(ctx context.Context, linkID int64) (getRss *[]*dto.RssLinkDTO, err error)
-		// GetLinkRssWithLinkName 获取链接的Rss信息
-		// 用于获取链接的Rss信息，如果成功则返回 nil，否则返回错误
-		// 本接口会根据已有的链接信息对Rss信息进行获取，若获取失败返回失败信息，若成功返回成功信息
+		// # 返回:
+		//   - getRss: 如果获取Rss信息成功，返回 nil；否则返回错误。
+		//   - err: 如果获取Rss信息成功，返回 nil；否则返回错误。
+		GetAllLinkRssInfo(ctx context.Context) (getRss *[]*dmiddle.RssLinkDTO, err error)
+		// GetLinkRssInfoWithLinkID
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// linkName: 链接的名称
+		// # 获取链接的Rss信息
 		//
-		// 返回：
-		// getRss: 如果获取Rss信息成功，返回 nil；否则返回错误。
-		// err: 如果获取Rss信息成功，返回 nil；否则返回错误。
-		GetLinkRssWithLinkName(ctx context.Context, linkName string) (getRss *[]*dto.RssLinkDTO, err error)
-		// GetLinkRssWithLinkLocation 获取链接的Rss信息
-		// 用于获取链接的Rss信息，如果成功则返回 nil，否则返回错误
-		// 本接口会根据已有的链接信息对Rss信息进行获取，若获取失败返回失败信息，若成功返回成功信息
+		// 用于获取链接的Rss信息，如果成功则返回 nil，否则返回错误。
+		// 本接口会根据已有的链接信息对Rss信息进行获取，若获取失败返回失败信息，若成功返回成功信息。
 		//
-		// 参数：
-		// ctx: 请求的上下文，用于管理超时和取消信号。
-		// linkLocation: 链接的位置
+		// # 参数:
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//   - linkID: 链接的ID。
 		//
-		// 返回：
-		// getRss: 如果获取Rss信息成功，返回 nil；否则返回错误。
-		// err: 如果获取Rss信息成功，返回 nil；否则返回错误。
-		GetLinkRssWithLinkLocation(ctx context.Context, linkLocation int64) (getRss *[]*dto.RssLinkDTO, err error)
+		// # 返回:
+		//   - getRss: 如果获取Rss信息成功，返回 nil；否则返回错误。
+		//   - err: 如果获取Rss信息成功，返回 nil；否则返回错误。
+		GetLinkRssInfoWithLinkID(ctx context.Context, linkID int64) (getRss *[]*dmiddle.RssLinkDTO, err error)
+		// GetLinkRssWithLinkName
+		//
+		// # 获取链接的Rss信息
+		//
+		// 用于获取链接的Rss信息，如果成功则返回 nil，否则返回错误。
+		// 本接口会根据已有的链接信息对Rss信息进行获取，若获取失败返回失败信息，若成功返回成功信息。
+		//
+		// # 参数:
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//   - linkName: 链接的名称。
+		//
+		// # 返回:
+		//   - getRss: 如果获取Rss信息成功，返回 nil；否则返回错误。
+		//   - err: 如果获取Rss信息成功，返回 nil；否则返回错误。
+		GetLinkRssWithLinkName(ctx context.Context, linkName string) (getRss *[]*dmiddle.RssLinkDTO, err error)
+		// GetLinkRssWithLinkLocation
+		//
+		// # 获取链接的Rss信息
+		//
+		// 用于获取链接的Rss信息，如果成功则返回 nil，否则返回错误。
+		// 本接口会根据已有的链接信息对Rss信息进行获取，若获取失败返回失败信息，若成功返回成功信息。
+		//
+		// # 参数:
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//   - linkLocation: 链接的位置。
+		//
+		// # 返回:
+		//   - getRss: 如果获取Rss信息成功，返回 nil；否则返回错误。
+		//   - err: 如果获取Rss信息成功，返回 nil；否则返回错误。
+		GetLinkRssWithLinkLocation(ctx context.Context, linkLocation int64) (getRss *[]*dmiddle.RssLinkDTO, err error)
 		// RssWithHexoFeed 通过Hexo的Rss信息获取Rss信息
 		// 用于获取Hexo的Rss内容（插件：hexo-generator-feed ｜ 插件内容 https://github.com/hexojs/hexo-generator-feed）
 		// 如果成功则返回 RssLinkDTO，否则返回 false
@@ -98,7 +109,7 @@ type (
 		// 返回：
 		// rssLink: 如果获取Rss信息成功，返回 RssLinkDTO；否则返回 nil。
 		// hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
-		RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink *[]dto.RssLinkDTO, hasThis bool)
+		RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink *[]*dmiddle.RssLinkDTO, hasThis bool)
 		// RssWithHugoFeed 通过Hugo的Rss信息获取Rss信息
 		// 用于获取Hugo的Rss内容（插件：Hugo ｜ 插件内容 https://gohugo.io/）
 		// 如果成功则返回 nil，否则返回错误
@@ -110,7 +121,7 @@ type (
 		// 返回：
 		// rssLink: 如果获取Rss信息成功，返回 RssLinkDTO；否则返回 nil。
 		// hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
-		RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink *[]dto.RssLinkDTO, hasThis bool)
+		RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink *[]*dmiddle.RssLinkDTO, hasThis bool)
 		// RssWithWordpressFeed 通过WordPress的Rss信息获取Rss信息
 		// 用于获取WordPress的Rss内容（插件：WordPress ｜ 插件内容 https://wordpress.org/）
 		// 如果成功则返回 nil，否则返回错误
@@ -122,21 +133,21 @@ type (
 		// 返回：
 		// rssLink: 如果获取Rss信息成功，返回 RssLinkDTO；否则返回 nil。
 		// hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
-		RssWithWordpressFeed(ctx context.Context, rssURL string) (rssLink *[]dto.RssLinkDTO, hasThis bool)
+		RssWithWordpressFeed(ctx context.Context, rssURL string) (rssLink *[]*dmiddle.RssLinkDTO, hasThis bool)
 	}
 )
 
 var (
-	localRssLogic IRssLogic
+	localRss IRss
 )
 
-func RssLogic() IRssLogic {
-	if localRssLogic == nil {
-		panic("implement not found for interface IRssLogic, forgot register?")
+func Rss() IRss {
+	if localRss == nil {
+		panic("implement not found for interface IRss, forgot register?")
 	}
-	return localRssLogic
+	return localRss
 }
 
-func RegisterRssLogic(i IRssLogic) {
-	localRssLogic = i
+func RegisterRss(i IRss) {
+	localRss = i
 }

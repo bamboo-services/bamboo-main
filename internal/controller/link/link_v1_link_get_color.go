@@ -30,46 +30,50 @@ package link
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
-	"xiaoMain/internal/model/vo"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/model/dto/flow"
 	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
 
 	"xiaoMain/api/link/v1"
 )
 
-// LinkGetColor 获取期望颜色信息
-// 用于获取期望颜色信息, 如果成功则返回期望颜色信息，否则返回错误。
+// LinkGetColor
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含获取期望颜色信息的详细信息。
+// # 获取期望颜色信息
 //
-// 返回：
-// res: 如果获取期望颜色信息成功，返回期望颜色信息；否则返回错误。
-// err: 如果获取期望颜色信息成功，返回 nil；否则返回错误。
+// 获取期望颜色信息, 需要用户提供颜色的ID。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含获取期望颜色信息的详细信息。
+//
+// # 返回
+//   - res: 发送给用户的响应。如果获取期望颜色信息成功，它将返回成功的消息。
+//   - err: 在获取期望颜色信息过程中发生的任何错误。
 func (c *ControllerV1) LinkGetColor(ctx context.Context, _ *v1.LinkGetColorReq) (res *v1.LinkGetColorRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 LinkGetColor 接口")
-	getRequest := ghttp.RequestFromCtx(ctx)
+	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkGetColor 接口")
 	// 获取期望颜色信息
-	getColor, err := service.LinkLogic().GetColor(ctx)
+	getColor, err := service.Link().GetColor(ctx)
 	if err != nil {
-		result.ServerInternalError.SetErrorMessage("数据库操作失败").Response(getRequest)
+		return nil, err
 	}
-	if getColor != nil {
-		glog.Debugf(ctx, "[CONTROL] 获取期望颜色信息成功, 数量[%d]", len(getColor))
-		getColorList := make([]vo.LinkColorVO, len(getColor))
+	if getColor == nil {
+		return nil, berror.NewError(bcode.NotExist, "没有找到期望颜色信息")
+	} else {
+		g.Log().Debugf(ctx, "[CONTROL] 获取期望颜色信息成功, 数量[%d]", len(getColor))
+		getColorList := make([]*flow.LinkColorDTO, len(getColor))
 		for i, color := range getColor {
-			getColorList[i] = vo.LinkColorVO{
+			getColorList[i] = &flow.LinkColorDTO{
 				ID:          color.Id,
 				DisplayName: color.DisplayName,
 				Color:       color.Color,
 			}
 		}
-		result.Success("获取期望颜色信息成功", getColorList).Response(getRequest)
-	} else {
-		result.ServerInternalError.SetErrorMessage("颜色配置为空").Response(getRequest)
+		return &v1.LinkGetColorRes{
+			Colors: getColorList,
+			Total:  len(getColorList),
+		}, nil
 	}
-	return nil, nil
 }

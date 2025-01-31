@@ -28,23 +28,34 @@
 
 package v1
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/model/dto/flow"
+)
 
-// GetWebInfoReq 获取系统信息请求参数
-// 获取系统信息
+// GetWebInfoReq
+//
+// # 获取系统信息
+//
+// 获取系统信息，包括站点名称、站点描述、站点关键字、站点备案号、站点版权信息等。
 type GetWebInfoReq struct {
-	g.Meta `path:"/" method:"GET" tags:"Info" summary:"获取站点信息"`
+	g.Meta `path:"/info" method:"GET" tags:"信息控制器" summary:"获取站点信息"`
 }
 
-// GetWebInfoRes 获取系统信息响应参数
+// GetWebInfoRes
+//
+// # 获取系统信息
+//
+// 获取系统信息，包括站点名称、站点描述、站点关键字、站点备案号、站点版权信息等。
 type GetWebInfoRes struct {
 	g.Meta `mime:"application/json"`
+	flow.WebInfoDTO
 }
 
 // EditWebInfoReq 编辑系统信息请求参数
 // 编辑系统信息
 type EditWebInfoReq struct {
-	g.Meta `path:"/" method:"PUT" tags:"Info" summary:"编辑站点信息"`
+	g.Meta `path:"/info" method:"PUT" tags:"信息控制器" summary:"编辑站点信息"`
 }
 
 // EditWebInfoRes 编辑系统信息响应参数

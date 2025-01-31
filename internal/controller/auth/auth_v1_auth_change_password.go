@@ -30,63 +30,48 @@ package auth
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
-	"xiaoMain/internal/consts"
-	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
-
+	"github.com/gogf/gf/v2/frame/g"
 	"xiaoMain/api/auth/v1"
+	"xiaoMain/internal/constants"
+	"xiaoMain/internal/service"
 )
 
-// AuthChangePassword 是用于处理用户修改密码组件。
-// 它处理用户尝试更改密码的过程。
+// AuthChangePassword
 //
-// 参数:
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含更改密码的详细信息。
+// # 修改密码
 //
-// 返回:
-// res: 发送给用户的响应。如果更改密码成功，它将返回成功的消息。
-// err: 在更改密码过程中发生的任何错误。
+// 修改用户的密码, 需要用户提供邮箱和验证码, 以及新的密码。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含修改密码的详细信息。
+//
+// # 返回
+//   - res: 发送给用户的响应。如果修改密码成功，它将返回成功的消息。
+//   - err: 在修改密码过程中发生的任何错误。
 func (c *ControllerV1) AuthChangePassword(
 	ctx context.Context,
 	req *v1.AuthChangePasswordReq,
 ) (res *v1.AuthChangePasswordRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 UserChangePassword 接口")
-	// 获取 Request
-	getRequest := ghttp.RequestFromCtx(ctx)
+	g.Log().Notice(ctx, "[CONTROL] AuthChangePassword | 修改密码")
 	// 检查用户登录是否有效
-	hasLogin, message := service.AuthLogic().IsUserLogin(ctx)
-	if !hasLogin {
-		result.NotLoggedIn.SetErrorMessage(message).Response(getRequest)
-		return nil, nil
-	}
-
+	err = service.Auth().IsUserLogin(ctx)
 	// 检查用户邮箱是否正确
-	hasCheck, info := service.UserMailLogic().CheckMailHasConsoleUser(ctx, req.Email)
-	if !hasCheck {
-		result.RequestBodyValidationError.SetErrorMessage(info).Response(getRequest)
-		return nil, nil
+	if err == nil {
+		err = service.User().IsMailHasConsoleUser(ctx, req.Email)
 	}
-
 	// 检查验证码是否正确
-	isCorrect, info := service.MailLogic().
-		VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, consts.ChangePasswordScene)
-	if !isCorrect {
-		result.VerificationFailed.SetErrorMessage(info).Response(getRequest)
-		return nil, nil
+	if err == nil {
+		err = service.Mail().VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, constants.ChangePasswordScene)
+	}
+	if err != nil {
+		return nil, err
 	}
 
 	// 对密码进行修改
-	err = service.AuthLogic().ChangeUserPassword(ctx, req.NewPassword)
+	err = service.Auth().ChangeUserPassword(ctx, req.NewPassword)
 	if err != nil {
-		if err.Error() == "密码与原密码相同" {
-			result.VerificationFailed.SetErrorMessage(err.Error()).Response(getRequest)
-		} else {
-			result.ServerInternalError.Response(getRequest)
-		}
+		return nil, err
 	}
-	result.Success("密码修改成功", nil)
 	return nil, nil
 }

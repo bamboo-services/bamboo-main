@@ -30,13 +30,37 @@ package link
 
 import (
 	"context"
-
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"xiaoMain/internal/service"
 
 	"xiaoMain/api/link/v1"
 )
 
+// LinkAddAdmin
+//
+// # 添加链接
+//
+// 添加链接, 需要用户提供链接的详细信息。用于管理员直接添加链接，无需审核。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含添加链接的详细信息。
+//
+// # 返回
+//   - res: 发送给用户的响应。如果添加链接成功，它将返回成功的消息。
+//   - err: 在添加链接过程中发生的任何错误。
 func (c *ControllerV1) LinkAddAdmin(ctx context.Context, req *v1.LinkAddAdminReq) (res *v1.LinkAddAdminRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	g.Log().Notice(ctx, "[CONTRO] LinkAddAdmin | 添加链接")
+	// 权限鉴定
+	err = service.Auth().IsUserLogin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	// 数据插入
+	err = service.Link().AddLinkAdmin(ctx, *req)
+	if err != nil {
+		return nil, err
+	} else {
+		return nil, nil
+	}
 }

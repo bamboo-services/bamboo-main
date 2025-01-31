@@ -45,7 +45,7 @@
 
 # 开发 & 贡献
 
-![Alt](https://repobeats.axiom.co/api/embed/1bcafd727e23465801ce742ce6a4959d8e9ec95b.svg "分析图像")
+![Alt](https://repobeats.axiom.co/api/embed/7ea3d4dd0f9b5b0c4b246f5bba6c893601f8d782.svg "Repobeats analytics image")
 
 ![贡献者](https://contrib.rocks/image?repo=bamboo-services/XiaoMain)
 

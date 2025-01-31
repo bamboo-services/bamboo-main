@@ -30,12 +30,13 @@ package auth
 
 import (
 	"context"
-	"errors"
-	"github.com/gogf/gf/v2/os/glog"
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
+	"github.com/bamboo-services/bamboo-utils/butil"
+	"github.com/gogf/gf/v2/frame/g"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
 	"xiaoMain/internal/model/entity"
-	"xiaoMain/utility"
 )
 
 // ChangeUserPassword 用于修改用户密码。如果密码修改成功，将会清理用户的登录状态，需要用户重新进行登录。
@@ -47,25 +48,24 @@ import (
 //
 // 返回值:
 // err: 如果密码修改成功，返回 nil。否则返回错误信息。
-func (s *sAuthLogic) ChangeUserPassword(ctx context.Context, password string) (err error) {
-	glog.Notice(ctx, "[LOGIC] 执行 AuthLogic:ChangeUserPassword 服务层")
+func (s *sAuth) ChangeUserPassword(ctx context.Context, password string) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] 执行 AuthLogic:ChangeUserPassword 服务层")
 	// 检查用户的密码是否与前密码一致
-	var getUserPassword entity.XfIndex
-	if dao.XfIndex.Ctx(ctx).Where(do.XfIndex{Key: "password"}).Scan(&getUserPassword) != nil {
-		glog.Error(ctx, "[LOGIC] 数据库读取错误")
-		return errors.New("数据库错误")
+	var getUserPassword entity.Index
+	err = dao.Index.Ctx(ctx).Where(do.Index{Key: "password"}).Scan(&getUserPassword)
+	if err != nil {
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	// 对密码进行检查
-	if utility.PasswordVerify(getUserPassword.Value, password) {
-		glog.Notice(ctx, "[LOGIC] 用户修改的密码与原密码相同")
-		return errors.New("密码与原密码相同")
+	if butil.PasswordVerify(password, getUserPassword.Value) {
+		g.Log().Warning(ctx, "[LOGIC] 用户修改的密码与原密码相同")
+		return berror.NewError(bcode.OperationFailed, "新密码与原密码相同")
 	}
 	// 对密码进行修改
-	getHashPassword := utility.PasswordEncode(password)
-	_, err = dao.XfIndex.Ctx(ctx).Data(do.XfIndex{Value: getHashPassword}).Where(do.XfIndex{Key: "password"}).Update()
+	getHashPassword := butil.PasswordEncode(password)
+	_, err = dao.Index.Ctx(ctx).Data(do.Index{Value: getHashPassword}).Where(do.Index{Key: "password"}).Update()
 	if err != nil {
-		glog.Error(ctx, "[LOGIC] 数据库写入错误", err)
-		return err
+		return berror.NewErrorHasError(bcode.ServerInternalError, err)
 	}
 	return nil
 }

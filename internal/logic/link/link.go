@@ -30,13 +30,13 @@ package link
 
 import "xiaoMain/internal/service"
 
-type sLinkLogic struct {
+type sLink struct {
 }
 
 func init() {
-	service.RegisterLinkLogic(New())
+	service.RegisterLink(New())
 }
 
-func New() *sLinkLogic {
-	return &sLinkLogic{}
+func New() *sLink {
+	return &sLink{}
 }

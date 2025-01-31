@@ -30,12 +30,12 @@ package user
 
 import "xiaoMain/internal/service"
 
-type sUserLogic struct{}
+type sUser struct{}
 
 func init() {
-	service.RegisterUserLogic(New())
+	service.RegisterUser(New())
 }
 
-func New() *sUserLogic {
-	return &sUserLogic{}
+func New() *sUser {
+	return &sUser{}
 }

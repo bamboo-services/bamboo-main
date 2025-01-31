@@ -35,27 +35,65 @@ package service
 
 import (
 	"context"
+	"xiaoMain/internal/model/dto/flow"
 )
 
 type (
-	IUserMailLogic interface {
-		// CheckUserMail
-		// 检查用户输入的邮箱是否与数据库存储的邮箱保持正确，若保持争取的信息将会返回布尔值正确，否则返回错误
-		CheckMailHasConsoleUser(ctx context.Context, email string) (checkMail bool, info string)
+	IUser interface {
+		// IsMailHasConsoleUser
+		//
+		// # 检查邮箱是否为站长邮箱
+		//
+		// 用于检查该邮箱是否为站长的邮箱，如果是则返回 nil，否则返回错误信息。
+		//
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - email: 邮箱地址(string)
+		//
+		// # 返回:
+		//   - err: 如果检查过程中发生错误，返回错误信息。否则返回 nil.
+		IsMailHasConsoleUser(ctx context.Context, email string) (err error)
+		// IsUserHasConsoleUser
+		//
+		// # 检查用户是否为站长用户
+		//
+		// 用于检查该用户是否为站长用户，如果是则返回 nil，否则返回错误信息。
+		//
+		// # 参数:
+		//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+		//   - user: 用户名(string)
+		//
+		// # 返回:
+		//   - err: 如果检查过程中发生错误，返回错误信息。否则返回 nil.
+		IsUserHasConsoleUser(ctx context.Context, user string) (err error)
+		// GetUserCurrent
+		//
+		// # 获取当前用户信息
+		//
+		// 获取当前用户信息，需要用户UUID。根据用户UUID获取当前用户的信息。
+		//
+		// # 参数
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//   - userUUID: 用户UUID
+		//
+		// # 返回
+		//   - userCurrent: 当前用户信息
+		//   - err: 在获取过程中发生的任何错误。
+		GetUserCurrent(ctx context.Context) (userCurrent *flow.UserCurrentDTO, err error)
 	}
 )
 
 var (
-	localUserMailLogic IUserMailLogic
+	localUser IUser
 )
 
-func UserMailLogic() IUserMailLogic {
-	if localUserMailLogic == nil {
-		panic("implement not found for interface IUserMailLogic, forgot register?")
+func User() IUser {
+	if localUser == nil {
+		panic("implement not found for interface IUser, forgot register?")
 	}
-	return localUserMailLogic
+	return localUser
 }
 
-func RegisterUserLogic(i IUserMailLogic) {
-	localUserMailLogic = i
+func RegisterUser(i IUser) {
+	localUser = i
 }

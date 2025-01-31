@@ -30,55 +30,44 @@ package auth
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
-	"xiaoMain/internal/consts"
-	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
-
+	"github.com/gogf/gf/v2/frame/g"
 	"xiaoMain/api/auth/v1"
+	"xiaoMain/internal/constants"
+	"xiaoMain/internal/service"
 )
 
-// AuthResetPassword 是 ControllerV1 结构体的一个方法。
-// 它处理用户尝试重置密码的过程。
+// AuthResetPassword
 //
-// 参数:
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含重置密码的详细信息。
+// # 重置密码
 //
-// 返回:
-// res: 发送给用户的响应。如果重置密码成功，它将返回成功的消息。
-// err: 在重置密码过程中发生的任何错误。
+// 重置用户的密码, 需要用户提供邮箱和验证码, 以及新的密码。重置密码是通过邮箱验证码的方式进行的。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含重置密码的详细信息。
+//
+// # 返回
+//   - res: 发送给用户的响应。如果重置密码成功，它将返回成功的消息。
+//   - err: 在重置密码过程中发生的任何错误。
 func (c *ControllerV1) AuthResetPassword(
 	ctx context.Context,
 	req *v1.AuthResetPasswordReq,
 ) (res *v1.AuthResetPasswordRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 UserResetPassword 接口")
-	// 获取 Request
-	getRequest := ghttp.RequestFromCtx(ctx)
-	// 获取邮件是否存在
-	isCorrect, info := service.UserMailLogic().CheckMailHasConsoleUser(ctx, req.Email)
-	if !isCorrect {
-		result.VerificationFailed.SetErrorMessage(info).Response(getRequest)
-		return nil, nil
-	}
+	g.Log().Notice(ctx, "[CONTROL] UserResetPassword | 用户重置密码")
 	// 检查用户名是否正确
-	if err = service.AuthLogic().CheckUserHasConsoleUser(ctx, req.Username); err != nil {
-		result.VerificationFailed.SetErrorMessage(err.Error()).Response(getRequest)
-		return nil, nil
-	}
+	err = service.User().IsUserHasConsoleUser(ctx, req.Username)
 	// 检查验证码是否正确
-	codeCorrect, errMessage := service.MailLogic().
-		VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, consts.ResetPasswordScene)
-	if !codeCorrect {
-		result.VerificationFailed.SetErrorMessage(errMessage).Response(getRequest)
-		return nil, nil
+	if err == nil {
+		err = service.Mail().VerificationCodeHasCorrect(ctx, req.Email, req.EmailCode, constants.ResetPasswordScene)
 	}
-	// 重置密码
-	if service.AuthLogic().ChangeUserPassword(ctx, req.NewPassword) == nil {
-		result.Success("密码重置成功", nil)
-	} else {
-		result.VerificationFailed.SetErrorMessage("密码重置失败").Response(getRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	// 对密码进行修改
+	err = service.Auth().ChangeUserPassword(ctx, req.NewPassword)
+	if err != nil {
+		return nil, err
 	}
 	return nil, nil
 }

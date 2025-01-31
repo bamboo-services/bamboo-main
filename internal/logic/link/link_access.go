@@ -32,28 +32,33 @@ import (
 	"context"
 	"encoding/xml"
 	"errors"
-	"github.com/gogf/gf/v2/os/glog"
+	"github.com/bamboo-services/bamboo-utils/berror"
+	"github.com/gogf/gf/v2/frame/g"
 	"io"
 	"net"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
-	"xiaoMain/internal/consts"
+	xerror "xiaoMain/internal/config/error"
+	"xiaoMain/internal/constants"
 	"xiaoMain/internal/lutil"
 )
 
-// CheckLinkCanAccess 检查链接是否可以访问
-// 用于检查用户添加的链接是否可以访问，如果可以访问则返回 nil，否则返回错误
+// CheckLinkCanAccess
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// siteURL: 用户尝试添加的链接地址。
+// # 检查链接是否可以访问
 //
-// 返回：
-// err: 如果链接可以访问，返回 nil；否则返回错误。
-func (s *sLinkLogic) CheckLinkCanAccess(ctx context.Context, siteURL string) (err error) {
-	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckLinkCanAccess 服务层")
+// 用于检查用户添加的链接是否可以访问，如果可以访问则返回 nil，否则返回错误。
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//   - siteURL: 网站地址(string)
+//
+// # 返回:
+//   - err: 如果链接可以访问，返回 nil。否则返回错误信息。
+func (s *sLink) CheckLinkCanAccess(ctx context.Context, siteURL string) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] Link:CheckLinkCanAccess | 检查链接是否可以访问")
 	getNowTimestamp := time.Now().UnixMilli()
 	// 检查链接是否可以访问
 	getResp, err := lutil.LinkAccess(siteURL)
@@ -68,43 +73,45 @@ func (s *sLinkLogic) CheckLinkCanAccess(ctx context.Context, siteURL string) (er
 		var netErr *net.OpError
 		if errors.As(urlErr.Err, &netErr) {
 			if netErr.Timeout() {
-				glog.Debug(ctx, "[LOGIC] Link 链接超时")
-				return errors.New("链接超时")
+				g.Log().Debug(ctx, "[LOGIC] Link 链接超时")
+				return berror.NewError(xerror.LinkAccessTimeout, "链接超时")
 			} else {
-				glog.Debug(ctx, "[LOGIC] Link 链接错误")
-				return errors.New("链接错误")
+				g.Log().Debug(ctx, "[LOGIC] Link 链接错误")
+				return berror.NewError(xerror.LinkAccessError, "链接错误")
 			}
 		} else {
-			glog.Debug(ctx, "[LOGIC] Link 链接错误")
-			return errors.New("链接错误")
+			g.Log().Debug(ctx, "[LOGIC] Link 链接错误")
+			return berror.NewError(xerror.LinkAccessError, "链接错误")
 		}
 	}
 	// 检查链接是否可以访问
 	if getResp == nil {
-		glog.Debug(ctx, "[LOGIC] 链接错误")
-		return errors.New("网站不可达")
+		g.Log().Debug(ctx, "[LOGIC] 网站不可达")
+		return berror.NewError(xerror.WebsiteIsUnreachable, "网站不可达")
 	}
 	if getResp.StatusCode != http.StatusOK {
-		glog.Debug(ctx, "[LOGIC] Link 访问状态不正确")
-		return errors.New("访问状态不正确")
+		g.Log().Debug(ctx, "[LOGIC] Link 访问状态不正确")
+		return berror.NewError(xerror.WebIncorrectStatus, "站点访问状态不正确")
 	}
 	_ = getResp.Body.Close()
-	glog.Debugf(ctx, "[LOGIC] Link 访问成功，耗时：%dms", time.Now().UnixMilli()-getNowTimestamp)
+	g.Log().Debugf(ctx, "[LOGIC] Link 访问成功，耗时：%dms", time.Now().UnixMilli()-getNowTimestamp)
 	return nil
 }
 
-// CheckLogoCanAccess 检查 Logo 是否可以访问
-// 用于检查用户添加的 Logo 是否可以访问，如果可以访问则返回 nil，否则返回错误
-// 并且检查获取的状态是否是图片，如果不是图片则返回错误，否则返回 nil
+// CheckLogoCanAccess
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// siteLogo: 用户尝试添加的 Logo 地址。
+// # 检查 Logo 是否可以访问
 //
-// 返回：
-// err: 如果 Logo 可以访问，返回 nil；否则返回错误。
-func (s *sLinkLogic) CheckLogoCanAccess(ctx context.Context, siteLogo string) (err error) {
-	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckLogoCanAccess 服务层")
+// 用于检查用户添加的 Logo 是否可以访问，如果可以访问则返回 nil，否则返回错误。
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//   - siteLogo: 网站 Logo 地址(string)
+//
+// # 返回:
+//   - err: 如果 Logo 可以访问，返回 nil。否则返回错误信息。
+func (s *sLink) CheckLogoCanAccess(ctx context.Context, siteLogo string) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] 执行 Link:CheckLogoCanAccess 服务层")
 	getNowTimestamp := time.Now().UnixMilli()
 	// 检查链接是否可以访问
 	getResp, err := lutil.LinkAccess(siteLogo)
@@ -119,54 +126,56 @@ func (s *sLinkLogic) CheckLogoCanAccess(ctx context.Context, siteLogo string) (e
 		var netErr *net.OpError
 		if errors.As(urlErr.Err, &netErr) {
 			if netErr.Timeout() {
-				glog.Debug(ctx, "[LOGIC] Logo 链接超时")
-				return errors.New("链接超时")
+				g.Log().Debug(ctx, "[LOGIC] Logo 链接超时")
+				return berror.NewError(xerror.LinkAccessTimeout, "Logo超时")
 			} else {
-				glog.Debug(ctx, "[LOGIC] Logo 链接错误")
-				return errors.New("链接错误")
+				g.Log().Debug(ctx, "[LOGIC] Logo 链接错误")
+				return berror.NewError(xerror.LinkAccessError, "Logo错误")
 			}
 		} else {
-			glog.Debug(ctx, "[LOGIC] Logo 链接错误")
-			return errors.New("链接错误")
+			g.Log().Debug(ctx, "[LOGIC] Logo 链接错误")
+			return berror.NewError(xerror.LinkAccessError, "Logo错误")
 		}
 	}
 	// 检查链接是否可以访问
 	if getResp == nil {
-		glog.Debug(ctx, "[LOGIC] 链接错误")
-		return errors.New("网站不可达")
+		g.Log().Debug(ctx, "[LOGIC] 网站不可达")
+		return berror.NewError(xerror.WebsiteIsUnreachable, "网站不可达")
 	}
 	if getResp.StatusCode != http.StatusOK {
-		glog.Debug(ctx, "[LOGIC] Logo 访问状态不正确")
-		return errors.New("访问状态不正确")
+		g.Log().Debug(ctx, "[LOGIC] Logo 访问状态不正确")
+		return berror.NewError(xerror.WebIncorrectStatus, "Logo访问状态不正确")
 	} else {
 		_ = getResp.Body.Close()
 		// 检查获取的状态是否是图片
-		for _, imageContentType := range consts.ImageContentTypes {
+		for _, imageContentType := range constants.ImageContentTypes {
 			// 拆分 Content-Type 获取图片类型
 			for _, getUserContentType := range strings.Split(getResp.Header.Get("Content-Type"), ";") {
 				if imageContentType == getUserContentType {
-					glog.Debugf(ctx, "[LOGIC] Logo 访问成功，耗时：%dms", time.Now().UnixMilli()-getNowTimestamp)
+					g.Log().Debugf(ctx, "[LOGIC] Logo 访问成功，耗时：%dms", time.Now().UnixMilli()-getNowTimestamp)
 					return nil
 				}
 			}
 		}
-		glog.Noticef(ctx, "[LOGIC] Logo 不是图片，获取请求头为 [%s]", getResp.Header.Get("Content-Type"))
+		g.Log().Noticef(ctx, "[LOGIC] Logo 不是图片，获取请求头为 [%s]", getResp.Header.Get("Content-Type"))
 		return errors.New("该 URL 不是图片")
 	}
 }
 
-// CheckRSSCanAccess 检查链接是否可以访问
-// 用于检查用户添加的链接是否可以访问，如果可以访问则返回 nil，否则返回错误
-// 还需要检查是否为 RSS URL 是否为 XML 格式
+// CheckRSSCanAccess
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// siteRSS: 用户尝试添加的 RSS 地址。
+// # 检查 RSS 是否可以访问
 //
-// 返回：
-// err: 如果链接可以访问，返回 nil；否则返回错误。
-func (s *sLinkLogic) CheckRSSCanAccess(ctx context.Context, siteRSS string) (err error) {
-	glog.Notice(ctx, "[LOGIC] 执行 LinkLogic:CheckRSSCanAccess 服务层")
+// 用于检查用户添加的 RSS 是否可以访问，如果可以访问则返回 nil，否则返回错误。
+//
+// # 参数:
+//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
+//   - siteRSS: 网站 RSS 地址(string)
+//
+// # 返回:
+//   - err: 如果 RSS 可以访问，返回 nil。否则返回错误信息。
+func (s *sLink) CheckRSSCanAccess(ctx context.Context, siteRSS string) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] 执行 Link:CheckRSSCanAccess 服务层")
 	getNowTimestamp := time.Now().UnixMilli()
 	// 检查链接是否可以访问
 	getResp, err := lutil.LinkAccess(siteRSS)
@@ -181,39 +190,39 @@ func (s *sLinkLogic) CheckRSSCanAccess(ctx context.Context, siteRSS string) (err
 		var netErr *net.OpError
 		if errors.As(urlErr.Err, &netErr) {
 			if netErr.Timeout() {
-				glog.Debug(ctx, "[LOGIC] RSS 链接超时")
-				return errors.New("链接超时")
+				g.Log().Debug(ctx, "[LOGIC] RSS 链接超时")
+				return berror.NewError(xerror.LinkAccessTimeout, "RSS超时")
 			} else {
-				glog.Debug(ctx, "[LOGIC] RSS 链接错误")
-				return errors.New("链接错误")
+				g.Log().Debug(ctx, "[LOGIC] RSS 链接错误")
+				return berror.NewError(xerror.LinkAccessError, "RSS错误")
 			}
 		} else {
-			glog.Debug(ctx, "[LOGIC] RSS 链接错误")
-			return errors.New("链接错误")
+			g.Log().Debug(ctx, "[LOGIC] RSS 链接错误")
+			return berror.NewError(xerror.LinkAccessError, "RSS错误")
 		}
 	}
 	// 检查链接是否可以访问
 	if getResp == nil {
-		glog.Debug(ctx, "[LOGIC] RSS 链接错误")
-		return errors.New("网站不可达")
+		g.Log().Debug(ctx, "[LOGIC] RSS 网站不可达")
+		return berror.NewError(xerror.WebsiteIsUnreachable, "RSS网站不可达")
 	}
 	if getResp.StatusCode != http.StatusOK {
-		glog.Debug(ctx, "[LOGIC] RSS 访问状态不正确")
-		return errors.New("访问状态不正确")
+		g.Log().Debug(ctx, "[LOGIC] RSS 访问状态不正确")
+		return berror.NewError(xerror.WebIncorrectStatus, "RSS访问状态不正确")
 	} else {
 		// 检查是否为 XML 格式
 		getBody, err := io.ReadAll(getResp.Body)
 		if err != nil {
-			glog.Debug(ctx, "[LOGIC] 读取 RSS 错误")
-			return errors.New("读取 RSS 错误")
+			g.Log().Debug(ctx, "[LOGIC] 读取 RSS 错误")
+			return berror.NewError(xerror.ReadRSSFailed, "读取 RSS 错误")
 		}
 		err = xml.Unmarshal(getBody, new(interface{}))
 		if err == nil {
-			glog.Debugf(ctx, "[LOGIC] RSS 访问成功，耗时：%dms", time.Now().UnixMilli()-getNowTimestamp)
+			g.Log().Debugf(ctx, "[LOGIC] RSS 访问成功，耗时：%dms", time.Now().UnixMilli()-getNowTimestamp)
 			return nil
 		} else {
-			glog.Errorf(ctx, "[LOGIC] RSS 不是 XML 格式")
-			return errors.New("该 RSS 不是 XML 格式")
+			g.Log().Errorf(ctx, "[LOGIC] RSS 不是 XML 格式")
+			return berror.NewError(xerror.RSSIsNotXML, "RSS 不是 XML 格式")
 		}
 	}
 }

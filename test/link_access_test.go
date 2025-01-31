@@ -41,16 +41,16 @@ import (
 // 参数：
 // t: 测试实例
 func TestBlogURLAbleToUse(t *testing.T) {
-	service.RegisterLinkLogic(link.New())
+	service.RegisterLink(link.New())
 	// 测试其中一个地址是否可以访问
 	// 正确可以返回的
-	err := service.LinkLogic().CheckLinkCanAccess(context.Background(), "https://blog.x-lf.com/")
+	err := service.Link().CheckLinkCanAccess(context.Background(), "https://blog.x-lf.com/")
 	if err != nil {
 		t.Errorf("测试失败，错误原因：%s", err.Error())
 	}
 
 	// 错误的不可返回的
-	err = service.LinkLogic().CheckLinkCanAccess(context.Background(), "https://blog.x-lf.com/404")
+	err = service.Link().CheckLinkCanAccess(context.Background(), "https://blog.x-lf.com/404")
 	if err != nil {
 		t.Logf("测试失败，错误原因：%s", err.Error())
 	}
@@ -64,10 +64,10 @@ func TestBlogURLAbleToUse(t *testing.T) {
 // 参数：
 // t: 测试实例
 func TestLogoURLAbleToUse(t *testing.T) {
-	service.RegisterLinkLogic(link.New())
+	service.RegisterLink(link.New())
 	// 测试其中一个地址是否可以访问
 	// 正确可以返回的
-	err := service.LinkLogic().CheckLogoCanAccess(
+	err := service.Link().CheckLogoCanAccess(
 		context.Background(),
 		"https://www.baidu.com/img/flexible/logo/pc/peak-result.png",
 	)
@@ -76,13 +76,13 @@ func TestLogoURLAbleToUse(t *testing.T) {
 	}
 
 	// 返回非图片
-	err = service.LinkLogic().CheckLogoCanAccess(context.Background(), "https://blog.x-lf.com/")
+	err = service.Link().CheckLogoCanAccess(context.Background(), "https://blog.x-lf.com/")
 	if err != nil {
 		t.Logf("测试失败，错误原因：%s", err.Error())
 	}
 
 	// 错误的不可返回的
-	err = service.LinkLogic().CheckLogoCanAccess(context.Background(), "https://blog.x-lf.com/404")
+	err = service.Link().CheckLogoCanAccess(context.Background(), "https://blog.x-lf.com/404")
 	if err != nil {
 		t.Logf("测试失败，错误原因：%s", err.Error())
 	}
@@ -95,16 +95,16 @@ func TestLogoURLAbleToUse(t *testing.T) {
 // 参数：
 // t: 测试实例
 func TestRSSURLAbleToUse(t *testing.T) {
-	service.RegisterLinkLogic(link.New())
+	service.RegisterLink(link.New())
 	// 测试其中一个地址是否可以访问
 	// 正确可以返回的
-	err := service.LinkLogic().CheckRSSCanAccess(context.Background(), "https://blog.x-lf.com/atom.xml")
+	err := service.Link().CheckRSSCanAccess(context.Background(), "https://blog.x-lf.com/atom.xml")
 	if err != nil {
 		t.Errorf("测试失败，错误原因：%s", err.Error())
 	}
 
 	// 错误的不可返回的
-	err = service.LinkLogic().CheckRSSCanAccess(context.Background(), "https://blog.x-lf.com/404")
+	err = service.Link().CheckRSSCanAccess(context.Background(), "https://blog.x-lf.com/404")
 	if err != nil {
 		t.Logf("测试失败，错误原因：%s", err.Error())
 	}

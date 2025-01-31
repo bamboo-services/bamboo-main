@@ -32,13 +32,13 @@ import (
 	"context"
 	"encoding/xml"
 	"errors"
-	"github.com/gogf/gf/v2/os/glog"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"io"
 	"regexp"
 	time2 "time"
 	"xiaoMain/internal/lutil"
-	"xiaoMain/internal/model/dto"
+	"xiaoMain/internal/model/dto/dmiddle"
 )
 
 // RssWithHexoFeed 通过Hexo的Rss信息获取Rss信息
@@ -52,23 +52,23 @@ import (
 // 返回：
 // rssLink: 如果获取Rss信息成功，返回 RssLinkDTO；否则返回 nil。
 // hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
-func (s *sRssLogic) RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink *[]dto.RssLinkDTO, hasThis bool) {
-	glog.Noticef(ctx, "[LOGIC] 尝试获取 Hexo 中 hexo-generator-feed 插件的 feed 内容")
+func (s *sRss) RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink *[]*dmiddle.RssLinkDTO, hasThis bool) {
+	g.Log().Noticef(ctx, "[LOGIC] 尝试获取 Hexo 中 hexo-generator-feed 插件的 feed 内容")
 	getBody, err := s.rssLinkAccess(ctx, rssURL)
 	if err != nil {
 		return nil, false
 	}
 	// 解析 XML
-	getFeed := new(dto.HexoFeedDTO)
+	getFeed := new(dmiddle.HexoFeedDTO)
 	err = xml.Unmarshal(getBody, &getFeed)
 	if err != nil {
-		glog.Warningf(ctx, "解析 XML 失败: %v", err.Error())
+		g.Log().Warningf(ctx, "解析 XML 失败: %v", err.Error())
 		return nil, false
 	}
 	// 处理数据
 	if getFeed != nil {
 		if getFeed.Generator == "Hexo" {
-			rssLink = new([]dto.RssLinkDTO)
+			rssLink = new([]*dmiddle.RssLinkDTO)
 			for _, item := range getFeed.Entry {
 				// 处理 Category
 				categories := new([]string)
@@ -80,7 +80,7 @@ func (s *sRssLogic) RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink
 					description = description[:100]
 				}
 				// 添加数据
-				*rssLink = append(*rssLink, dto.RssLinkDTO{
+				*rssLink = append(*rssLink, &dmiddle.RssLinkDTO{
 					Title:    item.Title,
 					Link:     item.ID,
 					Summary:  description,
@@ -91,7 +91,7 @@ func (s *sRssLogic) RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink
 			return rssLink, true
 		}
 	} else {
-		glog.Warning(ctx, "解析 XML 成功，但数据为空")
+		g.Log().Warning(ctx, "解析 XML 成功，但数据为空")
 	}
 	return nil, false
 }
@@ -107,23 +107,23 @@ func (s *sRssLogic) RssWithHexoFeed(ctx context.Context, rssURL string) (rssLink
 // 返回：
 // rssLink: 如果获取Rss信息成功，返回 RssLinkDTO；否则返回 nil。
 // hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
-func (s *sRssLogic) RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink *[]dto.RssLinkDTO, hasThis bool) {
-	glog.Noticef(ctx, "[LOGIC] 尝试获取 Hugo 中 原生 的 feed 内容")
+func (s *sRss) RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink *[]*dmiddle.RssLinkDTO, hasThis bool) {
+	g.Log().Noticef(ctx, "[LOGIC] 尝试获取 Hugo 中 原生 的 feed 内容")
 	getBody, err := s.rssLinkAccess(ctx, rssURL)
 	if err != nil {
 		return nil, false
 	}
 	// 解析 XML
-	getFeed := new(dto.HugoFeedDTO)
+	getFeed := new(dmiddle.HugoFeedDTO)
 	err = xml.Unmarshal(getBody, &getFeed)
 	if err != nil {
-		glog.Warningf(ctx, "解析 XML 失败: %v", err.Error())
+		g.Log().Warningf(ctx, "解析 XML 失败: %v", err.Error())
 		return nil, false
 	}
 	// 处理数据
 	if getFeed != nil {
 		if getFeed.Generator == "Hugo -- gohugo.io" {
-			rssLink = new([]dto.RssLinkDTO)
+			rssLink = new([]*dmiddle.RssLinkDTO)
 			for _, item := range getFeed.Items {
 				description := item.Description
 				if len(description) > 100 {
@@ -132,7 +132,7 @@ func (s *sRssLogic) RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink
 				// 时间处理
 				parse, _ := time2.Parse("Mon, 02 Jan 2006 15:04:05 -0700", item.PubDate)
 				// 添加数据
-				*rssLink = append(*rssLink, dto.RssLinkDTO{
+				*rssLink = append(*rssLink, &dmiddle.RssLinkDTO{
 					Title:   item.Title,
 					Link:    item.Link,
 					Summary: description,
@@ -142,7 +142,7 @@ func (s *sRssLogic) RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink
 			return rssLink, true
 		}
 	} else {
-		glog.Warning(ctx, "解析 XML 成功，但数据为空")
+		g.Log().Warning(ctx, "解析 XML 成功，但数据为空")
 	}
 	return nil, false
 }
@@ -158,23 +158,23 @@ func (s *sRssLogic) RssWithHugoFeed(ctx context.Context, rssURL string) (rssLink
 // 返回：
 // rssLink: 如果获取Rss信息成功，返回 RssLinkDTO；否则返回 nil。
 // hasThis: 如果获取Rss信息成功，返回 true；否则返回 false。
-func (s *sRssLogic) RssWithWordpressFeed(ctx context.Context, rssURL string) (rssLink *[]dto.RssLinkDTO, hasThis bool) {
-	glog.Noticef(ctx, "[LOGIC] 尝试获取 WordPress 中 原生 的 feed 内容")
+func (s *sRss) RssWithWordpressFeed(ctx context.Context, rssURL string) (rssLink *[]*dmiddle.RssLinkDTO, hasThis bool) {
+	g.Log().Noticef(ctx, "[LOGIC] 尝试获取 WordPress 中 原生 的 feed 内容")
 	getBody, err := s.rssLinkAccess(ctx, rssURL)
 	if err != nil {
 		return nil, false
 	}
 	// 解析 XML
-	getFeed := new(dto.WordPressFeedDTO)
+	getFeed := new(dmiddle.WordPressFeedDTO)
 	err = xml.Unmarshal(getBody, &getFeed)
 	if err != nil {
-		glog.Warningf(ctx, "解析 XML 失败: %v", err.Error())
+		g.Log().Warningf(ctx, "解析 XML 失败: %v", err.Error())
 		return nil, false
 	}
 	// 处理数据
 	if getFeed != nil {
-		if match, _ := regexp.MatchString(`wordpress\.org`, getFeed.Channel.Generator); match {
-			rssLink = new([]dto.RssLinkDTO)
+		if match, _ := regexp.MatchString(`^https?://\S*wordpress\.org\S*$`, getFeed.Channel.Generator); match {
+			rssLink = new([]*dmiddle.RssLinkDTO)
 			for _, item := range getFeed.Channel.Items {
 				description := item.Description
 				if len(description) > 100 {
@@ -183,7 +183,7 @@ func (s *sRssLogic) RssWithWordpressFeed(ctx context.Context, rssURL string) (rs
 				// 时间处理
 				parse, _ := time2.Parse("Mon, 02 Jan 2006 15:04:05 -0700", item.PubDate)
 				// 添加数据
-				*rssLink = append(*rssLink, dto.RssLinkDTO{
+				*rssLink = append(*rssLink, &dmiddle.RssLinkDTO{
 					Title:   item.Title,
 					Link:    item.Link,
 					Summary: description,
@@ -193,7 +193,7 @@ func (s *sRssLogic) RssWithWordpressFeed(ctx context.Context, rssURL string) (rs
 			return rssLink, true
 		}
 	} else {
-		glog.Warning(ctx, "解析 XML 成功，但数据为空")
+		g.Log().Warning(ctx, "解析 XML 成功，但数据为空")
 	}
 	return nil, false
 }
@@ -209,7 +209,7 @@ func (s *sRssLogic) RssWithWordpressFeed(ctx context.Context, rssURL string) (rs
 // 返回：
 // getBody: 如果获取 RSS 链接信息成功，返回 RSS 链接信息；否则返回错误。
 // err: 如果获取 RSS 链接信息成功，返回 nil；否则返回错误。
-func (s *sRssLogic) rssLinkAccess(ctx context.Context, rssURL string) ([]byte, error) {
+func (s *sRss) rssLinkAccess(ctx context.Context, rssURL string) ([]byte, error) {
 	getResp, err := lutil.LinkAccess(rssURL)
 	defer func() {
 		if getResp != nil {
@@ -218,17 +218,12 @@ func (s *sRssLogic) rssLinkAccess(ctx context.Context, rssURL string) ([]byte, e
 	}()
 	// 处理错误检查信息
 	if err != nil {
-		glog.Warningf(ctx, "获取链接信息失败: %v", err)
+		g.Log().Warningf(ctx, "获取链接信息失败: %v", err)
 		return nil, errors.New("获取链接信息失败")
-	}
-	// 获取 Body 并解析 XML
-	if err != nil {
-		glog.Warningf(ctx, "UTF8解析链接信息失败: %v", err)
-		return nil, errors.New("UTF8解析链接信息失败")
 	}
 	getBody, err := io.ReadAll(getResp.Body)
 	if err != nil {
-		glog.Warningf(ctx, "获取链接信息失败: %v", err)
+		g.Log().Warningf(ctx, "获取链接信息失败: %v", err)
 		return nil, errors.New("获取链接信息失败")
 	}
 	return getBody, nil

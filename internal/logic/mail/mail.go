@@ -30,13 +30,13 @@ package mail
 
 import "xiaoMain/internal/service"
 
-type sMailLogic struct {
+type sMail struct {
 }
 
 func init() {
-	service.RegisterMailLogic(New())
+	service.RegisterMail(New())
 }
 
-func New() *sMailLogic {
-	return &sMailLogic{}
+func New() *sMail {
+	return &sMail{}
 }

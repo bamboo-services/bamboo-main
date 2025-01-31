@@ -30,46 +30,46 @@ package link
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
-	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
-
+	"github.com/bamboo-services/bamboo-utils/bcode"
+	"github.com/bamboo-services/bamboo-utils/berror"
+	"github.com/gogf/gf/v2/frame/g"
 	"xiaoMain/api/link/v1"
+	"xiaoMain/internal/service"
 )
 
-// LinkLocationAdd 添加链接位置
-// 用于添加链接位置，如果成功则返回 nil，否则返回错误。
-// 本接口会根据已有的链接位置信息对链接位置进行添加，若添加失败返回失败信息，若成功返回成功信息
+// LinkLocationAdd
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含添加链接位置的详细信息。
+// # 添加链接位置
 //
-// 返回：
-// res: 如果添加链接位置成功，返回 nil；否则返回错误。
+// 添加链接位置, 需要用户提供链接位置的详细信息。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含添加链接位置的详细信息。
+//
+// # 返回
+//   - res: 发送给用户的响应。如果添加链接位置成功，它将返回成功的消息。
+//   - err: 在添加链接位置过程中发生的任何错误。
 func (c *ControllerV1) LinkLocationAdd(
 	ctx context.Context,
 	req *v1.LinkLocationAddReq,
 ) (res *v1.LinkLocationAddRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 LinkLocationAdd 接口")
-	getRequest := ghttp.RequestFromCtx(ctx)
-	if err = service.LinkLogic().CheckLocationExist(ctx, req.Name); err != nil {
-		result.ExistedError.SetErrorMessage(err.Error()).Response(getRequest)
-		return nil, nil
+	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkLocationAdd 接口")
+	err = service.Link().IsLocationExist(ctx, req.Name)
+	if err == nil {
+		return nil, berror.NewError(bcode.AlreadyExists, "位置已存在")
 	}
-	// 添加链接位置
-	if err = service.LinkLogic().AddLocation(
+	err = service.Link().AddLocation(
 		ctx,
 		req.Name,
 		req.DisplayName,
 		req.Description,
 		req.Reveal,
 		req.Sort,
-	); err == nil {
-		result.Success("添加成功", nil).Response(getRequest)
+	)
+	if err != nil {
+		return nil, err
 	} else {
-		result.ServerInternalError.SetErrorMessage(err.Error()).Response(getRequest)
+		return nil, nil
 	}
-	return nil, nil
 }

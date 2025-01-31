@@ -30,38 +30,39 @@ package info
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/glog"
+	"github.com/gogf/gf/v2/frame/g"
 	"sync"
-	"xiaoMain/internal/model/vo"
+	"xiaoMain/internal/model/dto/flow"
 	"xiaoMain/internal/service"
-	"xiaoMain/utility/result"
 
 	"xiaoMain/api/info/v1"
 )
 
-// GetWebInfo 获取站点信息
-// 用于获取站点信息，如果成功则返回 nil，否则返回错误。
-// 本接口会根据已有的系统信息对站点信息进行获取，若获取失败返回失败信息，若成功返回成功信息
+// GetWebInfo
 //
-// 参数：
-// ctx: 请求的上下文，用于管理超时和取消信号。
-// req: 用户的请求，包含获取系统信息的详细信息。
+// # 获取网站信息
 //
-// 返回：
-// res: 如果获取系统信息成功，返回 nil；否则返回错误。
-func (c *ControllerV1) GetWebInfo(ctx context.Context, req *v1.GetWebInfoReq) (res *v1.GetWebInfoRes, err error) {
-	glog.Notice(ctx, "[CONTROL] 控制层 GetSystemInfo 接口")
-	getRequest := ghttp.RequestFromCtx(ctx)
-	returnData := new(vo.WebInfoRes)
+// 获取网站的信息，包括网站的基本信息、博主的信息等。 该接口用于获取网站的基本信息。
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含获取网站信息的详细信息。
+//
+// # 返回
+//   - res: 发送给用户的响应。如果获取网站信息成功，它将返回成功的消息。
+//   - err: 在获取网站信息过程中发生的任何错误。
+func (c *ControllerV1) GetWebInfo(ctx context.Context, _ *v1.GetWebInfoReq) (res *v1.GetWebInfoRes, err error) {
+	g.Log().Notice(ctx, "[CONTROL] 控制层 GetSystemInfo 接口")
+	returnData := new(flow.WebInfoDTO)
 	// 获取系统信息
 	wg := sync.WaitGroup{}
 	wg.Add(1)
-	go func() { returnData.Main = service.InfoLogic().GetMainInfo(ctx); wg.Done() }()
+	go func() { returnData.Main = service.Info().GetMainInfo(ctx); wg.Done() }()
 	wg.Add(1)
-	go func() { returnData.Blogger = service.InfoLogic().GetBloggerInfo(ctx); wg.Done() }()
+	go func() { returnData.Blogger = service.Info().GetBloggerInfo(ctx); wg.Done() }()
 	wg.Wait()
-	glog.Debugf(ctx, "获取参数 returnData 值 %v", returnData)
-	result.Success("获取成功", returnData).Response(getRequest)
-	return nil, nil
+	g.Log().Debugf(ctx, "获取参数 returnData 值 %v", returnData)
+	return &v1.GetWebInfoRes{
+		WebInfoDTO: *returnData,
+	}, nil
 }

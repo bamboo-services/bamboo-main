@@ -30,12 +30,12 @@ package auth
 
 import "xiaoMain/internal/service"
 
-type sAuthLogic struct{}
+type sAuth struct{}
 
 func init() {
-	service.RegisterAuthLogic(New())
+	service.RegisterAuth(New())
 }
 
-func New() *sAuthLogic {
-	return &sAuthLogic{}
+func New() *sAuth {
+	return &sAuth{}
 }

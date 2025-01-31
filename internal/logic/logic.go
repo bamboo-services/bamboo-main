@@ -38,5 +38,6 @@ import (
 	_ "xiaoMain/internal/logic/link"
 	_ "xiaoMain/internal/logic/mail"
 	_ "xiaoMain/internal/logic/rss"
+	_ "xiaoMain/internal/logic/sponsor"
 	_ "xiaoMain/internal/logic/user"
 )
