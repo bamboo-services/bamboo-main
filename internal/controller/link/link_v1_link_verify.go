@@ -30,60 +30,31 @@ package link
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/frame/g"
 	"xiaoMain/internal/service"
 
 	"xiaoMain/api/link/v1"
 )
 
-// LinkGetAdmin
+// LinkVerify
 //
-// # 获取链接
+// # 审核站点
 //
-// 获取链接，包括友情链接、社交链接等。
+// 审核站点, 用于审核用户提交的站点链接。
 //
-// # 参数:
-//   - ctx: 上下文对象，用于传递和控制请求的生命周期。
-//   - req: 请求参数，包括获取链接的请求参数。
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含审核站点的详细信息。
 //
-// # 返回:
-//   - res: 响应参数，返回获取链接的响应结果。
-//   - err: 如果处理过程中发生错误，返回错误信息。
-func (c *ControllerV1) LinkGetAdmin(ctx context.Context, req *v1.LinkGetAdminReq) (res *v1.LinkGetAdminRes, err error) {
-	// 检查用户是否登录
-	err = service.Auth().IsUserLogin(ctx)
+// # 返回
+//   - res: 发送给用户的响应。如果审核站点成功，它将返回成功的消息。
+//   - err: 在审核站点过程中发生的任何错误。
+func (c *ControllerV1) LinkVerify(ctx context.Context, req *v1.LinkVerifyReq) (res *v1.LinkVerifyRes, err error) {
+	g.Log().Notice(ctx, "[CONTROL] 控制层 LinkVerify 接口")
+	err = service.Link().Verify(ctx, req)
 	if err != nil {
 		return nil, err
+	} else {
+		return &v1.LinkVerifyRes{}, nil
 	}
-	// 获取链接
-	link, total, err := service.Link().GetLinkAdmin(ctx)
-	if err != nil {
-		return nil, err
-	}
-	// 待审核的链接
-	var (
-		reviewedNumber   uint64 = 0
-		recentlyAdded    uint64 = 0
-		recentlyModified uint64 = 0
-	)
-	for _, list := range link {
-		if list.Location == 0 {
-			reviewedNumber++
-		}
-		// 查找创建时间，找出最近七天
-		if gtime.Now().Sub(list.CreatedAt).Hours() < 24*7 && list.Location != 0 {
-			recentlyAdded++
-		}
-		// 查找修改时间，找出最近七天
-		if gtime.Now().Sub(list.UpdatedAt).Hours() < 24*7 && list.Location != 0 {
-			recentlyModified++
-		}
-	}
-	return &v1.LinkGetAdminRes{
-		Links:            link,
-		Total:            total,
-		Reviewed:         reviewedNumber,
-		RecentlyAdded:    recentlyAdded,
-		RecentlyModified: recentlyModified,
-	}, nil
 }

@@ -158,3 +158,37 @@ func (s *sLink) AddLinkAdmin(ctx context.Context, data v1.LinkAddAdminReq) (err 
 	}
 	return nil
 }
+
+// Verify
+//
+// # 审核链接
+//
+// 审核链接
+//
+// # 参数
+//   - ctx: 请求的上下文，用于管理超时和取消信号。
+//   - req: 用户的请求，包含审核链接的详细信息。
+//
+// # 返回
+//   - error: 在审核链接过程中发生的任何错误。
+func (s *sLink) Verify(ctx context.Context, req *v1.LinkVerifyReq) (err error) {
+	g.Log().Notice(ctx, "[LOGIC] Link:Verify | 审核链接")
+	// 根据 id 获取链接信息
+	info, err := s.GetSingleLink(ctx, req.Id)
+	if req.Status {
+		info.Status = 1
+		info.Location = req.DesiredLocation
+		info.Color = req.DesiredColor
+		_, err := dao.LinkList.Ctx(ctx).Data(info).Where(do.LinkList{Id: req.Id}).Update()
+		if err != nil {
+			return berror.NewErrorHasError(bcode.ServerInternalError, err)
+		}
+	} else {
+		info.Status = 2
+		_, err := dao.LinkList.Ctx(ctx).Data(info).Where(do.LinkList{Id: req.Id}).Update()
+		if err != nil {
+			return berror.NewErrorHasError(bcode.ServerInternalError, err)
+		}
+	}
+	return nil
+}

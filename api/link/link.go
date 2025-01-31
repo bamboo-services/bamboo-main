@@ -50,6 +50,7 @@ type ILinkV1 interface {
 	LinkGetSingle(ctx context.Context, req *v1.LinkGetSingleReq) (res *v1.LinkGetSingleRes, err error)
 	CheckLinkURLHasConnect(ctx context.Context, req *v1.CheckLinkURLHasConnectReq) (res *v1.CheckLinkURLHasConnectRes, err error)
 	CheckLinkIDHasConnect(ctx context.Context, req *v1.CheckLinkIDHasConnectReq) (res *v1.CheckLinkIDHasConnectRes, err error)
+	LinkVerify(ctx context.Context, req *v1.LinkVerifyReq) (res *v1.LinkVerifyRes, err error)
 	LinkLocationAdd(ctx context.Context, req *v1.LinkLocationAddReq) (res *v1.LinkLocationAddRes, err error)
 	DelLocation(ctx context.Context, req *v1.DelLocationReq) (res *v1.DelLocationRes, err error)
 	EditLocation(ctx context.Context, req *v1.EditLocationReq) (res *v1.EditLocationRes, err error)

@@ -217,6 +217,19 @@ type (
 		// # 返回
 		//   - error: 在添加链接过程中发生的任何错误。
 		AddLinkAdmin(ctx context.Context, data v1.LinkAddAdminReq) (err error)
+		// Verify
+		//
+		// # 审核链接
+		//
+		// 审核链接
+		//
+		// # 参数
+		//   - ctx: 请求的上下文，用于管理超时和取消信号。
+		//   - req: 用户的请求，包含审核链接的详细信息。
+		//
+		// # 返回
+		//   - error: 在审核链接过程中发生的任何错误。
+		Verify(ctx context.Context, req *v1.LinkVerifyReq) (err error)
 		EditLocation(ctx context.Context, req v1.EditLocationReq) (err error)
 		LocationMove(ctx context.Context, id int64, moveID int64) (err error)
 		DelLocation(ctx context.Context, id int64) (err error)
