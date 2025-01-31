@@ -26,7 +26,6 @@
  * --------------------------------------------------------------------------------
  */
 
--- auto-generated definition
 create table xf_sponsor_type
 (
     id         serial               not null
@@ -47,4 +46,3 @@ comment on column xf_sponsor_type.include is '是否纳入总数';
 comment on column xf_sponsor_type.link is '是否跳转链接';
 comment on column xf_sponsor_type.created_at is '创建时间';
 comment on column xf_sponsor_type.updated_at is '修改时间';
-

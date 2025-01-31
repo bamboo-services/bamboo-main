@@ -26,7 +26,6 @@
  * --------------------------------------------------------------------------------
  */
 
--- auto-generated definition
 create table xf_sponsor
 (
     sponsor_uuid uuid                    not null
@@ -53,4 +52,3 @@ comment on column xf_sponsor.money is '赞助金额';
 comment on column xf_sponsor.time is '时间戳';
 comment on column xf_sponsor.created_at is '创建时间';
 comment on column xf_sponsor.updated_at is '修改时间';
-

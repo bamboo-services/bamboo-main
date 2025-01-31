@@ -29,11 +29,16 @@
 package startup
 
 import (
+	"bufio"
+	"bytes"
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gres"
 	"github.com/gogf/gf/v2/os/gtime"
+	"regexp"
+	"strings"
 	"xiaoMain/internal/constants"
 	"xiaoMain/internal/dao"
 	"xiaoMain/internal/model/do"
@@ -53,22 +58,80 @@ import (
 func (is *InitStruct) initialSQL(ctx context.Context, databaseName string) {
 	result, _ := g.Model("information_schema.tables").Where("table_name = ?", databaseName).One()
 	if result.IsEmpty() {
-		// 创建数据表
 		errTransaction := g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
-			// 读取文件
-			getFileContent := gres.GetContent("sql/" + databaseName + ".sql")
-			// 创建 xf_index.sql 表
-			if _, err := tx.Exec(string(getFileContent)); err != nil {
-				return err
+			// 读取原始SQL文件
+			rawSQL := gres.GetContent("sql/" + databaseName + ".sql")
+
+			// 清洗SQL内容
+			cleanedSQL := cleanSQLContent(string(rawSQL))
+
+			// 拆分独立SQL语句
+			sqlStatements := splitSQLStatements(cleanedSQL)
+
+			// 逐条执行SQL
+			for _, stmt := range sqlStatements {
+				if _, err := tx.Exec(stmt); err != nil {
+					return fmt.Errorf("执行SQL失败: %w\n语句: %s", err, stmt)
+				}
 			}
 			return nil
 		})
+
 		if errTransaction != nil {
 			g.Log().Panicf(ctx, "[BOOT] 数据表 %s 创建失败 (%v)", databaseName, errTransaction)
 		} else {
 			g.Log().Debugf(ctx, "[BOOT] 数据表 %s 创建成功", databaseName)
 		}
 	}
+}
+
+// cleanSQLContent 清洗SQL文件内容
+func cleanSQLContent(raw string) string {
+	var buffer bytes.Buffer
+	inCommentBlock := false
+	scanner := bufio.NewScanner(strings.NewReader(raw))
+
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+
+		// 处理多行注释块
+		if strings.HasPrefix(line, "/*") {
+			inCommentBlock = true
+		}
+		if inCommentBlock {
+			if strings.Contains(line, "*/") {
+				inCommentBlock = false
+			}
+			continue
+		}
+
+		// 跳过单行注释和空行
+		if strings.HasPrefix(line, "--") || strings.HasPrefix(line, "//") || len(line) == 0 {
+			continue
+		}
+
+		buffer.WriteString(line + "\n")
+	}
+	return buffer.String()
+}
+
+// splitSQLStatements 拆分SQL语句
+func splitSQLStatements(cleanedSQL string) []string {
+	// 标准化语句结尾
+	normalized := strings.ReplaceAll(cleanedSQL, "\n", " ")
+	normalized = regexp.MustCompile(`\s+`).ReplaceAllString(normalized, " ")
+
+	// 按分号拆分并过滤空语句
+	statements := strings.Split(normalized, ";")
+	result := make([]string, 0)
+
+	for _, stmt := range statements {
+		trimmed := strings.TrimSpace(stmt)
+		if len(trimmed) > 0 {
+			result = append(result, trimmed+";") // 补回分号
+		}
+	}
+	return result
 }
 
 // getMailTemplate
