@@ -1,12 +1,12 @@
 module xiaoMain
 
 go 1.22.2
-toolchain go1.23.6
+toolchain go1.24.1
 
 require (
 	github.com/bamboo-services/bamboo-utils v0.1.5
-	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.8.3
-	github.com/gogf/gf/v2 v2.8.3
+	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.9.0
+	github.com/gogf/gf/v2 v2.9.0
 	github.com/google/uuid v1.6.0
 	github.com/young2j/gocopy v1.1.14
 	golang.org/x/crypto v0.35.0
