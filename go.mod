@@ -1,7 +1,7 @@
 module xiaoMain
 
 go 1.22.2
-toolchain go1.23.6
+toolchain go1.24.1
 
 require (
 	github.com/bamboo-services/bamboo-utils v0.1.5
@@ -9,7 +9,7 @@ require (
 	github.com/gogf/gf/v2 v2.8.3
 	github.com/google/uuid v1.6.0
 	github.com/young2j/gocopy v1.1.14
-	golang.org/x/crypto v0.35.0
+	golang.org/x/crypto v0.36.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
 
@@ -36,9 +36,9 @@ require (
 	go.opentelemetry.io/otel/metric v1.33.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.33.0 // indirect
 	go.opentelemetry.io/otel/trace v1.33.0 // indirect
-	golang.org/x/net v0.33.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
