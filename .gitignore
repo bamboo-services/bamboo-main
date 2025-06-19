@@ -21,3 +21,4 @@ bin
 
 ### Custom Ignore Rules ###
 internal/packed/packed_template.go
+/doc/*
