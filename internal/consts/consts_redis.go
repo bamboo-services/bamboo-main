@@ -9,30 +9,8 @@
  * --------------------------------------------------------------------------------
  */
 
-package main
+package consts
 
-import (
-	_ "bamboo-main/internal/logic"
-
-	"bamboo-main/internal/config/cmd"
-	"bamboo-main/internal/config/setup"
-	_ "bamboo-main/internal/packed"
-
-	_ "github.com/gogf/gf/contrib/drivers/pgsql/v2"
-
-	"github.com/gogf/gf/v2/os/gctx"
+const (
+	SystemFieldsRedisKey = "system:%s" // SystemFieldsRedisKey 系统字段Redis键，%s 为系统 name 字段
 )
-
-// main
-//
-// 系统服务启动
-func main() {
-	// 创建新的系统上下文
-	getSystemContext := gctx.GetInitCtx()
-
-	// 系统初始化服务
-	setup.NewSetup(getSystemContext)
-
-	// 启动服务
-	cmd.Main.Run(getSystemContext)
-}

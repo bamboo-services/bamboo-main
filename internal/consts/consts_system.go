@@ -12,5 +12,20 @@
 package consts
 
 const (
-	SystemVersion = "v1.0.0-alpha" // 系统版本号
+	SystemVersionValue = "v1.0.0-alpha" // 系统版本号
+)
+
+const (
+	SystemNameKey        = "system_name"        // 系统名称键
+	SystemVersionKey     = "system_version"     // 系统版本键
+	SystemDescriptionKey = "system_description" // 系统描述键
+
+	SystemUserUsernameKey     = "user_username"      // 用户名键
+	SystemUserPasswordKey     = "user_password"      // 密码键
+	SystemUserEmailKey        = "user_email"         // 邮箱键
+	SystemUserNicknameKey     = "user_nickname"      // 昵称键
+	SystemUserPhoneKey        = "user_phone"         // 手机号键
+	SystemUserAvatarTypeKey   = "user_avatar_type"   // 头像类型键
+	SystemUserAvatarBase64Key = "user_avatar_base64" // 头像Base64键
+	SystemUserAvatarURLKey    = "user_avatar_url"    // 头像URL键
 )

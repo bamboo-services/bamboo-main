@@ -19,8 +19,8 @@ import (
 
 type AuthLoginReq struct {
 	g.Meta   `path:"/auth/login" method:"POST" tags:"认证控制器" summary:"用户登录" dc:"用户登录接口，使用用户名和密码进行身份验证，返回登录状态和用户信息"`
-	Username string `json:"username" v:"required|regex:^[0-9A-Za-z-\\_]{6,32}#请输入用户名|用户名格式不正确，必须是6-32位的字母或数字" dc:"用户名，必填，6-32位字母或数字"`
-	Password string `json:"password" v:"required#请输入密码" dc:"密码，必填"`
+	User     string `json:"user" v:"required#请输入用户名、邮箱、手机号" dc:"用户名、邮箱或手机号"`
+	Password string `json:"password" v:"required#请输入密码" dc:"密码"`
 }
 
 type AuthLoginRes struct {

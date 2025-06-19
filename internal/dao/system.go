@@ -5,7 +5,16 @@
 package dao
 
 import (
+	"bamboo-main/internal/consts"
 	"bamboo-main/internal/dao/internal"
+	"bamboo-main/internal/model/do"
+	"bamboo-main/internal/model/entity"
+	"context"
+	"fmt"
+	"github.com/XiaoLFeng/bamboo-utils/berror"
+	"github.com/XiaoLFeng/bamboo-utils/blog"
+	"github.com/gogf/gf/v2/database/gdb"
+	"time"
 )
 
 // systemDao is the data access object for the table xf_system.
@@ -20,3 +29,21 @@ var (
 )
 
 // Add your custom methods and functionality below.
+
+// GetSystemValue
+//
+// 根据其名称检索系统设置的值；
+// 如果数据库产生错误则抛出 *berror.ErrorCode；
+// 若查询数据为空，则不产生报错但输出结果 string 为空
+func (dao *systemDao) GetSystemValue(ctx context.Context, name string) (string, *berror.ErrorCode) {
+	var systemEntity *entity.System
+	daoErr := dao.Ctx(ctx).Cache(gdb.CacheOption{
+		Duration: 24 * time.Hour,
+		Name:     fmt.Sprintf(consts.SystemFieldsRedisKey, name),
+	}).Where(&do.System{SystemName: name}).Scan(&systemEntity)
+	if daoErr != nil {
+		blog.DaoError(ctx, "GetSystemValue", "查询系统值失败: %v", daoErr)
+		return "", berror.ErrorAddData(&berror.ErrDatabaseError, daoErr.Error())
+	}
+	return systemEntity.SystemValue, nil
+}

@@ -12,6 +12,7 @@
 package setup
 
 import (
+	"bamboo-main/internal/consts"
 	"bamboo-main/internal/dao"
 	"bamboo-main/internal/model/do"
 	"bamboo-main/internal/model/entity"
@@ -23,25 +24,27 @@ import (
 
 // ProjectSetupSystemValueInit
 //
-// -
+// 初始化项目的系统值数据；
+// 当对应的系统值数据不存在时，将会插入新数据；
+// 若数据已存在，则不进行任何操作；
+// 会返回结果值供给全局变量使用。
 func (setup *projectSetup) ProjectSetupSystemValueInit() {
 	blog.BambooNotice(setup.ctx, "ProjectSetupSystemValueInit", "初始化系统值")
 
 	// 系统基础有关数据
-	checkAndInsertData(setup.ctx, "system_name", "XiaoMain")
-	checkAndInsertData(setup.ctx, "system_version", "v1.0.0-alpha")
-	checkAndInsertData(setup.ctx, "system_description", "XiaoMain 是一个基于 Go 语言开发的开源项目，旨在提供一个高效、灵活的 Web 应用框架。")
+	checkAndInsertData(setup.ctx, consts.SystemNameKey, "XiaoMain")
+	checkAndInsertData(setup.ctx, consts.SystemVersionKey, "v1.0.0-alpha")
+	checkAndInsertData(setup.ctx, consts.SystemDescriptionKey, "XiaoMain 是一个基于 Go 语言开发的开源项目，旨在提供一个高效、灵活的 Web 应用框架。")
 
 	// 系统用户有关数据
-	checkAndInsertData(setup.ctx, "user_username", "admin")
-	checkAndInsertData(setup.ctx, "user_password", butil.PasswordEncode("admin"))
-	checkAndInsertData(setup.ctx, "user_email", "admin@x-lf.cn")
-	checkAndInsertData(setup.ctx, "user_nickname", "筱锋")
-	checkAndInsertData(setup.ctx, "user_phone", "13388888880")
-	checkAndInsertData(setup.ctx, "user_avatar_type", "local")
-	checkAndInsertData(setup.ctx, "user_avatar_base64", "")
-	checkAndInsertData(setup.ctx, "user_avatar_url", "https://i-cdn.akass.cn/2024/05/664870a814c0d.png!wp60")
-
+	checkAndInsertData(setup.ctx, consts.SystemUserUsernameKey, "admin")
+	checkAndInsertData(setup.ctx, consts.SystemUserPasswordKey, butil.PasswordEncode("admin"))
+	checkAndInsertData(setup.ctx, consts.SystemUserEmailKey, "admin@x-lf.cn")
+	checkAndInsertData(setup.ctx, consts.SystemUserNicknameKey, "筱锋")
+	checkAndInsertData(setup.ctx, consts.SystemUserPhoneKey, "13388888880")
+	checkAndInsertData(setup.ctx, consts.SystemUserAvatarTypeKey, "local")
+	checkAndInsertData(setup.ctx, consts.SystemUserAvatarBase64Key, "")
+	checkAndInsertData(setup.ctx, consts.SystemUserAvatarURLKey, "https://i-cdn.akass.cn/2024/05/664870a814c0d.png!wp60")
 }
 
 // checkAndInsertData
