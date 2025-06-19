@@ -12,5 +12,5 @@
 package consts
 
 const (
-	SystemVersion = "v1.0.0-Alpha" // 系统版本号
+	SystemVersion = "v1.0.0-alpha" // 系统版本号
 )

@@ -13,7 +13,7 @@
 CREATE TABLE xf_system (
     system_uuid UUID PRIMARY KEY,
     system_name VARCHAR NOT NULL,
-    system_value JSONB NOT NULL,
+    system_value TEXT NULL,
     created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

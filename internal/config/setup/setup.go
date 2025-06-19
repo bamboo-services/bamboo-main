@@ -31,6 +31,7 @@ func NewSetup(ctx context.Context) {
 	var newSetup = &projectSetup{ctx: ctx}
 
 	newSetup.ProjectSetupForSQL()
+	newSetup.ProjectSetupSystemValueInit()
 
 	/*
 	 * 系统初始化完成
