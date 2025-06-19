@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"bamboo-main/internal/model/response"
 	"bamboo-main/internal/service"
 	"context"
 	"github.com/XiaoLFeng/bamboo-utils/berror"
@@ -61,13 +62,24 @@ func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res
 		}
 	}
 
+	// 获取用户信息
+	iUser := service.User()
+	getUserDTO, errorCode := iUser.GetUserSimple(ctx)
+	if errorCode != nil {
+		blog.ControllerError(ctx, "AuthLogin", "获取用户信息失败: %v", errorCode)
+		return nil, errorCode
+	}
 	// 登录成功，生成用户令牌
 	iToken := service.Token()
 	tokenDAO, errorCode := iToken.GenerateUserToken(ctx)
 	if errorCode != nil {
 		return nil, errorCode
 	}
+
 	return &v1.AuthLoginRes{
-		ResponseDTO: bresult.SuccessHasData(ctx, "用户登录成功", tokenDAO),
+		ResponseDTO: bresult.SuccessHasData(ctx, "用户登录成功", &response.AuthLoginResponse{
+			User:  getUserDTO,
+			Token: tokenDAO,
+		}),
 	}, nil
 }

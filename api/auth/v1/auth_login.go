@@ -12,7 +12,7 @@
 package v1
 
 import (
-	"bamboo-main/internal/model/dto/base"
+	"bamboo-main/internal/model/response"
 	"github.com/XiaoLFeng/bamboo-utils/bmodels"
 	"github.com/gogf/gf/v2/frame/g"
 )
@@ -25,5 +25,5 @@ type AuthLoginReq struct {
 
 type AuthLoginRes struct {
 	g.Meta `mime:"application/json; charset=utf-8" dc:"登录响应"`
-	*bmodels.ResponseDTO[*base.UserTokenDTO]
+	*bmodels.ResponseDTO[*response.AuthLoginResponse]
 }
