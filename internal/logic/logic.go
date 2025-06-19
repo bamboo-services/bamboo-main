@@ -6,4 +6,5 @@ package logic
 
 import (
 	_ "bamboo-main/internal/logic/auth"
+	_ "bamboo-main/internal/logic/token"
 )

@@ -9,29 +9,17 @@
  * --------------------------------------------------------------------------------
  */
 
-package main
+package token
 
-import (
-	"bamboo-main/internal/config/cmd"
-	"bamboo-main/internal/config/setup"
-	"github.com/gogf/gf/v2/os/gctx"
+import "bamboo-main/internal/service"
 
-	_ "bamboo-main/internal/logic"
-	_ "bamboo-main/internal/packed"
-	_ "github.com/gogf/gf/contrib/drivers/pgsql/v2"
-	_ "github.com/gogf/gf/contrib/nosql/redis/v2"
-)
+type sToken struct {
+}
 
-// main
-//
-// 系统服务启动
-func main() {
-	// 创建新的系统上下文
-	getSystemContext := gctx.GetInitCtx()
+func init() {
+	service.RegisterToken(New())
+}
 
-	// 系统初始化服务
-	setup.NewSetup(getSystemContext)
-
-	// 启动服务
-	cmd.Main.Run(getSystemContext)
+func New() *sToken {
+	return &sToken{}
 }

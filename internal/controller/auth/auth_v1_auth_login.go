@@ -5,6 +5,7 @@ import (
 	"context"
 	"github.com/XiaoLFeng/bamboo-utils/berror"
 	"github.com/XiaoLFeng/bamboo-utils/blog"
+	"github.com/XiaoLFeng/bamboo-utils/bresult"
 	"regexp"
 
 	"bamboo-main/api/auth/v1"
@@ -60,5 +61,13 @@ func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res
 		}
 	}
 
-	return &v1.AuthLoginRes{}, nil
+	// 登录成功，生成用户令牌
+	iToken := service.Token()
+	tokenDAO, errorCode := iToken.GenerateUserToken(ctx)
+	if errorCode != nil {
+		return nil, errorCode
+	}
+	return &v1.AuthLoginRes{
+		ResponseDTO: bresult.SuccessHasData(ctx, "用户登录成功", tokenDAO),
+	}, nil
 }

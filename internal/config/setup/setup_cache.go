@@ -9,29 +9,22 @@
  * --------------------------------------------------------------------------------
  */
 
-package main
+package setup
 
 import (
-	"bamboo-main/internal/config/cmd"
-	"bamboo-main/internal/config/setup"
-	"github.com/gogf/gf/v2/os/gctx"
-
-	_ "bamboo-main/internal/logic"
-	_ "bamboo-main/internal/packed"
-	_ "github.com/gogf/gf/contrib/drivers/pgsql/v2"
-	_ "github.com/gogf/gf/contrib/nosql/redis/v2"
+	"github.com/XiaoLFeng/bamboo-utils/blog"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gcache"
 )
 
-// main
+// ProjectSetupCache
 //
-// 系统服务启动
-func main() {
-	// 创建新的系统上下文
-	getSystemContext := gctx.GetInitCtx()
+// 项目缓存初始化；
+// 主要用于初始化 Redis 缓存适配器，确保项目中使用的缓存系统正常工作。
+func (setup *projectSetup) ProjectSetupCache() {
+	blog.BambooNotice(setup.ctx, "ProjectSetupCache", "项目缓存初始化")
 
-	// 系统初始化服务
-	setup.NewSetup(getSystemContext)
-
-	// 启动服务
-	cmd.Main.Run(getSystemContext)
+	// 初始化 Redis 缓存
+	getAdapter := gcache.NewAdapterRedis(g.Redis())
+	g.DB().GetCache().SetAdapter(getAdapter)
 }

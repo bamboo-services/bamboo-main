@@ -12,5 +12,6 @@
 package consts
 
 const (
-	SystemFieldsRedisKey = "system:%s" // SystemFieldsRedisKey 系统字段Redis键，%s 为系统 name 字段
+	SystemFieldsRedisKey = "system:%s"  // SystemFieldsRedisKey 系统字段Redis键，%s 为系统 name 字段
+	UserTokenRedisKey    = "user:token" // UserTokenRedisKey 用户令牌Redis键，用于存储用户令牌信息
 )

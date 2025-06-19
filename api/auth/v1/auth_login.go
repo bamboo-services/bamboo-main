@@ -12,9 +12,9 @@
 package v1
 
 import (
+	"bamboo-main/internal/model/dto/base"
 	"github.com/XiaoLFeng/bamboo-utils/bmodels"
 	"github.com/gogf/gf/v2/frame/g"
-	"go/types"
 )
 
 type AuthLoginReq struct {
@@ -25,5 +25,5 @@ type AuthLoginReq struct {
 
 type AuthLoginRes struct {
 	g.Meta `mime:"application/json; charset=utf-8" dc:"登录响应"`
-	bmodels.ResponseDTO[*types.Nil]
+	*bmodels.ResponseDTO[*base.UserTokenDTO]
 }

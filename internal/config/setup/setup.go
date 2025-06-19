@@ -32,6 +32,7 @@ func NewSetup(ctx context.Context) {
 
 	newSetup.ProjectSetupForSQL()
 	newSetup.ProjectSetupSystemValueInit()
+	newSetup.ProjectSetupCache()
 
 	/*
 	 * 系统初始化完成
@@ -43,6 +44,6 @@ func NewSetup(ctx context.Context) {
 ` + "\033[1;32m" + ` /   |/ / /_/ / /_/ ` + "\033[1;34m" + `/ /  / / /_/ / / / / /
 ` + "\033[1;32m" + `/_/|_/_/\__,_/\____` + "\033[1;34m" + `/_/  /_/\__,_/_/_/ /_/
 `)
-	fmt.Println("\033[1;33m   ::: XiaoMain :::	::: " + consts.SystemVersion + " :::")
+	fmt.Println("\033[1;33m   ::: XiaoMain :::	::: " + consts.SystemVersionValue + " :::")
 	fmt.Println("\033[0m")
 }
