@@ -20,3 +20,4 @@ bin
 **/config/config.yaml
 
 ### Custom Ignore Rules ###
+internal/packed/packed_template.go

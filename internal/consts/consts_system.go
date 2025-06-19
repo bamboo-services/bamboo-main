@@ -9,27 +9,8 @@
  * --------------------------------------------------------------------------------
  */
 
-package main
+package consts
 
-import (
-	"bamboo-main/internal/config/cmd"
-	"bamboo-main/internal/config/setup"
-	_ "bamboo-main/internal/packed"
-	_ "github.com/gogf/gf/contrib/drivers/pgsql/v2"
-
-	"github.com/gogf/gf/v2/os/gctx"
+const (
+	SystemVersion = "v1.0.0-Alpha" // 系统版本号
 )
-
-// main
-//
-// 系统服务启动
-func main() {
-	// 创建新的系统上下文
-	getSystemContext := gctx.GetInitCtx()
-
-	// 系统初始化服务
-	setup.NewSetup(getSystemContext)
-
-	// 启动服务
-	cmd.Main.Run(getSystemContext)
-}
