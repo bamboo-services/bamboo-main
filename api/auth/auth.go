@@ -12,4 +12,5 @@ import (
 
 type IAuthV1 interface {
 	AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res *v1.AuthLoginRes, err error)
+	AuthPasswordChange(ctx context.Context, req *v1.AuthPasswordChangeReq) (res *v1.AuthPasswordChangeRes, err error)
 }

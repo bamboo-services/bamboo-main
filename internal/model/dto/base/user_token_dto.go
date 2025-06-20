@@ -13,7 +13,6 @@ package base
 
 import (
 	"github.com/gogf/gf/v2/os/gtime"
-	"github.com/google/uuid"
 )
 
 // UserTokenDTO
@@ -22,8 +21,8 @@ import (
 // 包含用户令牌、刷新令牌、用户代理、用户IP地址、创建时间、过期时间和刷新时间等信息；
 // 该结构体用于在用户认证和授权过程中传递令牌相关信息。
 type UserTokenDTO struct {
-	Token        uuid.UUID   `json:"token_uuid" dc:"用户令牌"`
-	RefreshToken uuid.UUID   `json:"refresh_token_uuid" dc:"用户刷新令牌"`
+	Token        string      `json:"token_uuid" dc:"用户令牌"`
+	RefreshToken string      `json:"refresh_token_uuid" dc:"用户刷新令牌"`
 	UserAgent    string      `json:"user_agent" dc:"用户代理"`
 	UserIP       string      `json:"user_ip" dc:"用户IP地址"`
 	CreatedAt    *gtime.Time `json:"created_at" dc:"创建时间"`

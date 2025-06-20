@@ -23,3 +23,4 @@ bin
 internal/packed/packed_template.go
 /doc/*
 diff.txt
+/debug.*
