@@ -16,7 +16,6 @@ import (
 	"bamboo-main/internal/dao"
 	"bamboo-main/internal/model/dto/base"
 	"context"
-	"github.com/XiaoLFeng/bamboo-utils/berror"
 	"github.com/XiaoLFeng/bamboo-utils/blog"
 )
 
@@ -24,69 +23,34 @@ import (
 //
 // 获取用户的简单信息；
 // 如果获取成功，则返回用户的简单信息；
-// 如果获取失败，则返回错误码；
-// 如果获取的用户信息出现错误或获取不到用户信息，则返回内部服务器错误。
-func (s *sUser) GetUserSimple(ctx context.Context) (*base.UserSimpleDTO, *berror.ErrorCode) {
+// 如果获取失败，则会产生恐慌（一般情况下都可以正常输出）
+func (s *sUser) GetUserSimple(ctx context.Context) *base.UserSimpleDTO {
 	blog.ServiceInfo(ctx, "GetUserSimple", "获取用户的简单信息")
 
-	username, errorCode := dao.System.GetSystemValue(ctx, consts.SystemUserUsernameKey)
-	if errorCode != nil {
-		return nil, errorCode
-	}
-	email, errorCode := dao.System.GetSystemValue(ctx, consts.SystemUserEmailKey)
-	if errorCode != nil {
-		return nil, errorCode
-	}
-	phone, errorCode := dao.System.GetSystemValue(ctx, consts.SystemUserPhoneKey)
-	if errorCode != nil {
-		return nil, errorCode
-	}
-
 	var userSimpleData = &base.UserSimpleDTO{
-		Username: username,
-		Email:    email,
-		Phone:    phone,
+		Username: dao.System.MustGetSystemValue(ctx, consts.SystemUserUsernameKey),
+		Email:    dao.System.MustGetSystemValue(ctx, consts.SystemUserEmailKey),
+		Phone:    dao.System.MustGetSystemValue(ctx, consts.SystemUserPhoneKey),
 	}
-	return userSimpleData, nil
+	return userSimpleData
 }
 
 // GetUserDetail
 //
 // 获取用户的详细信息；
 // 如果获取成功，则返回用户的详细信息；
-// 如果获取失败，则返回错误码；
-// 如果获取的用户信息出现错误或获取不到用户信息，则返回内部服务器错误。
-func (s *sUser) GetUserDetail(ctx context.Context) (*base.UserDetailDTO, *berror.ErrorCode) {
+// 如果获取失败，则会产生恐慌（一般情况下都可以正常输出）
+func (s *sUser) GetUserDetail(ctx context.Context) *base.UserDetailDTO {
 	blog.ServiceInfo(ctx, "GetUserDetail", "获取用户的详细信息")
 
-	simpleData, errorCode := s.GetUserSimple(ctx)
-	if errorCode != nil {
-		return nil, errorCode
-	}
-
-	nickname, errorCode := dao.System.GetSystemValue(ctx, consts.SystemUserNicknameKey)
-	if errorCode != nil {
-		return nil, errorCode
-	}
-	avatarType, errorCode := dao.System.GetSystemValue(ctx, consts.SystemUserAvatarTypeKey)
-	if errorCode != nil {
-		return nil, errorCode
-	}
-	avatarBase64, errorCode := dao.System.GetSystemValue(ctx, consts.SystemUserAvatarBase64Key)
-	if errorCode != nil {
-		return nil, errorCode
-	}
-	avatarURL, errorCode := dao.System.GetSystemValue(ctx, consts.SystemUserAvatarURLKey)
-	if errorCode != nil {
-		return nil, errorCode
-	}
+	simpleData := s.GetUserSimple(ctx)
 
 	var userDetailData = &base.UserDetailDTO{
 		UserSimpleDTO: *simpleData,
-		Nickname:      nickname,
-		AvatarType:    avatarType,
-		AvatarBase64:  avatarBase64,
-		AvatarURL:     avatarURL,
+		Nickname:      dao.System.MustGetSystemValue(ctx, consts.SystemUserNicknameKey),
+		AvatarType:    dao.System.MustGetSystemValue(ctx, consts.SystemUserAvatarTypeKey),
+		AvatarBase64:  dao.System.MustGetSystemValue(ctx, consts.SystemUserAvatarBase64Key),
+		AvatarURL:     dao.System.MustGetSystemValue(ctx, consts.SystemUserAvatarURLKey),
 	}
-	return userDetailData, nil
+	return userDetailData
 }

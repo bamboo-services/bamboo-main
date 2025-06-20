@@ -8,8 +8,6 @@ package service
 import (
 	"bamboo-main/internal/model/dto/base"
 	"context"
-
-	"github.com/XiaoLFeng/bamboo-utils/berror"
 )
 
 type (
@@ -18,16 +16,14 @@ type (
 		//
 		// 获取用户的简单信息；
 		// 如果获取成功，则返回用户的简单信息；
-		// 如果获取失败，则返回错误码；
-		// 如果获取的用户信息出现错误或获取不到用户信息，则返回内部服务器错误。
-		GetUserSimple(ctx context.Context) (*base.UserSimpleDTO, *berror.ErrorCode)
+		// 如果获取失败，则会产生恐慌（一般情况下都可以正常输出）
+		GetUserSimple(ctx context.Context) *base.UserSimpleDTO
 		// GetUserDetail
 		//
 		// 获取用户的详细信息；
 		// 如果获取成功，则返回用户的详细信息；
-		// 如果获取失败，则返回错误码；
-		// 如果获取的用户信息出现错误或获取不到用户信息，则返回内部服务器错误。
-		GetUserDetail(ctx context.Context) (*base.UserDetailDTO, *berror.ErrorCode)
+		// 如果获取失败，则会产生恐慌（一般情况下都可以正常输出）
+		GetUserDetail(ctx context.Context) *base.UserDetailDTO
 	}
 )
 

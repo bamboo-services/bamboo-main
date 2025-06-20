@@ -64,11 +64,7 @@ func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res
 
 	// 获取用户信息
 	iUser := service.User()
-	getUserDTO, errorCode := iUser.GetUserSimple(ctx)
-	if errorCode != nil {
-		blog.ControllerError(ctx, "AuthLogin", "获取用户信息失败: %v", errorCode)
-		return nil, errorCode
-	}
+	getUserDTO := iUser.GetUserSimple(ctx)
 	// 登录成功，生成用户令牌
 	iToken := service.Token()
 	tokenDAO, errorCode := iToken.GenerateUserToken(ctx)

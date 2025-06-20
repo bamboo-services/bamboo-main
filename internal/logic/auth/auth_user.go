@@ -29,10 +29,7 @@ func (s *sAuth) VerifyUserByUsername(ctx context.Context, username, password str
 	blog.ServiceInfo(ctx, "VerifyUserByUsername", "验证用户 %s 的登录信息", username)
 
 	// 获取用户信息
-	getUsername, errorCode := dao.System.GetSystemValue(ctx, consts.SystemUserUsernameKey)
-	if errorCode != nil {
-		return errorCode
-	}
+	getUsername := dao.System.MustGetSystemValue(ctx, consts.SystemUserUsernameKey)
 	if getUsername == "" {
 		return berror.ErrorAddData(&berror.ErrInternalServer, "系统错误 VerifyUserByUsername 函数出现意外错误")
 	}
@@ -62,10 +59,7 @@ func (s *sAuth) VerifyUserByEmail(ctx context.Context, email, password string) *
 	blog.ServiceInfo(ctx, "VerifyUserByEmail", "通过邮箱验证用户 %s 的登录信息", email)
 
 	// 获取用户邮箱
-	getUserEmail, errorCode := dao.System.GetSystemValue(ctx, consts.SystemUserEmailKey)
-	if errorCode != nil {
-		return errorCode
-	}
+	getUserEmail := dao.System.MustGetSystemValue(ctx, consts.SystemUserEmailKey)
 	if getUserEmail == "" {
 		return berror.ErrorAddData(&berror.ErrInternalServer, "系统错误 VerifyUserByEmail 函数出现意外错误")
 	}
@@ -95,10 +89,7 @@ func (s *sAuth) VerifyUserByPhone(ctx context.Context, phone, password string) *
 	blog.ServiceInfo(ctx, "VerifyUserByPhone", "通过手机号验证用户 %s 的登录信息", phone)
 
 	// 获取用户手机号
-	getUserPhone, errorCode := dao.System.GetSystemValue(ctx, consts.SystemUserPhoneKey)
-	if errorCode != nil {
-		return errorCode
-	}
+	getUserPhone := dao.System.MustGetSystemValue(ctx, consts.SystemUserPhoneKey)
 	if getUserPhone == "" {
 		return berror.ErrorAddData(&berror.ErrInternalServer, "系统错误 VerifyUserByPhone 函数出现意外错误")
 	}

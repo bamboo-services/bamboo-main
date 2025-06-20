@@ -47,3 +47,17 @@ func (dao *systemDao) GetSystemValue(ctx context.Context, name string) (string, 
 	}
 	return systemEntity.SystemValue, nil
 }
+
+// MustGetSystemValue
+//
+// 根据其名称检索系统设置的值；
+// 如果数据库产生了错误将会产生恐慌 panic(errorCode)；
+// 若查询数据为空，则不产生报错但输出结果 string 为空
+func (dao *systemDao) MustGetSystemValue(ctx context.Context, name string) string {
+	value, errorCode := dao.GetSystemValue(ctx, name)
+	if errorCode != nil {
+		panic(errorCode)
+	}
+	return value
+
+}

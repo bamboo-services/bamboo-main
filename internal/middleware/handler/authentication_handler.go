@@ -33,12 +33,7 @@ func AuthenticationHandler(r *ghttp.Request) {
 	}
 
 	// 设置新的用户令牌到请求上下文
-	getUserEntity, errorCode := service.User().GetUserSimple(r.GetCtx())
-	if errorCode != nil {
-		r.SetError(errorCode)
-		return
-	}
-	r.SetCtxVar("UserEntity", getUserEntity)
+	r.SetCtxVar("UserEntity", service.User().GetUserSimple(r.GetCtx()))
 
 	// 验证通过
 	r.Middleware.Next()

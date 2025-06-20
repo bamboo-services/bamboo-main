@@ -31,10 +31,7 @@ import (
 // 如果获取失败，则返回错误码；
 // 如果获取的密码出现错误或获取不到密码，则返回内部服务器错误。
 func getUserPassword(ctx context.Context) (string, *berror.ErrorCode) {
-	getPassword, errorCode := dao.System.GetSystemValue(ctx, consts.SystemUserPasswordKey)
-	if errorCode != nil {
-		return "", errorCode
-	}
+	getPassword := dao.System.MustGetSystemValue(ctx, consts.SystemUserPasswordKey)
 	if getPassword == "" {
 		return "", berror.ErrorAddData(&berror.ErrInternalServer, "系统错误 getUserPassword 函数出现意外错误")
 	}
