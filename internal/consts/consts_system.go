@@ -19,7 +19,10 @@ const (
 	SystemNameKey        = "system_name"        // 系统名称键
 	SystemVersionKey     = "system_version"     // 系统版本键
 	SystemDescriptionKey = "system_description" // 系统描述键
+	SystemSinceYearKey   = "system_since_year"  // 系统创建年份键
+)
 
+const (
 	SystemUserUsernameKey     = "user_username"      // 用户名键
 	SystemUserPasswordKey     = "user_password"      // 密码键
 	SystemUserEmailKey        = "user_email"         // 邮箱键
@@ -28,4 +31,14 @@ const (
 	SystemUserAvatarTypeKey   = "user_avatar_type"   // 头像类型键
 	SystemUserAvatarBase64Key = "user_avatar_base64" // 头像Base64键
 	SystemUserAvatarURLKey    = "user_avatar_url"    // 头像URL键
+)
+
+const (
+	SystemEmailHostKey                 = "email_host"                    // 邮件服务器地址键
+	SystemEmailPortKey                 = "email_port"                    // 邮件服务器端口键
+	SystemEmailUsernameKey             = "email_username"                // 邮件用户名键
+	SystemEmailPasswordKey             = "email_password"                // 邮件密码键
+	SystemEmailFromNameKey             = "email_from_name"               // 邮件发送人名称键
+	SystemEmailFromAddressKey          = "email_from_address"            // 邮件发送人地址键
+	SystemEmailVerifyCodeExpireTimeKey = "email_verify_code_expire_time" // 邮箱验证码过期时间键
 )

@@ -35,6 +35,7 @@ func (setup *projectSetup) ProjectSetupSystemValueInit() {
 	checkAndInsertData(setup.ctx, consts.SystemNameKey, "XiaoMain")
 	checkAndInsertData(setup.ctx, consts.SystemVersionKey, "v1.0.0-alpha")
 	checkAndInsertData(setup.ctx, consts.SystemDescriptionKey, "XiaoMain 是一个基于 Go 语言开发的开源项目，旨在提供一个高效、灵活的 Web 应用框架。")
+	checkAndInsertData(setup.ctx, consts.SystemSinceYearKey, "2016")
 
 	// 系统用户有关数据
 	checkAndInsertData(setup.ctx, consts.SystemUserUsernameKey, "admin")
@@ -45,6 +46,15 @@ func (setup *projectSetup) ProjectSetupSystemValueInit() {
 	checkAndInsertData(setup.ctx, consts.SystemUserAvatarTypeKey, "local")
 	checkAndInsertData(setup.ctx, consts.SystemUserAvatarBase64Key, "")
 	checkAndInsertData(setup.ctx, consts.SystemUserAvatarURLKey, "https://i-cdn.akass.cn/2024/05/664870a814c0d.png!wp60")
+
+	// 系统发送邮件
+	checkAndInsertData(setup.ctx, consts.SystemEmailHostKey, "smtp.qiye.aliyun.com")
+	checkAndInsertData(setup.ctx, consts.SystemEmailPortKey, "25")
+	checkAndInsertData(setup.ctx, consts.SystemEmailUsernameKey, "noreply@x-lf.cn")
+	checkAndInsertData(setup.ctx, consts.SystemEmailPasswordKey, "your-email-password")
+	checkAndInsertData(setup.ctx, consts.SystemEmailFromNameKey, "XiaoMain")
+	checkAndInsertData(setup.ctx, consts.SystemEmailFromAddressKey, "noreplay@x-lf.cn")
+	checkAndInsertData(setup.ctx, consts.SystemEmailVerifyCodeExpireTimeKey, "600")
 }
 
 // checkAndInsertData

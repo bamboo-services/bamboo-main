@@ -44,6 +44,7 @@ var (
 				// 非认证
 				group.Bind(
 					auth.NewV1().AuthLogin,
+					auth.NewV1().AuthPasswordReset,
 				)
 
 				// 认证

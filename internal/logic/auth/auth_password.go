@@ -16,7 +16,6 @@ import (
 	"bamboo-main/internal/dao"
 	"bamboo-main/internal/model/do"
 	"bamboo-main/internal/model/entity"
-	"bamboo-main/pkg/utility"
 	"context"
 	"fmt"
 	"github.com/XiaoLFeng/bamboo-utils/berror"
@@ -69,7 +68,7 @@ func (s *sAuth) VerifyPassword(ctx context.Context, password string) *berror.Err
 // 如果修改失败，则返回错误码；
 // 如果新密码为空，则返回错误码。
 func (s *sAuth) ChangePassword(ctx context.Context, newPassword string) *berror.ErrorCode {
-	blog.ServiceInfo(ctx, "ChangePassword", "修改 %s 用户密码", utility.GetCtxVarToUserEntity(ctx).Username)
+	blog.ServiceInfo(ctx, "ChangePassword", "修改用户密码")
 
 	// 验证新密码是否为空
 	if newPassword == "" {
@@ -89,6 +88,6 @@ func (s *sAuth) ChangePassword(ctx context.Context, newPassword string) *berror.
 		return berror.ErrorAddData(&berror.ErrInternalServer, "更新密码失败: "+daoErr.Error())
 	}
 
-	blog.ServiceNotice(ctx, "ChangePassword", "用户 %s 密码修改成功", utility.GetCtxVarToUserEntity(ctx).Username)
+	blog.ServiceNotice(ctx, "ChangePassword", "用户密码修改成功")
 	return nil
 }
