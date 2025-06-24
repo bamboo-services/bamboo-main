@@ -77,7 +77,7 @@ func (dao *SystemDao) Ctx(ctx context.Context) *gdb.Model {
 }
 
 // Transaction wraps the transaction logic using function f.
-// It rolls back the transaction and returns the cerror if function f returns a non-nil cerror.
+// It rolls back the transaction and returns the error if function f returns a non-nil error.
 // It commits the transaction and returns nil if function f returns nil.
 //
 // Note: Do not commit or roll back the transaction in function f,

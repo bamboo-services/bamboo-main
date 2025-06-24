@@ -46,6 +46,9 @@ func (setup *projectSetup) ProjectSetupForSQL() {
 var SQLNameList = []string{
 	"xf_system",
 	"xf_logs",
+	"xf_link_group",
+	"xf_link_color",
+	"xf_link_context",
 }
 
 // getSQLDataAndInsert

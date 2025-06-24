@@ -11,62 +11,66 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// LogsDao is the data access object for the table xf_logs.
-type LogsDao struct {
+// LinkGroupDao is the data access object for the table xf_link_group.
+type LinkGroupDao struct {
 	table    string             // table is the underlying table name of the DAO.
 	group    string             // group is the database configuration group name of the current DAO.
-	columns  LogsColumns        // columns contains all the column names of Table for convenient usage.
+	columns  LinkGroupColumns   // columns contains all the column names of Table for convenient usage.
 	handlers []gdb.ModelHandler // handlers for customized model modification.
 }
 
-// LogsColumns defines and stores column names for the table xf_logs.
-type LogsColumns struct {
-	LogUuid      string // 日志唯一标识符
-	LogType      string // 日志类型
-	LogContent   string // 日志内容
-	LogCreatedAt string // 日志创建时间
+// LinkGroupColumns defines and stores column names for the table xf_link_group.
+type LinkGroupColumns struct {
+	GroupUuid      string // 分组唯一标识符
+	GroupName      string // 分组名称
+	GroupDesc      string // 分组描述
+	GroupOrder     string // 分组排序
+	GroupCreatedAt string // 分组创建时间
+	GroupUpdatedAt string // 分组更新时间
 }
 
-// logsColumns holds the columns for the table xf_logs.
-var logsColumns = LogsColumns{
-	LogUuid:      "log_uuid",
-	LogType:      "log_type",
-	LogContent:   "log_content",
-	LogCreatedAt: "log_created_at",
+// linkGroupColumns holds the columns for the table xf_link_group.
+var linkGroupColumns = LinkGroupColumns{
+	GroupUuid:      "group_uuid",
+	GroupName:      "group_name",
+	GroupDesc:      "group_desc",
+	GroupOrder:     "group_order",
+	GroupCreatedAt: "group_created_at",
+	GroupUpdatedAt: "group_updated_at",
 }
 
-// NewLogsDao creates and returns a new DAO object for table data access.
-func NewLogsDao(handlers ...gdb.ModelHandler) *LogsDao {
-	return &LogsDao{
+// NewLinkGroupDao creates and returns a new DAO object for table data access.
+func NewLinkGroupDao(handlers ...gdb.ModelHandler) *LinkGroupDao {
+	return &LinkGroupDao{
 		group:    "default",
-		table:    "xf_logs",
-		columns:  logsColumns,
+		table:    "xf_link_group",
+		columns:  linkGroupColumns,
 		handlers: handlers,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of the current DAO.
-func (dao *LogsDao) DB() gdb.DB {
+func (dao *LinkGroupDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of the current DAO.
-func (dao *LogsDao) Table() string {
+func (dao *LinkGroupDao) Table() string {
 	return dao.table
 }
 
 // Columns returns all column names of the current DAO.
-func (dao *LogsDao) Columns() LogsColumns {
+func (dao *LinkGroupDao) Columns() LinkGroupColumns {
 	return dao.columns
 }
 
 // Group returns the database configuration group name of the current DAO.
-func (dao *LogsDao) Group() string {
+func (dao *LinkGroupDao) Group() string {
 	return dao.group
 }
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
-func (dao *LogsDao) Ctx(ctx context.Context) *gdb.Model {
+func (dao *LinkGroupDao) Ctx(ctx context.Context) *gdb.Model {
 	model := dao.DB().Model(dao.table)
 	for _, handler := range dao.handlers {
 		model = handler(model)
@@ -80,6 +84,6 @@ func (dao *LogsDao) Ctx(ctx context.Context) *gdb.Model {
 //
 // Note: Do not commit or roll back the transaction in function f,
 // as it is automatically handled by this function.
-func (dao *LogsDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
+func (dao *LinkGroupDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }

@@ -11,62 +11,66 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// LogsDao is the data access object for the table xf_logs.
-type LogsDao struct {
+// LinkColorDao is the data access object for the table xf_link_color.
+type LinkColorDao struct {
 	table    string             // table is the underlying table name of the DAO.
 	group    string             // group is the database configuration group name of the current DAO.
-	columns  LogsColumns        // columns contains all the column names of Table for convenient usage.
+	columns  LinkColorColumns   // columns contains all the column names of Table for convenient usage.
 	handlers []gdb.ModelHandler // handlers for customized model modification.
 }
 
-// LogsColumns defines and stores column names for the table xf_logs.
-type LogsColumns struct {
-	LogUuid      string // 日志唯一标识符
-	LogType      string // 日志类型
-	LogContent   string // 日志内容
-	LogCreatedAt string // 日志创建时间
+// LinkColorColumns defines and stores column names for the table xf_link_color.
+type LinkColorColumns struct {
+	ColorUuid      string // 颜色唯一标识符
+	ColorName      string // 颜色名称
+	ColorValue     string // 颜色值（如HEX值：#FFFFFF）
+	ColorDesc      string // 颜色描述
+	ColorCreatedAt string // 颜色创建时间
+	ColorUpdatedAt string // 颜色更新时间
 }
 
-// logsColumns holds the columns for the table xf_logs.
-var logsColumns = LogsColumns{
-	LogUuid:      "log_uuid",
-	LogType:      "log_type",
-	LogContent:   "log_content",
-	LogCreatedAt: "log_created_at",
+// linkColorColumns holds the columns for the table xf_link_color.
+var linkColorColumns = LinkColorColumns{
+	ColorUuid:      "color_uuid",
+	ColorName:      "color_name",
+	ColorValue:     "color_value",
+	ColorDesc:      "color_desc",
+	ColorCreatedAt: "color_created_at",
+	ColorUpdatedAt: "color_updated_at",
 }
 
-// NewLogsDao creates and returns a new DAO object for table data access.
-func NewLogsDao(handlers ...gdb.ModelHandler) *LogsDao {
-	return &LogsDao{
+// NewLinkColorDao creates and returns a new DAO object for table data access.
+func NewLinkColorDao(handlers ...gdb.ModelHandler) *LinkColorDao {
+	return &LinkColorDao{
 		group:    "default",
-		table:    "xf_logs",
-		columns:  logsColumns,
+		table:    "xf_link_color",
+		columns:  linkColorColumns,
 		handlers: handlers,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of the current DAO.
-func (dao *LogsDao) DB() gdb.DB {
+func (dao *LinkColorDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of the current DAO.
-func (dao *LogsDao) Table() string {
+func (dao *LinkColorDao) Table() string {
 	return dao.table
 }
 
 // Columns returns all column names of the current DAO.
-func (dao *LogsDao) Columns() LogsColumns {
+func (dao *LinkColorDao) Columns() LinkColorColumns {
 	return dao.columns
 }
 
 // Group returns the database configuration group name of the current DAO.
-func (dao *LogsDao) Group() string {
+func (dao *LinkColorDao) Group() string {
 	return dao.group
 }
 
 // Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
-func (dao *LogsDao) Ctx(ctx context.Context) *gdb.Model {
+func (dao *LinkColorDao) Ctx(ctx context.Context) *gdb.Model {
 	model := dao.DB().Model(dao.table)
 	for _, handler := range dao.handlers {
 		model = handler(model)
@@ -80,6 +84,6 @@ func (dao *LogsDao) Ctx(ctx context.Context) *gdb.Model {
 //
 // Note: Do not commit or roll back the transaction in function f,
 // as it is automatically handled by this function.
-func (dao *LogsDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
+func (dao *LinkColorDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }
