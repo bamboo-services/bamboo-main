@@ -40,6 +40,7 @@ var (
 			// RESTful API 路由
 			s.Group("/api/v1", func(group *ghttp.RouterGroup) {
 				group.Middleware(bmiddle.BambooHandlerResponse)
+				group.Middleware(handler.LogHandler)
 
 				// 非认证
 				group.Bind(
