@@ -12,18 +12,17 @@
 package v1
 
 import (
-	"bamboo-main/internal/model/response"
 	"github.com/XiaoLFeng/bamboo-utils/bmodels"
 	"github.com/gogf/gf/v2/frame/g"
+	"go/types"
 )
 
-type AuthLoginReq struct {
-	g.Meta   `path:"/auth/login" method:"POST" tags:"认证控制器" summary:"用户登录" dc:"用户登录接口，使用用户名和密码进行身份验证，返回登录状态和用户信息"`
-	User     string `json:"user" v:"required#请输入用户名、邮箱、手机号" dc:"用户名、邮箱或手机号"`
-	Password string `json:"password" v:"required#请输入密码" dc:"密码"`
+type LinkGroupDeleteReq struct {
+	g.Meta    `path:"/link/group" method:"DELETE" tags:"链接控制器" summary:"删除链接分组" dc:"删除友链分组的接口，允许用户删除指定的链接分组"`
+	GroupUuid string `json:"group_uuid" in:"query" v:"required#请输入分组唯一标识符|regex:^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$#请输入有效的UUID格式" dc:"分组唯一标识符，不能为空，用于指定要删除的分组"`
 }
 
-type AuthLoginRes struct {
-	g.Meta `mime:"application/json; charset=utf-8" dc:"登录响应"`
-	*bmodels.ResponseDTO[response.AuthLoginResponse]
+type LinkGroupDeleteRes struct {
+	g.Meta `mime:"application/json; charset=utf-8" dc:"删除链接分组响应"`
+	*bmodels.ResponseDTO[types.Nil]
 }

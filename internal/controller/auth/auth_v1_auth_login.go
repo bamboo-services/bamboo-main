@@ -73,7 +73,7 @@ func (c *ControllerV1) AuthLogin(ctx context.Context, req *v1.AuthLoginReq) (res
 	}
 
 	return &v1.AuthLoginRes{
-		ResponseDTO: bresult.SuccessHasData(ctx, "用户登录成功", &response.AuthLoginResponse{
+		ResponseDTO: bresult.SuccessHasData(ctx, "用户登录成功", response.AuthLoginResponse{
 			User:  getUserDTO,
 			Token: tokenDAO,
 		}),

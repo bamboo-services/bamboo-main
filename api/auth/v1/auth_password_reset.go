@@ -26,5 +26,5 @@ type AuthPasswordResetReq struct {
 
 type AuthPasswordResetRes struct {
 	g.Meta `mime:"application/json; charset=utf-8" dc:"重置密码响应"`
-	*bmodels.ResponseDTO[*types.Nil]
+	*bmodels.ResponseDTO[types.Nil]
 }

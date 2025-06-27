@@ -27,5 +27,5 @@ type AuthPasswordChangeReq struct {
 
 type AuthPasswordChangeRes struct {
 	g.Meta `mime:"application/json; charset=utf-8" dc:"修改密码响应"`
-	*bmodels.ResponseDTO[*types.Nil]
+	*bmodels.ResponseDTO[types.Nil]
 }
