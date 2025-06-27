@@ -22,7 +22,7 @@ CREATE TABLE xf_link_context
     link_group_uuid UUID NOT NULL,
     link_color_uuid UUID,
     link_order INT DEFAULT 0 NOT NULL,
-    link_status SMALLINT DEFAULT 0 NOT NULL,  -- 0: 待审核, 1: 已通过, 2: 已拒绝
+    link_status SMALLINT DEFAULT 0 NOT NULL,  -- 0: 待审核, 1: 已通过, 2: 已失效
     link_apply_remark TEXT,                  -- 申请者备注
     link_review_remark TEXT,                 -- 审核备注
     link_created_at TIMESTAMP DEFAULT NOW() NOT NULL,

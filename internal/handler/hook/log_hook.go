@@ -9,7 +9,7 @@
  * --------------------------------------------------------------------------------
  */
 
-package handler
+package hook
 
 import (
 	"bamboo-main/internal/dao"
@@ -25,17 +25,14 @@ import (
 	"strings"
 )
 
-// LogHandler
+// LogHook
 //
 //	是一个中间件，用于记录请求日志。
 //
 // 它会在请求处理完成后，记录请求的路径、方法、请求体、IP 地址、用户代理和引用页面等信息。
 // 如果请求处理过程中没有发生错误，则记录操作成功的日志；
 // 如果发生了错误，则记录错误信息。
-func LogHandler(r *ghttp.Request) {
-	// 记录请求日志
-	r.Middleware.Next()
-
+func LogHook(r *ghttp.Request) {
 	// 对以下开头的请求不记录日志
 	var urlPaths = []string{
 		"/api/v1/auth",

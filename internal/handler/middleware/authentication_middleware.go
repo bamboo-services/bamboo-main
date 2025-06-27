@@ -9,7 +9,7 @@
  * --------------------------------------------------------------------------------
  */
 
-package handler
+package middleware
 
 import (
 	"bamboo-main/internal/service"
@@ -17,11 +17,11 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 )
 
-// AuthenticationHandler
+// AuthenticationMiddleware
 //
 // 中间件处理函数，用于处理请求的认证逻辑；
 // 该函数会在请求处理链中被调用，确保请求在继续处理之前经过认证检查。
-func AuthenticationHandler(r *ghttp.Request) {
+func AuthenticationMiddleware(r *ghttp.Request) {
 	getToken := butil.TokenRemoveBearer(r.GetHeader("Authorization"))
 	getRefreshToken := r.GetHeader("X-Refresh-Token")
 

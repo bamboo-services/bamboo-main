@@ -13,7 +13,8 @@ package cmd
 
 import (
 	"bamboo-main/internal/controller/auth"
-	"bamboo-main/internal/middleware/handler"
+	"bamboo-main/internal/handler/hook"
+	"bamboo-main/internal/handler/middleware"
 	"context"
 	"github.com/XiaoLFeng/bamboo-utils/bhandler/bhook"
 	"github.com/XiaoLFeng/bamboo-utils/bhandler/bmiddle"
@@ -33,14 +34,14 @@ var (
 
 			// Hook
 			if glog.GetLevel() == glog.LEVEL_DEV {
-				s.BindHookHandler("/**", ghttp.HookBeforeServe, bhook.BambooHookDefaultCors)
-				s.BindHookHandler("/api/v1/**", ghttp.HookBeforeServe, bhook.BambooHookRequestInfo)
+				s.BindHookHandler("/api/*", ghttp.HookBeforeServe, bhook.BambooHookDefaultCors)
+				s.BindHookHandler("/api/v1/*", ghttp.HookBeforeServe, bhook.BambooHookRequestInfo)
 			}
+			s.BindHookHandler("/api/v1/*", ghttp.HookAfterOutput, hook.LogHook)
 
 			// RESTful API 路由
 			s.Group("/api/v1", func(group *ghttp.RouterGroup) {
 				group.Middleware(bmiddle.BambooHandlerResponse)
-				group.Middleware(handler.LogHandler)
 
 				// 非认证
 				group.Bind(
@@ -49,7 +50,7 @@ var (
 				)
 
 				// 认证
-				group.Middleware(handler.AuthenticationHandler)
+				group.Middleware(middleware.AuthenticationMiddleware)
 				group.Bind(
 					auth.NewV1().AuthPasswordChange,
 				)
