@@ -15,5 +15,5 @@ type ILinkGroupV1 interface {
 	LinkGroupDelete(ctx context.Context, req *v1.LinkGroupDeleteReq) (res *v1.LinkGroupDeleteRes, err error)
 	LinkGroupEdit(ctx context.Context, req *v1.LinkGroupEditReq) (res *v1.LinkGroupEditRes, err error)
 	LinkGroupGet(ctx context.Context, req *v1.LinkGroupGetReq) (res *v1.LinkGroupGetRes, err error)
-	LinkGroupList(ctx context.Context, req *v1.LinkGroupListReq) (res *v1.LinkGroupListRes, err error)
+	LinkGroupPage(ctx context.Context, req *v1.LinkGroupPageReq) (res *v1.LinkGroupPageRes, err error)
 }

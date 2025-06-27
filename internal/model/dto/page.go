@@ -16,9 +16,9 @@ package dto
 // 分页数据结构，包含当前页数据、页码、每页数据量、总数据量和总页数。
 // T 是一个泛型类型参数，表示当前页数据的类型。
 type Page[T interface{}] struct {
-	Record  []*T `json:"record" description:"当前页数据"`
-	Current int  `json:"current" description:"当前页码"`
-	Size    int  `json:"size" description:"每页数据量"`
-	Total   int  `json:"total" description:"总数据量"`
-	Pages   int  `json:"pages" description:"总页数"`
+	Record  []*T `json:"record" description:"当前页数据" v:"required"`
+	Current int  `json:"current" description:"当前页码" v:"required"`
+	Size    int  `json:"size" description:"每页数据量" v:"required|between:1,100"`
+	Total   int  `json:"total" description:"总数据量" v:"required"`
+	Pages   int  `json:"pages" description:"总页数" v:"required"`
 }

@@ -20,4 +20,8 @@ const (
 	LinkGroupByNameRedisKey        = "link_group:group:name:%s"              // LinkGroupByNameRedisKey 链接组名称Redis键，%s 为链接组名称
 	LinkGroupListRedisKey          = "link_group:group:list"                 // LinkGroupListRedisKey 链接组列表Redis键，用于存储所有链接组的列表
 	LinkGroupListHasSearchRedisKey = "link_group:group:list:search:%d:%d:%s" // LinkGroupListHasSearchRedisKey 链接组列表搜索Redis键，%s 分别为 `页码:大小:关键词`
+	LinkColorByUUIDRedisKey        = "xm:link:color:uuid:%s"                 // LinkColorByUUIDRedisKey 链接颜色通过 UUID 获取的 Redis 键
+	LinkColorByNameRedisKey        = "xm:link:color:name:%s"                 // LinkColorByNameRedisKey 链接颜色通过名称获取的 Redis 键
+	LinkColorListRedisKey          = "xm:link:color:list"                    // LinkColorListRedisKey 链接颜色列表的 Redis 键
+	LinkColorListHasSearchRedisKey = "xm:link:color:list:%d:%d:%s"           // LinkColorListHasSearchRedisKey 链接颜色分页列表带搜索的 Redis 键，格式：页码:每页数量:搜索词
 )
