@@ -1,11 +1,12 @@
-package link
+package link_group
 
 import (
-	"bamboo-main/api/link/v1"
 	"bamboo-main/internal/service"
 	"context"
 	"github.com/XiaoLFeng/bamboo-utils/blog"
 	"github.com/XiaoLFeng/bamboo-utils/bresult"
+
+	"bamboo-main/api/link_group/v1"
 )
 
 // LinkGroupList

@@ -13,7 +13,7 @@ package cmd
 
 import (
 	"bamboo-main/internal/controller/auth"
-	"bamboo-main/internal/controller/link"
+	"bamboo-main/internal/controller/link_group"
 	"bamboo-main/internal/handler/hook"
 	"bamboo-main/internal/handler/middleware"
 	"context"
@@ -54,10 +54,11 @@ var (
 				group.Middleware(middleware.AuthenticationMiddleware)
 				group.Bind(
 					auth.NewV1().AuthPasswordChange,
-					link.NewV1().LinkGroupAdd,
-					link.NewV1().LinkGroupEdit,
-					link.NewV1().LinkGroupDelete,
-					link.NewV1().LinkGroupList,
+					link_group.NewV1().LinkGroupGet,
+					link_group.NewV1().LinkGroupAdd,
+					link_group.NewV1().LinkGroupEdit,
+					link_group.NewV1().LinkGroupDelete,
+					link_group.NewV1().LinkGroupList,
 				)
 			})
 

@@ -18,7 +18,7 @@ import (
 )
 
 type LinkGroupAddReq struct {
-	g.Meta      `path:"/link/group" method:"POST" tags:"链接控制器" summary:"添加链接分组" dc:"添加友链分组的接口，允许用户创建新的链接分组"`
+	g.Meta      `path:"/link/group" method:"POST" tags:"链接分组控制器" summary:"添加链接分组" dc:"添加友链分组的接口，允许用户创建新的链接分组"`
 	Name        string `json:"name" v:"required#请输入分组名称" dc:"分组名称，不能为空"`
 	Description string `json:"description" v:"required#请输入分组描述" dc:"分组描述，不能为空"`
 	Order       int    `json:"order" default:"0" v:"required|between:0,100#请输入分组排序|分组顺序只允许 0 到 100" dc:"分组排序，数字越小越靠前，默认为0"`

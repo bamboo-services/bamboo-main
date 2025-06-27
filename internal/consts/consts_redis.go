@@ -12,12 +12,12 @@
 package consts
 
 const (
-	SystemFieldsRedisKey           = "system:%s"                       // SystemFieldsRedisKey 系统字段Redis键，%s 为系统 name 字段
-	UserTokenRedisKey              = "user:token"                      // UserTokenRedisKey 用户令牌Redis键，用于存储用户令牌信息
-	NextSendEmailTimeRedisKey      = "email:next:%s"                   // NextSendEmailTimeRedisKey 下次发送邮件时间Redis键，%s 为用户邮箱地址
-	SendEmailSmsRedisKey           = "email:sms:%s"                    // SendEmailSmsRedisKey 发送邮件验证码Redis键，%s 为用户邮箱地址
-	LinkGroupByUUIDRedisKey        = "link:group:%s"                   // LinkGroupByUUIDRedisKey 链接组Redis键，%s 为链接组 UUID
-	LinkGroupByNameRedisKey        = "link:group:name:%s"              // LinkGroupByNameRedisKey 链接组名称Redis键，%s 为链接组名称
-	LinkGroupListRedisKey          = "link:group:list"                 // LinkGroupListRedisKey 链接组列表Redis键，用于存储所有链接组的列表
-	LinkGroupListHasSearchRedisKey = "link:group:list:search:%d:%d:%s" // LinkGroupListHasSearchRedisKey 链接组列表搜索Redis键，%s 分别为 `页码:大小:关键词`
+	SystemFieldsRedisKey           = "system:%s"                             // SystemFieldsRedisKey 系统字段Redis键，%s 为系统 name 字段
+	UserTokenRedisKey              = "user:token"                            // UserTokenRedisKey 用户令牌Redis键，用于存储用户令牌信息
+	NextSendEmailTimeRedisKey      = "email:next:%s"                         // NextSendEmailTimeRedisKey 下次发送邮件时间Redis键，%s 为用户邮箱地址
+	SendEmailSmsRedisKey           = "email:sms:%s"                          // SendEmailSmsRedisKey 发送邮件验证码Redis键，%s 为用户邮箱地址
+	LinkGroupByUUIDRedisKey        = "link_group:group:%s"                   // LinkGroupByUUIDRedisKey 链接组Redis键，%s 为链接组 UUID
+	LinkGroupByNameRedisKey        = "link_group:group:name:%s"              // LinkGroupByNameRedisKey 链接组名称Redis键，%s 为链接组名称
+	LinkGroupListRedisKey          = "link_group:group:list"                 // LinkGroupListRedisKey 链接组列表Redis键，用于存储所有链接组的列表
+	LinkGroupListHasSearchRedisKey = "link_group:group:list:search:%d:%d:%s" // LinkGroupListHasSearchRedisKey 链接组列表搜索Redis键，%s 分别为 `页码:大小:关键词`
 )

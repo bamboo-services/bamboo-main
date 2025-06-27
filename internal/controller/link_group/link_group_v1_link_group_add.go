@@ -1,4 +1,4 @@
-package link
+package link_group
 
 import (
 	"bamboo-main/internal/model/dto/base"
@@ -9,7 +9,7 @@ import (
 	"github.com/XiaoLFeng/bamboo-utils/bresult"
 	"github.com/gogf/gf/v2/util/gconv"
 
-	"bamboo-main/api/link/v1"
+	"bamboo-main/api/link_group/v1"
 )
 
 // LinkGroupAdd
