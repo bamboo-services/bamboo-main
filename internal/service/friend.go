@@ -6,6 +6,7 @@
 package service
 
 import (
+	"bamboo-main/internal/model/dto"
 	"bamboo-main/internal/model/dto/base"
 	"bamboo-main/internal/model/entity"
 	"context"
@@ -40,6 +41,12 @@ type (
 		// 如果 UUID 格式无效或友链不存在，将返回对应的错误码。
 		// 执行成功后会清理相关的全局缓存以确保数据一致性。
 		Delete(ctx context.Context, linkUUID string) *berror.ErrorCode
+		// GetPage
+		//
+		// 获取友链分页数据。根据传入的搜索内容、页码和每页数量进行查询。
+		// 如果 isAll 为 false，则只查询未失败的友链；如果 isAll 为 true，则查询所有启用的友链。
+		// 返回一个包含友链分页数据的 DTO 对象，如果查询失败则返回对应的错误码。
+		GetPage(ctx context.Context, search string, page int, size int, isAll bool) (*dto.Page[base.LinkFriendDTO], *berror.ErrorCode)
 		// UpdateStatus
 		//
 		// 更新友链状态，根据传入的 UUID 和状态值进行操作。

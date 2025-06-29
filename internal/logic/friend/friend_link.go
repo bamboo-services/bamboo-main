@@ -15,6 +15,7 @@ import (
 	"bamboo-main/internal/consts"
 	"bamboo-main/internal/dao"
 	"bamboo-main/internal/model/do"
+	"bamboo-main/internal/model/dto"
 	"bamboo-main/internal/model/dto/base"
 	"bamboo-main/internal/model/entity"
 	"bamboo-main/pkg/cerror"
@@ -180,6 +181,42 @@ func (s *sFriend) Delete(ctx context.Context, linkUUID string) *berror.ErrorCode
 		return errorCode
 	}
 	return nil
+}
+
+// GetPage
+//
+// 获取友链分页数据。根据传入的搜索内容、页码和每页数量进行查询。
+// 如果 isAll 为 false，则只查询未失败的友链；如果 isAll 为 true，则查询所有启用的友链。
+// 返回一个包含友链分页数据的 DTO 对象，如果查询失败则返回对应的错误码。
+func (s *sFriend) GetPage(ctx context.Context, search string, page, size int, isAll bool) (*dto.Page[base.LinkFriendDTO], *berror.ErrorCode) {
+	blog.ServiceInfo(ctx, "GetPage", "获取友链分页数据，搜索内容：%s，页码：%d，每页数量：%d", search, page, size)
+
+	// 构建查询条件
+	whereBuilder := dao.LinkContext.Ctx(ctx).Builder().WhereOr("link_status = 1")
+	if search != "" {
+		whereBuilder = whereBuilder.
+			WhereOrLike("link_name", "%"+search+"%").
+			WhereOrLike("link_url", "%"+search+"%").
+			WhereOrLike("link_description", "%"+search+"%").
+			WhereOrLike("link_email", "%"+search+"%")
+	}
+	if !isAll {
+		whereBuilder = whereBuilder.WhereOr("link_fail = 0")
+	}
+
+	// 执行查询
+	var linkEntities []*entity.LinkContext
+	daoErr := dao.LinkContext.Ctx(ctx).Cache(gdb.CacheOption{
+		Duration: 24 * time.Hour,
+		Name:     fmt.Sprintf(consts.LinkContextListSearchRedisKey, page, size, search),
+	}).Where(whereBuilder).OmitEmpty().Scan(&linkEntities)
+	if daoErr != nil {
+		blog.ServiceError(ctx, "GetPage", "查询友链分页数据失败，错误：%v", daoErr)
+		return nil, berror.ErrorAddData(&berror.ErrDatabaseError, daoErr.Error())
+	}
+	// 合成分页数据
+	linkFriendPage := utility.MakePageToTarget(linkEntities, page, size, base.LinkFriendDTO{})
+	return linkFriendPage, nil
 }
 
 // deleteGlobalImpactCache
