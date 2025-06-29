@@ -21,10 +21,13 @@ import (
 	"context"
 	"github.com/XiaoLFeng/bamboo-utils/bhandler/bhook"
 	"github.com/XiaoLFeng/bamboo-utils/bhandler/bmiddle"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gcmd"
+	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/glog"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
 var (
@@ -76,7 +79,24 @@ var (
 					link_friend.NewV1().LinkFriendAdd,
 					link_friend.NewV1().LinkFriendEdit,
 					link_friend.NewV1().LinkFriendStatus,
+					link_friend.NewV1().LinkFriendFail,
 				)
+			})
+
+			// 404 Not Found
+			s.BindHandler("/api/v1/*", func(r *ghttp.Request) {
+				getValue := g.Map{
+					"context": gctx.CtxId(r.GetCtx()),
+					"code":    40401,
+					"message": "页面不存在",
+					"time":    gtime.Now().TimestampMilli(),
+				}
+				r.Response.Header().Set("Content-Type", "application/json; charset=utf-8")
+				if glog.GetLevel() == glog.LEVEL_DEV {
+					getValue["overhead"] = gtime.Now().Sub(r.EnterTime).Milliseconds()
+				}
+				jsonEncodeData := gjson.MustEncodeString(getValue)
+				r.Response.WriteStatus(404, jsonEncodeData)
 			})
 
 			s.Run()

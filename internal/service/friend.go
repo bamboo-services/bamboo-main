@@ -40,6 +40,12 @@ type (
 		// 如果 UUID 格式无效或状态值非法，将返回对应的错误码。
 		// 执行成功后会清理相关的全局缓存以确保数据一致性。
 		UpdateStatus(ctx context.Context, linkUUID string, status int) *berror.ErrorCode
+		// UpdateFailStatus
+		//
+		// 更新友链失败状态和原因，根据传入的 UUID、失败状态和原因进行操作。
+		// 如果 UUID 格式无效，将返回对应的错误码。
+		// 执行成功后会清理相关的全局缓存以确保数据一致性。
+		UpdateFailStatus(ctx context.Context, linkUUID string, isFail bool, reason string) *berror.ErrorCode
 	}
 )
 

@@ -18,8 +18,8 @@ import (
 )
 
 type LinkFriendFailReq struct {
-	g.Meta   `path:"/link/friend/fail" method:"PATCH" tags:"链接控制器" summary:"更新友情链接失败状态" dc:"更新友情链接失败状态的接口，允许管理员将友情链接标记为失败状态，通常用于处理审核未通过的链接请求"`
-	LinkUUID string `json:"link_uuid" v:"required|regex:^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$#请输入有效的UUID格式|请输入有效的UUID格式" dc:"友情链接唯一标识符，不能为空，用于指定要更新的友情链接"`
+	g.Meta   `path:"/link/friend/fail/{link_uuid}" method:"PATCH" tags:"链接控制器" summary:"更新友情链接失败状态" dc:"更新友情链接失败状态的接口，允许管理员将友情链接标记为失败状态，通常用于处理审核未通过的链接请求"`
+	LinkUUID string `json:"link_uuid" in:"path" v:"required|regex:^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$#请输入有效的UUID格式|请输入有效的UUID格式" dc:"友情链接唯一标识符，不能为空，用于指定要更新的友情链接"`
 	IsFail   bool   `json:"is_fail" v:"required#请输入是否失败状态" dc:"是否失败状态，不能为空，表示友情链接是否被标记为失败状态，通常用于审核未通过的情况"`
 	Reason   string `json:"reason" v:"required|max-length:1024#请输入失败原因|失败原因长度不能超过1024个字符" dc:"失败原因，不能为空，表示友情链接审核未通过的具体原因，长度不能超过1024个字符"`
 }
