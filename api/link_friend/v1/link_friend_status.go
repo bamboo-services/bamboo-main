@@ -18,8 +18,8 @@ import (
 )
 
 type LinkFriendStatusReq struct {
-	g.Meta   `path:"/link/friend/status" method:"PATCH" tags:"链接控制器" summary:"更新友情链接状态" dc:"更新友情链接状态的接口，允许管理员修改友情链接的审核状态和显示状态"`
-	LinkUUID string `json:"link_uuid" v:"required|regex:^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$#请输入有效的UUID格式|请输入有效的UUID格式" dc:"友情链接唯一标识符，不能为空，用于指定要更新的友情链接"`
+	g.Meta   `path:"/link/friend/status/{link_uuid}" method:"PATCH" tags:"链接控制器" summary:"更新友情链接状态" dc:"更新友情链接状态的接口，允许管理员修改友情链接的审核状态和显示状态"`
+	LinkUUID string `json:"link_uuid" in:"path" v:"required|regex:^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$#请输入有效的UUID格式|请输入有效的UUID格式" dc:"友情链接唯一标识符，不能为空，用于指定要更新的友情链接"`
 	Status   int    `json:"status" v:"required|in:0,1,2#请输入友情链接状态|友情链接状态只允许 0（待审核）、1（已通过）、2（已拒绝）" dc:"友情链接状态，0表示待审核，1表示已通过，2表示已拒绝，不能为空"`
 }
 

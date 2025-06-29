@@ -75,6 +75,7 @@ var (
 					// 友链
 					link_friend.NewV1().LinkFriendAdd,
 					link_friend.NewV1().LinkFriendEdit,
+					link_friend.NewV1().LinkFriendStatus,
 				)
 			})
 
