@@ -25,12 +25,15 @@ type LinkContextColumns struct {
 	LinkName         string // 友链名称
 	LinkUrl          string // 友链URL地址
 	LinkAvatar       string // 友链头像URL
+	LinkRss          string // 友链RSS地址
 	LinkDesc         string // 友链描述
 	LinkEmail        string // 友链联系邮箱
 	LinkGroupUuid    string // 所属分组ID
 	LinkColorUuid    string // 友链颜色ID
 	LinkOrder        string // 友链排序
 	LinkStatus       string // 友链状态（0: 待审核, 1: 已通过, 2: 已拒绝）
+	LinkFail         string // 友链失效标志（0: 正常, 1: 失效）
+	LinkFailReason   string // 友链失效原因
 	LinkApplyRemark  string // 申请者备注
 	LinkReviewRemark string // 审核备注
 	LinkCreatedAt    string // 友链创建时间
@@ -43,12 +46,15 @@ var linkContextColumns = LinkContextColumns{
 	LinkName:         "link_name",
 	LinkUrl:          "link_url",
 	LinkAvatar:       "link_avatar",
+	LinkRss:          "link_rss",
 	LinkDesc:         "link_desc",
 	LinkEmail:        "link_email",
 	LinkGroupUuid:    "link_group_uuid",
 	LinkColorUuid:    "link_color_uuid",
 	LinkOrder:        "link_order",
 	LinkStatus:       "link_status",
+	LinkFail:         "link_fail",
+	LinkFailReason:   "link_fail_reason",
 	LinkApplyRemark:  "link_apply_remark",
 	LinkReviewRemark: "link_review_remark",
 	LinkCreatedAt:    "link_created_at",

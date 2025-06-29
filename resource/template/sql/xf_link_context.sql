@@ -15,14 +15,17 @@ CREATE TABLE xf_link_context
 (
     link_uuid UUID NOT NULL PRIMARY KEY,
     link_name VARCHAR(100) NOT NULL,
-    link_url VARCHAR(255) NOT NULL,
-    link_avatar VARCHAR(255),
+    link_url VARCHAR NOT NULL,
+    link_avatar VARCHAR,
+    link_rss VARCHAR,                        -- 友链RSS地址
     link_desc TEXT,
     link_email VARCHAR(100),
     link_group_uuid UUID NOT NULL,
     link_color_uuid UUID,
     link_order INT DEFAULT 0 NOT NULL,
-    link_status SMALLINT DEFAULT 0 NOT NULL,  -- 0: 待审核, 1: 已通过, 2: 已失效
+    link_status SMALLINT DEFAULT 0 NOT NULL, -- 0: 待审核, 1: 已通过, 2: 已失效
+    link_fail SMALLINT DEFAULT 0 NOT NULL,   -- 友链失效标志（0: 正常, 1: 失效）
+    link_fail_reason TEXT,                   -- 友链失效原因
     link_apply_remark TEXT,                  -- 申请者备注
     link_review_remark TEXT,                 -- 审核备注
     link_created_at TIMESTAMP DEFAULT NOW() NOT NULL,
@@ -37,12 +40,15 @@ COMMENT ON COLUMN xf_link_context.link_uuid IS '友链唯一标识符';
 COMMENT ON COLUMN xf_link_context.link_name IS '友链名称';
 COMMENT ON COLUMN xf_link_context.link_url IS '友链URL地址';
 COMMENT ON COLUMN xf_link_context.link_avatar IS '友链头像URL';
+COMMENT ON COLUMN xf_link_context.link_rss IS '友链RSS地址';
 COMMENT ON COLUMN xf_link_context.link_desc IS '友链描述';
 COMMENT ON COLUMN xf_link_context.link_email IS '友链联系邮箱';
 COMMENT ON COLUMN xf_link_context.link_group_uuid IS '所属分组ID';
 COMMENT ON COLUMN xf_link_context.link_color_uuid IS '友链颜色ID';
 COMMENT ON COLUMN xf_link_context.link_order IS '友链排序';
 COMMENT ON COLUMN xf_link_context.link_status IS '友链状态（0: 待审核, 1: 已通过, 2: 已拒绝）';
+COMMENT ON COLUMN xf_link_context.link_fail IS '友链失效标志（0: 正常, 1: 失效）';
+COMMENT ON COLUMN xf_link_context.link_fail_reason IS '友链失效原因';
 COMMENT ON COLUMN xf_link_context.link_apply_remark IS '申请者备注';
 COMMENT ON COLUMN xf_link_context.link_review_remark IS '审核备注';
 COMMENT ON COLUMN xf_link_context.link_created_at IS '友链创建时间';

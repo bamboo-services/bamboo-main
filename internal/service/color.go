@@ -30,7 +30,7 @@ type (
 		// 通过颜色 ColorUUID 获取颜色信息；
 		// 如果获取成功，则返回颜色实体；
 		// 如果获取失败，则返回错误码。
-		GetOneByUUID(ctx context.Context, uuid string) (*entity.LinkColor, *berror.ErrorCode)
+		GetOneByUUID(ctx context.Context, linkUUID string) (*entity.LinkColor, *berror.ErrorCode)
 		// GetOneByName
 		//
 		// 获取单个颜色信息;

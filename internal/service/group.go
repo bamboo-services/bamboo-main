@@ -30,7 +30,7 @@ type (
 		// 通过分组 GroupUUID 获取分组信息；
 		// 如果获取成功，则返回分组实体；
 		// 如果获取失败，则返回错误码。
-		GetOneByUUID(ctx context.Context, uuid string) (*entity.LinkGroup, *berror.ErrorCode)
+		GetOneByUUID(ctx context.Context, linkUUID string) (*entity.LinkGroup, *berror.ErrorCode)
 		// GetOneByName
 		//
 		// 获取单个分组信息;

@@ -17,8 +17,9 @@ import (
 	"go/types"
 )
 
-type LinkFriendAddReq struct {
-	g.Meta       `path:"/link/friend" method:"POST" tags:"链接控制器" summary:"添加友情链接" dc:"添加友情链接接口，允许用户提交新的友情链接请求"`
+type LinkFriendEditReq struct {
+	g.Meta       `path:"/link/friend/{link_uuid}" method:"PUT" tags:"链接控制器" summary:"编辑友情链接" dc:"编辑友情链接的接口，允许用户更新现有的友情链接信息，包括名称、链接地址、分组等属性"`
+	LinkUUID     string `json:"link_uuid" in:"path" v:"required|regex:^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$#请输入有效的UUID格式|请输入有效的UUID格式" dc:"友链唯一标识符，不能为空，用于指定要编辑的友链"`
 	Name         string `json:"name" v:"required|max-length:100#请输入友链名称|友链名称长度不能超过100个字符" dc:"友链名称，不能为空，表示友情链接的名称"`
 	URL          string `json:"url" v:"required|url#请输入友链地址|请输入有效的URL地址" dc:"友链地址，不能为空，表示友情链接的URL地址，必须是有效的URL格式"`
 	Avatar       string `json:"avatar" v:"url#请输入有效的头像URL地址" dc:"友链头像地址，表示友情链接的头像图片URL地址，必须是有效的URL格式"`
@@ -31,7 +32,7 @@ type LinkFriendAddReq struct {
 	ReviewRemark string `json:"review_remark" v:"max-length:10240#审核备注长度不能超过10240个字符" dc:"审核备注，表示管理员对友情链接的审核意见，长度不能超过10240个字符"`
 }
 
-type LinkFriendAddRes struct {
-	g.Meta `mime:"application/json; charset=utf-8" dc:"添加友情链接响应"`
+type LinkFriendEditRes struct {
+	g.Meta `mime:"application/json; charset=utf-8" dc:"编辑友情链接响应"`
 	*bmodels.ResponseDTO[types.Nil]
 }

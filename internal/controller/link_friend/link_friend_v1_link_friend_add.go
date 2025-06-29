@@ -37,6 +37,7 @@ func (c *ControllerV1) LinkFriendAdd(ctx context.Context, req *v1.LinkFriendAddR
 		LinkAvatar:       req.Avatar,
 		LinkDesc:         req.Description,
 		LinkEmail:        req.Email,
+		LinkRss:          req.Rss,
 		LinkGroupUuid:    getGroupEntity.GroupUuid,
 		LinkColorUuid:    getColorEntity.ColorUuid,
 		LinkOrder:        req.Order,

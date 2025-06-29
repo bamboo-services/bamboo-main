@@ -74,6 +74,7 @@ var (
 					link_color.NewV1().LinkColorPage,
 					// 友链
 					link_friend.NewV1().LinkFriendAdd,
+					link_friend.NewV1().LinkFriendEdit,
 				)
 			})
 

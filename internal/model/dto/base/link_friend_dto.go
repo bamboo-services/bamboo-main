@@ -20,14 +20,17 @@ import "github.com/gogf/gf/v2/os/gtime"
 type LinkFriendDTO struct {
 	LinkUuid         string      `json:"link_uuid"          description:"友链唯一标识符" v:"required|regex:^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"` // 友链唯一标识符
 	LinkName         string      `json:"link_name"          description:"友链名称" v:"required|max-length:100"`                                                                         // 友链名称
-	LinkUrl          string      `json:"link_url"           description:"友链URL地址" v:"required|url"`                                                                                 // 友链URL地址
-	LinkAvatar       string      `json:"link_avatar"        description:"友链头像URL"`                                                                                                  // 友链头像URL
-	LinkDesc         string      `json:"link_desc"          description:"友链描述"`                                                                                                     // 友链描述
+	LinkUrl          string      `json:"link_url"           description:"友链URL地址" v:"required|url|max-length:10240"`                                                                // 友链URL地址
+	LinkAvatar       string      `json:"link_avatar"        description:"友链头像URL" v:"url|max-length:10240"`                                                                         // 友链头像URL
+	LinkRss          string      `json:"link_rss"           description:"友链RSS地址" v:"url|max-length:10240"`                                                                         // 友链RSS地址
+	LinkDesc         string      `json:"link_desc"          description:"友链描述" v:"max-length:10240"`                                                                                // 友链描述
 	LinkEmail        string      `json:"link_email"         description:"友链联系邮箱" v:"email"`                                                                                         // 友链联系邮箱
 	LinkGroupUuid    string      `json:"link_group_uuid"    description:"所属分组ID" v:"regex:^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"`           // 所属分组ID
 	LinkColorUuid    string      `json:"link_color_uuid"    description:"友链颜色ID" v:"regex:^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"`           // 友链颜色ID
 	LinkOrder        int         `json:"link_order"         description:"友链排序" v:"between:0,100"`                                                                                   // 友链排序
-	LinkStatus       int         `json:"link_status"        description:"友链状态（0: 待审核, 1: 已通过, 2: 已拒绝）" v:"required|regex:^[012]$"`                                                  // 友链状态（0: 待审核, 1: 已通过, 2: 已拒绝）
+	LinkStatus       int         `json:"link_status"        description:"友链状态（0: 待审核, 1: 已通过, 2: 已拒绝）" v:"required|in:0,1,2"`                                                       // 友链状态（0: 待审核, 1: 已通过, 2: 已拒绝）
+	LinkFail         int         `json:"link_fail"          description:"友链失效标志（0: 正常, 1: 失效）" v:"required|in:0,1"`                                                                 // 友链失效标志（0: 正常, 1: 失效）
+	LinkFailReason   string      `json:"link_fail_reason"   description:"友链失效原因" v:"max-length:10240"`                                                                              // 友链失效原因
 	LinkApplyRemark  string      `json:"link_apply_remark"  description:"申请者备注" v:"max-length:10240"`                                                                               // 申请者备注
 	LinkReviewRemark string      `json:"link_review_remark" description:"审核备注" v:"max-length:10240"`                                                                                // 审核备注
 	LinkCreatedAt    *gtime.Time `json:"link_created_at"    description:"友链创建时间"`                                                                                                   // 友链创建时间

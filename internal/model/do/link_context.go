@@ -16,12 +16,15 @@ type LinkContext struct {
 	LinkName         interface{} // 友链名称
 	LinkUrl          interface{} // 友链URL地址
 	LinkAvatar       interface{} // 友链头像URL
+	LinkRss          interface{} // 友链RSS地址
 	LinkDesc         interface{} // 友链描述
 	LinkEmail        interface{} // 友链联系邮箱
 	LinkGroupUuid    interface{} // 所属分组ID
 	LinkColorUuid    interface{} // 友链颜色ID
 	LinkOrder        interface{} // 友链排序
 	LinkStatus       interface{} // 友链状态（0: 待审核, 1: 已通过, 2: 已拒绝）
+	LinkFail         interface{} // 友链失效标志（0: 正常, 1: 失效）
+	LinkFailReason   interface{} // 友链失效原因
 	LinkApplyRemark  interface{} // 申请者备注
 	LinkReviewRemark interface{} // 审核备注
 	LinkCreatedAt    *gtime.Time // 友链创建时间

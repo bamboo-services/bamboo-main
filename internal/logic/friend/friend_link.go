@@ -14,6 +14,7 @@ package friend
 import (
 	"bamboo-main/internal/consts"
 	"bamboo-main/internal/dao"
+	"bamboo-main/internal/model/do"
 	"bamboo-main/internal/model/dto/base"
 	"bamboo-main/internal/model/entity"
 	"bamboo-main/pkg/cerror"
@@ -69,6 +70,71 @@ func (s *sFriend) AddFriend(ctx context.Context, friend base.LinkFriendDTO) *ber
 
 	// 删除关于友链的全局缓存
 	errorCode := deleteGlobalImpactCache(ctx)
+	if errorCode != nil {
+		return errorCode
+	}
+
+	return nil
+}
+
+// GetOneByUUID
+//
+// 根据传入的 UUID 查询并返回友链信息，不存在或发生错误时返回对应的错误码。
+// 该函数会检查传入的 UUID 是否有效，并使用缓存机制来提高查询效率。
+// 如果查询成功，则返回友链实体；如果查询失败或未找到友链信息，则返回错误码。
+func (s *sFriend) GetOneByUUID(ctx context.Context, linkUUID string) (*entity.LinkContext, *berror.ErrorCode) {
+	blog.ServiceInfo(ctx, "GetOneByUUID", "获取友链信息 UUID: %s", linkUUID)
+	// 检查 UUID 是否有效
+	parseUUID, uuidErr := uuid.Parse(linkUUID)
+	if uuidErr != nil {
+		blog.ServiceError(ctx, "GetOneByUUID", "无效的友链 UUID: %s, 错误: %v", linkUUID, uuidErr)
+		return nil, berror.ErrorAddData(&berror.ErrInvalidParameters, "无效的友链 UUID: "+uuidErr.Error())
+	}
+	// 查询友链信息
+	var linkEntity *entity.LinkContext
+	daoErr := dao.LinkContext.Ctx(ctx).Cache(gdb.CacheOption{
+		Duration: 7 * 24 * time.Hour,
+		Name:     fmt.Sprintf(consts.LinkContextByUuidRedisKey, parseUUID.String()),
+	}).Where(&do.LinkContext{LinkUuid: parseUUID.String()}).Scan(&linkEntity)
+	if daoErr != nil {
+		blog.ServiceError(ctx, "GetOneByUUID", "查询友链信息失败，错误：%v", daoErr)
+		return nil, berror.ErrorAddData(&berror.ErrDatabaseError, daoErr.Error())
+	}
+	if linkEntity == nil {
+		blog.ServiceNotice(ctx, "GetOneByUUID", "未找到友链信息，UUID: %s", linkUUID)
+		return nil, berror.ErrorAddData(&berror.ErrNotFound, "未找到友链信息")
+	}
+	return linkEntity, nil
+}
+
+// Update
+//
+// 更新友链信息。如果友链不存在或更新操作失败，返回对应的错误码。更新成功后会删除相关的全局缓存。
+// 该函数会检查友链是否存在，并更新其信息，包括名称、URL、头像、RSS、描述、邮箱、分组、颜色、排序和审核备注等字段。
+// 如果更新成功，则会删除相关的全局缓存，以确保数据的一致性和最新性。
+// 如果更新失败，则返回错误码。
+func (s *sFriend) Update(ctx context.Context, editFriendEntity base.LinkFriendDTO) *berror.ErrorCode {
+	blog.ServiceInfo(ctx, "Update", "更新友链信息，UUID: %s", editFriendEntity.LinkUuid)
+
+	// 检查友链是否存在
+	getLinkEntity, errorCode := s.GetOneByUUID(ctx, editFriendEntity.LinkUuid)
+	if errorCode != nil {
+		return errorCode
+	}
+
+	// 更新友链信息
+	editFriendEntity.LinkUpdatedAt = gtime.Now()
+	_, daoErr := dao.LinkContext.Ctx(ctx).Cache(gdb.CacheOption{
+		Duration: -1,
+		Name:     fmt.Sprintf(consts.LinkContextByUuidRedisKey, editFriendEntity.LinkUuid),
+	}).WherePri(getLinkEntity.LinkUuid).OmitEmpty().Update(&editFriendEntity)
+	if daoErr != nil {
+		blog.ServiceError(ctx, "Update", "更新友链信息失败，错误：%v", daoErr)
+		return berror.ErrorAddData(&berror.ErrDatabaseError, daoErr.Error())
+	}
+
+	// 删除相关的全局缓存
+	errorCode = deleteGlobalImpactCache(ctx)
 	if errorCode != nil {
 		return errorCode
 	}
