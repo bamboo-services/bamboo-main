@@ -34,6 +34,12 @@ type (
 		// 如果更新成功，则会删除相关的全局缓存，以确保数据的一致性和最新性。
 		// 如果更新失败，则返回错误码。
 		Update(ctx context.Context, editFriendEntity base.LinkFriendDTO) *berror.ErrorCode
+		// Delete
+		//
+		// 删除友情链接。根据传入的 UUID 删除友链信息。
+		// 如果 UUID 格式无效或友链不存在，将返回对应的错误码。
+		// 执行成功后会清理相关的全局缓存以确保数据一致性。
+		Delete(ctx context.Context, linkUUID string) *berror.ErrorCode
 		// UpdateStatus
 		//
 		// 更新友链状态，根据传入的 UUID 和状态值进行操作。

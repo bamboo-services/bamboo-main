@@ -142,6 +142,46 @@ func (s *sFriend) Update(ctx context.Context, editFriendEntity base.LinkFriendDT
 	return nil
 }
 
+// Delete
+//
+// 删除友情链接。根据传入的 UUID 删除友链信息。
+// 如果 UUID 格式无效或友链不存在，将返回对应的错误码。
+// 执行成功后会清理相关的全局缓存以确保数据一致性。
+func (s *sFriend) Delete(ctx context.Context, linkUUID string) *berror.ErrorCode {
+	blog.ServiceInfo(ctx, "Delete", "删除友情链接 %s", linkUUID)
+
+	// 检查 UUID 是否有效
+	parseUUID, uuidErr := uuid.Parse(linkUUID)
+	if uuidErr != nil {
+		blog.ServiceError(ctx, "Delete", "UUID 格式错误", uuidErr)
+		return berror.ErrorAddData(&berror.ErrInvalidParameters, "UUID 格式错误: "+uuidErr.Error())
+	}
+
+	// 执行删除操作
+	_, daoErr := dao.LinkContext.Ctx(ctx).Cache(gdb.CacheOption{
+		Duration: -1,
+		Name:     fmt.Sprintf(consts.LinkContextByUuidRedisKey, parseUUID.String()),
+	}).WherePri(parseUUID.String()).Delete()
+	if daoErr != nil {
+		blog.ServiceError(ctx, "Delete", "删除友情链接失败", daoErr)
+		return berror.ErrorAddData(&berror.ErrDatabaseError, "删除友情链接失败: "+daoErr.Error())
+	}
+
+	// 删除缓存
+	_, cacheErr := g.Redis().Del(ctx, fmt.Sprintf(consts.LinkContextByUuidRedisKey, parseUUID.String()))
+	if cacheErr != nil {
+		blog.ServiceError(ctx, "Delete", "删除友情链接缓存失败", cacheErr)
+		return berror.ErrorAddData(&berror.ErrDatabaseError, cacheErr.Error())
+	}
+
+	// 删除相关的全局缓存
+	errorCode := deleteGlobalImpactCache(ctx)
+	if errorCode != nil {
+		return errorCode
+	}
+	return nil
+}
+
 // deleteGlobalImpactCache
 //
 // 删除友链相关的全局缓存；
