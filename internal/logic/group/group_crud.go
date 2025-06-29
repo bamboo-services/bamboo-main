@@ -82,19 +82,25 @@ func (s *sGroup) Create(ctx context.Context, name, description string, order int
 // 通过分组 GroupUUID 获取分组信息；
 // 如果获取成功，则返回分组实体；
 // 如果获取失败，则返回错误码。
-func (s *sGroup) GetOneByUUID(ctx context.Context, uuid string) (*entity.LinkGroup, *berror.ErrorCode) {
-	blog.ServiceInfo(ctx, "GetOneByUUID", "获取友链分组 %s", uuid)
+func (s *sGroup) GetOneByUUID(ctx context.Context, linkUUID string) (*entity.LinkGroup, *berror.ErrorCode) {
+	blog.ServiceInfo(ctx, "GetOneByUUID", "获取友链分组 %s", linkUUID)
+	// 检查输入是否是 UUID
+	parseUUID, uuidErr := uuid.Parse(linkUUID)
+	if uuidErr != nil {
+		blog.ServiceError(ctx, "GetOneByUUID", "无效的 UUID 格式，错误：%v", uuidErr)
+		return nil, berror.ErrorAddData(&berror.ErrInvalidParameters, "无效的 UUID 格式")
+	}
 	var groupEntity *entity.LinkGroup
 	daoErr := dao.LinkGroup.Ctx(ctx).Cache(gdb.CacheOption{
 		Duration: 7 * 24 * time.Hour,
-		Name:     fmt.Sprintf(consts.LinkGroupByUuidRedisKey, uuid),
-	}).Where(&do.LinkGroup{GroupUuid: uuid}).OmitEmptyWhere().Scan(&groupEntity)
+		Name:     fmt.Sprintf(consts.LinkGroupByUuidRedisKey, linkUUID),
+	}).Where(&do.LinkGroup{GroupUuid: parseUUID.String()}).OmitEmptyWhere().Scan(&groupEntity)
 	if daoErr != nil {
 		blog.ServiceError(ctx, "GetOneByUUID", "获取友链分组失败，错误：%v", daoErr)
 		return nil, berror.ErrorAddData(&berror.ErrDatabaseError, daoErr.Error())
 	}
 	if groupEntity == nil {
-		blog.ServiceNotice(ctx, "GetOneByUUID", "友链分组不存在，UUID：%s", uuid)
+		blog.ServiceNotice(ctx, "GetOneByUUID", "友链分组不存在，UUID：%s", linkUUID)
 		return nil, berror.ErrorAddData(&berror.ErrNotFound, "友链分组不存在")
 	}
 	return groupEntity, nil

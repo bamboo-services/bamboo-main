@@ -82,19 +82,25 @@ func (s *sColor) Create(ctx context.Context, name, value, description string) (*
 // 通过颜色 ColorUUID 获取颜色信息；
 // 如果获取成功，则返回颜色实体；
 // 如果获取失败，则返回错误码。
-func (s *sColor) GetOneByUUID(ctx context.Context, uuid string) (*entity.LinkColor, *berror.ErrorCode) {
-	blog.ServiceInfo(ctx, "GetOneByUUID", "获取友链颜色 %s", uuid)
+func (s *sColor) GetOneByUUID(ctx context.Context, linkUUID string) (*entity.LinkColor, *berror.ErrorCode) {
+	blog.ServiceInfo(ctx, "GetOneByUUID", "获取友链颜色 %s", linkUUID)
+	// 检查输入是否是 UUID
+	parseUUID, uuidErr := uuid.Parse(linkUUID)
+	if uuidErr != nil {
+		blog.ServiceError(ctx, "GetOneByUUID", "无效的 UUID 格式，错误：%v", uuidErr)
+		return nil, berror.ErrorAddData(&berror.ErrInvalidParameters, "无效的 UUID 格式")
+	}
 	var colorEntity *entity.LinkColor
 	daoErr := dao.LinkColor.Ctx(ctx).Cache(gdb.CacheOption{
 		Duration: 7 * 24 * time.Hour,
-		Name:     fmt.Sprintf(consts.LinkColorByUuidRedisKey, uuid),
-	}).Where(&do.LinkColor{ColorUuid: uuid}).OmitEmptyWhere().Scan(&colorEntity)
+		Name:     fmt.Sprintf(consts.LinkColorByUuidRedisKey, linkUUID),
+	}).Where(&do.LinkColor{ColorUuid: parseUUID.String()}).OmitEmpty().Scan(&colorEntity)
 	if daoErr != nil {
 		blog.ServiceError(ctx, "GetOneByUUID", "获取友链颜色失败，错误：%v", daoErr)
 		return nil, berror.ErrorAddData(&berror.ErrDatabaseError, daoErr.Error())
 	}
 	if colorEntity == nil {
-		blog.ServiceNotice(ctx, "GetOneByUUID", "友链颜色不存在，UUID：%s", uuid)
+		blog.ServiceNotice(ctx, "GetOneByUUID", "友链颜色不存在，UUID：%s", linkUUID)
 		return nil, berror.ErrorAddData(&berror.ErrNotFound, "友链颜色不存在")
 	}
 	return colorEntity, nil

@@ -17,6 +17,19 @@ import (
 func (c *ControllerV1) LinkFriendAdd(ctx context.Context, req *v1.LinkFriendAddReq) (res *v1.LinkFriendAddRes, err error) {
 	blog.ControllerInfo(ctx, "LinkFriendAdd", "添加 %s 友链", req.Name)
 
+	// 检查颜色是否存在
+	iColor := service.Color()
+	getColorEntity, errorCode := iColor.GetOneByUUID(ctx, req.Color)
+	if errorCode != nil {
+		return nil, errorCode
+	}
+	// 检查分组是否存在
+	iGroup := service.Group()
+	getGroupEntity, errorCode := iGroup.GetOneByUUID(ctx, req.Group)
+	if errorCode != nil {
+		return nil, errorCode
+	}
+
 	// 构建数据层
 	newFriend := base.LinkFriendDTO{
 		LinkName:         req.Name,
@@ -24,15 +37,15 @@ func (c *ControllerV1) LinkFriendAdd(ctx context.Context, req *v1.LinkFriendAddR
 		LinkAvatar:       req.Avatar,
 		LinkDesc:         req.Description,
 		LinkEmail:        req.Email,
-		LinkGroupUuid:    req.Group,
-		LinkColorUuid:    req.Color,
+		LinkGroupUuid:    getGroupEntity.GroupUuid,
+		LinkColorUuid:    getColorEntity.ColorUuid,
 		LinkOrder:        req.Order,
 		LinkReviewRemark: req.ReviewRemark,
 	}
 
 	// 调用逻辑层处理
 	iFriend := service.Friend()
-	errorCode := iFriend.AddFriend(ctx, newFriend)
+	errorCode = iFriend.AddFriend(ctx, newFriend)
 	if errorCode != nil {
 		return nil, errorCode
 	}
