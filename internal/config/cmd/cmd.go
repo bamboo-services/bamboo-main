@@ -82,6 +82,7 @@ var (
 					link_friend.NewV1().LinkFriendFail,
 					link_friend.NewV1().LinkFriendDelete,
 					link_friend.NewV1().LinkFriendPage,
+					link_friend.NewV1().LinkFriendGet,
 				)
 			})
 
