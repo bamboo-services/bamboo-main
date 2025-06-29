@@ -19,4 +19,5 @@ var (
 	ErrMailCodeNotExist           = berror.NewErrorCode(40306, "邮件验证码不存在", nil)   // ErrMailCodeNotExist 邮件验证码不存在错误
 	ErrMailCodeExpired            = berror.NewErrorCode(40307, "邮件验证码已过期", nil)   // ErrMailCodeExpired 邮件验证码已过期错误
 	ErrMailCodeInvalid            = berror.NewErrorCode(40308, "邮件验证码无效", nil)    // ErrMailCodeInvalid 邮件验证码无效错误
+	ErrDomainExisted              = berror.NewErrorCode(40309, "域名已存在", nil)      // ErrDomainExisted 域名已存在错误
 )

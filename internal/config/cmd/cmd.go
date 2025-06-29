@@ -14,6 +14,7 @@ package cmd
 import (
 	"bamboo-main/internal/controller/auth"
 	"bamboo-main/internal/controller/link_color"
+	"bamboo-main/internal/controller/link_friend"
 	"bamboo-main/internal/controller/link_group"
 	"bamboo-main/internal/handler/hook"
 	"bamboo-main/internal/handler/middleware"
@@ -47,24 +48,32 @@ var (
 
 				// 非认证
 				group.Bind(
+					// 授权
 					auth.NewV1().AuthLogin,
 					auth.NewV1().AuthPasswordReset,
+					// 友链颜色
 					link_color.NewV1().LinkColorGet,
+					// 友链分组
 					link_group.NewV1().LinkGroupGet,
 				)
 
 				// 认证
 				group.Middleware(middleware.AuthenticationMiddleware)
 				group.Bind(
+					// 授权
 					auth.NewV1().AuthPasswordChange,
+					// 友链分组
 					link_group.NewV1().LinkGroupAdd,
 					link_group.NewV1().LinkGroupEdit,
 					link_group.NewV1().LinkGroupDelete,
 					link_group.NewV1().LinkGroupPage,
+					// 友链颜色
 					link_color.NewV1().LinkColorAdd,
 					link_color.NewV1().LinkColorEdit,
 					link_color.NewV1().LinkColorDelete,
 					link_color.NewV1().LinkColorPage,
+					// 友链
+					link_friend.NewV1().LinkFriendAdd,
 				)
 			})
 

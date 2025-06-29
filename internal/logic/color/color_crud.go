@@ -51,14 +51,14 @@ func (s *sColor) Create(ctx context.Context, name, value, description string) (*
 	}
 	_, daoErr := dao.LinkColor.Ctx(ctx).Cache(gdb.CacheOption{
 		Duration: -1,
-		Name:     fmt.Sprintf(consts.LinkColorByUUIDRedisKey, newEntity.ColorUuid),
+		Name:     fmt.Sprintf(consts.LinkColorByUuidRedisKey, newEntity.ColorUuid),
 	}).OmitEmpty().Insert(&newEntity)
 	if daoErr != nil {
 		blog.ServiceError(ctx, "Create", "创建友链颜色失败，错误：%v", daoErr)
 		return nil, berror.ErrorAddData(&berror.ErrDatabaseError, daoErr.Error())
 	}
 	// 删除其余缓存
-	_, cacheErr := g.Redis().Del(ctx, fmt.Sprintf(consts.LinkColorByUUIDRedisKey, newEntity.ColorUuid))
+	_, cacheErr := g.Redis().Del(ctx, fmt.Sprintf(consts.LinkColorByUuidRedisKey, newEntity.ColorUuid))
 	if cacheErr != nil {
 		blog.ServiceError(ctx, "Create", "删除友链颜色缓存失败，错误：%v", cacheErr)
 		return nil, berror.ErrorAddData(&berror.ErrDatabaseError, cacheErr.Error())
@@ -87,7 +87,7 @@ func (s *sColor) GetOneByUUID(ctx context.Context, uuid string) (*entity.LinkCol
 	var colorEntity *entity.LinkColor
 	daoErr := dao.LinkColor.Ctx(ctx).Cache(gdb.CacheOption{
 		Duration: 7 * 24 * time.Hour,
-		Name:     fmt.Sprintf(consts.LinkColorByUUIDRedisKey, uuid),
+		Name:     fmt.Sprintf(consts.LinkColorByUuidRedisKey, uuid),
 	}).Where(&do.LinkColor{ColorUuid: uuid}).OmitEmptyWhere().Scan(&colorEntity)
 	if daoErr != nil {
 		blog.ServiceError(ctx, "GetOneByUUID", "获取友链颜色失败，错误：%v", daoErr)
@@ -202,7 +202,7 @@ func (s *sColor) Update(ctx context.Context, uuid, name, value, description stri
 	}
 	_, daoErr := dao.LinkColor.Ctx(ctx).Cache(gdb.CacheOption{
 		Duration: -1,
-		Name:     fmt.Sprintf(consts.LinkColorByUUIDRedisKey, uuid),
+		Name:     fmt.Sprintf(consts.LinkColorByUuidRedisKey, uuid),
 	}).OmitEmpty().WherePri(originalEntity.ColorUuid).OmitEmpty().Update(&newEntity)
 	if daoErr != nil {
 		blog.ServiceError(ctx, "Update", "更新友链颜色失败，错误：%v", daoErr)
@@ -242,7 +242,7 @@ func (s *sColor) Delete(ctx context.Context, uuid string) *berror.ErrorCode {
 	// 删除数据
 	_, daoErr := dao.LinkColor.Ctx(ctx).Cache(gdb.CacheOption{
 		Duration: -1,
-		Name:     fmt.Sprintf(consts.LinkColorByUUIDRedisKey, uuid),
+		Name:     fmt.Sprintf(consts.LinkColorByUuidRedisKey, uuid),
 	}).WherePri(originalEntity.ColorUuid).Delete()
 	if daoErr != nil {
 		blog.ServiceError(ctx, "Delete", "删除友链颜色失败，错误：%v", daoErr)

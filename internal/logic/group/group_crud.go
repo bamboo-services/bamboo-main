@@ -51,14 +51,14 @@ func (s *sGroup) Create(ctx context.Context, name, description string, order int
 	}
 	_, daoErr := dao.LinkGroup.Ctx(ctx).Cache(gdb.CacheOption{
 		Duration: -1,
-		Name:     fmt.Sprintf(consts.LinkGroupByUUIDRedisKey, newEntity.GroupUuid),
+		Name:     fmt.Sprintf(consts.LinkGroupByUuidRedisKey, newEntity.GroupUuid),
 	}).OmitEmpty().Insert(&newEntity)
 	if daoErr != nil {
 		blog.ServiceError(ctx, "Create", "创建友链分组失败，错误：%v", daoErr)
 		return nil, berror.ErrorAddData(&berror.ErrDatabaseError, daoErr.Error())
 	}
 	// 删除其余缓存
-	_, cacheErr := g.Redis().Del(ctx, fmt.Sprintf(consts.LinkGroupByUUIDRedisKey, newEntity.GroupUuid))
+	_, cacheErr := g.Redis().Del(ctx, fmt.Sprintf(consts.LinkGroupByUuidRedisKey, newEntity.GroupUuid))
 	if cacheErr != nil {
 		blog.ServiceError(ctx, "Create", "删除友链分组缓存失败，错误：%v", cacheErr)
 		return nil, berror.ErrorAddData(&berror.ErrDatabaseError, cacheErr.Error())
@@ -87,7 +87,7 @@ func (s *sGroup) GetOneByUUID(ctx context.Context, uuid string) (*entity.LinkGro
 	var groupEntity *entity.LinkGroup
 	daoErr := dao.LinkGroup.Ctx(ctx).Cache(gdb.CacheOption{
 		Duration: 7 * 24 * time.Hour,
-		Name:     fmt.Sprintf(consts.LinkGroupByUUIDRedisKey, uuid),
+		Name:     fmt.Sprintf(consts.LinkGroupByUuidRedisKey, uuid),
 	}).Where(&do.LinkGroup{GroupUuid: uuid}).OmitEmptyWhere().Scan(&groupEntity)
 	if daoErr != nil {
 		blog.ServiceError(ctx, "GetOneByUUID", "获取友链分组失败，错误：%v", daoErr)
@@ -202,7 +202,7 @@ func (s *sGroup) Update(ctx context.Context, uuid, name, description string, ord
 	}
 	_, daoErr := dao.LinkGroup.Ctx(ctx).Cache(gdb.CacheOption{
 		Duration: -1,
-		Name:     fmt.Sprintf(consts.LinkGroupByUUIDRedisKey, uuid),
+		Name:     fmt.Sprintf(consts.LinkGroupByUuidRedisKey, uuid),
 	}).OmitEmpty().WherePri(originalEntity.GroupUuid).OmitEmpty().Update(&newEntity)
 	if daoErr != nil {
 		blog.ServiceError(ctx, "Update", "更新友链分组失败，错误：%v", daoErr)
@@ -242,7 +242,7 @@ func (s *sGroup) Delete(ctx context.Context, uuid string) *berror.ErrorCode {
 	// 删除数据
 	_, daoErr := dao.LinkGroup.Ctx(ctx).Cache(gdb.CacheOption{
 		Duration: -1,
-		Name:     fmt.Sprintf(consts.LinkGroupByUUIDRedisKey, uuid),
+		Name:     fmt.Sprintf(consts.LinkGroupByUuidRedisKey, uuid),
 	}).WherePri(originalEntity.GroupUuid).Delete()
 	if daoErr != nil {
 		blog.ServiceError(ctx, "Delete", "删除友链分组失败，错误：%v", daoErr)
