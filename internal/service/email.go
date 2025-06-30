@@ -6,6 +6,7 @@
 package service
 
 import (
+	"bamboo-main/internal/model/dto/base"
 	"context"
 
 	"github.com/XiaoLFeng/bamboo-utils/berror"
@@ -26,6 +27,7 @@ type (
 		// needBCC: 是否需要抄送给管理员；
 		// data: 邮件模板数据，键值对形式，模板中使用 <%key%> 的方式引用。
 		SendMail(ctx context.Context, mailTo string, subject string, templateName string, needBCC bool, data map[string]interface{}) *berror.ErrorCode
+		SendEmailLinkApply(ctx context.Context, applyLink base.LinkFriendDTO) *berror.ErrorCode
 		// SendMailByPasswordReset
 		//
 		// 发送重置密码的邮件；

@@ -12,6 +12,7 @@
 package cmd
 
 import (
+	"bamboo-main/internal/controller/apply"
 	"bamboo-main/internal/controller/auth"
 	"bamboo-main/internal/controller/link_color"
 	"bamboo-main/internal/controller/link_friend"
@@ -58,6 +59,8 @@ var (
 					link_color.NewV1().LinkColorGet,
 					// 友链分组
 					link_group.NewV1().LinkGroupGet,
+					// 申请
+					apply.NewV1().ApplyLink,
 				)
 
 				// 认证

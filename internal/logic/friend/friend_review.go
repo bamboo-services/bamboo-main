@@ -66,7 +66,7 @@ func (s *sFriend) UpdateStatus(ctx context.Context, linkUUID string, status int)
 	}
 
 	// 删除相关的全局缓存
-	errorCode := deleteGlobalImpactCache(ctx)
+	errorCode := s.DeleteGlobalImpactCache(ctx)
 	if errorCode != nil {
 		return errorCode
 	}
@@ -111,7 +111,7 @@ func (s *sFriend) UpdateFailStatus(ctx context.Context, linkUUID string, isFail 
 	}
 
 	// 删除相关的全局缓存
-	errorCode := deleteGlobalImpactCache(ctx)
+	errorCode := s.DeleteGlobalImpactCache(ctx)
 	if errorCode != nil {
 		return errorCode
 	}

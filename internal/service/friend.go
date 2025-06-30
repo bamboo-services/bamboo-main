@@ -28,6 +28,11 @@ type (
 		// 该函数会检查传入的 UUID 是否有效，并使用缓存机制来提高查询效率。
 		// 如果查询成功，则返回友链实体；如果查询失败或未找到友链信息，则返回错误码。
 		GetOneByUUID(ctx context.Context, linkUUID string) (*entity.LinkContext, *berror.ErrorCode)
+		// GetOneByURL
+		//
+		// 根据传入的 URL 查询并返回友链信息，如果未找到或发生错误，则返回对应的错误码。
+		// 该函数会解析传入的 URL，提取出域名部分，并使用缓存机制来提高查询效率。
+		GetOneByURL(ctx context.Context, linkURL string) (*entity.LinkContext, *berror.ErrorCode)
 		// Update
 		//
 		// 更新友链信息。如果友链不存在或更新操作失败，返回对应的错误码。更新成功后会删除相关的全局缓存。
@@ -47,6 +52,11 @@ type (
 		// 如果 isAll 为 false，则只查询未失败的友链；如果 isAll 为 true，则查询所有启用的友链。
 		// 返回一个包含友链分页数据的 DTO 对象，如果查询失败则返回对应的错误码。
 		GetPage(ctx context.Context, search string, page int, size int, isAll bool) (*dto.Page[base.LinkFriendDTO], *berror.ErrorCode)
+		// DeleteGlobalImpactCache
+		//
+		// 删除友链相关的全局缓存；
+		// 该函数会删除友链分组列表缓存和友链分组列表搜索缓存。
+		DeleteGlobalImpactCache(ctx context.Context) *berror.ErrorCode
 		// UpdateStatus
 		//
 		// 更新友链状态，根据传入的 UUID 和状态值进行操作。

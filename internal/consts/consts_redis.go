@@ -78,6 +78,12 @@ const (
 	// 用于通过名称存储获取的友链信息
 	LinkContextListRedisKey = "link:context:list"
 
+	// LinkContextByUrlRedisKey
+	// 用于通过 URL 存储获取的友链信息
+	//
+	// 1. %s 为经过 MD5 加密的友链 URL
+	LinkContextByUrlRedisKey = "link:context:url:%s"
+
 	// LinkContextListSearchRedisKey
 	// 用于存储友链查询列表信息
 	//

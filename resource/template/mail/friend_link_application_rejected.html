@@ -1,0 +1,215 @@
+<!--
+  ~ --------------------------------------------------------------------------------
+  ~ Copyright (c) 2016-NOW(至今) 筱锋
+  ~ Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
+  ~ --------------------------------------------------------------------------------
+  ~ 许可证声明：版权所有 (c) 2016-2025 筱锋。保留所有权利。
+  ~ 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+  ~ https://opensource.org/licenses/MIT
+  ~ --------------------------------------------------------------------------------
+  -->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>冰之妖精的友链申请未通过通知</title>
+    <style>
+        /* --- 基础设定：营造清澈冰爽的基调 --- */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f5faff; /* 淡雅的天蓝色，如同冬日晴空 */
+        }
+
+        /* --- 邮件主容器：如同冰晶雕琢的信匣 --- */
+        .email-container {
+            max-width: 680px;
+            margin: 50px auto;
+            background-color: #ffffff;
+            border-radius: 16px; /* 更圆润的边角，增添柔和感 */
+            overflow: hidden;
+            border: 1px solid #d0eaff;
+            box-shadow: 0 10px 35px rgba(100, 150, 255, 0.12);
+            /* 使用伪元素制作顶部的冰晶装饰，增添东方窗格意象 */
+            position: relative;
+        }
+
+        .email-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: linear-gradient(135deg, #a0e7ff, #c1f0ff); /* 冰晶的光泽感 */
+            opacity: 0.8;
+        }
+
+        /* --- 页眉：冰雪世界的入口 --- */
+        .email-header {
+            padding: 40px 20px 20px;
+            text-align: center;
+            /* 使用背景图片模拟冰裂纹/雪花纹理，更具东方美感 */
+            background-color: #eafcff;
+            background-image:
+                    linear-gradient(135deg, #d4faff 25%, transparent 25%),
+                    linear-gradient(225deg, #d4faff 25%, transparent 25%),
+                    linear-gradient(45deg, #d4faff 25%, transparent 25%),
+                    linear-gradient(315deg, #d4faff 25%, #eafcff 25%);
+            background-position: 10px 0, 10px 0, 0 0, 0 0;
+            background-size: 20px 20px;
+            background-repeat: repeat;
+        }
+
+        .email-header h1 {
+            margin: 0;
+            color: #0077c2; /* 深邃的湖蓝色，如同冰下深水 */
+            font-size: 28px;
+            font-weight: 500;
+        }
+
+        /* --- 内容区域：琪露诺的口信 --- */
+        .email-body {
+            padding: 25px 40px 35px;
+            color: #37474f; /* 深蓝灰色，清晰易读 */
+            line-height: 1.8;
+        }
+
+        .email-body h2 {
+            font-size: 18px;
+            color: #0288d1; /* 明亮的蓝色标题 */
+            border-left: 4px solid #4fc3f7; /* 左侧的装饰性边框 */
+            padding-left: 12px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .email-body p {
+            margin: 0 0 18px;
+            font-size: 15px;
+        }
+
+        /* --- 结果显示区域 --- */
+        .result-box {
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+            text-align: center;
+            background-color: #ffebee;
+            border: 2px solid #ef9a9a;
+        }
+
+        .result-box h3 {
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #c62828;
+        }
+
+        /* --- 申请信息卡片 --- */
+        .application-info {
+            padding: 20px;
+            margin: 25px 0;
+            background-color: #f0faff;
+            border-radius: 8px;
+        }
+
+        .application-item {
+            margin-bottom: 10px;
+            display: flex;
+        }
+
+        .application-item strong {
+            width: 80px;
+            color: #0288d1;
+            flex-shrink: 0;
+        }
+
+        .application-item span {
+            color: #37474f;
+        }
+
+        /* --- 提示信息：妖精的叮嘱 --- */
+        .info-text {
+            font-size: 13px;
+            color: #607d8b;
+            padding-left: 15px;
+            border-left: 3px solid #b3e5fc;
+            margin-top: 20px !important;
+        }
+
+        /* --- 页脚：来自幻想乡的祝福 --- */
+        .email-footer {
+            background-color: #f8f9fa;
+            padding: 25px;
+            text-align: center;
+            font-size: 12px;
+            color: #90a4ae;
+            border-top: 1px solid #e7eaec;
+        }
+
+        .email-footer p {
+            margin: 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="email-header">
+        <h1><%system_name%> - 友链申请结果</h1>
+    </div>
+    <div class="email-body">
+        <h2>致亲爱的 <%user_name%>：</h2>
+        <p>哈喽～本天才带来了关于你友链申请的消息！</p>
+
+        <div class="result-box">
+            <h3>很遗憾，申请未通过审核</h3>
+            <p>站长经过仔细考虑后，暂时没有通过你的友链申请。</p>
+            <p><%reject_reason%></p>
+            <p>如有疑问，可以通过以下邮箱联系站长：<%admin_email%></p>
+        </div>
+
+        <h2>申请信息回顾：</h2>
+        <div class="application-info">
+            <div class="application-item">
+                <strong>网站名称：</strong>
+                <span><%link_name%></span>
+            </div>
+            <div class="application-item">
+                <strong>网站链接：</strong>
+                <span><%link_url%></span>
+            </div>
+            <div class="application-item">
+                <strong>网站描述：</strong>
+                <span><%link_description%></span>
+            </div>
+            <div class="application-item">
+                <strong>联系邮箱：</strong>
+                <span><%link_email%></span>
+            </div>
+            <div class="application-item">
+                <strong>申请时间：</strong>
+                <span><%link_created_at%></span>
+            </div>
+            <div class="application-item">
+                <strong>申请编号：</strong>
+                <span><%link_uuid%></span>
+            </div>
+        </div>
+
+        <h2>妖精的特别叮嘱：</h2>
+        <p class="info-text">
+            别灰心，可以根据站长的反馈进行调整后再次申请，本天才会一直在这里等着你的！
+        </p>
+    </div>
+    <div class="email-footer">
+        <p>来自雾之湖的最强冰精⑨</p>
+        <p><%system_copyright%></p>
+    </div>
+</div>
+</body>
+</html>

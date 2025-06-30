@@ -36,6 +36,7 @@ func (setup *projectSetup) ProjectSetupSystemValueInit() {
 	checkAndInsertData(setup.ctx, consts.SystemVersionKey, "v1.0.0-alpha")
 	checkAndInsertData(setup.ctx, consts.SystemDescriptionKey, "XiaoMain 是一个基于 Go 语言开发的开源项目，旨在提供一个高效、灵活的 Web 应用框架。")
 	checkAndInsertData(setup.ctx, consts.SystemSinceYearKey, "2016")
+	checkAndInsertData(setup.ctx, consts.SystemWebsiteKey, "https://www.x-lf.com")
 
 	// 系统用户有关数据
 	checkAndInsertData(setup.ctx, consts.SystemUserUsernameKey, "admin")

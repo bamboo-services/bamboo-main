@@ -5,6 +5,7 @@
 package logic
 
 import (
+	_ "bamboo-main/internal/logic/apply"
 	_ "bamboo-main/internal/logic/auth"
 	_ "bamboo-main/internal/logic/code"
 	_ "bamboo-main/internal/logic/color"

@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"github.com/XiaoLFeng/bamboo-utils/berror"
 	"github.com/XiaoLFeng/bamboo-utils/blog"
+	"github.com/gogf/gf/v2/crypto/gmd5"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -70,7 +71,7 @@ func (s *sFriend) AddFriend(ctx context.Context, friend base.LinkFriendDTO) *ber
 	}
 
 	// 删除关于友链的全局缓存
-	errorCode := deleteGlobalImpactCache(ctx)
+	errorCode := s.DeleteGlobalImpactCache(ctx)
 	if errorCode != nil {
 		return errorCode
 	}
@@ -108,6 +109,32 @@ func (s *sFriend) GetOneByUUID(ctx context.Context, linkUUID string) (*entity.Li
 	return linkEntity, nil
 }
 
+// GetOneByURL
+//
+// 根据传入的 URL 查询并返回友链信息，如果未找到或发生错误，则返回对应的错误码。
+// 该函数会解析传入的 URL，提取出域名部分，并使用缓存机制来提高查询效率。
+func (s *sFriend) GetOneByURL(ctx context.Context, linkURL string) (*entity.LinkContext, *berror.ErrorCode) {
+	blog.ServiceInfo(ctx, "GetOneByURL", "获取友链信息 URL: %s", linkURL)
+
+	// 对链接进行解析，解析为域名
+	getDomain := utility.GetBaseDomain(linkURL)
+	// 查询友链信息
+	var linkEntity *entity.LinkContext
+	daoErr := dao.LinkContext.Ctx(ctx).Cache(gdb.CacheOption{
+		Duration: 7 * 24 * time.Hour,
+		Name:     fmt.Sprintf(consts.LinkContextByUrlRedisKey, gmd5.MustEncrypt(getDomain)),
+	}).WhereLike("link_url", "%"+getDomain+"%").Scan(&linkEntity)
+	if daoErr != nil {
+		blog.ServiceError(ctx, "GetOneByURL", "查询友链信息失败，错误：%v", daoErr)
+		return nil, berror.ErrorAddData(&berror.ErrDatabaseError, daoErr.Error())
+	}
+	if linkEntity == nil {
+		blog.ServiceNotice(ctx, "GetOneByURL", "未找到友链信息，URL: %s", linkURL)
+		return nil, berror.ErrorAddData(&berror.ErrNotFound, "未找到友链信息")
+	}
+	return linkEntity, nil
+}
+
 // Update
 //
 // 更新友链信息。如果友链不存在或更新操作失败，返回对应的错误码。更新成功后会删除相关的全局缓存。
@@ -135,7 +162,7 @@ func (s *sFriend) Update(ctx context.Context, editFriendEntity base.LinkFriendDT
 	}
 
 	// 删除相关的全局缓存
-	errorCode = deleteGlobalImpactCache(ctx)
+	errorCode = s.DeleteGlobalImpactCache(ctx)
 	if errorCode != nil {
 		return errorCode
 	}
@@ -176,7 +203,7 @@ func (s *sFriend) Delete(ctx context.Context, linkUUID string) *berror.ErrorCode
 	}
 
 	// 删除相关的全局缓存
-	errorCode := deleteGlobalImpactCache(ctx)
+	errorCode := s.DeleteGlobalImpactCache(ctx)
 	if errorCode != nil {
 		return errorCode
 	}
@@ -219,30 +246,30 @@ func (s *sFriend) GetPage(ctx context.Context, search string, page, size int, is
 	return linkFriendPage, nil
 }
 
-// deleteGlobalImpactCache
+// DeleteGlobalImpactCache
 //
 // 删除友链相关的全局缓存；
 // 该函数会删除友链分组列表缓存和友链分组列表搜索缓存。
-func deleteGlobalImpactCache(ctx context.Context) *berror.ErrorCode {
+func (s *sFriend) DeleteGlobalImpactCache(ctx context.Context) *berror.ErrorCode {
 	_, cacheErr := g.Redis().Del(ctx, consts.SelectCache+consts.LinkContextListRedisKey)
 	if cacheErr != nil {
-		blog.ServiceError(ctx, "deleteGlobalImpactCache", "删除友链分组列表缓存失败，错误：%v", cacheErr)
+		blog.ServiceError(ctx, "DeleteGlobalImpactCache", "删除友链分组列表缓存失败，错误：%v", cacheErr)
 		return berror.ErrorAddData(&berror.ErrDatabaseError, cacheErr.Error())
 	}
 	patternKey := consts.SelectCache + strings.ReplaceAll(consts.LinkContextListSearchRedisKey, "%d:%d:%s", "*")
 	keys, cacheErr := g.Redis().Keys(ctx, patternKey)
-	g.Log().Debugf(ctx, "deleteGlobalImpactCache 获取友链分组列表搜索缓存，匹配键：%s, 匹配到的键数量：%d", patternKey, len(keys))
+	g.Log().Debugf(ctx, "DeleteGlobalImpactCache 获取友链分组列表搜索缓存，匹配键：%s, 匹配到的键数量：%d", patternKey, len(keys))
 	if cacheErr != nil {
-		blog.ServiceError(ctx, "deleteGlobalImpactCache", "获取友链分组列表搜索缓存失败，错误：%v", cacheErr)
+		blog.ServiceError(ctx, "DeleteGlobalImpactCache", "获取友链分组列表搜索缓存失败，错误：%v", cacheErr)
 		return berror.ErrorAddData(&berror.ErrDatabaseError, cacheErr.Error())
 	}
 	if keys != nil && len(keys) > 0 {
 		delCount, cacheErr := g.Redis().Del(ctx, keys...)
 		if cacheErr != nil {
-			blog.ServiceError(ctx, "deleteGlobalImpactCache", "删除友链分组列表搜索缓存失败，错误：%v", cacheErr)
+			blog.ServiceError(ctx, "DeleteGlobalImpactCache", "删除友链分组列表搜索缓存失败，错误：%v", cacheErr)
 			return berror.ErrorAddData(&berror.ErrDatabaseError, cacheErr.Error())
 		}
-		blog.ServiceDebug(ctx, "deleteGlobalImpactCache", "成功删除 %s 缓存数量：%d", patternKey, delCount)
+		blog.ServiceDebug(ctx, "DeleteGlobalImpactCache", "成功删除 %s 缓存数量：%d", patternKey, delCount)
 	}
 	return nil
 }

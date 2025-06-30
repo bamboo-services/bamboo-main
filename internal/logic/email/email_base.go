@@ -48,6 +48,7 @@ func (s *sEmail) getBaseData(ctx context.Context) g.Map {
 		"system_version": dao.System.MustGetSystemValue(ctx, consts.SystemVersionKey),
 		"system_desc":    dao.System.MustGetSystemValue(ctx, consts.SystemDescriptionKey),
 		"system_since":   dao.System.MustGetSystemValue(ctx, consts.SystemSinceYearKey),
+		"system_website": dao.System.MustGetSystemValue(ctx, consts.SystemWebsiteKey),
 	}
 	baseData["system_copyright"] = fmt.Sprintf("Copyright &copy; %s-%d %s. All Rights Reserved.", baseData["system_since"], gtime.Now().Year(), baseData["system_name"])
 	return baseData

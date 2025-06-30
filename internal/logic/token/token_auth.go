@@ -210,7 +210,7 @@ func (s *sToken) VerifyAndRefreshUserToken(ctx context.Context, token string, re
 		return nil, berror.ErrorAddData(&berror.ErrInternalServer, "更新用户令牌缓存失败: "+cacheErr.Error())
 	}
 
-	blog.ServiceDebug(ctx, "VerifyAndRefreshUserToken", "用户令牌 %s 验证并刷新成功", token)
+	blog.ServiceDebug(ctx, "VerifyAndRefreshUserToken", "用户令牌 %s 验证成功", token)
 	return userToken, nil
 }
 

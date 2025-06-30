@@ -20,6 +20,7 @@ const (
 	SystemVersionKey     = "system_version"     // 系统版本键
 	SystemDescriptionKey = "system_description" // 系统描述键
 	SystemSinceYearKey   = "system_since_year"  // 系统创建年份键
+	SystemWebsiteKey     = "system_website"     // 系统官网键
 )
 
 const (
