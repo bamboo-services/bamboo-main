@@ -1,53 +1,42 @@
 package logic
 
 import (
-	"fmt"
-
 	"bamboo-main/internal/model/dto"
 	"bamboo-main/internal/model/entity"
 	"bamboo-main/internal/model/request"
 	"bamboo-main/pkg/constants"
 
+	xError "github.com/bamboo-services/bamboo-base-go/error"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
+	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	"gorm.io/gorm"
 )
 
-// stringToPtr 字符串转指针辅助函数
-func stringToPtr(s string) *string {
-	if s == "" {
-		return nil
-	}
-	return &s
+
+// LinkLogic 友情链接业务逻辑
+type LinkLogic struct {
 }
 
-// LinkFriendLogic 友情链接业务逻辑
-type LinkFriendLogic struct {
-}
-
-// NewLinkFriendLogic 创建友情链接业务逻辑实例
-func NewLinkFriendLogic() *LinkFriendLogic {
-	return &LinkFriendLogic{}
-}
 
 // Add 添加友情链接
-func (l *LinkFriendLogic) Add(ctx *gin.Context, req *request.LinkFriendAddReq) (*dto.LinkFriendDTO, error) {
+func (l *LinkLogic) Add(ctx *gin.Context, req *request.LinkFriendAddReq) (*dto.LinkFriendDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
-	
+
 	// 创建友情链接实体
 	link := &entity.LinkFriend{
-		Name:         req.LinkName,
-		URL:          req.LinkURL,
-		Avatar:       stringToPtr(req.LinkAvatar),
-		RSS:          stringToPtr(req.LinkRSS),
-		Description:  stringToPtr(req.LinkDesc),
-		Email:        stringToPtr(req.LinkEmail),
-		SortOrder:    req.LinkOrder,
-		Status:       constants.LinkStatusPending, // 默认待审核
-		IsFailure:    constants.LinkFailNormal,    // 默认正常
-		ApplyRemark:  stringToPtr(req.LinkApplyRemark),
+		Name:        req.LinkName,
+		URL:         req.LinkURL,
+		Avatar:      xUtil.Ptr(req.LinkAvatar),
+		RSS:         xUtil.Ptr(req.LinkRSS),
+		Description: xUtil.Ptr(req.LinkDesc),
+		Email:       xUtil.Ptr(req.LinkEmail),
+		SortOrder:   req.LinkOrder,
+		Status:      constants.LinkStatusPending, // 默认待审核
+		IsFailure:   constants.LinkFailNormal,    // 默认正常
+		ApplyRemark: xUtil.Ptr(req.LinkApplyRemark),
 	}
 
 	// 设置UUID外键
@@ -65,31 +54,31 @@ func (l *LinkFriendLogic) Add(ctx *gin.Context, req *request.LinkFriendAddReq) (
 	// 保存到数据库
 	err := db.WithContext(ctx).Create(link).Error
 	if err != nil {
-		return nil, fmt.Errorf("创建友情链接失败: %w", err)
+		return nil, xError.NewError(ctx, xError.DatabaseError, "创建友情链接失败", false, err)
 	}
 
 	// 预加载关联数据
 	err = db.WithContext(ctx).Preload("GroupFKey").Preload("ColorFKey").First(link, "uuid = ?", link.UUID).Error
 	if err != nil {
-		return nil, fmt.Errorf("查询友情链接失败: %w", err)
+		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
 	}
 
 	return convertLinkFriendToDTO(link), nil
 }
 
 // Update 更新友情链接
-func (l *LinkFriendLogic) Update(ctx *gin.Context, linkUUID string, req *request.LinkFriendUpdateReq) (*dto.LinkFriendDTO, error) {
+func (l *LinkLogic) Update(ctx *gin.Context, linkUUID string, req *request.LinkFriendUpdateReq) (*dto.LinkFriendDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
-	
+
 	// 查找友情链接
 	var link entity.LinkFriend
 	err := db.WithContext(ctx.Request.Context()).First(&link, "link_uuid = ?", linkUUID).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("友情链接不存在")
+			return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 		}
-		return nil, fmt.Errorf("查询友情链接失败: %w", err)
+		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
 	}
 
 	// 更新字段
@@ -128,55 +117,55 @@ func (l *LinkFriendLogic) Update(ctx *gin.Context, linkUUID string, req *request
 	// 执行更新
 	err = db.WithContext(ctx).Model(&link).Updates(updates).Error
 	if err != nil {
-		return nil, fmt.Errorf("更新友情链接失败: %w", err)
+		return nil, xError.NewError(ctx, xError.DatabaseError, "更新友情链接失败", false, err)
 	}
 
 	// 重新查询带关联数据
 	err = db.WithContext(ctx).Preload("LinkGroup").Preload("LinkColor").First(&link, "link_uuid = ?", linkUUID).Error
 	if err != nil {
-		return nil, fmt.Errorf("查询友情链接失败: %w", err)
+		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
 	}
 
 	return convertLinkFriendToDTO(&link), nil
 }
 
 // Delete 删除友情链接
-func (l *LinkFriendLogic) Delete(ctx *gin.Context, linkUUID string) error {
+func (l *LinkLogic) Delete(ctx *gin.Context, linkUUID string) *xError.Error {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
-	
+
 	result := db.WithContext(ctx.Request.Context()).Where("link_uuid = ?", linkUUID).Delete(&entity.LinkFriend{})
 	if result.Error != nil {
-		return fmt.Errorf("删除友情链接失败: %w", result.Error)
+		return xError.NewError(ctx, xError.DatabaseError, "删除友情链接失败", false, result.Error)
 	}
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("友情链接不存在")
+		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
 	return nil
 }
 
 // Get 获取友情链接详情
-func (l *LinkFriendLogic) Get(ctx *gin.Context, linkUUID string) (*dto.LinkFriendDTO, error) {
+func (l *LinkLogic) Get(ctx *gin.Context, linkUUID string) (*dto.LinkFriendDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
-	
+
 	var link entity.LinkFriend
 	err := db.WithContext(ctx.Request.Context()).Preload("LinkGroup").Preload("LinkColor").First(&link, "link_uuid = ?", linkUUID).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("友情链接不存在")
+			return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 		}
-		return nil, fmt.Errorf("查询友情链接失败: %w", err)
+		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
 	}
 
 	return convertLinkFriendToDTO(&link), nil
 }
 
 // List 获取友情链接列表
-func (l *LinkFriendLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*dto.PaginationDTO[dto.LinkFriendDTO], error) {
+func (l *LinkLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*dto.PaginationDTO[dto.LinkFriendDTO], *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
-	
+
 	// 设置默认值
 	if req.Page <= 0 {
 		req.Page = 1
@@ -227,7 +216,7 @@ func (l *LinkFriendLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq
 	var total int64
 	err := query.Count(&total).Error
 	if err != nil {
-		return nil, fmt.Errorf("统计友情链接数量失败: %w", err)
+		return nil, xError.NewError(ctx, xError.DatabaseError, "统计友情链接数量失败", false, err)
 	}
 
 	// 分页查询
@@ -235,7 +224,7 @@ func (l *LinkFriendLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq
 	offset := (req.Page - 1) * req.PageSize
 	err = query.Preload("LinkGroup").Preload("LinkColor").Offset(offset).Limit(req.PageSize).Find(&links).Error
 	if err != nil {
-		return nil, fmt.Errorf("查询友情链接列表失败: %w", err)
+		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友情链接列表失败", false, err)
 	}
 
 	// 转换为 DTO
@@ -254,10 +243,10 @@ func (l *LinkFriendLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq
 }
 
 // UpdateStatus 更新友情链接状态
-func (l *LinkFriendLogic) UpdateStatus(ctx *gin.Context, linkUUID string, req *request.LinkFriendStatusReq) error {
+func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkUUID string, req *request.LinkFriendStatusReq) *xError.Error {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
-	
+
 	updates := map[string]interface{}{
 		"link_status":        req.LinkStatus,
 		"link_review_remark": req.LinkReviewRemark,
@@ -265,20 +254,20 @@ func (l *LinkFriendLogic) UpdateStatus(ctx *gin.Context, linkUUID string, req *r
 
 	result := db.WithContext(ctx.Request.Context()).Model(&entity.LinkFriend{}).Where("link_uuid = ?", linkUUID).Updates(updates)
 	if result.Error != nil {
-		return fmt.Errorf("更新友情链接状态失败: %w", result.Error)
+		return xError.NewError(ctx, xError.DatabaseError, "更新友情链接状态失败", false, result.Error)
 	}
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("友情链接不存在")
+		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
 
 	return nil
 }
 
 // UpdateFailStatus 更新友情链接失效状态
-func (l *LinkFriendLogic) UpdateFailStatus(ctx *gin.Context, linkUUID string, req *request.LinkFriendFailReq) error {
+func (l *LinkLogic) UpdateFailStatus(ctx *gin.Context, linkUUID string, req *request.LinkFriendFailReq) *xError.Error {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
-	
+
 	updates := map[string]interface{}{
 		"link_fail":        req.LinkFail,
 		"link_fail_reason": req.LinkFailReason,
@@ -286,20 +275,20 @@ func (l *LinkFriendLogic) UpdateFailStatus(ctx *gin.Context, linkUUID string, re
 
 	result := db.WithContext(ctx.Request.Context()).Model(&entity.LinkFriend{}).Where("link_uuid = ?", linkUUID).Updates(updates)
 	if result.Error != nil {
-		return fmt.Errorf("更新友情链接失效状态失败: %w", result.Error)
+		return xError.NewError(ctx, xError.DatabaseError, "更新友情链接失效状态失败", false, result.Error)
 	}
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("友情链接不存在")
+		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
 
 	return nil
 }
 
 // GetPublicLinks 获取公开的友情链接列表
-func (l *LinkFriendLogic) GetPublicLinks(ctx *gin.Context, groupUUID string) ([]dto.LinkFriendDTO, error) {
+func (l *LinkLogic) GetPublicLinks(ctx *gin.Context, groupUUID string) ([]dto.LinkFriendDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
-	
+
 	query := db.WithContext(ctx.Request.Context()).Where("link_status = ? AND link_fail = ?", constants.LinkStatusApproved, constants.LinkFailNormal)
 
 	if groupUUID != "" {
@@ -309,7 +298,7 @@ func (l *LinkFriendLogic) GetPublicLinks(ctx *gin.Context, groupUUID string) ([]
 	var links []entity.LinkFriend
 	err := query.Preload("LinkGroup").Preload("LinkColor").Order("link_order ASC, link_created_at DESC").Find(&links).Error
 	if err != nil {
-		return nil, fmt.Errorf("查询公开友情链接失败: %w", err)
+		return nil, xError.NewError(ctx, xError.DatabaseError, "查询公开友情链接失败", false, err)
 	}
 
 	var linkDTOs []dto.LinkFriendDTO
@@ -327,25 +316,25 @@ func convertLinkFriendToDTO(link *entity.LinkFriend) *dto.LinkFriendDTO {
 	}
 
 	linkDTO := &dto.LinkFriendDTO{
-		UUID:          link.UUID.String(),
-		Name:          link.Name,
-		URL:           link.URL,
-		Avatar:        safeStringValue(link.Avatar),
-		RSS:           safeStringValue(link.RSS),
-		Description:   safeStringValue(link.Description),
-		Email:         safeStringValue(link.Email),
-		GroupUUID:     safeUUIDValue(link.GroupUUID),
-		ColorUUID:     safeUUIDValue(link.ColorUUID),
-		SortOrder:     link.SortOrder,
-		Status:        link.Status,
-		StatusText:    getLinkStatusText(link.Status),
-		IsFailure:     link.IsFailure,
-		FailureText:   getLinkFailText(link.IsFailure),
-		FailReason:    safeStringValue(link.FailReason),
-		ApplyRemark:   safeStringValue(link.ApplyRemark),
-		ReviewRemark:  safeStringValue(link.ReviewRemark),
-		CreatedAt:     link.CreatedAt,
-		UpdatedAt:     link.UpdatedAt,
+		UUID:         link.UUID.String(),
+		Name:         link.Name,
+		URL:          link.URL,
+		Avatar:       safeStringValue(link.Avatar),
+		RSS:          safeStringValue(link.RSS),
+		Description:  safeStringValue(link.Description),
+		Email:        safeStringValue(link.Email),
+		GroupUUID:    safeUUIDValue(link.GroupUUID),
+		ColorUUID:    safeUUIDValue(link.ColorUUID),
+		SortOrder:    link.SortOrder,
+		Status:       link.Status,
+		StatusText:   getLinkStatusText(link.Status),
+		IsFailure:    link.IsFailure,
+		FailureText:  getLinkFailText(link.IsFailure),
+		FailReason:   safeStringValue(link.FailReason),
+		ApplyRemark:  safeStringValue(link.ApplyRemark),
+		ReviewRemark: safeStringValue(link.ReviewRemark),
+		CreatedAt:    link.CreatedAt,
+		UpdatedAt:    link.UpdatedAt,
 	}
 
 	// 转换关联的分组信息

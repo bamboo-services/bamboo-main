@@ -36,9 +36,10 @@ func Init(engine *gin.Engine, config *base.BambooConfig) {
 	route := New(getGroup)
 
 	// 注册路由
-	route.PublicRouter()
-	route.AuthRouter()
-	route.AdminRouter()
+	route.PublicRouter()   // 纯公开接口 (health, ping)
+	route.CommonRouter()   // 业务接口但无需认证 (links)
+	route.AuthRouter()     // 认证相关
+	route.AdminRouter()    // 管理员专用
 
 	// 未匹配路由处理
 	engine.NoRoute(xRoute.NoRoute)

@@ -8,15 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// LinkFriendHandler 友情链接处理器
-type LinkFriendHandler struct {
-	linkFriendService *service.LinkFriendService
+// LinkHandler 友情链接处理器
+type LinkHandler struct {
+	linkService service.ILinkService
 }
 
-// NewLinkFriendHandler 创建友情链接处理器
-func NewLinkFriendHandler() *LinkFriendHandler {
-	return &LinkFriendHandler{
-		linkFriendService: service.NewLinkFriendService(),
+// NewLinkHandler 创建友情链接处理器
+func NewLinkHandler() *LinkHandler {
+	return &LinkHandler{
+		linkService: service.NewLinkService(),
 	}
 }
 
@@ -33,7 +33,7 @@ func NewLinkFriendHandler() *LinkFriendHandler {
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /admin/links [post]
-func (h *LinkFriendHandler) Add(c *gin.Context) {
+func (h *LinkHandler) Add(c *gin.Context) {
 	var req request.LinkFriendAddReq
 	
 	// 绑定请求数据
@@ -44,7 +44,7 @@ func (h *LinkFriendHandler) Add(c *gin.Context) {
 	}
 
 	// 调用服务层
-	link, err := h.linkFriendService.Add(c, &req)
+	link, err := h.linkService.Add(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -69,7 +69,7 @@ func (h *LinkFriendHandler) Add(c *gin.Context) {
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /admin/links/{link_uuid} [put]
-func (h *LinkFriendHandler) Update(c *gin.Context) {
+func (h *LinkHandler) Update(c *gin.Context) {
 	linkUUID := c.Param("link_uuid")
 	var req request.LinkFriendUpdateReq
 	
@@ -81,7 +81,7 @@ func (h *LinkFriendHandler) Update(c *gin.Context) {
 	}
 
 	// 调用服务层
-	link, err := h.linkFriendService.Update(c, linkUUID, &req)
+	link, err := h.linkService.Update(c, linkUUID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -105,11 +105,11 @@ func (h *LinkFriendHandler) Update(c *gin.Context) {
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /admin/links/{link_uuid} [delete]
-func (h *LinkFriendHandler) Delete(c *gin.Context) {
+func (h *LinkHandler) Delete(c *gin.Context) {
 	linkUUID := c.Param("link_uuid")
 
 	// 调用服务层
-	err := h.linkFriendService.Delete(c, linkUUID)
+	err := h.linkService.Delete(c, linkUUID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -133,11 +133,11 @@ func (h *LinkFriendHandler) Delete(c *gin.Context) {
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /admin/links/{link_uuid} [get]
-func (h *LinkFriendHandler) Get(c *gin.Context) {
+func (h *LinkHandler) Get(c *gin.Context) {
 	linkUUID := c.Param("link_uuid")
 
 	// 调用服务层
-	link, err := h.linkFriendService.Get(c, linkUUID)
+	link, err := h.linkService.Get(c, linkUUID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -167,7 +167,7 @@ func (h *LinkFriendHandler) Get(c *gin.Context) {
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /admin/links [get]
-func (h *LinkFriendHandler) List(c *gin.Context) {
+func (h *LinkHandler) List(c *gin.Context) {
 	var req request.LinkFriendQueryReq
 	
 	// 绑定查询参数
@@ -178,7 +178,7 @@ func (h *LinkFriendHandler) List(c *gin.Context) {
 	}
 
 	// 调用服务层
-	result, err := h.linkFriendService.List(c, &req)
+	result, err := h.linkService.List(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -203,7 +203,7 @@ func (h *LinkFriendHandler) List(c *gin.Context) {
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /admin/links/{link_uuid}/status [put]
-func (h *LinkFriendHandler) UpdateStatus(c *gin.Context) {
+func (h *LinkHandler) UpdateStatus(c *gin.Context) {
 	linkUUID := c.Param("link_uuid")
 	var req request.LinkFriendStatusReq
 	
@@ -215,7 +215,7 @@ func (h *LinkFriendHandler) UpdateStatus(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.linkFriendService.UpdateStatus(c, linkUUID, &req)
+	err := h.linkService.UpdateStatus(c, linkUUID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -240,7 +240,7 @@ func (h *LinkFriendHandler) UpdateStatus(c *gin.Context) {
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /admin/links/{link_uuid}/fail [put]
-func (h *LinkFriendHandler) UpdateFailStatus(c *gin.Context) {
+func (h *LinkHandler) UpdateFailStatus(c *gin.Context) {
 	linkUUID := c.Param("link_uuid")
 	var req request.LinkFriendFailReq
 	
@@ -252,7 +252,7 @@ func (h *LinkFriendHandler) UpdateFailStatus(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.linkFriendService.UpdateFailStatus(c, linkUUID, &req)
+	err := h.linkService.UpdateFailStatus(c, linkUUID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -272,11 +272,11 @@ func (h *LinkFriendHandler) UpdateFailStatus(c *gin.Context) {
 // @Success 200 {object} map[string]interface{} "获取成功"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /public/links [get]
-func (h *LinkFriendHandler) GetPublicLinks(c *gin.Context) {
+func (h *LinkHandler) GetPublicLinks(c *gin.Context) {
 	groupUUID := c.Query("group_uuid")
 
 	// 调用服务层
-	links, err := h.linkFriendService.GetPublicLinks(c, groupUUID)
+	links, err := h.linkService.GetPublicLinks(c, groupUUID)
 	if err != nil {
 		_ = c.Error(err)
 		return

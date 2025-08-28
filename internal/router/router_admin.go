@@ -14,7 +14,7 @@ func (r *Route) AdminRouter() {
 	admin.Use(middleware.AuthMiddleware)
 	admin.Use(middleware.RequireRole("admin", "moderator"))
 	{
-		r.registerLinkFriendAdminRouter(admin) // 友情链接管理路由
+		r.registerLinkAdminRouter(admin) // 友情链接管理路由
 		r.registerLinkGroupAdminRouter(admin)  // 友链分组管理路由
 		r.registerLinkColorAdminRouter(admin)  // 友链颜色管理路由
 		r.registerSystemUserAdminRouter(admin) // 系统用户管理路由
@@ -22,18 +22,18 @@ func (r *Route) AdminRouter() {
 	}
 }
 
-// registerLinkFriendAdminRouter 注册友情链接管理路由
-func (r *Route) registerLinkFriendAdminRouter(admin *gin.RouterGroup) {
-	linkFriendHandler := handler.NewLinkFriendHandler()
+// registerLinkAdminRouter 注册友情链接管理路由
+func (r *Route) registerLinkAdminRouter(admin *gin.RouterGroup) {
+	linkHandler := handler.NewLinkHandler()
 	links := admin.Group("/links")
 	{
-		links.POST("", linkFriendHandler.Add)                             // 添加友情链接
-		links.GET("", linkFriendHandler.List)                             // 获取友情链接分页列表
-		links.GET("/:link_uuid", linkFriendHandler.Get)                   // 获取友情链接详情
-		links.PUT("/:link_uuid", linkFriendHandler.Update)                // 更新友情链接
-		links.DELETE("/:link_uuid", linkFriendHandler.Delete)             // 删除友情链接
-		links.PUT("/:link_uuid/status", linkFriendHandler.UpdateStatus)   // 更新友情链接状态
-		links.PUT("/:link_uuid/fail", linkFriendHandler.UpdateFailStatus) // 更新友情链接失效状态
+		links.POST("", linkHandler.Add)                             // 添加友情链接
+		links.GET("", linkHandler.List)                             // 获取友情链接分页列表
+		links.GET("/:link_uuid", linkHandler.Get)                   // 获取友情链接详情
+		links.PUT("/:link_uuid", linkHandler.Update)                // 更新友情链接
+		links.DELETE("/:link_uuid", linkHandler.Delete)             // 删除友情链接
+		links.PUT("/:link_uuid/status", linkHandler.UpdateStatus)   // 更新友情链接状态
+		links.PUT("/:link_uuid/fail", linkHandler.UpdateFailStatus) // 更新友情链接失效状态
 	}
 }
 
