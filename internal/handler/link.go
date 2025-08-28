@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"bamboo-main/internal/model/dto/response"
 	"bamboo-main/internal/model/request"
 	"bamboo-main/internal/service"
+
 	xResult "github.com/bamboo-services/bamboo-base-go/result"
 	xValid "github.com/bamboo-services/bamboo-base-go/validator"
 	"github.com/gin-gonic/gin"
@@ -28,14 +30,14 @@ func NewLinkHandler() *LinkHandler {
 // @Produce json
 // @Security Bearer
 // @Param request body request.LinkFriendAddReq true "添加友情链接请求"
-// @Success 200 {object} map[string]interface{} "添加成功"
+// @Success 200 {object} response.LinkAddResponse "添加成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /admin/links [post]
+// @Router /api/v1/admin/links [post]
 func (h *LinkHandler) Add(c *gin.Context) {
 	var req request.LinkFriendAddReq
-	
+
 	// 绑定请求数据
 	bindErr := c.ShouldBindJSON(&req)
 	if bindErr != nil {
@@ -51,7 +53,8 @@ func (h *LinkHandler) Add(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "友情链接添加成功", link)
+	resp := response.LinkAddResponse{LinkFriendDTO: *link}
+	xResult.SuccessHasData(c, "友情链接添加成功", resp)
 }
 
 // Update 更新友情链接
@@ -63,16 +66,16 @@ func (h *LinkHandler) Add(c *gin.Context) {
 // @Security Bearer
 // @Param link_uuid path string true "友情链接UUID"
 // @Param request body request.LinkFriendUpdateReq true "更新友情链接请求"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} response.LinkUpdateResponse "更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /admin/links/{link_uuid} [put]
+// @Router /api/v1/admin/links/{link_uuid} [put]
 func (h *LinkHandler) Update(c *gin.Context) {
 	linkUUID := c.Param("link_uuid")
 	var req request.LinkFriendUpdateReq
-	
+
 	// 绑定请求数据
 	bindErr := c.ShouldBindJSON(&req)
 	if bindErr != nil {
@@ -88,7 +91,8 @@ func (h *LinkHandler) Update(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "友情链接更新成功", link)
+	resp := response.LinkUpdateResponse{LinkFriendDTO: *link}
+	xResult.SuccessHasData(c, "友情链接更新成功", resp)
 }
 
 // Delete 删除友情链接
@@ -99,12 +103,12 @@ func (h *LinkHandler) Update(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param link_uuid path string true "友情链接UUID"
-// @Success 200 {object} map[string]interface{} "删除成功"
+// @Success 200 {object} response.MessageResponse "删除成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /admin/links/{link_uuid} [delete]
+// @Router /api/v1/admin/links/{link_uuid} [delete]
 func (h *LinkHandler) Delete(c *gin.Context) {
 	linkUUID := c.Param("link_uuid")
 
@@ -127,12 +131,12 @@ func (h *LinkHandler) Delete(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param link_uuid path string true "友情链接UUID"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} response.LinkDetailResponse "获取成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /admin/links/{link_uuid} [get]
+// @Router /api/v1/admin/links/{link_uuid} [get]
 func (h *LinkHandler) Get(c *gin.Context) {
 	linkUUID := c.Param("link_uuid")
 
@@ -144,7 +148,8 @@ func (h *LinkHandler) Get(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "获取成功", link)
+	resp := response.LinkDetailResponse{LinkFriendDTO: *link}
+	xResult.SuccessHasData(c, "获取成功", resp)
 }
 
 // List 获取友情链接列表
@@ -162,14 +167,14 @@ func (h *LinkHandler) Get(c *gin.Context) {
 // @Param link_group_uuid query string false "分组UUID"
 // @Param sort_by query string false "排序字段" Enums(created_at, updated_at, link_order, link_name)
 // @Param sort_order query string false "排序方式" Enums(asc, desc)
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} response.LinkListResponse "获取成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /admin/links [get]
+// @Router /api/v1/admin/links [get]
 func (h *LinkHandler) List(c *gin.Context) {
 	var req request.LinkFriendQueryReq
-	
+
 	// 绑定查询参数
 	bindErr := c.ShouldBindQuery(&req)
 	if bindErr != nil {
@@ -185,7 +190,8 @@ func (h *LinkHandler) List(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "获取成功", result)
+	resp := response.LinkListResponse{PaginationResponse: *result}
+	xResult.SuccessHasData(c, "获取成功", resp)
 }
 
 // UpdateStatus 更新友情链接状态
@@ -197,16 +203,16 @@ func (h *LinkHandler) List(c *gin.Context) {
 // @Security Bearer
 // @Param link_uuid path string true "友情链接UUID"
 // @Param request body request.LinkFriendStatusReq true "更新状态请求"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} response.MessageResponse "更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /admin/links/{link_uuid}/status [put]
+// @Router /api/v1/admin/links/{link_uuid}/status [put]
 func (h *LinkHandler) UpdateStatus(c *gin.Context) {
 	linkUUID := c.Param("link_uuid")
 	var req request.LinkFriendStatusReq
-	
+
 	// 绑定请求数据
 	bindErr := c.ShouldBindJSON(&req)
 	if bindErr != nil {
@@ -234,16 +240,16 @@ func (h *LinkHandler) UpdateStatus(c *gin.Context) {
 // @Security Bearer
 // @Param link_uuid path string true "友情链接UUID"
 // @Param request body request.LinkFriendFailReq true "更新失效状态请求"
-// @Success 200 {object} map[string]interface{} "更新成功"
+// @Success 200 {object} response.MessageResponse "更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /admin/links/{link_uuid}/fail [put]
+// @Router /api/v1/admin/links/{link_uuid}/fail [put]
 func (h *LinkHandler) UpdateFailStatus(c *gin.Context) {
 	linkUUID := c.Param("link_uuid")
 	var req request.LinkFriendFailReq
-	
+
 	// 绑定请求数据
 	bindErr := c.ShouldBindJSON(&req)
 	if bindErr != nil {
@@ -269,9 +275,9 @@ func (h *LinkHandler) UpdateFailStatus(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param group_uuid query string false "分组UUID，不传则获取所有"
-// @Success 200 {object} map[string]interface{} "获取成功"
+// @Success 200 {object} response.LinkPublicResponse "获取成功"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /public/links [get]
+// @Router /api/v1/public/links [get]
 func (h *LinkHandler) GetPublicLinks(c *gin.Context) {
 	groupUUID := c.Query("group_uuid")
 
@@ -283,5 +289,6 @@ func (h *LinkHandler) GetPublicLinks(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "获取成功", links)
+	resp := response.LinkPublicResponse{Links: links}
+	xResult.SuccessHasData(c, "获取成功", resp)
 }

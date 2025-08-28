@@ -2,6 +2,7 @@ package service
 
 import (
 	"bamboo-main/internal/logic"
+	"bamboo-main/internal/model/base"
 	"bamboo-main/internal/model/dto"
 	"bamboo-main/internal/model/request"
 
@@ -15,7 +16,7 @@ type ILinkService interface {
 	Update(ctx *gin.Context, linkUUID string, req *request.LinkFriendUpdateReq) (*dto.LinkFriendDTO, *xError.Error)
 	Delete(ctx *gin.Context, linkUUID string) *xError.Error
 	Get(ctx *gin.Context, linkUUID string) (*dto.LinkFriendDTO, *xError.Error)
-	List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*dto.PaginationDTO[dto.LinkFriendDTO], *xError.Error)
+	List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*base.PaginationResponse[dto.LinkFriendDTO], *xError.Error)
 	UpdateStatus(ctx *gin.Context, linkUUID string, req *request.LinkFriendStatusReq) *xError.Error
 	UpdateFailStatus(ctx *gin.Context, linkUUID string, req *request.LinkFriendFailReq) *xError.Error
 	GetPublicLinks(ctx *gin.Context, groupUUID string) ([]dto.LinkFriendDTO, *xError.Error)

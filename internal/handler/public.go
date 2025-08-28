@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"bamboo-main/internal/model/dto/response"
 	"bamboo-main/internal/service"
+
 	xResult "github.com/bamboo-services/bamboo-base-go/result"
 	"github.com/gin-gonic/gin"
 )
@@ -26,7 +28,7 @@ func NewPublicHandler() *PublicHandler {
 // @Produce json
 // @Success 200 {object} response.HealthResponse "健康检查成功"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /public/health [get]
+// @Router /api/v1/public/health [get]
 func (h *PublicHandler) HealthCheck(c *gin.Context) {
 	// 调用服务层
 	result, err := h.publicService.HealthCheck(c)
@@ -37,7 +39,11 @@ func (h *PublicHandler) HealthCheck(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "系统状态正常", result)
+	resp := response.HealthResponse{}
+	if result != nil {
+		resp = *result
+	}
+	xResult.SuccessHasData(c, "系统状态正常", resp)
 }
 
 // Ping 简单连通性测试接口
@@ -48,7 +54,7 @@ func (h *PublicHandler) HealthCheck(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} response.PingResponse "连通测试成功"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /public/ping [get]
+// @Router /api/v1/public/ping [get]
 func (h *PublicHandler) Ping(c *gin.Context) {
 	// 调用服务层
 	result, err := h.publicService.Ping(c)
@@ -59,5 +65,9 @@ func (h *PublicHandler) Ping(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "pong", result)
+	resp := response.PingResponse{}
+	if result != nil {
+		resp = *result
+	}
+	xResult.SuccessHasData(c, "pong", resp)
 }

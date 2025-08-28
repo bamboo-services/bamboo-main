@@ -31,6 +31,7 @@ func main() {
 	router.Init(getGin, getServ.Config)
 
 	// 启动 gin 主服务
+	log.Infof("启动程序端口: %d", getServ.Config.Xlf.Server.Port)
 	err := getGin.Run(fmt.Sprintf(":%d", getServ.Config.Xlf.Server.Port))
 	if err != nil {
 		log.Fatalf("[MAIN] 系统启动失败 %v", err)

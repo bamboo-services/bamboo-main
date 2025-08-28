@@ -1,24 +1,23 @@
 package logic
 
 import (
+	"bamboo-main/internal/model/base"
 	"bamboo-main/internal/model/dto"
 	"bamboo-main/internal/model/entity"
 	"bamboo-main/internal/model/request"
 	"bamboo-main/pkg/constants"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-
 // LinkLogic 友情链接业务逻辑
 type LinkLogic struct {
 }
-
 
 // Add 添加友情链接
 func (l *LinkLogic) Add(ctx *gin.Context, req *request.LinkFriendAddReq) (*dto.LinkFriendDTO, *xError.Error) {
@@ -81,41 +80,44 @@ func (l *LinkLogic) Update(ctx *gin.Context, linkUUID string, req *request.LinkF
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
 	}
 
-	// 更新字段
-	updates := make(map[string]interface{})
+	// 直接更新实体字段
 	if req.LinkName != "" {
-		updates["link_name"] = req.LinkName
+		link.Name = req.LinkName
 	}
 	if req.LinkURL != "" {
-		updates["link_url"] = req.LinkURL
+		link.URL = req.LinkURL
 	}
 	if req.LinkAvatar != "" {
-		updates["link_avatar"] = req.LinkAvatar
+		link.Avatar = xUtil.Ptr(req.LinkAvatar)
 	}
 	if req.LinkRSS != "" {
-		updates["link_rss"] = req.LinkRSS
+		link.RSS = xUtil.Ptr(req.LinkRSS)
 	}
 	if req.LinkDesc != "" {
-		updates["link_desc"] = req.LinkDesc
+		link.Description = xUtil.Ptr(req.LinkDesc)
 	}
 	if req.LinkEmail != "" {
-		updates["link_email"] = req.LinkEmail
+		link.Email = xUtil.Ptr(req.LinkEmail)
 	}
 	if req.LinkGroupUUID != "" {
-		updates["link_group_uuid"] = req.LinkGroupUUID
+		if groupUUID, err := uuid.Parse(req.LinkGroupUUID); err == nil {
+			link.GroupUUID = &groupUUID
+		}
 	}
 	if req.LinkColorUUID != "" {
-		updates["link_color_uuid"] = req.LinkColorUUID
+		if colorUUID, err := uuid.Parse(req.LinkColorUUID); err == nil {
+			link.ColorUUID = &colorUUID
+		}
 	}
 	if req.LinkOrder != nil {
-		updates["link_order"] = *req.LinkOrder
+		link.SortOrder = *req.LinkOrder
 	}
 	if req.LinkApplyRemark != "" {
-		updates["link_apply_remark"] = req.LinkApplyRemark
+		link.ApplyRemark = xUtil.Ptr(req.LinkApplyRemark)
 	}
 
 	// 执行更新
-	err = db.WithContext(ctx).Model(&link).Updates(updates).Error
+	err = db.WithContext(ctx).Updates(&link).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "更新友情链接失败", false, err)
 	}
@@ -162,7 +164,7 @@ func (l *LinkLogic) Get(ctx *gin.Context, linkUUID string) (*dto.LinkFriendDTO, 
 }
 
 // List 获取友情链接列表
-func (l *LinkLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*dto.PaginationDTO[dto.LinkFriendDTO], *xError.Error) {
+func (l *LinkLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*base.PaginationResponse[dto.LinkFriendDTO], *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
@@ -233,13 +235,7 @@ func (l *LinkLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*dt
 		linkDTOs = append(linkDTOs, *convertLinkFriendToDTO(&link))
 	}
 
-	return &dto.PaginationDTO[dto.LinkFriendDTO]{
-		Data:       linkDTOs,
-		Total:      total,
-		Page:       req.Page,
-		PageSize:   req.PageSize,
-		TotalPages: calculateTotalPages(total, req.PageSize),
-	}, nil
+	return base.NewPaginationResponse(linkDTOs, req.Page, req.PageSize, total), nil
 }
 
 // UpdateStatus 更新友情链接状态
@@ -391,10 +387,3 @@ func getLinkFailText(fail int) string {
 	}
 }
 
-// calculateTotalPages 计算总页数
-func calculateTotalPages(total int64, pageSize int) int {
-	if pageSize <= 0 {
-		return 0
-	}
-	return int((total + int64(pageSize) - 1) / int64(pageSize))
-}

@@ -12,7 +12,9 @@
 package ctxUtil
 
 import (
+	"bamboo-main/internal/helper"
 	"bamboo-main/internal/model/base"
+	"bamboo-main/pkg/constants"
 
 	xConsts "github.com/bamboo-services/bamboo-base-go/constants"
 	"github.com/gin-gonic/gin"
@@ -53,4 +55,28 @@ func GetRedisClient(c *gin.Context) *redis.Client {
 		return value.(*redis.Client)
 	}
 	return nil
+}
+
+// GetUserFromContext 从上下文获取用户信息
+//
+// 从Gin上下文中获取当前认证用户的会话信息。
+//
+// 参数说明:
+//   - c: Gin 上下文指针，用于存储和传递请求相关的数据。
+//
+// 返回值:
+//   - 用户会话信息指针 (`*helper.UserSession`)，如果用户未认证则为 `nil`。
+//   - 布尔值，表示是否成功获取到用户信息。
+func GetUserFromContext(c *gin.Context) (*helper.UserSession, bool) {
+	user, exists := c.Get(constants.ContextKeyUser)
+	if !exists {
+		return nil, false
+	}
+
+	userSession, ok := user.(helper.UserSession)
+	if !ok {
+		return nil, false
+	}
+
+	return &userSession, true
 }

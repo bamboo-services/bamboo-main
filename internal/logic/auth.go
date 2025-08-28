@@ -9,9 +9,10 @@ import (
 	"bamboo-main/internal/model/request"
 
 	"crypto/rand"
-	"github.com/gin-gonic/gin"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
+
 	xError "github.com/bamboo-services/bamboo-base-go/error"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
+	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -29,7 +30,7 @@ func NewAuthLogic() *AuthLogic {
 func (a *AuthLogic) Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.SystemUserDTO, string, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
-	
+
 	// 查找用户
 	var user entity.SystemUser
 	err := db.WithContext(ctx.Request.Context()).Where("username = ? OR email = ?", req.Username, req.Username).First(&user).Error
@@ -96,7 +97,7 @@ func (a *AuthLogic) Logout(ctx *gin.Context, token string) *xError.Error {
 func (a *AuthLogic) ChangePassword(ctx *gin.Context, userUUID string, req *request.AuthPasswordChangeReq) *xError.Error {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
-	
+
 	// 查找用户
 	var user entity.SystemUser
 	err := db.WithContext(ctx.Request.Context()).First(&user, "uuid = ?", userUUID).Error
@@ -132,7 +133,7 @@ func (a *AuthLogic) ChangePassword(ctx *gin.Context, userUUID string, req *reque
 func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *request.AuthPasswordResetReq) *xError.Error {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
-	
+
 	// 查找用户
 	var user entity.SystemUser
 	err := db.WithContext(ctx.Request.Context()).First(&user, "email = ?", req.Email).Error
@@ -168,7 +169,7 @@ func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *request.AuthPasswordRes
 func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userUUID string) (*dto.SystemUserDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
-	
+
 	var user entity.SystemUser
 	err := db.WithContext(ctx.Request.Context()).First(&user, "uuid = ?", userUUID).Error
 	if err != nil {
@@ -197,7 +198,7 @@ func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userUUID string) (*dto.SystemU
 func (a *AuthLogic) UpdateLastLogin(ctx *gin.Context, userUUID string) *xError.Error {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
-	
+
 	now := time.Now()
 	err := db.WithContext(ctx.Request.Context()).Model(&entity.SystemUser{}).Where("uuid = ?", userUUID).Update("last_login_at", &now).Error
 	if err != nil {
@@ -217,30 +218,30 @@ func (a *AuthLogic) ValidateToken(ctx *gin.Context, token string) (*dto.SystemUs
 func generateSecurityKey() string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	const keyLength = 64
-	
+
 	b := make([]byte, keyLength)
 	rand.Read(b)
-	
+
 	result := make([]byte, keyLength)
 	for i := range b {
 		result[i] = charset[b[i]%byte(len(charset))]
 	}
-	
+
 	return "cs_" + string(result)
 }
 
 // generateRandomString 生成随机字符串
 func generateRandomString(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	
+
 	b := make([]byte, length)
 	rand.Read(b)
-	
+
 	result := make([]byte, length)
 	for i := range b {
 		result[i] = charset[b[i]%byte(len(charset))]
 	}
-	
+
 	return string(result)
 }
 

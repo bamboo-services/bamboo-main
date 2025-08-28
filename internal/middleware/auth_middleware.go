@@ -7,23 +7,13 @@ import (
 	"strings"
 	"time"
 
-	"bamboo-main/internal/model/entity"
+	"bamboo-main/internal/helper"
 	"bamboo-main/pkg/constants"
 	ctxUtil "bamboo-main/pkg/util/ctx"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 )
-
-// UserSession 用户会话结构
-type UserSession struct {
-	UserUUID string    `json:"user_uuid"`
-	Username string    `json:"username"`
-	Email    string    `json:"email"`
-	Role     string    `json:"role"`
-	LoginAt  time.Time `json:"login_at"`
-	ExpireAt time.Time `json:"expire_at"`
-}
 
 // AuthMiddleware 认证中间件
 func AuthMiddleware(c *gin.Context) {
@@ -96,7 +86,7 @@ func AuthMiddleware(c *gin.Context) {
 	}
 
 	// 解析用户会话数据
-	var session UserSession
+	var session helper.UserSession
 	err = json.Unmarshal([]byte(sessionData), &session)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -127,101 +117,4 @@ func AuthMiddleware(c *gin.Context) {
 	c.Set(constants.ContextKeyToken, token)
 
 	c.Next()
-}
-
-// GetUserFromContext 从上下文获取用户信息
-func GetUserFromContext(c *gin.Context) (*UserSession, bool) {
-	user, exists := c.Get(constants.ContextKeyUser)
-	if !exists {
-		return nil, false
-	}
-
-	userSession, ok := user.(UserSession)
-	if !ok {
-		return nil, false
-	}
-
-	return &userSession, true
-}
-
-// RequireRole 要求特定角色的中间件
-func RequireRole(roles ...string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		user, exists := GetUserFromContext(c)
-		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":    401,
-				"message": "未认证的用户",
-				"data":    nil,
-			})
-			c.Abort()
-			return
-		}
-
-		// 检查用户角色
-		hasRole := false
-		for _, role := range roles {
-			if user.Role == role {
-				hasRole = true
-				break
-			}
-		}
-
-		if !hasRole {
-			c.JSON(http.StatusForbidden, gin.H{
-				"code":    403,
-				"message": "权限不足",
-				"data":    nil,
-			})
-			c.Abort()
-			return
-		}
-
-		c.Next()
-	}
-}
-
-// CreateUserSession 创建用户会话
-func CreateUserSession(c *gin.Context, user *entity.SystemUser, token string) error {
-	// 获取 Redis 客户端
-	rdb := ctxUtil.GetRedisClient(c)
-	if rdb == nil {
-		return fmt.Errorf("Redis 客户端不可用")
-	}
-
-	session := UserSession{
-		UserUUID: user.UUID.String(),
-		Username: user.Username,
-		Email:    user.Email,
-		Role:     user.Role,
-		LoginAt:  time.Now(),
-		ExpireAt: time.Now().Add(24 * time.Hour), // 24小时过期
-	}
-
-	// 序列化会话数据
-	sessionData, err := json.Marshal(session)
-	if err != nil {
-		return err
-	}
-
-	// 存储到 Redis
-	redisKey := fmt.Sprintf(constants.AuthTokenPrefix, token)
-	err = rdb.Set(c.Request.Context(), redisKey, sessionData, 24*time.Hour).Err()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// DeleteUserSession 删除用户会话
-func DeleteUserSession(c *gin.Context, token string) error {
-	// 获取 Redis 客户端
-	rdb := ctxUtil.GetRedisClient(c)
-	if rdb == nil {
-		return fmt.Errorf("Redis 客户端不可用")
-	}
-
-	redisKey := fmt.Sprintf(constants.AuthTokenPrefix, token)
-	return rdb.Del(c.Request.Context(), redisKey).Err()
 }
