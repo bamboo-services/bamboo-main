@@ -9,7 +9,7 @@ import (
 // 包含登录、登出、密码管理等用户认证相关功能
 func (r *Route) AuthRouter() {
 	auth := r.router.Group("/auth")
-	authHandler := handler.NewAuthHandler(r.reg)
+	authHandler := handler.NewAuthHandler()
 	{
 		// 无需认证的路由
 		auth.POST("/login", authHandler.Login)                  // 用户登录
@@ -17,7 +17,7 @@ func (r *Route) AuthRouter() {
 
 		// 需要认证的路由
 		authRequired := auth.Group("")
-		authRequired.Use(middleware.AuthMiddleware(r.reg))
+		authRequired.Use(middleware.AuthMiddleware)
 		{
 			authRequired.POST("/logout", authHandler.Logout)                  // 用户登出
 			authRequired.GET("/user", authHandler.GetUserInfo)                // 获取用户信息

@@ -11,37 +11,28 @@ import (
 // 管理员路由需要认证且需要管理员权限
 func (r *Route) AdminRouter() {
 	admin := r.router.Group("/admin")
-	admin.Use(middleware.AuthMiddleware(r.reg))
+	admin.Use(middleware.AuthMiddleware)
 	admin.Use(middleware.RequireRole("admin", "moderator"))
 	{
-		// 友情链接管理路由
-		r.registerLinkFriendAdminRouter(admin)
-		
-		// 友链分组管理路由
-		r.registerLinkGroupAdminRouter(admin)
-		
-		// 友链颜色管理路由
-		r.registerLinkColorAdminRouter(admin)
-
-		// 系统用户管理路由
-		r.registerSystemUserAdminRouter(admin)
-
-		// 系统日志路由
-		r.registerSystemLogRouter(admin)
+		r.registerLinkFriendAdminRouter(admin) // 友情链接管理路由
+		r.registerLinkGroupAdminRouter(admin)  // 友链分组管理路由
+		r.registerLinkColorAdminRouter(admin)  // 友链颜色管理路由
+		r.registerSystemUserAdminRouter(admin) // 系统用户管理路由
+		r.registerSystemLogRouter(admin)       // 系统日志路由
 	}
 }
 
 // registerLinkFriendAdminRouter 注册友情链接管理路由
 func (r *Route) registerLinkFriendAdminRouter(admin *gin.RouterGroup) {
-	linkFriendHandler := handler.NewLinkFriendHandler(r.reg)
+	linkFriendHandler := handler.NewLinkFriendHandler()
 	links := admin.Group("/links")
 	{
-		links.POST("", linkFriendHandler.Add)                           // 添加友情链接
-		links.GET("", linkFriendHandler.List)                           // 获取友情链接分页列表
-		links.GET("/:link_uuid", linkFriendHandler.Get)                 // 获取友情链接详情
-		links.PUT("/:link_uuid", linkFriendHandler.Update)              // 更新友情链接
-		links.DELETE("/:link_uuid", linkFriendHandler.Delete)           // 删除友情链接
-		links.PUT("/:link_uuid/status", linkFriendHandler.UpdateStatus) // 更新友情链接状态
+		links.POST("", linkFriendHandler.Add)                             // 添加友情链接
+		links.GET("", linkFriendHandler.List)                             // 获取友情链接分页列表
+		links.GET("/:link_uuid", linkFriendHandler.Get)                   // 获取友情链接详情
+		links.PUT("/:link_uuid", linkFriendHandler.Update)                // 更新友情链接
+		links.DELETE("/:link_uuid", linkFriendHandler.Delete)             // 删除友情链接
+		links.PUT("/:link_uuid/status", linkFriendHandler.UpdateStatus)   // 更新友情链接状态
 		links.PUT("/:link_uuid/fail", linkFriendHandler.UpdateFailStatus) // 更新友情链接失效状态
 	}
 }
@@ -52,11 +43,11 @@ func (r *Route) registerLinkGroupAdminRouter(admin *gin.RouterGroup) {
 	groups := admin.Group("/groups")
 	{
 		// 这些路由需要等handler实现后再添加
-		groups.POST("", nil)             // 添加友链分组
-		groups.GET("", nil)              // 获取友链分组分页列表
-		groups.GET("/all", nil)          // 获取所有友链分组（用于下拉选择）
-		groups.GET("/:group_uuid", nil)  // 获取友链分组详情
-		groups.PUT("/:group_uuid", nil)  // 更新友链分组
+		groups.POST("", nil)               // 添加友链分组
+		groups.GET("", nil)                // 获取友链分组分页列表
+		groups.GET("/all", nil)            // 获取所有友链分组（用于下拉选择）
+		groups.GET("/:group_uuid", nil)    // 获取友链分组详情
+		groups.PUT("/:group_uuid", nil)    // 更新友链分组
 		groups.DELETE("/:group_uuid", nil) // 删除友链分组
 	}
 }
@@ -67,11 +58,11 @@ func (r *Route) registerLinkColorAdminRouter(admin *gin.RouterGroup) {
 	colors := admin.Group("/colors")
 	{
 		// 这些路由需要等handler实现后再添加
-		colors.POST("", nil)             // 添加友链颜色
-		colors.GET("", nil)              // 获取友链颜色分页列表
-		colors.GET("/all", nil)          // 获取所有友链颜色（用于下拉选择）
-		colors.GET("/:color_uuid", nil)  // 获取友链颜色详情
-		colors.PUT("/:color_uuid", nil)  // 更新友链颜色
+		colors.POST("", nil)               // 添加友链颜色
+		colors.GET("", nil)                // 获取友链颜色分页列表
+		colors.GET("/all", nil)            // 获取所有友链颜色（用于下拉选择）
+		colors.GET("/:color_uuid", nil)    // 获取友链颜色详情
+		colors.PUT("/:color_uuid", nil)    // 更新友链颜色
 		colors.DELETE("/:color_uuid", nil) // 删除友链颜色
 	}
 }
@@ -82,12 +73,12 @@ func (r *Route) registerSystemUserAdminRouter(admin *gin.RouterGroup) {
 	users := admin.Group("/users")
 	{
 		// 这些路由需要等handler实现后再添加
-		users.POST("", nil)             // 添加系统用户
-		users.GET("", nil)              // 获取系统用户分页列表
-		users.GET("/:user_uuid", nil)   // 获取系统用户详情
-		users.PUT("/:user_uuid", nil)   // 更新系统用户
-		users.DELETE("/:user_uuid", nil) // 删除系统用户
-		users.PUT("/:user_uuid/status", nil) // 更新用户状态
+		users.POST("", nil)                           // 添加系统用户
+		users.GET("", nil)                            // 获取系统用户分页列表
+		users.GET("/:user_uuid", nil)                 // 获取系统用户详情
+		users.PUT("/:user_uuid", nil)                 // 更新系统用户
+		users.DELETE("/:user_uuid", nil)              // 删除系统用户
+		users.PUT("/:user_uuid/status", nil)          // 更新用户状态
 		users.POST("/:user_uuid/password/reset", nil) // 重置用户密码
 	}
 }
@@ -98,9 +89,9 @@ func (r *Route) registerSystemLogRouter(admin *gin.RouterGroup) {
 	logs := admin.Group("/logs")
 	{
 		// 这些路由需要等handler实现后再添加
-		logs.GET("", nil)             // 获取系统日志分页列表
-		logs.GET("/:log_uuid", nil)   // 获取系统日志详情
+		logs.GET("", nil)              // 获取系统日志分页列表
+		logs.GET("/:log_uuid", nil)    // 获取系统日志详情
 		logs.DELETE("/:log_uuid", nil) // 删除系统日志
-		logs.POST("/cleanup", nil)    // 清理旧日志
+		logs.POST("/cleanup", nil)     // 清理旧日志
 	}
 }

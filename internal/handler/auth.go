@@ -5,7 +5,6 @@ import (
 	"bamboo-main/internal/middleware"
 	"bamboo-main/internal/model/request"
 	"bamboo-main/internal/service"
-	"bamboo-main/pkg/startup"
 	xResult "github.com/bamboo-services/bamboo-base-go/result"
 	xValid "github.com/bamboo-services/bamboo-base-go/validator"
 	"github.com/gin-gonic/gin"
@@ -17,9 +16,9 @@ type AuthHandler struct {
 }
 
 // NewAuthHandler 创建认证处理器
-func NewAuthHandler(reg *startup.Reg) *AuthHandler {
+func NewAuthHandler() *AuthHandler {
 	return &AuthHandler{
-		authService: service.NewAuthService(reg),
+		authService: service.NewAuthService(),
 	}
 }
 

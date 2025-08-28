@@ -11,6 +11,14 @@ import (
 	"gorm.io/gorm/schema"
 )
 
+var mergeEntities = []interface{}{
+	&entity.SystemUser{},
+	&entity.LinkGroup{},
+	&entity.LinkColor{},
+	&entity.LinkFriend{},
+	&entity.SystemLog{},
+}
+
 // DatabaseInit 初始化数据库连接并执行自动迁移。
 //
 // 此方法基于配置文件中的数据库设置建立PostgreSQL连接，并自动创建或更新表结构。
@@ -49,13 +57,7 @@ func (r *Reg) DatabaseInit() {
 	}
 
 	// 自动迁移数据库表
-	err = db.AutoMigrate(
-		&entity.SystemUser{},
-		&entity.LinkGroup{},
-		&entity.LinkColor{},
-		&entity.LinkFriend{},
-		&entity.SystemLog{},
-	)
+	err = db.AutoMigrate(mergeEntities...)
 	if err != nil {
 		panic("[Database] 数据库迁移失败: " + err.Error())
 	}

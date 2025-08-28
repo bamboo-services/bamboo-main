@@ -2,7 +2,6 @@ package handler
 
 import (
 	"bamboo-main/internal/model/request"
-	"bamboo-main/pkg/startup"
 	"bamboo-main/internal/service"
 	xResult "github.com/bamboo-services/bamboo-base-go/result"
 	xValid "github.com/bamboo-services/bamboo-base-go/validator"
@@ -15,9 +14,9 @@ type LinkFriendHandler struct {
 }
 
 // NewLinkFriendHandler 创建友情链接处理器
-func NewLinkFriendHandler(reg *startup.Reg) *LinkFriendHandler {
+func NewLinkFriendHandler() *LinkFriendHandler {
 	return &LinkFriendHandler{
-		linkFriendService: service.NewLinkFriendService(reg),
+		linkFriendService: service.NewLinkFriendService(),
 	}
 }
 

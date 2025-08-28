@@ -18,7 +18,7 @@ func (r *Route) PublicRouter() {
 		public.GET("/ping", r.ping)
 
 		// 公开的友情链接接口
-		linkFriendHandler := handler.NewLinkFriendHandler(r.reg)
+		linkFriendHandler := handler.NewLinkFriendHandler()
 		public.GET("/links", linkFriendHandler.GetPublicLinks)
 		public.GET("/links/group/:group_uuid", linkFriendHandler.GetPublicLinks) // 按分组获取
 	}
