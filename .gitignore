@@ -1,0 +1,59 @@
+### System Files ###
+.DS_Store
+Thumbs.db
+ehthumbs.db
+*.swp
+*.orig
+
+### IDE ###
+.idea/
+.vscode/
+.settings/
+.buildpath
+.project
+.claude/
+
+### Go Build ###
+# Executable files
+bamboo-main
+main
+main.exe
+build_*
+*.pid
+
+# Go test files
+test*
+
+# Dependencies
+vendor/
+
+### Logs ###
+logs/
+*.log
+
+### Configuration ###
+**/config/config.yaml
+configs/config.yaml
+temp.yaml
+
+### Documentation ###
+swagger.*
+docs/docs.go
+docs/swagger.json
+docs/swagger.yaml
+
+### Temporary Files ###
+temp/
+output/
+manifest/output/
+bin/
+gf
+
+### Development ###
+debug.*
+diff.txt
+.mcp.json
+
+### Project Specific ###
+demo/
+old/
