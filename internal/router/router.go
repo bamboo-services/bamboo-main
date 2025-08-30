@@ -1,8 +1,20 @@
+/*
+ * --------------------------------------------------------------------------------
+ * Copyright (c) 2016-NOW(至今) 筱锋
+ * Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
+ * --------------------------------------------------------------------------------
+ * 许可证声明：版权所有 (c) 2016-2025 筱锋。保留所有权利。
+ * 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+ * https://opensource.org/licenses/MIT
+ * --------------------------------------------------------------------------------
+ */
+
 package router
 
 import (
 	"bamboo-main/internal/model/base"
 
+	xMiddle "github.com/bamboo-services/bamboo-base-go/middleware"
 	xRoute "github.com/bamboo-services/bamboo-base-go/route"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -30,16 +42,16 @@ func Init(engine *gin.Engine, config *base.BambooConfig) {
 
 	// 创建路由组
 	getGroup := engine.Group("/api/v1")
-	// TODO: 添加中间件支持
+	getGroup.Use(xMiddle.ResponseMiddleware)
 
 	// 初始化路由表
 	route := New(getGroup)
 
 	// 注册路由
-	route.PublicRouter()   // 纯公开接口 (health, ping)
-	route.CommonRouter()   // 业务接口但无需认证 (links)
-	route.AuthRouter()     // 认证相关
-	route.AdminRouter()    // 管理员专用
+	route.PublicRouter() // 纯公开接口 (health, ping)
+	route.CommonRouter() // 业务接口但无需认证 (links)
+	route.AuthRouter()   // 认证相关
+	route.AdminRouter()  // 管理员专用
 
 	// 未匹配路由处理
 	engine.NoRoute(xRoute.NoRoute)
