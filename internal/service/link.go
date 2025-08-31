@@ -33,7 +33,7 @@ type ILinkService interface {
 	GetPublicLinks(ctx *gin.Context, groupUUID string) ([]dto.LinkFriendDTO, *xError.Error)
 }
 
-// NewLinkService 创建友情链接服务实例，返回Logic实现
-func NewLinkService() *logic.LinkLogic {
+// NewLinkService 创建友情链接服务实例
+func NewLinkService() ILinkService {
 	return &logic.LinkLogic{}
 }

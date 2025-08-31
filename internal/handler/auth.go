@@ -25,7 +25,7 @@ import (
 
 // AuthHandler 认证处理器
 type AuthHandler struct {
-	authService *service.AuthService
+	authService service.IAuthService
 }
 
 // NewAuthHandler 创建认证处理器
@@ -37,12 +37,12 @@ func NewAuthHandler() *AuthHandler {
 
 // Login 用户登录
 // @Summary 用户登录
-// @Description 管理员用户登录
+// @Description 管理员用户登录，返回用户信息、访问令牌及Token时间信息
 // @Tags 认证管理
 // @Accept json
 // @Produce json
 // @Param request body request.AuthLoginReq true "登录请求"
-// @Success 200 {object} response.AuthLoginResponse "登录成功"
+// @Success 200 {object} response.AuthLoginResponse "登录成功，包含用户信息、Token及时间信息"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "认证失败"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
@@ -58,7 +58,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	// 调用服务层
-	user, token, err := h.authService.Login(c, &req)
+	user, token, createdAt, expiredAt, err := h.authService.Login(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -66,8 +66,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	// 返回成功响应
 	resp := response.AuthLoginResponse{
-		User:  *user,
-		Token: token,
+		User:      *user,
+		Token:     token,
+		CreatedAt: *createdAt,
+		ExpiredAt: *expiredAt,
 	}
 	xResult.SuccessHasData(c, "登录成功", resp)
 }

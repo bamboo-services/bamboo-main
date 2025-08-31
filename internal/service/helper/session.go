@@ -9,24 +9,25 @@
  * --------------------------------------------------------------------------------
  */
 
-package middleware
+package servHelper
 
 import (
+	logcHelper "bamboo-main/internal/logic/helper"
 	"bamboo-main/internal/model/entity"
-	servHelper "bamboo-main/internal/service/helper"
 
 	"github.com/gin-gonic/gin"
 )
 
-// sessionService 全局会话服务实例
-var sessionService = servHelper.NewSessionService()
+// ISessionService 会话管理服务接口
+type ISessionService interface {
+	// CreateUserSession 创建用户会话
+	CreateUserSession(c *gin.Context, user *entity.SystemUser, token string) error
 
-// CreateUserSession 创建用户会话（中间件层包装）
-func CreateUserSession(c *gin.Context, user *entity.SystemUser, token string) error {
-	return sessionService.CreateUserSession(c, user, token)
+	// DeleteUserSession 删除用户会话
+	DeleteUserSession(c *gin.Context, token string) error
 }
 
-// DeleteUserSession 删除用户会话（中间件层包装）
-func DeleteUserSession(c *gin.Context, token string) error {
-	return sessionService.DeleteUserSession(c, token)
+// NewSessionService 创建会话管理服务实例
+func NewSessionService() ISessionService {
+	return &logcHelper.SessionLogic{}
 }

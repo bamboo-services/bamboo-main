@@ -13,12 +13,15 @@ package response
 
 import (
 	"bamboo-main/internal/model/dto"
+	"time"
 )
 
 // AuthLoginResponse 用户登录响应
 type AuthLoginResponse struct {
-	User  dto.SystemUserDetailDTO `json:"user"`  // 用户信息
-	Token string                  `json:"token"` // 访问令牌
+	User      dto.SystemUserDetailDTO `json:"user"`       // 用户信息
+	Token     string                  `json:"token"`      // 访问令牌
+	CreatedAt time.Time               `json:"created_at"` // Token创建时间
+	ExpiredAt time.Time               `json:"expired_at"` // Token过期时间
 }
 
 // AuthUserInfoResponse 用户信息响应

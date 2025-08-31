@@ -25,7 +25,7 @@ type IPublicService interface {
 	Ping(ctx *gin.Context) (*response.PingResponse, *xError.Error)
 }
 
-// NewPublicService 创建公开接口服务实例，返回Logic实现
-func NewPublicService() *logic.PublicLogic {
+// NewPublicService 创建公开接口服务实例
+func NewPublicService() IPublicService {
 	return &logic.PublicLogic{}
 }
