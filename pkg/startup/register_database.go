@@ -28,6 +28,7 @@ var mergeEntities = []interface{}{
 	&entity.LinkColor{},
 	&entity.LinkFriend{},
 	&entity.SystemLog{},
+	&entity.System{},
 }
 
 // DatabaseInit 初始化数据库连接并执行自动迁移。

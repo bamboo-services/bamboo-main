@@ -88,7 +88,6 @@ func (h *AuthHandler) Login(c *gin.Context) {
 func (h *AuthHandler) Logout(c *gin.Context) {
 	token, exists := c.Get("token")
 	if !exists {
-		// 返回认证错误
 		_ = c.Error(errors.New("未找到认证令牌"))
 		return
 	}

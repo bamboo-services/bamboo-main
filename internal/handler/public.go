@@ -44,8 +44,7 @@ func (h *PublicHandler) HealthCheck(c *gin.Context) {
 	// 调用服务层
 	result, err := h.publicService.HealthCheck(c)
 	if err != nil {
-		// Logic 层返回的是 *xError.Error
-		xResult.Error(c, err.GetErrorCode(), err.GetErrorMessage(), err.GetData())
+		_ = c.Error(err)
 		return
 	}
 

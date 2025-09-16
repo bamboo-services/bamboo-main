@@ -16,7 +16,7 @@ import (
 	"fmt"
 	"time"
 
-	"bamboo-main/internal/model/dto/redis"
+	dtoRedis "bamboo-main/internal/model/dto/redis"
 	"bamboo-main/internal/model/entity"
 	"bamboo-main/pkg/constants"
 	ctxUtil "bamboo-main/pkg/util/ctx"
@@ -44,7 +44,7 @@ func (s *SessionLogic) CreateUserSession(c *gin.Context, user *entity.SystemUser
 
 	// 创建Token会话数据
 	now := time.Now()
-	tokenDTO := redis.TokenDTO{
+	tokenDTO := dtoRedis.TokenDTO{
 		UserUUID:  user.UUID.String(),
 		Username:  user.Username,
 		Email:     user.Email,

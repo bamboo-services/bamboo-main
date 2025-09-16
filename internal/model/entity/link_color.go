@@ -23,7 +23,7 @@ import (
 // 该类型包含颜色的唯一标识符、名称、颜色值等信息。
 // 同时记录该颜色的创建时间和更新时间，便于数据管理和审计。
 type LinkColor struct {
-	UUID      uuid.UUID `json:"uuid" gorm:"primaryKey;type:char(36);comment:颜色唯一标识符"`                             // UUID 使用 UUID 作为主键
+	UUID      uuid.UUID `json:"uuid" gorm:"primaryKey;type:uuid;comment:颜色唯一标识符"`                             // UUID 使用 UUID 作为主键
 	Name      string    `json:"name" gorm:"type:varchar(50);not null;comment:颜色名称"`                               // 颜色名称
 	Value     string    `json:"value" gorm:"type:varchar(7);not null;comment:颜色值（如#FF0000）"`                      // 颜色值
 	SortOrder int       `json:"sort_order" gorm:"type:int;default:0;comment:颜色排序"`                                // 颜色排序

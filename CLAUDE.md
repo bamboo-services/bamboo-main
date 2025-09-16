@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Technology Stack
 - **Web Framework**: Gin
-- **ORM**: GORM v2 
+- **ORM**: GORM v2
 - **Database**: PostgreSQL
 - **Cache**: Redis
 - **Authentication**: Custom Token + Redis Sessions
@@ -23,7 +23,7 @@ go build .                    # Build the application
 go run main.go                # Run the application (auto-creates DB tables)
 go mod tidy                   # Install/update dependencies
 
-# Development tools  
+# Development tools
 swag init -g main.go          # Generate Swagger documentation
 go test ./...                 # Run all tests
 go vet ./...                  # Static code analysis
@@ -39,7 +39,7 @@ psql -h localhost -U bamboo_main -d bamboo_main -f scripts/init_admin.sql
 The project follows a **Handler → Service → Logic → Model** layered architecture:
 
 - **Handler Layer** (`internal/handler/`): HTTP request handling and response formatting
-- **Service Layer** (`internal/service/`): Interface definitions with Logic implementations  
+- **Service Layer** (`internal/service/`): Interface definitions with Logic implementations
 - **Logic Layer** (`internal/logic/`): Core business logic and data processing
 - **Model Layer** (`internal/model/`): Data structures (Entity, DTO, Request, Response)
 
@@ -72,7 +72,7 @@ pkg/
 
 ### API Structure
 - **Base Path**: `/api/v1`
-- **Admin Routes**: `/api/v1/admin/*` (requires authentication + admin role)  
+- **Admin Routes**: `/api/v1/admin/*` (requires authentication + admin role)
 - **Auth Routes**: `/api/v1/auth/*` (login/logout/user management)
 - **Public Routes**: `/api/v1/public/*` (health checks, public content)
 
@@ -98,7 +98,7 @@ Key format: `bm:{category}:{type}:{identifier}` (defined in `pkg/constants/redis
 ### Business Domain
 Friend links management system with:
 - Link submission and approval workflow
-- Administrative review interface  
+- Administrative review interface
 - Grouping and color categorization
 - Link health monitoring (working/broken status)
 - Public display API for approved links

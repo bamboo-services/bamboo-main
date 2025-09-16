@@ -9,18 +9,18 @@
  * --------------------------------------------------------------------------------
  */
 
-package redis
+package dtoRedis
 
 import "time"
 
 // TokenDTO Token令牌数据传输对象
 type TokenDTO struct {
-	UserUUID   string    `json:"user_uuid"`   // 用户UUID
-	Username   string    `json:"username"`    // 用户名
-	Email      string    `json:"email"`       // 用户邮箱
-	Role       string    `json:"role"`        // 用户角色
-	LoginIP    string    `json:"login_ip"`    // 登录IP地址
-	UserAgent  string    `json:"user_agent"`  // 用户代理
-	CreatedAt  time.Time `json:"created_at"`  // Token创建时间
-	ExpiredAt  time.Time `json:"expired_at"`  // Token过期时间
+	UserUUID  string    `json:"user_uuid"`  // 用户UUID
+	Username  string    `json:"username"`   // 用户名
+	Email     string    `json:"email"`      // 用户邮箱
+	Role      string    `json:"role"`       // 用户角色
+	LoginIP   string    `json:"login_ip"`   // 登录IP地址
+	UserAgent string    `json:"user_agent"` // 用户代理
+	CreatedAt time.Time `json:"created_at"` // Token创建时间
+	ExpiredAt time.Time `json:"expired_at"` // Token过期时间
 }
