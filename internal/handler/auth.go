@@ -16,8 +16,8 @@ import (
 	"bamboo-main/internal/model/request"
 	"bamboo-main/internal/service"
 	ctxUtil "bamboo-main/pkg/util/ctx"
-	"errors"
 
+	xError "github.com/bamboo-services/bamboo-base-go/error"
 	xResult "github.com/bamboo-services/bamboo-base-go/result"
 	xValid "github.com/bamboo-services/bamboo-base-go/validator"
 	"github.com/gin-gonic/gin"
@@ -84,11 +84,11 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Success 200 {object} response.AuthLogoutResponse "登出成功"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/auth/logout [post]
+// @Router /api/v1/auth/logout [patch]
 func (h *AuthHandler) Logout(c *gin.Context) {
 	token, exists := c.Get("token")
 	if !exists {
-		_ = c.Error(errors.New("未找到认证令牌"))
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "未找到认证令牌", false))
 		return
 	}
 
@@ -115,14 +115,14 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/auth/user [get]
 func (h *AuthHandler) GetUserInfo(c *gin.Context) {
-	user, exists := ctxUtil.GetUserFromContext(c)
+	userUUID, exists := ctxUtil.GetUserUUID(c)
 	if !exists {
-		_ = c.Error(errors.New("用户信息获取失败"))
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
 		return
 	}
 
 	// 调用服务层
-	userInfo, err := h.authService.GetUserInfo(c, user.UserUUID)
+	userInfo, err := h.authService.GetUserInfo(c, userUUID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -145,7 +145,7 @@ func (h *AuthHandler) GetUserInfo(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证或旧密码错误"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/auth/password/change [post]
+// @Router /api/v1/auth/password/change [put]
 func (h *AuthHandler) ChangePassword(c *gin.Context) {
 	var req request.AuthPasswordChangeReq
 
@@ -156,14 +156,14 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	user, exists := ctxUtil.GetUserFromContext(c)
+	userUUID, exists := ctxUtil.GetUserUUID(c)
 	if !exists {
-		_ = c.Error(errors.New("用户信息获取失败"))
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
 		return
 	}
 
 	// 调用服务层
-	err := h.authService.ChangePassword(c, user.UserUUID, &req)
+	err := h.authService.ChangePassword(c, userUUID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -184,7 +184,7 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 404 {object} map[string]interface{} "邮箱不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/auth/password/reset [post]
+// @Router /api/v1/auth/password/reset [patch]
 func (h *AuthHandler) ResetPassword(c *gin.Context) {
 	var req request.AuthPasswordResetReq
 

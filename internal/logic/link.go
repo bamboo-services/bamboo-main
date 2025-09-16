@@ -219,7 +219,7 @@ func (l *LinkLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*ba
 	}
 
 	sortOrder := "DESC"
-	if req.SortOrder != "" && req.SortOrder == "asc" {
+	if req.SortOrder == "asc" {
 		sortOrder = "ASC"
 	}
 
@@ -229,7 +229,7 @@ func (l *LinkLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*ba
 	var total int64
 	err := query.Count(&total).Error
 	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "统计友情链接数量失败", false, err)
+		return nil, xError.NewError(ctx, xError.DatabaseError, "统计友情链接数量失败", true, err)
 	}
 
 	// 分页查询

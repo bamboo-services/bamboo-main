@@ -12,24 +12,41 @@
 package middleware
 
 import (
-	"net/http"
-
+	"bamboo-main/internal/model/entity"
 	ctxUtil "bamboo-main/pkg/util/ctx"
+	"errors"
 
+	xError "github.com/bamboo-services/bamboo-base-go/error"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // RequireRole 要求特定角色的中间件
 func RequireRole(roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		user, exists := ctxUtil.GetUserFromContext(c)
+		// 获取用户UUID
+		userUUID, exists := ctxUtil.GetUserUUID(c)
 		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":    401,
-				"message": "未认证的用户",
-				"data":    nil,
-			})
-			c.Abort()
+			_ = c.Error(xError.NewError(c, xError.Unauthorized, "未认证的用户", false))
+			return
+		}
+
+		// 从数据库获取用户信息
+		db := xCtxUtil.GetDB(c)
+		if db == nil {
+			_ = c.Error(xError.NewError(c, xError.DatabaseError, "数据库连接异常", false))
+			return
+		}
+
+		var user entity.SystemUser
+		err := db.Where("uuid = ? AND status = ?", userUUID, 1).First(&user).Error
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				_ = c.Error(xError.NewError(c, xError.NotFound, "用户不存在或已被禁用", false))
+			} else {
+				_ = c.Error(xError.NewError(c, xError.DatabaseError, "用户信息查询失败", false))
+			}
 			return
 		}
 
@@ -43,12 +60,7 @@ func RequireRole(roles ...string) gin.HandlerFunc {
 		}
 
 		if !hasRole {
-			c.JSON(http.StatusForbidden, gin.H{
-				"code":    403,
-				"message": "权限不足",
-				"data":    nil,
-			})
-			c.Abort()
+			_ = c.Error(xError.NewError(c, xError.PermissionDenied, "权限不足", false))
 			return
 		}
 

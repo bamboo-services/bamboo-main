@@ -92,7 +92,6 @@ func AuthMiddleware(c *gin.Context) {
 	}
 
 	// 将用户信息存储到上下文中
-	c.Set(constants.ContextKeyUser, session)
 	c.Set(constants.ContextKeyUserID, session.UserUUID)
 	c.Set(constants.ContextKeyToken, token)
 
