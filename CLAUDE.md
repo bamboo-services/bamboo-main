@@ -77,14 +77,27 @@ pkg/
 - **Public Routes**: `/api/v1/public/*` (health checks, public content)
 
 ### Database Design
-- **Primary Keys**: All entities use `uuid.UUID`
+- **Primary Keys**: All entities use PostgreSQL native `uuid` type (not char(36))
 - **GORM v2**: PostgreSQL driver with auto-migration
 - **Soft Deletes**: Built-in GORM soft delete support
 - **Relations**: Foreign keys use `*uuid.UUID` for optional relationships
+- **System Config**: `entity.System` provides key-value configuration storage
+
+### Authentication Architecture
+- **Token Storage**: `dtoRedis.TokenDTO` in Redis with 24h expiration
+- **Context Flow**: Middleware validates token → stores UserUUID → handlers query DB
+- **Real-time Security**: User status changes (disabled/role changes) take effect immediately
+- **Context Access**: Use `ctxUtil.GetUserUUID(c)` to get authenticated user UUID
+
+### Error Handling Standards
+- **Handler Layer**: Use `xError.NewError()` for structured errors, never `errors.New()`
+- **Error Transmission**: Pass errors via `_ = c.Error(err)` with `*xError.Error` type
+- **Success Responses**: Use `xResult.Success()` or `xResult.SuccessHasData()` only
+- **Error Codes**: Use predefined ErrorCode constants from bamboo-base-go
 
 ### Redis Patterns
 Key format: `bm:{category}:{type}:{identifier}` (defined in `pkg/constants/redis.go`)
-- Authentication: `bm:auth:token:{token}`, `bm:auth:user:{uuid}`
+- Authentication: `bm:auth:token:{token}`
 - Caching: `bm:link:cache:{uuid}`, `bm:group:cache:{uuid}`
 
 ### Environment Setup
@@ -92,7 +105,7 @@ Key format: `bm:{category}:{type}:{identifier}` (defined in `pkg/constants/redis
 - **Database**: PostgreSQL 12+
 - **Cache**: Redis 6+
 - **Default Port**: 23333
-- **Admin Account**: `admin` / `admin123456`
+- **Admin Account**: `xiao_lfeng` / `xiao_lfeng` (auto-created via system config)
 - **Config**: `configs/config.yaml`
 
 ### Business Domain

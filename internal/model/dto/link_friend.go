@@ -72,41 +72,11 @@ type LinkFriendDetailDTO struct {
 // LinkFriendDTO 兼容性DTO，保持向后兼容
 type LinkFriendDTO = LinkFriendDetailDTO
 
-// LinkGroupSimpleDTO 友链分组简单DTO - 用于列表查询
+// LinkGroupSimpleDTO 友链分组简单DTO - 用于在LinkFriend中引用
 type LinkGroupSimpleDTO struct {
 	UUID string `json:"uuid"` // 分组主键
 	Name string `json:"name"` // 分组名称
 }
-
-// LinkGroupNormalDTO 友链分组标准DTO - 用于分页查询
-type LinkGroupNormalDTO struct {
-	UUID        string    `json:"uuid"`        // 分组主键
-	Name        string    `json:"name"`        // 分组名称
-	Description string    `json:"description"` // 分组描述
-	SortOrder   int       `json:"sort_order"`  // 排序
-	Status      int       `json:"status"`      // 状态
-	LinkCount   int       `json:"link_count"`  // 友链数量
-	CreatedAt   time.Time `json:"created_at"`  // 创建时间
-	UpdatedAt   time.Time `json:"updated_at"`  // 更新时间
-}
-
-// LinkGroupDetailDTO 友链分组详细DTO - 用于详情查询
-type LinkGroupDetailDTO struct {
-	UUID        string    `json:"uuid"`        // 分组主键
-	Name        string    `json:"name"`        // 分组名称
-	Description string    `json:"description"` // 分组描述
-	SortOrder   int       `json:"sort_order"`  // 排序
-	Status      int       `json:"status"`      // 状态
-	LinkCount   int       `json:"link_count"`  // 友链数量
-	CreatedAt   time.Time `json:"created_at"`  // 创建时间
-	UpdatedAt   time.Time `json:"updated_at"`  // 更新时间
-
-	// 关联信息
-	Links []LinkFriendSimpleDTO `json:"links,omitempty"` // 分组下的友链列表（可选）
-}
-
-// LinkGroupDTO 兼容性DTO，保持向后兼容
-type LinkGroupDTO = LinkGroupDetailDTO
 
 // LinkColorSimpleDTO 友链颜色简单DTO - 用于列表查询
 type LinkColorSimpleDTO struct {

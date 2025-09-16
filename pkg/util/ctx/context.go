@@ -23,7 +23,7 @@ import (
 // GetConfig 从 Gin 的上下文中获取 `BambooConfig` 配置实例。
 //
 // 如果上下文中存在对应配置，则返回其指针；如果不存在，则返回 `nil`。
-// 
+//
 // 注意: 这是项目特定的配置获取函数，与 bamboo-base-go 的 GetConfig 不同
 //
 // 参数说明:

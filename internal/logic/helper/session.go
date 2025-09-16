@@ -20,7 +20,7 @@ import (
 	"bamboo-main/internal/model/entity"
 	"bamboo-main/pkg/constants"
 	ctxUtil "bamboo-main/pkg/util/ctx"
-	"bamboo-main/pkg/util/network"
+	"bamboo-main/pkg/util/netUtil"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,7 +37,7 @@ func (s *SessionLogic) CreateUserSession(c *gin.Context, user *entity.SystemUser
 	}
 
 	// 获取客户端真实IP地址
-	clientIP := network.GetRealClientIP(c)
+	clientIP := netUtil.GetClientIP(c)
 
 	// 获取用户代理
 	userAgent := c.GetHeader("User-Agent")

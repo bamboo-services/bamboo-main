@@ -25,15 +25,15 @@ import (
 //
 // 注意: 友情链接通过外键关联到分组和颜色表。
 type LinkFriend struct {
-	UUID         uuid.UUID  `json:"uuid" gorm:"primaryKey;type:uuid;comment:友链唯一标识符"`                             // UUID 使用 UUID 作为主键
+	UUID         uuid.UUID  `json:"uuid" gorm:"primaryKey;type:uuid;comment:友链唯一标识符"`                                 // UUID 使用 UUID 作为主键
 	Name         string     `json:"name" gorm:"type:varchar(100);not null;comment:友链名称"`                              // 友链名称
 	URL          string     `json:"url" gorm:"type:varchar(500);not null;comment:友链URL地址"`                            // 友链URL地址
 	Avatar       *string    `json:"avatar" gorm:"type:varchar(500);comment:友链头像URL"`                                  // 友链头像URL
 	RSS          *string    `json:"rss" gorm:"type:varchar(500);comment:友链RSS地址"`                                     // 友链RSS地址
 	Description  *string    `json:"description" gorm:"type:text;comment:友链描述"`                                        // 友链描述
 	Email        *string    `json:"email" gorm:"type:varchar(100);comment:友链联系邮箱"`                                    // 友链联系邮箱
-	GroupUUID    *uuid.UUID `json:"group_uuid" gorm:"type:uuid;comment:所属分组UUID"`                                 // 所属分组UUID
-	ColorUUID    *uuid.UUID `json:"color_uuid" gorm:"type:uuid;comment:友链颜色UUID"`                                 // 友链颜色UUID
+	GroupUUID    *uuid.UUID `json:"group_uuid" gorm:"type:uuid;comment:所属分组UUID"`                                     // 所属分组UUID
+	ColorUUID    *uuid.UUID `json:"color_uuid" gorm:"type:uuid;comment:友链颜色UUID"`                                     // 友链颜色UUID
 	SortOrder    int        `json:"sort_order" gorm:"type:int;default:0;comment:友链排序"`                                // 友链排序
 	Status       int        `json:"status" gorm:"type:int;default:0;comment:友链状态（0: 待审核, 1: 已通过, 2: 已拒绝）"`            // 友链状态
 	IsFailure    int        `json:"is_failure" gorm:"type:int;default:0;comment:友链失效标志（0: 正常, 1: 失效）"`                // 友链失效标志

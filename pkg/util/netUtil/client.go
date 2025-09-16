@@ -9,7 +9,7 @@
  * --------------------------------------------------------------------------------
  */
 
-package network
+package netUtil
 
 import (
 	"net"
@@ -19,8 +19,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetRealClientIP 获取客户端真实IP地址
-func GetRealClientIP(c *gin.Context) string {
+// GetClientIP 获取客户端真实IP地址
+func GetClientIP(c *gin.Context) string {
 	// 按优先级检查各种可能的IP头部
 	headers := []string{
 		"X-Original-Forwarded-For",

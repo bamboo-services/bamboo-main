@@ -50,16 +50,17 @@ func (r *Route) registerLinkAdminRouter(admin *gin.RouterGroup) {
 
 // registerLinkGroupAdminRouter 注册友链分组管理路由
 func (r *Route) registerLinkGroupAdminRouter(admin *gin.RouterGroup) {
-	// TODO: 创建 LinkGroupHandler
+	groupHandler := handler.NewLinkGroupHandler()
 	groups := admin.Group("/groups")
 	{
-		// 这些路由需要等handler实现后再添加
-		groups.POST("", nil)               // 添加友链分组
-		groups.GET("", nil)                // 获取友链分组分页列表
-		groups.GET("/all", nil)            // 获取所有友链分组（用于下拉选择）
-		groups.GET("/:group_uuid", nil)    // 获取友链分组详情
-		groups.PUT("/:group_uuid", nil)    // 更新友链分组
-		groups.DELETE("/:group_uuid", nil) // 删除友链分组
+		groups.POST("", groupHandler.Add)                              // 添加友链分组
+		groups.GET("", groupHandler.GetPage)                           // 获取友链分组分页列表
+		groups.GET("/all", groupHandler.GetList)                       // 获取所有友链分组（用于下拉选择）
+		groups.PATCH("/sort", groupHandler.UpdateSort)                 // 批量更新分组排序
+		groups.GET("/:group_uuid", groupHandler.Get)                   // 获取友链分组详情
+		groups.PUT("/:group_uuid", groupHandler.Update)                // 更新友链分组
+		groups.PATCH("/:group_uuid/status", groupHandler.UpdateStatus) // 更新友链分组状态
+		groups.DELETE("/:group_uuid", groupHandler.Delete)             // 删除友链分组
 	}
 }
 
