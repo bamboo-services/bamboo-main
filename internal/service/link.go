@@ -23,14 +23,14 @@ import (
 
 // ILinkService 友情链接服务接口
 type ILinkService interface {
-	Add(ctx *gin.Context, req *request.LinkFriendAddReq) (*dto.LinkFriendDTO, *xError.Error)
-	Update(ctx *gin.Context, linkIDStr string, req *request.LinkFriendUpdateReq) (*dto.LinkFriendDTO, *xError.Error)
+	Add(ctx *gin.Context, req *request.LinkFriendAddReq) (*dto.LinkFriendDetailDTO, *xError.Error)
+	Update(ctx *gin.Context, linkIDStr string, req *request.LinkFriendUpdateReq) (*dto.LinkFriendDetailDTO, *xError.Error)
 	Delete(ctx *gin.Context, linkIDStr string) *xError.Error
-	Get(ctx *gin.Context, linkIDStr string) (*dto.LinkFriendDTO, *xError.Error)
-	List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*base.PaginationResponse[dto.LinkFriendDTO], *xError.Error)
+	Get(ctx *gin.Context, linkIDStr string) (*dto.LinkFriendDetailDTO, *xError.Error)
+	List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*base.PaginationResponse[dto.LinkFriendDetailDTO], *xError.Error)
 	UpdateStatus(ctx *gin.Context, linkIDStr string, req *request.LinkFriendStatusReq) *xError.Error
 	UpdateFailStatus(ctx *gin.Context, linkIDStr string, req *request.LinkFriendFailReq) *xError.Error
-	GetPublicLinks(ctx *gin.Context, groupIDStr string) ([]dto.LinkFriendDTO, *xError.Error)
+	GetPublicLinks(ctx *gin.Context, groupIDStr string) ([]dto.LinkFriendDetailDTO, *xError.Error)
 }
 
 // NewLinkService 创建友情链接服务实例

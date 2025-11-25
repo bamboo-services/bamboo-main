@@ -47,20 +47,20 @@ type LinkFriendDetailDTO struct {
 	ID           int64     `json:"id"`            // 友链主键
 	Name         string    `json:"name"`          // 友链名称
 	URL          string    `json:"url"`           // 友链地址
-	Avatar       string    `json:"avatar"`        // 友链头像
-	RSS          string    `json:"rss"`           // RSS地址
-	Description  string    `json:"description"`   // 友链描述
-	Email        string    `json:"email"`         // 联系邮箱
-	GroupID      int64     `json:"group_id"`      // 所属分组ID
-	ColorID      int64     `json:"color_id"`      // 颜色ID
+	Avatar       *string   `json:"avatar"`        // 友链头像
+	RSS          *string   `json:"rss"`           // RSS地址
+	Description  *string   `json:"description"`   // 友链描述
+	Email        *string   `json:"email"`         // 联系邮箱
+	GroupID      *int64    `json:"group_id"`      // 所属分组ID
+	ColorID      *int64    `json:"color_id"`      // 颜色ID
 	SortOrder    int       `json:"sort_order"`    // 排序
 	Status       int       `json:"status"`        // 友链状态
 	StatusText   string    `json:"status_text"`   // 友链状态文本
 	IsFailure    int       `json:"is_failure"`    // 是否失效
 	FailureText  string    `json:"failure_text"`  // 失效状态文本
-	FailReason   string    `json:"fail_reason"`   // 失效原因
-	ApplyRemark  string    `json:"apply_remark"`  // 申请备注
-	ReviewRemark string    `json:"review_remark"` // 审核备注
+	FailReason   *string   `json:"fail_reason"`   // 失效原因
+	ApplyRemark  *string   `json:"apply_remark"`  // 申请备注
+	ReviewRemark *string   `json:"review_remark"` // 审核备注
 	CreatedAt    time.Time `json:"created_at"`    // 创建时间
 	UpdatedAt    time.Time `json:"updated_at"`    // 更新时间
 
@@ -68,6 +68,3 @@ type LinkFriendDetailDTO struct {
 	GroupInfo *LinkGroupSimpleDTO `json:"group_info,omitempty"` // 分组信息（可选）
 	ColorInfo *LinkColorSimpleDTO `json:"color_info,omitempty"` // 颜色信息（可选）
 }
-
-// LinkFriendDTO 兼容性DTO，保持向后兼容
-type LinkFriendDTO = LinkFriendDetailDTO

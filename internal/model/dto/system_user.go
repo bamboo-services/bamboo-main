@@ -41,8 +41,8 @@ type SystemUserDetailDTO struct {
 	ID          int64      `json:"id"`            // 用户主键
 	Username    string     `json:"username"`      // 用户名
 	Email       string     `json:"email"`         // 邮箱
-	Nickname    string     `json:"nickname"`      // 昵称
-	Avatar      string     `json:"avatar"`        // 头像
+	Nickname    *string    `json:"nickname"`      // 昵称
+	Avatar      *string    `json:"avatar"`        // 头像
 	Role        string     `json:"role"`          // 角色
 	Status      int        `json:"status"`        // 状态
 	EmailVerify bool       `json:"email_verify"`  // 邮箱验证状态
@@ -50,6 +50,3 @@ type SystemUserDetailDTO struct {
 	CreatedAt   time.Time  `json:"created_at"`    // 创建时间
 	UpdatedAt   time.Time  `json:"updated_at"`    // 更新时间
 }
-
-// SystemUserDTO 兼容性DTO，保持向后兼容
-type SystemUserDTO = SystemUserDetailDTO

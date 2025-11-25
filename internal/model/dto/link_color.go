@@ -48,6 +48,3 @@ type LinkColorDetailDTO struct {
 	// 关联信息
 	Links []LinkFriendSimpleDTO `json:"links,omitempty"` // 使用此颜色的友链列表（可选）
 }
-
-// LinkColorDTO 兼容性DTO，保持向后兼容
-type LinkColorDTO = LinkColorDetailDTO

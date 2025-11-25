@@ -31,7 +31,7 @@ type LinkLogic struct {
 }
 
 // Add 添加友情链接
-func (l *LinkLogic) Add(ctx *gin.Context, req *request.LinkFriendAddReq) (*dto.LinkFriendDTO, *xError.Error) {
+func (l *LinkLogic) Add(ctx *gin.Context, req *request.LinkFriendAddReq) (*dto.LinkFriendDetailDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
@@ -73,7 +73,7 @@ func (l *LinkLogic) Add(ctx *gin.Context, req *request.LinkFriendAddReq) (*dto.L
 }
 
 // Update 更新友情链接
-func (l *LinkLogic) Update(ctx *gin.Context, linkIDStr string, req *request.LinkFriendUpdateReq) (*dto.LinkFriendDTO, *xError.Error) {
+func (l *LinkLogic) Update(ctx *gin.Context, linkIDStr string, req *request.LinkFriendUpdateReq) (*dto.LinkFriendDetailDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
@@ -162,7 +162,7 @@ func (l *LinkLogic) Delete(ctx *gin.Context, linkIDStr string) *xError.Error {
 }
 
 // Get 获取友情链接详情
-func (l *LinkLogic) Get(ctx *gin.Context, linkIDStr string) (*dto.LinkFriendDTO, *xError.Error) {
+func (l *LinkLogic) Get(ctx *gin.Context, linkIDStr string) (*dto.LinkFriendDetailDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
@@ -185,7 +185,7 @@ func (l *LinkLogic) Get(ctx *gin.Context, linkIDStr string) (*dto.LinkFriendDTO,
 }
 
 // List 获取友情链接列表
-func (l *LinkLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*base.PaginationResponse[dto.LinkFriendDTO], *xError.Error) {
+func (l *LinkLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*base.PaginationResponse[dto.LinkFriendDetailDTO], *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
@@ -251,7 +251,7 @@ func (l *LinkLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*ba
 	}
 
 	// 转换为 DTO
-	var linkDTOs []dto.LinkFriendDTO
+	var linkDTOs []dto.LinkFriendDetailDTO
 	for _, link := range links {
 		linkDTOs = append(linkDTOs, *convertLinkFriendToDTO(&link))
 	}
@@ -314,7 +314,7 @@ func (l *LinkLogic) UpdateFailStatus(ctx *gin.Context, linkIDStr string, req *re
 }
 
 // GetPublicLinks 获取公开的友情链接列表
-func (l *LinkLogic) GetPublicLinks(ctx *gin.Context, groupIDStr string) ([]dto.LinkFriendDTO, *xError.Error) {
+func (l *LinkLogic) GetPublicLinks(ctx *gin.Context, groupIDStr string) ([]dto.LinkFriendDetailDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
@@ -333,7 +333,7 @@ func (l *LinkLogic) GetPublicLinks(ctx *gin.Context, groupIDStr string) ([]dto.L
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询公开友情链接失败", false, err)
 	}
 
-	var linkDTOs []dto.LinkFriendDTO
+	var linkDTOs []dto.LinkFriendDetailDTO
 	for _, link := range links {
 		linkDTOs = append(linkDTOs, *convertLinkFriendToDTO(&link))
 	}
@@ -342,29 +342,29 @@ func (l *LinkLogic) GetPublicLinks(ctx *gin.Context, groupIDStr string) ([]dto.L
 }
 
 // 辅助函数：将友链实体转换为详细DTO
-func convertLinkFriendToDTO(link *entity.LinkFriend) *dto.LinkFriendDTO {
+func convertLinkFriendToDTO(link *entity.LinkFriend) *dto.LinkFriendDetailDTO {
 	if link == nil {
 		return nil
 	}
 
-	linkDTO := &dto.LinkFriendDTO{
+	linkDTO := &dto.LinkFriendDetailDTO{
 		ID:           link.ID,
 		Name:         link.Name,
 		URL:          link.URL,
-		Avatar:       xUtil.Val(link.Avatar),
-		RSS:          xUtil.Val(link.RSS),
-		Description:  xUtil.Val(link.Description),
-		Email:        xUtil.Val(link.Email),
-		GroupID:      safeIDValue(link.GroupID),
-		ColorID:      safeIDValue(link.ColorID),
+		Avatar:       link.Avatar,      // 直接赋值指针 *string → *string
+		RSS:          link.RSS,         // 直接赋值指针 *string → *string
+		Description:  link.Description, // 直接赋值指针 *string → *string
+		Email:        link.Email,       // 直接赋值指针 *string → *string
+		GroupID:      link.GroupID,     // 直接赋值指针 *int64 → *int64
+		ColorID:      link.ColorID,     // 直接赋值指针 *int64 → *int64
 		SortOrder:    link.SortOrder,
 		Status:       link.Status,
 		StatusText:   getLinkStatusText(link.Status),
 		IsFailure:    link.IsFailure,
 		FailureText:  getLinkFailText(link.IsFailure),
-		FailReason:   xUtil.Val(link.FailReason),
-		ApplyRemark:  xUtil.Val(link.ApplyRemark),
-		ReviewRemark: xUtil.Val(link.ReviewRemark),
+		FailReason:   link.FailReason,   // 直接赋值指针 *string → *string
+		ApplyRemark:  link.ApplyRemark,  // 直接赋值指针 *string → *string
+		ReviewRemark: link.ReviewRemark, // 直接赋值指针 *string → *string
 		CreatedAt:    link.CreatedAt,
 		UpdatedAt:    link.UpdatedAt,
 	}
@@ -387,14 +387,6 @@ func convertLinkFriendToDTO(link *entity.LinkFriend) *dto.LinkFriendDTO {
 	}
 
 	return linkDTO
-}
-
-// safeIDValue 安全转换ID指针为int64
-func safeIDValue(id *int64) int64 {
-	if id == nil {
-		return 0
-	}
-	return *id
 }
 
 // getLinkStatusText 获取链接状态文本

@@ -491,7 +491,7 @@ func convertLinkGroupToDetailDTO(group *entity.LinkGroup) *dto.LinkGroupDetailDT
 	return &dto.LinkGroupDetailDTO{
 		ID:          group.ID,
 		Name:        group.Name,
-		Description: xUtil.Val(group.Description),
+		Description: group.Description, // 直接赋值指针 *string → *string
 		SortOrder:   group.SortOrder,
 		Status:      status,
 		LinkCount:   len(links),
@@ -512,7 +512,7 @@ func convertLinkGroupToNormalDTO(group *entity.LinkGroup, linkCount int64) dto.L
 	return dto.LinkGroupNormalDTO{
 		ID:          group.ID,
 		Name:        group.Name,
-		Description: xUtil.Val(group.Description),
+		Description: group.Description, // 直接赋值指针 *string → *string
 		SortOrder:   group.SortOrder,
 		Status:      status,
 		LinkCount:   int(linkCount),

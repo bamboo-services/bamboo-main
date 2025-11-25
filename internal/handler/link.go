@@ -64,7 +64,7 @@ func (h *LinkHandler) Add(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	resp := response.LinkAddResponse{LinkFriendDTO: *link}
+	resp := response.LinkAddResponse{LinkFriendDetailDTO: *link}
 	xResult.SuccessHasData(c, "友情链接添加成功", resp)
 }
 
@@ -102,7 +102,7 @@ func (h *LinkHandler) Update(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	resp := response.LinkUpdateResponse{LinkFriendDTO: *link}
+	resp := response.LinkUpdateResponse{LinkFriendDetailDTO: *link}
 	xResult.SuccessHasData(c, "友情链接更新成功", resp)
 }
 
@@ -159,7 +159,7 @@ func (h *LinkHandler) Get(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	resp := response.LinkDetailResponse{LinkFriendDTO: *link}
+	resp := response.LinkDetailResponse{LinkFriendDetailDTO: *link}
 	xResult.SuccessHasData(c, "获取成功", resp)
 }
 

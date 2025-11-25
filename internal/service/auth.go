@@ -26,10 +26,10 @@ import (
 // IAuthService 认证服务接口
 type IAuthService interface {
 	// Login 用户登录
-	Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.SystemUserDTO, string, *time.Time, *time.Time, *xError.Error)
+	Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.SystemUserDetailDTO, string, *time.Time, *time.Time, *xError.Error)
 
 	// Register 用户注册
-	Register(ctx *gin.Context, r *request.AuthRegisterReq) (*dto.SystemUserDTO, string, *time.Time, *time.Time, *xError.Error)
+	Register(ctx *gin.Context, r *request.AuthRegisterReq) (*dto.SystemUserDetailDTO, string, *time.Time, *time.Time, *xError.Error)
 
 	// Logout 用户登出
 	Logout(ctx *gin.Context, token string) *xError.Error
@@ -41,13 +41,13 @@ type IAuthService interface {
 	ResetPassword(ctx *gin.Context, req *request.AuthPasswordResetReq) *xError.Error
 
 	// GetUserInfo 获取用户信息
-	GetUserInfo(ctx *gin.Context, userID int64) (*dto.SystemUserDTO, *xError.Error)
+	GetUserInfo(ctx *gin.Context, userID int64) (*dto.SystemUserDetailDTO, *xError.Error)
 
 	// UpdateLastLogin 更新最后登录时间
 	UpdateLastLogin(ctx *gin.Context, userID int64) *xError.Error
 
 	// ValidateToken 验证令牌
-	ValidateToken(ctx *gin.Context, token string) (*dto.SystemUserDTO, *xError.Error)
+	ValidateToken(ctx *gin.Context, token string) (*dto.SystemUserDetailDTO, *xError.Error)
 }
 
 // NewAuthService 创建认证服务实例

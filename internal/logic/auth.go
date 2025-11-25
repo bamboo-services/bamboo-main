@@ -35,7 +35,7 @@ type AuthLogic struct {
 }
 
 // Login 用户登录
-func (a *AuthLogic) Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.SystemUserDTO, string, *time.Time, *time.Time, *xError.Error) {
+func (a *AuthLogic) Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.SystemUserDetailDTO, string, *time.Time, *time.Time, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
@@ -79,12 +79,12 @@ func (a *AuthLogic) Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.Sys
 		xCtxUtil.GetSugarLogger(ctx, "").Errorf("更新最后登录时间失败: %v", err)
 	}
 
-	userDTO := &dto.SystemUserDTO{
+	userDTO := &dto.SystemUserDetailDTO{
 		ID:          user.ID,
 		Username:    user.Username,
 		Email:       user.Email,
-		Nickname:    xUtil.Val(user.Nickname),
-		Avatar:      xUtil.Val(user.Avatar),
+		Nickname:    user.Nickname, // 直接赋值指针 *string → *string
+		Avatar:      user.Avatar,   // 直接赋值指针 *string → *string
 		Role:        user.Role,
 		Status:      user.Status,
 		LastLoginAt: user.LastLoginAt,
@@ -95,7 +95,7 @@ func (a *AuthLogic) Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.Sys
 }
 
 // Register 用户注册
-func (a *AuthLogic) Register(ctx *gin.Context, req *request.AuthRegisterReq) (*dto.SystemUserDTO, string, *time.Time, *time.Time, *xError.Error) {
+func (a *AuthLogic) Register(ctx *gin.Context, req *request.AuthRegisterReq) (*dto.SystemUserDetailDTO, string, *time.Time, *time.Time, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
@@ -167,12 +167,12 @@ func (a *AuthLogic) Register(ctx *gin.Context, req *request.AuthRegisterReq) (*d
 	xCtxUtil.GetSugarLogger(ctx, "").Infof("用户 %s 注册成功，邮箱 %s 待验证", newUser.Username, newUser.Email)
 
 	// 10. 构建返回 DTO（注册不更新 last_login_at）
-	userDTO := &dto.SystemUserDTO{
+	userDTO := &dto.SystemUserDetailDTO{
 		ID:          newUser.ID,
 		Username:    newUser.Username,
 		Email:       newUser.Email,
-		Nickname:    xUtil.Val(newUser.Nickname),
-		Avatar:      xUtil.Val(newUser.Avatar),
+		Nickname:    newUser.Nickname, // 直接赋值指针 *string → *string
+		Avatar:      newUser.Avatar,   // 直接赋值指针 *string → *string
 		Role:        newUser.Role,
 		Status:      newUser.Status,
 		EmailVerify: newUser.EmailVerify,
@@ -265,7 +265,7 @@ func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *request.AuthPasswordRes
 }
 
 // GetUserInfo 获取用户信息
-func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID int64) (*dto.SystemUserDTO, *xError.Error) {
+func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID int64) (*dto.SystemUserDetailDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
@@ -278,12 +278,12 @@ func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID int64) (*dto.SystemUser
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询用户失败", false, err)
 	}
 
-	userDTO := &dto.SystemUserDTO{
+	userDTO := &dto.SystemUserDetailDTO{
 		ID:          user.ID,
 		Username:    user.Username,
 		Email:       user.Email,
-		Nickname:    xUtil.Val(user.Nickname),
-		Avatar:      xUtil.Val(user.Avatar),
+		Nickname:    user.Nickname, // 直接赋值指针 *string → *string
+		Avatar:      user.Avatar,   // 直接赋值指针 *string → *string
 		Role:        user.Role,
 		Status:      user.Status,
 		LastLoginAt: user.LastLoginAt,
@@ -307,7 +307,7 @@ func (a *AuthLogic) UpdateLastLogin(ctx *gin.Context, userID int64) *xError.Erro
 }
 
 // ValidateToken 验证令牌
-func (a *AuthLogic) ValidateToken(ctx *gin.Context, token string) (*dto.SystemUserDTO, *xError.Error) {
+func (a *AuthLogic) ValidateToken(ctx *gin.Context, token string) (*dto.SystemUserDetailDTO, *xError.Error) {
 	// 这个方法主要通过中间件来处理，这里提供一个备用实现
 	// 实际项目中可以根据需要实现更复杂的验证逻辑
 	return nil, xError.NewError(ctx, xError.OperationNotSupported, "请通过认证中间件验证令牌", false)

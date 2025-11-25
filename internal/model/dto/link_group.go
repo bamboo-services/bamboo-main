@@ -33,7 +33,7 @@ type LinkGroupSimpleDTO struct {
 type LinkGroupNormalDTO struct {
 	ID          int64     `json:"id"`          // 分组主键
 	Name        string    `json:"name"`        // 分组名称
-	Description string    `json:"description"` // 分组描述
+	Description *string   `json:"description"` // 分组描述
 	SortOrder   int       `json:"sort_order"`  // 排序
 	Status      int       `json:"status"`      // 状态
 	LinkCount   int       `json:"link_count"`  // 友链数量
@@ -45,7 +45,7 @@ type LinkGroupNormalDTO struct {
 type LinkGroupDetailDTO struct {
 	ID          int64     `json:"id"`          // 分组主键
 	Name        string    `json:"name"`        // 分组名称
-	Description string    `json:"description"` // 分组描述
+	Description *string   `json:"description"` // 分组描述
 	SortOrder   int       `json:"sort_order"`  // 排序
 	Status      int       `json:"status"`      // 状态
 	LinkCount   int       `json:"link_count"`  // 友链数量
@@ -64,9 +64,6 @@ type LinkGroupListDTO struct {
 	Status    int    `json:"status"`     // 状态
 	LinkCount int    `json:"link_count"` // 友链数量
 }
-
-// LinkGroupDTO 兼容性DTO，保持向后兼容
-type LinkGroupDTO = LinkGroupDetailDTO
 
 // LinkGroupDeleteConflictDTO 删除冲突DTO - 用于显示冲突的友链信息
 type LinkGroupDeleteConflictDTO struct {
