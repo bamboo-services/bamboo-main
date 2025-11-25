@@ -13,7 +13,7 @@ package service
 
 import (
 	"bamboo-main/internal/logic"
-	"bamboo-main/internal/model/dto/response"
+	"bamboo-main/internal/model/response"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
 	"github.com/gin-gonic/gin"

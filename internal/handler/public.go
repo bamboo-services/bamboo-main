@@ -12,7 +12,7 @@
 package handler
 
 import (
-	"bamboo-main/internal/model/dto/response"
+	"bamboo-main/internal/model/response"
 	"bamboo-main/internal/service"
 
 	xResult "github.com/bamboo-services/bamboo-base-go/result"

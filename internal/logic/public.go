@@ -12,7 +12,7 @@
 package logic
 
 import (
-	"bamboo-main/internal/model/dto/response"
+	"bamboo-main/internal/model/response"
 	"runtime"
 	"time"
 

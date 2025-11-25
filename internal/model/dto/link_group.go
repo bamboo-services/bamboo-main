@@ -23,6 +23,12 @@ type LinkFriendBasicInfo struct {
 	Avatar string `json:"avatar"` // 友链头像
 }
 
+// LinkGroupSimpleDTO 友链分组简单DTO - 用于在LinkFriend中引用
+type LinkGroupSimpleDTO struct {
+	ID   int64  `json:"id"`   // 分组主键
+	Name string `json:"name"` // 分组名称
+}
+
 // LinkGroupNormalDTO 友链分组标准DTO - 用于分页查询
 type LinkGroupNormalDTO struct {
 	ID          int64     `json:"id"`          // 分组主键
