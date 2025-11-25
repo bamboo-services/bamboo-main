@@ -99,6 +99,14 @@ type AuthLoginReq struct {
 	Password string `json:"password" binding:"required,min=6,max=100" example:"password123"`
 }
 
+// AuthRegisterReq 注册请求
+type AuthRegisterReq struct {
+	Username string  `json:"username" binding:"required,min=1,max=50" example:"admin"`
+	Email    string  `json:"email" binding:"required,email" example:"admin@example.com"`
+	Nickname *string `json:"nickname" binding:"omitempty,min=1,max=50" example:"筱锋"`
+	Password string  `json:"password" binding:"required,min=6,max=100" example:"password123"`
+}
+
 // AuthPasswordChangeReq 修改密码请求
 type AuthPasswordChangeReq struct {
 	OldPassword string `json:"old_password" binding:"required,min=6,max=100" example:"oldpassword123"`

@@ -24,6 +24,7 @@ func (r *Route) AuthRouter() {
 	{
 		// 无需认证的路由
 		auth.POST("/login", authHandler.Login)                   // 用户登录
+		auth.POST("/register", authHandler.Register)             // 用户注册
 		auth.PATCH("/password/reset", authHandler.ResetPassword) // 重置密码
 
 		// 需要认证的路由

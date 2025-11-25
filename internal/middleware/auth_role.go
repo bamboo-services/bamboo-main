@@ -26,7 +26,7 @@ import (
 func RequireRole(roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户UUID
-		userUUID, exists := ctxUtil.GetUserID(c)
+		userID, exists := ctxUtil.GetUserID(c)
 		if !exists {
 			_ = c.Error(xError.NewError(c, xError.Unauthorized, "未认证的用户", false))
 			return
@@ -40,7 +40,7 @@ func RequireRole(roles ...string) gin.HandlerFunc {
 		}
 
 		var user entity.SystemUser
-		err := db.Where("uuid = ? AND status = ?", userUUID, 1).First(&user).Error
+		err := db.Where("id = ? AND status = ?", userID, 1).First(&user).Error
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				_ = c.Error(xError.NewError(c, xError.NotFound, "用户不存在或已被禁用", false))

@@ -139,6 +139,7 @@ type SystemUserNormalDTO struct {
 	Nickname    string     `json:"nickname"`      // 昵称
 	Role        string     `json:"role"`          // 角色
 	Status      int        `json:"status"`        // 状态
+	EmailVerify bool       `json:"email_verify"`  // 邮箱验证状态
 	LastLoginAt *time.Time `json:"last_login_at"` // 最后登录时间
 	CreatedAt   time.Time  `json:"created_at"`    // 创建时间
 	UpdatedAt   time.Time  `json:"updated_at"`    // 更新时间
@@ -153,6 +154,7 @@ type SystemUserDetailDTO struct {
 	Avatar      string     `json:"avatar"`        // 头像
 	Role        string     `json:"role"`          // ���色
 	Status      int        `json:"status"`        // 状态
+	EmailVerify bool       `json:"email_verify"`  // 邮箱验证状态
 	LastLoginAt *time.Time `json:"last_login_at"` // 最后登录时间
 	CreatedAt   time.Time  `json:"created_at"`    // 创建时间
 	UpdatedAt   time.Time  `json:"updated_at"`    // 更新时间

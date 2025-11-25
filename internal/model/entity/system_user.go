@@ -34,6 +34,7 @@ type SystemUser struct {
 	Avatar      *string    `json:"avatar" gorm:"type:varchar(500);comment:头像URL"`                                    // 头像URL
 	Role        string     `json:"role" gorm:"type:varchar(20);default:'admin';comment:角色（admin, moderator）"`        // 角色
 	Status      int        `json:"status" gorm:"type:int;default:1;comment:状态（0: 禁用, 1: 启用）"`                        // 状态
+	EmailVerify bool       `json:"email_verify" gorm:"type:boolean;default:false;comment:邮箱是否已验证"`                   // 邮箱验证状态
 	LastLoginAt *time.Time `json:"last_login_at" gorm:"type:timestamp;comment:最后登录时间"`                               // 最后登录时间
 	CreatedAt   time.Time  `json:"created_at" gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP;comment:创建时间"` // 创建时间
 	UpdatedAt   time.Time  `json:"updated_at" gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP;comment:更新时间"` // 更新时间

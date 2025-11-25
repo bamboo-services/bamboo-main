@@ -94,6 +94,96 @@ func (a *AuthLogic) Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.Sys
 	return userDTO, token, &now, &expireAt, nil
 }
 
+// Register 用户注册
+func (a *AuthLogic) Register(ctx *gin.Context, req *request.AuthRegisterReq) (*dto.SystemUserDTO, string, *time.Time, *time.Time, *xError.Error) {
+	// 获取数据库连接
+	db := xCtxUtil.GetDB(ctx)
+
+	// 1. 检查用户名是否已存在
+	var existingUser entity.SystemUser
+	err := db.WithContext(ctx.Request.Context()).Where("username = ?", req.Username).First(&existingUser).Error
+	if err == nil {
+		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterError, "用户名已存在", false)
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, "", nil, nil, xError.NewError(ctx, xError.DatabaseError, "查询用户失败", false, err)
+	}
+
+	// 2. 检查邮箱是否已存在
+	err = db.WithContext(ctx.Request.Context()).Where("email = ?", req.Email).First(&existingUser).Error
+	if err == nil {
+		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterError, "邮箱已被注册", false)
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, "", nil, nil, xError.NewError(ctx, xError.DatabaseError, "查询邮箱失败", false, err)
+	}
+
+	// 3. 加密密码
+	hashedPassword, err := xUtil.EncryptPasswordString(req.Password)
+	if err != nil {
+		return nil, "", nil, nil, xError.NewError(ctx, xError.ServerInternalError, "密码加密失败", false, err)
+	}
+
+	// 4. 构建用户实体
+	newUser := entity.SystemUser{
+		Username:    req.Username,
+		Password:    hashedPassword,
+		Email:       req.Email,
+		Nickname:    req.Nickname,
+		Role:        "user", // 新用户角色为 user
+		Status:      1,      // 默认启用
+		EmailVerify: false,  // 默认未验证邮箱
+	}
+
+	// 5. 创建用户（BeforeCreate Hook 会自动生成 ID 和时间戳）
+	err = db.WithContext(ctx.Request.Context()).Create(&newUser).Error
+	if err != nil {
+		return nil, "", nil, nil, xError.NewError(ctx, xError.DatabaseError, "创建用户失败", false, err)
+	}
+
+	// 6. 生成 Token
+	token := xUtil.GenerateSecurityKey()
+
+	// 7. 记录时间信息
+	now := time.Now()
+	expireAt := now.Add(24 * time.Hour) // 24小时过期
+
+	// 8. 创建用户会话
+	err = a.SessionService.CreateUserSession(ctx, &newUser, token)
+	if err != nil {
+		return nil, "", nil, nil, xError.NewError(ctx, xError.ServerInternalError, "创建用户会话失败", false, err)
+	}
+
+	// 9. TODO: 发送邮箱验证邮件
+	// 功能说明：
+	//   - 生成邮箱验证令牌（建议使用 JWT 或随机字符串）
+	//   - 将令牌存储到 Redis，设置过期时间（如 24 小时）
+	//   - 发送包含验证链接的邮件到用户邮箱
+	//   - 验证链接格式：https://域名/api/v1/auth/verify-email?token=xxx
+	//   - 用户点击链接后，验证 Token 并更新 email_verify 字段为 true
+	// 相关文件：
+	//   - 邮件发送服务：待实现（参考 pkg/constants/redis.go 的 EmailLimitPrefix）
+	//   - 验证接口：待添加到 router_auth.go
+	xCtxUtil.GetSugarLogger(ctx, "").Infof("用户 %s 注册成功，邮箱 %s 待验证", newUser.Username, newUser.Email)
+
+	// 10. 构建返回 DTO（注册不更新 last_login_at）
+	userDTO := &dto.SystemUserDTO{
+		ID:          newUser.ID,
+		Username:    newUser.Username,
+		Email:       newUser.Email,
+		Nickname:    xUtil.Val(newUser.Nickname),
+		Avatar:      xUtil.Val(newUser.Avatar),
+		Role:        newUser.Role,
+		Status:      newUser.Status,
+		EmailVerify: newUser.EmailVerify,
+		LastLoginAt: nil, // 注册时不设置最后登录时间
+		CreatedAt:   newUser.CreatedAt,
+		UpdatedAt:   newUser.UpdatedAt,
+	}
+
+	return userDTO, token, &now, &expireAt, nil
+}
+
 // Logout 用户登出
 func (a *AuthLogic) Logout(ctx *gin.Context, token string) *xError.Error {
 	err := a.SessionService.DeleteUserSession(ctx, token)

@@ -37,6 +37,11 @@ const (
 	LinkFailNormal = 0 // 正常
 	LinkFailBroken = 1 // 失效
 
+	// 用户角色
+	RoleAdmin     = "admin"     // 管理员
+	RoleModerator = "moderator" // 审核员
+	RoleUser      = "user"      // 普通用户
+
 	// 邮件类型
 	EmailTypeApply         = "apply"
 	EmailTypeApproved      = "approved"

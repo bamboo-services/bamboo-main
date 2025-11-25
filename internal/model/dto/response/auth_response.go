@@ -24,6 +24,14 @@ type AuthLoginResponse struct {
 	ExpiredAt time.Time               `json:"expired_at"` // Token过期时间
 }
 
+// AuthRegisterResponse 用户注册响应
+type AuthRegisterResponse struct {
+	User      dto.SystemUserDetailDTO `json:"user"`       // 用户信息
+	Token     string                  `json:"token"`      // 访问令牌
+	CreatedAt time.Time               `json:"created_at"` // Token创建时间
+	ExpiredAt time.Time               `json:"expired_at"` // Token过期时间
+}
+
 // AuthUserInfoResponse 用户信息响应
 type AuthUserInfoResponse struct {
 	dto.SystemUserDetailDTO

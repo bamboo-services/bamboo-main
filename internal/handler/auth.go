@@ -74,6 +74,44 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	xResult.SuccessHasData(c, "登录成功", resp)
 }
 
+// Register 用户注册
+// @Summary 用户注册
+// @Description 注册新用户账户，注册成功后自动登录并返回访问令牌
+// @Tags 认证管理
+// @Accept json
+// @Produce json
+// @Param request body request.AuthRegisterReq true "注册请求"
+// @Success 200 {object} response.AuthRegisterResponse "注册成功，包含用户信息、Token及时间信息"
+// @Failure 400 {object} map[string]interface{} "请求参数错误（用户名或邮箱已存在）"
+// @Failure 500 {object} map[string]interface{} "服务器内部错误"
+// @Router /api/v1/auth/register [post]
+func (h *AuthHandler) Register(c *gin.Context) {
+	var req request.AuthRegisterReq
+
+	// 绑定请求数据
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	user, token, createdAt, expiredAt, err := h.authService.Register(c, &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	resp := response.AuthRegisterResponse{
+		User:      *user,
+		Token:     token,
+		CreatedAt: *createdAt,
+		ExpiredAt: *expiredAt,
+	}
+	xResult.SuccessHasData(c, "注册成功", resp)
+}
+
 // Logout 用户登出
 // @Summary 用户登出
 // @Description 注销当前登录会话

@@ -23,7 +23,7 @@ import (
 func (r *Route) AdminRouter() {
 	admin := r.router.Group("/admin")
 	admin.Use(middleware.AuthMiddleware)
-	admin.Use(middleware.RequireRole("admin", "moderator"))
+	admin.Use(middleware.RequireRole("admin"))
 	{
 		r.registerLinkAdminRouter(admin)       // 友情链接管理路由
 		r.registerLinkGroupAdminRouter(admin)  // 友链分组管理路由

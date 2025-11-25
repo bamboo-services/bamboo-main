@@ -28,6 +28,9 @@ type IAuthService interface {
 	// Login 用户登录
 	Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.SystemUserDTO, string, *time.Time, *time.Time, *xError.Error)
 
+	// Register 用户注册
+	Register(ctx *gin.Context, r *request.AuthRegisterReq) (*dto.SystemUserDTO, string, *time.Time, *time.Time, *xError.Error)
+
 	// Logout 用户登出
 	Logout(ctx *gin.Context, token string) *xError.Error
 
