@@ -16,12 +16,12 @@ import (
 	"bamboo-main/internal/model/dto"
 	"bamboo-main/internal/model/entity"
 	"bamboo-main/internal/model/request"
+	"strconv"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
 	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -53,7 +53,7 @@ func (l *LinkGroupLogic) Add(ctx *gin.Context, req *request.LinkGroupAddReq) (*d
 	}
 
 	// 预加载关联数据并统计友链数量
-	err = db.WithContext(ctx).Preload("LinksFKey").First(group, "uuid = ?", group.UUID).Error
+	err = db.WithContext(ctx).Preload("LinksFKey").First(group, "id = ?", group.ID).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链分组失败", false, err)
 	}
@@ -61,20 +61,20 @@ func (l *LinkGroupLogic) Add(ctx *gin.Context, req *request.LinkGroupAddReq) (*d
 	return convertLinkGroupToDetailDTO(group), nil
 }
 
-// Update 更新友链分组（名称和描述）
-func (l *LinkGroupLogic) Update(ctx *gin.Context, groupUUID string, req *request.LinkGroupUpdateReq) (*dto.LinkGroupDetailDTO, *xError.Error) {
+// Update 更新友链分组(名称和描述)
+func (l *LinkGroupLogic) Update(ctx *gin.Context, groupIDStr string, req *request.LinkGroupUpdateReq) (*dto.LinkGroupDetailDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
-	// 解析UUID
-	groupID, err := uuid.Parse(groupUUID)
+	// 解析ID
+	groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
 	if err != nil {
-		return nil, xError.NewError(ctx, xError.BadRequest, "无效的分组UUID", false)
+		return nil, xError.NewError(ctx, xError.BadRequest, "无效的分组ID", false)
 	}
 
 	// 查找友链分组
 	var group entity.LinkGroup
-	err = db.WithContext(ctx).First(&group, "uuid = ?", groupID).Error
+	err = db.WithContext(ctx).First(&group, "id = ?", groupID).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
@@ -103,7 +103,7 @@ func (l *LinkGroupLogic) Update(ctx *gin.Context, groupUUID string, req *request
 	}
 
 	// 预加载关联数据
-	err = db.WithContext(ctx).Preload("LinksFKey").First(&group, "uuid = ?", group.UUID).Error
+	err = db.WithContext(ctx).Preload("LinksFKey").First(&group, "id = ?", group.ID).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链分组失败", false, err)
 	}
@@ -116,15 +116,8 @@ func (l *LinkGroupLogic) UpdateSort(ctx *gin.Context, req *request.LinkGroupSort
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
-	// 解析UUID数组
-	groupIDs := make([]uuid.UUID, len(req.GroupUUIDs))
-	for i, uuidStr := range req.GroupUUIDs {
-		groupID, err := uuid.Parse(uuidStr)
-		if err != nil {
-			return xError.NewError(ctx, xError.BadRequest, "无效的分组UUID", false)
-		}
-		groupIDs[i] = groupID
-	}
+	// 直接使用ID数组（已经是[]int64类型）
+	groupIDs := req.GroupIDs
 
 	// 开始事务
 	tx := db.WithContext(ctx).Begin()
@@ -143,7 +136,7 @@ func (l *LinkGroupLogic) UpdateSort(ctx *gin.Context, req *request.LinkGroupSort
 	// 按顺序更新每个分组的排序值
 	for i, groupID := range groupIDs {
 		result := tx.Model(&entity.LinkGroup{}).
-			Where("uuid = ?", groupID).
+			Where("id = ?", groupID).
 			Update("sort_order", startSort+i)
 
 		if result.Error != nil {
@@ -166,19 +159,19 @@ func (l *LinkGroupLogic) UpdateSort(ctx *gin.Context, req *request.LinkGroupSort
 }
 
 // UpdateStatus 更新友链分组状态
-func (l *LinkGroupLogic) UpdateStatus(ctx *gin.Context, groupUUID string, req *request.LinkGroupStatusReq) *xError.Error {
+func (l *LinkGroupLogic) UpdateStatus(ctx *gin.Context, groupIDStr string, req *request.LinkGroupStatusReq) *xError.Error {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
-	// 解析UUID
-	groupID, err := uuid.Parse(groupUUID)
+	// 解析ID
+	groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
 	if err != nil {
-		return xError.NewError(ctx, xError.BadRequest, "无效的分组UUID", false)
+		return xError.NewError(ctx, xError.BadRequest, "无效的分组ID", false)
 	}
 
 	// 更新状态
 	result := db.WithContext(ctx).Model(&entity.LinkGroup{}).
-		Where("uuid = ?", groupID).
+		Where("id = ?", groupID).
 		Update("status", req.Status)
 
 	if result.Error != nil {
@@ -193,19 +186,19 @@ func (l *LinkGroupLogic) UpdateStatus(ctx *gin.Context, groupUUID string, req *r
 }
 
 // Delete 删除友链分组
-func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupUUID string, req *request.LinkGroupDeleteReq) ([]dto.LinkGroupDeleteConflictDTO, *xError.Error) {
+func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupIDStr string, req *request.LinkGroupDeleteReq) ([]dto.LinkGroupDeleteConflictDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
-	// 解析UUID
-	groupID, err := uuid.Parse(groupUUID)
+	// 解析ID
+	groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
 	if err != nil {
-		return nil, xError.NewError(ctx, xError.BadRequest, "无效的分组UUID", false)
+		return nil, xError.NewError(ctx, xError.BadRequest, "无效的分组ID", false)
 	}
 
 	// 检查分组是否存在
 	var group entity.LinkGroup
-	err = db.WithContext(ctx).First(&group, "uuid = ?", groupID).Error
+	err = db.WithContext(ctx).First(&group, "id = ?", groupID).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
@@ -216,7 +209,7 @@ func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupUUID string, req *request
 	// 查询关联的友链
 	var linkCount int64
 	err = db.WithContext(ctx).Model(&entity.LinkFriend{}).
-		Where("group_uuid = ?", groupID).
+		Where("group_id = ?", groupID).
 		Count(&linkCount).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询关联友链失败", false, err)
@@ -226,7 +219,7 @@ func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupUUID string, req *request
 	if linkCount > 0 && !req.Force {
 		var conflictLinks []entity.LinkFriend
 		err = db.WithContext(ctx).
-			Where("group_uuid = ?", groupID).
+			Where("group_id = ?", groupID).
 			Limit(10).
 			Find(&conflictLinks).Error
 		if err != nil {
@@ -237,7 +230,7 @@ func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupUUID string, req *request
 		conflictDTOs := make([]dto.LinkGroupDeleteConflictDTO, len(conflictLinks))
 		for i, link := range conflictLinks {
 			conflictDTOs[i] = dto.LinkGroupDeleteConflictDTO{
-				UUID: link.UUID.String(),
+				ID:   link.ID,
 				Name: link.Name,
 				URL:  link.URL,
 			}
@@ -254,11 +247,11 @@ func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupUUID string, req *request
 		}
 	}()
 
-	// 如果是强制删除，先清空关联友链的group_uuid
+	// 如果是强制删除，先清空关联友链的group_id
 	if req.Force && linkCount > 0 {
 		result := tx.Model(&entity.LinkFriend{}).
-			Where("group_uuid = ?", groupID).
-			Update("group_uuid", nil)
+			Where("group_id = ?", groupID).
+			Update("group_id", nil)
 		if result.Error != nil {
 			tx.Rollback()
 			return nil, xError.NewError(ctx, xError.DatabaseError, "清空友链分组关联失败", false, result.Error)
@@ -266,7 +259,7 @@ func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupUUID string, req *request
 	}
 
 	// 删除分组（硬删除）
-	result := tx.Unscoped().Where("uuid = ?", groupID).Delete(&entity.LinkGroup{})
+	result := tx.Unscoped().Where("id = ?", groupID).Delete(&entity.LinkGroup{})
 	if result.Error != nil {
 		tx.Rollback()
 		return nil, xError.NewError(ctx, xError.DatabaseError, "删除友链分组失败", false, result.Error)
@@ -281,19 +274,19 @@ func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupUUID string, req *request
 }
 
 // Get 获取友链分组详情
-func (l *LinkGroupLogic) Get(ctx *gin.Context, groupUUID string) (*dto.LinkGroupDetailDTO, *xError.Error) {
+func (l *LinkGroupLogic) Get(ctx *gin.Context, groupIDStr string) (*dto.LinkGroupDetailDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
-	// 解析UUID
-	groupID, err := uuid.Parse(groupUUID)
+	// 解析ID
+	groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
 	if err != nil {
-		return nil, xError.NewError(ctx, xError.BadRequest, "无效的分组UUID", false)
+		return nil, xError.NewError(ctx, xError.BadRequest, "无效的分组ID", false)
 	}
 
 	// 查询友链分组（预加载关联友链）
 	var group entity.LinkGroup
-	err = db.WithContext(ctx).Preload("LinksFKey").First(&group, "uuid = ?", groupID).Error
+	err = db.WithContext(ctx).Preload("LinksFKey").First(&group, "id = ?", groupID).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
@@ -345,37 +338,37 @@ func (l *LinkGroupLogic) GetList(ctx *gin.Context, req *request.LinkGroupListReq
 	}
 
 	// 批量查询友链数量
-	groupUUIDs := make([]uuid.UUID, len(groups))
+	groupIDs := make([]int64, len(groups))
 	for i, group := range groups {
-		groupUUIDs[i] = group.UUID
+		groupIDs[i] = group.ID
 	}
 
-	linkCounts := make(map[uuid.UUID]int64)
-	if len(groupUUIDs) > 0 {
+	linkCounts := make(map[int64]int64)
+	if len(groupIDs) > 0 {
 		var countResults []struct {
-			GroupUUID uuid.UUID `gorm:"column:group_uuid"`
-			Count     int64     `gorm:"column:count"`
+			GroupID int64 `gorm:"column:group_id"`
+			Count   int64 `gorm:"column:count"`
 		}
 
 		err = db.WithContext(ctx).
 			Model(&entity.LinkFriend{}).
-			Select("group_uuid, COUNT(*) as count").
-			Where("group_uuid IN ?", groupUUIDs).
-			Group("group_uuid").
+			Select("group_id, COUNT(*) as count").
+			Where("group_id IN ?", groupIDs).
+			Group("group_id").
 			Find(&countResults).Error
 		if err != nil {
 			return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链数量失败", false, err)
 		}
 
 		for _, result := range countResults {
-			linkCounts[result.GroupUUID] = result.Count
+			linkCounts[result.GroupID] = result.Count
 		}
 	}
 
 	// 转换为DTO
 	groupDTOs := make([]dto.LinkGroupListDTO, len(groups))
 	for i, group := range groups {
-		groupDTOs[i] = convertLinkGroupToListDTO(&group, linkCounts[group.UUID])
+		groupDTOs[i] = convertLinkGroupToListDTO(&group, linkCounts[group.ID])
 	}
 
 	return groupDTOs, nil
@@ -434,37 +427,37 @@ func (l *LinkGroupLogic) GetPage(ctx *gin.Context, req *request.LinkGroupPageReq
 	}
 
 	// 批量查询友链数量
-	groupUUIDs := make([]uuid.UUID, len(groups))
+	groupIDs := make([]int64, len(groups))
 	for i, group := range groups {
-		groupUUIDs[i] = group.UUID
+		groupIDs[i] = group.ID
 	}
 
-	linkCounts := make(map[uuid.UUID]int64)
-	if len(groupUUIDs) > 0 {
+	linkCounts := make(map[int64]int64)
+	if len(groupIDs) > 0 {
 		var countResults []struct {
-			GroupUUID uuid.UUID `gorm:"column:group_uuid"`
-			Count     int64     `gorm:"column:count"`
+			GroupID int64 `gorm:"column:group_id"`
+			Count   int64 `gorm:"column:count"`
 		}
 
 		err = db.WithContext(ctx).
 			Model(&entity.LinkFriend{}).
-			Select("group_uuid, COUNT(*) as count").
-			Where("group_uuid IN ?", groupUUIDs).
-			Group("group_uuid").
+			Select("group_id, COUNT(*) as count").
+			Where("group_id IN ?", groupIDs).
+			Group("group_id").
 			Find(&countResults).Error
 		if err != nil {
 			return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链数量失败", false, err)
 		}
 
 		for _, result := range countResults {
-			linkCounts[result.GroupUUID] = result.Count
+			linkCounts[result.GroupID] = result.Count
 		}
 	}
 
 	// 转换为DTO
 	groupDTOs := make([]dto.LinkGroupNormalDTO, len(groups))
 	for i, group := range groups {
-		groupDTOs[i] = convertLinkGroupToNormalDTO(&group, linkCounts[group.UUID])
+		groupDTOs[i] = convertLinkGroupToNormalDTO(&group, linkCounts[group.ID])
 	}
 
 	return base.NewPaginationResponse(groupDTOs, req.Page, req.PageSize, total), nil
@@ -481,7 +474,7 @@ func convertLinkGroupToDetailDTO(group *entity.LinkGroup) *dto.LinkGroupDetailDT
 	for i, link := range group.LinksFKey {
 		if link != nil {
 			links[i] = dto.LinkFriendBasicInfo{
-				UUID:   link.UUID.String(),
+				ID:     link.ID,
 				Name:   link.Name,
 				URL:    link.URL,
 				Avatar: xUtil.Val(link.Avatar),
@@ -496,7 +489,7 @@ func convertLinkGroupToDetailDTO(group *entity.LinkGroup) *dto.LinkGroupDetailDT
 	}
 
 	return &dto.LinkGroupDetailDTO{
-		UUID:        group.UUID.String(),
+		ID:          group.ID,
 		Name:        group.Name,
 		Description: xUtil.Val(group.Description),
 		SortOrder:   group.SortOrder,
@@ -517,7 +510,7 @@ func convertLinkGroupToNormalDTO(group *entity.LinkGroup, linkCount int64) dto.L
 	}
 
 	return dto.LinkGroupNormalDTO{
-		UUID:        group.UUID.String(),
+		ID:          group.ID,
 		Name:        group.Name,
 		Description: xUtil.Val(group.Description),
 		SortOrder:   group.SortOrder,
@@ -537,7 +530,7 @@ func convertLinkGroupToListDTO(group *entity.LinkGroup, linkCount int64) dto.Lin
 	}
 
 	return dto.LinkGroupListDTO{
-		UUID:      group.UUID.String(),
+		ID:        group.ID,
 		Name:      group.Name,
 		SortOrder: group.SortOrder,
 		Status:    status,

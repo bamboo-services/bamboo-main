@@ -76,11 +76,11 @@ func (a *AuthLogic) Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.Sys
 	err = db.WithContext(ctx.Request.Context()).Model(&user).Update("last_login_at", &now).Error
 	if err != nil {
 		// 记录错误但不影响登录
-		xCtxUtil.GetSugarLogger(ctx).Errorf("更新最后登录时间失败: %v", err)
+		xCtxUtil.GetSugarLogger(ctx, "").Errorf("更新最后登录时间失败: %v", err)
 	}
 
 	userDTO := &dto.SystemUserDTO{
-		UUID:        user.UUID.String(),
+		ID:          user.ID,
 		Username:    user.Username,
 		Email:       user.Email,
 		Nickname:    xUtil.Val(user.Nickname),
@@ -104,13 +104,13 @@ func (a *AuthLogic) Logout(ctx *gin.Context, token string) *xError.Error {
 }
 
 // ChangePassword 修改密码
-func (a *AuthLogic) ChangePassword(ctx *gin.Context, userUUID string, req *request.AuthPasswordChangeReq) *xError.Error {
+func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID int64, req *request.AuthPasswordChangeReq) *xError.Error {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
 	// 查找用户
 	var user entity.SystemUser
-	err := db.WithContext(ctx.Request.Context()).First(&user, "uuid = ?", userUUID).Error
+	err := db.WithContext(ctx.Request.Context()).First(&user, "id = ?", userID).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return xError.NewError(ctx, xError.NotFound, "用户不存在", false)
@@ -169,18 +169,18 @@ func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *request.AuthPasswordRes
 	}
 
 	// TODO: 发送邮件通知新密码
-	xCtxUtil.GetSugarLogger(ctx).Infof("用户 %s 的临时密码为: %s", user.Email, tempPassword)
+	xCtxUtil.GetSugarLogger(ctx, "").Infof("用户 %s 的临时密码为: %s", user.Email, tempPassword)
 
 	return nil
 }
 
 // GetUserInfo 获取用户信息
-func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userUUID string) (*dto.SystemUserDTO, *xError.Error) {
+func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID int64) (*dto.SystemUserDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
 	var user entity.SystemUser
-	err := db.WithContext(ctx.Request.Context()).First(&user, "uuid = ?", userUUID).Error
+	err := db.WithContext(ctx.Request.Context()).First(&user, "id = ?", userID).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, xError.NewError(ctx, xError.NotFound, "用户不存在", false)
@@ -189,7 +189,7 @@ func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userUUID string) (*dto.SystemU
 	}
 
 	userDTO := &dto.SystemUserDTO{
-		UUID:        user.UUID.String(),
+		ID:          user.ID,
 		Username:    user.Username,
 		Email:       user.Email,
 		Nickname:    xUtil.Val(user.Nickname),
@@ -204,12 +204,12 @@ func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userUUID string) (*dto.SystemU
 }
 
 // UpdateLastLogin 更新最后登录时间
-func (a *AuthLogic) UpdateLastLogin(ctx *gin.Context, userUUID string) *xError.Error {
+func (a *AuthLogic) UpdateLastLogin(ctx *gin.Context, userID int64) *xError.Error {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
 	now := time.Now()
-	err := db.WithContext(ctx.Request.Context()).Model(&entity.SystemUser{}).Where("uuid = ?", userUUID).Update("last_login_at", &now).Error
+	err := db.WithContext(ctx.Request.Context()).Model(&entity.SystemUser{}).Where("id = ?", userID).Update("last_login_at", &now).Error
 	if err != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "更新最后登录时间失败", false, err)
 	}

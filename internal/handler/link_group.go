@@ -75,16 +75,16 @@ func (h *LinkGroupHandler) Add(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param group_uuid path string true "友链分组UUID"
+// @Param id path int64 true "友链分组ID"
 // @Param request body request.LinkGroupUpdateReq true "更新友链分组请求"
 // @Success 200 {object} response.LinkGroupUpdateResponse "更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友链分组不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/groups/{group_uuid} [put]
+// @Router /api/v1/admin/groups/{id} [put]
 func (h *LinkGroupHandler) Update(c *gin.Context) {
-	groupUUID := c.Param("group_uuid")
+	groupIDStr := c.Param("id")
 	var req request.LinkGroupUpdateReq
 
 	// 绑定请求数据
@@ -95,7 +95,7 @@ func (h *LinkGroupHandler) Update(c *gin.Context) {
 	}
 
 	// 调用服务层
-	group, err := h.groupService.Update(c, groupUUID, &req)
+	group, err := h.groupService.Update(c, groupIDStr, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -140,7 +140,7 @@ func (h *LinkGroupHandler) UpdateSort(c *gin.Context) {
 	// 返回成功响应
 	resp := response.LinkGroupSortResponse{
 		Message: "分组排序更新成功",
-		Count:   len(req.GroupUUIDs),
+		Count:   len(req.GroupIDs),
 	}
 	xResult.SuccessHasData(c, "分组排序更新成功", resp)
 }
@@ -152,16 +152,16 @@ func (h *LinkGroupHandler) UpdateSort(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param group_uuid path string true "友链分组UUID"
+// @Param id path int64 true "友链分组ID"
 // @Param request body request.LinkGroupStatusReq true "分组状态请求"
 // @Success 200 {object} response.LinkGroupStatusResponse "状态更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友链分组不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/groups/{group_uuid}/status [patch]
+// @Router /api/v1/admin/groups/{id}/status [patch]
 func (h *LinkGroupHandler) UpdateStatus(c *gin.Context) {
-	groupUUID := c.Param("group_uuid")
+	groupIDStr := c.Param("id")
 	var req request.LinkGroupStatusReq
 
 	// 绑定请求数据
@@ -172,7 +172,7 @@ func (h *LinkGroupHandler) UpdateStatus(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.groupService.UpdateStatus(c, groupUUID, &req)
+	err := h.groupService.UpdateStatus(c, groupIDStr, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -197,7 +197,7 @@ func (h *LinkGroupHandler) UpdateStatus(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param group_uuid path string true "友链分组UUID"
+// @Param id path int64 true "友链分组ID"
 // @Param force query bool false "是否强制删除（默认false）"
 // @Success 200 {object} response.LinkGroupDeleteResponse "删除成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
@@ -205,16 +205,16 @@ func (h *LinkGroupHandler) UpdateStatus(c *gin.Context) {
 // @Failure 404 {object} map[string]interface{} "友链分组不存在"
 // @Failure 409 {object} response.LinkGroupDeleteConflictResponse "存在关联数据冲突"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/groups/{group_uuid} [delete]
+// @Router /api/v1/admin/groups/{id} [delete]
 func (h *LinkGroupHandler) Delete(c *gin.Context) {
-	groupUUID := c.Param("group_uuid")
+	groupIDStr := c.Param("id")
 
 	// 获取force参数
 	var req request.LinkGroupDeleteReq
 	req.Force = c.Query("force") == "true"
 
 	// 调用服务层
-	_, err := h.groupService.Delete(c, groupUUID, &req)
+	_, err := h.groupService.Delete(c, groupIDStr, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -229,23 +229,23 @@ func (h *LinkGroupHandler) Delete(c *gin.Context) {
 
 // Get 获取友链分组详情
 // @Summary 获取友链分组详情
-// @Description 根据UUID获取指定友链分组的详细信息
+// @Description 根据ID获取指定友链分组的详细信息
 // @Tags 友链分组管理
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param group_uuid path string true "友链分组UUID"
+// @Param id path int64 true "友链分组ID"
 // @Success 200 {object} response.LinkGroupDetailResponse "获取成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友链分组不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/groups/{group_uuid} [get]
+// @Router /api/v1/admin/groups/{id} [get]
 func (h *LinkGroupHandler) Get(c *gin.Context) {
-	groupUUID := c.Param("group_uuid")
+	groupIDStr := c.Param("id")
 
 	// 调用服务层
-	group, err := h.groupService.Get(c, groupUUID)
+	group, err := h.groupService.Get(c, groupIDStr)
 	if err != nil {
 		_ = c.Error(err)
 		return

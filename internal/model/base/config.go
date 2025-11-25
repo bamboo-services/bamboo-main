@@ -13,10 +13,11 @@ package base
 
 // BambooConfig 主配置结构
 type BambooConfig struct {
-	Xlf      BMConfig       `mapstructure:"xlf" yaml:"xlf"`
-	Database DatabaseConfig `mapstructure:"database" yaml:"database"`
-	NoSQL    NoSQLConfig    `mapstructure:"nosql" yaml:"nosql"`
-	Email    EmailConfig    `mapstructure:"email" yaml:"email"`
+	Xlf       BMConfig        `mapstructure:"xlf" yaml:"xlf"`
+	Snowflake SnowflakeConfig `mapstructure:"snowflake" yaml:"snowflake"`
+	Database  DatabaseConfig  `mapstructure:"database" yaml:"database"`
+	NoSQL     NoSQLConfig     `mapstructure:"nosql" yaml:"nosql"`
+	Email     EmailConfig     `mapstructure:"email" yaml:"email"`
 }
 
 // BMConfig 应用配置
@@ -28,6 +29,11 @@ type BMConfig struct {
 // ServerConfig 服务器配置
 type ServerConfig struct {
 	Port int `mapstructure:"port" yaml:"port"`
+}
+
+// SnowflakeConfig 表示用于配置 Snowflake ID 生成器的结构。
+type SnowflakeConfig struct {
+	NodeID *int64 `mapstructure:"node_id" yaml:"node_id"`
 }
 
 // DatabaseConfig 数据库配置

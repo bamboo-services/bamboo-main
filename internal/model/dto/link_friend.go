@@ -18,7 +18,7 @@ import (
 // LinkFriendSimpleDTO 友情链接简单DTO - 用于列表查询
 // 只包含最基本的信息，适用于下拉选择、简单列表等场景
 type LinkFriendSimpleDTO struct {
-	UUID   string `json:"uuid"`   // 友链主键
+	ID     int64  `json:"id"`     // 友链主键
 	Name   string `json:"name"`   // 友链名称
 	URL    string `json:"url"`    // 友链地址
 	Avatar string `json:"avatar"` // 友链头像
@@ -27,7 +27,7 @@ type LinkFriendSimpleDTO struct {
 // LinkFriendNormalDTO 友情链接标准DTO - 用于分页查询
 // 包含常用信息，适用于表格展示、卡片列表等场景
 type LinkFriendNormalDTO struct {
-	UUID        string    `json:"uuid"`         // 友链主键
+	ID          int64     `json:"id"`           // 友链主键
 	Name        string    `json:"name"`         // 友链名称
 	URL         string    `json:"url"`          // 友链地址
 	Avatar      string    `json:"avatar"`       // 友链头像
@@ -44,15 +44,15 @@ type LinkFriendNormalDTO struct {
 // LinkFriendDetailDTO 友情链接详细DTO - 用于详情查询
 // 包含所有信息，适用于详情页面、编辑表单等场景
 type LinkFriendDetailDTO struct {
-	UUID         string    `json:"uuid"`          // 友链主键
+	ID           int64     `json:"id"`            // 友链主键
 	Name         string    `json:"name"`          // 友链名称
 	URL          string    `json:"url"`           // 友链地址
 	Avatar       string    `json:"avatar"`        // 友链头像
 	RSS          string    `json:"rss"`           // RSS地址
 	Description  string    `json:"description"`   // 友链描述
 	Email        string    `json:"email"`         // 联系邮箱
-	GroupUUID    string    `json:"group_uuid"`    // 所属分组UUID
-	ColorUUID    string    `json:"color_uuid"`    // 颜色UUID
+	GroupID      int64     `json:"group_id"`      // 所属分组ID
+	ColorID      int64     `json:"color_id"`      // 颜色ID
 	SortOrder    int       `json:"sort_order"`    // 排序
 	Status       int       `json:"status"`        // 友链状态
 	StatusText   string    `json:"status_text"`   // 友链状态文本
@@ -74,20 +74,20 @@ type LinkFriendDTO = LinkFriendDetailDTO
 
 // LinkGroupSimpleDTO 友链分组简单DTO - 用于在LinkFriend中引用
 type LinkGroupSimpleDTO struct {
-	UUID string `json:"uuid"` // 分组主键
+	ID   int64  `json:"id"`   // 分组主键
 	Name string `json:"name"` // 分组名称
 }
 
 // LinkColorSimpleDTO 友链颜色简单DTO - 用于列表查询
 type LinkColorSimpleDTO struct {
-	UUID  string `json:"uuid"`  // 颜色主键
+	ID    int64  `json:"id"`    // 颜色主键
 	Name  string `json:"name"`  // 颜色名称
 	Value string `json:"value"` // 颜色值
 }
 
 // LinkColorNormalDTO 友链颜色标准DTO - 用于分页查询
 type LinkColorNormalDTO struct {
-	UUID      string    `json:"uuid"`       // 颜色主键
+	ID        int64     `json:"id"`         // 颜色主键
 	Name      string    `json:"name"`       // 颜色名称
 	Value     string    `json:"value"`      // 颜色值
 	SortOrder int       `json:"sort_order"` // 排序
@@ -99,7 +99,7 @@ type LinkColorNormalDTO struct {
 
 // LinkColorDetailDTO 友链颜色详细DTO - 用于详情查询
 type LinkColorDetailDTO struct {
-	UUID      string    `json:"uuid"`       // 颜色主键
+	ID        int64     `json:"id"`         // 颜色主键
 	Name      string    `json:"name"`       // 颜色名称
 	Value     string    `json:"value"`      // 颜色值
 	SortOrder int       `json:"sort_order"` // 排序
@@ -126,14 +126,14 @@ type PaginationDTO[T any] struct {
 
 // SystemUserSimpleDTO 系统用户简单DTO - 用于列表查询
 type SystemUserSimpleDTO struct {
-	UUID     string `json:"uuid"`     // 用户主键
+	ID       int64  `json:"id"`       // 用户主键
 	Username string `json:"username"` // 用户名
 	Nickname string `json:"nickname"` // 昵称
 }
 
 // SystemUserNormalDTO 系统用户标准DTO - 用于分页查询
 type SystemUserNormalDTO struct {
-	UUID        string     `json:"uuid"`          // 用户主键
+	ID          int64      `json:"id"`            // 用户主键
 	Username    string     `json:"username"`      // 用户名
 	Email       string     `json:"email"`         // 邮箱
 	Nickname    string     `json:"nickname"`      // 昵称
@@ -146,12 +146,12 @@ type SystemUserNormalDTO struct {
 
 // SystemUserDetailDTO 系统用户详细DTO - 用于详情查询
 type SystemUserDetailDTO struct {
-	UUID        string     `json:"uuid"`          // 用户主键
+	ID          int64      `json:"id"`            // 用户主键
 	Username    string     `json:"username"`      // 用户名
 	Email       string     `json:"email"`         // 邮箱
 	Nickname    string     `json:"nickname"`      // 昵称
 	Avatar      string     `json:"avatar"`        // 头像
-	Role        string     `json:"role"`          // 角色
+	Role        string     `json:"role"`          // ���色
 	Status      int        `json:"status"`        // 状态
 	LastLoginAt *time.Time `json:"last_login_at"` // 最后登录时间
 	CreatedAt   time.Time  `json:"created_at"`    // 创建时间

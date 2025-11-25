@@ -115,7 +115,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/auth/user [get]
 func (h *AuthHandler) GetUserInfo(c *gin.Context) {
-	userUUID, exists := ctxUtil.GetUserUUID(c)
+	userUUID, exists := ctxUtil.GetUserID(c)
 	if !exists {
 		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
 		return
@@ -156,7 +156,7 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	userUUID, exists := ctxUtil.GetUserUUID(c)
+	userUUID, exists := ctxUtil.GetUserID(c)
 	if !exists {
 		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
 		return

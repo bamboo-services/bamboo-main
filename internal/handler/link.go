@@ -75,16 +75,16 @@ func (h *LinkHandler) Add(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param link_uuid path string true "友情链接UUID"
+// @Param id path int64 true "友情链接ID"
 // @Param request body request.LinkFriendUpdateReq true "更新友情链接请求"
 // @Success 200 {object} response.LinkUpdateResponse "更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/links/{link_uuid} [put]
+// @Router /api/v1/admin/links/{id} [put]
 func (h *LinkHandler) Update(c *gin.Context) {
-	linkUUID := c.Param("link_uuid")
+	linkIDStr := c.Param("id")
 	var req request.LinkFriendUpdateReq
 
 	// 绑定请求数据
@@ -95,7 +95,7 @@ func (h *LinkHandler) Update(c *gin.Context) {
 	}
 
 	// 调用服务层
-	link, err := h.linkService.Update(c, linkUUID, &req)
+	link, err := h.linkService.Update(c, linkIDStr, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -113,18 +113,18 @@ func (h *LinkHandler) Update(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param link_uuid path string true "友情链接UUID"
+// @Param id path int64 true "友情链接ID"
 // @Success 200 {object} response.MessageResponse "删除成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/links/{link_uuid} [delete]
+// @Router /api/v1/admin/links/{id} [delete]
 func (h *LinkHandler) Delete(c *gin.Context) {
-	linkUUID := c.Param("link_uuid")
+	linkIDStr := c.Param("id")
 
 	// 调用服务层
-	err := h.linkService.Delete(c, linkUUID)
+	err := h.linkService.Delete(c, linkIDStr)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -141,18 +141,18 @@ func (h *LinkHandler) Delete(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param link_uuid path string true "友情链接UUID"
+// @Param id path int64 true "友情链接ID"
 // @Success 200 {object} response.LinkDetailResponse "获取成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/links/{link_uuid} [get]
+// @Router /api/v1/admin/links/{id} [get]
 func (h *LinkHandler) Get(c *gin.Context) {
-	linkUUID := c.Param("link_uuid")
+	linkIDStr := c.Param("id")
 
 	// 调用服务层
-	link, err := h.linkService.Get(c, linkUUID)
+	link, err := h.linkService.Get(c, linkIDStr)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -175,7 +175,7 @@ func (h *LinkHandler) Get(c *gin.Context) {
 // @Param link_name query string false "友情链接名称"
 // @Param link_status query int false "友情链接状态 0:待审核 1:已通过 2:已拒绝"
 // @Param link_fail query int false "失效状态 0:正常 1:失效"
-// @Param link_group_uuid query string false "分组UUID"
+// @Param link_group_id query int64 false "分组ID"
 // @Param sort_by query string false "排序字段" Enums(created_at, updated_at, link_order, link_name)
 // @Param sort_order query string false "排序方式" Enums(asc, desc)
 // @Success 200 {object} response.LinkListResponse "获取成功"
@@ -212,16 +212,16 @@ func (h *LinkHandler) List(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param link_uuid path string true "友情链接UUID"
+// @Param id path int64 true "友情链接ID"
 // @Param request body request.LinkFriendStatusReq true "更新状态请求"
 // @Success 200 {object} response.MessageResponse "更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/links/{link_uuid}/status [put]
+// @Router /api/v1/admin/links/{id}/status [put]
 func (h *LinkHandler) UpdateStatus(c *gin.Context) {
-	linkUUID := c.Param("link_uuid")
+	linkIDStr := c.Param("id")
 	var req request.LinkFriendStatusReq
 
 	// 绑定请求数据
@@ -232,7 +232,7 @@ func (h *LinkHandler) UpdateStatus(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.linkService.UpdateStatus(c, linkUUID, &req)
+	err := h.linkService.UpdateStatus(c, linkIDStr, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -249,16 +249,16 @@ func (h *LinkHandler) UpdateStatus(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param link_uuid path string true "友情链接UUID"
+// @Param id path int64 true "友情链接ID"
 // @Param request body request.LinkFriendFailReq true "更新失效状态请求"
 // @Success 200 {object} response.MessageResponse "更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友情链接不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/links/{link_uuid}/fail [put]
+// @Router /api/v1/admin/links/{id}/fail [put]
 func (h *LinkHandler) UpdateFailStatus(c *gin.Context) {
-	linkUUID := c.Param("link_uuid")
+	linkIDStr := c.Param("id")
 	var req request.LinkFriendFailReq
 
 	// 绑定请求数据
@@ -269,7 +269,7 @@ func (h *LinkHandler) UpdateFailStatus(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.linkService.UpdateFailStatus(c, linkUUID, &req)
+	err := h.linkService.UpdateFailStatus(c, linkIDStr, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -285,15 +285,15 @@ func (h *LinkHandler) UpdateFailStatus(c *gin.Context) {
 // @Tags 公开接口
 // @Accept json
 // @Produce json
-// @Param group_uuid query string false "分组UUID，不传则获取所有"
+// @Param group_id query int64 false "分组ID，不传则获取所有"
 // @Success 200 {object} response.LinkPublicResponse "获取成功"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/public/links [get]
 func (h *LinkHandler) GetPublicLinks(c *gin.Context) {
-	groupUUID := c.Query("group_uuid")
+	groupIDStr := c.Query("group_id")
 
 	// 调用服务层
-	links, err := h.linkService.GetPublicLinks(c, groupUUID)
+	links, err := h.linkService.GetPublicLinks(c, groupIDStr)
 	if err != nil {
 		_ = c.Error(err)
 		return

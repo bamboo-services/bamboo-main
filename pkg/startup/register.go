@@ -15,16 +15,18 @@ import (
 	"bamboo-main/internal/model/base"
 
 	xInit "github.com/bamboo-services/bamboo-base-go/init"
+	"github.com/bwmarrin/snowflake"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 // Reg 是一个类型别名，用于表示注册操作的整数类型。
 type Reg struct {
-	DB     *gorm.DB           // 数据库连接实例
-	Rdb    *redis.Client      // Redis 客户端实例
-	Config *base.BambooConfig // 客制化配置文件
-	Serv   *xInit.Reg         // 初始服务注册
+	DB            *gorm.DB           // 数据库连接实例
+	Rdb           *redis.Client      // Redis 客户端实例
+	Config        *base.BambooConfig // 客制化配置文件
+	Serv          *xInit.Reg         // 初始服务注册
+	SnowflakeNode *snowflake.Node    // Snowflake 节点实例
 }
 
 // New 创建并返回一个未初始化的 `Reg` 实例。
@@ -53,6 +55,7 @@ func Register(serv *xInit.Reg) *Reg {
 	reg := New(serv)
 
 	reg.ConfigInit()       // 配置文件增量处理
+	reg.SnowflakeInit()    // 初始化 Snowflake 节点
 	reg.DatabaseInit()     // 初始化数据库连接
 	reg.RedisInit()        // 初始化 Redis 连接池
 	reg.DatabaseUserInit() // 初始化系统用户

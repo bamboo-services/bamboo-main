@@ -12,6 +12,7 @@
 package startup
 
 import (
+	"context"
 	"fmt"
 
 	"bamboo-main/internal/model/entity"
@@ -80,6 +81,10 @@ func (r *Reg) DatabaseInit() {
 		db = db.Debug()
 	}
 
-	r.DB = db
+	// 设置 Snowflake Context
+	ctx := context.WithValue(context.Background(), xConsts.ContextSnowflakeNode.String(), r.SnowflakeNode)
+
+	// 赋值数据库连接实例
+	r.DB = db.WithContext(ctx)
 	r.Serv.Logger.Named(xConsts.LogINIT).Info("数据库连接初始化完成")
 }

@@ -16,6 +16,7 @@ import (
 	"bamboo-main/pkg/constants"
 
 	xConsts "github.com/bamboo-services/bamboo-base-go/constants"
+	"github.com/bwmarrin/snowflake"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 )
@@ -39,6 +40,18 @@ func GetConfig(c *gin.Context) *base.BambooConfig {
 	return nil
 }
 
+// GetSnowflake 从 gin.Context 中获取 Snowflake 节点实例。
+// 如果上下文中不存在对应的 Snowflake 节点，则返回 nil。
+// 参数 c 表示请求上下文 gin.Context。
+// 返回值为指向 Snowflake 节点的指针或 nil。
+func GetSnowflake(c *gin.Context) *snowflake.Node {
+	value, exists := c.Get(xConsts.ContextSnowflakeNode.String())
+	if exists {
+		return value.(*snowflake.Node)
+	}
+	return nil
+}
+
 // GetRedisClient 从 Gin 的上下文中获取 Redis 客户端实例。
 //
 // 如果上下文中存在 Redis 客户端，则返回其指针；如果不存在，则返回 `nil`。
@@ -56,26 +69,26 @@ func GetRedisClient(c *gin.Context) *redis.Client {
 	return nil
 }
 
-// GetUserUUID 从上下文获取用户UUID
+// GetUserID 从上下文获取用户ID
 //
-// 从Gin上下文中获取当前认证用户的UUID字符串。
+// 从Gin上下文中获取当前认证用户的ID(Snowflake ID)。
 //
 // 参数说明:
 //   - c: Gin 上下文指针，用于存储和传递请求相关的数据。
 //
 // 返回值:
-//   - 用户UUID字符串，如果用户未认证则为空字符串。
-//   - 布尔值，表示是否成功获取到用户UUID。
-func GetUserUUID(c *gin.Context) (string, bool) {
+//   - 用户ID(int64)，如果用户未认证则为0。
+//   - 布尔值，表示是否成功获取到用户ID。
+func GetUserID(c *gin.Context) (int64, bool) {
 	userID, exists := c.Get(constants.ContextKeyUserID)
 	if !exists {
-		return "", false
+		return 0, false
 	}
 
-	userUUID, ok := userID.(string)
+	userIDInt64, ok := userID.(int64)
 	if !ok {
-		return "", false
+		return 0, false
 	}
 
-	return userUUID, true
+	return userIDInt64, true
 }

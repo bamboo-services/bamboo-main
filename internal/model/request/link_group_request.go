@@ -13,8 +13,8 @@ package request
 
 // LinkGroupSortReq 分组排序请求
 type LinkGroupSortReq struct {
-	GroupUUIDs []string `json:"group_uuids" binding:"required,min=1" validate:"required" example:"[\"uuid1\",\"uuid2\",\"uuid3\"]"` // 分组UUID数组，按新的排序传入
-	SortOrder  *int     `json:"sort_order" binding:"omitempty,min=0" example:"10"`                                                  // 可选的起始排序值，不填则从0开始递增
+	GroupIDs  []int64 `json:"group_ids" binding:"required,min=1" validate:"required"` // 分组ID数组，按新的排序传入
+	SortOrder *int    `json:"sort_order" binding:"omitempty,min=0" example:"10"`      // 可选的起始排序值，不填则从0开始递增
 }
 
 // LinkGroupStatusReq 分组状态切换请求

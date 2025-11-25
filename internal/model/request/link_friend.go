@@ -19,8 +19,8 @@ type LinkFriendAddReq struct {
 	LinkRSS         string `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
 	LinkDesc        string `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
 	LinkEmail       string `json:"link_email" binding:"omitempty,email,max=100" example:"admin@example.com"`
-	LinkGroupUUID   string `json:"link_group_uuid" binding:"omitempty,uuid" example:"550e8400-e29b-41d4-a716-446655440000"`
-	LinkColorUUID   string `json:"link_color_uuid" binding:"omitempty,uuid" example:"550e8400-e29b-41d4-a716-446655440001"`
+	LinkGroupID     int64  `json:"link_group_id" binding:"omitempty,number" example:"1"`
+	LinkColorID     int64  `json:"link_color_id" binding:"omitempty,number" example:"1"`
 	LinkOrder       int    `json:"link_order" binding:"omitempty,min=0" example:"0"`
 	LinkApplyRemark string `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
 }
@@ -33,22 +33,22 @@ type LinkFriendUpdateReq struct {
 	LinkRSS         string `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
 	LinkDesc        string `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
 	LinkEmail       string `json:"link_email" binding:"omitempty,email,max=100" example:"admin@example.com"`
-	LinkGroupUUID   string `json:"link_group_uuid" binding:"omitempty,uuid" example:"550e8400-e29b-41d4-a716-446655440000"`
-	LinkColorUUID   string `json:"link_color_uuid" binding:"omitempty,uuid" example:"550e8400-e29b-41d4-a716-446655440001"`
+	LinkGroupID     int64  `json:"link_group_id" binding:"omitempty,number" example:"1"`
+	LinkColorID     int64  `json:"link_color_id" binding:"omitempty,number" example:"1"`
 	LinkOrder       *int   `json:"link_order" binding:"omitempty,min=0" example:"0"`
 	LinkApplyRemark string `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
 }
 
 // LinkFriendQueryReq 查询友情链接请求
 type LinkFriendQueryReq struct {
-	Page          int    `form:"page" binding:"omitempty,min=1" example:"1"`
-	PageSize      int    `form:"page_size" binding:"omitempty,min=1,max=100" example:"10"`
-	LinkName      string `form:"link_name" binding:"omitempty,max=100" example:"示例"`
-	LinkStatus    *int   `form:"link_status" binding:"omitempty,oneof=0 1 2" example:"1"`
-	LinkFail      *int   `form:"link_fail" binding:"omitempty,oneof=0 1" example:"0"`
-	LinkGroupUUID string `form:"link_group_uuid" binding:"omitempty,uuid" example:"550e8400-e29b-41d4-a716-446655440000"`
-	SortBy        string `form:"sort_by" binding:"omitempty,oneof=created_at updated_at link_order link_name" example:"created_at"`
-	SortOrder     string `form:"sort_order" binding:"omitempty,oneof=asc desc" example:"desc"`
+	Page        int    `form:"page" binding:"omitempty,min=1" example:"1"`
+	PageSize    int    `form:"page_size" binding:"omitempty,min=1,max=100" example:"10"`
+	LinkName    string `form:"link_name" binding:"omitempty,max=100" example:"示例"`
+	LinkStatus  *int   `form:"link_status" binding:"omitempty,oneof=0 1 2" example:"1"`
+	LinkFail    *int   `form:"link_fail" binding:"omitempty,oneof=0 1" example:"0"`
+	LinkGroupID int64  `form:"link_group_id" binding:"omitempty,number" example:"1"`
+	SortBy      string `form:"sort_by" binding:"omitempty,oneof=created_at updated_at link_order link_name" example:"created_at"`
+	SortOrder   string `form:"sort_order" binding:"omitempty,oneof=asc desc" example:"desc"`
 }
 
 // LinkFriendStatusReq 更新友情链接状态请求

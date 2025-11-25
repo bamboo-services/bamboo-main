@@ -57,6 +57,7 @@ func (h *handler) systemContextHandlerFunc(c *gin.Context) {
 	c.Set(xConsts.ContextDatabase.String(), h.DB)
 	c.Set(xConsts.ContextRedisClient.String(), h.Rdb)
 	c.Set(xConsts.ContextCustomConfig.String(), h.Config)
+	c.Set(xConsts.ContextSnowflakeNode.String(), h.SnowflakeNode)
 
 	// 放行内容
 	c.Next()

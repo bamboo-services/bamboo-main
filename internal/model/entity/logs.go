@@ -12,10 +12,13 @@
 package entity
 
 import (
+	"errors"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/bwmarrin/snowflake"
 	"gorm.io/gorm"
+
+	xConsts "github.com/bamboo-services/bamboo-base-go/constants"
 )
 
 // SystemLog 表示一个系统日志实体，用于记录系统操作和事件。
@@ -23,29 +26,34 @@ import (
 // 该类型包含日志的唯一标识符、级别、模块、操作、消息等信息。
 // 同时记录操作者、IP地址等审计信息。
 type SystemLog struct {
-	UUID      uuid.UUID  `json:"uuid" gorm:"primaryKey;type:uuid;comment:日志唯一标识符"`                                 // UUID 使用 UUID 作为主键
-	Level     string     `json:"level" gorm:"type:varchar(20);not null;comment:日志级别（INFO, WARN, ERROR）"`           // 日志级别
-	Module    string     `json:"module" gorm:"type:varchar(50);not null;comment:日志模块"`                             // 日志模块
-	Action    string     `json:"action" gorm:"type:varchar(100);not null;comment:操作动作"`                            // 操作动作
-	Message   string     `json:"message" gorm:"type:text;not null;comment:日志消息"`                                   // 日志消息
-	UserUUID  *uuid.UUID `json:"user_uuid" gorm:"type:uuid;comment:操作用户UUID"`                                      // 操作用户UUID
-	IPAddress *string    `json:"ip_address" gorm:"type:varchar(45);comment:操作IP地址"`                                // 操作IP地址
-	UserAgent *string    `json:"user_agent" gorm:"type:text;comment:用户代理"`                                         // 用户代理
-	ExtraData *string    `json:"extra_data" gorm:"type:text;comment:额外数据（JSON格式）"`                                 // 额外数据
-	CreatedAt time.Time  `json:"created_at" gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP;comment:创建时间"` // 创建时间
+	ID        int64     `json:"id" gorm:"primaryKey;autoIncrement:false;comment:日志唯一标识符"`                         // ID 使用 Snowflake ID 作为主键
+	Level     string    `json:"level" gorm:"type:varchar(20);not null;comment:日志级别（INFO, WARN, ERROR）"`           // 日志级别
+	Module    string    `json:"module" gorm:"type:varchar(50);not null;comment:日志模块"`                             // 日志模块
+	Action    string    `json:"action" gorm:"type:varchar(100);not null;comment:操作动作"`                            // 操作动作
+	Message   string    `json:"message" gorm:"type:text;not null;comment:日志消息"`                                   // 日志消息
+	UserID    *int64    `json:"user_id" gorm:"comment:操作用户ID"`                                                    // 操作用户ID
+	IPAddress *string   `json:"ip_address" gorm:"type:varchar(45);comment:操作IP地址"`                                // 操作IP地址
+	UserAgent *string   `json:"user_agent" gorm:"type:text;comment:用户代理"`                                         // 用户代理
+	ExtraData *string   `json:"extra_data" gorm:"type:text;comment:额外数据（JSON格式）"`                                 // 额外数据
+	CreatedAt time.Time `json:"created_at" gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP;comment:创建时间"` // 创建时间
 
 	// 关联关系
-	UserFKey *SystemUser `json:"user_f_key" gorm:"foreignKey:UserUUID;references:UUID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;comment:用户外键"` // 用户外键
+	UserFKey *SystemUser `json:"user_f_key" gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;comment:用户外键"` // 用户外键
 }
 
-// BeforeCreate 在创建 SystemLog 实例前自动调用，确保为 UUID 字段生成唯一标识符。
-func (l *SystemLog) BeforeCreate(_ *gorm.DB) error {
-	if l.UUID == uuid.Nil {
-		newUUID, err := uuid.NewV7()
-		if err != nil {
-			return err
+// BeforeCreate 在创建 SystemLog 实例前自动调用，确保为 ID 字段生成唯一标识符。
+func (l *SystemLog) BeforeCreate(tx *gorm.DB) error {
+	if l.ID == 0 {
+		// 从 Context 中获取 Snowflake 节点
+		if val := tx.Statement.Context.Value(xConsts.ContextSnowflakeNode.String()); val != nil {
+			if node, ok := val.(*snowflake.Node); ok {
+				l.ID = node.Generate().Int64()
+			} else {
+				return errors.New("上下文中的无效雪花节点")
+			}
+		} else {
+			return errors.New("snowflake 节点在上下文中未出现")
 		}
-		l.UUID = newUUID
 	}
 	l.CreatedAt = time.Now()
 	return nil

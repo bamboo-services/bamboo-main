@@ -26,7 +26,7 @@ import (
 func RequireRole(roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取用户UUID
-		userUUID, exists := ctxUtil.GetUserUUID(c)
+		userUUID, exists := ctxUtil.GetUserID(c)
 		if !exists {
 			_ = c.Error(xError.NewError(c, xError.Unauthorized, "未认证的用户", false))
 			return

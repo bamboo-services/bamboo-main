@@ -32,16 +32,16 @@ type IAuthService interface {
 	Logout(ctx *gin.Context, token string) *xError.Error
 
 	// ChangePassword 修改密码
-	ChangePassword(ctx *gin.Context, userUUID string, req *request.AuthPasswordChangeReq) *xError.Error
+	ChangePassword(ctx *gin.Context, userID int64, req *request.AuthPasswordChangeReq) *xError.Error
 
 	// ResetPassword 重置密码
 	ResetPassword(ctx *gin.Context, req *request.AuthPasswordResetReq) *xError.Error
 
 	// GetUserInfo 获取用户信息
-	GetUserInfo(ctx *gin.Context, userUUID string) (*dto.SystemUserDTO, *xError.Error)
+	GetUserInfo(ctx *gin.Context, userID int64) (*dto.SystemUserDTO, *xError.Error)
 
 	// UpdateLastLogin 更新最后登录时间
-	UpdateLastLogin(ctx *gin.Context, userUUID string) *xError.Error
+	UpdateLastLogin(ctx *gin.Context, userID int64) *xError.Error
 
 	// ValidateToken 验证令牌
 	ValidateToken(ctx *gin.Context, token string) (*dto.SystemUserDTO, *xError.Error)

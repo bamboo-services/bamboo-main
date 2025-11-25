@@ -14,6 +14,7 @@ package startup
 import (
 	"bamboo-main/internal/model/entity"
 	"errors"
+	"strconv"
 
 	xConsts "github.com/bamboo-services/bamboo-base-go/constants"
 	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
@@ -27,7 +28,10 @@ func (r *Reg) DatabaseUserInit() {
 	var hasUser = true
 
 	var getValue *entity.System
-	result := r.DB.Model(&entity.System{}).Where("key = ?", "system.admin.id").First(&getValue)
+	result := r.DB.Model(&entity.System{}).Where(
+		"key = ?",
+		"system.admin.id",
+	).First(&getValue)
 	if result.Error != nil {
 		if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			panic(result.Error)
@@ -44,6 +48,7 @@ func (r *Reg) DatabaseUserInit() {
 	if !hasUser {
 		passwordString, _ := xUtil.EncryptPasswordString("xiao_lfeng")
 		var user = &entity.SystemUser{
+			ID:       r.SnowflakeNode.Generate().Int64(), // 手动生成 Snowflake ID
 			Username: "xiao_lfeng",
 			Password: passwordString,
 			Email:    "gm@x-lf.cn",
@@ -58,8 +63,9 @@ func (r *Reg) DatabaseUserInit() {
 		}
 
 		err = r.DB.Create(&entity.System{
+			ID:    r.SnowflakeNode.Generate().Int64(), // 手动生成 Snowflake ID
 			Key:   "system.admin.id",
-			Value: xUtil.Ptr(user.UUID.String()),
+			Value: xUtil.Ptr(strconv.FormatInt(user.ID, 10)),
 		}).Error
 		if err != nil {
 			panic(err)

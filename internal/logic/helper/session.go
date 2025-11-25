@@ -45,7 +45,7 @@ func (s *SessionLogic) CreateUserSession(c *gin.Context, user *entity.SystemUser
 	// 创建Token会话数据
 	now := time.Now()
 	tokenDTO := dtoRedis.TokenDTO{
-		UserUUID:  user.UUID.String(),
+		UserID:    user.ID,
 		Username:  user.Username,
 		Email:     user.Email,
 		Role:      user.Role,

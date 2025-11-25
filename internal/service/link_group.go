@@ -27,20 +27,20 @@ type ILinkGroupService interface {
 	Add(ctx *gin.Context, req *request.LinkGroupAddReq) (*dto.LinkGroupDetailDTO, *xError.Error)
 
 	// Update 更新友链分组（名称和描述）
-	Update(ctx *gin.Context, groupUUID string, req *request.LinkGroupUpdateReq) (*dto.LinkGroupDetailDTO, *xError.Error)
+	Update(ctx *gin.Context, groupIDStr string, req *request.LinkGroupUpdateReq) (*dto.LinkGroupDetailDTO, *xError.Error)
 
 	// UpdateSort 批量更新友链分组排序
 	UpdateSort(ctx *gin.Context, req *request.LinkGroupSortReq) *xError.Error
 
 	// UpdateStatus 更新友链分组状态（启用/禁用）
-	UpdateStatus(ctx *gin.Context, groupUUID string, req *request.LinkGroupStatusReq) *xError.Error
+	UpdateStatus(ctx *gin.Context, groupIDStr string, req *request.LinkGroupStatusReq) *xError.Error
 
 	// Delete 删除友链分组
 	// 返回值：删除冲突的友链列表（如果force=false且存在关联），错误信息
-	Delete(ctx *gin.Context, groupUUID string, req *request.LinkGroupDeleteReq) ([]dto.LinkGroupDeleteConflictDTO, *xError.Error)
+	Delete(ctx *gin.Context, groupIDStr string, req *request.LinkGroupDeleteReq) ([]dto.LinkGroupDeleteConflictDTO, *xError.Error)
 
 	// Get 获取友链分组详情
-	Get(ctx *gin.Context, groupUUID string) (*dto.LinkGroupDetailDTO, *xError.Error)
+	Get(ctx *gin.Context, groupIDStr string) (*dto.LinkGroupDetailDTO, *xError.Error)
 
 	// GetList 获取友链分组列表（不分页）
 	GetList(ctx *gin.Context, req *request.LinkGroupListReq) ([]dto.LinkGroupListDTO, *xError.Error)

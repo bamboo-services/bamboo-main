@@ -15,7 +15,7 @@ import "time"
 
 // TokenDTO Token令牌数据传输对象
 type TokenDTO struct {
-	UserUUID  string    `json:"user_uuid"`  // 用户UUID
+	UserID    int64     `json:"user_id"`    // 用户ID
 	Username  string    `json:"username"`   // 用户名
 	Email     string    `json:"email"`      // 用户邮箱
 	Role      string    `json:"role"`       // 用户角色

@@ -12,10 +12,13 @@
 package entity
 
 import (
+	"errors"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/bwmarrin/snowflake"
 	"gorm.io/gorm"
+
+	xConsts "github.com/bamboo-services/bamboo-base-go/constants"
 )
 
 // LinkGroup 表示一个友链分组实体，用于对友情链接进行分类管理。
@@ -23,7 +26,7 @@ import (
 // 该类型包含分组的唯一标识符、名称、描述、排序等信息。
 // 同时记录该分组的创建时间和更新时间，便于数据管理和审计。
 type LinkGroup struct {
-	UUID        uuid.UUID `json:"uuid" gorm:"primaryKey;type:uuid;comment:分组唯一标识符"`                                 // UUID 使用 UUID 作为主键
+	ID          int64     `json:"id" gorm:"primaryKey;autoIncrement:false;comment:分组唯一标识符"`                         // ID 使用 Snowflake ID 作为主键
 	Name        string    `json:"name" gorm:"type:varchar(100);not null;comment:分组名称"`                              // 分组名称
 	Description *string   `json:"description" gorm:"type:text;comment:分组描述"`                                        // 分组描述
 	SortOrder   int       `json:"sort_order" gorm:"type:int;default:0;comment:分组排序"`                                // 分组排序
@@ -32,17 +35,22 @@ type LinkGroup struct {
 	UpdatedAt   time.Time `json:"updated_at" gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP;comment:更新时间"` // 更新时间
 
 	// 关联关系
-	LinksFKey []*LinkFriend `json:"links_f_key" gorm:"foreignKey:GroupUUID;references:UUID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;comment:友链外键"` // 友链外键，关联 LinkFriend 类型
+	LinksFKey []*LinkFriend `json:"links_f_key" gorm:"foreignKey:GroupID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;comment:友链外键"` // 友链外键，关联 LinkFriend 类型
 }
 
-// BeforeCreate 在创建 LinkGroup 实例前自动调用，确保为 UUID 字段生成唯一标识符。
-func (g *LinkGroup) BeforeCreate(_ *gorm.DB) error {
-	if g.UUID == uuid.Nil {
-		newUUID, err := uuid.NewV7()
-		if err != nil {
-			return err
+// BeforeCreate 在创建 LinkGroup 实例前自动调用，确保为 ID 字段生成唯一标识符。
+func (g *LinkGroup) BeforeCreate(tx *gorm.DB) error {
+	if g.ID == 0 {
+		// 从 Context 中获取 Snowflake 节点
+		if val := tx.Statement.Context.Value(xConsts.ContextSnowflakeNode.String()); val != nil {
+			if node, ok := val.(*snowflake.Node); ok {
+				g.ID = node.Generate().Int64()
+			} else {
+				return errors.New("上下文中的无效雪花节点")
+			}
+		} else {
+			return errors.New("snowflake 节点在上下文中未出现")
 		}
-		g.UUID = newUUID
 	}
 	g.CreatedAt = time.Now()
 	g.UpdatedAt = time.Now()

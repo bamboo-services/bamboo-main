@@ -12,10 +12,13 @@
 package entity
 
 import (
+	"errors"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/bwmarrin/snowflake"
 	"gorm.io/gorm"
+
+	xConsts "github.com/bamboo-services/bamboo-base-go/constants"
 )
 
 // System 表示一个系统配置实体，用于存储键值对配置信息。
@@ -23,21 +26,26 @@ import (
 // 该类型包含配置的唯一标识符、键名、值等信息。
 // 同时记录该配置的创建时间和更新时间，便于数据管理和审计。
 type System struct {
-	UUID      uuid.UUID `json:"uuid" gorm:"primaryKey;type:uuid;comment:系统配置唯一标识符"`                               // UUID 使用 UUID 作为主键
+	ID        int64     `json:"id" gorm:"primaryKey;autoIncrement:false;comment:系统配置唯一标识符"`                       // ID 使用 Snowflake ID 作为主键
 	Key       string    `json:"key" gorm:"type:varchar(100);not null;uniqueIndex;comment:配置键名"`                   // 配置键名
 	Value     *string   `json:"value" gorm:"type:text;comment:配置值"`                                               // 配置值
 	CreatedAt time.Time `json:"created_at" gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP;comment:创建时间"` // 创建时间
 	UpdatedAt time.Time `json:"updated_at" gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP;comment:更新时间"` // 更新时间
 }
 
-// BeforeCreate 在创建 System 实例前自动调用，确保为 UUID 字段生成唯一标识符。
-func (s *System) BeforeCreate(_ *gorm.DB) error {
-	if s.UUID == uuid.Nil {
-		newUUID, err := uuid.NewV7()
-		if err != nil {
-			return err
+// BeforeCreate 在创建 System 实例前自动调用，确保为 ID 字段生成唯一标识符。
+func (s *System) BeforeCreate(tx *gorm.DB) error {
+	if s.ID == 0 {
+		// 从 Context 中获取 Snowflake 节点
+		if val := tx.Statement.Context.Value(xConsts.ContextSnowflakeNode.String()); val != nil {
+			if node, ok := val.(*snowflake.Node); ok {
+				s.ID = node.Generate().Int64()
+			} else {
+				return errors.New("上下文中的无效雪花节点")
+			}
+		} else {
+			return errors.New("snowflake 节点在上下文中未出现")
 		}
-		s.UUID = newUUID
 	}
 	s.CreatedAt = time.Now()
 	s.UpdatedAt = time.Now()
