@@ -58,13 +58,13 @@ func (l *LinkLogic) Add(ctx *gin.Context, req *request.LinkFriendAddReq) (*dto.L
 	}
 
 	// 保存到数据库
-	err := db.WithContext(ctx).Create(link).Error
+	err := db.Create(link).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "创建友情链接失败", false, err)
 	}
 
 	// 预加载关联数据
-	err = db.WithContext(ctx).Preload("GroupFKey").Preload("ColorFKey").First(link, "id = ?", link.ID).Error
+	err = db.Preload("GroupFKey").Preload("ColorFKey").First(link, "id = ?", link.ID).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
 	}
@@ -85,7 +85,7 @@ func (l *LinkLogic) Update(ctx *gin.Context, linkIDStr string, req *request.Link
 
 	// 查找友情链接
 	var link entity.LinkFriend
-	err = db.WithContext(ctx.Request.Context()).First(&link, "id = ?", linkID).Error
+	err = db.First(&link, "id = ?", linkID).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
@@ -126,13 +126,13 @@ func (l *LinkLogic) Update(ctx *gin.Context, linkIDStr string, req *request.Link
 	}
 
 	// 执行更新
-	err = db.WithContext(ctx).Updates(&link).Error
+	err = db.Updates(&link).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "更新友情链接失败", false, err)
 	}
 
 	// 重新查询带关联数据
-	err = db.WithContext(ctx).Preload("GroupFKey").Preload("ColorFKey").First(&link, "id = ?", linkID).Error
+	err = db.Preload("GroupFKey").Preload("ColorFKey").First(&link, "id = ?", linkID).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
 	}
@@ -151,7 +151,7 @@ func (l *LinkLogic) Delete(ctx *gin.Context, linkIDStr string) *xError.Error {
 		return xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
 	}
 
-	result := db.WithContext(ctx.Request.Context()).Where("id = ?", linkID).Delete(&entity.LinkFriend{})
+	result := db.Where("id = ?", linkID).Delete(&entity.LinkFriend{})
 	if result.Error != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "删除友情链接失败", false, result.Error)
 	}
@@ -173,7 +173,7 @@ func (l *LinkLogic) Get(ctx *gin.Context, linkIDStr string) (*dto.LinkFriendDeta
 	}
 
 	var link entity.LinkFriend
-	err = db.WithContext(ctx.Request.Context()).Preload("GroupFKey").Preload("ColorFKey").First(&link, "id = ?", linkID).Error
+	err = db.Preload("GroupFKey").Preload("ColorFKey").First(&link, "id = ?", linkID).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
@@ -198,7 +198,7 @@ func (l *LinkLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*ba
 	}
 
 	// 构建查询条件
-	query := db.WithContext(ctx.Request.Context()).Model(&entity.LinkFriend{})
+	query := db.Model(&entity.LinkFriend{})
 
 	if req.LinkName != "" {
 		query = query.Where("link_name ILIKE ?", "%"+req.LinkName+"%")
@@ -275,7 +275,7 @@ func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkIDStr string, req *reques
 		"review_remark": req.LinkReviewRemark,
 	}
 
-	result := db.WithContext(ctx.Request.Context()).Model(&entity.LinkFriend{}).Where("id = ?", linkID).Updates(updates)
+	result := db.Model(&entity.LinkFriend{}).Where("id = ?", linkID).Updates(updates)
 	if result.Error != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "更新友情链接状态失败", false, result.Error)
 	}
@@ -302,7 +302,7 @@ func (l *LinkLogic) UpdateFailStatus(ctx *gin.Context, linkIDStr string, req *re
 		"fail_reason": req.LinkFailReason,
 	}
 
-	result := db.WithContext(ctx.Request.Context()).Model(&entity.LinkFriend{}).Where("id = ?", linkID).Updates(updates)
+	result := db.Model(&entity.LinkFriend{}).Where("id = ?", linkID).Updates(updates)
 	if result.Error != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "更新友情链接失效状态失败", false, result.Error)
 	}
@@ -318,7 +318,7 @@ func (l *LinkLogic) GetPublicLinks(ctx *gin.Context, groupIDStr string) ([]dto.L
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
 
-	query := db.WithContext(ctx.Request.Context()).Where("status = ? AND is_failure = ?", constants.LinkStatusApproved, constants.LinkFailNormal)
+	query := db.Where("status = ? AND is_failure = ?", constants.LinkStatusApproved, constants.LinkFailNormal)
 
 	if groupIDStr != "" {
 		groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
@@ -351,20 +351,20 @@ func convertLinkFriendToDTO(link *entity.LinkFriend) *dto.LinkFriendDetailDTO {
 		ID:           link.ID,
 		Name:         link.Name,
 		URL:          link.URL,
-		Avatar:       link.Avatar,      // 直接赋值指针 *string → *string
-		RSS:          link.RSS,         // 直接赋值指针 *string → *string
-		Description:  link.Description, // 直接赋值指针 *string → *string
-		Email:        link.Email,       // 直接赋值指针 *string → *string
-		GroupID:      link.GroupID,     // 直接赋值指针 *int64 → *int64
-		ColorID:      link.ColorID,     // 直接赋值指针 *int64 → *int64
+		Avatar:       link.Avatar,
+		RSS:          link.RSS,
+		Description:  link.Description,
+		Email:        link.Email,
+		GroupID:      link.GroupID,
+		ColorID:      link.ColorID,
 		SortOrder:    link.SortOrder,
 		Status:       link.Status,
 		StatusText:   getLinkStatusText(link.Status),
 		IsFailure:    link.IsFailure,
 		FailureText:  getLinkFailText(link.IsFailure),
-		FailReason:   link.FailReason,   // 直接赋值指针 *string → *string
-		ApplyRemark:  link.ApplyRemark,  // 直接赋值指针 *string → *string
-		ReviewRemark: link.ReviewRemark, // 直接赋值指针 *string → *string
+		FailReason:   link.FailReason,
+		ApplyRemark:  link.ApplyRemark,
+		ReviewRemark: link.ReviewRemark,
 		CreatedAt:    link.CreatedAt,
 		UpdatedAt:    link.UpdatedAt,
 	}

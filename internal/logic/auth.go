@@ -41,7 +41,7 @@ func (a *AuthLogic) Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.Sys
 
 	// 查找用户
 	var user entity.SystemUser
-	err := db.WithContext(ctx.Request.Context()).Where("username = ? OR email = ?", req.Username, req.Username).First(&user).Error
+	err := db.Where("username = ? OR email = ?", req.Username, req.Username).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, "", nil, nil, xError.NewError(ctx, xError.LoginFailed, "用户名或密码错误", false)
@@ -73,7 +73,7 @@ func (a *AuthLogic) Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.Sys
 	}
 
 	// 更新最后登录时间
-	err = db.WithContext(ctx.Request.Context()).Model(&user).Update("last_login_at", &now).Error
+	err = db.Model(&user).Update("last_login_at", &now).Error
 	if err != nil {
 		// 记录错误但不影响登录
 		xCtxUtil.GetSugarLogger(ctx, "").Errorf("更新最后登录时间失败: %v", err)
@@ -83,8 +83,8 @@ func (a *AuthLogic) Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.Sys
 		ID:          user.ID,
 		Username:    user.Username,
 		Email:       user.Email,
-		Nickname:    user.Nickname, // 直接赋值指针 *string → *string
-		Avatar:      user.Avatar,   // 直接赋值指针 *string → *string
+		Nickname:    user.Nickname,
+		Avatar:      user.Avatar,
 		Role:        user.Role,
 		Status:      user.Status,
 		LastLoginAt: user.LastLoginAt,
@@ -101,7 +101,7 @@ func (a *AuthLogic) Register(ctx *gin.Context, req *request.AuthRegisterReq) (*d
 
 	// 1. 检查用户名是否已存在
 	var existingUser entity.SystemUser
-	err := db.WithContext(ctx.Request.Context()).Where("username = ?", req.Username).First(&existingUser).Error
+	err := db.Where("username = ?", req.Username).First(&existingUser).Error
 	if err == nil {
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterError, "用户名已存在", false)
 	}
@@ -110,7 +110,7 @@ func (a *AuthLogic) Register(ctx *gin.Context, req *request.AuthRegisterReq) (*d
 	}
 
 	// 2. 检查邮箱是否已存在
-	err = db.WithContext(ctx.Request.Context()).Where("email = ?", req.Email).First(&existingUser).Error
+	err = db.Where("email = ?", req.Email).First(&existingUser).Error
 	if err == nil {
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterError, "邮箱已被注册", false)
 	}
@@ -136,7 +136,7 @@ func (a *AuthLogic) Register(ctx *gin.Context, req *request.AuthRegisterReq) (*d
 	}
 
 	// 5. 创建用户（BeforeCreate Hook 会自动生成 ID 和时间戳）
-	err = db.WithContext(ctx.Request.Context()).Create(&newUser).Error
+	err = db.Create(&newUser).Error
 	if err != nil {
 		return nil, "", nil, nil, xError.NewError(ctx, xError.DatabaseError, "创建用户失败", false, err)
 	}
@@ -171,8 +171,8 @@ func (a *AuthLogic) Register(ctx *gin.Context, req *request.AuthRegisterReq) (*d
 		ID:          newUser.ID,
 		Username:    newUser.Username,
 		Email:       newUser.Email,
-		Nickname:    newUser.Nickname, // 直接赋值指针 *string → *string
-		Avatar:      newUser.Avatar,   // 直接赋值指针 *string → *string
+		Nickname:    newUser.Nickname,
+		Avatar:      newUser.Avatar,
 		Role:        newUser.Role,
 		Status:      newUser.Status,
 		EmailVerify: newUser.EmailVerify,
@@ -200,7 +200,7 @@ func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID int64, req *request.
 
 	// 查找用户
 	var user entity.SystemUser
-	err := db.WithContext(ctx.Request.Context()).First(&user, "id = ?", userID).Error
+	err := db.First(&user, "id = ?", userID).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return xError.NewError(ctx, xError.NotFound, "用户不存在", false)
@@ -220,7 +220,7 @@ func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID int64, req *request.
 	}
 
 	// 更新密码
-	err = db.WithContext(ctx.Request.Context()).Model(&user).Update("password", hashedPassword).Error
+	err = db.Model(&user).Update("password", hashedPassword).Error
 	if err != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "更新密码失败", false, err)
 	}
@@ -235,7 +235,7 @@ func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *request.AuthPasswordRes
 
 	// 查找用户
 	var user entity.SystemUser
-	err := db.WithContext(ctx.Request.Context()).First(&user, "email = ?", req.Email).Error
+	err := db.First(&user, "email = ?", req.Email).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return xError.NewError(ctx, xError.NotFound, "邮箱不存在", false)
@@ -253,7 +253,7 @@ func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *request.AuthPasswordRes
 	}
 
 	// 更新密码
-	err = db.WithContext(ctx.Request.Context()).Model(&user).Update("password", hashedPassword).Error
+	err = db.Model(&user).Update("password", hashedPassword).Error
 	if err != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "重置密码失败", false, err)
 	}
@@ -270,7 +270,7 @@ func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID int64) (*dto.SystemUser
 	db := xCtxUtil.GetDB(ctx)
 
 	var user entity.SystemUser
-	err := db.WithContext(ctx.Request.Context()).First(&user, "id = ?", userID).Error
+	err := db.First(&user, "id = ?", userID).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, xError.NewError(ctx, xError.NotFound, "用户不存在", false)
@@ -282,8 +282,8 @@ func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID int64) (*dto.SystemUser
 		ID:          user.ID,
 		Username:    user.Username,
 		Email:       user.Email,
-		Nickname:    user.Nickname, // 直接赋值指针 *string → *string
-		Avatar:      user.Avatar,   // 直接赋值指针 *string → *string
+		Nickname:    user.Nickname,
+		Avatar:      user.Avatar,
 		Role:        user.Role,
 		Status:      user.Status,
 		LastLoginAt: user.LastLoginAt,
@@ -299,7 +299,7 @@ func (a *AuthLogic) UpdateLastLogin(ctx *gin.Context, userID int64) *xError.Erro
 	db := xCtxUtil.GetDB(ctx)
 
 	now := time.Now()
-	err := db.WithContext(ctx.Request.Context()).Model(&entity.SystemUser{}).Where("id = ?", userID).Update("last_login_at", &now).Error
+	err := db.Model(&entity.SystemUser{}).Where("id = ?", userID).Update("last_login_at", &now).Error
 	if err != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "更新最后登录时间失败", false, err)
 	}

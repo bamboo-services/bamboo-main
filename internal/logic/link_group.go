@@ -16,6 +16,7 @@ import (
 	"bamboo-main/internal/model/dto"
 	"bamboo-main/internal/model/entity"
 	"bamboo-main/internal/model/request"
+	"errors"
 	"strconv"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
@@ -43,17 +44,17 @@ func (l *LinkGroupLogic) Add(ctx *gin.Context, req *request.LinkGroupAddReq) (*d
 
 	// 设置排序值：查询当前最大排序值并+1
 	var maxSort int
-	db.WithContext(ctx).Model(&entity.LinkGroup{}).Select("COALESCE(MAX(sort_order), 0)").Scan(&maxSort)
+	db.Model(&entity.LinkGroup{}).Select("COALESCE(MAX(sort_order), 0)").Scan(&maxSort)
 	group.SortOrder = maxSort + 1
 
 	// 保存到数据库
-	err := db.WithContext(ctx).Create(group).Error
+	err := db.Create(group).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "创建友链分组失败", false, err)
 	}
 
 	// 预加载关联数据并统计友链数量
-	err = db.WithContext(ctx).Preload("LinksFKey").First(group, "id = ?", group.ID).Error
+	err = db.Preload("LinksFKey").First(group, "id = ?", group.ID).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链分组失败", false, err)
 	}
@@ -74,7 +75,7 @@ func (l *LinkGroupLogic) Update(ctx *gin.Context, groupIDStr string, req *reques
 
 	// 查找友链分组
 	var group entity.LinkGroup
-	err = db.WithContext(ctx).First(&group, "id = ?", groupID).Error
+	err = db.First(&group, "id = ?", groupID).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
@@ -97,13 +98,13 @@ func (l *LinkGroupLogic) Update(ctx *gin.Context, groupIDStr string, req *reques
 	}
 
 	// 保存更新
-	err = db.WithContext(ctx).Updates(&group).Error
+	err = db.Updates(&group).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "更新友链分组失败", false, err)
 	}
 
 	// 预加载关联数据
-	err = db.WithContext(ctx).Preload("LinksFKey").First(&group, "id = ?", group.ID).Error
+	err = db.Preload("LinksFKey").First(&group, "id = ?", group.ID).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链分组失败", false, err)
 	}
@@ -120,7 +121,7 @@ func (l *LinkGroupLogic) UpdateSort(ctx *gin.Context, req *request.LinkGroupSort
 	groupIDs := req.GroupIDs
 
 	// 开始事务
-	tx := db.WithContext(ctx).Begin()
+	tx := db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
@@ -170,7 +171,7 @@ func (l *LinkGroupLogic) UpdateStatus(ctx *gin.Context, groupIDStr string, req *
 	}
 
 	// 更新状态
-	result := db.WithContext(ctx).Model(&entity.LinkGroup{}).
+	result := db.Model(&entity.LinkGroup{}).
 		Where("id = ?", groupID).
 		Update("status", req.Status)
 
@@ -198,7 +199,7 @@ func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupIDStr string, req *reques
 
 	// 检查分组是否存在
 	var group entity.LinkGroup
-	err = db.WithContext(ctx).First(&group, "id = ?", groupID).Error
+	err = db.First(&group, "id = ?", groupID).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
@@ -208,7 +209,7 @@ func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupIDStr string, req *reques
 
 	// 查询关联的友链
 	var linkCount int64
-	err = db.WithContext(ctx).Model(&entity.LinkFriend{}).
+	err = db.Model(&entity.LinkFriend{}).
 		Where("group_id = ?", groupID).
 		Count(&linkCount).Error
 	if err != nil {
@@ -218,7 +219,7 @@ func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupIDStr string, req *reques
 	// 如果有关联友链且不是强制删除，返回冲突信息
 	if linkCount > 0 && !req.Force {
 		var conflictLinks []entity.LinkFriend
-		err = db.WithContext(ctx).
+		err = db.
 			Where("group_id = ?", groupID).
 			Limit(10).
 			Find(&conflictLinks).Error
@@ -240,7 +241,7 @@ func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupIDStr string, req *reques
 	}
 
 	// 开始事务
-	tx := db.WithContext(ctx).Begin()
+	tx := db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
@@ -286,9 +287,9 @@ func (l *LinkGroupLogic) Get(ctx *gin.Context, groupIDStr string) (*dto.LinkGrou
 
 	// 查询友链分组（预加载关联友链）
 	var group entity.LinkGroup
-	err = db.WithContext(ctx).Preload("LinksFKey").First(&group, "id = ?", groupID).Error
+	err = db.Preload("LinksFKey").First(&group, "id = ?", groupID).Error
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
 		}
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链分组失败", false, err)
@@ -303,7 +304,7 @@ func (l *LinkGroupLogic) GetList(ctx *gin.Context, req *request.LinkGroupListReq
 	db := xCtxUtil.GetDB(ctx)
 
 	// 构建查询
-	query := db.WithContext(ctx).Model(&entity.LinkGroup{})
+	query := db.Model(&entity.LinkGroup{})
 
 	// 应用过滤条件
 	if req.Status != nil {
@@ -350,7 +351,7 @@ func (l *LinkGroupLogic) GetList(ctx *gin.Context, req *request.LinkGroupListReq
 			Count   int64 `gorm:"column:count"`
 		}
 
-		err = db.WithContext(ctx).
+		err = db.
 			Model(&entity.LinkFriend{}).
 			Select("group_id, COUNT(*) as count").
 			Where("group_id IN ?", groupIDs).
@@ -388,7 +389,7 @@ func (l *LinkGroupLogic) GetPage(ctx *gin.Context, req *request.LinkGroupPageReq
 	}
 
 	// 构建查询
-	query := db.WithContext(ctx).Model(&entity.LinkGroup{})
+	query := db.Model(&entity.LinkGroup{})
 
 	// 应用过滤条件
 	if req.Status != nil {
@@ -439,7 +440,7 @@ func (l *LinkGroupLogic) GetPage(ctx *gin.Context, req *request.LinkGroupPageReq
 			Count   int64 `gorm:"column:count"`
 		}
 
-		err = db.WithContext(ctx).
+		err = db.
 			Model(&entity.LinkFriend{}).
 			Select("group_id, COUNT(*) as count").
 			Where("group_id IN ?", groupIDs).
@@ -491,7 +492,7 @@ func convertLinkGroupToDetailDTO(group *entity.LinkGroup) *dto.LinkGroupDetailDT
 	return &dto.LinkGroupDetailDTO{
 		ID:          group.ID,
 		Name:        group.Name,
-		Description: group.Description, // 直接赋值指针 *string → *string
+		Description: group.Description,
 		SortOrder:   group.SortOrder,
 		Status:      status,
 		LinkCount:   len(links),
@@ -512,7 +513,7 @@ func convertLinkGroupToNormalDTO(group *entity.LinkGroup, linkCount int64) dto.L
 	return dto.LinkGroupNormalDTO{
 		ID:          group.ID,
 		Name:        group.Name,
-		Description: group.Description, // 直接赋值指针 *string → *string
+		Description: group.Description,
 		SortOrder:   group.SortOrder,
 		Status:      status,
 		LinkCount:   int(linkCount),

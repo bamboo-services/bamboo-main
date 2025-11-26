@@ -221,6 +221,28 @@ func (h *LinkHandler) AddLink(ctx *gin.Context) {
   - 未导出: camelCase
 - **导入**: 标准库 → 第三方库 → 本地包,分组留空行
 
+### 数据库 Context 使用规范
+
+**重要**：从 `xCtxUtil.GetDB(ctx)` 获取的 db 实例已包含 Snowflake 节点，**不要**再次调用 `WithContext` 覆盖！
+
+❌ **错误**：
+```go
+db := xCtxUtil.GetDB(ctx)
+err := db.WithContext(ctx.Request.Context()).Create(&user).Error  // 会丢失 Snowflake 节点
+```
+
+✅ **正确**：
+```go
+db := xCtxUtil.GetDB(ctx)
+err := db.Create(&user).Error  // 直接使用即可
+```
+
+**原理**：
+- 数据库在初始化时（`pkg/startup/register_database.go:85-88`）已设置包含 Snowflake 节点的 context
+- 中间件会将这个 db 实例注入到每个请求的 Gin Context 中
+- 使用 `WithContext()` 会替换原有的 context，导致 BeforeCreate Hook 无法获取 Snowflake 节点生成主键 ID
+- 直接使用 `xCtxUtil.GetDB(ctx)` 返回的 db 即可，无需额外设置 context
+
 ### 提交规范
 
 遵循 Conventional Commits:
