@@ -21,9 +21,6 @@ main.exe
 build_*
 *.pid
 
-# Go test files
-test*
-
 # Dependencies
 vendor/
 

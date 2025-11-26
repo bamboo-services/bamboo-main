@@ -59,6 +59,7 @@ func Register(serv *xInit.Reg) *Reg {
 	reg.DatabaseInit()     // 初始化数据库连接
 	reg.RedisInit()        // 初始化 Redis 连接池
 	reg.DatabaseUserInit() // 初始化系统用户
+	reg.MailInit()         // 初始化邮件系统
 
 	// 初始化系统上下文
 	reg.SystemContextInit()

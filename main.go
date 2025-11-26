@@ -12,6 +12,13 @@
 package main
 
 import (
+	"context"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	_ "bamboo-main/docs"
 	"bamboo-main/internal/router"
 	"bamboo-main/pkg/startup"
@@ -41,10 +48,39 @@ func main() {
 	// 初始化路由表
 	router.Init(getGin, getServ.Config)
 
-	// 启动 gin 主服务
-	log.Infof("启动程序端口: %d", getServ.Config.Xlf.Server.Port)
-	err := getGin.Run(fmt.Sprintf(":%d", getServ.Config.Xlf.Server.Port))
-	if err != nil {
-		log.Fatalf("[MAIN] 系统启动失败 %v", err)
+	// 创建 HTTP 服务器
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%d", getServ.Config.Xlf.Server.Port),
+		Handler: getGin,
 	}
+
+	// 在独立的 goroutine 中启动服务器
+	go func() {
+		log.Infof("启动程序端口: %d", getServ.Config.Xlf.Server.Port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("[MAIN] 系统启动失败: %v", err)
+		}
+	}()
+
+	// 监听系统信号，优雅关闭
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Info("收到关闭信号，正在优雅关闭...")
+
+	// 停止邮件工作协程
+	if mailWorker := startup.GetMailWorker(); mailWorker != nil {
+		mailWorker.Stop()
+	}
+
+	// 设置 5 秒超时关闭 HTTP 服务器
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Errorf("HTTP 服务器关闭失败: %v", err)
+	}
+
+	log.Info("服务已停止")
 }

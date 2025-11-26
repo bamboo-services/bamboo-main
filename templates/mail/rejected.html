@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>友链审核拒绝通知</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="color: #333; border-bottom: 2px solid #F44336; padding-bottom: 10px; margin-top: 0;">
+                😔 很抱歉，您的友链申请未通过
+            </h2>
+            <p style="color: #555; line-height: 1.8;">
+                亲爱的 <strong>{{.Username}}</strong>，您好！
+            </p>
+            <p style="color: #555; line-height: 1.8;">
+                很遗憾地通知您，您提交的友情链接申请未通过审核：
+            </p>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #ddd; background: #f9f9f9; width: 30%;">网站名称</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">{{.LinkName}}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #ddd; background: #f9f9f9;">网站地址</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">
+                        <a href="{{.LinkURL}}" style="color: #1a73e8;">{{.LinkURL}}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #ddd; background: #fff3e0;">拒绝原因</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; background: #fff3e0; color: #e65100;">{{.RejectReason}}</td>
+                </tr>
+            </table>
+            <p style="color: #666; line-height: 1.8;">
+                如有疑问，欢迎修改后重新提交申请。
+            </p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0 20px;">
+            <p style="color: #999; font-size: 12px; text-align: center;">
+                此邮件由 {{.FromName}} 系统自动发送，请勿回复。
+            </p>
+        </div>
+    </div>
+</body>
+</html>

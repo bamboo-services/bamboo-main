@@ -30,7 +30,11 @@ const (
 	ColorListPrefix  = "bm:color:list:%s"
 
 	// 邮件相关
-	EmailLimitPrefix = "bm:email:limit:%s"
+	EmailLimitPrefix  = "bm:email:limit:%s"
+	MailQueueKey      = "bm:mail:queue"     // 邮件主队列（List - FIFO）
+	MailRetryQueueKey = "bm:mail:retry"     // 邮件重试队列（Sorted Set）
+	MailFailedKey     = "bm:mail:failed:%s" // 邮件失败记录（7天TTL）
+	MailStatsKey      = "bm:mail:stats"     // 邮件统计信息（Hash）
 
 	// 申请相关
 	ApplyLimitPrefix = "bm:apply:limit:%s"
