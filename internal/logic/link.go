@@ -16,7 +16,9 @@ import (
 	"bamboo-main/internal/model/dto"
 	"bamboo-main/internal/model/entity"
 	"bamboo-main/internal/model/request"
+	servHelper "bamboo-main/internal/service/helper"
 	"bamboo-main/pkg/constants"
+	ctxUtil "bamboo-main/pkg/util/ctx"
 	"strconv"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
@@ -68,6 +70,9 @@ func (l *LinkLogic) Add(ctx *gin.Context, req *request.LinkFriendAddReq) (*dto.L
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
 	}
+
+	// 发送邮件通知管理员（异步，不阻断主流程）
+	go l.sendApplyNotification(ctx, link)
 
 	return convertLinkFriendToDTO(link), nil
 }
@@ -270,6 +275,16 @@ func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkIDStr string, req *reques
 		return xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
 	}
 
+	// 先查询友链信息（用于发送邮件通知）
+	var link entity.LinkFriend
+	err = db.First(&link, "id = ?", linkID).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		}
+		return xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
+	}
+
 	updates := map[string]interface{}{
 		"status":        req.LinkStatus,
 		"review_remark": req.LinkReviewRemark,
@@ -282,6 +297,9 @@ func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkIDStr string, req *reques
 	if result.RowsAffected == 0 {
 		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
+
+	// 发送审核结果邮件通知（异步，不阻断主流程）
+	go l.sendStatusNotification(ctx, &link, req.LinkStatus, req.LinkReviewRemark)
 
 	return nil
 }
@@ -412,5 +430,114 @@ func getLinkFailText(fail int) string {
 		return "失效"
 	default:
 		return "未知状态"
+	}
+}
+
+// sendApplyNotification 发送友链申请通知邮件给管理员
+//
+// 此函数应在 goroutine 中异步调用，不会阻断主流程
+func (l *LinkLogic) sendApplyNotification(ctx *gin.Context, link *entity.LinkFriend) {
+	logger := xCtxUtil.GetSugarLogger(ctx, "MAIL")
+
+	// 获取配置
+	config := ctxUtil.GetConfig(ctx)
+	if config == nil {
+		logger.Warn("无法获取配置，跳过发送申请通知邮件")
+		return
+	}
+
+	// 检查管理员邮箱是否配置
+	if config.Email.AdminEmail == "" {
+		logger.Warn("管理员邮箱未配置，跳过发送申请通知邮件")
+		return
+	}
+
+	// 构建模板变量
+	linkDesc := ""
+	if link.Description != nil {
+		linkDesc = *link.Description
+	}
+	linkEmail := ""
+	if link.Email != nil {
+		linkEmail = *link.Email
+	}
+
+	variables := map[string]string{
+		"Username": link.Name,
+		"LinkName": link.Name,
+		"LinkURL":  link.URL,
+		"LinkDesc": linkDesc,
+		"Email":    linkEmail,
+		"AdminURL": "", // 可后续配置后台管理链接
+		"FromName": config.Email.FromName,
+	}
+
+	// 发送邮件
+	mailLogic := &MailLogic{TemplateService: servHelper.NewMailTemplateService(), MaxRetry: 3}
+	err := mailLogic.SendWithTemplate(
+		ctx,
+		"apply",
+		[]string{config.Email.AdminEmail},
+		"【友链申请】收到新的友情链接申请",
+		variables,
+	)
+	if err != nil {
+		logger.Warnf("发送友链申请通知邮件失败: %v", err)
+	}
+}
+
+// sendStatusNotification 发送审核结果通知邮件给申请者
+//
+// 此函数应在 goroutine 中异步调用，不会阻断主流程
+func (l *LinkLogic) sendStatusNotification(ctx *gin.Context, link *entity.LinkFriend, status int, reviewRemark string) {
+	logger := xCtxUtil.GetSugarLogger(ctx, "MAIL")
+
+	// 检查友链是否有邮箱
+	if link.Email == nil || *link.Email == "" {
+		logger.Infof("友链 %s 无联系邮箱，跳过发送审核通知", link.Name)
+		return
+	}
+
+	// 获取配置
+	config := ctxUtil.GetConfig(ctx)
+	if config == nil {
+		logger.Warn("无法获取配置，跳过发送审核通知邮件")
+		return
+	}
+
+	// 根据状态选择模板和主题
+	var templateName, subject string
+	switch status {
+	case constants.LinkStatusApproved:
+		templateName = "approved"
+		subject = "🎉 您的友链申请已通过"
+	case constants.LinkStatusRejected:
+		templateName = "rejected"
+		subject = "📋 您的友链申请审核结果"
+	default:
+		// 非通过/拒绝状态不发送邮件
+		return
+	}
+
+	// 构建模板变量
+	variables := map[string]string{
+		"Username":     link.Name,
+		"LinkName":     link.Name,
+		"LinkURL":      link.URL,
+		"RejectReason": reviewRemark,
+		"FromName":     config.Email.FromName,
+	}
+
+	// 发送邮件
+	mailLogic := &MailLogic{TemplateService: servHelper.NewMailTemplateService(), MaxRetry: 3}
+	err := mailLogic.SendWithTemplate(
+		ctx,
+		templateName,
+		[]string{*link.Email},
+		subject,
+		variables,
+	)
+	if err != nil {
+		logger.Warnf("发送友链审核通知邮件失败: %v", err)
 	}
 }

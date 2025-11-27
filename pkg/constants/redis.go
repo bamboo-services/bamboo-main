@@ -36,6 +36,12 @@ const (
 	MailFailedKey     = "bm:mail:failed:%s" // 邮件失败记录（7天TTL）
 	MailStatsKey      = "bm:mail:stats"     // 邮件统计信息（Hash）
 
+	// 邮箱验证相关
+	EmailVerifyTokenPrefix = "bm:email:verify:%s" // 邮箱验证Token（24小时TTL）
+
+	// 密码重置相关
+	PasswordResetTokenPrefix = "bm:password:reset:%s" // 密码重置Token（1小时TTL）
+
 	// 申请相关
 	ApplyLimitPrefix = "bm:apply:limit:%s"
 )

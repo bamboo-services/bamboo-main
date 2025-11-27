@@ -213,12 +213,12 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 
 // ResetPassword 重置密码
 // @Summary 重置密码
-// @Description 通过邮箱重置用户密码
+// @Description 通过邮箱重置用户密码，发送重置链接到邮箱
 // @Tags 认证管理
 // @Accept json
 // @Produce json
 // @Param request body request.AuthPasswordResetReq true "重置密码请求"
-// @Success 200 {object} response.AuthPasswordResetResponse "重置成功"
+// @Success 200 {object} response.AuthPasswordResetResponse "重置链接已发送"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 404 {object} map[string]interface{} "邮箱不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
@@ -241,5 +241,106 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "密码重置成功，新密码已发送到邮箱")
+	xResult.Success(c, "重置链接已发送到您的邮箱，请在1小时内完成密码重置")
+}
+
+// VerifyEmail 验证邮箱
+// @Summary 验证邮箱
+// @Description 通过邮箱中的验证链接验证用户邮箱
+// @Tags 认证管理
+// @Accept json
+// @Produce json
+// @Param token query string true "验证Token"
+// @Success 200 {object} map[string]interface{} "验证成功"
+// @Failure 400 {object} map[string]interface{} "Token无效或已过期"
+// @Failure 500 {object} map[string]interface{} "服务器内部错误"
+// @Router /api/v1/auth/verify-email [get]
+func (h *AuthHandler) VerifyEmail(c *gin.Context) {
+	var req request.AuthVerifyEmailReq
+
+	// 绑定请求数据
+	bindErr := c.ShouldBindQuery(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	err := h.authService.VerifyEmail(c, &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	xResult.Success(c, "邮箱验证成功")
+}
+
+// VerifyResetToken 验证重置密码Token
+// @Summary 验证重置密码Token
+// @Description 检查密码重置链接是否有效
+// @Tags 认证管理
+// @Accept json
+// @Produce json
+// @Param token query string true "重置Token"
+// @Success 200 {object} map[string]interface{} "Token有效"
+// @Failure 400 {object} map[string]interface{} "Token无效或已过期"
+// @Failure 500 {object} map[string]interface{} "服务器内部错误"
+// @Router /api/v1/auth/reset-password [get]
+func (h *AuthHandler) VerifyResetToken(c *gin.Context) {
+	var req request.AuthVerifyResetTokenReq
+
+	// 绑定请求数据
+	bindErr := c.ShouldBindQuery(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	valid, err := h.authService.VerifyResetToken(c, &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	if !valid {
+		_ = c.Error(xError.NewError(c, xError.BadRequest, "重置链接无效或已过期", false))
+		return
+	}
+
+	// 返回成功响应
+	xResult.Success(c, "重置链接有效，请设置新密码")
+}
+
+// ConfirmResetPassword 确认重置密码
+// @Summary 确认重置密码
+// @Description 通过重置Token设置新密码
+// @Tags 认证管理
+// @Accept json
+// @Produce json
+// @Param request body request.AuthConfirmResetPasswordReq true "确认重置密码请求"
+// @Success 200 {object} map[string]interface{} "密码重置成功"
+// @Failure 400 {object} map[string]interface{} "Token无效或已过期"
+// @Failure 500 {object} map[string]interface{} "服务器内部错误"
+// @Router /api/v1/auth/reset-password [post]
+func (h *AuthHandler) ConfirmResetPassword(c *gin.Context) {
+	var req request.AuthConfirmResetPasswordReq
+
+	// 绑定请求数据
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	err := h.authService.ConfirmResetPassword(c, &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	xResult.Success(c, "密码重置成功，请使用新密码登录")
 }

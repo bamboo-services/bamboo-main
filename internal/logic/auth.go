@@ -13,12 +13,15 @@ package logic
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"bamboo-main/internal/model/dto"
 	"bamboo-main/internal/model/entity"
 	"bamboo-main/internal/model/request"
 	servHelper "bamboo-main/internal/service/helper"
+	"bamboo-main/pkg/constants"
+	ctxUtil "bamboo-main/pkg/util/ctx"
 
 	"crypto/rand"
 
@@ -154,17 +157,8 @@ func (a *AuthLogic) Register(ctx *gin.Context, req *request.AuthRegisterReq) (*d
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ServerInternalError, "创建用户会话失败", false, err)
 	}
 
-	// 9. TODO: 发送邮箱验证邮件
-	// 功能说明：
-	//   - 生成邮箱验证令牌（建议使用 JWT 或随机字符串）
-	//   - 将令牌存储到 Redis，设置过期时间（如 24 小时）
-	//   - 发送包含验证链接的邮件到用户邮箱
-	//   - 验证链接格式：https://域名/api/v1/auth/verify-email?token=xxx
-	//   - 用户点击链接后，验证 Token 并更新 email_verify 字段为 true
-	// 相关文件：
-	//   - 邮件发送服务：待实现（参考 pkg/constants/redis.go 的 EmailLimitPrefix）
-	//   - 验证接口：待添加到 router_auth.go
-	xCtxUtil.GetSugarLogger(ctx, "").Infof("用户 %s 注册成功，邮箱 %s 待验证", newUser.Username, newUser.Email)
+	// 9. 发送邮箱验证邮件（异步，不阻断主流程）
+	go a.sendEmailVerification(ctx, &newUser)
 
 	// 10. 构建返回 DTO（注册不更新 last_login_at）
 	userDTO := &dto.SystemUserDetailDTO{
@@ -228,7 +222,7 @@ func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID int64, req *request.
 	return nil
 }
 
-// ResetPassword 重置密码
+// ResetPassword 重置密码（发送重置链接）
 func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *request.AuthPasswordResetReq) *xError.Error {
 	// 获取数据库连接
 	db := xCtxUtil.GetDB(ctx)
@@ -243,23 +237,23 @@ func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *request.AuthPasswordRes
 		return xError.NewError(ctx, xError.DatabaseError, "查询用户失败", false, err)
 	}
 
-	// 生成临时密码
-	tempPassword := generateRandomString(12)
+	// 生成重置 Token（32位随机字符串）
+	resetToken := generateRandomString(32)
 
-	// 加密密码
-	hashedPassword, err := xUtil.EncryptPasswordString(tempPassword)
-	if err != nil {
-		return xError.NewError(ctx, xError.ServerInternalError, "密码加密失败", false, err)
+	// 存储到 Redis（1小时过期）
+	rdb := ctxUtil.GetRedisClient(ctx)
+	if rdb == nil {
+		return xError.NewError(ctx, xError.ServerInternalError, "Redis 客户端不可用", false)
 	}
 
-	// 更新密码
-	err = db.Model(&user).Update("password", hashedPassword).Error
+	redisKey := fmt.Sprintf(constants.PasswordResetTokenPrefix, resetToken)
+	err = rdb.Set(ctx.Request.Context(), redisKey, user.ID, time.Hour).Err()
 	if err != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "重置密码失败", false, err)
+		return xError.NewError(ctx, xError.ServerInternalError, "保存重置Token失败", false, err)
 	}
 
-	// TODO: 发送邮件通知新密码
-	xCtxUtil.GetSugarLogger(ctx, "").Infof("用户 %s 的临时密码为: %s", user.Email, tempPassword)
+	// 发送重置密码邮件（异步，不阻断主流程）
+	go a.sendPasswordResetEmail(ctx, &user, resetToken)
 
 	return nil
 }
@@ -326,4 +320,202 @@ func generateRandomString(length int) string {
 	}
 
 	return string(result)
+}
+
+// VerifyEmail 验证邮箱
+func (a *AuthLogic) VerifyEmail(ctx *gin.Context, req *request.AuthVerifyEmailReq) *xError.Error {
+	logger := xCtxUtil.GetSugarLogger(ctx, "AUTH")
+
+	// 获取 Redis 客户端
+	rdb := ctxUtil.GetRedisClient(ctx)
+	if rdb == nil {
+		return xError.NewError(ctx, xError.ServerInternalError, "Redis 客户端不可用", false)
+	}
+
+	// 从 Redis 获取用户 ID
+	redisKey := fmt.Sprintf(constants.EmailVerifyTokenPrefix, req.Token)
+	userIDStr, err := rdb.Get(ctx.Request.Context(), redisKey).Result()
+	if err != nil {
+		logger.Warnf("邮箱验证Token无效或已过期: %s", req.Token)
+		return xError.NewError(ctx, xError.BadRequest, "验证链接无效或已过期", false)
+	}
+
+	// 删除已使用的 Token
+	rdb.Del(ctx.Request.Context(), redisKey)
+
+	// 更新用户邮箱验证状态
+	db := xCtxUtil.GetDB(ctx)
+	err = db.Model(&entity.SystemUser{}).Where("id = ?", userIDStr).Update("email_verify", true).Error
+	if err != nil {
+		return xError.NewError(ctx, xError.DatabaseError, "更新邮箱验证状态失败", false, err)
+	}
+
+	logger.Infof("用户 %s 邮箱验证成功", userIDStr)
+	return nil
+}
+
+// VerifyResetToken 验证重置密码Token
+func (a *AuthLogic) VerifyResetToken(ctx *gin.Context, req *request.AuthVerifyResetTokenReq) (bool, *xError.Error) {
+	// 获取 Redis 客户端
+	rdb := ctxUtil.GetRedisClient(ctx)
+	if rdb == nil {
+		return false, xError.NewError(ctx, xError.ServerInternalError, "Redis 客户端不可用", false)
+	}
+
+	// 检查 Token 是否存在
+	redisKey := fmt.Sprintf(constants.PasswordResetTokenPrefix, req.Token)
+	exists, err := rdb.Exists(ctx.Request.Context(), redisKey).Result()
+	if err != nil {
+		return false, xError.NewError(ctx, xError.ServerInternalError, "验证Token失败", false, err)
+	}
+
+	return exists > 0, nil
+}
+
+// ConfirmResetPassword 确认重置密码
+func (a *AuthLogic) ConfirmResetPassword(ctx *gin.Context, req *request.AuthConfirmResetPasswordReq) *xError.Error {
+	logger := xCtxUtil.GetSugarLogger(ctx, "AUTH")
+
+	// 获取 Redis 客户端
+	rdb := ctxUtil.GetRedisClient(ctx)
+	if rdb == nil {
+		return xError.NewError(ctx, xError.ServerInternalError, "Redis 客户端不可用", false)
+	}
+
+	// 从 Redis 获取用户 ID
+	redisKey := fmt.Sprintf(constants.PasswordResetTokenPrefix, req.Token)
+	userIDStr, err := rdb.Get(ctx.Request.Context(), redisKey).Result()
+	if err != nil {
+		logger.Warnf("密码重置Token无效或已过期: %s", req.Token)
+		return xError.NewError(ctx, xError.BadRequest, "重置链接无效或已过期", false)
+	}
+
+	// 删除已使用的 Token
+	rdb.Del(ctx.Request.Context(), redisKey)
+
+	// 加密新密码
+	hashedPassword, err := xUtil.EncryptPasswordString(req.NewPassword)
+	if err != nil {
+		return xError.NewError(ctx, xError.ServerInternalError, "密码加密失败", false, err)
+	}
+
+	// 更新用户密码
+	db := xCtxUtil.GetDB(ctx)
+	err = db.Model(&entity.SystemUser{}).Where("id = ?", userIDStr).Update("password", hashedPassword).Error
+	if err != nil {
+		return xError.NewError(ctx, xError.DatabaseError, "重置密码失败", false, err)
+	}
+
+	logger.Infof("用户 %s 密码重置成功", userIDStr)
+	return nil
+}
+
+// sendEmailVerification 发送邮箱验证邮件
+//
+// 此函数应在 goroutine 中异步调用，不会阻断主流程
+func (a *AuthLogic) sendEmailVerification(ctx *gin.Context, user *entity.SystemUser) {
+	logger := xCtxUtil.GetSugarLogger(ctx, "MAIL")
+
+	// 获取配置
+	config := ctxUtil.GetConfig(ctx)
+	if config == nil {
+		logger.Warn("无法获取配置，跳过发送邮箱验证邮件")
+		return
+	}
+
+	// 获取 Redis 客户端
+	rdb := ctxUtil.GetRedisClient(ctx)
+	if rdb == nil {
+		logger.Warn("Redis 客户端不可用，跳过发送邮箱验证邮件")
+		return
+	}
+
+	// 生成验证 Token
+	verifyToken := generateRandomString(32)
+
+	// 存储到 Redis（24小时过期）
+	redisKey := fmt.Sprintf(constants.EmailVerifyTokenPrefix, verifyToken)
+	err := rdb.Set(ctx.Request.Context(), redisKey, user.ID, 24*time.Hour).Err()
+	if err != nil {
+		logger.Warnf("保存验证Token失败: %v", err)
+		return
+	}
+
+	// 构建验证链接（TODO: 从配置读取域名前缀）
+	verifyLink := fmt.Sprintf("https://localhost/api/v1/auth/verify-email?token=%s", verifyToken)
+
+	// 获取用户昵称
+	username := user.Username
+	if user.Nickname != nil && *user.Nickname != "" {
+		username = *user.Nickname
+	}
+
+	// 构建模板变量
+	variables := map[string]string{
+		"Username":   username,
+		"VerifyLink": verifyLink,
+		"ExpireTime": "24小时",
+		"FromName":   config.Email.FromName,
+	}
+
+	// 发送邮件
+	mailLogic := &MailLogic{TemplateService: servHelper.NewMailTemplateService(), MaxRetry: 3}
+	mailErr := mailLogic.SendWithTemplate(
+		ctx,
+		"email_verify",
+		[]string{user.Email},
+		"请验证您的邮箱地址",
+		variables,
+	)
+	if mailErr != nil {
+		logger.Warnf("发送邮箱验证邮件失败: %v", mailErr)
+	} else {
+		logger.Infof("已发送邮箱验证邮件到: %s", user.Email)
+	}
+}
+
+// sendPasswordResetEmail 发送密码重置邮件
+//
+// 此函数应在 goroutine 中异步调用，不会阻断主流程
+func (a *AuthLogic) sendPasswordResetEmail(ctx *gin.Context, user *entity.SystemUser, resetToken string) {
+	logger := xCtxUtil.GetSugarLogger(ctx, "MAIL")
+
+	// 获取配置
+	config := ctxUtil.GetConfig(ctx)
+	if config == nil {
+		logger.Warn("无法获取配置，跳过发送密码重置邮件")
+		return
+	}
+
+	// 构建重置链接（TODO: 从配置读取域名前缀）
+	resetLink := fmt.Sprintf("https://localhost/api/v1/auth/reset-password?token=%s", resetToken)
+
+	// 获取用户昵称
+	username := user.Username
+	if user.Nickname != nil && *user.Nickname != "" {
+		username = *user.Nickname
+	}
+
+	// 构建模板变量
+	variables := map[string]string{
+		"Username":   username,
+		"ResetLink":  resetLink,
+		"ExpireTime": "1小时",
+		"FromName":   config.Email.FromName,
+	}
+
+	// 发送邮件
+	mailLogic := &MailLogic{TemplateService: servHelper.NewMailTemplateService(), MaxRetry: 3}
+	mailErr := mailLogic.SendWithTemplate(
+		ctx,
+		"password_reset",
+		[]string{user.Email},
+		"密码重置请求",
+		variables,
+	)
+	if mailErr != nil {
+		logger.Warnf("发送密码重置邮件失败: %v", mailErr)
+	} else {
+		logger.Infof("已发送密码重置邮件到: %s", user.Email)
+	}
 }

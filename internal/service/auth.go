@@ -37,8 +37,17 @@ type IAuthService interface {
 	// ChangePassword 修改密码
 	ChangePassword(ctx *gin.Context, userID int64, req *request.AuthPasswordChangeReq) *xError.Error
 
-	// ResetPassword 重置密码
+	// ResetPassword 重置密码（发送重置链接）
 	ResetPassword(ctx *gin.Context, req *request.AuthPasswordResetReq) *xError.Error
+
+	// VerifyEmail 验证邮箱
+	VerifyEmail(ctx *gin.Context, req *request.AuthVerifyEmailReq) *xError.Error
+
+	// VerifyResetToken 验证重置密码Token
+	VerifyResetToken(ctx *gin.Context, req *request.AuthVerifyResetTokenReq) (bool, *xError.Error)
+
+	// ConfirmResetPassword 确认重置密码
+	ConfirmResetPassword(ctx *gin.Context, req *request.AuthConfirmResetPasswordReq) *xError.Error
 
 	// GetUserInfo 获取用户信息
 	GetUserInfo(ctx *gin.Context, userID int64) (*dto.SystemUserDetailDTO, *xError.Error)

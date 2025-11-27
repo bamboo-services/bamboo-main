@@ -117,3 +117,19 @@ type AuthPasswordChangeReq struct {
 type AuthPasswordResetReq struct {
 	Email string `json:"email" binding:"required,email" example:"admin@example.com"`
 }
+
+// AuthVerifyEmailReq 验证邮箱请求
+type AuthVerifyEmailReq struct {
+	Token string `form:"token" binding:"required,min=32,max=64" example:"abc123..."`
+}
+
+// AuthConfirmResetPasswordReq 确认重置密码请求
+type AuthConfirmResetPasswordReq struct {
+	Token       string `json:"token" binding:"required,min=32,max=64" example:"abc123..."`
+	NewPassword string `json:"new_password" binding:"required,min=6,max=100" example:"newpassword123"`
+}
+
+// AuthVerifyResetTokenReq 验证重置Token请求
+type AuthVerifyResetTokenReq struct {
+	Token string `form:"token" binding:"required,min=32,max=64" example:"abc123..."`
+}

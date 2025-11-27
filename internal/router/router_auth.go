@@ -23,9 +23,12 @@ func (r *Route) AuthRouter() {
 	authHandler := handler.NewAuthHandler()
 	{
 		// 无需认证的路由
-		auth.POST("/login", authHandler.Login)                   // 用户登录
-		auth.POST("/register", authHandler.Register)             // 用户注册
-		auth.PATCH("/password/reset", authHandler.ResetPassword) // 重置密码
+		auth.POST("/login", authHandler.Login)                         // 用户登录
+		auth.POST("/register", authHandler.Register)                   // 用户注册
+		auth.PATCH("/password/reset", authHandler.ResetPassword)       // 发送重置密码链接
+		auth.GET("/verify-email", authHandler.VerifyEmail)             // 验证邮箱
+		auth.GET("/reset-password", authHandler.VerifyResetToken)      // 验证重置密码Token
+		auth.POST("/reset-password", authHandler.ConfirmResetPassword) // 确认重置密码
 
 		// 需要认证的路由
 		authRequired := auth.Group("")

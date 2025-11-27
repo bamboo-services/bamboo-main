@@ -65,6 +65,7 @@ type EmailConfig struct {
 	Password    string `mapstructure:"password" yaml:"password"`         // SMTP 密码
 	FromEmail   string `mapstructure:"from_email" yaml:"from_email"`     // 发件人邮箱
 	FromName    string `mapstructure:"from_name" yaml:"from_name"`       // 发件人名称
+	AdminEmail  string `mapstructure:"admin_email" yaml:"admin_email"`   // 管理员邮箱（接收申请通知）
 	WorkerCount int    `mapstructure:"worker_count" yaml:"worker_count"` // 工作协程数（默认4）
 	MaxRetry    int    `mapstructure:"max_retry" yaml:"max_retry"`       // 最大重试次数（默认3）
 	Timeout     int    `mapstructure:"timeout" yaml:"timeout"`           // 发送超时秒数（默认10）
