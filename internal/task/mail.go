@@ -13,6 +13,7 @@ package task
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -35,7 +36,7 @@ import (
 type MailWorker struct {
 	rdb         *redis.Client      // Redis 客户端
 	config      *base.EmailConfig  // 邮件配置
-	pool        *email.Pool        // SMTP 连接池
+	pool        *TLSMailPool       // TLS 邮件连接池
 	logger      *zap.SugaredLogger // 日志记录器
 	ctx         context.Context    // 上下文
 	cancel      context.CancelFunc // 取消函数
@@ -87,12 +88,26 @@ func (w *MailWorker) Start() {
 	addr := fmt.Sprintf("%s:%d", w.config.SMTPHost, w.config.SMTPPort)
 	auth := smtp.PlainAuth("", w.config.Username, w.config.Password, w.config.SMTPHost)
 
-	pool, err := email.NewPool(addr, w.workerCount, auth)
-	if err != nil {
-		w.logger.Errorf("创建邮件连接池失败: %v", err)
-		return
+	// TLS 配置
+	tlsConfig := &tls.Config{
+		ServerName: w.config.SMTPHost,
 	}
-	w.pool = pool
+
+	// 智能判断 TLS 模式
+	useTLS := w.config.UseTLS
+	if !useTLS && !w.config.UseStartTLS {
+		// 如果两者都未配置，根据端口自动判断
+		if w.config.SMTPPort == 465 {
+			useTLS = true
+			w.logger.Info("检测到 465 端口，自动启用 TLS 直连模式")
+		} else if w.config.SMTPPort == 587 {
+			useTLS = false
+			w.logger.Info("检测到 587 端口，自动启用 STARTTLS 模式")
+		}
+	}
+
+	// 创建自定义 TLS 连接池
+	w.pool = NewTLSMailPool(addr, w.workerCount, auth, tlsConfig, useTLS)
 
 	w.ctx, w.cancel = context.WithCancel(context.Background())
 
@@ -106,7 +121,7 @@ func (w *MailWorker) Start() {
 	w.wg.Add(1)
 	go w.retryScheduler()
 
-	w.logger.Infof("邮件工作协程已启动，工作协程数: %d", w.workerCount)
+	w.logger.Infof("邮件工作协程已启动，工作协程数: %d, TLS模式: %v", w.workerCount, useTLS)
 }
 
 // Stop 优雅停止守护协程
@@ -115,6 +130,12 @@ func (w *MailWorker) Stop() {
 		w.cancel()
 	}
 	w.wg.Wait()
+
+	// 关闭连接池
+	if w.pool != nil {
+		w.pool.Close()
+	}
+
 	w.logger.Info("邮件工作协程已停止")
 }
 

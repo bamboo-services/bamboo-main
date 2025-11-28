@@ -69,4 +69,6 @@ type EmailConfig struct {
 	WorkerCount int    `mapstructure:"worker_count" yaml:"worker_count"` // 工作协程数（默认4）
 	MaxRetry    int    `mapstructure:"max_retry" yaml:"max_retry"`       // 最大重试次数（默认3）
 	Timeout     int    `mapstructure:"timeout" yaml:"timeout"`           // 发送超时秒数（默认10）
+	UseTLS      bool   `mapstructure:"use_tls" yaml:"use_tls"`           // 是否使用 TLS 直连（465 端口）
+	UseStartTLS bool   `mapstructure:"use_starttls" yaml:"use_starttls"` // 是否使用 STARTTLS（587 端口）
 }
