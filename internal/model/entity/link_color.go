@@ -23,16 +23,20 @@ import (
 
 // LinkColor 表示一个友链颜色实体，用于友情链接的颜色主题管理。
 //
-// 该类型包含颜色的唯一标识符、名称、颜色值等信息。
-// 同时记录该颜色的创建时间和更新时间，便于数据管理和审计。
+// 该类型支持两种颜色模式：
+// - Type=0 (普通模式): 需要设置 PrimaryColor、SubColor、HoverColor 三个颜色值
+// - Type=1 (炫彩模式): 颜色字段全部为空，由前端实现炫彩效果
 type LinkColor struct {
-	ID        int64     `json:"id" gorm:"primaryKey;autoIncrement:false;comment:颜色唯一标识符"`                         // ID 使用 Snowflake ID 作为主键
-	Name      string    `json:"name" gorm:"type:varchar(50);not null;comment:颜色名称"`                               // 颜色名称
-	Value     string    `json:"value" gorm:"type:varchar(7);not null;comment:颜色值（如#FF0000）"`                      // 颜色值
-	SortOrder int       `json:"sort_order" gorm:"type:int;default:0;comment:颜色排序"`                                // 颜色排序
-	Status    int       `json:"status" gorm:"type:int;default:1;comment:颜色状态（0: 禁用, 1: 启用）"`                      // 颜色状态
-	CreatedAt time.Time `json:"created_at" gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP;comment:创建时间"` // 创建时间
-	UpdatedAt time.Time `json:"updated_at" gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP;comment:更新时间"` // 更新时间
+	ID           int64     `json:"id" gorm:"primaryKey;autoIncrement:false;comment:颜色唯一标识符"`                         // ID 使用 Snowflake ID 作为主键
+	Name         string    `json:"name" gorm:"type:varchar(50);not null;comment:颜色名称"`                               // 颜色名称
+	Type         int       `json:"type" gorm:"type:int;default:0;not null;comment:颜色类型（0: 普通, 1: 炫彩）"`               // 颜色类型
+	PrimaryColor *string   `json:"primary_color" gorm:"type:varchar(9);comment:主颜色（如#FF0000或#FF0000FF）"`             // 主颜色
+	SubColor     *string   `json:"sub_color" gorm:"type:varchar(9);comment:副颜色"`                                     // 副颜色
+	HoverColor   *string   `json:"hover_color" gorm:"type:varchar(9);comment:悬停颜色"`                                  // 悬停颜色
+	SortOrder    int       `json:"sort_order" gorm:"type:int;default:0;comment:颜色排序"`                                // 颜色排序
+	Status       bool      `json:"status" gorm:"type:boolean;default:true;comment:颜色状态（false: 禁用, true: 启用）"`        // 颜色状态
+	CreatedAt    time.Time `json:"created_at" gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP;comment:创建时间"` // 创建时间
+	UpdatedAt    time.Time `json:"updated_at" gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP;comment:更新时间"` // 更新时间
 
 	// 关联关系
 	LinksFKey []*LinkFriend `json:"links_f_key" gorm:"foreignKey:ColorID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;comment:友链外键"` // 友链外键，关联 LinkFriend 类型

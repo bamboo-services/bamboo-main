@@ -66,16 +66,17 @@ func (r *Route) registerLinkGroupAdminRouter(admin *gin.RouterGroup) {
 
 // registerLinkColorAdminRouter 注册友链颜色管理路由
 func (r *Route) registerLinkColorAdminRouter(admin *gin.RouterGroup) {
-	// TODO: 创建 LinkColorHandler
+	colorHandler := handler.NewLinkColorHandler()
 	colors := admin.Group("/colors")
 	{
-		// 这些路由需要等handler实现后再添加
-		colors.POST("", nil)               // 添加友链颜色
-		colors.GET("", nil)                // 获取友链颜色分页列表
-		colors.GET("/all", nil)            // 获取所有友链颜色（用于下拉选择）
-		colors.GET("/:color_uuid", nil)    // 获取友链颜色详情
-		colors.PUT("/:color_uuid", nil)    // 更新友链颜色
-		colors.DELETE("/:color_uuid", nil) // 删除友链颜色
+		colors.POST("", colorHandler.Add)                      // 添加友链颜色
+		colors.GET("", colorHandler.GetPage)                   // 获取友链颜色分页列表
+		colors.GET("/all", colorHandler.GetList)               // 获取所有友链颜色（用于下拉选择）
+		colors.PATCH("/sort", colorHandler.UpdateSort)         // 批量更新颜色排序
+		colors.GET("/:id", colorHandler.Get)                   // 获取友链颜色详情
+		colors.PUT("/:id", colorHandler.Update)                // 更新友链颜色
+		colors.PATCH("/:id/status", colorHandler.UpdateStatus) // 更新友链颜色状态
+		colors.DELETE("/:id", colorHandler.Delete)             // 删除友链颜色
 	}
 }
 

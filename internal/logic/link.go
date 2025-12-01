@@ -398,9 +398,12 @@ func convertLinkFriendToDTO(link *entity.LinkFriend) *dto.LinkFriendDetailDTO {
 	// 转换关联的颜色信息
 	if link.ColorFKey != nil {
 		linkDTO.ColorInfo = &dto.LinkColorSimpleDTO{
-			ID:    link.ColorFKey.ID,
-			Name:  link.ColorFKey.Name,
-			Value: link.ColorFKey.Value,
+			ID:           link.ColorFKey.ID,
+			Name:         link.ColorFKey.Name,
+			Type:         link.ColorFKey.Type,
+			PrimaryColor: link.ColorFKey.PrimaryColor,
+			SubColor:     link.ColorFKey.SubColor,
+			HoverColor:   link.ColorFKey.HoverColor,
 		}
 	}
 

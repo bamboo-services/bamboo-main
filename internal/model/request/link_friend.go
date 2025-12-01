@@ -78,21 +78,6 @@ type LinkGroupUpdateReq struct {
 	GroupStatus *int   `json:"group_status" binding:"omitempty,oneof=0 1" example:"1"`
 }
 
-// LinkColorAddReq 添加友链颜色请求
-type LinkColorAddReq struct {
-	ColorName  string `json:"color_name" binding:"required,min=1,max=50" example:"红色"`
-	ColorValue string `json:"color_value" binding:"required,hexcolor" example:"#FF0000"`
-	ColorOrder int    `json:"color_order" binding:"omitempty,min=0" example:"0"`
-}
-
-// LinkColorUpdateReq 更新友链颜色请求
-type LinkColorUpdateReq struct {
-	ColorName   string `json:"color_name" binding:"omitempty,min=1,max=50" example:"红色"`
-	ColorValue  string `json:"color_value" binding:"omitempty,hexcolor" example:"#FF0000"`
-	ColorOrder  *int   `json:"color_order" binding:"omitempty,min=0" example:"0"`
-	ColorStatus *int   `json:"color_status" binding:"omitempty,oneof=0 1" example:"1"`
-}
-
 // AuthLoginReq 登录请求
 type AuthLoginReq struct {
 	Username string `json:"username" binding:"required,min=1,max=50" example:"admin"`
