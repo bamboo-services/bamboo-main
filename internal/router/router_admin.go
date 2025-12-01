@@ -28,6 +28,7 @@ func (r *Route) AdminRouter() {
 		r.registerLinkAdminRouter(admin)       // 友情链接管理路由
 		r.registerLinkGroupAdminRouter(admin)  // 友链分组管理路由
 		r.registerLinkColorAdminRouter(admin)  // 友链颜色管理路由
+		r.registerInfoAdminRouter(admin)       // 站点信息管理路由
 		r.registerSystemUserAdminRouter(admin) // 系统用户管理路由
 		r.registerSystemLogRouter(admin)       // 系统日志路由
 	}
