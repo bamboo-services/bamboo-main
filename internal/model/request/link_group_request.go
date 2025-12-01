@@ -11,6 +11,21 @@
 
 package request
 
+// LinkGroupAddReq 添加友链分组请求
+type LinkGroupAddReq struct {
+	GroupName  string `json:"group_name" binding:"required,min=1,max=100" example:"技术博客"`
+	GroupDesc  string `json:"group_desc" binding:"omitempty,max=500" example:"技术相关的友情链接"`
+	GroupOrder int    `json:"group_order" binding:"omitempty,min=0" example:"0"`
+}
+
+// LinkGroupUpdateReq 更新友链分组请求
+type LinkGroupUpdateReq struct {
+	GroupName   string `json:"group_name" binding:"omitempty,min=1,max=100" example:"技术博客"`
+	GroupDesc   string `json:"group_desc" binding:"omitempty,max=500" example:"技术相关的友情链接"`
+	GroupOrder  *int   `json:"group_order" binding:"omitempty,min=0" example:"0"`
+	GroupStatus *int   `json:"group_status" binding:"omitempty,oneof=0 1" example:"1"`
+}
+
 // LinkGroupSortReq 分组排序请求
 type LinkGroupSortReq struct {
 	GroupIDs  []int64 `json:"group_ids" binding:"required,min=1" validate:"required"` // 分组ID数组，按新的排序传入
