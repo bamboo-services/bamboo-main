@@ -30,6 +30,8 @@ var mergeEntities = []interface{}{
 	&entity.LinkFriend{},
 	&entity.SystemLog{},
 	&entity.System{},
+	&entity.SponsorChannel{},
+	&entity.SponsorRecord{},
 }
 
 // DatabaseInit 初始化数据库连接并执行自动迁移。

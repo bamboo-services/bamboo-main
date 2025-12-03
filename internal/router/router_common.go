@@ -26,4 +26,7 @@ func (r *Route) CommonRouter() {
 
 	// 站点信息接口 (无需认证)
 	r.registerInfoPublicRouter()
+
+	// 赞助公开接口 (无需认证，用于前台赞助墙展示)
+	r.registerSponsorPublicRouter()
 }

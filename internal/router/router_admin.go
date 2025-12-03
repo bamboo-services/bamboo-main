@@ -31,6 +31,7 @@ func (r *Route) AdminRouter() {
 		r.registerInfoAdminRouter(admin)       // 站点信息管理路由
 		r.registerSystemUserAdminRouter(admin) // 系统用户管理路由
 		r.registerSystemLogRouter(admin)       // 系统日志路由
+		r.registerSponsorAdminRouter(admin)    // 赞助管理路由
 	}
 }
 
