@@ -13,24 +13,11 @@ package handler
 
 import (
 	apiInfo "github.com/bamboo-services/bamboo-main/api/info"
-	logic "github.com/bamboo-services/bamboo-main/internal/logic"
 
 	xResult "github.com/bamboo-services/bamboo-base-go/result"
 	xValid "github.com/bamboo-services/bamboo-base-go/validator"
 	"github.com/gin-gonic/gin"
 )
-
-// InfoHandler 站点信息处理器
-type InfoHandler struct {
-	infoLogic *logic.InfoLogic
-}
-
-// NewInfoHandler 创建站点信息处理器
-func NewInfoHandler() *InfoHandler {
-	return &InfoHandler{
-		infoLogic: logic.NewInfoLogic(),
-	}
-}
 
 // GetSiteInfo 获取站点信息
 // @Summary 获取站点信息
@@ -42,7 +29,7 @@ func NewInfoHandler() *InfoHandler {
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/info/site [get]
 func (h *InfoHandler) GetSiteInfo(c *gin.Context) {
-	result, err := h.infoLogic.GetSiteInfo(c)
+	result, err := h.service.infoLogic.GetSiteInfo(c)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -73,7 +60,7 @@ func (h *InfoHandler) UpdateSiteInfo(c *gin.Context) {
 		return
 	}
 
-	result, err := h.infoLogic.UpdateSiteInfo(c, &req)
+	result, err := h.service.infoLogic.UpdateSiteInfo(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -93,7 +80,7 @@ func (h *InfoHandler) UpdateSiteInfo(c *gin.Context) {
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/info/about [get]
 func (h *InfoHandler) GetAbout(c *gin.Context) {
-	result, err := h.infoLogic.GetAbout(c)
+	result, err := h.service.infoLogic.GetAbout(c)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -124,7 +111,7 @@ func (h *InfoHandler) UpdateAbout(c *gin.Context) {
 		return
 	}
 
-	result, err := h.infoLogic.UpdateAbout(c, &req)
+	result, err := h.service.infoLogic.UpdateAbout(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return

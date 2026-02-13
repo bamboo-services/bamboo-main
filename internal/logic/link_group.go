@@ -12,30 +12,42 @@
 package logic
 
 import (
+	"context"
 	"errors"
 	"strconv"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
+	xLog "github.com/bamboo-services/bamboo-base-go/log"
 	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
-	apiLinkGroup "github.com/bamboo-services/bamboo-main/api/linkgroup"
+	apiLinkGroup "github.com/bamboo-services/bamboo-main/api/link"
 	entity2 "github.com/bamboo-services/bamboo-main/internal/entity"
-	"github.com/bamboo-services/bamboo-main/internal/model/base"
-	"github.com/bamboo-services/bamboo-main/internal/model/dto"
+	"github.com/bamboo-services/bamboo-main/internal/models/base"
+	"github.com/bamboo-services/bamboo-main/internal/models/dto"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 // LinkGroupLogic 友链分组业务逻辑
 type LinkGroupLogic struct {
+	logic
 }
 
-func NewLinkGroupLogic() *LinkGroupLogic {
-	return &LinkGroupLogic{}
+func NewLinkGroupLogic(ctx context.Context) *LinkGroupLogic {
+	db := xCtxUtil.MustGetDB(ctx)
+	rdb := xCtxUtil.MustGetRDB(ctx)
+
+	return &LinkGroupLogic{
+		logic: logic{
+			db:  db,
+			rdb: rdb,
+			log: xLog.WithName(xLog.NamedLOGC, "LinkGroupLogic"),
+		},
+	}
 }
 
 // Add 添加友链分组
-func (l *LinkGroupLogic) Add(ctx *gin.Context, req *apiLinkGroup.AddRequest) (*dto.LinkGroupDetailDTO, *xError.Error) {
+func (l *LinkGroupLogic) Add(ctx *gin.Context, req *apiLinkGroup.GroupAddRequest) (*dto.LinkGroupDetailDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 
@@ -67,7 +79,7 @@ func (l *LinkGroupLogic) Add(ctx *gin.Context, req *apiLinkGroup.AddRequest) (*d
 }
 
 // Update 更新友链分组(名称和描述)
-func (l *LinkGroupLogic) Update(ctx *gin.Context, groupIDStr string, req *apiLinkGroup.UpdateRequest) (*dto.LinkGroupDetailDTO, *xError.Error) {
+func (l *LinkGroupLogic) Update(ctx *gin.Context, groupIDStr string, req *apiLinkGroup.GroupUpdateRequest) (*dto.LinkGroupDetailDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 
@@ -117,7 +129,7 @@ func (l *LinkGroupLogic) Update(ctx *gin.Context, groupIDStr string, req *apiLin
 }
 
 // UpdateSort 批量更新友链分组排序
-func (l *LinkGroupLogic) UpdateSort(ctx *gin.Context, req *apiLinkGroup.SortRequest) *xError.Error {
+func (l *LinkGroupLogic) UpdateSort(ctx *gin.Context, req *apiLinkGroup.GroupSortRequest) *xError.Error {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 
@@ -164,7 +176,7 @@ func (l *LinkGroupLogic) UpdateSort(ctx *gin.Context, req *apiLinkGroup.SortRequ
 }
 
 // UpdateStatus 更新友链分组状态
-func (l *LinkGroupLogic) UpdateStatus(ctx *gin.Context, groupIDStr string, req *apiLinkGroup.StatusRequest) *xError.Error {
+func (l *LinkGroupLogic) UpdateStatus(ctx *gin.Context, groupIDStr string, req *apiLinkGroup.GroupStatusRequest) *xError.Error {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 
@@ -191,7 +203,7 @@ func (l *LinkGroupLogic) UpdateStatus(ctx *gin.Context, groupIDStr string, req *
 }
 
 // Delete 删除友链分组
-func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupIDStr string, req *apiLinkGroup.DeleteRequest) ([]dto.LinkGroupDeleteConflictDTO, *xError.Error) {
+func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupIDStr string, req *apiLinkGroup.GroupDeleteRequest) ([]dto.LinkGroupDeleteConflictDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 
@@ -303,7 +315,7 @@ func (l *LinkGroupLogic) Get(ctx *gin.Context, groupIDStr string) (*dto.LinkGrou
 }
 
 // GetList 获取友链分组列表（不分页）
-func (l *LinkGroupLogic) GetList(ctx *gin.Context, req *apiLinkGroup.ListRequest) ([]dto.LinkGroupListDTO, *xError.Error) {
+func (l *LinkGroupLogic) GetList(ctx *gin.Context, req *apiLinkGroup.GroupListRequest) ([]dto.LinkGroupListDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 
@@ -380,7 +392,7 @@ func (l *LinkGroupLogic) GetList(ctx *gin.Context, req *apiLinkGroup.ListRequest
 }
 
 // GetPage 获取友链分组分页列表
-func (l *LinkGroupLogic) GetPage(ctx *gin.Context, req *apiLinkGroup.PageRequest) (*base.PaginationResponse[dto.LinkGroupNormalDTO], *xError.Error) {
+func (l *LinkGroupLogic) GetPage(ctx *gin.Context, req *apiLinkGroup.GroupPageRequest) (*base.PaginationResponse[dto.LinkGroupNormalDTO], *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 

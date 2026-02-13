@@ -17,7 +17,7 @@ import (
 	"time"
 
 	"github.com/bamboo-services/bamboo-main/internal/entity"
-	dtoRedis "github.com/bamboo-services/bamboo-main/internal/model/dto/redis"
+	dtoRedis "github.com/bamboo-services/bamboo-main/internal/models/dto/redis"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 	"github.com/bamboo-services/bamboo-main/pkg/util/netUtil"

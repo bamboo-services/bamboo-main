@@ -12,28 +12,40 @@
 package logic
 
 import (
+	"context"
 	"runtime"
 	"time"
 
 	apiPublic "github.com/bamboo-services/bamboo-main/api/public"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
+	xLog "github.com/bamboo-services/bamboo-base-go/log"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	"github.com/gin-gonic/gin"
 )
 
 // PublicLogic 公开接口业务逻辑
 type PublicLogic struct {
+	logic
 }
 
-func NewPublicLogic() *PublicLogic {
-	return &PublicLogic{}
+func NewPublicLogic(ctx context.Context) *PublicLogic {
+	db := xCtxUtil.MustGetDB(ctx)
+	rdb := xCtxUtil.MustGetRDB(ctx)
+
+	return &PublicLogic{
+		logic: logic{
+			db:  db,
+			rdb: rdb,
+			log: xLog.WithName(xLog.NamedLOGC, "PublicLogic"),
+		},
+	}
 }
 
 // HealthCheck 健康检查
 func (p *PublicLogic) HealthCheck(ctx *gin.Context) (*apiPublic.HealthResponse, *xError.Error) {
 	// 检查数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
+	db := p.db
 	if db == nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "数据库连接失败", false)
 	}

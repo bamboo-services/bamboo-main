@@ -29,15 +29,12 @@ logs/
 *.log
 
 ### Configuration ###
+.env
+.env.local
+.env.*.local
 **/config/config.yaml
 configs/config.yaml
 temp.yaml
-
-### Documentation ###
-swagger.*
-docs/docs.go
-docs/swagger.json
-docs/swagger.yaml
 
 ### Temporary Files ###
 temp/

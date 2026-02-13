@@ -1,6 +1,6 @@
 package apiInfo
 
-import "github.com/bamboo-services/bamboo-main/internal/model/dto"
+import "github.com/bamboo-services/bamboo-main/internal/models/dto"
 
 // SiteUpdateRequest 站点信息更新请求
 type SiteUpdateRequest struct {

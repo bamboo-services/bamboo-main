@@ -13,26 +13,14 @@ package handler
 
 import (
 	apiAuth "github.com/bamboo-services/bamboo-main/api/auth"
-	logic "github.com/bamboo-services/bamboo-main/internal/logic"
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
 	xResult "github.com/bamboo-services/bamboo-base-go/result"
 	xValid "github.com/bamboo-services/bamboo-base-go/validator"
 	"github.com/gin-gonic/gin"
+	bSdkUtil "github.com/phalanx/beacon-sso-sdk/utility"
 )
-
-// AuthHandler 认证处理器
-type AuthHandler struct {
-	authLogic *logic.AuthLogic
-}
-
-// NewAuthHandler 创建认证处理器
-func NewAuthHandler() *AuthHandler {
-	return &AuthHandler{
-		authLogic: logic.NewAuthLogic(),
-	}
-}
 
 // Login 用户登录
 // @Summary 用户登录
@@ -40,24 +28,20 @@ func NewAuthHandler() *AuthHandler {
 // @Tags 认证管理
 // @Accept json
 // @Produce json
-// @Param request body apiAuth.LoginRequest true "登录请求"
+// @Security Bearer
 // @Success 200 {object} apiAuth.LoginResponse "登录成功，包含用户信息、Token及时间信息"
-// @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "认证失败"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
-	var req apiAuth.LoginRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	accessToken := bSdkUtil.GetAuthorization(c)
+	userinfo, xErr := h.service.oauthLogic.Userinfo(c, accessToken)
+	if xErr != nil {
+		_ = c.Error(xErr)
 		return
 	}
 
-	// 调用服务层
-	user, token, createdAt, expiredAt, err := h.authLogic.Login(c, &req)
+	user, token, createdAt, expiredAt, err := h.service.authLogic.LoginByOAuth(c, userinfo, accessToken)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -95,7 +79,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	// 调用服务层
-	user, token, createdAt, expiredAt, err := h.authLogic.Register(c, &req)
+	user, token, createdAt, expiredAt, err := h.service.authLogic.Register(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -123,14 +107,19 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/auth/logout [patch]
 func (h *AuthHandler) Logout(c *gin.Context) {
-	token, exists := c.Get("token")
-	if !exists {
+	token := bSdkUtil.GetAuthorization(c)
+	if token == "" {
+		if ctxToken, exists := c.Get("token"); exists {
+			token, _ = ctxToken.(string)
+		}
+	}
+
+	if token == "" {
 		_ = c.Error(xError.NewError(c, xError.Unauthorized, "未找到认证令牌", false))
 		return
 	}
 
-	// 调用服务层
-	err := h.authLogic.Logout(c, token.(string))
+	err := h.service.authLogic.Logout(c, token)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -159,7 +148,7 @@ func (h *AuthHandler) GetUserInfo(c *gin.Context) {
 	}
 
 	// 调用服务层
-	userInfo, err := h.authLogic.GetUserInfo(c, userUUID)
+	userInfo, err := h.service.authLogic.GetUserInfo(c, userUUID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -200,7 +189,7 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.authLogic.ChangePassword(c, userUUID, &req)
+	err := h.service.authLogic.ChangePassword(c, userUUID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -233,7 +222,7 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.authLogic.ResetPassword(c, &req)
+	err := h.service.authLogic.ResetPassword(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -265,7 +254,7 @@ func (h *AuthHandler) VerifyEmail(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.authLogic.VerifyEmail(c, &req)
+	err := h.service.authLogic.VerifyEmail(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -297,7 +286,7 @@ func (h *AuthHandler) VerifyResetToken(c *gin.Context) {
 	}
 
 	// 调用服务层
-	valid, err := h.authLogic.VerifyResetToken(c, &req)
+	valid, err := h.service.authLogic.VerifyResetToken(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -334,7 +323,7 @@ func (h *AuthHandler) ConfirmResetPassword(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.authLogic.ConfirmResetPassword(c, &req)
+	err := h.service.authLogic.ConfirmResetPassword(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return

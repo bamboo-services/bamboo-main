@@ -8,6 +8,7 @@ import (
 	xReg "github.com/bamboo-services/bamboo-base-go/register"
 	xRoute "github.com/bamboo-services/bamboo-base-go/route"
 	"github.com/gin-gonic/gin"
+	bSdkRoute "github.com/phalanx/beacon-sso-sdk/route"
 )
 
 type route struct {
@@ -32,8 +33,12 @@ func NewRoute(reg *xReg.Reg) {
 		swaggerRegister(r.engine)
 	}
 
+	oauthRoute := bSdkRoute.NewOAuthRoute(r.context)
+
 	{
 		apiRouter := r.engine.Group("/api/v1")
+
+		oauthRoute.OAuthRouter(apiRouter)
 
 		r.publicRouter(apiRouter)
 		r.authRouter(apiRouter)

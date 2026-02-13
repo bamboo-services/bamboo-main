@@ -26,7 +26,8 @@ import (
 // 该类型包含用户的唯一标识符、用户名、密码、邮箱、角色等信息。
 // 同时记录该用户的创建时间和更新时间，便于数据管理和审计。
 type SystemUser struct {
-	ID          int64      `json:"id" gorm:"primaryKey;autoIncrement:false;comment:系统用户唯一标识符"`                       // ID 使用 Snowflake ID 作为主键
+	ID          int64      `json:"id" gorm:"primaryKey;autoIncrement:false;comment:系统用户唯一标识符"` // ID 使用 Snowflake ID 作为主键
+	OAuthUserID *string    `json:"oauth_user_id" gorm:"type:varchar(255);uniqueIndex;comment:OAuth 用户唯一标识"`
 	Username    string     `json:"username" gorm:"type:varchar(50);not null;uniqueIndex;comment:用户名"`                // 用户名
 	Password    string     `json:"password" gorm:"type:varchar(255);not null;comment:密码哈希"`                          // 密码哈希
 	Email       string     `json:"email" gorm:"type:varchar(100);not null;uniqueIndex;comment:邮箱"`                   // 邮箱

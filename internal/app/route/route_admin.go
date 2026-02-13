@@ -5,10 +5,12 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/middleware"
 
 	"github.com/gin-gonic/gin"
+	bSdkMiddle "github.com/phalanx/beacon-sso-sdk/middleware"
 )
 
 func (r *route) adminRouter(route gin.IRouter) {
 	adminGroup := route.Group("/admin")
+	adminGroup.Use(bSdkMiddle.CheckAuth(r.context))
 	adminGroup.Use(middleware.AuthMiddleware)
 	adminGroup.Use(middleware.RequireRole("admin"))
 	{
@@ -23,7 +25,7 @@ func (r *route) adminRouter(route gin.IRouter) {
 }
 
 func (r *route) linkAdminRouter(route gin.IRouter) {
-	linkHandler := handler.NewLinkHandler()
+	linkHandler := handler.NewHandler[handler.LinkHandler](r.context, "LinkHandler")
 	linkGroup := route.Group("/links")
 	{
 		linkGroup.POST("", linkHandler.Add)
@@ -37,7 +39,7 @@ func (r *route) linkAdminRouter(route gin.IRouter) {
 }
 
 func (r *route) linkGroupAdminRouter(route gin.IRouter) {
-	groupHandler := handler.NewLinkGroupHandler()
+	groupHandler := handler.NewHandler[handler.LinkGroupHandler](r.context, "LinkGroupHandler")
 	groupRouter := route.Group("/groups")
 	{
 		groupRouter.POST("", groupHandler.Add)
@@ -52,7 +54,7 @@ func (r *route) linkGroupAdminRouter(route gin.IRouter) {
 }
 
 func (r *route) linkColorAdminRouter(route gin.IRouter) {
-	colorHandler := handler.NewLinkColorHandler()
+	colorHandler := handler.NewHandler[handler.LinkColorHandler](r.context, "LinkColorHandler")
 	colorRouter := route.Group("/colors")
 	{
 		colorRouter.POST("", colorHandler.Add)

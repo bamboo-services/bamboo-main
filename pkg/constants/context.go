@@ -53,5 +53,4 @@ const (
 
 const (
 	ContextCustomConfig xCtx.ContextKey = "context_custom_config"
-	ContextMailWorker   xCtx.ContextKey = "context_mail_worker"
 )

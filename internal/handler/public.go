@@ -13,23 +13,10 @@ package handler
 
 import (
 	apiPublic "github.com/bamboo-services/bamboo-main/api/public"
-	logic "github.com/bamboo-services/bamboo-main/internal/logic"
 
 	xResult "github.com/bamboo-services/bamboo-base-go/result"
 	"github.com/gin-gonic/gin"
 )
-
-// PublicHandler 公开接口处理器
-type PublicHandler struct {
-	publicLogic *logic.PublicLogic
-}
-
-// NewPublicHandler 创建公开接口处理器
-func NewPublicHandler() *PublicHandler {
-	return &PublicHandler{
-		publicLogic: logic.NewPublicLogic(),
-	}
-}
 
 // HealthCheck 健康检查接口
 // @Summary 系统健康检查
@@ -42,7 +29,7 @@ func NewPublicHandler() *PublicHandler {
 // @Router /api/v1/public/health [get]
 func (h *PublicHandler) HealthCheck(c *gin.Context) {
 	// 调用服务层
-	result, err := h.publicLogic.HealthCheck(c)
+	result, err := h.service.publicLogic.HealthCheck(c)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -67,7 +54,7 @@ func (h *PublicHandler) HealthCheck(c *gin.Context) {
 // @Router /api/v1/public/ping [get]
 func (h *PublicHandler) Ping(c *gin.Context) {
 	// 调用服务层
-	result, err := h.publicLogic.Ping(c)
+	result, err := h.service.publicLogic.Ping(c)
 	if err != nil {
 		// Logic 层返回的是 *xError.Error
 		xResult.Error(c, err.GetErrorCode(), err.GetErrorMessage(), err.GetData())

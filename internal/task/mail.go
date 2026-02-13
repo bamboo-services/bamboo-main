@@ -23,8 +23,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bamboo-services/bamboo-main/internal/model/base"
-	dtoRedis "github.com/bamboo-services/bamboo-main/internal/model/dto/redis"
+	"github.com/bamboo-services/bamboo-main/internal/models/base"
+	dtoRedis "github.com/bamboo-services/bamboo-main/internal/models/dto/redis"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
 	"github.com/jordan-wright/email"

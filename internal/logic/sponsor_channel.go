@@ -12,29 +12,41 @@
 package logic
 
 import (
+	"context"
 	"errors"
 	"strconv"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
+	xLog "github.com/bamboo-services/bamboo-base-go/log"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
-	apiSponsorChannel "github.com/bamboo-services/bamboo-main/api/sponsorchannel"
+	apiSponsorChannel "github.com/bamboo-services/bamboo-main/api/sponsor"
 	entity2 "github.com/bamboo-services/bamboo-main/internal/entity"
-	"github.com/bamboo-services/bamboo-main/internal/model/base"
-	"github.com/bamboo-services/bamboo-main/internal/model/dto"
+	"github.com/bamboo-services/bamboo-main/internal/models/base"
+	"github.com/bamboo-services/bamboo-main/internal/models/dto"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 // SponsorChannelLogic 赞助渠道业务逻辑
 type SponsorChannelLogic struct {
+	logic
 }
 
-func NewSponsorChannelLogic() *SponsorChannelLogic {
-	return &SponsorChannelLogic{}
+func NewSponsorChannelLogic(ctx context.Context) *SponsorChannelLogic {
+	db := xCtxUtil.MustGetDB(ctx)
+	rdb := xCtxUtil.MustGetRDB(ctx)
+
+	return &SponsorChannelLogic{
+		logic: logic{
+			db:  db,
+			rdb: rdb,
+			log: xLog.WithName(xLog.NamedLOGC, "SponsorChannelLogic"),
+		},
+	}
 }
 
 // Add 添加赞助渠道
-func (l *SponsorChannelLogic) Add(ctx *gin.Context, req *apiSponsorChannel.AddRequest) (*dto.SponsorChannelDetailDTO, *xError.Error) {
+func (l *SponsorChannelLogic) Add(ctx *gin.Context, req *apiSponsorChannel.ChannelAddRequest) (*dto.SponsorChannelDetailDTO, *xError.Error) {
 	// 获取数据库连接 - 注意：不要再次调用 WithContext，已包含 Snowflake 节点
 	db := xCtxUtil.MustGetDB(ctx)
 
@@ -63,7 +75,7 @@ func (l *SponsorChannelLogic) Add(ctx *gin.Context, req *apiSponsorChannel.AddRe
 }
 
 // Update 更新赞助渠道
-func (l *SponsorChannelLogic) Update(ctx *gin.Context, idStr string, req *apiSponsorChannel.UpdateRequest) (*dto.SponsorChannelDetailDTO, *xError.Error) {
+func (l *SponsorChannelLogic) Update(ctx *gin.Context, idStr string, req *apiSponsorChannel.ChannelUpdateRequest) (*dto.SponsorChannelDetailDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 
@@ -114,7 +126,7 @@ func (l *SponsorChannelLogic) Update(ctx *gin.Context, idStr string, req *apiSpo
 }
 
 // UpdateStatus 更新赞助渠道状态
-func (l *SponsorChannelLogic) UpdateStatus(ctx *gin.Context, idStr string, req *apiSponsorChannel.StatusRequest) (bool, *xError.Error) {
+func (l *SponsorChannelLogic) UpdateStatus(ctx *gin.Context, idStr string, req *apiSponsorChannel.ChannelStatusRequest) (bool, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 
@@ -216,7 +228,7 @@ func (l *SponsorChannelLogic) Get(ctx *gin.Context, idStr string) (*dto.SponsorC
 }
 
 // GetList 获取赞助渠道列表（不分页）
-func (l *SponsorChannelLogic) GetList(ctx *gin.Context, req *apiSponsorChannel.ListRequest) ([]dto.SponsorChannelListDTO, *xError.Error) {
+func (l *SponsorChannelLogic) GetList(ctx *gin.Context, req *apiSponsorChannel.ChannelListRequest) ([]dto.SponsorChannelListDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 
@@ -292,7 +304,7 @@ func (l *SponsorChannelLogic) GetList(ctx *gin.Context, req *apiSponsorChannel.L
 }
 
 // GetPage 获取赞助渠道分页列表
-func (l *SponsorChannelLogic) GetPage(ctx *gin.Context, req *apiSponsorChannel.PageRequest) (*base.PaginationResponse[dto.SponsorChannelNormalDTO], *xError.Error) {
+func (l *SponsorChannelLogic) GetPage(ctx *gin.Context, req *apiSponsorChannel.ChannelPageRequest) (*base.PaginationResponse[dto.SponsorChannelNormalDTO], *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 

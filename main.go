@@ -12,11 +12,10 @@
 package main
 
 import (
-	"context"
-
 	_ "github.com/bamboo-services/bamboo-main/docs"
 	"github.com/bamboo-services/bamboo-main/internal/app/route"
 	"github.com/bamboo-services/bamboo-main/internal/app/startup"
+	"github.com/bamboo-services/bamboo-main/internal/app/startup/worker"
 
 	xLog "github.com/bamboo-services/bamboo-base-go/log"
 	xMain "github.com/bamboo-services/bamboo-base-go/main"
@@ -36,9 +35,5 @@ func main() {
 	reg := xReg.Register(startup.Init())
 	log := xLog.WithName(xLog.NamedMAIN)
 
-	xMain.Runner(reg, log, route.NewRoute, func(ctx context.Context, _ ...any) {
-		if worker := startup.GetMailWorker(ctx); worker != nil {
-			worker.Stop()
-		}
-	})
+	xMain.Runner(reg, log, route.NewRoute, worker.MailWorkerRunner)
 }

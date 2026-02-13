@@ -3,7 +3,7 @@ package apiAuth
 import (
 	"time"
 
-	"github.com/bamboo-services/bamboo-main/internal/model/dto"
+	"github.com/bamboo-services/bamboo-main/internal/models/dto"
 )
 
 type LoginRequest struct {

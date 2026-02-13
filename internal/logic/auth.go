@@ -12,6 +12,7 @@
 package logic
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -19,7 +20,7 @@ import (
 	apiAuth "github.com/bamboo-services/bamboo-main/api/auth"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
-	"github.com/bamboo-services/bamboo-main/internal/model/dto"
+	"github.com/bamboo-services/bamboo-main/internal/models/dto"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
@@ -30,16 +31,28 @@ import (
 	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	"github.com/gin-gonic/gin"
+	bSdkLogic "github.com/phalanx/beacon-sso-sdk/logic"
 	"gorm.io/gorm"
 )
 
 // AuthLogic 认证业务逻辑
 type AuthLogic struct {
+	logic
 	SessionService *logcHelper.SessionLogic
 }
 
-func NewAuthLogic() *AuthLogic {
-	return &AuthLogic{SessionService: &logcHelper.SessionLogic{}}
+func NewAuthLogic(ctx context.Context) *AuthLogic {
+	db := xCtxUtil.MustGetDB(ctx)
+	rdb := xCtxUtil.MustGetRDB(ctx)
+
+	return &AuthLogic{
+		logic: logic{
+			db:  db,
+			rdb: rdb,
+			log: xLog.WithName(xLog.NamedLOGC, "AuthLogic"),
+		},
+		SessionService: &logcHelper.SessionLogic{},
+	}
 }
 
 // Login 用户登录
@@ -185,10 +198,16 @@ func (a *AuthLogic) Register(ctx *gin.Context, req *apiAuth.RegisterRequest) (*d
 
 // Logout 用户登出
 func (a *AuthLogic) Logout(ctx *gin.Context, token string) *xError.Error {
-	err := a.SessionService.DeleteUserSession(ctx, token)
-	if err != nil {
-		return xError.NewError(ctx, xError.ServerInternalError, "删除用户会话失败", false, err)
+	if token == "" {
+		return xError.NewError(ctx, xError.ParameterEmpty, "访问令牌不能为空", false)
 	}
+
+	oauthLogic := bSdkLogic.NewOAuth(ctx)
+	xErr := oauthLogic.Logout(ctx, "access_token", token)
+	if xErr != nil {
+		return xErr
+	}
+
 	return nil
 }
 

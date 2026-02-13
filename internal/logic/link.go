@@ -12,14 +12,15 @@
 package logic
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
 	apiLink "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
-	"github.com/bamboo-services/bamboo-main/internal/model/base"
-	"github.com/bamboo-services/bamboo-main/internal/model/dto"
+	"github.com/bamboo-services/bamboo-main/internal/models/base"
+	"github.com/bamboo-services/bamboo-main/internal/models/dto"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
@@ -33,10 +34,20 @@ import (
 
 // LinkLogic 友情链接业务逻辑
 type LinkLogic struct {
+	logic
 }
 
-func NewLinkLogic() *LinkLogic {
-	return &LinkLogic{}
+func NewLinkLogic(ctx context.Context) *LinkLogic {
+	db := xCtxUtil.MustGetDB(ctx)
+	rdb := xCtxUtil.MustGetRDB(ctx)
+
+	return &LinkLogic{
+		logic: logic{
+			db:  db,
+			rdb: rdb,
+			log: xLog.WithName(xLog.NamedLOGC, "LinkLogic"),
+		},
+	}
 }
 
 // Add 添加友情链接

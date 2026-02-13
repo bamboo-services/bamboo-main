@@ -1,8 +1,8 @@
 package apiLink
 
 import (
-	"github.com/bamboo-services/bamboo-main/internal/model/base"
-	"github.com/bamboo-services/bamboo-main/internal/model/dto"
+	"github.com/bamboo-services/bamboo-main/internal/models/base"
+	"github.com/bamboo-services/bamboo-main/internal/models/dto"
 )
 
 // FriendAddRequest 添加友情链接请求
@@ -57,27 +57,31 @@ type FriendFailRequest struct {
 	LinkFailReason string `json:"link_fail_reason" binding:"omitempty,max=500" example:"网站无法访问"`
 }
 
-// AddResponse 添加友情链接响应
-type AddResponse struct {
+// FriendAddResponse 添加友情链接响应
+type FriendAddResponse struct {
 	dto.LinkFriendDetailDTO
 }
 
-// UpdateResponse 更新友情链接响应
-type UpdateResponse struct {
+// FriendUpdateResponse 更新友情链接响应
+type FriendUpdateResponse struct {
 	dto.LinkFriendDetailDTO
 }
 
-// DetailResponse 友情链接详情响应
-type DetailResponse struct {
+// FriendDetailResponse 友情链接详情响应
+type FriendDetailResponse struct {
 	dto.LinkFriendDetailDTO
 }
 
-// ListResponse 友情链接列表响应
-type ListResponse struct {
+// FriendListResponse 友情链接列表响应
+type FriendListResponse struct {
 	base.PaginationResponse[dto.LinkFriendDetailDTO]
 }
 
-// PublicResponse 公开友情链接响应
-type PublicResponse struct {
+// FriendPublicResponse 公开友情链接响应
+type FriendPublicResponse struct {
 	Links []dto.LinkFriendDetailDTO `json:"links"`
+}
+
+type MessageResponse struct {
+	Message string `json:"message"`
 }

@@ -12,29 +12,42 @@
 package logic
 
 import (
+	"context"
 	"errors"
 	"strconv"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
+	xLog "github.com/bamboo-services/bamboo-base-go/log"
 	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
-	apiLinkColor "github.com/bamboo-services/bamboo-main/api/linkcolor"
+	apiLinkColor "github.com/bamboo-services/bamboo-main/api/link"
 	entity2 "github.com/bamboo-services/bamboo-main/internal/entity"
-	"github.com/bamboo-services/bamboo-main/internal/model/base"
-	"github.com/bamboo-services/bamboo-main/internal/model/dto"
+	"github.com/bamboo-services/bamboo-main/internal/models/base"
+	"github.com/bamboo-services/bamboo-main/internal/models/dto"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 // LinkColorLogic 友链颜色业务逻辑
-type LinkColorLogic struct{}
+type LinkColorLogic struct {
+	logic
+}
 
-func NewLinkColorLogic() *LinkColorLogic {
-	return &LinkColorLogic{}
+func NewLinkColorLogic(ctx context.Context) *LinkColorLogic {
+	db := xCtxUtil.MustGetDB(ctx)
+	rdb := xCtxUtil.MustGetRDB(ctx)
+
+	return &LinkColorLogic{
+		logic: logic{
+			db:  db,
+			rdb: rdb,
+			log: xLog.WithName(xLog.NamedLOGC, "LinkColorLogic"),
+		},
+	}
 }
 
 // Add 添加友链颜色
-func (l *LinkColorLogic) Add(ctx *gin.Context, req *apiLinkColor.AddRequest) (*dto.LinkColorDetailDTO, *xError.Error) {
+func (l *LinkColorLogic) Add(ctx *gin.Context, req *apiLinkColor.ColorAddRequest) (*dto.LinkColorDetailDTO, *xError.Error) {
 	db := xCtxUtil.MustGetDB(ctx)
 
 	// 业务规则校验：type=0 时三个颜色字段必填
@@ -81,7 +94,7 @@ func (l *LinkColorLogic) Add(ctx *gin.Context, req *apiLinkColor.AddRequest) (*d
 }
 
 // Update 更新友链颜色
-func (l *LinkColorLogic) Update(ctx *gin.Context, colorIDStr string, req *apiLinkColor.UpdateRequest) (*dto.LinkColorDetailDTO, *xError.Error) {
+func (l *LinkColorLogic) Update(ctx *gin.Context, colorIDStr string, req *apiLinkColor.ColorUpdateRequest) (*dto.LinkColorDetailDTO, *xError.Error) {
 	db := xCtxUtil.MustGetDB(ctx)
 
 	// 解析ID
@@ -154,7 +167,7 @@ func (l *LinkColorLogic) Update(ctx *gin.Context, colorIDStr string, req *apiLin
 }
 
 // UpdateSort 批量更新友链颜色排序
-func (l *LinkColorLogic) UpdateSort(ctx *gin.Context, req *apiLinkColor.SortRequest) *xError.Error {
+func (l *LinkColorLogic) UpdateSort(ctx *gin.Context, req *apiLinkColor.ColorSortRequest) *xError.Error {
 	db := xCtxUtil.MustGetDB(ctx)
 	colorIDs := req.ColorIDs
 
@@ -194,7 +207,7 @@ func (l *LinkColorLogic) UpdateSort(ctx *gin.Context, req *apiLinkColor.SortRequ
 }
 
 // UpdateStatus 更新友链颜色状态
-func (l *LinkColorLogic) UpdateStatus(ctx *gin.Context, colorIDStr string, req *apiLinkColor.StatusRequest) *xError.Error {
+func (l *LinkColorLogic) UpdateStatus(ctx *gin.Context, colorIDStr string, req *apiLinkColor.ColorStatusRequest) *xError.Error {
 	db := xCtxUtil.MustGetDB(ctx)
 
 	colorID, err := strconv.ParseInt(colorIDStr, 10, 64)
@@ -218,7 +231,7 @@ func (l *LinkColorLogic) UpdateStatus(ctx *gin.Context, colorIDStr string, req *
 }
 
 // Delete 删除友链颜色
-func (l *LinkColorLogic) Delete(ctx *gin.Context, colorIDStr string, req *apiLinkColor.DeleteRequest) ([]dto.LinkColorDeleteConflictDTO, *xError.Error) {
+func (l *LinkColorLogic) Delete(ctx *gin.Context, colorIDStr string, req *apiLinkColor.ColorDeleteRequest) ([]dto.LinkColorDeleteConflictDTO, *xError.Error) {
 	db := xCtxUtil.MustGetDB(ctx)
 
 	colorID, err := strconv.ParseInt(colorIDStr, 10, 64)
@@ -309,7 +322,7 @@ func (l *LinkColorLogic) Get(ctx *gin.Context, colorIDStr string) (*dto.LinkColo
 }
 
 // GetList 获取友链颜色列表（不分页）
-func (l *LinkColorLogic) GetList(ctx *gin.Context, req *apiLinkColor.ListRequest) ([]dto.LinkColorListDTO, *xError.Error) {
+func (l *LinkColorLogic) GetList(ctx *gin.Context, req *apiLinkColor.ColorListRequest) ([]dto.LinkColorListDTO, *xError.Error) {
 	db := xCtxUtil.MustGetDB(ctx)
 	query := db.Model(&entity2.LinkColor{})
 
@@ -380,7 +393,7 @@ func (l *LinkColorLogic) GetList(ctx *gin.Context, req *apiLinkColor.ListRequest
 }
 
 // GetPage 获取友链颜色分页列表
-func (l *LinkColorLogic) GetPage(ctx *gin.Context, req *apiLinkColor.PageRequest) (*base.PaginationResponse[dto.LinkColorNormalDTO], *xError.Error) {
+func (l *LinkColorLogic) GetPage(ctx *gin.Context, req *apiLinkColor.ColorPageRequest) (*base.PaginationResponse[dto.LinkColorNormalDTO], *xError.Error) {
 	db := xCtxUtil.MustGetDB(ctx)
 
 	// 设置默认值

@@ -1,14 +1,25 @@
-package apiSponsorRecord
+/*
+ * --------------------------------------------------------------------------------
+ * Copyright (c) 2016-NOW(至今) 筱锋
+ * Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
+ * --------------------------------------------------------------------------------
+ * 许可证声明：版权所有 (c) 2016-2025 筱锋。保留所有权利。
+ * 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+ * https://opensource.org/licenses/MIT
+ * --------------------------------------------------------------------------------
+ */
+
+package apiSponsor
 
 import (
 	"time"
 
-	"github.com/bamboo-services/bamboo-main/internal/model/base"
-	"github.com/bamboo-services/bamboo-main/internal/model/dto"
+	"github.com/bamboo-services/bamboo-main/internal/models/base"
+	"github.com/bamboo-services/bamboo-main/internal/models/dto"
 )
 
-// AddRequest 添加赞助记录请求
-type AddRequest struct {
+// RecordAddRequest 添加赞助记录请求
+type RecordAddRequest struct {
 	Nickname    string     `json:"nickname" binding:"required,min=1,max=100" example:"张三"`                 // 赞助者昵称
 	RedirectURL *string    `json:"redirect_url" binding:"omitempty,max=500" example:"https://example.com"` // 跳转链接
 	Amount      int64      `json:"amount" binding:"required,min=1" example:"1000"`                         // 赞助金额(分)
@@ -20,8 +31,8 @@ type AddRequest struct {
 	IsHidden    bool       `json:"is_hidden" binding:"omitempty" example:"false"`                          // 是否隐藏
 }
 
-// UpdateRequest 更新赞助记录请求
-type UpdateRequest struct {
+// RecordUpdateRequest 更新赞助记录请求
+type RecordUpdateRequest struct {
 	Nickname    *string    `json:"nickname" binding:"omitempty,min=1,max=100" example:"张三"`                // 赞助者昵称
 	RedirectURL *string    `json:"redirect_url" binding:"omitempty,max=500" example:"https://example.com"` // 跳转链接
 	Amount      *int64     `json:"amount" binding:"omitempty,min=1" example:"1000"`                        // 赞助金额(分)
@@ -33,8 +44,8 @@ type UpdateRequest struct {
 	IsHidden    *bool      `json:"is_hidden" binding:"omitempty" example:"false"`                          // 是否隐藏
 }
 
-// PageRequest 分页查询请求(后台)
-type PageRequest struct {
+// RecordPageRequest 分页查询请求(后台)
+type RecordPageRequest struct {
 	Page        int     `form:"page" binding:"omitempty,min=1" example:"1"`                                                               // 页码,默认1
 	PageSize    int     `form:"page_size" binding:"omitempty,min=1,max=100" example:"10"`                                                 // 每页数量,默认10,最大100
 	ChannelID   *int64  `form:"channel_id" binding:"omitempty" example:"123456789"`                                                       // 渠道 ID 过滤
@@ -45,8 +56,8 @@ type PageRequest struct {
 	Order       *string `form:"order" binding:"omitempty,oneof=asc desc" example:"desc"`                                                  // 排序方向
 }
 
-// PublicPageRequest 公开分页查询请求(前台)
-type PublicPageRequest struct {
+// RecordPublicPageRequest 公开分页查询请求(前台)
+type RecordPublicPageRequest struct {
 	Page      int     `form:"page" binding:"omitempty,min=1" example:"1"`                                           // 页码,默认1
 	PageSize  int     `form:"page_size" binding:"omitempty,min=1,max=50" example:"20"`                              // 每页数量,默认20,最大50
 	ChannelID *int64  `form:"channel_id" binding:"omitempty" example:"123456789"`                                   // 渠道 ID 过滤
@@ -54,32 +65,32 @@ type PublicPageRequest struct {
 	Order     *string `form:"order" binding:"omitempty,oneof=asc desc" example:"desc"`                              // 排序方向
 }
 
-// AddResponse 添加记录响应
-type AddResponse struct {
+// RecordAddResponse 添加记录响应
+type RecordAddResponse struct {
 	dto.SponsorRecordDetailDTO
 }
 
-// UpdateResponse 更新记录响应
-type UpdateResponse struct {
+// RecordUpdateResponse 更新记录响应
+type RecordUpdateResponse struct {
 	dto.SponsorRecordDetailDTO
 }
 
-// DetailResponse 详情响应
-type DetailResponse struct {
+// RecordDetailResponse 详情响应
+type RecordDetailResponse struct {
 	dto.SponsorRecordDetailDTO
 }
 
-// PageResponse 分页响应（后台）
-type PageResponse struct {
+// RecordPageResponse 分页响应（后台）
+type RecordPageResponse struct {
 	base.PaginationResponse[dto.SponsorRecordNormalDTO]
 }
 
-// PublicPageResponse 公开分页响应（前台）
-type PublicPageResponse struct {
+// RecordPublicPageResponse 公开分页响应（前台）
+type RecordPublicPageResponse struct {
 	base.PaginationResponse[dto.SponsorRecordSimpleDTO]
 }
 
-// DeleteResponse 删除响应
-type DeleteResponse struct {
+// RecordDeleteResponse 删除响应
+type RecordDeleteResponse struct {
 	Message string `json:"message"`
 }

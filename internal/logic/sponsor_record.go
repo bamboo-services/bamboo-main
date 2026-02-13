@@ -12,29 +12,41 @@
 package logic
 
 import (
+	"context"
 	"errors"
 	"strconv"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
+	xLog "github.com/bamboo-services/bamboo-base-go/log"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
-	apiSponsorRecord "github.com/bamboo-services/bamboo-main/api/sponsorrecord"
+	apiSponsorRecord "github.com/bamboo-services/bamboo-main/api/sponsor"
 	entity2 "github.com/bamboo-services/bamboo-main/internal/entity"
-	"github.com/bamboo-services/bamboo-main/internal/model/base"
-	"github.com/bamboo-services/bamboo-main/internal/model/dto"
+	"github.com/bamboo-services/bamboo-main/internal/models/base"
+	"github.com/bamboo-services/bamboo-main/internal/models/dto"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 // SponsorRecordLogic 赞助记录业务逻辑
 type SponsorRecordLogic struct {
+	logic
 }
 
-func NewSponsorRecordLogic() *SponsorRecordLogic {
-	return &SponsorRecordLogic{}
+func NewSponsorRecordLogic(ctx context.Context) *SponsorRecordLogic {
+	db := xCtxUtil.MustGetDB(ctx)
+	rdb := xCtxUtil.MustGetRDB(ctx)
+
+	return &SponsorRecordLogic{
+		logic: logic{
+			db:  db,
+			rdb: rdb,
+			log: xLog.WithName(xLog.NamedLOGC, "SponsorRecordLogic"),
+		},
+	}
 }
 
 // Add 添加赞助记录
-func (l *SponsorRecordLogic) Add(ctx *gin.Context, req *apiSponsorRecord.AddRequest) (*dto.SponsorRecordDetailDTO, *xError.Error) {
+func (l *SponsorRecordLogic) Add(ctx *gin.Context, req *apiSponsorRecord.RecordAddRequest) (*dto.SponsorRecordDetailDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 
@@ -79,7 +91,7 @@ func (l *SponsorRecordLogic) Add(ctx *gin.Context, req *apiSponsorRecord.AddRequ
 }
 
 // Update 更新赞助记录
-func (l *SponsorRecordLogic) Update(ctx *gin.Context, idStr string, req *apiSponsorRecord.UpdateRequest) (*dto.SponsorRecordDetailDTO, *xError.Error) {
+func (l *SponsorRecordLogic) Update(ctx *gin.Context, idStr string, req *apiSponsorRecord.RecordUpdateRequest) (*dto.SponsorRecordDetailDTO, *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 
@@ -210,7 +222,7 @@ func (l *SponsorRecordLogic) Get(ctx *gin.Context, idStr string) (*dto.SponsorRe
 }
 
 // GetPage 获取赞助记录分页列表（后台）
-func (l *SponsorRecordLogic) GetPage(ctx *gin.Context, req *apiSponsorRecord.PageRequest) (*base.PaginationResponse[dto.SponsorRecordNormalDTO], *xError.Error) {
+func (l *SponsorRecordLogic) GetPage(ctx *gin.Context, req *apiSponsorRecord.RecordPageRequest) (*base.PaginationResponse[dto.SponsorRecordNormalDTO], *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 
@@ -278,7 +290,7 @@ func (l *SponsorRecordLogic) GetPage(ctx *gin.Context, req *apiSponsorRecord.Pag
 }
 
 // GetPublicPage 获取赞助记录公开分页列表（前台）
-func (l *SponsorRecordLogic) GetPublicPage(ctx *gin.Context, req *apiSponsorRecord.PublicPageRequest) (*base.PaginationResponse[dto.SponsorRecordSimpleDTO], *xError.Error) {
+func (l *SponsorRecordLogic) GetPublicPage(ctx *gin.Context, req *apiSponsorRecord.RecordPublicPageRequest) (*base.PaginationResponse[dto.SponsorRecordSimpleDTO], *xError.Error) {
 	// 获取数据库连接
 	db := xCtxUtil.MustGetDB(ctx)
 

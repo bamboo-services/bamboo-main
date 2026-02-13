@@ -18,6 +18,7 @@ type BambooConfig struct {
 	Database  DatabaseConfig  `mapstructure:"database" yaml:"database"`
 	NoSQL     NoSQLConfig     `mapstructure:"nosql" yaml:"nosql"`
 	Email     EmailConfig     `mapstructure:"email" yaml:"email"`
+	SSO       SSOConfig       `mapstructure:"sso" yaml:"sso"`
 }
 
 // BMConfig 应用配置
@@ -71,4 +72,17 @@ type EmailConfig struct {
 	Timeout     int    `mapstructure:"timeout" yaml:"timeout"`           // 发送超时秒数（默认10）
 	UseTLS      bool   `mapstructure:"use_tls" yaml:"use_tls"`           // 是否使用 TLS 直连（465 端口）
 	UseStartTLS bool   `mapstructure:"use_starttls" yaml:"use_starttls"` // 是否使用 STARTTLS（587 端口）
+}
+
+type SSOConfig struct {
+	ClientID                 string `mapstructure:"client_id" yaml:"client_id"`
+	ClientSecret             string `mapstructure:"client_secret" yaml:"client_secret"`
+	WellKnownURI             string `mapstructure:"well_known_uri" yaml:"well_known_uri"`
+	RedirectURI              string `mapstructure:"redirect_uri" yaml:"redirect_uri"`
+	EndpointAuthURI          string `mapstructure:"endpoint_auth_uri" yaml:"endpoint_auth_uri"`
+	EndpointTokenURI         string `mapstructure:"endpoint_token_uri" yaml:"endpoint_token_uri"`
+	EndpointUserinfoURI      string `mapstructure:"endpoint_userinfo_uri" yaml:"endpoint_userinfo_uri"`
+	EndpointIntrospectionURI string `mapstructure:"endpoint_introspection_uri" yaml:"endpoint_introspection_uri"`
+	EndpointRevocationURI    string `mapstructure:"endpoint_revocation_uri" yaml:"endpoint_revocation_uri"`
+	BusinessCache            *bool  `mapstructure:"business_cache" yaml:"business_cache"`
 }

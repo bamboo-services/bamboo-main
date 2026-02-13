@@ -6,7 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/bamboo-services/bamboo-main/internal/entity"
-	"github.com/bamboo-services/bamboo-main/internal/model/base"
+	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
 	xLog "github.com/bamboo-services/bamboo-base-go/log"
