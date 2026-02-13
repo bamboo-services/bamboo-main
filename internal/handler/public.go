@@ -12,8 +12,8 @@
 package handler
 
 import (
-	"bamboo-main/internal/model/response"
-	"bamboo-main/internal/service"
+	apiPublic "github.com/bamboo-services/bamboo-main/api/public"
+	logic "github.com/bamboo-services/bamboo-main/internal/logic"
 
 	xResult "github.com/bamboo-services/bamboo-base-go/result"
 	"github.com/gin-gonic/gin"
@@ -21,13 +21,13 @@ import (
 
 // PublicHandler 公开接口处理器
 type PublicHandler struct {
-	publicService service.IPublicService
+	publicLogic *logic.PublicLogic
 }
 
 // NewPublicHandler 创建公开接口处理器
 func NewPublicHandler() *PublicHandler {
 	return &PublicHandler{
-		publicService: service.NewPublicService(),
+		publicLogic: logic.NewPublicLogic(),
 	}
 }
 
@@ -37,19 +37,19 @@ func NewPublicHandler() *PublicHandler {
 // @Tags 公开接口
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.HealthResponse "健康检查成功"
+// @Success 200 {object} apiPublic.HealthResponse "健康检查成功"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/public/health [get]
 func (h *PublicHandler) HealthCheck(c *gin.Context) {
 	// 调用服务层
-	result, err := h.publicService.HealthCheck(c)
+	result, err := h.publicLogic.HealthCheck(c)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	resp := response.HealthResponse{}
+	resp := apiPublic.HealthResponse{}
 	if result != nil {
 		resp = *result
 	}
@@ -62,12 +62,12 @@ func (h *PublicHandler) HealthCheck(c *gin.Context) {
 // @Tags 公开接口
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.PingResponse "连通测试成功"
+// @Success 200 {object} apiPublic.PingResponse "连通测试成功"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/public/ping [get]
 func (h *PublicHandler) Ping(c *gin.Context) {
 	// 调用服务层
-	result, err := h.publicService.Ping(c)
+	result, err := h.publicLogic.Ping(c)
 	if err != nil {
 		// Logic 层返回的是 *xError.Error
 		xResult.Error(c, err.GetErrorCode(), err.GetErrorMessage(), err.GetData())
@@ -75,7 +75,7 @@ func (h *PublicHandler) Ping(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	resp := response.PingResponse{}
+	resp := apiPublic.PingResponse{}
 	if result != nil {
 		resp = *result
 	}

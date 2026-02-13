@@ -18,9 +18,9 @@ import (
 	"strings"
 	"time"
 
-	dtoRedis "bamboo-main/internal/model/dto/redis"
-	"bamboo-main/pkg/constants"
-	ctxUtil "bamboo-main/pkg/util/ctx"
+	dtoRedis "github.com/bamboo-services/bamboo-main/internal/model/dto/redis"
+	"github.com/bamboo-services/bamboo-main/pkg/constants"
+	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
 	xResult "github.com/bamboo-services/bamboo-base-go/result"
@@ -33,14 +33,14 @@ func AuthMiddleware(c *gin.Context) {
 	// 获取 Authorization 头部
 	authHeader := c.GetHeader(constants.HeaderAuthorization)
 	if authHeader == "" {
-		xResult.Error(c, xError.HeaderMissing, "认证令牌缺失", nil)
+		xResult.Error(c, xError.HeaderEmpty, "认证令牌缺失", nil)
 		c.Abort()
 		return
 	}
 
 	// 检查 Bearer 前缀
 	if !strings.HasPrefix(authHeader, constants.TokenPrefix) {
-		xResult.Error(c, xError.HeaderIllegal, "认证令牌格式错误", nil)
+		xResult.Error(c, xError.HeaderType, "认证令牌格式错误", nil)
 		c.Abort()
 		return
 	}
@@ -48,7 +48,7 @@ func AuthMiddleware(c *gin.Context) {
 	// 提取 token
 	token := strings.TrimPrefix(authHeader, constants.TokenPrefix)
 	if token == "" {
-		xResult.Error(c, xError.HeaderMissing, "认证令牌不能为空", nil)
+		xResult.Error(c, xError.HeaderEmpty, "认证令牌不能为空", nil)
 		c.Abort()
 		return
 	}

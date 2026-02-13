@@ -16,11 +16,11 @@ import (
 	"fmt"
 	"time"
 
-	dtoRedis "bamboo-main/internal/model/dto/redis"
-	"bamboo-main/internal/model/entity"
-	"bamboo-main/pkg/constants"
-	ctxUtil "bamboo-main/pkg/util/ctx"
-	"bamboo-main/pkg/util/netUtil"
+	"github.com/bamboo-services/bamboo-main/internal/entity"
+	dtoRedis "github.com/bamboo-services/bamboo-main/internal/model/dto/redis"
+	"github.com/bamboo-services/bamboo-main/pkg/constants"
+	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
+	"github.com/bamboo-services/bamboo-main/pkg/util/netUtil"
 
 	"github.com/gin-gonic/gin"
 )

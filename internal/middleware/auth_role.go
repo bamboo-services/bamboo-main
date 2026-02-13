@@ -12,9 +12,10 @@
 package middleware
 
 import (
-	"bamboo-main/internal/model/entity"
-	ctxUtil "bamboo-main/pkg/util/ctx"
 	"errors"
+
+	"github.com/bamboo-services/bamboo-main/internal/entity"
+	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
@@ -33,7 +34,7 @@ func RequireRole(roles ...string) gin.HandlerFunc {
 		}
 
 		// 从数据库获取用户信息
-		db := xCtxUtil.GetDB(c)
+		db := xCtxUtil.MustGetDB(c)
 		if db == nil {
 			_ = c.Error(xError.NewError(c, xError.DatabaseError, "数据库连接异常", false))
 			return

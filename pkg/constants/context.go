@@ -11,6 +11,8 @@
 
 package constants
 
+import xCtx "github.com/bamboo-services/bamboo-base-go/context"
+
 const (
 	// 上下文键
 	ContextKeyUser   = "user"
@@ -47,4 +49,9 @@ const (
 	EmailTypeApproved      = "approved"
 	EmailTypeRejected      = "rejected"
 	EmailTypePasswordReset = "password_reset"
+)
+
+const (
+	ContextCustomConfig xCtx.ContextKey = "context_custom_config"
+	ContextMailWorker   xCtx.ContextKey = "context_mail_worker"
 )

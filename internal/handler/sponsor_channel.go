@@ -12,8 +12,8 @@
 package handler
 
 import (
-	"bamboo-main/internal/model/request"
-	"bamboo-main/internal/service"
+	apiSponsorChannel "github.com/bamboo-services/bamboo-main/api/sponsorchannel"
+	logic "github.com/bamboo-services/bamboo-main/internal/logic"
 
 	xResult "github.com/bamboo-services/bamboo-base-go/result"
 	xValid "github.com/bamboo-services/bamboo-base-go/validator"
@@ -22,13 +22,13 @@ import (
 
 // SponsorChannelHandler 赞助渠道处理器
 type SponsorChannelHandler struct {
-	channelService service.ISponsorChannelService
+	channelLogic *logic.SponsorChannelLogic
 }
 
 // NewSponsorChannelHandler 创建赞助渠道处理器
 func NewSponsorChannelHandler() *SponsorChannelHandler {
 	return &SponsorChannelHandler{
-		channelService: service.NewSponsorChannelService(),
+		channelLogic: logic.NewSponsorChannelLogic(),
 	}
 }
 
@@ -39,14 +39,14 @@ func NewSponsorChannelHandler() *SponsorChannelHandler {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body request.SponsorChannelAddReq true "添加赞助渠道请求"
+// @Param request body apiSponsorChannel.AddRequest true "添加赞助渠道请求"
 // @Success 200 {object} dto.SponsorChannelDetailDTO "添加成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/admin/sponsors/channels [post]
 func (h *SponsorChannelHandler) Add(c *gin.Context) {
-	var req request.SponsorChannelAddReq
+	var req apiSponsorChannel.AddRequest
 
 	// 绑定请求数据
 	bindErr := c.ShouldBindJSON(&req)
@@ -56,7 +56,7 @@ func (h *SponsorChannelHandler) Add(c *gin.Context) {
 	}
 
 	// 调用服务层
-	channel, err := h.channelService.Add(c, &req)
+	channel, err := h.channelLogic.Add(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -74,7 +74,7 @@ func (h *SponsorChannelHandler) Add(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int64 true "赞助渠道ID"
-// @Param request body request.SponsorChannelUpdateReq true "更新赞助渠道请求"
+// @Param request body apiSponsorChannel.UpdateRequest true "更新赞助渠道请求"
 // @Success 200 {object} dto.SponsorChannelDetailDTO "更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
@@ -83,7 +83,7 @@ func (h *SponsorChannelHandler) Add(c *gin.Context) {
 // @Router /api/v1/admin/sponsors/channels/{id} [put]
 func (h *SponsorChannelHandler) Update(c *gin.Context) {
 	channelIDStr := c.Param("id")
-	var req request.SponsorChannelUpdateReq
+	var req apiSponsorChannel.UpdateRequest
 
 	// 绑定请求数据
 	bindErr := c.ShouldBindJSON(&req)
@@ -93,7 +93,7 @@ func (h *SponsorChannelHandler) Update(c *gin.Context) {
 	}
 
 	// 调用服务层
-	channel, err := h.channelService.Update(c, channelIDStr, &req)
+	channel, err := h.channelLogic.Update(c, channelIDStr, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -111,7 +111,7 @@ func (h *SponsorChannelHandler) Update(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int64 true "赞助渠道ID"
-// @Param request body request.SponsorChannelStatusReq true "渠道状态请求"
+// @Param request body apiSponsorChannel.StatusRequest true "渠道状态请求"
 // @Success 200 {object} map[string]interface{} "状态更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
@@ -120,7 +120,7 @@ func (h *SponsorChannelHandler) Update(c *gin.Context) {
 // @Router /api/v1/admin/sponsors/channels/{id}/status [patch]
 func (h *SponsorChannelHandler) UpdateStatus(c *gin.Context) {
 	channelIDStr := c.Param("id")
-	var req request.SponsorChannelStatusReq
+	var req apiSponsorChannel.StatusRequest
 
 	// 绑定请求数据
 	bindErr := c.ShouldBindJSON(&req)
@@ -130,7 +130,7 @@ func (h *SponsorChannelHandler) UpdateStatus(c *gin.Context) {
 	}
 
 	// 调用服务层
-	status, err := h.channelService.UpdateStatus(c, channelIDStr, &req)
+	status, err := h.channelLogic.UpdateStatus(c, channelIDStr, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -164,7 +164,7 @@ func (h *SponsorChannelHandler) Delete(c *gin.Context) {
 	channelIDStr := c.Param("id")
 
 	// 调用服务层
-	err := h.channelService.Delete(c, channelIDStr)
+	err := h.channelLogic.Delete(c, channelIDStr)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -192,7 +192,7 @@ func (h *SponsorChannelHandler) Get(c *gin.Context) {
 	channelIDStr := c.Param("id")
 
 	// 调用服务层
-	channel, err := h.channelService.Get(c, channelIDStr)
+	channel, err := h.channelLogic.Get(c, channelIDStr)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -220,7 +220,7 @@ func (h *SponsorChannelHandler) Get(c *gin.Context) {
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/admin/sponsors/channels/all [get]
 func (h *SponsorChannelHandler) GetList(c *gin.Context) {
-	var req request.SponsorChannelListReq
+	var req apiSponsorChannel.ListRequest
 
 	// 绑定查询参数
 	bindErr := c.ShouldBindQuery(&req)
@@ -230,7 +230,7 @@ func (h *SponsorChannelHandler) GetList(c *gin.Context) {
 	}
 
 	// 调用服务层
-	channels, err := h.channelService.GetList(c, &req)
+	channels, err := h.channelLogic.GetList(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -253,13 +253,13 @@ func (h *SponsorChannelHandler) GetList(c *gin.Context) {
 // @Param name query string false "名称模糊搜索"
 // @Param order_by query string false "排序字段（name, sort_order, created_at）"
 // @Param order query string false "排序方向（asc, desc）"
-// @Success 200 {object} response.SponsorChannelPageResponse "获取成功"
+// @Success 200 {object} apiSponsorChannel.PageResponse "获取成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/admin/sponsors/channels [get]
 func (h *SponsorChannelHandler) GetPage(c *gin.Context) {
-	var req request.SponsorChannelPageReq
+	var req apiSponsorChannel.PageRequest
 
 	// 绑定查询参数
 	bindErr := c.ShouldBindQuery(&req)
@@ -269,7 +269,7 @@ func (h *SponsorChannelHandler) GetPage(c *gin.Context) {
 	}
 
 	// 调用服务层
-	result, err := h.channelService.GetPage(c, &req)
+	result, err := h.channelLogic.GetPage(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -290,7 +290,7 @@ func (h *SponsorChannelHandler) GetPage(c *gin.Context) {
 // @Router /api/v1/sponsors/channels [get]
 func (h *SponsorChannelHandler) GetPublicList(c *gin.Context) {
 	// 调用服务层
-	channels, err := h.channelService.GetPublicList(c)
+	channels, err := h.channelLogic.GetPublicList(c)
 	if err != nil {
 		_ = c.Error(err)
 		return

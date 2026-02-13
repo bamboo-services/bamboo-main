@@ -16,21 +16,25 @@ import (
 	"fmt"
 	"time"
 
-	dtoRedis "bamboo-main/internal/model/dto/redis"
-	servHelper "bamboo-main/internal/service/helper"
-	"bamboo-main/pkg/constants"
-	ctxUtil "bamboo-main/pkg/util/ctx"
+	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
+	dtoRedis "github.com/bamboo-services/bamboo-main/internal/model/dto/redis"
+	"github.com/bamboo-services/bamboo-main/pkg/constants"
+	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
+	xLog "github.com/bamboo-services/bamboo-base-go/log"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 // MailLogic 邮件业务逻辑
 type MailLogic struct {
-	TemplateService servHelper.IMailTemplateService
+	TemplateService *logcHelper.MailTemplateLogic
 	MaxRetry        int // 最大重试次数
+}
+
+func NewMailLogic() *MailLogic {
+	return &MailLogic{TemplateService: &logcHelper.MailTemplateLogic{}, MaxRetry: 3}
 }
 
 // GetTemplate 获取邮件模板
@@ -175,7 +179,7 @@ func (m *MailLogic) SendWithTemplate(ctx *gin.Context, templateName string, to [
 	}
 
 	// 记录日志
-	xCtxUtil.GetSugarLogger(ctx, "MAIL").Infof("邮件任务已入队: ID=%s, To=%v, Template=%s", task.ID, to, templateName)
+	xLog.WithName(xLog.NamedLOGC, "MAIL").Info(ctx, fmt.Sprintf("邮件任务已入队: ID=%s, To=%v, Template=%s", task.ID, to, templateName))
 
 	return nil
 }
@@ -220,7 +224,7 @@ func (m *MailLogic) SendWithTemplateAndCC(ctx *gin.Context, templateName string,
 	}
 
 	// 记录日志
-	xCtxUtil.GetSugarLogger(ctx, "MAIL").Infof("邮件任务已入队: ID=%s, To=%v, CC=%v, Template=%s", task.ID, to, cc, templateName)
+	xLog.WithName(xLog.NamedLOGC, "MAIL").Info(ctx, fmt.Sprintf("邮件任务已入队: ID=%s, To=%v, CC=%v, Template=%s", task.ID, to, cc, templateName))
 
 	return nil
 }

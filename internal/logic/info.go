@@ -12,10 +12,11 @@
 package logic
 
 import (
-	"bamboo-main/internal/model/dto"
-	"bamboo-main/internal/model/entity"
-	"bamboo-main/internal/model/request"
 	"time"
+
+	apiInfo "github.com/bamboo-services/bamboo-main/api/info"
+	"github.com/bamboo-services/bamboo-main/internal/entity"
+	"github.com/bamboo-services/bamboo-main/internal/model/dto"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
@@ -33,9 +34,13 @@ const (
 // InfoLogic 站点信息业务逻辑
 type InfoLogic struct{}
 
+func NewInfoLogic() *InfoLogic {
+	return &InfoLogic{}
+}
+
 // GetSiteInfo 获取站点信息
 func (l *InfoLogic) GetSiteInfo(ctx *gin.Context) (*dto.SiteInfoDTO, *xError.Error) {
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 批量查询站点相关配置
 	keys := []string{KeySiteName, KeySiteDescription, KeySiteIntroduction}
@@ -62,8 +67,8 @@ func (l *InfoLogic) GetSiteInfo(ctx *gin.Context) (*dto.SiteInfoDTO, *xError.Err
 }
 
 // UpdateSiteInfo 更新站点信息
-func (l *InfoLogic) UpdateSiteInfo(ctx *gin.Context, req *request.SiteInfoUpdateReq) (*dto.SiteInfoDTO, *xError.Error) {
-	db := xCtxUtil.GetDB(ctx)
+func (l *InfoLogic) UpdateSiteInfo(ctx *gin.Context, req *apiInfo.SiteUpdateRequest) (*dto.SiteInfoDTO, *xError.Error) {
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 收集需要更新的字段（仅更新非 nil 的字段）
 	updates := make(map[string]*string)
@@ -96,7 +101,7 @@ func (l *InfoLogic) UpdateSiteInfo(ctx *gin.Context, req *request.SiteInfoUpdate
 
 // GetAbout 获取自我介绍
 func (l *InfoLogic) GetAbout(ctx *gin.Context) (*dto.AboutDTO, *xError.Error) {
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	var config entity.System
 	if err := db.Where("key = ?", KeyProfileAbout).First(&config).Error; err != nil {
@@ -115,8 +120,8 @@ func (l *InfoLogic) GetAbout(ctx *gin.Context) (*dto.AboutDTO, *xError.Error) {
 }
 
 // UpdateAbout 更新自我介绍
-func (l *InfoLogic) UpdateAbout(ctx *gin.Context, req *request.AboutUpdateReq) (*dto.AboutDTO, *xError.Error) {
-	db := xCtxUtil.GetDB(ctx)
+func (l *InfoLogic) UpdateAbout(ctx *gin.Context, req *apiInfo.AboutUpdateRequest) (*dto.AboutDTO, *xError.Error) {
+	db := xCtxUtil.MustGetDB(ctx)
 
 	if err := db.Model(&entity.System{}).
 		Where("key = ?", KeyProfileAbout).

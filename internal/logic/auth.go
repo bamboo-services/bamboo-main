@@ -16,16 +16,17 @@ import (
 	"fmt"
 	"time"
 
-	"bamboo-main/internal/model/dto"
-	"bamboo-main/internal/model/entity"
-	"bamboo-main/internal/model/request"
-	servHelper "bamboo-main/internal/service/helper"
-	"bamboo-main/pkg/constants"
-	ctxUtil "bamboo-main/pkg/util/ctx"
+	apiAuth "github.com/bamboo-services/bamboo-main/api/auth"
+	"github.com/bamboo-services/bamboo-main/internal/entity"
+	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
+	"github.com/bamboo-services/bamboo-main/internal/model/dto"
+	"github.com/bamboo-services/bamboo-main/pkg/constants"
+	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
 	"crypto/rand"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
+	xLog "github.com/bamboo-services/bamboo-base-go/log"
 	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	"github.com/gin-gonic/gin"
@@ -34,13 +35,17 @@ import (
 
 // AuthLogic 认证业务逻辑
 type AuthLogic struct {
-	SessionService servHelper.ISessionService
+	SessionService *logcHelper.SessionLogic
+}
+
+func NewAuthLogic() *AuthLogic {
+	return &AuthLogic{SessionService: &logcHelper.SessionLogic{}}
 }
 
 // Login 用户登录
-func (a *AuthLogic) Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.SystemUserDetailDTO, string, *time.Time, *time.Time, *xError.Error) {
+func (a *AuthLogic) Login(ctx *gin.Context, req *apiAuth.LoginRequest) (*dto.SystemUserDetailDTO, string, *time.Time, *time.Time, *xError.Error) {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 查找用户
 	var user entity.SystemUser
@@ -79,7 +84,7 @@ func (a *AuthLogic) Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.Sys
 	err = db.Model(&user).Update("last_login_at", &now).Error
 	if err != nil {
 		// 记录错误但不影响登录
-		xCtxUtil.GetSugarLogger(ctx, "").Errorf("更新最后登录时间失败: %v", err)
+		xLog.WithName(xLog.NamedLOGC, "AUTH").Error(ctx, fmt.Sprintf("更新最后登录时间失败: %v", err))
 	}
 
 	userDTO := &dto.SystemUserDetailDTO{
@@ -98,9 +103,9 @@ func (a *AuthLogic) Login(ctx *gin.Context, req *request.AuthLoginReq) (*dto.Sys
 }
 
 // Register 用户注册
-func (a *AuthLogic) Register(ctx *gin.Context, req *request.AuthRegisterReq) (*dto.SystemUserDetailDTO, string, *time.Time, *time.Time, *xError.Error) {
+func (a *AuthLogic) Register(ctx *gin.Context, req *apiAuth.RegisterRequest) (*dto.SystemUserDetailDTO, string, *time.Time, *time.Time, *xError.Error) {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 1. 检查用户名是否已存在
 	var existingUser entity.SystemUser
@@ -188,9 +193,9 @@ func (a *AuthLogic) Logout(ctx *gin.Context, token string) *xError.Error {
 }
 
 // ChangePassword 修改密码
-func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID int64, req *request.AuthPasswordChangeReq) *xError.Error {
+func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID int64, req *apiAuth.PasswordChangeRequest) *xError.Error {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 查找用户
 	var user entity.SystemUser
@@ -223,9 +228,9 @@ func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID int64, req *request.
 }
 
 // ResetPassword 重置密码（发送重置链接）
-func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *request.AuthPasswordResetReq) *xError.Error {
+func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *apiAuth.PasswordResetRequest) *xError.Error {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 查找用户
 	var user entity.SystemUser
@@ -261,7 +266,7 @@ func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *request.AuthPasswordRes
 // GetUserInfo 获取用户信息
 func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID int64) (*dto.SystemUserDetailDTO, *xError.Error) {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	var user entity.SystemUser
 	err := db.First(&user, "id = ?", userID).Error
@@ -290,7 +295,7 @@ func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID int64) (*dto.SystemUser
 // UpdateLastLogin 更新最后登录时间
 func (a *AuthLogic) UpdateLastLogin(ctx *gin.Context, userID int64) *xError.Error {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	now := time.Now()
 	err := db.Model(&entity.SystemUser{}).Where("id = ?", userID).Update("last_login_at", &now).Error
@@ -304,7 +309,7 @@ func (a *AuthLogic) UpdateLastLogin(ctx *gin.Context, userID int64) *xError.Erro
 func (a *AuthLogic) ValidateToken(ctx *gin.Context, token string) (*dto.SystemUserDetailDTO, *xError.Error) {
 	// 这个方法主要通过中间件来处理，这里提供一个备用实现
 	// 实际项目中可以根据需要实现更复杂的验证逻辑
-	return nil, xError.NewError(ctx, xError.OperationNotSupported, "请通过认证中间件验证令牌", false)
+	return nil, xError.NewError(ctx, xError.OperationInvalid, "请通过认证中间件验证令牌", false)
 }
 
 // generateRandomString 生成随机字符串
@@ -323,8 +328,8 @@ func generateRandomString(length int) string {
 }
 
 // VerifyEmail 验证邮箱
-func (a *AuthLogic) VerifyEmail(ctx *gin.Context, req *request.AuthVerifyEmailReq) *xError.Error {
-	logger := xCtxUtil.GetSugarLogger(ctx, "AUTH")
+func (a *AuthLogic) VerifyEmail(ctx *gin.Context, req *apiAuth.VerifyEmailRequest) *xError.Error {
+	logger := xLog.WithName(xLog.NamedLOGC, "AUTH")
 
 	// 获取 Redis 客户端
 	rdb := ctxUtil.GetRedisClient(ctx)
@@ -336,7 +341,7 @@ func (a *AuthLogic) VerifyEmail(ctx *gin.Context, req *request.AuthVerifyEmailRe
 	redisKey := fmt.Sprintf(constants.EmailVerifyTokenPrefix, req.Token)
 	userIDStr, err := rdb.Get(ctx.Request.Context(), redisKey).Result()
 	if err != nil {
-		logger.Warnf("邮箱验证Token无效或已过期: %s", req.Token)
+		logger.Warn(ctx, fmt.Sprintf("邮箱验证Token无效或已过期: %s", req.Token))
 		return xError.NewError(ctx, xError.BadRequest, "验证链接无效或已过期", false)
 	}
 
@@ -344,18 +349,18 @@ func (a *AuthLogic) VerifyEmail(ctx *gin.Context, req *request.AuthVerifyEmailRe
 	rdb.Del(ctx.Request.Context(), redisKey)
 
 	// 更新用户邮箱验证状态
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 	err = db.Model(&entity.SystemUser{}).Where("id = ?", userIDStr).Update("email_verify", true).Error
 	if err != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "更新邮箱验证状态失败", false, err)
 	}
 
-	logger.Infof("用户 %s 邮箱验证成功", userIDStr)
+	logger.Info(ctx, fmt.Sprintf("用户 %s 邮箱验证成功", userIDStr))
 	return nil
 }
 
 // VerifyResetToken 验证重置密码Token
-func (a *AuthLogic) VerifyResetToken(ctx *gin.Context, req *request.AuthVerifyResetTokenReq) (bool, *xError.Error) {
+func (a *AuthLogic) VerifyResetToken(ctx *gin.Context, req *apiAuth.VerifyResetTokenRequest) (bool, *xError.Error) {
 	// 获取 Redis 客户端
 	rdb := ctxUtil.GetRedisClient(ctx)
 	if rdb == nil {
@@ -373,8 +378,8 @@ func (a *AuthLogic) VerifyResetToken(ctx *gin.Context, req *request.AuthVerifyRe
 }
 
 // ConfirmResetPassword 确认重置密码
-func (a *AuthLogic) ConfirmResetPassword(ctx *gin.Context, req *request.AuthConfirmResetPasswordReq) *xError.Error {
-	logger := xCtxUtil.GetSugarLogger(ctx, "AUTH")
+func (a *AuthLogic) ConfirmResetPassword(ctx *gin.Context, req *apiAuth.ConfirmResetPasswordRequest) *xError.Error {
+	logger := xLog.WithName(xLog.NamedLOGC, "AUTH")
 
 	// 获取 Redis 客户端
 	rdb := ctxUtil.GetRedisClient(ctx)
@@ -386,7 +391,7 @@ func (a *AuthLogic) ConfirmResetPassword(ctx *gin.Context, req *request.AuthConf
 	redisKey := fmt.Sprintf(constants.PasswordResetTokenPrefix, req.Token)
 	userIDStr, err := rdb.Get(ctx.Request.Context(), redisKey).Result()
 	if err != nil {
-		logger.Warnf("密码重置Token无效或已过期: %s", req.Token)
+		logger.Warn(ctx, fmt.Sprintf("密码重置Token无效或已过期: %s", req.Token))
 		return xError.NewError(ctx, xError.BadRequest, "重置链接无效或已过期", false)
 	}
 
@@ -400,13 +405,13 @@ func (a *AuthLogic) ConfirmResetPassword(ctx *gin.Context, req *request.AuthConf
 	}
 
 	// 更新用户密码
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 	err = db.Model(&entity.SystemUser{}).Where("id = ?", userIDStr).Update("password", hashedPassword).Error
 	if err != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "重置密码失败", false, err)
 	}
 
-	logger.Infof("用户 %s 密码重置成功", userIDStr)
+	logger.Info(ctx, fmt.Sprintf("用户 %s 密码重置成功", userIDStr))
 	return nil
 }
 
@@ -414,19 +419,19 @@ func (a *AuthLogic) ConfirmResetPassword(ctx *gin.Context, req *request.AuthConf
 //
 // 此函数应在 goroutine 中异步调用，不会阻断主流程
 func (a *AuthLogic) sendEmailVerification(ctx *gin.Context, user *entity.SystemUser) {
-	logger := xCtxUtil.GetSugarLogger(ctx, "MAIL")
+	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
 
 	// 获取配置
 	config := ctxUtil.GetConfig(ctx)
 	if config == nil {
-		logger.Warn("无法获取配置，跳过发送邮箱验证邮件")
+		logger.Warn(ctx, "无法获取配置，跳过发送邮箱验证邮件")
 		return
 	}
 
 	// 获取 Redis 客户端
 	rdb := ctxUtil.GetRedisClient(ctx)
 	if rdb == nil {
-		logger.Warn("Redis 客户端不可用，跳过发送邮箱验证邮件")
+		logger.Warn(ctx, "Redis 客户端不可用，跳过发送邮箱验证邮件")
 		return
 	}
 
@@ -437,7 +442,7 @@ func (a *AuthLogic) sendEmailVerification(ctx *gin.Context, user *entity.SystemU
 	redisKey := fmt.Sprintf(constants.EmailVerifyTokenPrefix, verifyToken)
 	err := rdb.Set(ctx.Request.Context(), redisKey, user.ID, 24*time.Hour).Err()
 	if err != nil {
-		logger.Warnf("保存验证Token失败: %v", err)
+		logger.Warn(ctx, fmt.Sprintf("保存验证Token失败: %v", err))
 		return
 	}
 
@@ -459,7 +464,7 @@ func (a *AuthLogic) sendEmailVerification(ctx *gin.Context, user *entity.SystemU
 	}
 
 	// 发送邮件
-	mailLogic := &MailLogic{TemplateService: servHelper.NewMailTemplateService(), MaxRetry: 3}
+	mailLogic := &MailLogic{TemplateService: &logcHelper.MailTemplateLogic{}, MaxRetry: 3}
 	mailErr := mailLogic.SendWithTemplate(
 		ctx,
 		"email_verify",
@@ -468,9 +473,9 @@ func (a *AuthLogic) sendEmailVerification(ctx *gin.Context, user *entity.SystemU
 		variables,
 	)
 	if mailErr != nil {
-		logger.Warnf("发送邮箱验证邮件失败: %v", mailErr)
+		logger.Warn(ctx, fmt.Sprintf("发送邮箱验证邮件失败: %v", mailErr))
 	} else {
-		logger.Infof("已发送邮箱验证邮件到: %s", user.Email)
+		logger.Info(ctx, fmt.Sprintf("已发送邮箱验证邮件到: %s", user.Email))
 	}
 }
 
@@ -478,12 +483,12 @@ func (a *AuthLogic) sendEmailVerification(ctx *gin.Context, user *entity.SystemU
 //
 // 此函数应在 goroutine 中异步调用，不会阻断主流程
 func (a *AuthLogic) sendPasswordResetEmail(ctx *gin.Context, user *entity.SystemUser, resetToken string) {
-	logger := xCtxUtil.GetSugarLogger(ctx, "MAIL")
+	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
 
 	// 获取配置
 	config := ctxUtil.GetConfig(ctx)
 	if config == nil {
-		logger.Warn("无法获取配置，跳过发送密码重置邮件")
+		logger.Warn(ctx, "无法获取配置，跳过发送密码重置邮件")
 		return
 	}
 
@@ -505,7 +510,7 @@ func (a *AuthLogic) sendPasswordResetEmail(ctx *gin.Context, user *entity.System
 	}
 
 	// 发送邮件
-	mailLogic := &MailLogic{TemplateService: servHelper.NewMailTemplateService(), MaxRetry: 3}
+	mailLogic := &MailLogic{TemplateService: &logcHelper.MailTemplateLogic{}, MaxRetry: 3}
 	mailErr := mailLogic.SendWithTemplate(
 		ctx,
 		"password_reset",
@@ -514,8 +519,8 @@ func (a *AuthLogic) sendPasswordResetEmail(ctx *gin.Context, user *entity.System
 		variables,
 	)
 	if mailErr != nil {
-		logger.Warnf("发送密码重置邮件失败: %v", mailErr)
+		logger.Warn(ctx, fmt.Sprintf("发送密码重置邮件失败: %v", mailErr))
 	} else {
-		logger.Infof("已发送密码重置邮件到: %s", user.Email)
+		logger.Info(ctx, fmt.Sprintf("已发送密码重置邮件到: %s", user.Email))
 	}
 }

@@ -12,16 +12,16 @@
 package logic
 
 import (
-	"bamboo-main/internal/model/base"
-	"bamboo-main/internal/model/dto"
-	"bamboo-main/internal/model/entity"
-	"bamboo-main/internal/model/request"
 	"errors"
 	"strconv"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
 	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
+	apiLinkColor "github.com/bamboo-services/bamboo-main/api/linkcolor"
+	entity2 "github.com/bamboo-services/bamboo-main/internal/entity"
+	"github.com/bamboo-services/bamboo-main/internal/model/base"
+	"github.com/bamboo-services/bamboo-main/internal/model/dto"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -29,9 +29,13 @@ import (
 // LinkColorLogic 友链颜色业务逻辑
 type LinkColorLogic struct{}
 
+func NewLinkColorLogic() *LinkColorLogic {
+	return &LinkColorLogic{}
+}
+
 // Add 添加友链颜色
-func (l *LinkColorLogic) Add(ctx *gin.Context, req *request.LinkColorAddReq) (*dto.LinkColorDetailDTO, *xError.Error) {
-	db := xCtxUtil.GetDB(ctx)
+func (l *LinkColorLogic) Add(ctx *gin.Context, req *apiLinkColor.AddRequest) (*dto.LinkColorDetailDTO, *xError.Error) {
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 业务规则校验：type=0 时三个颜色字段必填
 	if req.ColorType == 0 {
@@ -44,7 +48,7 @@ func (l *LinkColorLogic) Add(ctx *gin.Context, req *request.LinkColorAddReq) (*d
 	}
 
 	// 创建友链颜色实体
-	color := &entity.LinkColor{
+	color := &entity2.LinkColor{
 		Name:   req.ColorName,
 		Type:   req.ColorType,
 		Status: true, // 默认启用
@@ -60,7 +64,7 @@ func (l *LinkColorLogic) Add(ctx *gin.Context, req *request.LinkColorAddReq) (*d
 
 	// 设置排序值：查询当前最大排序值并+1
 	var maxSort int
-	db.Model(&entity.LinkColor{}).Select("COALESCE(MAX(sort_order), 0)").Scan(&maxSort)
+	db.Model(&entity2.LinkColor{}).Select("COALESCE(MAX(sort_order), 0)").Scan(&maxSort)
 	color.SortOrder = maxSort + 1
 
 	// 保存到数据库
@@ -77,8 +81,8 @@ func (l *LinkColorLogic) Add(ctx *gin.Context, req *request.LinkColorAddReq) (*d
 }
 
 // Update 更新友链颜色
-func (l *LinkColorLogic) Update(ctx *gin.Context, colorIDStr string, req *request.LinkColorUpdateReq) (*dto.LinkColorDetailDTO, *xError.Error) {
-	db := xCtxUtil.GetDB(ctx)
+func (l *LinkColorLogic) Update(ctx *gin.Context, colorIDStr string, req *apiLinkColor.UpdateRequest) (*dto.LinkColorDetailDTO, *xError.Error) {
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 解析ID
 	colorID, err := strconv.ParseInt(colorIDStr, 10, 64)
@@ -87,7 +91,7 @@ func (l *LinkColorLogic) Update(ctx *gin.Context, colorIDStr string, req *reques
 	}
 
 	// 查找友链颜色
-	var color entity.LinkColor
+	var color entity2.LinkColor
 	if err := db.First(&color, "id = ?", colorID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, xError.NewError(ctx, xError.NotFound, "友链颜色不存在", false)
@@ -150,8 +154,8 @@ func (l *LinkColorLogic) Update(ctx *gin.Context, colorIDStr string, req *reques
 }
 
 // UpdateSort 批量更新友链颜色排序
-func (l *LinkColorLogic) UpdateSort(ctx *gin.Context, req *request.LinkColorSortReq) *xError.Error {
-	db := xCtxUtil.GetDB(ctx)
+func (l *LinkColorLogic) UpdateSort(ctx *gin.Context, req *apiLinkColor.SortRequest) *xError.Error {
+	db := xCtxUtil.MustGetDB(ctx)
 	colorIDs := req.ColorIDs
 
 	tx := db.Begin()
@@ -167,7 +171,7 @@ func (l *LinkColorLogic) UpdateSort(ctx *gin.Context, req *request.LinkColorSort
 	}
 
 	for i, colorID := range colorIDs {
-		result := tx.Model(&entity.LinkColor{}).
+		result := tx.Model(&entity2.LinkColor{}).
 			Where("id = ?", colorID).
 			Update("sort_order", startSort+i)
 
@@ -190,15 +194,15 @@ func (l *LinkColorLogic) UpdateSort(ctx *gin.Context, req *request.LinkColorSort
 }
 
 // UpdateStatus 更新友链颜色状态
-func (l *LinkColorLogic) UpdateStatus(ctx *gin.Context, colorIDStr string, req *request.LinkColorStatusReq) *xError.Error {
-	db := xCtxUtil.GetDB(ctx)
+func (l *LinkColorLogic) UpdateStatus(ctx *gin.Context, colorIDStr string, req *apiLinkColor.StatusRequest) *xError.Error {
+	db := xCtxUtil.MustGetDB(ctx)
 
 	colorID, err := strconv.ParseInt(colorIDStr, 10, 64)
 	if err != nil {
 		return xError.NewError(ctx, xError.BadRequest, "无效的颜色ID", false)
 	}
 
-	result := db.Model(&entity.LinkColor{}).
+	result := db.Model(&entity2.LinkColor{}).
 		Where("id = ?", colorID).
 		Update("status", req.Status)
 
@@ -214,8 +218,8 @@ func (l *LinkColorLogic) UpdateStatus(ctx *gin.Context, colorIDStr string, req *
 }
 
 // Delete 删除友链颜色
-func (l *LinkColorLogic) Delete(ctx *gin.Context, colorIDStr string, req *request.LinkColorDeleteReq) ([]dto.LinkColorDeleteConflictDTO, *xError.Error) {
-	db := xCtxUtil.GetDB(ctx)
+func (l *LinkColorLogic) Delete(ctx *gin.Context, colorIDStr string, req *apiLinkColor.DeleteRequest) ([]dto.LinkColorDeleteConflictDTO, *xError.Error) {
+	db := xCtxUtil.MustGetDB(ctx)
 
 	colorID, err := strconv.ParseInt(colorIDStr, 10, 64)
 	if err != nil {
@@ -223,7 +227,7 @@ func (l *LinkColorLogic) Delete(ctx *gin.Context, colorIDStr string, req *reques
 	}
 
 	// 检查颜色是否存在
-	var color entity.LinkColor
+	var color entity2.LinkColor
 	if err := db.First(&color, "id = ?", colorID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, xError.NewError(ctx, xError.NotFound, "友链颜色不存在", false)
@@ -233,13 +237,13 @@ func (l *LinkColorLogic) Delete(ctx *gin.Context, colorIDStr string, req *reques
 
 	// 查询关联的友链
 	var linkCount int64
-	if err := db.Model(&entity.LinkFriend{}).Where("color_id = ?", colorID).Count(&linkCount).Error; err != nil {
+	if err := db.Model(&entity2.LinkFriend{}).Where("color_id = ?", colorID).Count(&linkCount).Error; err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询关联友链失败", false, err)
 	}
 
 	// 如果有关联友链且不是强制删除，返回冲突信息
 	if linkCount > 0 && !req.Force {
-		var conflictLinks []entity.LinkFriend
+		var conflictLinks []entity2.LinkFriend
 		if err := db.Where("color_id = ?", colorID).Limit(10).Find(&conflictLinks).Error; err != nil {
 			return nil, xError.NewError(ctx, xError.DatabaseError, "查询冲突友链失败", false, err)
 		}
@@ -265,14 +269,14 @@ func (l *LinkColorLogic) Delete(ctx *gin.Context, colorIDStr string, req *reques
 
 	// 如果是强制删除，先清空关联友链的 color_id
 	if req.Force && linkCount > 0 {
-		if result := tx.Model(&entity.LinkFriend{}).Where("color_id = ?", colorID).Update("color_id", nil); result.Error != nil {
+		if result := tx.Model(&entity2.LinkFriend{}).Where("color_id = ?", colorID).Update("color_id", nil); result.Error != nil {
 			tx.Rollback()
 			return nil, xError.NewError(ctx, xError.DatabaseError, "清空友链颜色关联失败", false, result.Error)
 		}
 	}
 
 	// 删除颜色（硬删除）
-	if result := tx.Unscoped().Where("id = ?", colorID).Delete(&entity.LinkColor{}); result.Error != nil {
+	if result := tx.Unscoped().Where("id = ?", colorID).Delete(&entity2.LinkColor{}); result.Error != nil {
 		tx.Rollback()
 		return nil, xError.NewError(ctx, xError.DatabaseError, "删除友链颜色失败", false, result.Error)
 	}
@@ -286,14 +290,14 @@ func (l *LinkColorLogic) Delete(ctx *gin.Context, colorIDStr string, req *reques
 
 // Get 获取友链颜色详情
 func (l *LinkColorLogic) Get(ctx *gin.Context, colorIDStr string) (*dto.LinkColorDetailDTO, *xError.Error) {
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	colorID, err := strconv.ParseInt(colorIDStr, 10, 64)
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.BadRequest, "无效的颜色ID", false)
 	}
 
-	var color entity.LinkColor
+	var color entity2.LinkColor
 	if err := db.Preload("LinksFKey").First(&color, "id = ?", colorID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, xError.NewError(ctx, xError.NotFound, "友链颜色不存在", false)
@@ -305,9 +309,9 @@ func (l *LinkColorLogic) Get(ctx *gin.Context, colorIDStr string) (*dto.LinkColo
 }
 
 // GetList 获取友链颜色列表（不分页）
-func (l *LinkColorLogic) GetList(ctx *gin.Context, req *request.LinkColorListReq) ([]dto.LinkColorListDTO, *xError.Error) {
-	db := xCtxUtil.GetDB(ctx)
-	query := db.Model(&entity.LinkColor{})
+func (l *LinkColorLogic) GetList(ctx *gin.Context, req *apiLinkColor.ListRequest) ([]dto.LinkColorListDTO, *xError.Error) {
+	db := xCtxUtil.MustGetDB(ctx)
+	query := db.Model(&entity2.LinkColor{})
 
 	// 应用过滤条件
 	if req.Status != nil {
@@ -335,7 +339,7 @@ func (l *LinkColorLogic) GetList(ctx *gin.Context, req *request.LinkColorListReq
 	}
 	query = query.Order(orderBy + " " + order)
 
-	var colors []entity.LinkColor
+	var colors []entity2.LinkColor
 	if err := query.Find(&colors).Error; err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链颜色列表失败", false, err)
 	}
@@ -353,7 +357,7 @@ func (l *LinkColorLogic) GetList(ctx *gin.Context, req *request.LinkColorListReq
 			Count   int64 `gorm:"column:count"`
 		}
 
-		if err := db.Model(&entity.LinkFriend{}).
+		if err := db.Model(&entity2.LinkFriend{}).
 			Select("color_id, COUNT(*) as count").
 			Where("color_id IN ?", colorIDs).
 			Group("color_id").
@@ -376,8 +380,8 @@ func (l *LinkColorLogic) GetList(ctx *gin.Context, req *request.LinkColorListReq
 }
 
 // GetPage 获取友链颜色分页列表
-func (l *LinkColorLogic) GetPage(ctx *gin.Context, req *request.LinkColorPageReq) (*base.PaginationResponse[dto.LinkColorNormalDTO], *xError.Error) {
-	db := xCtxUtil.GetDB(ctx)
+func (l *LinkColorLogic) GetPage(ctx *gin.Context, req *apiLinkColor.PageRequest) (*base.PaginationResponse[dto.LinkColorNormalDTO], *xError.Error) {
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 设置默认值
 	if req.Page <= 0 {
@@ -387,7 +391,7 @@ func (l *LinkColorLogic) GetPage(ctx *gin.Context, req *request.LinkColorPageReq
 		req.PageSize = 10
 	}
 
-	query := db.Model(&entity.LinkColor{})
+	query := db.Model(&entity2.LinkColor{})
 
 	// 应用过滤条件
 	if req.Status != nil {
@@ -419,7 +423,7 @@ func (l *LinkColorLogic) GetPage(ctx *gin.Context, req *request.LinkColorPageReq
 	query = query.Order(orderBy + " " + order)
 
 	// 分页查询
-	var colors []entity.LinkColor
+	var colors []entity2.LinkColor
 	offset := (req.Page - 1) * req.PageSize
 	if err := query.Offset(offset).Limit(req.PageSize).Find(&colors).Error; err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链颜色列表失败", false, err)
@@ -438,7 +442,7 @@ func (l *LinkColorLogic) GetPage(ctx *gin.Context, req *request.LinkColorPageReq
 			Count   int64 `gorm:"column:count"`
 		}
 
-		if err := db.Model(&entity.LinkFriend{}).
+		if err := db.Model(&entity2.LinkFriend{}).
 			Select("color_id, COUNT(*) as count").
 			Where("color_id IN ?", colorIDs).
 			Group("color_id").
@@ -475,7 +479,7 @@ func getColorTypeText(colorType int) string {
 }
 
 // convertLinkColorToDetailDTO 将友链颜色实体转换为详细DTO
-func convertLinkColorToDetailDTO(color *entity.LinkColor) *dto.LinkColorDetailDTO {
+func convertLinkColorToDetailDTO(color *entity2.LinkColor) *dto.LinkColorDetailDTO {
 	if color == nil {
 		return nil
 	}
@@ -515,7 +519,7 @@ func convertLinkColorToDetailDTO(color *entity.LinkColor) *dto.LinkColorDetailDT
 }
 
 // convertLinkColorToNormalDTO 将友链颜色实体转换为标准DTO
-func convertLinkColorToNormalDTO(color *entity.LinkColor, linkCount int64) dto.LinkColorNormalDTO {
+func convertLinkColorToNormalDTO(color *entity2.LinkColor, linkCount int64) dto.LinkColorNormalDTO {
 	status := 0
 	if color.Status {
 		status = 1
@@ -538,7 +542,7 @@ func convertLinkColorToNormalDTO(color *entity.LinkColor, linkCount int64) dto.L
 }
 
 // convertLinkColorToListDTO 将友链颜色实体转换为列表DTO
-func convertLinkColorToListDTO(color *entity.LinkColor, linkCount int64) dto.LinkColorListDTO {
+func convertLinkColorToListDTO(color *entity2.LinkColor, linkCount int64) dto.LinkColorListDTO {
 	status := 0
 	if color.Status {
 		status = 1

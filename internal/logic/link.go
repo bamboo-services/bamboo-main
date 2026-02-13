@@ -12,16 +12,19 @@
 package logic
 
 import (
-	"bamboo-main/internal/model/base"
-	"bamboo-main/internal/model/dto"
-	"bamboo-main/internal/model/entity"
-	"bamboo-main/internal/model/request"
-	servHelper "bamboo-main/internal/service/helper"
-	"bamboo-main/pkg/constants"
-	ctxUtil "bamboo-main/pkg/util/ctx"
+	"fmt"
 	"strconv"
 
+	apiLink "github.com/bamboo-services/bamboo-main/api/link"
+	"github.com/bamboo-services/bamboo-main/internal/entity"
+	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
+	"github.com/bamboo-services/bamboo-main/internal/model/base"
+	"github.com/bamboo-services/bamboo-main/internal/model/dto"
+	"github.com/bamboo-services/bamboo-main/pkg/constants"
+	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
+
 	xError "github.com/bamboo-services/bamboo-base-go/error"
+	xLog "github.com/bamboo-services/bamboo-base-go/log"
 	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	"github.com/gin-gonic/gin"
@@ -32,10 +35,14 @@ import (
 type LinkLogic struct {
 }
 
+func NewLinkLogic() *LinkLogic {
+	return &LinkLogic{}
+}
+
 // Add 添加友情链接
-func (l *LinkLogic) Add(ctx *gin.Context, req *request.LinkFriendAddReq) (*dto.LinkFriendDetailDTO, *xError.Error) {
+func (l *LinkLogic) Add(ctx *gin.Context, req *apiLink.FriendAddRequest) (*dto.LinkFriendDetailDTO, *xError.Error) {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 创建友情链接实体
 	link := &entity.LinkFriend{
@@ -78,9 +85,9 @@ func (l *LinkLogic) Add(ctx *gin.Context, req *request.LinkFriendAddReq) (*dto.L
 }
 
 // Update 更新友情链接
-func (l *LinkLogic) Update(ctx *gin.Context, linkIDStr string, req *request.LinkFriendUpdateReq) (*dto.LinkFriendDetailDTO, *xError.Error) {
+func (l *LinkLogic) Update(ctx *gin.Context, linkIDStr string, req *apiLink.FriendUpdateRequest) (*dto.LinkFriendDetailDTO, *xError.Error) {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 解析ID
 	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
@@ -148,7 +155,7 @@ func (l *LinkLogic) Update(ctx *gin.Context, linkIDStr string, req *request.Link
 // Delete 删除友情链接
 func (l *LinkLogic) Delete(ctx *gin.Context, linkIDStr string) *xError.Error {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 解析ID
 	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
@@ -169,7 +176,7 @@ func (l *LinkLogic) Delete(ctx *gin.Context, linkIDStr string) *xError.Error {
 // Get 获取友情链接详情
 func (l *LinkLogic) Get(ctx *gin.Context, linkIDStr string) (*dto.LinkFriendDetailDTO, *xError.Error) {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 解析ID
 	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
@@ -190,9 +197,9 @@ func (l *LinkLogic) Get(ctx *gin.Context, linkIDStr string) (*dto.LinkFriendDeta
 }
 
 // List 获取友情链接列表
-func (l *LinkLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*base.PaginationResponse[dto.LinkFriendDetailDTO], *xError.Error) {
+func (l *LinkLogic) List(ctx *gin.Context, req *apiLink.FriendQueryRequest) (*base.PaginationResponse[dto.LinkFriendDetailDTO], *xError.Error) {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 设置默认值
 	if req.Page <= 0 {
@@ -265,9 +272,9 @@ func (l *LinkLogic) List(ctx *gin.Context, req *request.LinkFriendQueryReq) (*ba
 }
 
 // UpdateStatus 更新友情链接状态
-func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkIDStr string, req *request.LinkFriendStatusReq) *xError.Error {
+func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkIDStr string, req *apiLink.FriendStatusRequest) *xError.Error {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 解析ID
 	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
@@ -305,9 +312,9 @@ func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkIDStr string, req *reques
 }
 
 // UpdateFailStatus 更新友情链接失效状态
-func (l *LinkLogic) UpdateFailStatus(ctx *gin.Context, linkIDStr string, req *request.LinkFriendFailReq) *xError.Error {
+func (l *LinkLogic) UpdateFailStatus(ctx *gin.Context, linkIDStr string, req *apiLink.FriendFailRequest) *xError.Error {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 解析ID
 	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
@@ -334,7 +341,7 @@ func (l *LinkLogic) UpdateFailStatus(ctx *gin.Context, linkIDStr string, req *re
 // GetPublicLinks 获取公开的友情链接列表
 func (l *LinkLogic) GetPublicLinks(ctx *gin.Context, groupIDStr string) ([]dto.LinkFriendDetailDTO, *xError.Error) {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	query := db.Where("status = ? AND is_failure = ?", constants.LinkStatusApproved, constants.LinkFailNormal)
 
@@ -440,18 +447,18 @@ func getLinkFailText(fail int) string {
 //
 // 此函数应在 goroutine 中异步调用，不会阻断主流程
 func (l *LinkLogic) sendApplyNotification(ctx *gin.Context, link *entity.LinkFriend) {
-	logger := xCtxUtil.GetSugarLogger(ctx, "MAIL")
+	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
 
 	// 获取配置
 	config := ctxUtil.GetConfig(ctx)
 	if config == nil {
-		logger.Warn("无法获取配置，跳过发送申请通知邮件")
+		logger.Warn(ctx, "无法获取配置，跳过发送申请通知邮件")
 		return
 	}
 
 	// 检查管理员邮箱是否配置
 	if config.Email.AdminEmail == "" {
-		logger.Warn("管理员邮箱未配置，跳过发送申请通知邮件")
+		logger.Warn(ctx, "管理员邮箱未配置，跳过发送申请通知邮件")
 		return
 	}
 
@@ -476,7 +483,7 @@ func (l *LinkLogic) sendApplyNotification(ctx *gin.Context, link *entity.LinkFri
 	}
 
 	// 发送邮件
-	mailLogic := &MailLogic{TemplateService: servHelper.NewMailTemplateService(), MaxRetry: 3}
+	mailLogic := &MailLogic{TemplateService: &logcHelper.MailTemplateLogic{}, MaxRetry: 3}
 	err := mailLogic.SendWithTemplate(
 		ctx,
 		"apply",
@@ -485,7 +492,7 @@ func (l *LinkLogic) sendApplyNotification(ctx *gin.Context, link *entity.LinkFri
 		variables,
 	)
 	if err != nil {
-		logger.Warnf("发送友链申请通知邮件失败: %v", err)
+		logger.Warn(ctx, fmt.Sprintf("发送友链申请通知邮件失败: %v", err))
 	}
 }
 
@@ -493,18 +500,18 @@ func (l *LinkLogic) sendApplyNotification(ctx *gin.Context, link *entity.LinkFri
 //
 // 此函数应在 goroutine 中异步调用，不会阻断主流程
 func (l *LinkLogic) sendStatusNotification(ctx *gin.Context, link *entity.LinkFriend, status int, reviewRemark string) {
-	logger := xCtxUtil.GetSugarLogger(ctx, "MAIL")
+	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
 
 	// 检查友链是否有邮箱
 	if link.Email == nil || *link.Email == "" {
-		logger.Infof("友链 %s 无联系邮箱，跳过发送审核通知", link.Name)
+		logger.Info(ctx, fmt.Sprintf("友链 %s 无联系邮箱，跳过发送审核通知", link.Name))
 		return
 	}
 
 	// 获取配置
 	config := ctxUtil.GetConfig(ctx)
 	if config == nil {
-		logger.Warn("无法获取配置，跳过发送审核通知邮件")
+		logger.Warn(ctx, "无法获取配置，跳过发送审核通知邮件")
 		return
 	}
 
@@ -532,7 +539,7 @@ func (l *LinkLogic) sendStatusNotification(ctx *gin.Context, link *entity.LinkFr
 	}
 
 	// 发送邮件
-	mailLogic := &MailLogic{TemplateService: servHelper.NewMailTemplateService(), MaxRetry: 3}
+	mailLogic := &MailLogic{TemplateService: &logcHelper.MailTemplateLogic{}, MaxRetry: 3}
 	err := mailLogic.SendWithTemplate(
 		ctx,
 		templateName,
@@ -541,6 +548,6 @@ func (l *LinkLogic) sendStatusNotification(ctx *gin.Context, link *entity.LinkFr
 		variables,
 	)
 	if err != nil {
-		logger.Warnf("发送友链审核通知邮件失败: %v", err)
+		logger.Warn(ctx, fmt.Sprintf("发送友链审核通知邮件失败: %v", err))
 	}
 }

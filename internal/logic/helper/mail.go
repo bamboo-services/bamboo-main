@@ -18,7 +18,7 @@ import (
 	"io/fs"
 	"strings"
 
-	mailTemplates "bamboo-main/templates/mail"
+	mailTemplates "github.com/bamboo-services/bamboo-main/templates/mail"
 )
 
 // MailTemplateLogic 邮件模板逻辑

@@ -12,9 +12,10 @@
 package logic
 
 import (
-	"bamboo-main/internal/model/response"
 	"runtime"
 	"time"
+
+	apiPublic "github.com/bamboo-services/bamboo-main/api/public"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
@@ -25,10 +26,14 @@ import (
 type PublicLogic struct {
 }
 
+func NewPublicLogic() *PublicLogic {
+	return &PublicLogic{}
+}
+
 // HealthCheck 健康检查
-func (p *PublicLogic) HealthCheck(ctx *gin.Context) (*response.HealthResponse, *xError.Error) {
+func (p *PublicLogic) HealthCheck(ctx *gin.Context) (*apiPublic.HealthResponse, *xError.Error) {
 	// 检查数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 	if db == nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "数据库连接失败", false)
 	}
@@ -47,16 +52,16 @@ func (p *PublicLogic) HealthCheck(ctx *gin.Context) (*response.HealthResponse, *
 	// 注意：暂时注释Redis检查，等待Redis相关工具函数实现
 
 	// 构建健康检查响应
-	healthResponse := &response.HealthResponse{
+	healthResponse := &apiPublic.HealthResponse{
 		Status:    "healthy",
 		Timestamp: time.Now(),
-		System: response.SystemInfo{
+		System: apiPublic.SystemInfo{
 			Version:     "v1.0.0",
 			Environment: "development", // 可以从配置获取
 			Platform:    runtime.GOOS,
 			GoVersion:   runtime.Version(),
 		},
-		Runtime: response.RuntimeInfo{
+		Runtime: apiPublic.RuntimeInfo{
 			Uptime:      "0m", // 可以计算实际运行时间
 			Goroutines:  runtime.NumGoroutine(),
 			MemoryUsage: "N/A", // 可以计算实际内存使用
@@ -68,8 +73,8 @@ func (p *PublicLogic) HealthCheck(ctx *gin.Context) (*response.HealthResponse, *
 }
 
 // Ping 简单连通性测试
-func (p *PublicLogic) Ping(ctx *gin.Context) (*response.PingResponse, *xError.Error) {
-	pingResponse := &response.PingResponse{
+func (p *PublicLogic) Ping(ctx *gin.Context) (*apiPublic.PingResponse, *xError.Error) {
+	pingResponse := &apiPublic.PingResponse{
 		Message:   "pong",
 		Timestamp: time.Now(),
 	}

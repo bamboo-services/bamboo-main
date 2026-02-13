@@ -12,9 +12,8 @@
 package handler
 
 import (
-	"bamboo-main/internal/model/request"
-	"bamboo-main/internal/model/response"
-	"bamboo-main/internal/service"
+	apiInfo "github.com/bamboo-services/bamboo-main/api/info"
+	logic "github.com/bamboo-services/bamboo-main/internal/logic"
 
 	xResult "github.com/bamboo-services/bamboo-base-go/result"
 	xValid "github.com/bamboo-services/bamboo-base-go/validator"
@@ -23,13 +22,13 @@ import (
 
 // InfoHandler 站点信息处理器
 type InfoHandler struct {
-	infoService service.IInfoService
+	infoLogic *logic.InfoLogic
 }
 
 // NewInfoHandler 创建站点信息处理器
 func NewInfoHandler() *InfoHandler {
 	return &InfoHandler{
-		infoService: service.NewInfoService(),
+		infoLogic: logic.NewInfoLogic(),
 	}
 }
 
@@ -39,17 +38,17 @@ func NewInfoHandler() *InfoHandler {
 // @Tags 站点信息
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.SiteInfoResponse "获取成功"
+// @Success 200 {object} apiInfo.SiteResponse "获取成功"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/info/site [get]
 func (h *InfoHandler) GetSiteInfo(c *gin.Context) {
-	result, err := h.infoService.GetSiteInfo(c)
+	result, err := h.infoLogic.GetSiteInfo(c)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	resp := response.SiteInfoResponse{SiteInfoDTO: *result}
+	resp := apiInfo.SiteResponse{SiteInfoDTO: *result}
 	xResult.SuccessHasData(c, "获取站点信息成功", resp)
 }
 
@@ -60,27 +59,27 @@ func (h *InfoHandler) GetSiteInfo(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body request.SiteInfoUpdateReq true "站点信息更新请求"
-// @Success 200 {object} response.SiteInfoResponse "更新成功"
+// @Param request body apiInfo.SiteUpdateRequest true "站点信息更新请求"
+// @Success 200 {object} apiInfo.SiteResponse "更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/admin/info/site [put]
 func (h *InfoHandler) UpdateSiteInfo(c *gin.Context) {
-	var req request.SiteInfoUpdateReq
+	var req apiInfo.SiteUpdateRequest
 
 	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
 		xValid.HandleValidationError(c, bindErr)
 		return
 	}
 
-	result, err := h.infoService.UpdateSiteInfo(c, &req)
+	result, err := h.infoLogic.UpdateSiteInfo(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	resp := response.SiteInfoResponse{SiteInfoDTO: *result}
+	resp := apiInfo.SiteResponse{SiteInfoDTO: *result}
 	xResult.SuccessHasData(c, "站点信息更新成功", resp)
 }
 
@@ -90,17 +89,17 @@ func (h *InfoHandler) UpdateSiteInfo(c *gin.Context) {
 // @Tags 站点信息
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.AboutResponse "获取成功"
+// @Success 200 {object} apiInfo.AboutResponse "获取成功"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/info/about [get]
 func (h *InfoHandler) GetAbout(c *gin.Context) {
-	result, err := h.infoService.GetAbout(c)
+	result, err := h.infoLogic.GetAbout(c)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	resp := response.AboutResponse{AboutDTO: *result}
+	resp := apiInfo.AboutResponse{AboutDTO: *result}
 	xResult.SuccessHasData(c, "获取自我介绍成功", resp)
 }
 
@@ -111,26 +110,26 @@ func (h *InfoHandler) GetAbout(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body request.AboutUpdateReq true "自我介绍更新请求"
-// @Success 200 {object} response.AboutResponse "更新成功"
+// @Param request body apiInfo.AboutUpdateRequest true "自我介绍更新请求"
+// @Success 200 {object} apiInfo.AboutResponse "更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/admin/info/about [put]
 func (h *InfoHandler) UpdateAbout(c *gin.Context) {
-	var req request.AboutUpdateReq
+	var req apiInfo.AboutUpdateRequest
 
 	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
 		xValid.HandleValidationError(c, bindErr)
 		return
 	}
 
-	result, err := h.infoService.UpdateAbout(c, &req)
+	result, err := h.infoLogic.UpdateAbout(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	resp := response.AboutResponse{AboutDTO: *result}
+	resp := apiInfo.AboutResponse{AboutDTO: *result}
 	xResult.SuccessHasData(c, "自我介绍更新成功", resp)
 }

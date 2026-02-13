@@ -12,15 +12,15 @@
 package logic
 
 import (
-	"bamboo-main/internal/model/base"
-	"bamboo-main/internal/model/dto"
-	"bamboo-main/internal/model/entity"
-	"bamboo-main/internal/model/request"
 	"errors"
 	"strconv"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
+	apiSponsorRecord "github.com/bamboo-services/bamboo-main/api/sponsorrecord"
+	entity2 "github.com/bamboo-services/bamboo-main/internal/entity"
+	"github.com/bamboo-services/bamboo-main/internal/model/base"
+	"github.com/bamboo-services/bamboo-main/internal/model/dto"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -29,14 +29,18 @@ import (
 type SponsorRecordLogic struct {
 }
 
+func NewSponsorRecordLogic() *SponsorRecordLogic {
+	return &SponsorRecordLogic{}
+}
+
 // Add 添加赞助记录
-func (l *SponsorRecordLogic) Add(ctx *gin.Context, req *request.SponsorRecordAddReq) (*dto.SponsorRecordDetailDTO, *xError.Error) {
+func (l *SponsorRecordLogic) Add(ctx *gin.Context, req *apiSponsorRecord.AddRequest) (*dto.SponsorRecordDetailDTO, *xError.Error) {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 如果提供了渠道ID,需要验证渠道是否存在
 	if req.ChannelID != nil {
-		var channel entity.SponsorChannel
+		var channel entity2.SponsorChannel
 		err := db.First(&channel, "id = ?", *req.ChannelID).Error
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -47,7 +51,7 @@ func (l *SponsorRecordLogic) Add(ctx *gin.Context, req *request.SponsorRecordAdd
 	}
 
 	// 创建赞助记录实体
-	record := &entity.SponsorRecord{
+	record := &entity2.SponsorRecord{
 		Nickname:    req.Nickname,
 		RedirectURL: req.RedirectURL,
 		Amount:      req.Amount,
@@ -75,9 +79,9 @@ func (l *SponsorRecordLogic) Add(ctx *gin.Context, req *request.SponsorRecordAdd
 }
 
 // Update 更新赞助记录
-func (l *SponsorRecordLogic) Update(ctx *gin.Context, idStr string, req *request.SponsorRecordUpdateReq) (*dto.SponsorRecordDetailDTO, *xError.Error) {
+func (l *SponsorRecordLogic) Update(ctx *gin.Context, idStr string, req *apiSponsorRecord.UpdateRequest) (*dto.SponsorRecordDetailDTO, *xError.Error) {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 解析ID
 	recordID, err := strconv.ParseInt(idStr, 10, 64)
@@ -86,7 +90,7 @@ func (l *SponsorRecordLogic) Update(ctx *gin.Context, idStr string, req *request
 	}
 
 	// 查找赞助记录
-	var record entity.SponsorRecord
+	var record entity2.SponsorRecord
 	err = db.First(&record, "id = ?", recordID).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -97,7 +101,7 @@ func (l *SponsorRecordLogic) Update(ctx *gin.Context, idStr string, req *request
 
 	// 如果更新了渠道ID,需要验证渠道是否存在
 	if req.ChannelID != nil {
-		var channel entity.SponsorChannel
+		var channel entity2.SponsorChannel
 		err = db.First(&channel, "id = ?", *req.ChannelID).Error
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -154,7 +158,7 @@ func (l *SponsorRecordLogic) Update(ctx *gin.Context, idStr string, req *request
 // Delete 删除赞助记录
 func (l *SponsorRecordLogic) Delete(ctx *gin.Context, idStr string) *xError.Error {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 解析ID
 	recordID, err := strconv.ParseInt(idStr, 10, 64)
@@ -163,7 +167,7 @@ func (l *SponsorRecordLogic) Delete(ctx *gin.Context, idStr string) *xError.Erro
 	}
 
 	// 检查记录是否存在
-	var record entity.SponsorRecord
+	var record entity2.SponsorRecord
 	err = db.First(&record, "id = ?", recordID).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -173,7 +177,7 @@ func (l *SponsorRecordLogic) Delete(ctx *gin.Context, idStr string) *xError.Erro
 	}
 
 	// 删除记录（硬删除）
-	result := db.Unscoped().Where("id = ?", recordID).Delete(&entity.SponsorRecord{})
+	result := db.Unscoped().Where("id = ?", recordID).Delete(&entity2.SponsorRecord{})
 	if result.Error != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "删除赞助记录失败", false, result.Error)
 	}
@@ -184,7 +188,7 @@ func (l *SponsorRecordLogic) Delete(ctx *gin.Context, idStr string) *xError.Erro
 // Get 获取赞助记录详情
 func (l *SponsorRecordLogic) Get(ctx *gin.Context, idStr string) (*dto.SponsorRecordDetailDTO, *xError.Error) {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 解析ID
 	recordID, err := strconv.ParseInt(idStr, 10, 64)
@@ -193,7 +197,7 @@ func (l *SponsorRecordLogic) Get(ctx *gin.Context, idStr string) (*dto.SponsorRe
 	}
 
 	// 查询赞助记录（预加载关联渠道）
-	var record entity.SponsorRecord
+	var record entity2.SponsorRecord
 	err = db.Preload("ChannelFKey").First(&record, "id = ?", recordID).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -206,9 +210,9 @@ func (l *SponsorRecordLogic) Get(ctx *gin.Context, idStr string) (*dto.SponsorRe
 }
 
 // GetPage 获取赞助记录分页列表（后台）
-func (l *SponsorRecordLogic) GetPage(ctx *gin.Context, req *request.SponsorRecordPageReq) (*base.PaginationResponse[dto.SponsorRecordNormalDTO], *xError.Error) {
+func (l *SponsorRecordLogic) GetPage(ctx *gin.Context, req *apiSponsorRecord.PageRequest) (*base.PaginationResponse[dto.SponsorRecordNormalDTO], *xError.Error) {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 设置默认值
 	if req.Page <= 0 {
@@ -219,7 +223,7 @@ func (l *SponsorRecordLogic) GetPage(ctx *gin.Context, req *request.SponsorRecor
 	}
 
 	// 构建查询
-	query := db.Model(&entity.SponsorRecord{})
+	query := db.Model(&entity2.SponsorRecord{})
 
 	// 应用过滤条件
 	if req.ChannelID != nil {
@@ -257,7 +261,7 @@ func (l *SponsorRecordLogic) GetPage(ctx *gin.Context, req *request.SponsorRecor
 	query = query.Order(orderBy + " " + order)
 
 	// 分页查询
-	var records []entity.SponsorRecord
+	var records []entity2.SponsorRecord
 	offset := (req.Page - 1) * req.PageSize
 	err = query.Preload("ChannelFKey").Offset(offset).Limit(req.PageSize).Find(&records).Error
 	if err != nil {
@@ -274,9 +278,9 @@ func (l *SponsorRecordLogic) GetPage(ctx *gin.Context, req *request.SponsorRecor
 }
 
 // GetPublicPage 获取赞助记录公开分页列表（前台）
-func (l *SponsorRecordLogic) GetPublicPage(ctx *gin.Context, req *request.SponsorRecordPublicPageReq) (*base.PaginationResponse[dto.SponsorRecordSimpleDTO], *xError.Error) {
+func (l *SponsorRecordLogic) GetPublicPage(ctx *gin.Context, req *apiSponsorRecord.PublicPageRequest) (*base.PaginationResponse[dto.SponsorRecordSimpleDTO], *xError.Error) {
 	// 获取数据库连接
-	db := xCtxUtil.GetDB(ctx)
+	db := xCtxUtil.MustGetDB(ctx)
 
 	// 设置默认值
 	if req.Page <= 0 {
@@ -287,7 +291,7 @@ func (l *SponsorRecordLogic) GetPublicPage(ctx *gin.Context, req *request.Sponso
 	}
 
 	// 构建查询（只查询未隐藏的记录）
-	query := db.Model(&entity.SponsorRecord{}).Where("is_hidden = ?", false)
+	query := db.Model(&entity2.SponsorRecord{}).Where("is_hidden = ?", false)
 
 	// 应用过滤条件
 	if req.ChannelID != nil {
@@ -313,7 +317,7 @@ func (l *SponsorRecordLogic) GetPublicPage(ctx *gin.Context, req *request.Sponso
 	query = query.Order(orderBy + " " + order)
 
 	// 分页查询
-	var records []entity.SponsorRecord
+	var records []entity2.SponsorRecord
 	offset := (req.Page - 1) * req.PageSize
 	err = query.Preload("ChannelFKey").Offset(offset).Limit(req.PageSize).Find(&records).Error
 	if err != nil {
@@ -330,7 +334,7 @@ func (l *SponsorRecordLogic) GetPublicPage(ctx *gin.Context, req *request.Sponso
 }
 
 // 辅助函数：将赞助记录实体转换为详细DTO
-func convertRecordToDetailDTO(record *entity.SponsorRecord) *dto.SponsorRecordDetailDTO {
+func convertRecordToDetailDTO(record *entity2.SponsorRecord) *dto.SponsorRecordDetailDTO {
 	if record == nil {
 		return nil
 	}
@@ -341,7 +345,7 @@ func convertRecordToDetailDTO(record *entity.SponsorRecord) *dto.SponsorRecordDe
 }
 
 // 辅助函数：将赞助记录实体转换为标准DTO
-func convertRecordToNormalDTO(record *entity.SponsorRecord) dto.SponsorRecordNormalDTO {
+func convertRecordToNormalDTO(record *entity2.SponsorRecord) dto.SponsorRecordNormalDTO {
 	normalDTO := dto.SponsorRecordNormalDTO{
 		ID:          record.ID,
 		Nickname:    record.Nickname,
@@ -370,7 +374,7 @@ func convertRecordToNormalDTO(record *entity.SponsorRecord) dto.SponsorRecordNor
 }
 
 // 辅助函数：将赞助记录实体转换为简单DTO（公开接口用）
-func convertRecordToSimpleDTO(record *entity.SponsorRecord) dto.SponsorRecordSimpleDTO {
+func convertRecordToSimpleDTO(record *entity2.SponsorRecord) dto.SponsorRecordSimpleDTO {
 	// 匿名记录特殊处理
 	nickname := record.Nickname
 	redirectURL := record.RedirectURL

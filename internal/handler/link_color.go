@@ -12,9 +12,8 @@
 package handler
 
 import (
-	"bamboo-main/internal/model/request"
-	"bamboo-main/internal/model/response"
-	"bamboo-main/internal/service"
+	apiLinkColor "github.com/bamboo-services/bamboo-main/api/linkcolor"
+	logic "github.com/bamboo-services/bamboo-main/internal/logic"
 
 	xResult "github.com/bamboo-services/bamboo-base-go/result"
 	xValid "github.com/bamboo-services/bamboo-base-go/validator"
@@ -23,13 +22,13 @@ import (
 
 // LinkColorHandler 友链颜色处理器
 type LinkColorHandler struct {
-	colorService service.ILinkColorService
+	colorLogic *logic.LinkColorLogic
 }
 
 // NewLinkColorHandler 创建友链颜色处理器
 func NewLinkColorHandler() *LinkColorHandler {
 	return &LinkColorHandler{
-		colorService: service.NewLinkColorService(),
+		colorLogic: logic.NewLinkColorLogic(),
 	}
 }
 
@@ -40,27 +39,27 @@ func NewLinkColorHandler() *LinkColorHandler {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body request.LinkColorAddReq true "添加友链颜色请求"
-// @Success 200 {object} response.LinkColorAddResponse "添加成功"
+// @Param request body apiLinkColor.AddRequest true "添加友链颜色请求"
+// @Success 200 {object} apiLinkColor.AddResponse "添加成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/admin/colors [post]
 func (h *LinkColorHandler) Add(c *gin.Context) {
-	var req request.LinkColorAddReq
+	var req apiLinkColor.AddRequest
 
 	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
 		xValid.HandleValidationError(c, bindErr)
 		return
 	}
 
-	color, err := h.colorService.Add(c, &req)
+	color, err := h.colorLogic.Add(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	resp := response.LinkColorAddResponse{LinkColorDetailDTO: *color}
+	resp := apiLinkColor.AddResponse{LinkColorDetailDTO: *color}
 	xResult.SuccessHasData(c, "友链颜色添加成功", resp)
 }
 
@@ -72,8 +71,8 @@ func (h *LinkColorHandler) Add(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int64 true "友链颜色ID"
-// @Param request body request.LinkColorUpdateReq true "更新友链颜色请求"
-// @Success 200 {object} response.LinkColorUpdateResponse "更新成功"
+// @Param request body apiLinkColor.UpdateRequest true "更新友链颜色请求"
+// @Success 200 {object} apiLinkColor.UpdateResponse "更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友链颜色不存在"
@@ -81,20 +80,20 @@ func (h *LinkColorHandler) Add(c *gin.Context) {
 // @Router /api/v1/admin/colors/{id} [put]
 func (h *LinkColorHandler) Update(c *gin.Context) {
 	colorIDStr := c.Param("id")
-	var req request.LinkColorUpdateReq
+	var req apiLinkColor.UpdateRequest
 
 	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
 		xValid.HandleValidationError(c, bindErr)
 		return
 	}
 
-	color, err := h.colorService.Update(c, colorIDStr, &req)
+	color, err := h.colorLogic.Update(c, colorIDStr, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	resp := response.LinkColorUpdateResponse{LinkColorDetailDTO: *color}
+	resp := apiLinkColor.UpdateResponse{LinkColorDetailDTO: *color}
 	xResult.SuccessHasData(c, "友链颜色更新成功", resp)
 }
 
@@ -105,27 +104,27 @@ func (h *LinkColorHandler) Update(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body request.LinkColorSortReq true "颜色排序请求"
-// @Success 200 {object} response.LinkColorSortResponse "排序更新成功"
+// @Param request body apiLinkColor.SortRequest true "颜色排序请求"
+// @Success 200 {object} apiLinkColor.SortResponse "排序更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "颜色不存在"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/admin/colors/sort [patch]
 func (h *LinkColorHandler) UpdateSort(c *gin.Context) {
-	var req request.LinkColorSortReq
+	var req apiLinkColor.SortRequest
 
 	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
 		xValid.HandleValidationError(c, bindErr)
 		return
 	}
 
-	if err := h.colorService.UpdateSort(c, &req); err != nil {
+	if err := h.colorLogic.UpdateSort(c, &req); err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	resp := response.LinkColorSortResponse{
+	resp := apiLinkColor.SortResponse{
 		Message: "颜色排序更新成功",
 		Count:   len(req.ColorIDs),
 	}
@@ -140,8 +139,8 @@ func (h *LinkColorHandler) UpdateSort(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int64 true "友链颜色ID"
-// @Param request body request.LinkColorStatusReq true "颜色状态请求"
-// @Success 200 {object} response.LinkColorStatusResponse "状态更新成功"
+// @Param request body apiLinkColor.StatusRequest true "颜色状态请求"
+// @Success 200 {object} apiLinkColor.StatusResponse "状态更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友链颜色不存在"
@@ -149,14 +148,14 @@ func (h *LinkColorHandler) UpdateSort(c *gin.Context) {
 // @Router /api/v1/admin/colors/{id}/status [patch]
 func (h *LinkColorHandler) UpdateStatus(c *gin.Context) {
 	colorIDStr := c.Param("id")
-	var req request.LinkColorStatusReq
+	var req apiLinkColor.StatusRequest
 
 	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
 		xValid.HandleValidationError(c, bindErr)
 		return
 	}
 
-	if err := h.colorService.UpdateStatus(c, colorIDStr, &req); err != nil {
+	if err := h.colorLogic.UpdateStatus(c, colorIDStr, &req); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -165,7 +164,7 @@ func (h *LinkColorHandler) UpdateStatus(c *gin.Context) {
 	if req.Status {
 		statusText = "启用"
 	}
-	resp := response.LinkColorStatusResponse{
+	resp := apiLinkColor.StatusResponse{
 		Message: "颜色状态更新成功",
 		Status:  req.Status,
 	}
@@ -181,25 +180,25 @@ func (h *LinkColorHandler) UpdateStatus(c *gin.Context) {
 // @Security Bearer
 // @Param id path int64 true "友链颜色ID"
 // @Param force query bool false "是否强制删除（默认false）"
-// @Success 200 {object} response.LinkColorDeleteResponse "删除成功"
+// @Success 200 {object} apiLinkColor.DeleteResponse "删除成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友链颜色不存在"
-// @Failure 409 {object} response.LinkColorDeleteConflictResponse "存在关联数据冲突"
+// @Failure 409 {object} apiLinkColor.DeleteConflictResponse "存在关联数据冲突"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/admin/colors/{id} [delete]
 func (h *LinkColorHandler) Delete(c *gin.Context) {
 	colorIDStr := c.Param("id")
 
-	var req request.LinkColorDeleteReq
+	var req apiLinkColor.DeleteRequest
 	req.Force = c.Query("force") == "true"
 
-	if _, err := h.colorService.Delete(c, colorIDStr, &req); err != nil {
+	if _, err := h.colorLogic.Delete(c, colorIDStr, &req); err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	resp := response.LinkColorDeleteResponse{
+	resp := apiLinkColor.DeleteResponse{
 		Message: "友链颜色删除成功",
 	}
 	xResult.SuccessHasData(c, "友链颜色删除成功", resp)
@@ -213,7 +212,7 @@ func (h *LinkColorHandler) Delete(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int64 true "友链颜色ID"
-// @Success 200 {object} response.LinkColorDetailResponse "获取成功"
+// @Success 200 {object} apiLinkColor.DetailResponse "获取成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "友链颜色不存在"
@@ -222,13 +221,13 @@ func (h *LinkColorHandler) Delete(c *gin.Context) {
 func (h *LinkColorHandler) Get(c *gin.Context) {
 	colorIDStr := c.Param("id")
 
-	color, err := h.colorService.Get(c, colorIDStr)
+	color, err := h.colorLogic.Get(c, colorIDStr)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	resp := response.LinkColorDetailResponse{LinkColorDetailDTO: *color}
+	resp := apiLinkColor.DetailResponse{LinkColorDetailDTO: *color}
 	xResult.SuccessHasData(c, "获取友链颜色详情成功", resp)
 }
 
@@ -251,14 +250,14 @@ func (h *LinkColorHandler) Get(c *gin.Context) {
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/admin/colors/all [get]
 func (h *LinkColorHandler) GetList(c *gin.Context) {
-	var req request.LinkColorListReq
+	var req apiLinkColor.ListRequest
 
 	if bindErr := c.ShouldBindQuery(&req); bindErr != nil {
 		xValid.HandleValidationError(c, bindErr)
 		return
 	}
 
-	colors, err := h.colorService.GetList(c, &req)
+	colors, err := h.colorLogic.GetList(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -281,25 +280,25 @@ func (h *LinkColorHandler) GetList(c *gin.Context) {
 // @Param name query string false "名称模糊搜索"
 // @Param order_by query string false "排序字段（name, sort_order, created_at）"
 // @Param order query string false "排序方向（asc, desc）"
-// @Success 200 {object} response.LinkColorPageResponse "获取成功"
+// @Success 200 {object} apiLinkColor.PageResponse "获取成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/admin/colors [get]
 func (h *LinkColorHandler) GetPage(c *gin.Context) {
-	var req request.LinkColorPageReq
+	var req apiLinkColor.PageRequest
 
 	if bindErr := c.ShouldBindQuery(&req); bindErr != nil {
 		xValid.HandleValidationError(c, bindErr)
 		return
 	}
 
-	result, err := h.colorService.GetPage(c, &req)
+	result, err := h.colorLogic.GetPage(c, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	resp := response.LinkColorPageResponse{PaginationResponse: *result}
+	resp := apiLinkColor.PageResponse{PaginationResponse: *result}
 	xResult.SuccessHasData(c, "获取友链颜色分页列表成功", resp)
 }

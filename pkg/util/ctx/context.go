@@ -12,11 +12,11 @@
 package ctxUtil
 
 import (
-	"bamboo-main/internal/model/base"
-	"bamboo-main/pkg/constants"
+	"github.com/bamboo-services/bamboo-main/internal/model/base"
+	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
-	xConsts "github.com/bamboo-services/bamboo-base-go/constants"
-	"github.com/bwmarrin/snowflake"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/snowflake"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 )
@@ -33,9 +33,9 @@ import (
 // 返回值:
 //   - 配置实例指针 (`*base.BambooConfig`)，如果配置不存在则为 `nil`。
 func GetConfig(c *gin.Context) *base.BambooConfig {
-	value, exists := c.Get(xConsts.ContextCustomConfig.String())
-	if exists {
-		return value.(*base.BambooConfig)
+	value, err := xCtxUtil.Get[*base.BambooConfig](c, constants.ContextCustomConfig)
+	if err == nil {
+		return value
 	}
 	return nil
 }
@@ -44,12 +44,8 @@ func GetConfig(c *gin.Context) *base.BambooConfig {
 // 如果上下文中不存在对应的 Snowflake 节点，则返回 nil。
 // 参数 c 表示请求上下文 gin.Context。
 // 返回值为指向 Snowflake 节点的指针或 nil。
-func GetSnowflake(c *gin.Context) *snowflake.Node {
-	value, exists := c.Get(xConsts.ContextSnowflakeNode.String())
-	if exists {
-		return value.(*snowflake.Node)
-	}
-	return nil
+func GetSnowflake(c *gin.Context) *xSnowflake.Node {
+	return xCtxUtil.GetSnowflakeNode(c)
 }
 
 // GetRedisClient 从 Gin 的上下文中获取 Redis 客户端实例。
@@ -62,9 +58,9 @@ func GetSnowflake(c *gin.Context) *snowflake.Node {
 // 返回值:
 //   - Redis 客户端实例指针 (`*redis.Client`)，如果客户端不存在则为 `nil`。
 func GetRedisClient(c *gin.Context) *redis.Client {
-	value, exists := c.Get(xConsts.ContextRedisClient.String())
-	if exists {
-		return value.(*redis.Client)
+	value, err := xCtxUtil.GetRDB(c)
+	if err == nil {
+		return value
 	}
 	return nil
 }

@@ -23,9 +23,9 @@ import (
 	"sync"
 	"time"
 
-	"bamboo-main/internal/model/base"
-	dtoRedis "bamboo-main/internal/model/dto/redis"
-	"bamboo-main/pkg/constants"
+	"github.com/bamboo-services/bamboo-main/internal/model/base"
+	dtoRedis "github.com/bamboo-services/bamboo-main/internal/model/dto/redis"
+	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
 	"github.com/jordan-wright/email"
 	"github.com/redis/go-redis/v9"
