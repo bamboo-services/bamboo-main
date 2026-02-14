@@ -20,7 +20,7 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
-	"github.com/bamboo-services/bamboo-main/internal/models/dto"
+	"github.com/bamboo-services/bamboo-main/internal/repository"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
@@ -29,12 +29,16 @@ import (
 	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
+
+type linkRepo struct {
+	link *repository.LinkRepo
+}
 
 // LinkLogic 友情链接业务逻辑
 type LinkLogic struct {
 	logic
+	repo linkRepo
 }
 
 func NewLinkLogic(ctx context.Context) *LinkLogic {
@@ -47,14 +51,12 @@ func NewLinkLogic(ctx context.Context) *LinkLogic {
 			rdb: rdb,
 			log: xLog.WithName(xLog.NamedLOGC, "LinkLogic"),
 		},
+		repo: linkRepo{link: repository.NewLinkRepo(db, rdb)},
 	}
 }
 
 // Add 添加友情链接
-func (l *LinkLogic) Add(ctx *gin.Context, req *apiLink.FriendAddRequest) (*dto.LinkFriendDetailDTO, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
+func (l *LinkLogic) Add(ctx *gin.Context, req *apiLink.FriendAddRequest) (*entity.LinkFriend, *xError.Error) {
 	// 创建友情链接实体
 	link := &entity.LinkFriend{
 		Name:        req.LinkName,
@@ -77,43 +79,39 @@ func (l *LinkLogic) Add(ctx *gin.Context, req *apiLink.FriendAddRequest) (*dto.L
 		link.ColorID = &req.LinkColorID
 	}
 
-	// 保存到数据库
-	err := db.Create(link).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "创建友情链接失败", false, err)
+	_, xErr := l.repo.link.Create(ctx, link, nil)
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	// 预加载关联数据
-	err = db.Preload("GroupFKey").Preload("ColorFKey").First(link, "id = ?", link.ID).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
+	reloaded, found, xErr := l.repo.link.GetByID(ctx, link.ID, true, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+	if !found {
+		return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
 
 	// 发送邮件通知管理员（异步，不阻断主流程）
-	go l.sendApplyNotification(ctx, link)
+	go l.sendApplyNotification(ctx, reloaded)
 
-	return convertLinkFriendToDTO(link), nil
+	return reloaded, nil
 }
 
 // Update 更新友情链接
-func (l *LinkLogic) Update(ctx *gin.Context, linkIDStr string, req *apiLink.FriendUpdateRequest) (*dto.LinkFriendDetailDTO, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
+func (l *LinkLogic) Update(ctx *gin.Context, linkIDStr string, req *apiLink.FriendUpdateRequest) (*entity.LinkFriend, *xError.Error) {
 	// 解析ID
 	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
 	}
 
-	// 查找友情链接
-	var link entity.LinkFriend
-	err = db.First(&link, "id = ?", linkID).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
-		}
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
+	link, found, xErr := l.repo.link.GetByID(ctx, linkID, false, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+	if !found {
+		return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
 
 	// 直接更新实体字段
@@ -148,70 +146,61 @@ func (l *LinkLogic) Update(ctx *gin.Context, linkIDStr string, req *apiLink.Frie
 		link.ApplyRemark = xUtil.Ptr(req.LinkApplyRemark)
 	}
 
-	// 执行更新
-	err = db.Updates(&link).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "更新友情链接失败", false, err)
+	_, xErr = l.repo.link.Save(ctx, link, nil)
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	// 重新查询带关联数据
-	err = db.Preload("GroupFKey").Preload("ColorFKey").First(&link, "id = ?", linkID).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
+	reloaded, found, xErr := l.repo.link.GetByID(ctx, linkID, true, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+	if !found {
+		return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
 
-	return convertLinkFriendToDTO(&link), nil
+	return reloaded, nil
 }
 
 // Delete 删除友情链接
 func (l *LinkLogic) Delete(ctx *gin.Context, linkIDStr string) *xError.Error {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
 	// 解析ID
 	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
 	if err != nil {
 		return xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
 	}
 
-	result := db.Where("id = ?", linkID).Delete(&entity.LinkFriend{})
-	if result.Error != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "删除友情链接失败", false, result.Error)
+	ok, xErr := l.repo.link.DeleteByID(ctx, linkID, nil)
+	if xErr != nil {
+		return xErr
 	}
-	if result.RowsAffected == 0 {
+	if !ok {
 		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
 	return nil
 }
 
 // Get 获取友情链接详情
-func (l *LinkLogic) Get(ctx *gin.Context, linkIDStr string) (*dto.LinkFriendDetailDTO, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
+func (l *LinkLogic) Get(ctx *gin.Context, linkIDStr string) (*entity.LinkFriend, *xError.Error) {
 	// 解析ID
 	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
 	}
 
-	var link entity.LinkFriend
-	err = db.Preload("GroupFKey").Preload("ColorFKey").First(&link, "id = ?", linkID).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
-		}
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
+	link, found, xErr := l.repo.link.GetByID(ctx, linkID, true, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+	if !found {
+		return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
 
-	return convertLinkFriendToDTO(&link), nil
+	return link, nil
 }
 
 // List 获取友情链接列表
-func (l *LinkLogic) List(ctx *gin.Context, req *apiLink.FriendQueryRequest) (*base.PaginationResponse[dto.LinkFriendDetailDTO], *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
+func (l *LinkLogic) List(ctx *gin.Context, req *apiLink.FriendQueryRequest) (*base.PaginationResponse[entity.LinkFriend], *xError.Error) {
 	// 设置默认值
 	if req.Page <= 0 {
 		req.Page = 1
@@ -220,73 +209,16 @@ func (l *LinkLogic) List(ctx *gin.Context, req *apiLink.FriendQueryRequest) (*ba
 		req.PageSize = 10
 	}
 
-	// 构建查询条件
-	query := db.Model(&entity.LinkFriend{})
-
-	if req.LinkName != "" {
-		query = query.Where("link_name ILIKE ?", "%"+req.LinkName+"%")
-	}
-	if req.LinkStatus != nil {
-		query = query.Where("link_status = ?", *req.LinkStatus)
-	}
-	if req.LinkFail != nil {
-		query = query.Where("is_failure = ?", *req.LinkFail)
-	}
-	if req.LinkGroupID != 0 {
-		query = query.Where("group_id = ?", req.LinkGroupID)
+	links, total, xErr := l.repo.link.List(ctx, req, nil)
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	// 排序
-	orderBy := "link_created_at"
-	if req.SortBy != "" {
-		switch req.SortBy {
-		case "created_at":
-			orderBy = "link_created_at"
-		case "updated_at":
-			orderBy = "link_updated_at"
-		case "link_order":
-			orderBy = "link_order"
-		case "link_name":
-			orderBy = "link_name"
-		}
-	}
-
-	sortOrder := "DESC"
-	if req.SortOrder == "asc" {
-		sortOrder = "ASC"
-	}
-
-	query = query.Order(orderBy + " " + sortOrder)
-
-	// 获取总数
-	var total int64
-	err := query.Count(&total).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "统计友情链接数量失败", true, err)
-	}
-
-	// 分页查询
-	var links []entity.LinkFriend
-	offset := (req.Page - 1) * req.PageSize
-	err = query.Preload("GroupFKey").Preload("ColorFKey").Offset(offset).Limit(req.PageSize).Find(&links).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友情链接列表失败", false, err)
-	}
-
-	// 转换为 DTO
-	var linkDTOs []dto.LinkFriendDetailDTO
-	for _, link := range links {
-		linkDTOs = append(linkDTOs, *convertLinkFriendToDTO(&link))
-	}
-
-	return base.NewPaginationResponse(linkDTOs, req.Page, req.PageSize, total), nil
+	return base.NewPaginationResponse(links, req.Page, req.PageSize, total), nil
 }
 
 // UpdateStatus 更新友情链接状态
 func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkIDStr string, req *apiLink.FriendStatusRequest) *xError.Error {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
 	// 解析ID
 	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
 	if err != nil {
@@ -294,55 +226,41 @@ func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkIDStr string, req *apiLin
 	}
 
 	// 先查询友链信息（用于发送邮件通知）
-	var link entity.LinkFriend
-	err = db.First(&link, "id = ?", linkID).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
-		}
-		return xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
+	link, found, xErr := l.repo.link.GetByID(ctx, linkID, false, nil)
+	if xErr != nil {
+		return xErr
+	}
+	if !found {
+		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
 
-	updates := map[string]interface{}{
-		"status":        req.LinkStatus,
-		"review_remark": req.LinkReviewRemark,
+	ok, xErr := l.repo.link.UpdateStatusByID(ctx, linkID, req.LinkStatus, req.LinkReviewRemark, nil)
+	if xErr != nil {
+		return xErr
 	}
-
-	result := db.Model(&entity.LinkFriend{}).Where("id = ?", linkID).Updates(updates)
-	if result.Error != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "更新友情链接状态失败", false, result.Error)
-	}
-	if result.RowsAffected == 0 {
+	if !ok {
 		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
 
 	// 发送审核结果邮件通知（异步，不阻断主流程）
-	go l.sendStatusNotification(ctx, &link, req.LinkStatus, req.LinkReviewRemark)
+	go l.sendStatusNotification(ctx, link, req.LinkStatus, req.LinkReviewRemark)
 
 	return nil
 }
 
 // UpdateFailStatus 更新友情链接失效状态
 func (l *LinkLogic) UpdateFailStatus(ctx *gin.Context, linkIDStr string, req *apiLink.FriendFailRequest) *xError.Error {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
 	// 解析ID
 	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
 	if err != nil {
 		return xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
 	}
 
-	updates := map[string]interface{}{
-		"is_failure":  req.LinkFail,
-		"fail_reason": req.LinkFailReason,
+	ok, xErr := l.repo.link.UpdateFailureByID(ctx, linkID, req.LinkFail, req.LinkFailReason, nil)
+	if xErr != nil {
+		return xErr
 	}
-
-	result := db.Model(&entity.LinkFriend{}).Where("id = ?", linkID).Updates(updates)
-	if result.Error != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "更新友情链接失效状态失败", false, result.Error)
-	}
-	if result.RowsAffected == 0 {
+	if !ok {
 		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
 
@@ -350,108 +268,16 @@ func (l *LinkLogic) UpdateFailStatus(ctx *gin.Context, linkIDStr string, req *ap
 }
 
 // GetPublicLinks 获取公开的友情链接列表
-func (l *LinkLogic) GetPublicLinks(ctx *gin.Context, groupIDStr string) ([]dto.LinkFriendDetailDTO, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	query := db.Where("status = ? AND is_failure = ?", constants.LinkStatusApproved, constants.LinkFailNormal)
-
+func (l *LinkLogic) GetPublicLinks(ctx *gin.Context, groupIDStr string) ([]entity.LinkFriend, *xError.Error) {
+	var groupID *int64
 	if groupIDStr != "" {
-		groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
+		parsedID, err := strconv.ParseInt(groupIDStr, 10, 64)
 		if err == nil {
-			query = query.Where("group_id = ?", groupID)
+			groupID = &parsedID
 		}
 	}
 
-	var links []entity.LinkFriend
-	err := query.Preload("GroupFKey").Preload("ColorFKey").Order("sort_order ASC, created_at DESC").Find(&links).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询公开友情链接失败", false, err)
-	}
-
-	var linkDTOs []dto.LinkFriendDetailDTO
-	for _, link := range links {
-		linkDTOs = append(linkDTOs, *convertLinkFriendToDTO(&link))
-	}
-
-	return linkDTOs, nil
-}
-
-// 辅助函数：将友链实体转换为详细DTO
-func convertLinkFriendToDTO(link *entity.LinkFriend) *dto.LinkFriendDetailDTO {
-	if link == nil {
-		return nil
-	}
-
-	linkDTO := &dto.LinkFriendDetailDTO{
-		ID:           link.ID,
-		Name:         link.Name,
-		URL:          link.URL,
-		Avatar:       link.Avatar,
-		RSS:          link.RSS,
-		Description:  link.Description,
-		Email:        link.Email,
-		GroupID:      link.GroupID,
-		ColorID:      link.ColorID,
-		SortOrder:    link.SortOrder,
-		Status:       link.Status,
-		StatusText:   getLinkStatusText(link.Status),
-		IsFailure:    link.IsFailure,
-		FailureText:  getLinkFailText(link.IsFailure),
-		FailReason:   link.FailReason,
-		ApplyRemark:  link.ApplyRemark,
-		ReviewRemark: link.ReviewRemark,
-		CreatedAt:    link.CreatedAt,
-		UpdatedAt:    link.UpdatedAt,
-	}
-
-	// 转换关联的分组信息
-	if link.GroupFKey != nil {
-		linkDTO.GroupInfo = &dto.LinkGroupSimpleDTO{
-			ID:   link.GroupFKey.ID,
-			Name: link.GroupFKey.Name,
-		}
-	}
-
-	// 转换关联的颜色信息
-	if link.ColorFKey != nil {
-		linkDTO.ColorInfo = &dto.LinkColorSimpleDTO{
-			ID:           link.ColorFKey.ID,
-			Name:         link.ColorFKey.Name,
-			Type:         link.ColorFKey.Type,
-			PrimaryColor: link.ColorFKey.PrimaryColor,
-			SubColor:     link.ColorFKey.SubColor,
-			HoverColor:   link.ColorFKey.HoverColor,
-		}
-	}
-
-	return linkDTO
-}
-
-// getLinkStatusText 获取链接状态文本
-func getLinkStatusText(status int) string {
-	switch status {
-	case constants.LinkStatusPending:
-		return "待审核"
-	case constants.LinkStatusApproved:
-		return "已通过"
-	case constants.LinkStatusRejected:
-		return "已拒绝"
-	default:
-		return "未知状态"
-	}
-}
-
-// getLinkFailText 获取链接失效状态文本
-func getLinkFailText(fail int) string {
-	switch fail {
-	case constants.LinkFailNormal:
-		return "正常"
-	case constants.LinkFailBroken:
-		return "失效"
-	default:
-		return "未知状态"
-	}
+	return l.repo.link.ListPublic(ctx, groupID, constants.LinkStatusApproved, constants.LinkFailNormal, nil)
 }
 
 // sendApplyNotification 发送友链申请通知邮件给管理员

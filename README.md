@@ -19,7 +19,7 @@
 - **缓存**: Redis
 - **认证**: 自定义 Token + Redis 会话
 - **文档**: Swagger
-- **配置**: YAML
+- **配置**: `.env` 环境变量
 
 ## 📁 项目结构
 
@@ -27,19 +27,17 @@
 bamboo-main/
 ├── main.go                    # 应用入口
 ├── go.mod                     # 依赖管理
-├── configs/
-│   └── config.yaml           # 配置文件
+├── .env.example               # 环境变量示例
 ├── internal/
 │   ├── handler/              # HTTP 处理层
 │   ├── service/              # 服务接口层
 │   ├── logic/                # 业务逻辑层
-│   ├── model/                # 数据模型
+│   ├── models/               # 配置模型与基础结构
+│   ├── entity/               # 数据库实体
+│   ├── repository/           # 数据访问层（含 cache）
 │   ├── middleware/           # 中间件
-│   └── router/               # 路由配置
-├── pkg/
-│   ├── startup/              # 应用启动
-│   ├── constants/            # 常量定义
-│   └── util/                 # 工具函数
+│   └── app/                  # 路由与启动编排
+├── pkg/                      # 常量与工具函数
 ├── scripts/
 │   └── init_admin.sql        # 初始化 SQL
 └── docs/                     # Swagger 文档
@@ -62,22 +60,18 @@ CREATE USER bamboo_main WITH PASSWORD 'bamboo_main';
 GRANT ALL PRIVILEGES ON DATABASE bamboo_main TO bamboo_main;
 ```
 
-### 3. 配置文件
+### 3. 配置环境变量
 
-修改 `configs/config.yaml`：
-```yaml
-bm:
-  debug: true
-  server:
-    port: 23333
-database:
-  host: localhost
-  port: 5432
-  user: bamboo_main
-  pass: bamboo_main
-  name: bamboo_main
-  # ... 其他配置
+复制配置模板并按需填写：
+```bash
+cp .env.example .env
 ```
+
+常用配置项：
+- `XLF_DEBUG` / `XLF_PORT`
+- `DATABASE_HOST` / `DATABASE_PORT` / `DATABASE_USER` / `DATABASE_PASS` / `DATABASE_NAME`
+- `NOSQL_HOST` / `NOSQL_PORT` / `NOSQL_DATABASE` / `NOSQL_PREFIX`
+- `EMAIL_HOST` / `EMAIL_PORT` / `EMAIL_USER` / `EMAIL_PASS`
 
 ### 4. 安装依赖
 
@@ -133,20 +127,23 @@ psql -h localhost -U bamboo_main -d bamboo_main -f scripts/init_admin.sql
 1. 登录成功后获得 token（格式：`cs_` + 64位字符串）
 2. 请求头添加：`Authorization: Bearer {token}`
 3. Token 存储在 Redis 中，默认有效期 24 小时
-4. Redis Key 格式：`bm:auth:token:{token}`
+4. Redis Key 格式：`{NOSQL_PREFIX}:auth:token:{token}`（默认 `bm:auth:token:{token}`）
 
 ## 📊 Redis 常量规范
 
 项目使用统一的 Redis Key 命名规范：
 
 ```go
-// 项目前缀: bm (bamboo-main)
+type RedisKey string
+
 const (
-    AuthTokenPrefix = "bm:auth:token:"      // 认证令牌
-    LinkCachePrefix = "bm:link:cache:"      // 链接缓存
-    GroupCachePrefix = "bm:group:cache:"    // 分组缓存
-    // ...
+    RedisAuthToken   RedisKey = "auth:token:%s"
+    RedisMailQueue   RedisKey = "mail:queue"
+    RedisLinkFriend  RedisKey = "link:friend:%d"
+    RedisSponsorChan RedisKey = "sponsor:channel:%d"
 )
+
+key := RedisAuthToken.Get(token).String() // => bm:auth:token:{token}
 ```
 
 ## 🔧 开发相关

@@ -49,7 +49,7 @@ func (h *LinkGroupHandler) Add(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	resp := apiLinkGroup.GroupAddResponse{LinkGroupDetailDTO: *group}
+	resp := apiLinkGroup.GroupAddResponse{LinkGroup: *group}
 	xResult.SuccessHasData(c, "友链分组添加成功", resp)
 }
 
@@ -87,7 +87,7 @@ func (h *LinkGroupHandler) Update(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	resp := apiLinkGroup.GroupUpdateResponse{LinkGroupDetailDTO: *group}
+	resp := apiLinkGroup.GroupUpdateResponse{LinkGroup: *group}
 	xResult.SuccessHasData(c, "友链分组更新成功", resp)
 }
 
@@ -237,7 +237,7 @@ func (h *LinkGroupHandler) Get(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	resp := apiLinkGroup.GroupDetailResponse{LinkGroupDetailDTO: *group}
+	resp := apiLinkGroup.GroupDetailResponse{LinkGroup: *group}
 	xResult.SuccessHasData(c, "获取友链分组详情成功", resp)
 }
 
@@ -254,7 +254,7 @@ func (h *LinkGroupHandler) Get(c *gin.Context) {
 // @Param only_enabled query bool false "仅查询启用的分组"
 // @Param order_by query string false "排序字段（name, sort_order, created_at）"
 // @Param order query string false "排序方向（asc, desc）"
-// @Success 200 {object} []dto.LinkGroupListDTO "获取成功"
+// @Success 200 {object} []entity.LinkGroup "获取成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"

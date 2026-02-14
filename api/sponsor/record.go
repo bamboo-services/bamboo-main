@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
-	"github.com/bamboo-services/bamboo-main/internal/models/dto"
 )
 
 // RecordAddRequest 添加赞助记录请求
@@ -65,29 +64,61 @@ type RecordPublicPageRequest struct {
 	Order     *string `form:"order" binding:"omitempty,oneof=asc desc" example:"desc"`                              // 排序方向
 }
 
+type SponsorChannelSimpleResponse struct {
+	ID   int64   `json:"id"`
+	Name string  `json:"name"`
+	Icon *string `json:"icon"`
+}
+
+type RecordEntityResponse struct {
+	ID          int64                         `json:"id"`
+	Nickname    string                        `json:"nickname"`
+	RedirectURL *string                       `json:"redirect_url"`
+	Amount      int64                         `json:"amount"`
+	ChannelID   *int64                        `json:"channel_id"`
+	Message     *string                       `json:"message"`
+	SponsorAt   *time.Time                    `json:"sponsor_at"`
+	SortOrder   int                           `json:"sort_order"`
+	IsAnonymous bool                          `json:"is_anonymous"`
+	IsHidden    bool                          `json:"is_hidden"`
+	CreatedAt   time.Time                     `json:"created_at"`
+	UpdatedAt   time.Time                     `json:"updated_at"`
+	Channel     *SponsorChannelSimpleResponse `json:"channel,omitempty"`
+}
+
+type RecordPublicItemResponse struct {
+	ID          int64                         `json:"id"`
+	Nickname    string                        `json:"nickname"`
+	RedirectURL *string                       `json:"redirect_url"`
+	Amount      int64                         `json:"amount"`
+	Message     *string                       `json:"message"`
+	SponsorAt   *time.Time                    `json:"sponsor_at"`
+	Channel     *SponsorChannelSimpleResponse `json:"channel,omitempty"`
+}
+
 // RecordAddResponse 添加记录响应
 type RecordAddResponse struct {
-	dto.SponsorRecordDetailDTO
+	RecordEntityResponse
 }
 
 // RecordUpdateResponse 更新记录响应
 type RecordUpdateResponse struct {
-	dto.SponsorRecordDetailDTO
+	RecordEntityResponse
 }
 
 // RecordDetailResponse 详情响应
 type RecordDetailResponse struct {
-	dto.SponsorRecordDetailDTO
+	RecordEntityResponse
 }
 
 // RecordPageResponse 分页响应（后台）
 type RecordPageResponse struct {
-	base.PaginationResponse[dto.SponsorRecordNormalDTO]
+	base.PaginationResponse[RecordEntityResponse]
 }
 
 // RecordPublicPageResponse 公开分页响应（前台）
 type RecordPublicPageResponse struct {
-	base.PaginationResponse[dto.SponsorRecordSimpleDTO]
+	base.PaginationResponse[RecordPublicItemResponse]
 }
 
 // RecordDeleteResponse 删除响应

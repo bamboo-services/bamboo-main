@@ -12,8 +12,8 @@
 package apiLink
 
 import (
+	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
-	"github.com/bamboo-services/bamboo-main/internal/models/dto"
 )
 
 // ColorAddRequest 添加友链颜色请求
@@ -75,27 +75,27 @@ type ColorPageRequest struct {
 
 // ColorAddResponse 添加友链颜色响应
 type ColorAddResponse struct {
-	dto.LinkColorDetailDTO
+	entity.LinkColor
 }
 
 // ColorUpdateResponse 更新友链颜色响应
 type ColorUpdateResponse struct {
-	dto.LinkColorDetailDTO
+	entity.LinkColor
 }
 
 // ColorDetailResponse 友链颜色详情响应
 type ColorDetailResponse struct {
-	dto.LinkColorDetailDTO
+	entity.LinkColor
 }
 
 // ColorListResponse 友链颜色列表响应
 type ColorListResponse struct {
-	Colors []dto.LinkColorListDTO `json:"colors"`
+	Colors []entity.LinkColor `json:"colors"`
 }
 
 // ColorPageResponse 友链颜色分页响应
 type ColorPageResponse struct {
-	base.PaginationResponse[dto.LinkColorNormalDTO]
+	base.PaginationResponse[entity.LinkColor]
 }
 
 // ColorSortResponse 友链颜色排序响应
@@ -117,9 +117,9 @@ type ColorDeleteResponse struct {
 
 // ColorDeleteConflictResponse 友链颜色删除冲突响应
 type ColorDeleteConflictResponse struct {
-	Message      string                           `json:"message"`       // 错误消息
-	ConflictInfo ColorDeleteConflictInfo          `json:"conflict_info"` // 冲突信息
-	Links        []dto.LinkColorDeleteConflictDTO `json:"links"`         // 冲突的友链列表（前10个）
+	Message      string                  `json:"message"`       // 错误消息
+	ConflictInfo ColorDeleteConflictInfo `json:"conflict_info"` // 冲突信息
+	Links        []entity.LinkFriend     `json:"links"`         // 冲突的友链列表（前10个）
 }
 
 // ColorDeleteConflictInfo 删除冲突的详细信息

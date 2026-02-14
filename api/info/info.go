@@ -1,6 +1,6 @@
 package apiInfo
 
-import "github.com/bamboo-services/bamboo-main/internal/models/dto"
+import "time"
 
 // SiteUpdateRequest 站点信息更新请求
 type SiteUpdateRequest struct {
@@ -16,10 +16,14 @@ type AboutUpdateRequest struct {
 
 // SiteResponse 站点信息响应
 type SiteResponse struct {
-	dto.SiteInfoDTO
+	SiteName        string    `json:"site_name"`
+	SiteDescription string    `json:"site_description"`
+	Introduction    string    `json:"introduction"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 // AboutResponse 自我介绍响应
 type AboutResponse struct {
-	dto.AboutDTO
+	Content   string    `json:"content"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

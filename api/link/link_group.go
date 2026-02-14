@@ -12,8 +12,8 @@
 package apiLink
 
 import (
+	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
-	"github.com/bamboo-services/bamboo-main/internal/models/dto"
 )
 
 // GroupAddRequest 添加友链分组请求
@@ -69,27 +69,27 @@ type GroupPageRequest struct {
 
 // GroupAddResponse 添加友链分组响应
 type GroupAddResponse struct {
-	dto.LinkGroupDetailDTO
+	entity.LinkGroup
 }
 
 // GroupUpdateResponse 更新友链分组响应
 type GroupUpdateResponse struct {
-	dto.LinkGroupDetailDTO
+	entity.LinkGroup
 }
 
 // GroupDetailResponse 友链分组详情响应
 type GroupDetailResponse struct {
-	dto.LinkGroupDetailDTO
+	entity.LinkGroup
 }
 
 // GroupListResponse 友链分组列表响应
 type GroupListResponse struct {
-	Groups []dto.LinkGroupListDTO `json:"groups"`
+	Groups []entity.LinkGroup `json:"groups"`
 }
 
 // GroupPageResponse 友链分组分页响应
 type GroupPageResponse struct {
-	base.PaginationResponse[dto.LinkGroupNormalDTO]
+	base.PaginationResponse[entity.LinkGroup]
 }
 
 // GroupSortResponse 友链分组排序响应
@@ -111,14 +111,14 @@ type GroupDeleteResponse struct {
 
 // GroupDeleteConflictResponse 友链分组删除冲突响应
 type GroupDeleteConflictResponse struct {
-	Message      string                           `json:"message"`       // 错误消息
-	ConflictInfo GroupDeleteConflictInfo          `json:"conflict_info"` // 冲突信息
-	Links        []dto.LinkGroupDeleteConflictDTO `json:"links"`         // 冲突的友链列表（前10个）
+	Message      string                  `json:"message"`       // 错误消息
+	ConflictInfo GroupDeleteConflictInfo `json:"conflict_info"` // 冲突信息
+	Links        []entity.LinkFriend     `json:"links"`         // 冲突的友链列表（前10个）
 }
 
 // GroupDeleteConflictInfo 删除冲突的详细信息
 type GroupDeleteConflictInfo struct {
-	GroupUUID    string `json:"group_uuid"`    // 分组UUID
+	GroupID      int64  `json:"group_id"`
 	GroupName    string `json:"group_name"`    // 分组名称
 	TotalLinks   int    `json:"total_links"`   // 总友链数量
 	DisplayCount int    `json:"display_count"` // 显示的友链数量（最多10个）

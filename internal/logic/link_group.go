@@ -1,36 +1,27 @@
-/*
- * --------------------------------------------------------------------------------
- * Copyright (c) 2016-NOW(至今) 筱锋
- * Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
- * --------------------------------------------------------------------------------
- * 许可证声明：版权所有 (c) 2016-2025 筱锋。保留所有权利。
- * 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
- * https://opensource.org/licenses/MIT
- * --------------------------------------------------------------------------------
- */
-
 package logic
 
 import (
 	"context"
-	"errors"
 	"strconv"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/log"
-	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	apiLinkGroup "github.com/bamboo-services/bamboo-main/api/link"
-	entity2 "github.com/bamboo-services/bamboo-main/internal/entity"
+	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
-	"github.com/bamboo-services/bamboo-main/internal/models/dto"
+	"github.com/bamboo-services/bamboo-main/internal/repository"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-// LinkGroupLogic 友链分组业务逻辑
+type linkGroupRepo struct {
+	group *repository.LinkGroupRepo
+	link  *repository.LinkRepo
+}
+
 type LinkGroupLogic struct {
 	logic
+	repo linkGroupRepo
 }
 
 func NewLinkGroupLogic(ctx context.Context) *LinkGroupLogic {
@@ -43,63 +34,56 @@ func NewLinkGroupLogic(ctx context.Context) *LinkGroupLogic {
 			rdb: rdb,
 			log: xLog.WithName(xLog.NamedLOGC, "LinkGroupLogic"),
 		},
+		repo: linkGroupRepo{
+			group: repository.NewLinkGroupRepo(db, rdb),
+			link:  repository.NewLinkRepo(db, rdb),
+		},
 	}
 }
 
-// Add 添加友链分组
-func (l *LinkGroupLogic) Add(ctx *gin.Context, req *apiLinkGroup.GroupAddRequest) (*dto.LinkGroupDetailDTO, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
+func (l *LinkGroupLogic) Add(ctx *gin.Context, req *apiLinkGroup.GroupAddRequest) (*entity.LinkGroup, *xError.Error) {
+	maxSort, xErr := l.repo.group.GetMaxSortOrder(ctx, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
 
-	// 创建友链分组实体
-	group := &entity2.LinkGroup{
+	group := &entity.LinkGroup{
 		Name:        req.GroupName,
 		Description: &req.GroupDesc,
-		Status:      true, // 默认启用
+		SortOrder:   maxSort + 1,
+		Status:      true,
 	}
 
-	// 设置排序值：查询当前最大排序值并+1
-	var maxSort int
-	db.Model(&entity2.LinkGroup{}).Select("COALESCE(MAX(sort_order), 0)").Scan(&maxSort)
-	group.SortOrder = maxSort + 1
-
-	// 保存到数据库
-	err := db.Create(group).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "创建友链分组失败", false, err)
+	_, xErr = l.repo.group.Create(ctx, group, nil)
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	// 预加载关联数据并统计友链数量
-	err = db.Preload("LinksFKey").First(group, "id = ?", group.ID).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链分组失败", false, err)
+	reloaded, found, xErr := l.repo.group.GetByID(ctx, group.ID, true, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+	if !found {
+		return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
 	}
 
-	return convertLinkGroupToDetailDTO(group), nil
+	return reloaded, nil
 }
 
-// Update 更新友链分组(名称和描述)
-func (l *LinkGroupLogic) Update(ctx *gin.Context, groupIDStr string, req *apiLinkGroup.GroupUpdateRequest) (*dto.LinkGroupDetailDTO, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 解析ID
+func (l *LinkGroupLogic) Update(ctx *gin.Context, groupIDStr string, req *apiLinkGroup.GroupUpdateRequest) (*entity.LinkGroup, *xError.Error) {
 	groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.BadRequest, "无效的分组ID", false)
 	}
 
-	// 查找友链分组
-	var group entity2.LinkGroup
-	err = db.First(&group, "id = ?", groupID).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
-		}
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链分组失败", false, err)
+	group, found, xErr := l.repo.group.GetByID(ctx, groupID, false, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+	if !found {
+		return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
 	}
 
-	// 更新字段
 	if req.GroupName != "" {
 		group.Name = req.GroupName
 	}
@@ -113,61 +97,40 @@ func (l *LinkGroupLogic) Update(ctx *gin.Context, groupIDStr string, req *apiLin
 		group.Status = *req.GroupStatus == 1
 	}
 
-	// 保存更新
-	err = db.Updates(&group).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "更新友链分组失败", false, err)
+	_, xErr = l.repo.group.Save(ctx, group, nil)
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	// 预加载关联数据
-	err = db.Preload("LinksFKey").First(&group, "id = ?", group.ID).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链分组失败", false, err)
+	reloaded, found, xErr := l.repo.group.GetByID(ctx, groupID, true, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+	if !found {
+		return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
 	}
 
-	return convertLinkGroupToDetailDTO(&group), nil
+	return reloaded, nil
 }
 
-// UpdateSort 批量更新友链分组排序
 func (l *LinkGroupLogic) UpdateSort(ctx *gin.Context, req *apiLinkGroup.GroupSortRequest) *xError.Error {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 直接使用ID数组（已经是[]int64类型）
-	groupIDs := req.GroupIDs
-
-	// 开始事务
-	tx := db.Begin()
+	tx := l.db.WithContext(ctx).Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
 		}
 	}()
 
-	// 计算起始排序值
 	startSort := 0
 	if req.SortOrder != nil && *req.SortOrder > 0 {
 		startSort = *req.SortOrder
 	}
 
-	// 按顺序更新每个分组的排序值
-	for i, groupID := range groupIDs {
-		result := tx.Model(&entity2.LinkGroup{}).
-			Where("id = ?", groupID).
-			Update("sort_order", startSort+i)
-
-		if result.Error != nil {
-			tx.Rollback()
-			return xError.NewError(ctx, xError.DatabaseError, "更新分组排序失败", false, result.Error)
-		}
-
-		if result.RowsAffected == 0 {
-			tx.Rollback()
-			return xError.NewError(ctx, xError.NotFound, "分组不存在", false)
-		}
+	if xErr := l.repo.group.UpdateSortByIDs(ctx, req.GroupIDs, startSort, tx); xErr != nil {
+		tx.Rollback()
+		return xErr
 	}
 
-	// 提交事务
 	if err := tx.Commit().Error; err != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "提交排序更新失败", false, err)
 	}
@@ -175,228 +138,103 @@ func (l *LinkGroupLogic) UpdateSort(ctx *gin.Context, req *apiLinkGroup.GroupSor
 	return nil
 }
 
-// UpdateStatus 更新友链分组状态
 func (l *LinkGroupLogic) UpdateStatus(ctx *gin.Context, groupIDStr string, req *apiLinkGroup.GroupStatusRequest) *xError.Error {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 解析ID
 	groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
 	if err != nil {
 		return xError.NewError(ctx, xError.BadRequest, "无效的分组ID", false)
 	}
 
-	// 更新状态
-	result := db.Model(&entity2.LinkGroup{}).
-		Where("id = ?", groupID).
-		Update("status", req.Status)
-
-	if result.Error != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "更新分组状态失败", false, result.Error)
+	ok, xErr := l.repo.group.UpdateStatusByID(ctx, groupID, req.Status, nil)
+	if xErr != nil {
+		return xErr
 	}
-
-	if result.RowsAffected == 0 {
+	if !ok {
 		return xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
 	}
 
 	return nil
 }
 
-// Delete 删除友链分组
-func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupIDStr string, req *apiLinkGroup.GroupDeleteRequest) ([]dto.LinkGroupDeleteConflictDTO, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 解析ID
+func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupIDStr string, req *apiLinkGroup.GroupDeleteRequest) ([]entity.LinkFriend, *xError.Error) {
 	groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.BadRequest, "无效的分组ID", false)
 	}
 
-	// 检查分组是否存在
-	var group entity2.LinkGroup
-	err = db.First(&group, "id = ?", groupID).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
-		}
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链分组失败", false, err)
+	_, found, xErr := l.repo.group.GetByID(ctx, groupID, false, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+	if !found {
+		return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
 	}
 
-	// 查询关联的友链
-	var linkCount int64
-	err = db.Model(&entity2.LinkFriend{}).
-		Where("group_id = ?", groupID).
-		Count(&linkCount).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询关联友链失败", false, err)
+	linkCount, xErr := l.repo.link.CountByGroupID(ctx, groupID, nil)
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	// 如果有关联友链且不是强制删除，返回冲突信息
 	if linkCount > 0 && !req.Force {
-		var conflictLinks []entity2.LinkFriend
-		err = db.
-			Where("group_id = ?", groupID).
-			Limit(10).
-			Find(&conflictLinks).Error
-		if err != nil {
-			return nil, xError.NewError(ctx, xError.DatabaseError, "查询冲突友链失败", false, err)
+		conflictLinks, xErr := l.repo.link.ListByGroupID(ctx, groupID, 10, nil)
+		if xErr != nil {
+			return nil, xErr
 		}
-
-		// 转换为冲突DTO
-		conflictDTOs := make([]dto.LinkGroupDeleteConflictDTO, len(conflictLinks))
-		for i, link := range conflictLinks {
-			conflictDTOs[i] = dto.LinkGroupDeleteConflictDTO{
-				ID:   link.ID,
-				Name: link.Name,
-				URL:  link.URL,
-			}
-		}
-
-		return conflictDTOs, xError.NewError(ctx, xError.BadRequest, "分组下存在友链，无法删除", false)
+		return conflictLinks, xError.NewError(ctx, xError.BadRequest, "分组下存在友链，无法删除", false)
 	}
 
-	// 开始事务
-	tx := db.Begin()
+	tx := l.db.WithContext(ctx).Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
 		}
 	}()
 
-	// 如果是强制删除，先清空关联友链的group_id
 	if req.Force && linkCount > 0 {
-		result := tx.Model(&entity2.LinkFriend{}).
-			Where("group_id = ?", groupID).
-			Update("group_id", nil)
-		if result.Error != nil {
+		if xErr = l.repo.link.ClearGroupID(ctx, groupID, tx); xErr != nil {
 			tx.Rollback()
-			return nil, xError.NewError(ctx, xError.DatabaseError, "清空友链分组关联失败", false, result.Error)
+			return nil, xErr
 		}
 	}
 
-	// 删除分组（硬删除）
-	result := tx.Unscoped().Where("id = ?", groupID).Delete(&entity2.LinkGroup{})
-	if result.Error != nil {
+	ok, xErr := l.repo.group.DeleteByID(ctx, groupID, tx)
+	if xErr != nil {
 		tx.Rollback()
-		return nil, xError.NewError(ctx, xError.DatabaseError, "删除友链分组失败", false, result.Error)
+		return nil, xErr
+	}
+	if !ok {
+		tx.Rollback()
+		return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
 	}
 
-	// 提交事务
-	if err := tx.Commit().Error; err != nil {
+	if err = tx.Commit().Error; err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "提交删除操作失败", false, err)
 	}
 
 	return nil, nil
 }
 
-// Get 获取友链分组详情
-func (l *LinkGroupLogic) Get(ctx *gin.Context, groupIDStr string) (*dto.LinkGroupDetailDTO, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 解析ID
+func (l *LinkGroupLogic) Get(ctx *gin.Context, groupIDStr string) (*entity.LinkGroup, *xError.Error) {
 	groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.BadRequest, "无效的分组ID", false)
 	}
 
-	// 查询友链分组（预加载关联友链）
-	var group entity2.LinkGroup
-	err = db.Preload("LinksFKey").First(&group, "id = ?", groupID).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
-		}
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链分组失败", false, err)
+	group, found, xErr := l.repo.group.GetByID(ctx, groupID, true, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+	if !found {
+		return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
 	}
 
-	return convertLinkGroupToDetailDTO(&group), nil
+	return group, nil
 }
 
-// GetList 获取友链分组列表（不分页）
-func (l *LinkGroupLogic) GetList(ctx *gin.Context, req *apiLinkGroup.GroupListRequest) ([]dto.LinkGroupListDTO, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 构建查询
-	query := db.Model(&entity2.LinkGroup{})
-
-	// 应用过滤条件
-	if req.Status != nil {
-		status := *req.Status == 1
-		query = query.Where("status = ?", status)
-	}
-
-	if req.OnlyEnabled != nil && *req.OnlyEnabled {
-		query = query.Where("status = ?", true)
-	}
-
-	if req.Name != nil && *req.Name != "" {
-		query = query.Where("name ILIKE ?", "%"+*req.Name+"%")
-	}
-
-	// 设置排序
-	orderBy := "sort_order"
-	if req.OrderBy != nil && *req.OrderBy != "" {
-		orderBy = *req.OrderBy
-	}
-	order := "asc"
-	if req.Order != nil && *req.Order != "" {
-		order = *req.Order
-	}
-	query = query.Order(orderBy + " " + order)
-
-	// 执行查询
-	var groups []entity2.LinkGroup
-	err := query.Find(&groups).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链分组列表失败", false, err)
-	}
-
-	// 批量查询友链数量
-	groupIDs := make([]int64, len(groups))
-	for i, group := range groups {
-		groupIDs[i] = group.ID
-	}
-
-	linkCounts := make(map[int64]int64)
-	if len(groupIDs) > 0 {
-		var countResults []struct {
-			GroupID int64 `gorm:"column:group_id"`
-			Count   int64 `gorm:"column:count"`
-		}
-
-		err = db.
-			Model(&entity2.LinkFriend{}).
-			Select("group_id, COUNT(*) as count").
-			Where("group_id IN ?", groupIDs).
-			Group("group_id").
-			Find(&countResults).Error
-		if err != nil {
-			return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链数量失败", false, err)
-		}
-
-		for _, result := range countResults {
-			linkCounts[result.GroupID] = result.Count
-		}
-	}
-
-	// 转换为DTO
-	groupDTOs := make([]dto.LinkGroupListDTO, len(groups))
-	for i, group := range groups {
-		groupDTOs[i] = convertLinkGroupToListDTO(&group, linkCounts[group.ID])
-	}
-
-	return groupDTOs, nil
+func (l *LinkGroupLogic) GetList(ctx *gin.Context, req *apiLinkGroup.GroupListRequest) ([]entity.LinkGroup, *xError.Error) {
+	return l.repo.group.List(ctx, req, nil)
 }
 
-// GetPage 获取友链分组分页列表
-func (l *LinkGroupLogic) GetPage(ctx *gin.Context, req *apiLinkGroup.GroupPageRequest) (*base.PaginationResponse[dto.LinkGroupNormalDTO], *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 设置默认值
+func (l *LinkGroupLogic) GetPage(ctx *gin.Context, req *apiLinkGroup.GroupPageRequest) (*base.PaginationResponse[entity.LinkGroup], *xError.Error) {
 	if req.Page <= 0 {
 		req.Page = 1
 	}
@@ -404,153 +242,10 @@ func (l *LinkGroupLogic) GetPage(ctx *gin.Context, req *apiLinkGroup.GroupPageRe
 		req.PageSize = 10
 	}
 
-	// 构建查询
-	query := db.Model(&entity2.LinkGroup{})
-
-	// 应用过滤条件
-	if req.Status != nil {
-		status := *req.Status == 1
-		query = query.Where("status = ?", status)
+	groups, total, xErr := l.repo.group.Page(ctx, req, nil)
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	if req.Name != nil && *req.Name != "" {
-		query = query.Where("name ILIKE ?", "%"+*req.Name+"%")
-	}
-
-	// 统计总数
-	var total int64
-	err := query.Count(&total).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "统计友链分组数量失败", false, err)
-	}
-
-	// 设置排序
-	orderBy := "sort_order"
-	if req.OrderBy != nil && *req.OrderBy != "" {
-		orderBy = *req.OrderBy
-	}
-	order := "asc"
-	if req.Order != nil && *req.Order != "" {
-		order = *req.Order
-	}
-	query = query.Order(orderBy + " " + order)
-
-	// 分页查询
-	var groups []entity2.LinkGroup
-	offset := (req.Page - 1) * req.PageSize
-	err = query.Offset(offset).Limit(req.PageSize).Find(&groups).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链分组列表失败", false, err)
-	}
-
-	// 批量查询友链数量
-	groupIDs := make([]int64, len(groups))
-	for i, group := range groups {
-		groupIDs[i] = group.ID
-	}
-
-	linkCounts := make(map[int64]int64)
-	if len(groupIDs) > 0 {
-		var countResults []struct {
-			GroupID int64 `gorm:"column:group_id"`
-			Count   int64 `gorm:"column:count"`
-		}
-
-		err = db.
-			Model(&entity2.LinkFriend{}).
-			Select("group_id, COUNT(*) as count").
-			Where("group_id IN ?", groupIDs).
-			Group("group_id").
-			Find(&countResults).Error
-		if err != nil {
-			return nil, xError.NewError(ctx, xError.DatabaseError, "查询友链数量失败", false, err)
-		}
-
-		for _, result := range countResults {
-			linkCounts[result.GroupID] = result.Count
-		}
-	}
-
-	// 转换为DTO
-	groupDTOs := make([]dto.LinkGroupNormalDTO, len(groups))
-	for i, group := range groups {
-		groupDTOs[i] = convertLinkGroupToNormalDTO(&group, linkCounts[group.ID])
-	}
-
-	return base.NewPaginationResponse(groupDTOs, req.Page, req.PageSize, total), nil
-}
-
-// 辅助函数：将友链分组实体转换为详细DTO
-func convertLinkGroupToDetailDTO(group *entity2.LinkGroup) *dto.LinkGroupDetailDTO {
-	if group == nil {
-		return nil
-	}
-
-	// 转换关联的友链信息
-	links := make([]dto.LinkFriendBasicInfo, len(group.LinksFKey))
-	for i, link := range group.LinksFKey {
-		if link != nil {
-			links[i] = dto.LinkFriendBasicInfo{
-				ID:     link.ID,
-				Name:   link.Name,
-				URL:    link.URL,
-				Avatar: xUtil.Val(link.Avatar),
-			}
-		}
-	}
-
-	// 构建状态值（true->1, false->0）
-	status := 0
-	if group.Status {
-		status = 1
-	}
-
-	return &dto.LinkGroupDetailDTO{
-		ID:          group.ID,
-		Name:        group.Name,
-		Description: group.Description,
-		SortOrder:   group.SortOrder,
-		Status:      status,
-		LinkCount:   len(links),
-		CreatedAt:   group.CreatedAt,
-		UpdatedAt:   group.UpdatedAt,
-		Links:       links,
-	}
-}
-
-// 辅助函数：将友链分组实体转换为标准DTO
-func convertLinkGroupToNormalDTO(group *entity2.LinkGroup, linkCount int64) dto.LinkGroupNormalDTO {
-	// 构建状态值（true->1, false->0）
-	status := 0
-	if group.Status {
-		status = 1
-	}
-
-	return dto.LinkGroupNormalDTO{
-		ID:          group.ID,
-		Name:        group.Name,
-		Description: group.Description,
-		SortOrder:   group.SortOrder,
-		Status:      status,
-		LinkCount:   int(linkCount),
-		CreatedAt:   group.CreatedAt,
-		UpdatedAt:   group.UpdatedAt,
-	}
-}
-
-// 辅助函数：将友链分组实体转换为列表DTO
-func convertLinkGroupToListDTO(group *entity2.LinkGroup, linkCount int64) dto.LinkGroupListDTO {
-	// 构建状态值（true->1, false->0）
-	status := 0
-	if group.Status {
-		status = 1
-	}
-
-	return dto.LinkGroupListDTO{
-		ID:        group.ID,
-		Name:      group.Name,
-		SortOrder: group.SortOrder,
-		Status:    status,
-		LinkCount: int(linkCount),
-	}
+	return base.NewPaginationResponse(groups, req.Page, req.PageSize, total), nil
 }

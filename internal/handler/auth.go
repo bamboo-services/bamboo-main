@@ -155,7 +155,7 @@ func (h *AuthHandler) GetUserInfo(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	resp := apiAuth.UserInfoResponse{SystemUserDetailDTO: *userInfo}
+	resp := apiAuth.UserInfoResponse{User: *userInfo}
 	xResult.SuccessHasData(c, "获取成功", resp)
 }
 

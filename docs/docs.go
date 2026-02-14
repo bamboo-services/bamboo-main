@@ -233,7 +233,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.LinkColorListDTO"
+                                "$ref": "#/definitions/entity.LinkColor"
                             }
                         }
                     },
@@ -825,7 +825,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.LinkGroupListDTO"
+                                "$ref": "#/definitions/entity.LinkGroup"
                             }
                         }
                     },
@@ -1971,7 +1971,7 @@ const docTemplate = `{
                     "200": {
                         "description": "添加成功",
                         "schema": {
-                            "$ref": "#/definitions/dto.SponsorChannelDetailDTO"
+                            "$ref": "#/definitions/apiSponsor.ChannelAddResponse"
                         }
                     },
                     "400": {
@@ -2054,7 +2054,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.SponsorChannelListDTO"
+                                "$ref": "#/definitions/apiSponsor.ChannelListItemResponse"
                             }
                         }
                     },
@@ -2114,7 +2114,7 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/dto.SponsorChannelDetailDTO"
+                            "$ref": "#/definitions/apiSponsor.ChannelDetailResponse"
                         }
                     },
                     "400": {
@@ -2187,7 +2187,7 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/dto.SponsorChannelDetailDTO"
+                            "$ref": "#/definitions/apiSponsor.ChannelUpdateResponse"
                         }
                     },
                     "400": {
@@ -2251,8 +2251,7 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/apiSponsor.ChannelDeleteResponse"
                         }
                     },
                     "400": {
@@ -2327,8 +2326,7 @@ const docTemplate = `{
                     "200": {
                         "description": "状态更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/apiSponsor.ChannelStatusResponse"
                         }
                     },
                     "400": {
@@ -3331,7 +3329,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.SponsorChannelListDTO"
+                                "$ref": "#/definitions/apiSponsor.ChannelListItemResponse"
                             }
                         }
                     },
@@ -3451,7 +3449,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/dto.SystemUserDetailDTO"
+                    "$ref": "#/definitions/entity.SystemUser"
                 }
             }
         },
@@ -3557,56 +3555,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/dto.SystemUserDetailDTO"
+                    "$ref": "#/definitions/entity.SystemUser"
                 }
             }
         },
         "apiAuth.UserInfoResponse": {
             "type": "object",
             "properties": {
-                "avatar": {
-                    "description": "头像",
-                    "type": "string"
-                },
-                "created_at": {
-                    "description": "创建时间",
-                    "type": "string"
-                },
-                "email": {
-                    "description": "邮箱",
-                    "type": "string"
-                },
-                "email_verify": {
-                    "description": "邮箱验证状态",
-                    "type": "boolean"
-                },
-                "id": {
-                    "description": "用户主键",
-                    "type": "integer"
-                },
-                "last_login_at": {
-                    "description": "最后登录时间",
-                    "type": "string"
-                },
-                "nickname": {
-                    "description": "昵称",
-                    "type": "string"
-                },
-                "role": {
-                    "description": "角色",
-                    "type": "string"
-                },
-                "status": {
-                    "description": "状态",
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "description": "更新时间",
-                    "type": "string"
-                },
-                "username": {
-                    "description": "用户名",
-                    "type": "string"
+                "user": {
+                    "$ref": "#/definitions/entity.SystemUser"
                 }
             }
         },
@@ -3614,11 +3571,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "content": {
-                    "description": "自我介绍内容（Markdown格式）",
                     "type": "string"
                 },
                 "updated_at": {
-                    "description": "最后更新时间",
                     "type": "string"
                 }
             }
@@ -3641,19 +3596,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "introduction": {
-                    "description": "主页介绍",
                     "type": "string"
                 },
                 "site_description": {
-                    "description": "站点描述",
                     "type": "string"
                 },
                 "site_name": {
-                    "description": "站点名字",
                     "type": "string"
                 },
                 "updated_at": {
-                    "description": "最后更新时间",
                     "type": "string"
                 }
             }
@@ -3736,18 +3687,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "颜色主键",
+                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
-                "link_count": {
-                    "description": "使用此颜色的友链数量",
-                    "type": "integer"
-                },
-                "links": {
-                    "description": "关联信息",
+                "links_f_key": {
+                    "description": "关联关系",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.LinkFriendSimpleDTO"
+                        "$ref": "#/definitions/entity.LinkFriend"
                     }
                 },
                 "name": {
@@ -3759,24 +3706,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
+                    "description": "颜色排序",
                     "type": "integer"
                 },
                 "status": {
-                    "description": "状态（0: 禁用, 1: 启用）",
-                    "type": "integer"
+                    "description": "颜色状态",
+                    "type": "boolean"
                 },
                 "sub_color": {
                     "description": "副颜色",
                     "type": "string"
                 },
                 "type": {
-                    "description": "颜色类型（0: 普通, 1: 炫彩）",
+                    "description": "颜色类型",
                     "type": "integer"
-                },
-                "type_text": {
-                    "description": "颜色类型文本",
-                    "type": "string"
                 },
                 "updated_at": {
                     "description": "更新时间",
@@ -3820,7 +3763,7 @@ const docTemplate = `{
                     "description": "冲突的友链列表（前10个）",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.LinkColorDeleteConflictDTO"
+                        "$ref": "#/definitions/entity.LinkFriend"
                     }
                 },
                 "message": {
@@ -3849,18 +3792,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "颜色主键",
+                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
-                "link_count": {
-                    "description": "使用此颜色的友链数量",
-                    "type": "integer"
-                },
-                "links": {
-                    "description": "关联信息",
+                "links_f_key": {
+                    "description": "关联关系",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.LinkFriendSimpleDTO"
+                        "$ref": "#/definitions/entity.LinkFriend"
                     }
                 },
                 "name": {
@@ -3872,24 +3811,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
+                    "description": "颜色排序",
                     "type": "integer"
                 },
                 "status": {
-                    "description": "状态（0: 禁用, 1: 启用）",
-                    "type": "integer"
+                    "description": "颜色状态",
+                    "type": "boolean"
                 },
                 "sub_color": {
                     "description": "副颜色",
                     "type": "string"
                 },
                 "type": {
-                    "description": "颜色类型（0: 普通, 1: 炫彩）",
+                    "description": "颜色类型",
                     "type": "integer"
-                },
-                "type_text": {
-                    "description": "颜色类型文本",
-                    "type": "string"
                 },
                 "updated_at": {
                     "description": "更新时间",
@@ -3904,7 +3839,7 @@ const docTemplate = `{
                     "description": "数据列表",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.LinkColorNormalDTO"
+                        "$ref": "#/definitions/entity.LinkColor"
                     }
                 },
                 "pagination": {
@@ -4027,18 +3962,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "颜色主键",
+                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
-                "link_count": {
-                    "description": "使用此颜色的友链数量",
-                    "type": "integer"
-                },
-                "links": {
-                    "description": "关联信息",
+                "links_f_key": {
+                    "description": "关联关系",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.LinkFriendSimpleDTO"
+                        "$ref": "#/definitions/entity.LinkFriend"
                     }
                 },
                 "name": {
@@ -4050,24 +3981,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
+                    "description": "颜色排序",
                     "type": "integer"
                 },
                 "status": {
-                    "description": "状态（0: 禁用, 1: 启用）",
-                    "type": "integer"
+                    "description": "颜色状态",
+                    "type": "boolean"
                 },
                 "sub_color": {
                     "description": "副颜色",
                     "type": "string"
                 },
                 "type": {
-                    "description": "颜色类型（0: 普通, 1: 炫彩）",
+                    "description": "颜色类型",
                     "type": "integer"
-                },
-                "type_text": {
-                    "description": "颜色类型文本",
-                    "type": "string"
                 },
                 "updated_at": {
                     "description": "更新时间",
@@ -4137,24 +4064,24 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "apply_remark": {
-                    "description": "申请备注",
+                    "description": "申请者备注",
                     "type": "string"
                 },
                 "avatar": {
-                    "description": "友链头像",
+                    "description": "友链头像URL",
                     "type": "string"
                 },
-                "color_id": {
-                    "description": "颜色ID",
-                    "type": "integer"
-                },
-                "color_info": {
-                    "description": "颜色信息（可选）",
+                "color_f_key": {
+                    "description": "友链颜色外键",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/dto.LinkColorSimpleDTO"
+                            "$ref": "#/definitions/entity.LinkColor"
                         }
                     ]
+                },
+                "color_id": {
+                    "description": "友链颜色ID",
+                    "type": "integer"
                 },
                 "created_at": {
                     "description": "创建时间",
@@ -4165,35 +4092,31 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "email": {
-                    "description": "联系邮箱",
+                    "description": "友链联系邮箱",
                     "type": "string"
                 },
                 "fail_reason": {
-                    "description": "失效原因",
+                    "description": "友链失效原因",
                     "type": "string"
                 },
-                "failure_text": {
-                    "description": "失效状态文本",
-                    "type": "string"
+                "group_f_key": {
+                    "description": "关联关系",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.LinkGroup"
+                        }
+                    ]
                 },
                 "group_id": {
                     "description": "所属分组ID",
                     "type": "integer"
                 },
-                "group_info": {
-                    "description": "关联信息",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/dto.LinkGroupSimpleDTO"
-                        }
-                    ]
-                },
                 "id": {
-                    "description": "友链主键",
+                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "is_failure": {
-                    "description": "是否失效",
+                    "description": "友链失效标志",
                     "type": "integer"
                 },
                 "name": {
@@ -4205,27 +4128,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "rss": {
-                    "description": "RSS地址",
+                    "description": "友链RSS地址",
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
+                    "description": "友链排序",
                     "type": "integer"
                 },
                 "status": {
                     "description": "友链状态",
                     "type": "integer"
                 },
-                "status_text": {
-                    "description": "友链状态文本",
-                    "type": "string"
-                },
                 "updated_at": {
                     "description": "更新时间",
                     "type": "string"
                 },
                 "url": {
-                    "description": "友链地址",
+                    "description": "友链URL地址",
                     "type": "string"
                 }
             }
@@ -4234,24 +4153,24 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "apply_remark": {
-                    "description": "申请备注",
+                    "description": "申请者备注",
                     "type": "string"
                 },
                 "avatar": {
-                    "description": "友链头像",
+                    "description": "友链头像URL",
                     "type": "string"
                 },
-                "color_id": {
-                    "description": "颜色ID",
-                    "type": "integer"
-                },
-                "color_info": {
-                    "description": "颜色信息（可选）",
+                "color_f_key": {
+                    "description": "友链颜色外键",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/dto.LinkColorSimpleDTO"
+                            "$ref": "#/definitions/entity.LinkColor"
                         }
                     ]
+                },
+                "color_id": {
+                    "description": "友链颜色ID",
+                    "type": "integer"
                 },
                 "created_at": {
                     "description": "创建时间",
@@ -4262,35 +4181,31 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "email": {
-                    "description": "联系邮箱",
+                    "description": "友链联系邮箱",
                     "type": "string"
                 },
                 "fail_reason": {
-                    "description": "失效原因",
+                    "description": "友链失效原因",
                     "type": "string"
                 },
-                "failure_text": {
-                    "description": "失效状态文本",
-                    "type": "string"
+                "group_f_key": {
+                    "description": "关联关系",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.LinkGroup"
+                        }
+                    ]
                 },
                 "group_id": {
                     "description": "所属分组ID",
                     "type": "integer"
                 },
-                "group_info": {
-                    "description": "关联信息",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/dto.LinkGroupSimpleDTO"
-                        }
-                    ]
-                },
                 "id": {
-                    "description": "友链主键",
+                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "is_failure": {
-                    "description": "是否失效",
+                    "description": "友链失效标志",
                     "type": "integer"
                 },
                 "name": {
@@ -4302,27 +4217,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "rss": {
-                    "description": "RSS地址",
+                    "description": "友链RSS地址",
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
+                    "description": "友链排序",
                     "type": "integer"
                 },
                 "status": {
                     "description": "友链状态",
                     "type": "integer"
                 },
-                "status_text": {
-                    "description": "友链状态文本",
-                    "type": "string"
-                },
                 "updated_at": {
                     "description": "更新时间",
                     "type": "string"
                 },
                 "url": {
-                    "description": "友链地址",
+                    "description": "友链URL地址",
                     "type": "string"
                 }
             }
@@ -4355,7 +4266,7 @@ const docTemplate = `{
                     "description": "数据列表",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.LinkFriendDetailDTO"
+                        "$ref": "#/definitions/entity.LinkFriend"
                     }
                 },
                 "pagination": {
@@ -4374,7 +4285,7 @@ const docTemplate = `{
                 "links": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.LinkFriendDetailDTO"
+                        "$ref": "#/definitions/entity.LinkFriend"
                     }
                 }
             }
@@ -4459,24 +4370,24 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "apply_remark": {
-                    "description": "申请备注",
+                    "description": "申请者备注",
                     "type": "string"
                 },
                 "avatar": {
-                    "description": "友链头像",
+                    "description": "友链头像URL",
                     "type": "string"
                 },
-                "color_id": {
-                    "description": "颜色ID",
-                    "type": "integer"
-                },
-                "color_info": {
-                    "description": "颜色信息（可选）",
+                "color_f_key": {
+                    "description": "友链颜色外键",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/dto.LinkColorSimpleDTO"
+                            "$ref": "#/definitions/entity.LinkColor"
                         }
                     ]
+                },
+                "color_id": {
+                    "description": "友链颜色ID",
+                    "type": "integer"
                 },
                 "created_at": {
                     "description": "创建时间",
@@ -4487,35 +4398,31 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "email": {
-                    "description": "联系邮箱",
+                    "description": "友链联系邮箱",
                     "type": "string"
                 },
                 "fail_reason": {
-                    "description": "失效原因",
+                    "description": "友链失效原因",
                     "type": "string"
                 },
-                "failure_text": {
-                    "description": "失效状态文本",
-                    "type": "string"
+                "group_f_key": {
+                    "description": "关联关系",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.LinkGroup"
+                        }
+                    ]
                 },
                 "group_id": {
                     "description": "所属分组ID",
                     "type": "integer"
                 },
-                "group_info": {
-                    "description": "关联信息",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/dto.LinkGroupSimpleDTO"
-                        }
-                    ]
-                },
                 "id": {
-                    "description": "友链主键",
+                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "is_failure": {
-                    "description": "是否失效",
+                    "description": "友链失效标志",
                     "type": "integer"
                 },
                 "name": {
@@ -4527,27 +4434,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "rss": {
-                    "description": "RSS地址",
+                    "description": "友链RSS地址",
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
+                    "description": "友链排序",
                     "type": "integer"
                 },
                 "status": {
                     "description": "友链状态",
                     "type": "integer"
                 },
-                "status_text": {
-                    "description": "友链状态文本",
-                    "type": "string"
-                },
                 "updated_at": {
                     "description": "更新时间",
                     "type": "string"
                 },
                 "url": {
-                    "description": "友链地址",
+                    "description": "友链URL地址",
                     "type": "string"
                 }
             }
@@ -4588,18 +4491,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "分组主键",
+                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
-                "link_count": {
-                    "description": "友链数量",
-                    "type": "integer"
-                },
-                "links": {
-                    "description": "关联信息 - 避免循环依赖,使用独立的结构",
+                "links_f_key": {
+                    "description": "关联关系",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.LinkFriendBasicInfo"
+                        "$ref": "#/definitions/entity.LinkFriend"
                     }
                 },
                 "name": {
@@ -4607,12 +4506,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
+                    "description": "分组排序",
                     "type": "integer"
                 },
                 "status": {
-                    "description": "状态",
-                    "type": "integer"
+                    "description": "分组状态",
+                    "type": "boolean"
                 },
                 "updated_at": {
                     "description": "更新时间",
@@ -4627,12 +4526,11 @@ const docTemplate = `{
                     "description": "显示的友链数量（最多10个）",
                     "type": "integer"
                 },
+                "group_id": {
+                    "type": "integer"
+                },
                 "group_name": {
                     "description": "分组名称",
-                    "type": "string"
-                },
-                "group_uuid": {
-                    "description": "分组UUID",
                     "type": "string"
                 },
                 "total_links": {
@@ -4656,7 +4554,7 @@ const docTemplate = `{
                     "description": "冲突的友链列表（前10个）",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.LinkGroupDeleteConflictDTO"
+                        "$ref": "#/definitions/entity.LinkFriend"
                     }
                 },
                 "message": {
@@ -4685,18 +4583,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "分组主键",
+                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
-                "link_count": {
-                    "description": "友链数量",
-                    "type": "integer"
-                },
-                "links": {
-                    "description": "关联信息 - 避免循环依赖,使用独立的结构",
+                "links_f_key": {
+                    "description": "关联关系",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.LinkFriendBasicInfo"
+                        "$ref": "#/definitions/entity.LinkFriend"
                     }
                 },
                 "name": {
@@ -4704,12 +4598,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
+                    "description": "分组排序",
                     "type": "integer"
                 },
                 "status": {
-                    "description": "状态",
-                    "type": "integer"
+                    "description": "分组状态",
+                    "type": "boolean"
                 },
                 "updated_at": {
                     "description": "更新时间",
@@ -4724,7 +4618,7 @@ const docTemplate = `{
                     "description": "数据列表",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.LinkGroupNormalDTO"
+                        "$ref": "#/definitions/entity.LinkGroup"
                     }
                 },
                 "pagination": {
@@ -4834,18 +4728,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "分组主键",
+                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
-                "link_count": {
-                    "description": "友链数量",
-                    "type": "integer"
-                },
-                "links": {
-                    "description": "关联信息 - 避免循环依赖,使用独立的结构",
+                "links_f_key": {
+                    "description": "关联关系",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.LinkFriendBasicInfo"
+                        "$ref": "#/definitions/entity.LinkFriend"
                     }
                 },
                 "name": {
@@ -4853,12 +4743,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
+                    "description": "分组排序",
                     "type": "integer"
                 },
                 "status": {
-                    "description": "状态",
-                    "type": "integer"
+                    "description": "分组状态",
+                    "type": "boolean"
                 },
                 "updated_at": {
                     "description": "更新时间",
@@ -4991,6 +4881,133 @@ const docTemplate = `{
                 }
             }
         },
+        "apiSponsor.ChannelAddResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sort_order": {
+                    "type": "integer"
+                },
+                "sponsor_count": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiSponsor.ChannelDeleteResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiSponsor.ChannelDetailResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sort_order": {
+                    "type": "integer"
+                },
+                "sponsor_count": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiSponsor.ChannelEntityResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sort_order": {
+                    "type": "integer"
+                },
+                "sponsor_count": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiSponsor.ChannelListItemResponse": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sort_order": {
+                    "type": "integer"
+                },
+                "sponsor_count": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
         "apiSponsor.ChannelPageResponse": {
             "type": "object",
             "properties": {
@@ -4998,7 +5015,7 @@ const docTemplate = `{
                     "description": "数据列表",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.SponsorChannelNormalDTO"
+                        "$ref": "#/definitions/apiSponsor.ChannelEntityResponse"
                     }
                 },
                 "pagination": {
@@ -5018,6 +5035,18 @@ const docTemplate = `{
                     "description": "状态:true=启用,false=禁用",
                     "type": "boolean",
                     "example": true
+                }
+            }
+        },
+        "apiSponsor.ChannelStatusResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "更新后的状态",
+                    "type": "boolean"
                 }
             }
         },
@@ -5048,6 +5077,38 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": 0,
                     "example": 0
+                }
+            }
+        },
+        "apiSponsor.ChannelUpdateResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sort_order": {
+                    "type": "integer"
+                },
+                "sponsor_count": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },
@@ -5115,59 +5176,42 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "amount": {
-                    "description": "赞助金额",
                     "type": "integer"
                 },
                 "channel": {
-                    "description": "赞助渠道",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/dto.SponsorChannelSimpleDTO"
-                        }
-                    ]
+                    "$ref": "#/definitions/apiSponsor.SponsorChannelSimpleResponse"
                 },
                 "channel_id": {
-                    "description": "渠道ID",
                     "type": "integer"
                 },
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "id": {
-                    "description": "赞助记录主键",
                     "type": "integer"
                 },
                 "is_anonymous": {
-                    "description": "是否匿名",
                     "type": "boolean"
                 },
                 "is_hidden": {
-                    "description": "是否隐藏",
                     "type": "boolean"
                 },
                 "message": {
-                    "description": "赞助留言",
                     "type": "string"
                 },
                 "nickname": {
-                    "description": "赞助者昵称",
                     "type": "string"
                 },
                 "redirect_url": {
-                    "description": "跳转链接",
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
                     "type": "integer"
                 },
                 "sponsor_at": {
-                    "description": "赞助时间",
                     "type": "string"
                 },
                 "updated_at": {
-                    "description": "更新时间",
                     "type": "string"
                 }
             }
@@ -5184,59 +5228,86 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "amount": {
-                    "description": "赞助金额",
                     "type": "integer"
                 },
                 "channel": {
-                    "description": "赞助渠道",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/dto.SponsorChannelSimpleDTO"
-                        }
-                    ]
+                    "$ref": "#/definitions/apiSponsor.SponsorChannelSimpleResponse"
                 },
                 "channel_id": {
-                    "description": "渠道ID",
                     "type": "integer"
                 },
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "id": {
-                    "description": "赞助记录主键",
                     "type": "integer"
                 },
                 "is_anonymous": {
-                    "description": "是否匿名",
                     "type": "boolean"
                 },
                 "is_hidden": {
-                    "description": "是否隐藏",
                     "type": "boolean"
                 },
                 "message": {
-                    "description": "赞助留言",
                     "type": "string"
                 },
                 "nickname": {
-                    "description": "赞助者昵称",
                     "type": "string"
                 },
                 "redirect_url": {
-                    "description": "跳转链接",
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
                     "type": "integer"
                 },
                 "sponsor_at": {
-                    "description": "赞助时间",
                     "type": "string"
                 },
                 "updated_at": {
-                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "apiSponsor.RecordEntityResponse": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "channel": {
+                    "$ref": "#/definitions/apiSponsor.SponsorChannelSimpleResponse"
+                },
+                "channel_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_anonymous": {
+                    "type": "boolean"
+                },
+                "is_hidden": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "redirect_url": {
+                    "type": "string"
+                },
+                "sort_order": {
+                    "type": "integer"
+                },
+                "sponsor_at": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -5248,7 +5319,7 @@ const docTemplate = `{
                     "description": "数据列表",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.SponsorRecordNormalDTO"
+                        "$ref": "#/definitions/apiSponsor.RecordEntityResponse"
                     }
                 },
                 "pagination": {
@@ -5261,6 +5332,32 @@ const docTemplate = `{
                 }
             }
         },
+        "apiSponsor.RecordPublicItemResponse": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "channel": {
+                    "$ref": "#/definitions/apiSponsor.SponsorChannelSimpleResponse"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "redirect_url": {
+                    "type": "string"
+                },
+                "sponsor_at": {
+                    "type": "string"
+                }
+            }
+        },
         "apiSponsor.RecordPublicPageResponse": {
             "type": "object",
             "properties": {
@@ -5268,7 +5365,7 @@ const docTemplate = `{
                     "description": "数据列表",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.SponsorRecordSimpleDTO"
+                        "$ref": "#/definitions/apiSponsor.RecordPublicItemResponse"
                     }
                 },
                 "pagination": {
@@ -5341,59 +5438,56 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "amount": {
-                    "description": "赞助金额",
                     "type": "integer"
                 },
                 "channel": {
-                    "description": "赞助渠道",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/dto.SponsorChannelSimpleDTO"
-                        }
-                    ]
+                    "$ref": "#/definitions/apiSponsor.SponsorChannelSimpleResponse"
                 },
                 "channel_id": {
-                    "description": "渠道ID",
                     "type": "integer"
                 },
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "id": {
-                    "description": "赞助记录主键",
                     "type": "integer"
                 },
                 "is_anonymous": {
-                    "description": "是否匿名",
                     "type": "boolean"
                 },
                 "is_hidden": {
-                    "description": "是否隐藏",
                     "type": "boolean"
                 },
                 "message": {
-                    "description": "赞助留言",
                     "type": "string"
                 },
                 "nickname": {
-                    "description": "赞助者昵称",
                     "type": "string"
                 },
                 "redirect_url": {
-                    "description": "跳转链接",
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
                     "type": "integer"
                 },
                 "sponsor_at": {
-                    "description": "赞助时间",
                     "type": "string"
                 },
                 "updated_at": {
-                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "apiSponsor.SponsorChannelSimpleResponse": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -5427,65 +5521,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.LinkColorDeleteConflictDTO": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "description": "友链ID",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "友链名称",
-                    "type": "string"
-                },
-                "url": {
-                    "description": "友链地址",
-                    "type": "string"
-                }
-            }
-        },
-        "dto.LinkColorListDTO": {
-            "type": "object",
-            "properties": {
-                "hover_color": {
-                    "description": "悬停颜色",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "颜色主键",
-                    "type": "integer"
-                },
-                "link_count": {
-                    "description": "使用此颜色的友链数量",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "颜色名称",
-                    "type": "string"
-                },
-                "primary_color": {
-                    "description": "主颜色",
-                    "type": "string"
-                },
-                "sort_order": {
-                    "description": "排序",
-                    "type": "integer"
-                },
-                "status": {
-                    "description": "状态",
-                    "type": "integer"
-                },
-                "sub_color": {
-                    "description": "副颜色",
-                    "type": "string"
-                },
-                "type": {
-                    "description": "颜色类型（0: 普通, 1: 炫彩）",
-                    "type": "integer"
-                }
-            }
-        },
-        "dto.LinkColorNormalDTO": {
+        "entity.LinkColor": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -5497,12 +5533,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "颜色主键",
+                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
-                "link_count": {
-                    "description": "使用此颜色的友链数量",
-                    "type": "integer"
+                "links_f_key": {
+                    "description": "关联关系",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.LinkFriend"
+                    }
                 },
                 "name": {
                     "description": "颜色名称",
@@ -5513,24 +5552,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
+                    "description": "颜色排序",
                     "type": "integer"
                 },
                 "status": {
-                    "description": "状态（0: 禁用, 1: 启用）",
-                    "type": "integer"
+                    "description": "颜色状态",
+                    "type": "boolean"
                 },
                 "sub_color": {
                     "description": "副颜色",
                     "type": "string"
                 },
                 "type": {
-                    "description": "颜色类型（0: 普通, 1: 炫彩）",
+                    "description": "颜色类型",
                     "type": "integer"
-                },
-                "type_text": {
-                    "description": "颜色类型文本",
-                    "type": "string"
                 },
                 "updated_at": {
                     "description": "更新时间",
@@ -5538,78 +5573,28 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.LinkColorSimpleDTO": {
-            "type": "object",
-            "properties": {
-                "hover_color": {
-                    "description": "悬停颜色",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "颜色主键",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "颜色名称",
-                    "type": "string"
-                },
-                "primary_color": {
-                    "description": "主颜色",
-                    "type": "string"
-                },
-                "sub_color": {
-                    "description": "副颜色",
-                    "type": "string"
-                },
-                "type": {
-                    "description": "颜色类型（0: 普通, 1: 炫彩）",
-                    "type": "integer"
-                }
-            }
-        },
-        "dto.LinkFriendBasicInfo": {
-            "type": "object",
-            "properties": {
-                "avatar": {
-                    "description": "友链头像",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "友链主键",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "友链名称",
-                    "type": "string"
-                },
-                "url": {
-                    "description": "友链地址",
-                    "type": "string"
-                }
-            }
-        },
-        "dto.LinkFriendDetailDTO": {
+        "entity.LinkFriend": {
             "type": "object",
             "properties": {
                 "apply_remark": {
-                    "description": "申请备注",
+                    "description": "申请者备注",
                     "type": "string"
                 },
                 "avatar": {
-                    "description": "友链头像",
+                    "description": "友链头像URL",
                     "type": "string"
                 },
-                "color_id": {
-                    "description": "颜色ID",
-                    "type": "integer"
-                },
-                "color_info": {
-                    "description": "颜色信息（可选）",
+                "color_f_key": {
+                    "description": "友链颜色外键",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/dto.LinkColorSimpleDTO"
+                            "$ref": "#/definitions/entity.LinkColor"
                         }
                     ]
+                },
+                "color_id": {
+                    "description": "友链颜色ID",
+                    "type": "integer"
                 },
                 "created_at": {
                     "description": "创建时间",
@@ -5620,35 +5605,31 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "email": {
-                    "description": "联系邮箱",
+                    "description": "友链联系邮箱",
                     "type": "string"
                 },
                 "fail_reason": {
-                    "description": "失效原因",
+                    "description": "友链失效原因",
                     "type": "string"
                 },
-                "failure_text": {
-                    "description": "失效状态文本",
-                    "type": "string"
+                "group_f_key": {
+                    "description": "关联关系",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.LinkGroup"
+                        }
+                    ]
                 },
                 "group_id": {
                     "description": "所属分组ID",
                     "type": "integer"
                 },
-                "group_info": {
-                    "description": "关联信息",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/dto.LinkGroupSimpleDTO"
-                        }
-                    ]
-                },
                 "id": {
-                    "description": "友链主键",
+                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "is_failure": {
-                    "description": "是否失效",
+                    "description": "友链失效标志",
                     "type": "integer"
                 },
                 "name": {
@@ -5660,95 +5641,28 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "rss": {
-                    "description": "RSS地址",
+                    "description": "友链RSS地址",
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
+                    "description": "友链排序",
                     "type": "integer"
                 },
                 "status": {
                     "description": "友链状态",
                     "type": "integer"
                 },
-                "status_text": {
-                    "description": "友链状态文本",
-                    "type": "string"
-                },
                 "updated_at": {
                     "description": "更新时间",
                     "type": "string"
                 },
                 "url": {
-                    "description": "友链地址",
+                    "description": "友链URL地址",
                     "type": "string"
                 }
             }
         },
-        "dto.LinkFriendSimpleDTO": {
-            "type": "object",
-            "properties": {
-                "avatar": {
-                    "description": "友链头像",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "友链主键",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "友链名称",
-                    "type": "string"
-                },
-                "url": {
-                    "description": "友链地址",
-                    "type": "string"
-                }
-            }
-        },
-        "dto.LinkGroupDeleteConflictDTO": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "description": "友链ID",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "友链名称",
-                    "type": "string"
-                },
-                "url": {
-                    "description": "友链地址",
-                    "type": "string"
-                }
-            }
-        },
-        "dto.LinkGroupListDTO": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "description": "分组主键",
-                    "type": "integer"
-                },
-                "link_count": {
-                    "description": "友链数量",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "分组名称",
-                    "type": "string"
-                },
-                "sort_order": {
-                    "description": "排序",
-                    "type": "integer"
-                },
-                "status": {
-                    "description": "状态",
-                    "type": "integer"
-                }
-            }
-        },
-        "dto.LinkGroupNormalDTO": {
+        "entity.LinkGroup": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -5760,77 +5674,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "分组主键",
+                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
-                "link_count": {
-                    "description": "友链数量",
-                    "type": "integer"
+                "links_f_key": {
+                    "description": "关联关系",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.LinkFriend"
+                    }
                 },
                 "name": {
                     "description": "分组名称",
                     "type": "string"
                 },
                 "sort_order": {
-                    "description": "排序",
+                    "description": "分组排序",
                     "type": "integer"
                 },
                 "status": {
-                    "description": "状态",
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "description": "更新时间",
-                    "type": "string"
-                }
-            }
-        },
-        "dto.LinkGroupSimpleDTO": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "description": "分组主键",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "分组名称",
-                    "type": "string"
-                }
-            }
-        },
-        "dto.SponsorChannelDetailDTO": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "description": "创建时间",
-                    "type": "string"
-                },
-                "description": {
-                    "description": "渠道描述",
-                    "type": "string"
-                },
-                "icon": {
-                    "description": "渠道图标",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "渠道主键",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "渠道名称",
-                    "type": "string"
-                },
-                "sort_order": {
-                    "description": "排序",
-                    "type": "integer"
-                },
-                "sponsor_count": {
-                    "description": "关联赞助记录数",
-                    "type": "integer"
-                },
-                "status": {
-                    "description": "状态",
+                    "description": "分组状态",
                     "type": "boolean"
                 },
                 "updated_at": {
@@ -5839,196 +5702,11 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SponsorChannelListDTO": {
-            "type": "object",
-            "properties": {
-                "icon": {
-                    "description": "渠道图标",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "渠道主键",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "渠道名称",
-                    "type": "string"
-                },
-                "sort_order": {
-                    "description": "排序",
-                    "type": "integer"
-                },
-                "sponsor_count": {
-                    "description": "关联赞助记录数",
-                    "type": "integer"
-                },
-                "status": {
-                    "description": "状态",
-                    "type": "boolean"
-                }
-            }
-        },
-        "dto.SponsorChannelNormalDTO": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "description": "创建时间",
-                    "type": "string"
-                },
-                "description": {
-                    "description": "渠道描述",
-                    "type": "string"
-                },
-                "icon": {
-                    "description": "渠道图标",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "渠道主键",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "渠道名称",
-                    "type": "string"
-                },
-                "sort_order": {
-                    "description": "排序",
-                    "type": "integer"
-                },
-                "sponsor_count": {
-                    "description": "关联赞助记录数",
-                    "type": "integer"
-                },
-                "status": {
-                    "description": "状态",
-                    "type": "boolean"
-                },
-                "updated_at": {
-                    "description": "更新时间",
-                    "type": "string"
-                }
-            }
-        },
-        "dto.SponsorChannelSimpleDTO": {
-            "type": "object",
-            "properties": {
-                "icon": {
-                    "description": "渠道图标",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "渠道主键",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "渠道名称",
-                    "type": "string"
-                }
-            }
-        },
-        "dto.SponsorRecordNormalDTO": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "description": "赞助金额",
-                    "type": "integer"
-                },
-                "channel": {
-                    "description": "赞助渠道",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/dto.SponsorChannelSimpleDTO"
-                        }
-                    ]
-                },
-                "channel_id": {
-                    "description": "渠道ID",
-                    "type": "integer"
-                },
-                "created_at": {
-                    "description": "创建时间",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "赞助记录主键",
-                    "type": "integer"
-                },
-                "is_anonymous": {
-                    "description": "是否匿名",
-                    "type": "boolean"
-                },
-                "is_hidden": {
-                    "description": "是否隐藏",
-                    "type": "boolean"
-                },
-                "message": {
-                    "description": "赞助留言",
-                    "type": "string"
-                },
-                "nickname": {
-                    "description": "赞助者昵称",
-                    "type": "string"
-                },
-                "redirect_url": {
-                    "description": "跳转链接",
-                    "type": "string"
-                },
-                "sort_order": {
-                    "description": "排序",
-                    "type": "integer"
-                },
-                "sponsor_at": {
-                    "description": "赞助时间",
-                    "type": "string"
-                },
-                "updated_at": {
-                    "description": "更新时间",
-                    "type": "string"
-                }
-            }
-        },
-        "dto.SponsorRecordSimpleDTO": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "description": "赞助金额",
-                    "type": "integer"
-                },
-                "channel": {
-                    "description": "赞助渠道",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/dto.SponsorChannelSimpleDTO"
-                        }
-                    ]
-                },
-                "id": {
-                    "description": "赞助记录主键",
-                    "type": "integer"
-                },
-                "message": {
-                    "description": "赞助留言",
-                    "type": "string"
-                },
-                "nickname": {
-                    "description": "赞助者昵称(匿名时显示\"匿名用户\")",
-                    "type": "string"
-                },
-                "redirect_url": {
-                    "description": "跳转链接",
-                    "type": "string"
-                },
-                "sponsor_at": {
-                    "description": "赞助时间",
-                    "type": "string"
-                }
-            }
-        },
-        "dto.SystemUserDetailDTO": {
+        "entity.SystemUser": {
             "type": "object",
             "properties": {
                 "avatar": {
-                    "description": "头像",
+                    "description": "头像URL",
                     "type": "string"
                 },
                 "created_at": {
@@ -6044,7 +5722,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "id": {
-                    "description": "用户主键",
+                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "last_login_at": {

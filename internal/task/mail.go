@@ -24,7 +24,7 @@ import (
 	"time"
 
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
-	dtoRedis "github.com/bamboo-services/bamboo-main/internal/models/dto/redis"
+	redisModel "github.com/bamboo-services/bamboo-main/internal/models/cache/redis"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
 	"github.com/jordan-wright/email"
@@ -152,7 +152,7 @@ func (w *MailWorker) processQueue(workerID int) {
 			return
 		default:
 			// 阻塞获取任务（最多等待 5 秒）
-			result, err := w.rdb.BRPop(w.ctx, 5*time.Second, constants.MailQueueKey).Result()
+			result, err := w.rdb.BRPop(w.ctx, 5*time.Second, constants.RedisMailQueue.Get().String()).Result()
 			if err != nil {
 				if err == redis.Nil || strings.Contains(err.Error(), "context canceled") {
 					continue
@@ -162,7 +162,7 @@ func (w *MailWorker) processQueue(workerID int) {
 			}
 
 			// 解析任务
-			var task dtoRedis.MailTaskDTO
+			var task redisModel.MailTask
 			if err := json.Unmarshal([]byte(result[1]), &task); err != nil {
 				w.logger.Errorf("解析邮件任务失败: %v", err)
 				continue
@@ -182,7 +182,7 @@ func (w *MailWorker) processQueue(workerID int) {
 }
 
 // sendEmail 使用 email 库发送邮件
-func (w *MailWorker) sendEmail(task *dtoRedis.MailTaskDTO) error {
+func (w *MailWorker) sendEmail(task *redisModel.MailTask) error {
 	e := email.NewEmail()
 	e.From = fmt.Sprintf("%s <%s>", w.config.FromName, w.config.FromEmail)
 	e.To = task.To
@@ -195,7 +195,7 @@ func (w *MailWorker) sendEmail(task *dtoRedis.MailTaskDTO) error {
 }
 
 // handleError 处理发送失败
-func (w *MailWorker) handleError(task *dtoRedis.MailTaskDTO, sendErr error) {
+func (w *MailWorker) handleError(task *redisModel.MailTask, sendErr error) {
 	w.logger.Errorf("邮件发送失败: ID=%s, To=%v, Error=%v, RetryCount=%d",
 		task.ID, task.To, sendErr, task.RetryCount)
 
@@ -234,7 +234,7 @@ func (w *MailWorker) calculateBackoff(retryCount int) time.Duration {
 }
 
 // requeueWithBackoff 重试入队（指数退避）
-func (w *MailWorker) requeueWithBackoff(task *dtoRedis.MailTaskDTO) error {
+func (w *MailWorker) requeueWithBackoff(task *redisModel.MailTask) error {
 	task.RetryCount++
 	backoff := w.calculateBackoff(task.RetryCount)
 	task.NextRetryAt = time.Now().Add(backoff)
@@ -246,7 +246,7 @@ func (w *MailWorker) requeueWithBackoff(task *dtoRedis.MailTaskDTO) error {
 
 	// 使用 Sorted Set 存储，score 为下次执行时间戳
 	score := float64(task.NextRetryAt.Unix())
-	return w.rdb.ZAdd(w.ctx, constants.MailRetryQueueKey, redis.Z{
+	return w.rdb.ZAdd(w.ctx, constants.RedisMailRetry.Get().String(), redis.Z{
 		Score:  score,
 		Member: taskJSON,
 	}).Err()
@@ -279,7 +279,7 @@ func (w *MailWorker) processRetryQueue() {
 	now := float64(time.Now().Unix())
 
 	// 获取已到期的重试任务
-	tasks, err := w.rdb.ZRangeByScore(w.ctx, constants.MailRetryQueueKey, &redis.ZRangeBy{
+	tasks, err := w.rdb.ZRangeByScore(w.ctx, constants.RedisMailRetry.Get().String(), &redis.ZRangeBy{
 		Min: "0",
 		Max: fmt.Sprintf("%f", now),
 	}).Result()
@@ -292,8 +292,8 @@ func (w *MailWorker) processRetryQueue() {
 	for _, taskJSON := range tasks {
 		// 使用事务确保原子性
 		pipe := w.rdb.Pipeline()
-		pipe.LPush(w.ctx, constants.MailQueueKey, taskJSON)
-		pipe.ZRem(w.ctx, constants.MailRetryQueueKey, taskJSON)
+		pipe.LPush(w.ctx, constants.RedisMailQueue.Get().String(), taskJSON)
+		pipe.ZRem(w.ctx, constants.RedisMailRetry.Get().String(), taskJSON)
 
 		if _, err := pipe.Exec(w.ctx); err != nil {
 			w.logger.Errorf("移动重试任务失败: %v", err)
@@ -304,8 +304,8 @@ func (w *MailWorker) processRetryQueue() {
 }
 
 // saveFailedTask 保存失败的任务
-func (w *MailWorker) saveFailedTask(task *dtoRedis.MailTaskDTO, err error) {
-	failedKey := fmt.Sprintf(constants.MailFailedKey, task.ID)
+func (w *MailWorker) saveFailedTask(task *redisModel.MailTask, err error) {
+	failedKey := constants.RedisMailFailed.Get(task.ID).String()
 
 	failedData := map[string]interface{}{
 		"task":      task,
@@ -320,6 +320,7 @@ func (w *MailWorker) saveFailedTask(task *dtoRedis.MailTaskDTO, err error) {
 
 // updateStats 更新统计信息
 func (w *MailWorker) updateStats(status string) {
-	w.rdb.HIncrBy(w.ctx, constants.MailStatsKey, status, 1)
-	w.rdb.HSet(w.ctx, constants.MailStatsKey, "last_updated", time.Now().Format(time.RFC3339))
+	statsKey := constants.RedisMailStats.Get().String()
+	w.rdb.HIncrBy(w.ctx, statsKey, status, 1)
+	w.rdb.HSet(w.ctx, statsKey, "last_updated", time.Now().Format(time.RFC3339))
 }

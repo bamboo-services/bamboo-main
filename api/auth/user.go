@@ -1,7 +1,7 @@
 package apiAuth
 
-import "github.com/bamboo-services/bamboo-main/internal/models/dto"
+import "github.com/bamboo-services/bamboo-main/internal/entity"
 
 type UserInfoResponse struct {
-	dto.SystemUserDetailDTO
+	User entity.SystemUser `json:"user"`
 }

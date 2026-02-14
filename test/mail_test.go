@@ -15,33 +15,97 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/smtp"
+	"os"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/jordan-wright/email"
 )
 
+type smtpTestConfig struct {
+	host      string
+	port      int
+	username  string
+	password  string
+	fromEmail string
+	fromName  string
+	toEmail   string
+}
+
+func loadSMTPTestConfig(t *testing.T) *smtpTestConfig {
+	t.Helper()
+
+	if testing.Short() {
+		t.Skip("skip smtp e2e in short mode")
+	}
+	if os.Getenv("ENABLE_SMTP_E2E_TEST") != "true" {
+		t.Skip("set ENABLE_SMTP_E2E_TEST=true to enable smtp e2e")
+	}
+
+	host := os.Getenv("EMAIL_HOST")
+	portRaw := os.Getenv("EMAIL_PORT")
+	username := os.Getenv("EMAIL_USER")
+	password := os.Getenv("EMAIL_PASS")
+	fromEmail := os.Getenv("EMAIL_FROM")
+	toEmail := os.Getenv("EMAIL_ADMIN_EMAIL")
+
+	if host == "" || portRaw == "" || username == "" || password == "" || fromEmail == "" || toEmail == "" {
+		t.Skip("EMAIL_HOST/EMAIL_PORT/EMAIL_USER/EMAIL_PASS/EMAIL_FROM/EMAIL_ADMIN_EMAIL are required")
+	}
+
+	port, err := strconv.Atoi(portRaw)
+	if err != nil || port <= 0 {
+		t.Skip("EMAIL_PORT is invalid")
+	}
+
+	fromName := os.Getenv("EMAIL_FROM_NAME")
+	if fromName == "" {
+		fromName = "竹叶"
+	}
+
+	return &smtpTestConfig{
+		host:      host,
+		port:      port,
+		username:  username,
+		password:  password,
+		fromEmail: fromEmail,
+		fromName:  fromName,
+		toEmail:   toEmail,
+	}
+}
+
+func sendMailWithTLS(t *testing.T, cfg *smtpTestConfig, subject string, html string) {
+	t.Helper()
+
+	e := email.NewEmail()
+	e.From = fmt.Sprintf("%s <%s>", cfg.fromName, cfg.fromEmail)
+	e.To = []string{cfg.toEmail}
+	e.Subject = subject
+	e.HTML = []byte(html)
+
+	auth := smtp.PlainAuth("", cfg.username, cfg.password, cfg.host)
+	addr := fmt.Sprintf("%s:%d", cfg.host, cfg.port)
+
+	tlsConfig := &tls.Config{
+		ServerName: cfg.host,
+	}
+
+	t.Logf("正在发送邮件到: %s", cfg.toEmail)
+	t.Logf("SMTP 服务器: %s", addr)
+
+	if err := e.SendWithTLS(addr, auth, tlsConfig); err != nil {
+		t.Fatalf("邮件发送失败: %v", err)
+	}
+}
+
 // TestSendEmail 测试发送邮件
 //
 // 使用 jordan-wright/email 库直接发送邮件，验证 SMTP 配置是否正确
 func TestSendEmail(t *testing.T) {
-	// SMTP 配置（从 config.yaml 中获取）
-	smtpHost := "smtp.feishu.cn"
-	smtpPort := 465
-	username := "noreply@x-lf.cn"
-	password := "xr9bLicI0UOnvHEK"
-	fromEmail := "noreply@x-lf.cn"
-	fromName := "竹叶"
+	cfg := loadSMTPTestConfig(t)
 
-	// 收件人（请修改为你的测试邮箱）
-	toEmail := "gm@x-lf.cn"
-
-	// 创建邮件
-	e := email.NewEmail()
-	e.From = fmt.Sprintf("%s <%s>", fromName, fromEmail)
-	e.To = []string{toEmail}
-	e.Subject = "【测试】Bamboo-Main 邮件模块测试"
-	e.HTML = []byte(`
+	sendMailWithTLS(t, cfg, "【测试】Bamboo-Main 邮件模块测试", `
 <!DOCTYPE html>
 <html>
 <head>
@@ -62,15 +126,15 @@ func TestSendEmail(t *testing.T) {
         <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
             <tr>
                 <td style="padding: 12px; border: 1px solid #ddd; background: #f9f9f9; width: 30%;">发送时间</td>
-                <td style="padding: 12px; border: 1px solid #ddd;">` + time.Now().Format("2006-01-02 15:04:05") + `</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">`+time.Now().Format("2006-01-02 15:04:05")+`</td>
             </tr>
             <tr>
                 <td style="padding: 12px; border: 1px solid #ddd; background: #f9f9f9;">SMTP 服务器</td>
-                <td style="padding: 12px; border: 1px solid #ddd;">` + smtpHost + `</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">`+cfg.host+`</td>
             </tr>
             <tr>
                 <td style="padding: 12px; border: 1px solid #ddd; background: #f9f9f9;">发件人</td>
-                <td style="padding: 12px; border: 1px solid #ddd;">` + fromEmail + `</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">`+cfg.fromEmail+`</td>
             </tr>
         </table>
         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0 20px;">
@@ -82,72 +146,23 @@ func TestSendEmail(t *testing.T) {
 </html>
 `)
 
-	// SMTP 认证
-	auth := smtp.PlainAuth("", username, password, smtpHost)
-	addr := fmt.Sprintf("%s:%d", smtpHost, smtpPort)
-
-	t.Logf("正在发送邮件到: %s", toEmail)
-	t.Logf("SMTP 服务器: %s", addr)
-
-	// TLS 配置
-	tlsConfig := &tls.Config{
-		ServerName: smtpHost,
-	}
-
-	// 发送邮件（端口 465 使用 SSL/TLS）
-	err := e.SendWithTLS(addr, auth, tlsConfig)
-	if err != nil {
-		t.Fatalf("邮件发送失败: %v", err)
-	}
-
 	t.Log("✅ 邮件发送成功！")
 }
 
 // TestSendEmailWithPool 测试使用连接池发送邮件
 func TestSendEmailWithPool(t *testing.T) {
-	// SMTP 配置
-	smtpHost := "smtp.feishu.cn"
-	smtpPort := 465
-	username := "noreply@x-lf.cn"
-	password := ""
-	fromEmail := "noreply@x-lf.cn"
-	fromName := "竹叶"
-
-	// 收件人
-	toEmail := "gm@x-lf.cn"
-
-	// 创建连接池
-	addr := fmt.Sprintf("%s:%d", smtpHost, smtpPort)
-	auth := smtp.PlainAuth("", username, password, smtpHost)
+	cfg := loadSMTPTestConfig(t)
 
 	// 注意：端口 465 需要使用 TLS，email.NewPool 默认使用 STARTTLS
-	// 对于 465 端口，我们直接使用 SendWithTLS 方法
-
-	e := email.NewEmail()
-	e.From = fmt.Sprintf("%s <%s>", fromName, fromEmail)
-	e.To = []string{toEmail}
-	e.Subject = "【测试】连接池邮件测试"
-	e.HTML = []byte(`
+	sendMailWithTLS(t, cfg, "【测试】连接池邮件测试", `
 <html>
 <body>
     <h2>🚀 连接池测试</h2>
     <p>这是通过连接池发送的测试邮件。</p>
-    <p>发送时间: ` + time.Now().Format("2006-01-02 15:04:05") + `</p>
+    <p>发送时间: `+time.Now().Format("2006-01-02 15:04:05")+`</p>
 </body>
 </html>
 `)
-
-	t.Logf("正在使用 TLS 发送邮件到: %s", toEmail)
-
-	// TLS 配置
-	tlsConfig := &tls.Config{
-		ServerName: smtpHost,
-	}
-
-	err := e.SendWithTLS(addr, auth, tlsConfig)
-	if err != nil {
-		t.Fatalf("邮件发送失败: %v", err)
-	}
 
 	t.Log("✅ 连接池邮件发送成功！")
 }

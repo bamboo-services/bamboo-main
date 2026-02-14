@@ -13,14 +13,14 @@ package logic
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	apiAuth "github.com/bamboo-services/bamboo-main/api/auth"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
-	"github.com/bamboo-services/bamboo-main/internal/models/dto"
+	"github.com/bamboo-services/bamboo-main/internal/repository"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
@@ -32,13 +32,17 @@ import (
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	"github.com/gin-gonic/gin"
 	bSdkLogic "github.com/phalanx/beacon-sso-sdk/logic"
-	"gorm.io/gorm"
 )
+
+type authRepo struct {
+	user *repository.SystemUserRepo
+}
 
 // AuthLogic 认证业务逻辑
 type AuthLogic struct {
 	logic
 	SessionService *logcHelper.SessionLogic
+	repo           authRepo
 }
 
 func NewAuthLogic(ctx context.Context) *AuthLogic {
@@ -52,22 +56,20 @@ func NewAuthLogic(ctx context.Context) *AuthLogic {
 			log: xLog.WithName(xLog.NamedLOGC, "AuthLogic"),
 		},
 		SessionService: &logcHelper.SessionLogic{},
+		repo: authRepo{
+			user: repository.NewSystemUserRepo(db, rdb),
+		},
 	}
 }
 
 // Login 用户登录
-func (a *AuthLogic) Login(ctx *gin.Context, req *apiAuth.LoginRequest) (*dto.SystemUserDetailDTO, string, *time.Time, *time.Time, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 查找用户
-	var user entity.SystemUser
-	err := db.Where("username = ? OR email = ?", req.Username, req.Username).First(&user).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, "", nil, nil, xError.NewError(ctx, xError.LoginFailed, "用户名或密码错误", false)
-		}
-		return nil, "", nil, nil, xError.NewError(ctx, xError.DatabaseError, "查询用户失败", false, err)
+func (a *AuthLogic) Login(ctx *gin.Context, req *apiAuth.LoginRequest) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
+	user, found, xErr := a.repo.user.GetByUsernameOrEmail(ctx, req.Username)
+	if xErr != nil {
+		return nil, "", nil, nil, xErr
+	}
+	if !found {
+		return nil, "", nil, nil, xError.NewError(ctx, xError.LoginFailed, "用户名或密码错误", false)
 	}
 
 	// 检查用户状态
@@ -88,64 +90,43 @@ func (a *AuthLogic) Login(ctx *gin.Context, req *apiAuth.LoginRequest) (*dto.Sys
 	expireAt := now.Add(24 * time.Hour) // 24小时过期
 
 	// 创建用户会话
-	err = a.SessionService.CreateUserSession(ctx, &user, token)
+	err := a.SessionService.CreateUserSession(ctx, user, token)
 	if err != nil {
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ServerInternalError, "创建用户会话失败", false, err)
 	}
 
 	// 更新最后登录时间
-	err = db.Model(&user).Update("last_login_at", &now).Error
-	if err != nil {
+	xErr = a.repo.user.UpdateLastLoginByID(ctx, user.ID, &now)
+	if xErr != nil {
 		// 记录错误但不影响登录
-		xLog.WithName(xLog.NamedLOGC, "AUTH").Error(ctx, fmt.Sprintf("更新最后登录时间失败: %v", err))
+		xLog.WithName(xLog.NamedLOGC, "AUTH").Error(ctx, fmt.Sprintf("更新最后登录时间失败: %v", xErr))
 	}
-
-	userDTO := &dto.SystemUserDetailDTO{
-		ID:          user.ID,
-		Username:    user.Username,
-		Email:       user.Email,
-		Nickname:    user.Nickname,
-		Avatar:      user.Avatar,
-		Role:        user.Role,
-		Status:      user.Status,
-		LastLoginAt: user.LastLoginAt,
-		CreatedAt:   user.CreatedAt,
-		UpdatedAt:   user.UpdatedAt,
-	}
-	return userDTO, token, &now, &expireAt, nil
+	return user, token, &now, &expireAt, nil
 }
 
 // Register 用户注册
-func (a *AuthLogic) Register(ctx *gin.Context, req *apiAuth.RegisterRequest) (*dto.SystemUserDetailDTO, string, *time.Time, *time.Time, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 1. 检查用户名是否已存在
-	var existingUser entity.SystemUser
-	err := db.Where("username = ?", req.Username).First(&existingUser).Error
-	if err == nil {
+func (a *AuthLogic) Register(ctx *gin.Context, req *apiAuth.RegisterRequest) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
+	exists, xErr := a.repo.user.ExistsByUsername(ctx, req.Username)
+	if xErr != nil {
+		return nil, "", nil, nil, xErr
+	}
+	if exists {
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterError, "用户名已存在", false)
 	}
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, "", nil, nil, xError.NewError(ctx, xError.DatabaseError, "查询用户失败", false, err)
-	}
 
-	// 2. 检查邮箱是否已存在
-	err = db.Where("email = ?", req.Email).First(&existingUser).Error
-	if err == nil {
+	exists, xErr = a.repo.user.ExistsByEmailExceptID(ctx, req.Email, 0)
+	if xErr != nil {
+		return nil, "", nil, nil, xErr
+	}
+	if exists {
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterError, "邮箱已被注册", false)
 	}
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, "", nil, nil, xError.NewError(ctx, xError.DatabaseError, "查询邮箱失败", false, err)
-	}
 
-	// 3. 加密密码
 	hashedPassword, err := xUtil.EncryptPasswordString(req.Password)
 	if err != nil {
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ServerInternalError, "密码加密失败", false, err)
 	}
 
-	// 4. 构建用户实体
 	newUser := entity.SystemUser{
 		Username:    req.Username,
 		Password:    hashedPassword,
@@ -156,44 +137,22 @@ func (a *AuthLogic) Register(ctx *gin.Context, req *apiAuth.RegisterRequest) (*d
 		EmailVerify: false,  // 默认未验证邮箱
 	}
 
-	// 5. 创建用户（BeforeCreate Hook 会自动生成 ID 和时间戳）
-	err = db.Create(&newUser).Error
-	if err != nil {
-		return nil, "", nil, nil, xError.NewError(ctx, xError.DatabaseError, "创建用户失败", false, err)
+	if _, xErr = a.repo.user.Create(ctx, &newUser); xErr != nil {
+		return nil, "", nil, nil, xErr
 	}
 
-	// 6. 生成 Token
 	token := xUtil.GenerateSecurityKey()
 
-	// 7. 记录时间信息
 	now := time.Now()
 	expireAt := now.Add(24 * time.Hour) // 24小时过期
 
-	// 8. 创建用户会话
 	err = a.SessionService.CreateUserSession(ctx, &newUser, token)
 	if err != nil {
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ServerInternalError, "创建用户会话失败", false, err)
 	}
 
-	// 9. 发送邮箱验证邮件（异步，不阻断主流程）
 	go a.sendEmailVerification(ctx, &newUser)
-
-	// 10. 构建返回 DTO（注册不更新 last_login_at）
-	userDTO := &dto.SystemUserDetailDTO{
-		ID:          newUser.ID,
-		Username:    newUser.Username,
-		Email:       newUser.Email,
-		Nickname:    newUser.Nickname,
-		Avatar:      newUser.Avatar,
-		Role:        newUser.Role,
-		Status:      newUser.Status,
-		EmailVerify: newUser.EmailVerify,
-		LastLoginAt: nil, // 注册时不设置最后登录时间
-		CreatedAt:   newUser.CreatedAt,
-		UpdatedAt:   newUser.UpdatedAt,
-	}
-
-	return userDTO, token, &now, &expireAt, nil
+	return &newUser, token, &now, &expireAt, nil
 }
 
 // Logout 用户登出
@@ -213,17 +172,12 @@ func (a *AuthLogic) Logout(ctx *gin.Context, token string) *xError.Error {
 
 // ChangePassword 修改密码
 func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID int64, req *apiAuth.PasswordChangeRequest) *xError.Error {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 查找用户
-	var user entity.SystemUser
-	err := db.First(&user, "id = ?", userID).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return xError.NewError(ctx, xError.NotFound, "用户不存在", false)
-		}
-		return xError.NewError(ctx, xError.DatabaseError, "查询用户失败", false, err)
+	user, found, xErr := a.repo.user.GetByID(ctx, userID)
+	if xErr != nil {
+		return xErr
+	}
+	if !found {
+		return xError.NewError(ctx, xError.NotFound, "用户不存在", false)
 	}
 
 	// 验证旧密码
@@ -238,9 +192,9 @@ func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID int64, req *apiAuth.
 	}
 
 	// 更新密码
-	err = db.Model(&user).Update("password", hashedPassword).Error
-	if err != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "更新密码失败", false, err)
+	xErr = a.repo.user.UpdatePasswordByID(ctx, userID, hashedPassword)
+	if xErr != nil {
+		return xErr
 	}
 
 	return nil
@@ -248,17 +202,12 @@ func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID int64, req *apiAuth.
 
 // ResetPassword 重置密码（发送重置链接）
 func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *apiAuth.PasswordResetRequest) *xError.Error {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 查找用户
-	var user entity.SystemUser
-	err := db.First(&user, "email = ?", req.Email).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return xError.NewError(ctx, xError.NotFound, "邮箱不存在", false)
-		}
-		return xError.NewError(ctx, xError.DatabaseError, "查询用户失败", false, err)
+	user, found, xErr := a.repo.user.GetByEmail(ctx, req.Email)
+	if xErr != nil {
+		return xErr
+	}
+	if !found {
+		return xError.NewError(ctx, xError.NotFound, "邮箱不存在", false)
 	}
 
 	// 生成重置 Token（32位随机字符串）
@@ -270,62 +219,38 @@ func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *apiAuth.PasswordResetRe
 		return xError.NewError(ctx, xError.ServerInternalError, "Redis 客户端不可用", false)
 	}
 
-	redisKey := fmt.Sprintf(constants.PasswordResetTokenPrefix, resetToken)
-	err = rdb.Set(ctx.Request.Context(), redisKey, user.ID, time.Hour).Err()
+	redisKey := constants.RedisPasswordReset.Get(resetToken).String()
+	err := rdb.Set(ctx.Request.Context(), redisKey, user.ID, time.Hour).Err()
 	if err != nil {
 		return xError.NewError(ctx, xError.ServerInternalError, "保存重置Token失败", false, err)
 	}
 
 	// 发送重置密码邮件（异步，不阻断主流程）
-	go a.sendPasswordResetEmail(ctx, &user, resetToken)
+	go a.sendPasswordResetEmail(ctx, user, resetToken)
 
 	return nil
 }
 
 // GetUserInfo 获取用户信息
-func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID int64) (*dto.SystemUserDetailDTO, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	var user entity.SystemUser
-	err := db.First(&user, "id = ?", userID).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, xError.NewError(ctx, xError.NotFound, "用户不存在", false)
-		}
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询用户失败", false, err)
+func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID int64) (*entity.SystemUser, *xError.Error) {
+	user, found, xErr := a.repo.user.GetByID(ctx, userID)
+	if xErr != nil {
+		return nil, xErr
 	}
-
-	userDTO := &dto.SystemUserDetailDTO{
-		ID:          user.ID,
-		Username:    user.Username,
-		Email:       user.Email,
-		Nickname:    user.Nickname,
-		Avatar:      user.Avatar,
-		Role:        user.Role,
-		Status:      user.Status,
-		LastLoginAt: user.LastLoginAt,
-		CreatedAt:   user.CreatedAt,
-		UpdatedAt:   user.UpdatedAt,
+	if !found {
+		return nil, xError.NewError(ctx, xError.NotFound, "用户不存在", false)
 	}
-	return userDTO, nil
+	return user, nil
 }
 
 // UpdateLastLogin 更新最后登录时间
 func (a *AuthLogic) UpdateLastLogin(ctx *gin.Context, userID int64) *xError.Error {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
 	now := time.Now()
-	err := db.Model(&entity.SystemUser{}).Where("id = ?", userID).Update("last_login_at", &now).Error
-	if err != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "更新最后登录时间失败", false, err)
-	}
-	return nil
+	return a.repo.user.UpdateLastLoginByID(ctx, userID, &now)
 }
 
 // ValidateToken 验证令牌
-func (a *AuthLogic) ValidateToken(ctx *gin.Context, token string) (*dto.SystemUserDetailDTO, *xError.Error) {
+func (a *AuthLogic) ValidateToken(ctx *gin.Context, token string) (*entity.SystemUser, *xError.Error) {
 	// 这个方法主要通过中间件来处理，这里提供一个备用实现
 	// 实际项目中可以根据需要实现更复杂的验证逻辑
 	return nil, xError.NewError(ctx, xError.OperationInvalid, "请通过认证中间件验证令牌", false)
@@ -346,6 +271,14 @@ func generateRandomString(length int) string {
 	return string(result)
 }
 
+func parseUserID(value string) int64 {
+	userID, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return userID
+}
+
 // VerifyEmail 验证邮箱
 func (a *AuthLogic) VerifyEmail(ctx *gin.Context, req *apiAuth.VerifyEmailRequest) *xError.Error {
 	logger := xLog.WithName(xLog.NamedLOGC, "AUTH")
@@ -357,7 +290,7 @@ func (a *AuthLogic) VerifyEmail(ctx *gin.Context, req *apiAuth.VerifyEmailReques
 	}
 
 	// 从 Redis 获取用户 ID
-	redisKey := fmt.Sprintf(constants.EmailVerifyTokenPrefix, req.Token)
+	redisKey := constants.RedisEmailVerify.Get(req.Token).String()
 	userIDStr, err := rdb.Get(ctx.Request.Context(), redisKey).Result()
 	if err != nil {
 		logger.Warn(ctx, fmt.Sprintf("邮箱验证Token无效或已过期: %s", req.Token))
@@ -368,10 +301,9 @@ func (a *AuthLogic) VerifyEmail(ctx *gin.Context, req *apiAuth.VerifyEmailReques
 	rdb.Del(ctx.Request.Context(), redisKey)
 
 	// 更新用户邮箱验证状态
-	db := xCtxUtil.MustGetDB(ctx)
-	err = db.Model(&entity.SystemUser{}).Where("id = ?", userIDStr).Update("email_verify", true).Error
-	if err != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "更新邮箱验证状态失败", false, err)
+	_, xErr := a.repo.user.UpdateFieldsByID(ctx, parseUserID(userIDStr), map[string]any{"email_verify": true})
+	if xErr != nil {
+		return xErr
 	}
 
 	logger.Info(ctx, fmt.Sprintf("用户 %s 邮箱验证成功", userIDStr))
@@ -387,7 +319,7 @@ func (a *AuthLogic) VerifyResetToken(ctx *gin.Context, req *apiAuth.VerifyResetT
 	}
 
 	// 检查 Token 是否存在
-	redisKey := fmt.Sprintf(constants.PasswordResetTokenPrefix, req.Token)
+	redisKey := constants.RedisPasswordReset.Get(req.Token).String()
 	exists, err := rdb.Exists(ctx.Request.Context(), redisKey).Result()
 	if err != nil {
 		return false, xError.NewError(ctx, xError.ServerInternalError, "验证Token失败", false, err)
@@ -407,7 +339,7 @@ func (a *AuthLogic) ConfirmResetPassword(ctx *gin.Context, req *apiAuth.ConfirmR
 	}
 
 	// 从 Redis 获取用户 ID
-	redisKey := fmt.Sprintf(constants.PasswordResetTokenPrefix, req.Token)
+	redisKey := constants.RedisPasswordReset.Get(req.Token).String()
 	userIDStr, err := rdb.Get(ctx.Request.Context(), redisKey).Result()
 	if err != nil {
 		logger.Warn(ctx, fmt.Sprintf("密码重置Token无效或已过期: %s", req.Token))
@@ -424,10 +356,9 @@ func (a *AuthLogic) ConfirmResetPassword(ctx *gin.Context, req *apiAuth.ConfirmR
 	}
 
 	// 更新用户密码
-	db := xCtxUtil.MustGetDB(ctx)
-	err = db.Model(&entity.SystemUser{}).Where("id = ?", userIDStr).Update("password", hashedPassword).Error
-	if err != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "重置密码失败", false, err)
+	xErr := a.repo.user.UpdatePasswordByID(ctx, parseUserID(userIDStr), hashedPassword)
+	if xErr != nil {
+		return xErr
 	}
 
 	logger.Info(ctx, fmt.Sprintf("用户 %s 密码重置成功", userIDStr))
@@ -458,7 +389,7 @@ func (a *AuthLogic) sendEmailVerification(ctx *gin.Context, user *entity.SystemU
 	verifyToken := generateRandomString(32)
 
 	// 存储到 Redis（24小时过期）
-	redisKey := fmt.Sprintf(constants.EmailVerifyTokenPrefix, verifyToken)
+	redisKey := constants.RedisEmailVerify.Get(verifyToken).String()
 	err := rdb.Set(ctx.Request.Context(), redisKey, user.ID, 24*time.Hour).Err()
 	if err != nil {
 		logger.Warn(ctx, fmt.Sprintf("保存验证Token失败: %v", err))

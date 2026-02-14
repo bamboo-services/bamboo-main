@@ -17,7 +17,7 @@ import (
 
 	apiInfo "github.com/bamboo-services/bamboo-main/api/info"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
-	"github.com/bamboo-services/bamboo-main/internal/models/dto"
+	"github.com/bamboo-services/bamboo-main/internal/repository"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/log"
@@ -34,8 +34,13 @@ const (
 )
 
 // InfoLogic 站点信息业务逻辑
+type infoRepo struct {
+	system *repository.SystemRepo
+}
+
 type InfoLogic struct {
 	logic
+	repo infoRepo
 }
 
 func NewInfoLogic(ctx context.Context) *InfoLogic {
@@ -48,18 +53,19 @@ func NewInfoLogic(ctx context.Context) *InfoLogic {
 			rdb: rdb,
 			log: xLog.WithName(xLog.NamedLOGC, "InfoLogic"),
 		},
+		repo: infoRepo{
+			system: repository.NewSystemRepo(db, rdb),
+		},
 	}
 }
 
 // GetSiteInfo 获取站点信息
-func (l *InfoLogic) GetSiteInfo(ctx *gin.Context) (*dto.SiteInfoDTO, *xError.Error) {
-	db := l.db
-
+func (l *InfoLogic) GetSiteInfo(ctx *gin.Context) (*apiInfo.SiteResponse, *xError.Error) {
 	// 批量查询站点相关配置
 	keys := []string{KeySiteName, KeySiteDescription, KeySiteIntroduction}
-	var configs []entity.System
-	if err := db.Where("key IN ?", keys).Find(&configs).Error; err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "获取站点信息失败", false, err)
+	configs, xErr := l.repo.system.ListByKeys(ctx, keys)
+	if xErr != nil {
+		return nil, xError.NewError(ctx, xError.DatabaseError, "获取站点信息失败", false, xErr)
 	}
 
 	// 转换为 map 便于访问
@@ -68,8 +74,7 @@ func (l *InfoLogic) GetSiteInfo(ctx *gin.Context) (*dto.SiteInfoDTO, *xError.Err
 		configMap[configs[i].Key] = &configs[i]
 	}
 
-	// 构建 DTO
-	result := &dto.SiteInfoDTO{
+	result := &apiInfo.SiteResponse{
 		SiteName:        getConfigValue(configMap, KeySiteName),
 		SiteDescription: getConfigValue(configMap, KeySiteDescription),
 		Introduction:    getConfigValue(configMap, KeySiteIntroduction),
@@ -80,9 +85,7 @@ func (l *InfoLogic) GetSiteInfo(ctx *gin.Context) (*dto.SiteInfoDTO, *xError.Err
 }
 
 // UpdateSiteInfo 更新站点信息
-func (l *InfoLogic) UpdateSiteInfo(ctx *gin.Context, req *apiInfo.SiteUpdateRequest) (*dto.SiteInfoDTO, *xError.Error) {
-	db := l.db
-
+func (l *InfoLogic) UpdateSiteInfo(ctx *gin.Context, req *apiInfo.SiteUpdateRequest) (*apiInfo.SiteResponse, *xError.Error) {
 	// 收集需要更新的字段（仅更新非 nil 的字段）
 	updates := make(map[string]*string)
 	if req.SiteName != nil {
@@ -102,10 +105,9 @@ func (l *InfoLogic) UpdateSiteInfo(ctx *gin.Context, req *apiInfo.SiteUpdateRequ
 
 	// 执行更新
 	for key, value := range updates {
-		if err := db.Model(&entity.System{}).
-			Where("key = ?", key).
-			Update("value", value).Error; err != nil {
-			return nil, xError.NewError(ctx, xError.DatabaseError, "更新站点信息失败", false, err)
+		xErr := l.repo.system.UpdateValueByKey(ctx, key, value)
+		if xErr != nil {
+			return nil, xError.NewError(ctx, xError.DatabaseError, "更新站点信息失败", false, xErr)
 		}
 	}
 
@@ -113,12 +115,13 @@ func (l *InfoLogic) UpdateSiteInfo(ctx *gin.Context, req *apiInfo.SiteUpdateRequ
 }
 
 // GetAbout 获取自我介绍
-func (l *InfoLogic) GetAbout(ctx *gin.Context) (*dto.AboutDTO, *xError.Error) {
-	db := l.db
-
-	var config entity.System
-	if err := db.Where("key = ?", KeyProfileAbout).First(&config).Error; err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "获取自我介绍失败", false, err)
+func (l *InfoLogic) GetAbout(ctx *gin.Context) (*apiInfo.AboutResponse, *xError.Error) {
+	config, found, xErr := l.repo.system.GetByKey(ctx, KeyProfileAbout)
+	if xErr != nil {
+		return nil, xError.NewError(ctx, xError.DatabaseError, "获取自我介绍失败", false, xErr)
+	}
+	if !found {
+		return nil, xError.NewError(ctx, xError.DatabaseError, "获取自我介绍失败", false)
 	}
 
 	content := ""
@@ -126,20 +129,18 @@ func (l *InfoLogic) GetAbout(ctx *gin.Context) (*dto.AboutDTO, *xError.Error) {
 		content = *config.Value
 	}
 
-	return &dto.AboutDTO{
+	return &apiInfo.AboutResponse{
 		Content:   content,
 		UpdatedAt: config.UpdatedAt,
 	}, nil
 }
 
 // UpdateAbout 更新自我介绍
-func (l *InfoLogic) UpdateAbout(ctx *gin.Context, req *apiInfo.AboutUpdateRequest) (*dto.AboutDTO, *xError.Error) {
-	db := l.db
-
-	if err := db.Model(&entity.System{}).
-		Where("key = ?", KeyProfileAbout).
-		Update("value", req.Content).Error; err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "更新自我介绍失败", false, err)
+func (l *InfoLogic) UpdateAbout(ctx *gin.Context, req *apiInfo.AboutUpdateRequest) (*apiInfo.AboutResponse, *xError.Error) {
+	content := req.Content
+	xErr := l.repo.system.UpdateValueByKey(ctx, KeyProfileAbout, &content)
+	if xErr != nil {
+		return nil, xError.NewError(ctx, xError.DatabaseError, "更新自我介绍失败", false, xErr)
 	}
 
 	return l.GetAbout(ctx)

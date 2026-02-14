@@ -35,8 +35,7 @@ func (h *InfoHandler) GetSiteInfo(c *gin.Context) {
 		return
 	}
 
-	resp := apiInfo.SiteResponse{SiteInfoDTO: *result}
-	xResult.SuccessHasData(c, "获取站点信息成功", resp)
+	xResult.SuccessHasData(c, "获取站点信息成功", result)
 }
 
 // UpdateSiteInfo 更新站点信息
@@ -66,8 +65,7 @@ func (h *InfoHandler) UpdateSiteInfo(c *gin.Context) {
 		return
 	}
 
-	resp := apiInfo.SiteResponse{SiteInfoDTO: *result}
-	xResult.SuccessHasData(c, "站点信息更新成功", resp)
+	xResult.SuccessHasData(c, "站点信息更新成功", result)
 }
 
 // GetAbout 获取自我介绍
@@ -86,8 +84,7 @@ func (h *InfoHandler) GetAbout(c *gin.Context) {
 		return
 	}
 
-	resp := apiInfo.AboutResponse{AboutDTO: *result}
-	xResult.SuccessHasData(c, "获取自我介绍成功", resp)
+	xResult.SuccessHasData(c, "获取自我介绍成功", result)
 }
 
 // UpdateAbout 更新自我介绍
@@ -117,6 +114,5 @@ func (h *InfoHandler) UpdateAbout(c *gin.Context) {
 		return
 	}
 
-	resp := apiInfo.AboutResponse{AboutDTO: *result}
-	xResult.SuccessHasData(c, "自我介绍更新成功", resp)
+	xResult.SuccessHasData(c, "自我介绍更新成功", result)
 }

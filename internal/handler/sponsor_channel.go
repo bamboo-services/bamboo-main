@@ -27,7 +27,7 @@ import (
 // @Produce json
 // @Security Bearer
 // @Param request body apiSponsorChannel.ChannelAddRequest true "添加赞助渠道请求"
-// @Success 200 {object} dto.SponsorChannelDetailDTO "添加成功"
+// @Success 200 {object} apiSponsorChannel.ChannelAddResponse "添加成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
@@ -50,7 +50,8 @@ func (h *SponsorChannelHandler) Add(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "赞助渠道添加成功", channel)
+	resp := apiSponsorChannel.ChannelAddResponse{ChannelEntityResponse: *channel}
+	xResult.SuccessHasData(c, "赞助渠道添加成功", resp)
 }
 
 // Update 更新赞助渠道
@@ -62,7 +63,7 @@ func (h *SponsorChannelHandler) Add(c *gin.Context) {
 // @Security Bearer
 // @Param id path int64 true "赞助渠道ID"
 // @Param request body apiSponsorChannel.ChannelUpdateRequest true "更新赞助渠道请求"
-// @Success 200 {object} dto.SponsorChannelDetailDTO "更新成功"
+// @Success 200 {object} apiSponsorChannel.ChannelUpdateResponse "更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "赞助渠道不存在"
@@ -87,7 +88,8 @@ func (h *SponsorChannelHandler) Update(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "赞助渠道更新成功", channel)
+	resp := apiSponsorChannel.ChannelUpdateResponse{ChannelEntityResponse: *channel}
+	xResult.SuccessHasData(c, "赞助渠道更新成功", resp)
 }
 
 // UpdateStatus 更新赞助渠道状态
@@ -99,7 +101,7 @@ func (h *SponsorChannelHandler) Update(c *gin.Context) {
 // @Security Bearer
 // @Param id path int64 true "赞助渠道ID"
 // @Param request body apiSponsorChannel.ChannelStatusRequest true "渠道状态请求"
-// @Success 200 {object} map[string]interface{} "状态更新成功"
+// @Success 200 {object} apiSponsorChannel.ChannelStatusResponse "状态更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "赞助渠道不存在"
@@ -128,8 +130,9 @@ func (h *SponsorChannelHandler) UpdateStatus(c *gin.Context) {
 	if status {
 		statusText = "启用"
 	}
-	xResult.SuccessHasData(c, "渠道已"+statusText, gin.H{
-		"status": status,
+	xResult.SuccessHasData(c, "渠道已"+statusText, apiSponsorChannel.ChannelStatusResponse{
+		Message: "渠道已" + statusText,
+		Status:  status,
 	})
 }
 
@@ -141,7 +144,7 @@ func (h *SponsorChannelHandler) UpdateStatus(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int64 true "赞助渠道ID"
-// @Success 200 {object} map[string]interface{} "删除成功"
+// @Success 200 {object} apiSponsorChannel.ChannelDeleteResponse "删除成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "赞助渠道不存在"
@@ -158,7 +161,7 @@ func (h *SponsorChannelHandler) Delete(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "赞助渠道删除成功")
+	xResult.SuccessHasData(c, "赞助渠道删除成功", apiSponsorChannel.ChannelDeleteResponse{Message: "赞助渠道删除成功"})
 }
 
 // Get 获取赞助渠道详情
@@ -169,7 +172,7 @@ func (h *SponsorChannelHandler) Delete(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int64 true "赞助渠道ID"
-// @Success 200 {object} dto.SponsorChannelDetailDTO "获取成功"
+// @Success 200 {object} apiSponsorChannel.ChannelDetailResponse "获取成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 404 {object} map[string]interface{} "赞助渠道不存在"
@@ -186,7 +189,8 @@ func (h *SponsorChannelHandler) Get(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "获取赞助渠道详情成功", channel)
+	resp := apiSponsorChannel.ChannelDetailResponse{ChannelEntityResponse: *channel}
+	xResult.SuccessHasData(c, "获取赞助渠道详情成功", resp)
 }
 
 // GetList 获取赞助渠道列表
@@ -201,7 +205,7 @@ func (h *SponsorChannelHandler) Get(c *gin.Context) {
 // @Param only_enabled query bool false "仅查询启用的渠道"
 // @Param order_by query string false "排序字段（name, sort_order, created_at）"
 // @Param order query string false "排序方向（asc, desc）"
-// @Success 200 {array} dto.SponsorChannelListDTO "获取成功"
+// @Success 200 {array} apiSponsorChannel.ChannelListItemResponse "获取成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
@@ -272,7 +276,7 @@ func (h *SponsorChannelHandler) GetPage(c *gin.Context) {
 // @Tags 赞助渠道
 // @Accept json
 // @Produce json
-// @Success 200 {array} dto.SponsorChannelListDTO "获取成功"
+// @Success 200 {array} apiSponsorChannel.ChannelListItemResponse "获取成功"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"
 // @Router /api/v1/sponsors/channels [get]
 func (h *SponsorChannelHandler) GetPublicList(c *gin.Context) {

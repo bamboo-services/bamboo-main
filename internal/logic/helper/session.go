@@ -17,7 +17,7 @@ import (
 	"time"
 
 	"github.com/bamboo-services/bamboo-main/internal/entity"
-	dtoRedis "github.com/bamboo-services/bamboo-main/internal/models/dto/redis"
+	redisModel "github.com/bamboo-services/bamboo-main/internal/models/cache/redis"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 	"github.com/bamboo-services/bamboo-main/pkg/util/netUtil"
@@ -44,7 +44,7 @@ func (s *SessionLogic) CreateUserSession(c *gin.Context, user *entity.SystemUser
 
 	// 创建Token会话数据
 	now := time.Now()
-	tokenDTO := dtoRedis.TokenDTO{
+	tokenSession := redisModel.TokenSession{
 		UserID:    user.ID,
 		Username:  user.Username,
 		Email:     user.Email,
@@ -56,13 +56,13 @@ func (s *SessionLogic) CreateUserSession(c *gin.Context, user *entity.SystemUser
 	}
 
 	// 序列化会话数据
-	sessionData, err := json.Marshal(tokenDTO)
+	sessionData, err := json.Marshal(tokenSession)
 	if err != nil {
 		return err
 	}
 
 	// 存储到 Redis
-	redisKey := fmt.Sprintf(constants.AuthTokenPrefix, token)
+	redisKey := constants.RedisAuthToken.Get(token).String()
 	err = rdb.Set(c.Request.Context(), redisKey, sessionData, 24*time.Hour).Err()
 	if err != nil {
 		return err
@@ -79,6 +79,6 @@ func (s *SessionLogic) DeleteUserSession(c *gin.Context, token string) error {
 		return fmt.Errorf("redis 客户端不可用")
 	}
 
-	redisKey := fmt.Sprintf(constants.AuthTokenPrefix, token)
+	redisKey := constants.RedisAuthToken.Get(token).String()
 	return rdb.Del(c.Request.Context(), redisKey).Err()
 }

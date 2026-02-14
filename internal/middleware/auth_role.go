@@ -12,15 +12,13 @@
 package middleware
 
 import (
-	"errors"
-
-	"github.com/bamboo-services/bamboo-main/internal/entity"
+	"github.com/bamboo-services/bamboo-main/internal/repository"
+	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // RequireRole 要求特定角色的中间件
@@ -35,19 +33,20 @@ func RequireRole(roles ...string) gin.HandlerFunc {
 
 		// 从数据库获取用户信息
 		db := xCtxUtil.MustGetDB(c)
+		rdb := xCtxUtil.MustGetRDB(c)
 		if db == nil {
 			_ = c.Error(xError.NewError(c, xError.DatabaseError, "数据库连接异常", false))
 			return
 		}
 
-		var user entity.SystemUser
-		err := db.Where("id = ? AND status = ?", userID, 1).First(&user).Error
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				_ = c.Error(xError.NewError(c, xError.NotFound, "用户不存在或已被禁用", false))
-			} else {
-				_ = c.Error(xError.NewError(c, xError.DatabaseError, "用户信息查询失败", false))
-			}
+		repo := repository.NewSystemUserRepo(db, rdb)
+		user, found, xErr := repo.GetByID(c, userID)
+		if xErr != nil {
+			_ = c.Error(xError.NewError(c, xError.DatabaseError, "用户信息查询失败", false, xErr))
+			return
+		}
+		if !found || user.Status != constants.StatusActive {
+			_ = c.Error(xError.NewError(c, xError.NotFound, "用户不存在或已被禁用", false))
 			return
 		}
 

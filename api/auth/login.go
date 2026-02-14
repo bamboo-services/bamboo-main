@@ -3,7 +3,7 @@ package apiAuth
 import (
 	"time"
 
-	"github.com/bamboo-services/bamboo-main/internal/models/dto"
+	"github.com/bamboo-services/bamboo-main/internal/entity"
 )
 
 type LoginRequest struct {
@@ -12,8 +12,8 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	User      dto.SystemUserDetailDTO `json:"user"`
-	Token     string                  `json:"token"`
-	CreatedAt time.Time               `json:"created_at"`
-	ExpiredAt time.Time               `json:"expired_at"`
+	User      entity.SystemUser `json:"user"`
+	Token     string            `json:"token"`
+	CreatedAt time.Time         `json:"created_at"`
+	ExpiredAt time.Time         `json:"expired_at"`
 }

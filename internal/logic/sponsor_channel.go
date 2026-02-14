@@ -1,35 +1,26 @@
-/*
- * --------------------------------------------------------------------------------
- * Copyright (c) 2016-NOW(至今) 筱锋
- * Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
- * --------------------------------------------------------------------------------
- * 许可证声明：版权所有 (c) 2016-2025 筱锋。保留所有权利。
- * 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
- * https://opensource.org/licenses/MIT
- * --------------------------------------------------------------------------------
- */
-
 package logic
 
 import (
 	"context"
-	"errors"
 	"strconv"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/log"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
-	apiSponsorChannel "github.com/bamboo-services/bamboo-main/api/sponsor"
-	entity2 "github.com/bamboo-services/bamboo-main/internal/entity"
+	apiSponsor "github.com/bamboo-services/bamboo-main/api/sponsor"
+	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
-	"github.com/bamboo-services/bamboo-main/internal/models/dto"
+	"github.com/bamboo-services/bamboo-main/internal/repository"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-// SponsorChannelLogic 赞助渠道业务逻辑
+type sponsorChannelRepo struct {
+	channel *repository.SponsorChannelRepo
+}
+
 type SponsorChannelLogic struct {
 	logic
+	repo sponsorChannelRepo
 }
 
 func NewSponsorChannelLogic(ctx context.Context) *SponsorChannelLogic {
@@ -42,273 +33,176 @@ func NewSponsorChannelLogic(ctx context.Context) *SponsorChannelLogic {
 			rdb: rdb,
 			log: xLog.WithName(xLog.NamedLOGC, "SponsorChannelLogic"),
 		},
+		repo: sponsorChannelRepo{
+			channel: repository.NewSponsorChannelRepo(db, rdb),
+		},
 	}
 }
 
-// Add 添加赞助渠道
-func (l *SponsorChannelLogic) Add(ctx *gin.Context, req *apiSponsorChannel.ChannelAddRequest) (*dto.SponsorChannelDetailDTO, *xError.Error) {
-	// 获取数据库连接 - 注意：不要再次调用 WithContext，已包含 Snowflake 节点
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 创建赞助渠道实体
-	channel := &entity2.SponsorChannel{
+func (l *SponsorChannelLogic) Add(ctx *gin.Context, req *apiSponsor.ChannelAddRequest) (*apiSponsor.ChannelEntityResponse, *xError.Error) {
+	channel, xErr := l.repo.channel.Create(ctx, &entity.SponsorChannel{
 		Name:        req.Name,
 		Icon:        req.Icon,
 		Description: req.Description,
 		SortOrder:   req.SortOrder,
-		Status:      true, // 默认启用
+		Status:      true,
+	})
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	// 保存到数据库
-	err := db.Create(channel).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "创建赞助渠道失败", false, err)
+	sponsorCount, xErr := l.repo.channel.CountSponsorsByChannelID(ctx, channel.ID)
+	if xErr != nil {
+		return nil, xErr
 	}
-
-	// 查询刚创建的渠道详情
-	err = db.First(channel, "id = ?", channel.ID).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询赞助渠道失败", false, err)
-	}
-
-	return convertChannelToDetailDTO(channel, 0), nil
+	return buildChannelEntityResponse(channel, int(sponsorCount)), nil
 }
 
-// Update 更新赞助渠道
-func (l *SponsorChannelLogic) Update(ctx *gin.Context, idStr string, req *apiSponsorChannel.ChannelUpdateRequest) (*dto.SponsorChannelDetailDTO, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 解析ID
-	channelID, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.BadRequest, "无效的渠道ID", false)
+func (l *SponsorChannelLogic) Update(ctx *gin.Context, idStr string, req *apiSponsor.ChannelUpdateRequest) (*apiSponsor.ChannelEntityResponse, *xError.Error) {
+	channelID, xErr := parseSponsorChannelID(ctx, idStr)
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	// 查找赞助渠道
-	var channel entity2.SponsorChannel
-	err = db.First(&channel, "id = ?", channelID).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, xError.NewError(ctx, xError.NotFound, "赞助渠道不存在", false)
-		}
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询赞助渠道失败", false, err)
+	channel, found, xErr := l.repo.channel.GetByID(ctx, channelID)
+	if xErr != nil {
+		return nil, xErr
+	}
+	if !found {
+		return nil, xError.NewError(ctx, xError.NotFound, "赞助渠道不存在", false)
 	}
 
-	// 更新字段 - 只更新提供的字段
+	updates := make(map[string]any)
 	if req.Name != nil {
-		channel.Name = *req.Name
+		updates["name"] = *req.Name
 	}
 	if req.Icon != nil {
-		channel.Icon = req.Icon
+		updates["icon"] = req.Icon
 	}
 	if req.Description != nil {
-		channel.Description = req.Description
+		updates["description"] = req.Description
 	}
 	if req.SortOrder != nil {
-		channel.SortOrder = *req.SortOrder
+		updates["sort_order"] = *req.SortOrder
 	}
 
-	// 保存更新
-	err = db.Updates(&channel).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "更新赞助渠道失败", false, err)
+	if len(updates) > 0 {
+		channel, found, xErr = l.repo.channel.UpdateByID(ctx, channelID, updates)
+		if xErr != nil {
+			return nil, xErr
+		}
+		if !found {
+			return nil, xError.NewError(ctx, xError.NotFound, "赞助渠道不存在", false)
+		}
 	}
 
-	// 查询赞助记录数量
-	var sponsorCount int64
-	err = db.Model(&entity2.SponsorRecord{}).Where("channel_id = ?", channelID).Count(&sponsorCount).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询赞助数量失败", false, err)
+	sponsorCount, xErr := l.repo.channel.CountSponsorsByChannelID(ctx, channelID)
+	if xErr != nil {
+		return nil, xErr
 	}
-
-	return convertChannelToDetailDTO(&channel, int(sponsorCount)), nil
+	return buildChannelEntityResponse(channel, int(sponsorCount)), nil
 }
 
-// UpdateStatus 更新赞助渠道状态
-func (l *SponsorChannelLogic) UpdateStatus(ctx *gin.Context, idStr string, req *apiSponsorChannel.ChannelStatusRequest) (bool, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 解析ID
-	channelID, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return false, xError.NewError(ctx, xError.BadRequest, "无效的渠道ID", false)
+func (l *SponsorChannelLogic) UpdateStatus(ctx *gin.Context, idStr string, req *apiSponsor.ChannelStatusRequest) (bool, *xError.Error) {
+	channelID, xErr := parseSponsorChannelID(ctx, idStr)
+	if xErr != nil {
+		return false, xErr
 	}
 
-	// 更新状态
-	result := db.Model(&entity2.SponsorChannel{}).
-		Where("id = ?", channelID).
-		Update("status", req.Status)
-
-	if result.Error != nil {
-		return false, xError.NewError(ctx, xError.DatabaseError, "更新渠道状态失败", false, result.Error)
+	_, found, xErr := l.repo.channel.UpdateByID(ctx, channelID, map[string]any{"status": req.Status})
+	if xErr != nil {
+		return false, xErr
 	}
-
-	if result.RowsAffected == 0 {
+	if !found {
 		return false, xError.NewError(ctx, xError.NotFound, "赞助渠道不存在", false)
 	}
-
 	return req.Status, nil
 }
 
-// Delete 删除赞助渠道
 func (l *SponsorChannelLogic) Delete(ctx *gin.Context, idStr string) *xError.Error {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 解析ID
-	channelID, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return xError.NewError(ctx, xError.BadRequest, "无效的渠道ID", false)
+	channelID, xErr := parseSponsorChannelID(ctx, idStr)
+	if xErr != nil {
+		return xErr
 	}
 
-	// 检查渠道是否存在
-	var channel entity2.SponsorChannel
-	err = db.First(&channel, "id = ?", channelID).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return xError.NewError(ctx, xError.NotFound, "赞助渠道不存在", false)
-		}
-		return xError.NewError(ctx, xError.DatabaseError, "查询赞助渠道失败", false, err)
+	_, found, xErr := l.repo.channel.GetByID(ctx, channelID)
+	if xErr != nil {
+		return xErr
+	}
+	if !found {
+		return xError.NewError(ctx, xError.NotFound, "赞助渠道不存在", false)
 	}
 
-	// 查询关联的赞助记录数量
-	var sponsorCount int64
-	err = db.Model(&entity2.SponsorRecord{}).
-		Where("channel_id = ?", channelID).
-		Count(&sponsorCount).Error
-	if err != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "查询关联赞助记录失败", false, err)
+	sponsorCount, xErr := l.repo.channel.CountSponsorsByChannelID(ctx, channelID)
+	if xErr != nil {
+		return xErr
 	}
-
-	// 如果有关联记录，不允许删除
 	if sponsorCount > 0 {
 		return xError.NewError(ctx, xError.BadRequest, "该渠道下存在赞助记录，无法删除", false)
 	}
 
-	// 删除渠道（硬删除）
-	result := db.Unscoped().Where("id = ?", channelID).Delete(&entity2.SponsorChannel{})
-	if result.Error != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "删除赞助渠道失败", false, result.Error)
+	deleted, xErr := l.repo.channel.HardDeleteByID(ctx, channelID)
+	if xErr != nil {
+		return xErr
 	}
-
+	if !deleted {
+		return xError.NewError(ctx, xError.NotFound, "赞助渠道不存在", false)
+	}
 	return nil
 }
 
-// Get 获取赞助渠道详情
-func (l *SponsorChannelLogic) Get(ctx *gin.Context, idStr string) (*dto.SponsorChannelDetailDTO, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 解析ID
-	channelID, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.BadRequest, "无效的渠道ID", false)
+func (l *SponsorChannelLogic) Get(ctx *gin.Context, idStr string) (*apiSponsor.ChannelEntityResponse, *xError.Error) {
+	channelID, xErr := parseSponsorChannelID(ctx, idStr)
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	// 查询赞助渠道
-	var channel entity2.SponsorChannel
-	err = db.First(&channel, "id = ?", channelID).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, xError.NewError(ctx, xError.NotFound, "赞助渠道不存在", false)
-		}
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询赞助渠道失败", false, err)
+	channel, found, xErr := l.repo.channel.GetByID(ctx, channelID)
+	if xErr != nil {
+		return nil, xErr
+	}
+	if !found {
+		return nil, xError.NewError(ctx, xError.NotFound, "赞助渠道不存在", false)
 	}
 
-	// 查询赞助记录数量
-	var sponsorCount int64
-	err = db.Model(&entity2.SponsorRecord{}).Where("channel_id = ?", channelID).Count(&sponsorCount).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询赞助数量失败", false, err)
+	sponsorCount, xErr := l.repo.channel.CountSponsorsByChannelID(ctx, channelID)
+	if xErr != nil {
+		return nil, xErr
 	}
-
-	return convertChannelToDetailDTO(&channel, int(sponsorCount)), nil
+	return buildChannelEntityResponse(channel, int(sponsorCount)), nil
 }
 
-// GetList 获取赞助渠道列表（不分页）
-func (l *SponsorChannelLogic) GetList(ctx *gin.Context, req *apiSponsorChannel.ChannelListRequest) ([]dto.SponsorChannelListDTO, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 构建查询
-	query := db.Model(&entity2.SponsorChannel{})
-
-	// 应用过滤条件
+func (l *SponsorChannelLogic) GetList(ctx *gin.Context, req *apiSponsor.ChannelListRequest) ([]apiSponsor.ChannelListItemResponse, *xError.Error) {
+	listQuery := repository.SponsorChannelListQuery{
+		OnlyEnabled: req.OnlyEnabled != nil && *req.OnlyEnabled,
+		OrderBy:     stringPointerValue(req.OrderBy),
+		Order:       stringPointerValue(req.Order),
+	}
 	if req.Status != nil {
-		query = query.Where("status = ?", *req.Status)
+		listQuery.Status = req.Status
+	}
+	if req.Name != nil {
+		listQuery.Name = *req.Name
 	}
 
-	if req.OnlyEnabled != nil && *req.OnlyEnabled {
-		query = query.Where("status = ?", true)
+	channels, xErr := l.repo.channel.List(ctx, listQuery)
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	if req.Name != nil && *req.Name != "" {
-		query = query.Where("name ILIKE ?", "%"+*req.Name+"%")
+	sponsorCounts, xErr := l.repo.channel.CountSponsorsByChannelIDs(ctx, collectChannelIDs(channels))
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	// 设置排序
-	orderBy := "sort_order"
-	if req.OrderBy != nil && *req.OrderBy != "" {
-		orderBy = *req.OrderBy
+	resp := make([]apiSponsor.ChannelListItemResponse, 0, len(channels))
+	for _, channel := range channels {
+		resp = append(resp, buildChannelListItemResponse(&channel, int(sponsorCounts[channel.ID])))
 	}
-	order := "asc"
-	if req.Order != nil && *req.Order != "" {
-		order = *req.Order
-	}
-	query = query.Order(orderBy + " " + order)
-
-	// 执行查询
-	var channels []entity2.SponsorChannel
-	err := query.Find(&channels).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询赞助渠道列表失败", false, err)
-	}
-
-	// 批量查询赞助记录数量
-	channelIDs := make([]int64, len(channels))
-	for i, channel := range channels {
-		channelIDs[i] = channel.ID
-	}
-
-	sponsorCounts := make(map[int64]int64)
-	if len(channelIDs) > 0 {
-		var countResults []struct {
-			ChannelID int64 `gorm:"column:channel_id"`
-			Count     int64 `gorm:"column:count"`
-		}
-
-		err = db.
-			Model(&entity2.SponsorRecord{}).
-			Select("channel_id, COUNT(*) as count").
-			Where("channel_id IN ?", channelIDs).
-			Group("channel_id").
-			Find(&countResults).Error
-		if err != nil {
-			return nil, xError.NewError(ctx, xError.DatabaseError, "查询赞助数量失败", false, err)
-		}
-
-		for _, result := range countResults {
-			sponsorCounts[result.ChannelID] = result.Count
-		}
-	}
-
-	// 转换为DTO
-	channelDTOs := make([]dto.SponsorChannelListDTO, len(channels))
-	for i, channel := range channels {
-		channelDTOs[i] = convertChannelToListDTO(&channel, int(sponsorCounts[channel.ID]))
-	}
-
-	return channelDTOs, nil
+	return resp, nil
 }
 
-// GetPage 获取赞助渠道分页列表
-func (l *SponsorChannelLogic) GetPage(ctx *gin.Context, req *apiSponsorChannel.ChannelPageRequest) (*base.PaginationResponse[dto.SponsorChannelNormalDTO], *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 设置默认值
+func (l *SponsorChannelLogic) GetPage(ctx *gin.Context, req *apiSponsor.ChannelPageRequest) (*base.PaginationResponse[apiSponsor.ChannelEntityResponse], *xError.Error) {
 	if req.Page <= 0 {
 		req.Page = 1
 	}
@@ -316,159 +210,79 @@ func (l *SponsorChannelLogic) GetPage(ctx *gin.Context, req *apiSponsorChannel.C
 		req.PageSize = 10
 	}
 
-	// 构建查询
-	query := db.Model(&entity2.SponsorChannel{})
-
-	// 应用过滤条件
+	pageQuery := repository.SponsorChannelPageQuery{
+		Page:     req.Page,
+		PageSize: req.PageSize,
+		OrderBy:  stringPointerValue(req.OrderBy),
+		Order:    stringPointerValue(req.Order),
+	}
 	if req.Status != nil {
-		query = query.Where("status = ?", *req.Status)
+		pageQuery.Status = req.Status
+	}
+	if req.Name != nil {
+		pageQuery.Name = *req.Name
 	}
 
-	if req.Name != nil && *req.Name != "" {
-		query = query.Where("name ILIKE ?", "%"+*req.Name+"%")
+	channels, total, xErr := l.repo.channel.Page(ctx, pageQuery)
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	// 统计总数
-	var total int64
-	err := query.Count(&total).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "统计赞助渠道数量失败", false, err)
+	sponsorCounts, xErr := l.repo.channel.CountSponsorsByChannelIDs(ctx, collectChannelIDs(channels))
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	// 设置排序
-	orderBy := "sort_order"
-	if req.OrderBy != nil && *req.OrderBy != "" {
-		orderBy = *req.OrderBy
-	}
-	order := "asc"
-	if req.Order != nil && *req.Order != "" {
-		order = *req.Order
-	}
-	query = query.Order(orderBy + " " + order)
-
-	// 分页查询
-	var channels []entity2.SponsorChannel
-	offset := (req.Page - 1) * req.PageSize
-	err = query.Offset(offset).Limit(req.PageSize).Find(&channels).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询赞助渠道列表失败", false, err)
-	}
-
-	// 批量查询赞助记录数量
-	channelIDs := make([]int64, len(channels))
-	for i, channel := range channels {
-		channelIDs[i] = channel.ID
-	}
-
-	sponsorCounts := make(map[int64]int64)
-	if len(channelIDs) > 0 {
-		var countResults []struct {
-			ChannelID int64 `gorm:"column:channel_id"`
-			Count     int64 `gorm:"column:count"`
-		}
-
-		err = db.
-			Model(&entity2.SponsorRecord{}).
-			Select("channel_id, COUNT(*) as count").
-			Where("channel_id IN ?", channelIDs).
-			Group("channel_id").
-			Find(&countResults).Error
-		if err != nil {
-			return nil, xError.NewError(ctx, xError.DatabaseError, "查询赞助数量失败", false, err)
-		}
-
-		for _, result := range countResults {
-			sponsorCounts[result.ChannelID] = result.Count
+	resp := make([]apiSponsor.ChannelEntityResponse, 0, len(channels))
+	for _, channel := range channels {
+		item := buildChannelEntityResponse(&channel, int(sponsorCounts[channel.ID]))
+		if item != nil {
+			resp = append(resp, *item)
 		}
 	}
 
-	// 转换为DTO
-	channelDTOs := make([]dto.SponsorChannelNormalDTO, len(channels))
-	for i, channel := range channels {
-		channelDTOs[i] = convertChannelToNormalDTO(&channel, int(sponsorCounts[channel.ID]))
-	}
-
-	return base.NewPaginationResponse(channelDTOs, req.Page, req.PageSize, total), nil
+	return base.NewPaginationResponse(resp, req.Page, req.PageSize, total), nil
 }
 
-// GetPublicList 获取公开的赞助渠道列表（仅返回启用状态的渠道）
-func (l *SponsorChannelLogic) GetPublicList(ctx *gin.Context) ([]dto.SponsorChannelListDTO, *xError.Error) {
-	// 获取数据库连接
-	db := xCtxUtil.MustGetDB(ctx)
-
-	// 构建查询：只查询启用状态的渠道
-	query := db.Model(&entity2.SponsorChannel{}).
-		Where("status = ?", true).
-		Order("sort_order asc")
-
-	// 执行查询
-	var channels []entity2.SponsorChannel
-	err := query.Find(&channels).Error
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询公开渠道列表失败", false, err)
+func (l *SponsorChannelLogic) GetPublicList(ctx *gin.Context) ([]apiSponsor.ChannelListItemResponse, *xError.Error) {
+	channels, xErr := l.repo.channel.PublicList(ctx)
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	// 批量查询赞助记录数量
-	channelIDs := make([]int64, len(channels))
-	for i, channel := range channels {
-		channelIDs[i] = channel.ID
+	sponsorCounts, xErr := l.repo.channel.CountSponsorsByChannelIDs(ctx, collectChannelIDs(channels))
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	sponsorCounts := make(map[int64]int64)
-	if len(channelIDs) > 0 {
-		var countResults []struct {
-			ChannelID int64 `gorm:"column:channel_id"`
-			Count     int64 `gorm:"column:count"`
-		}
-
-		err = db.
-			Model(&entity2.SponsorRecord{}).
-			Select("channel_id, COUNT(*) as count").
-			Where("channel_id IN ?", channelIDs).
-			Group("channel_id").
-			Find(&countResults).Error
-		if err != nil {
-			return nil, xError.NewError(ctx, xError.DatabaseError, "查询赞助数量失败", false, err)
-		}
-
-		for _, result := range countResults {
-			sponsorCounts[result.ChannelID] = result.Count
-		}
+	resp := make([]apiSponsor.ChannelListItemResponse, 0, len(channels))
+	for _, channel := range channels {
+		resp = append(resp, buildChannelListItemResponse(&channel, int(sponsorCounts[channel.ID])))
 	}
-
-	// 转换为DTO
-	channelDTOs := make([]dto.SponsorChannelListDTO, len(channels))
-	for i, channel := range channels {
-		channelDTOs[i] = convertChannelToListDTO(&channel, int(sponsorCounts[channel.ID]))
-	}
-
-	return channelDTOs, nil
+	return resp, nil
 }
 
-// 辅助函数：将赞助渠道实体转换为详细DTO
-func convertChannelToDetailDTO(channel *entity2.SponsorChannel, sponsorCount int) *dto.SponsorChannelDetailDTO {
+func parseSponsorChannelID(ctx *gin.Context, idStr string) (int64, *xError.Error) {
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return 0, xError.NewError(ctx, xError.BadRequest, "无效的渠道ID", false)
+	}
+	return id, nil
+}
+
+func collectChannelIDs(channels []entity.SponsorChannel) []int64 {
+	ids := make([]int64, 0, len(channels))
+	for _, item := range channels {
+		ids = append(ids, item.ID)
+	}
+	return ids
+}
+
+func buildChannelEntityResponse(channel *entity.SponsorChannel, sponsorCount int) *apiSponsor.ChannelEntityResponse {
 	if channel == nil {
 		return nil
 	}
-
-	return &dto.SponsorChannelDetailDTO{
-		SponsorChannelNormalDTO: dto.SponsorChannelNormalDTO{
-			ID:           channel.ID,
-			Name:         channel.Name,
-			Icon:         channel.Icon,
-			Description:  channel.Description,
-			SortOrder:    channel.SortOrder,
-			Status:       channel.Status,
-			SponsorCount: sponsorCount,
-			CreatedAt:    channel.CreatedAt,
-			UpdatedAt:    channel.UpdatedAt,
-		},
-	}
-}
-
-// 辅助函数：将赞助渠道实体转换为标准DTO
-func convertChannelToNormalDTO(channel *entity2.SponsorChannel, sponsorCount int) dto.SponsorChannelNormalDTO {
-	return dto.SponsorChannelNormalDTO{
+	return &apiSponsor.ChannelEntityResponse{
 		ID:           channel.ID,
 		Name:         channel.Name,
 		Icon:         channel.Icon,
@@ -481,9 +295,8 @@ func convertChannelToNormalDTO(channel *entity2.SponsorChannel, sponsorCount int
 	}
 }
 
-// 辅助函数：将赞助渠道实体转换为列表DTO
-func convertChannelToListDTO(channel *entity2.SponsorChannel, sponsorCount int) dto.SponsorChannelListDTO {
-	return dto.SponsorChannelListDTO{
+func buildChannelListItemResponse(channel *entity.SponsorChannel, sponsorCount int) apiSponsor.ChannelListItemResponse {
+	return apiSponsor.ChannelListItemResponse{
 		ID:           channel.ID,
 		Name:         channel.Name,
 		Icon:         channel.Icon,
@@ -491,4 +304,11 @@ func convertChannelToListDTO(channel *entity2.SponsorChannel, sponsorCount int) 
 		Status:       channel.Status,
 		SponsorCount: sponsorCount,
 	}
+}
+
+func stringPointerValue(v *string) string {
+	if v == nil {
+		return ""
+	}
+	return *v
 }

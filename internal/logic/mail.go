@@ -17,7 +17,7 @@ import (
 	"time"
 
 	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
-	dtoRedis "github.com/bamboo-services/bamboo-main/internal/models/dto/redis"
+	redisModel "github.com/bamboo-services/bamboo-main/internal/models/cache/redis"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
@@ -84,7 +84,7 @@ func (m *MailLogic) ListTemplates() ([]string, error) {
 // 返回值:
 //   - 错误信息
 func (m *MailLogic) SendMail(ctx *gin.Context, to []string, subject, body string) *xError.Error {
-	task := &dtoRedis.MailTaskDTO{
+	task := &redisModel.MailTask{
 		ID:           uuid.New().String(),
 		TemplateName: "",
 		To:           to,
@@ -117,7 +117,7 @@ func (m *MailLogic) SendMail(ctx *gin.Context, to []string, subject, body string
 // 返回值:
 //   - 错误信息
 func (m *MailLogic) SendMailWithCC(ctx *gin.Context, to, cc []string, subject, body string) *xError.Error {
-	task := &dtoRedis.MailTaskDTO{
+	task := &redisModel.MailTask{
 		ID:           uuid.New().String(),
 		TemplateName: "",
 		To:           to,
@@ -159,7 +159,7 @@ func (m *MailLogic) SendWithTemplate(ctx *gin.Context, templateName string, to [
 	}
 
 	// 构建任务
-	task := &dtoRedis.MailTaskDTO{
+	task := &redisModel.MailTask{
 		ID:           uuid.New().String(),
 		TemplateName: templateName,
 		To:           to,
@@ -204,7 +204,7 @@ func (m *MailLogic) SendWithTemplateAndCC(ctx *gin.Context, templateName string,
 	}
 
 	// 构建任务
-	task := &dtoRedis.MailTaskDTO{
+	task := &redisModel.MailTask{
 		ID:           uuid.New().String(),
 		TemplateName: templateName,
 		To:           to,
@@ -230,7 +230,7 @@ func (m *MailLogic) SendWithTemplateAndCC(ctx *gin.Context, templateName string,
 }
 
 // enqueueMailTask 将邮件任务加入 Redis 队列
-func (m *MailLogic) enqueueMailTask(ctx *gin.Context, task *dtoRedis.MailTaskDTO) error {
+func (m *MailLogic) enqueueMailTask(ctx *gin.Context, task *redisModel.MailTask) error {
 	rdb := ctxUtil.GetRedisClient(ctx)
 	if rdb == nil {
 		return fmt.Errorf("Redis 客户端不可用")
@@ -243,7 +243,7 @@ func (m *MailLogic) enqueueMailTask(ctx *gin.Context, task *dtoRedis.MailTaskDTO
 	}
 
 	// LPUSH 入队（左进右出，FIFO）
-	err = rdb.LPush(ctx.Request.Context(), constants.MailQueueKey, taskJSON).Err()
+	err = rdb.LPush(ctx.Request.Context(), constants.RedisMailQueue.Get().String(), taskJSON).Err()
 	if err != nil {
 		return fmt.Errorf("邮件任务入队失败: %w", err)
 	}

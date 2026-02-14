@@ -45,7 +45,7 @@ func (h *LinkColorHandler) Add(c *gin.Context) {
 		return
 	}
 
-	resp := apiLinkColor.ColorAddResponse{LinkColorDetailDTO: *color}
+	resp := apiLinkColor.ColorAddResponse{LinkColor: *color}
 	xResult.SuccessHasData(c, "友链颜色添加成功", resp)
 }
 
@@ -79,7 +79,7 @@ func (h *LinkColorHandler) Update(c *gin.Context) {
 		return
 	}
 
-	resp := apiLinkColor.ColorUpdateResponse{LinkColorDetailDTO: *color}
+	resp := apiLinkColor.ColorUpdateResponse{LinkColor: *color}
 	xResult.SuccessHasData(c, "友链颜色更新成功", resp)
 }
 
@@ -213,7 +213,7 @@ func (h *LinkColorHandler) Get(c *gin.Context) {
 		return
 	}
 
-	resp := apiLinkColor.ColorDetailResponse{LinkColorDetailDTO: *color}
+	resp := apiLinkColor.ColorDetailResponse{LinkColor: *color}
 	xResult.SuccessHasData(c, "获取友链颜色详情成功", resp)
 }
 
@@ -230,7 +230,7 @@ func (h *LinkColorHandler) Get(c *gin.Context) {
 // @Param only_enabled query bool false "仅查询启用的颜色"
 // @Param order_by query string false "排序字段（name, sort_order, created_at）"
 // @Param order query string false "排序方向（asc, desc）"
-// @Success 200 {object} []dto.LinkColorListDTO "获取成功"
+// @Success 200 {object} []entity.LinkColor "获取成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
 // @Failure 401 {object} map[string]interface{} "未认证"
 // @Failure 500 {object} map[string]interface{} "服务器内部错误"

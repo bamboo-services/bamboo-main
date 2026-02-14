@@ -49,7 +49,7 @@ func (h *SponsorRecordHandler) Add(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	resp := apiSponsorRecord.RecordAddResponse{SponsorRecordDetailDTO: *record}
+	resp := apiSponsorRecord.RecordAddResponse{RecordEntityResponse: *record}
 	xResult.SuccessHasData(c, "赞助记录添加成功", resp)
 }
 
@@ -87,7 +87,7 @@ func (h *SponsorRecordHandler) Update(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	resp := apiSponsorRecord.RecordUpdateResponse{SponsorRecordDetailDTO: *record}
+	resp := apiSponsorRecord.RecordUpdateResponse{RecordEntityResponse: *record}
 	xResult.SuccessHasData(c, "赞助记录更新成功", resp)
 }
 
@@ -147,7 +147,7 @@ func (h *SponsorRecordHandler) Get(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	resp := apiSponsorRecord.RecordDetailResponse{SponsorRecordDetailDTO: *record}
+	resp := apiSponsorRecord.RecordDetailResponse{RecordEntityResponse: *record}
 	xResult.SuccessHasData(c, "获取赞助记录详情成功", resp)
 }
 

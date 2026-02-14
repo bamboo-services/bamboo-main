@@ -1,16 +1,16 @@
 # Repository Guidelines
 
 ## 项目结构与模块组织
-- `main.go` 为 Gin 入口，组合 `pkg/startup` 完成配置、数据库、Redis 与默认用户初始化。
-- `internal/router` 注册路由；`internal/handler` 处理 HTTP 请求；`internal/logic` 封装业务流程；`internal/service` 访问数据库/Redis（含 helper）；`internal/model/{entity,dto,request,base}` 管理数据结构与配置模型。
-- `pkg/util` 公共工具与上下文辅助，`pkg/constants` 维护常量，`pkg/startup` 存放启动期注册逻辑。
-- `configs/config.yaml` 为本地样例配置；`docs/` 生成的 Swagger 规范；`logs/` 为运行日志输出目录。仓库根下的 `bamboo-main` 是已编译二进制，不应提交新版。
+- `main.go` 为 Gin 入口，组合 `internal/app/startup` 完成配置、数据库、Redis 与默认数据初始化，并通过 Runner 挂载常驻 worker。
+- `internal/app/route` 注册路由；`internal/handler` 处理 HTTP 请求；`internal/logic` 封装业务流程；`internal/repository` 访问数据库/Redis（含 cache 生命周期管理）。
+- `internal/models/base` 管理配置结构；数据库实体放在 `internal/entity`。
+- 配置采用 `.env` 环境变量方案；`docs/` 生成的 Swagger 规范；`logs/` 为运行日志输出目录。仓库根下的 `bamboo-main` 是已编译二进制，不应提交新版。
 
 ## 开发、构建与运行
 - 需要 Go 1.24+，并确保 `go.mod` 的 `replace github.com/bamboo-services/bamboo-base-go => ../bamboo-base` 指向可用路径。
 - 安装依赖：`go mod tidy`。
 - 构建：`go build ./...`（生成二进制 `bamboo-main`）。
-- 运行：`go run main.go`（读取 `configs/config.yaml`，默认端口 23333）。
+- 运行：`go run main.go`（读取环境变量；可复制 `.env.example` 为 `.env`）。
 - 测试：`go test ./...`；表驱动写法优先，必要时使用 `httptest` 针对 Gin 路由。
 - 若修改 API 注解，需要 `swag init -g main.go -o docs`（需预装 `github.com/swaggo/swag/cmd/swag@latest`）。
 
@@ -31,5 +31,5 @@
 - PR 描述需包含：变更摘要、关联 Issue/需求编号、主要测试步骤与结果、接口变更示例（如 curl/响应示例），以及潜在风险或回滚方式。涉及配置改动请标注新增键及默认值。
 
 ## 配置与安全提示
-- 默认配置位于 `configs/config.yaml`；生产环境请改用私有配置文件或环境变量，勿提交真实凭证。调试标志 `xlf.debug` 开启详细日志，发布前保持关闭。
+- 默认配置来源为环境变量（本地可使用 `.env`）；生产环境请改用私有配置文件或环境变量，勿提交真实凭证。调试标志 `XLF_DEBUG` 开启详细日志，发布前保持关闭。
 - PostgreSQL/Redis 连接依赖 `database.*` 与 `nosql.*` 字段，请确保端口可达；邮件配置为空时相关功能将被跳过。

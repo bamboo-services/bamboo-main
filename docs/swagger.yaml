@@ -25,7 +25,7 @@ definitions:
       token:
         type: string
       user:
-        $ref: '#/definitions/dto.SystemUserDetailDTO'
+        $ref: '#/definitions/entity.SystemUser'
     type: object
   apiAuth.LogoutResponse:
     properties:
@@ -100,51 +100,18 @@ definitions:
       token:
         type: string
       user:
-        $ref: '#/definitions/dto.SystemUserDetailDTO'
+        $ref: '#/definitions/entity.SystemUser'
     type: object
   apiAuth.UserInfoResponse:
     properties:
-      avatar:
-        description: 头像
-        type: string
-      created_at:
-        description: 创建时间
-        type: string
-      email:
-        description: 邮箱
-        type: string
-      email_verify:
-        description: 邮箱验证状态
-        type: boolean
-      id:
-        description: 用户主键
-        type: integer
-      last_login_at:
-        description: 最后登录时间
-        type: string
-      nickname:
-        description: 昵称
-        type: string
-      role:
-        description: 角色
-        type: string
-      status:
-        description: 状态
-        type: integer
-      updated_at:
-        description: 更新时间
-        type: string
-      username:
-        description: 用户名
-        type: string
+      user:
+        $ref: '#/definitions/entity.SystemUser'
     type: object
   apiInfo.AboutResponse:
     properties:
       content:
-        description: 自我介绍内容（Markdown格式）
         type: string
       updated_at:
-        description: 最后更新时间
         type: string
     type: object
   apiInfo.AboutUpdateRequest:
@@ -162,16 +129,12 @@ definitions:
   apiInfo.SiteResponse:
     properties:
       introduction:
-        description: 主页介绍
         type: string
       site_description:
-        description: 站点描述
         type: string
       site_name:
-        description: 站点名字
         type: string
       updated_at:
-        description: 最后更新时间
         type: string
     type: object
   apiInfo.SiteUpdateRequest:
@@ -234,15 +197,12 @@ definitions:
         description: 悬停颜色
         type: string
       id:
-        description: 颜色主键
+        description: ID 使用 Snowflake ID 作为主键
         type: integer
-      link_count:
-        description: 使用此颜色的友链数量
-        type: integer
-      links:
-        description: 关联信息
+      links_f_key:
+        description: 关联关系
         items:
-          $ref: '#/definitions/dto.LinkFriendSimpleDTO'
+          $ref: '#/definitions/entity.LinkFriend'
         type: array
       name:
         description: 颜色名称
@@ -251,20 +211,17 @@ definitions:
         description: 主颜色
         type: string
       sort_order:
-        description: 排序
+        description: 颜色排序
         type: integer
       status:
-        description: '状态（0: 禁用, 1: 启用）'
-        type: integer
+        description: 颜色状态
+        type: boolean
       sub_color:
         description: 副颜色
         type: string
       type:
-        description: '颜色类型（0: 普通, 1: 炫彩）'
+        description: 颜色类型
         type: integer
-      type_text:
-        description: 颜色类型文本
-        type: string
       updated_at:
         description: 更新时间
         type: string
@@ -293,7 +250,7 @@ definitions:
       links:
         description: 冲突的友链列表（前10个）
         items:
-          $ref: '#/definitions/dto.LinkColorDeleteConflictDTO'
+          $ref: '#/definitions/entity.LinkFriend'
         type: array
       message:
         description: 错误消息
@@ -313,15 +270,12 @@ definitions:
         description: 悬停颜色
         type: string
       id:
-        description: 颜色主键
+        description: ID 使用 Snowflake ID 作为主键
         type: integer
-      link_count:
-        description: 使用此颜色的友链数量
-        type: integer
-      links:
-        description: 关联信息
+      links_f_key:
+        description: 关联关系
         items:
-          $ref: '#/definitions/dto.LinkFriendSimpleDTO'
+          $ref: '#/definitions/entity.LinkFriend'
         type: array
       name:
         description: 颜色名称
@@ -330,20 +284,17 @@ definitions:
         description: 主颜色
         type: string
       sort_order:
-        description: 排序
+        description: 颜色排序
         type: integer
       status:
-        description: '状态（0: 禁用, 1: 启用）'
-        type: integer
+        description: 颜色状态
+        type: boolean
       sub_color:
         description: 副颜色
         type: string
       type:
-        description: '颜色类型（0: 普通, 1: 炫彩）'
+        description: 颜色类型
         type: integer
-      type_text:
-        description: 颜色类型文本
-        type: string
       updated_at:
         description: 更新时间
         type: string
@@ -353,7 +304,7 @@ definitions:
       data:
         description: 数据列表
         items:
-          $ref: '#/definitions/dto.LinkColorNormalDTO'
+          $ref: '#/definitions/entity.LinkColor'
         type: array
       pagination:
         allOf:
@@ -441,15 +392,12 @@ definitions:
         description: 悬停颜色
         type: string
       id:
-        description: 颜色主键
+        description: ID 使用 Snowflake ID 作为主键
         type: integer
-      link_count:
-        description: 使用此颜色的友链数量
-        type: integer
-      links:
-        description: 关联信息
+      links_f_key:
+        description: 关联关系
         items:
-          $ref: '#/definitions/dto.LinkFriendSimpleDTO'
+          $ref: '#/definitions/entity.LinkFriend'
         type: array
       name:
         description: 颜色名称
@@ -458,20 +406,17 @@ definitions:
         description: 主颜色
         type: string
       sort_order:
-        description: 排序
+        description: 颜色排序
         type: integer
       status:
-        description: '状态（0: 禁用, 1: 启用）'
-        type: integer
+        description: 颜色状态
+        type: boolean
       sub_color:
         description: 副颜色
         type: string
       type:
-        description: '颜色类型（0: 普通, 1: 炫彩）'
+        description: 颜色类型
         type: integer
-      type_text:
-        description: 颜色类型文本
-        type: string
       updated_at:
         description: 更新时间
         type: string
@@ -524,18 +469,18 @@ definitions:
   apiLink.FriendAddResponse:
     properties:
       apply_remark:
-        description: 申请备注
+        description: 申请者备注
         type: string
       avatar:
-        description: 友链头像
+        description: 友链头像URL
         type: string
-      color_id:
-        description: 颜色ID
-        type: integer
-      color_info:
+      color_f_key:
         allOf:
-        - $ref: '#/definitions/dto.LinkColorSimpleDTO'
-        description: 颜色信息（可选）
+        - $ref: '#/definitions/entity.LinkColor'
+        description: 友链颜色外键
+      color_id:
+        description: 友链颜色ID
+        type: integer
       created_at:
         description: 创建时间
         type: string
@@ -543,26 +488,23 @@ definitions:
         description: 友链描述
         type: string
       email:
-        description: 联系邮箱
+        description: 友链联系邮箱
         type: string
       fail_reason:
-        description: 失效原因
+        description: 友链失效原因
         type: string
-      failure_text:
-        description: 失效状态文本
-        type: string
+      group_f_key:
+        allOf:
+        - $ref: '#/definitions/entity.LinkGroup'
+        description: 关联关系
       group_id:
         description: 所属分组ID
         type: integer
-      group_info:
-        allOf:
-        - $ref: '#/definitions/dto.LinkGroupSimpleDTO'
-        description: 关联信息
       id:
-        description: 友链主键
+        description: ID 使用 Snowflake ID 作为主键
         type: integer
       is_failure:
-        description: 是否失效
+        description: 友链失效标志
         type: integer
       name:
         description: 友链名称
@@ -571,39 +513,36 @@ definitions:
         description: 审核备注
         type: string
       rss:
-        description: RSS地址
+        description: 友链RSS地址
         type: string
       sort_order:
-        description: 排序
+        description: 友链排序
         type: integer
       status:
         description: 友链状态
         type: integer
-      status_text:
-        description: 友链状态文本
-        type: string
       updated_at:
         description: 更新时间
         type: string
       url:
-        description: 友链地址
+        description: 友链URL地址
         type: string
     type: object
   apiLink.FriendDetailResponse:
     properties:
       apply_remark:
-        description: 申请备注
+        description: 申请者备注
         type: string
       avatar:
-        description: 友链头像
+        description: 友链头像URL
         type: string
-      color_id:
-        description: 颜色ID
-        type: integer
-      color_info:
+      color_f_key:
         allOf:
-        - $ref: '#/definitions/dto.LinkColorSimpleDTO'
-        description: 颜色信息（可选）
+        - $ref: '#/definitions/entity.LinkColor'
+        description: 友链颜色外键
+      color_id:
+        description: 友链颜色ID
+        type: integer
       created_at:
         description: 创建时间
         type: string
@@ -611,26 +550,23 @@ definitions:
         description: 友链描述
         type: string
       email:
-        description: 联系邮箱
+        description: 友链联系邮箱
         type: string
       fail_reason:
-        description: 失效原因
+        description: 友链失效原因
         type: string
-      failure_text:
-        description: 失效状态文本
-        type: string
+      group_f_key:
+        allOf:
+        - $ref: '#/definitions/entity.LinkGroup'
+        description: 关联关系
       group_id:
         description: 所属分组ID
         type: integer
-      group_info:
-        allOf:
-        - $ref: '#/definitions/dto.LinkGroupSimpleDTO'
-        description: 关联信息
       id:
-        description: 友链主键
+        description: ID 使用 Snowflake ID 作为主键
         type: integer
       is_failure:
-        description: 是否失效
+        description: 友链失效标志
         type: integer
       name:
         description: 友链名称
@@ -639,22 +575,19 @@ definitions:
         description: 审核备注
         type: string
       rss:
-        description: RSS地址
+        description: 友链RSS地址
         type: string
       sort_order:
-        description: 排序
+        description: 友链排序
         type: integer
       status:
         description: 友链状态
         type: integer
-      status_text:
-        description: 友链状态文本
-        type: string
       updated_at:
         description: 更新时间
         type: string
       url:
-        description: 友链地址
+        description: 友链URL地址
         type: string
     type: object
   apiLink.FriendFailRequest:
@@ -677,7 +610,7 @@ definitions:
       data:
         description: 数据列表
         items:
-          $ref: '#/definitions/dto.LinkFriendDetailDTO'
+          $ref: '#/definitions/entity.LinkFriend'
         type: array
       pagination:
         allOf:
@@ -688,7 +621,7 @@ definitions:
     properties:
       links:
         items:
-          $ref: '#/definitions/dto.LinkFriendDetailDTO'
+          $ref: '#/definitions/entity.LinkFriend'
         type: array
     type: object
   apiLink.FriendStatusRequest:
@@ -752,18 +685,18 @@ definitions:
   apiLink.FriendUpdateResponse:
     properties:
       apply_remark:
-        description: 申请备注
+        description: 申请者备注
         type: string
       avatar:
-        description: 友链头像
+        description: 友链头像URL
         type: string
-      color_id:
-        description: 颜色ID
-        type: integer
-      color_info:
+      color_f_key:
         allOf:
-        - $ref: '#/definitions/dto.LinkColorSimpleDTO'
-        description: 颜色信息（可选）
+        - $ref: '#/definitions/entity.LinkColor'
+        description: 友链颜色外键
+      color_id:
+        description: 友链颜色ID
+        type: integer
       created_at:
         description: 创建时间
         type: string
@@ -771,26 +704,23 @@ definitions:
         description: 友链描述
         type: string
       email:
-        description: 联系邮箱
+        description: 友链联系邮箱
         type: string
       fail_reason:
-        description: 失效原因
+        description: 友链失效原因
         type: string
-      failure_text:
-        description: 失效状态文本
-        type: string
+      group_f_key:
+        allOf:
+        - $ref: '#/definitions/entity.LinkGroup'
+        description: 关联关系
       group_id:
         description: 所属分组ID
         type: integer
-      group_info:
-        allOf:
-        - $ref: '#/definitions/dto.LinkGroupSimpleDTO'
-        description: 关联信息
       id:
-        description: 友链主键
+        description: ID 使用 Snowflake ID 作为主键
         type: integer
       is_failure:
-        description: 是否失效
+        description: 友链失效标志
         type: integer
       name:
         description: 友链名称
@@ -799,22 +729,19 @@ definitions:
         description: 审核备注
         type: string
       rss:
-        description: RSS地址
+        description: 友链RSS地址
         type: string
       sort_order:
-        description: 排序
+        description: 友链排序
         type: integer
       status:
         description: 友链状态
         type: integer
-      status_text:
-        description: 友链状态文本
-        type: string
       updated_at:
         description: 更新时间
         type: string
       url:
-        description: 友链地址
+        description: 友链URL地址
         type: string
     type: object
   apiLink.GroupAddRequest:
@@ -844,25 +771,22 @@ definitions:
         description: 分组描述
         type: string
       id:
-        description: 分组主键
+        description: ID 使用 Snowflake ID 作为主键
         type: integer
-      link_count:
-        description: 友链数量
-        type: integer
-      links:
-        description: 关联信息 - 避免循环依赖,使用独立的结构
+      links_f_key:
+        description: 关联关系
         items:
-          $ref: '#/definitions/dto.LinkFriendBasicInfo'
+          $ref: '#/definitions/entity.LinkFriend'
         type: array
       name:
         description: 分组名称
         type: string
       sort_order:
-        description: 排序
+        description: 分组排序
         type: integer
       status:
-        description: 状态
-        type: integer
+        description: 分组状态
+        type: boolean
       updated_at:
         description: 更新时间
         type: string
@@ -872,11 +796,10 @@ definitions:
       display_count:
         description: 显示的友链数量（最多10个）
         type: integer
+      group_id:
+        type: integer
       group_name:
         description: 分组名称
-        type: string
-      group_uuid:
-        description: 分组UUID
         type: string
       total_links:
         description: 总友链数量
@@ -891,7 +814,7 @@ definitions:
       links:
         description: 冲突的友链列表（前10个）
         items:
-          $ref: '#/definitions/dto.LinkGroupDeleteConflictDTO'
+          $ref: '#/definitions/entity.LinkFriend'
         type: array
       message:
         description: 错误消息
@@ -911,25 +834,22 @@ definitions:
         description: 分组描述
         type: string
       id:
-        description: 分组主键
+        description: ID 使用 Snowflake ID 作为主键
         type: integer
-      link_count:
-        description: 友链数量
-        type: integer
-      links:
-        description: 关联信息 - 避免循环依赖,使用独立的结构
+      links_f_key:
+        description: 关联关系
         items:
-          $ref: '#/definitions/dto.LinkFriendBasicInfo'
+          $ref: '#/definitions/entity.LinkFriend'
         type: array
       name:
         description: 分组名称
         type: string
       sort_order:
-        description: 排序
+        description: 分组排序
         type: integer
       status:
-        description: 状态
-        type: integer
+        description: 分组状态
+        type: boolean
       updated_at:
         description: 更新时间
         type: string
@@ -939,7 +859,7 @@ definitions:
       data:
         description: 数据列表
         items:
-          $ref: '#/definitions/dto.LinkGroupNormalDTO'
+          $ref: '#/definitions/entity.LinkGroup'
         type: array
       pagination:
         allOf:
@@ -1016,25 +936,22 @@ definitions:
         description: 分组描述
         type: string
       id:
-        description: 分组主键
+        description: ID 使用 Snowflake ID 作为主键
         type: integer
-      link_count:
-        description: 友链数量
-        type: integer
-      links:
-        description: 关联信息 - 避免循环依赖,使用独立的结构
+      links_f_key:
+        description: 关联关系
         items:
-          $ref: '#/definitions/dto.LinkFriendBasicInfo'
+          $ref: '#/definitions/entity.LinkFriend'
         type: array
       name:
         description: 分组名称
         type: string
       sort_order:
-        description: 排序
+        description: 分组排序
         type: integer
       status:
-        description: 状态
-        type: integer
+        description: 分组状态
+        type: boolean
       updated_at:
         description: 更新时间
         type: string
@@ -1126,12 +1043,95 @@ definitions:
     required:
     - name
     type: object
+  apiSponsor.ChannelAddResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      sort_order:
+        type: integer
+      sponsor_count:
+        type: integer
+      status:
+        type: boolean
+      updated_at:
+        type: string
+    type: object
+  apiSponsor.ChannelDeleteResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  apiSponsor.ChannelDetailResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      sort_order:
+        type: integer
+      sponsor_count:
+        type: integer
+      status:
+        type: boolean
+      updated_at:
+        type: string
+    type: object
+  apiSponsor.ChannelEntityResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      sort_order:
+        type: integer
+      sponsor_count:
+        type: integer
+      status:
+        type: boolean
+      updated_at:
+        type: string
+    type: object
+  apiSponsor.ChannelListItemResponse:
+    properties:
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      sort_order:
+        type: integer
+      sponsor_count:
+        type: integer
+      status:
+        type: boolean
+    type: object
   apiSponsor.ChannelPageResponse:
     properties:
       data:
         description: 数据列表
         items:
-          $ref: '#/definitions/dto.SponsorChannelNormalDTO'
+          $ref: '#/definitions/apiSponsor.ChannelEntityResponse'
         type: array
       pagination:
         allOf:
@@ -1143,6 +1143,14 @@ definitions:
       status:
         description: 状态:true=启用,false=禁用
         example: true
+        type: boolean
+    type: object
+  apiSponsor.ChannelStatusResponse:
+    properties:
+      message:
+        type: string
+      status:
+        description: 更新后的状态
         type: boolean
     type: object
   apiSponsor.ChannelUpdateRequest:
@@ -1168,6 +1176,27 @@ definitions:
         example: 0
         minimum: 0
         type: integer
+    type: object
+  apiSponsor.ChannelUpdateResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      sort_order:
+        type: integer
+      sponsor_count:
+        type: integer
+      status:
+        type: boolean
+      updated_at:
+        type: string
     type: object
   apiSponsor.RecordAddRequest:
     properties:
@@ -1220,44 +1249,30 @@ definitions:
   apiSponsor.RecordAddResponse:
     properties:
       amount:
-        description: 赞助金额
         type: integer
       channel:
-        allOf:
-        - $ref: '#/definitions/dto.SponsorChannelSimpleDTO'
-        description: 赞助渠道
+        $ref: '#/definitions/apiSponsor.SponsorChannelSimpleResponse'
       channel_id:
-        description: 渠道ID
         type: integer
       created_at:
-        description: 创建时间
         type: string
       id:
-        description: 赞助记录主键
         type: integer
       is_anonymous:
-        description: 是否匿名
         type: boolean
       is_hidden:
-        description: 是否隐藏
         type: boolean
       message:
-        description: 赞助留言
         type: string
       nickname:
-        description: 赞助者昵称
         type: string
       redirect_url:
-        description: 跳转链接
         type: string
       sort_order:
-        description: 排序
         type: integer
       sponsor_at:
-        description: 赞助时间
         type: string
       updated_at:
-        description: 更新时间
         type: string
     type: object
   apiSponsor.RecordDeleteResponse:
@@ -1268,44 +1283,59 @@ definitions:
   apiSponsor.RecordDetailResponse:
     properties:
       amount:
-        description: 赞助金额
         type: integer
       channel:
-        allOf:
-        - $ref: '#/definitions/dto.SponsorChannelSimpleDTO'
-        description: 赞助渠道
+        $ref: '#/definitions/apiSponsor.SponsorChannelSimpleResponse'
       channel_id:
-        description: 渠道ID
         type: integer
       created_at:
-        description: 创建时间
         type: string
       id:
-        description: 赞助记录主键
         type: integer
       is_anonymous:
-        description: 是否匿名
         type: boolean
       is_hidden:
-        description: 是否隐藏
         type: boolean
       message:
-        description: 赞助留言
         type: string
       nickname:
-        description: 赞助者昵称
         type: string
       redirect_url:
-        description: 跳转链接
         type: string
       sort_order:
-        description: 排序
         type: integer
       sponsor_at:
-        description: 赞助时间
         type: string
       updated_at:
-        description: 更新时间
+        type: string
+    type: object
+  apiSponsor.RecordEntityResponse:
+    properties:
+      amount:
+        type: integer
+      channel:
+        $ref: '#/definitions/apiSponsor.SponsorChannelSimpleResponse'
+      channel_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_anonymous:
+        type: boolean
+      is_hidden:
+        type: boolean
+      message:
+        type: string
+      nickname:
+        type: string
+      redirect_url:
+        type: string
+      sort_order:
+        type: integer
+      sponsor_at:
+        type: string
+      updated_at:
         type: string
     type: object
   apiSponsor.RecordPageResponse:
@@ -1313,19 +1343,36 @@ definitions:
       data:
         description: 数据列表
         items:
-          $ref: '#/definitions/dto.SponsorRecordNormalDTO'
+          $ref: '#/definitions/apiSponsor.RecordEntityResponse'
         type: array
       pagination:
         allOf:
         - $ref: '#/definitions/base.PaginationInfo'
         description: 分页信息
     type: object
+  apiSponsor.RecordPublicItemResponse:
+    properties:
+      amount:
+        type: integer
+      channel:
+        $ref: '#/definitions/apiSponsor.SponsorChannelSimpleResponse'
+      id:
+        type: integer
+      message:
+        type: string
+      nickname:
+        type: string
+      redirect_url:
+        type: string
+      sponsor_at:
+        type: string
+    type: object
   apiSponsor.RecordPublicPageResponse:
     properties:
       data:
         description: 数据列表
         items:
-          $ref: '#/definitions/dto.SponsorRecordSimpleDTO'
+          $ref: '#/definitions/apiSponsor.RecordPublicItemResponse'
         type: array
       pagination:
         allOf:
@@ -1380,44 +1427,39 @@ definitions:
   apiSponsor.RecordUpdateResponse:
     properties:
       amount:
-        description: 赞助金额
         type: integer
       channel:
-        allOf:
-        - $ref: '#/definitions/dto.SponsorChannelSimpleDTO'
-        description: 赞助渠道
+        $ref: '#/definitions/apiSponsor.SponsorChannelSimpleResponse'
       channel_id:
-        description: 渠道ID
         type: integer
       created_at:
-        description: 创建时间
         type: string
       id:
-        description: 赞助记录主键
         type: integer
       is_anonymous:
-        description: 是否匿名
         type: boolean
       is_hidden:
-        description: 是否隐藏
         type: boolean
       message:
-        description: 赞助留言
         type: string
       nickname:
-        description: 赞助者昵称
         type: string
       redirect_url:
-        description: 跳转链接
         type: string
       sort_order:
-        description: 排序
         type: integer
       sponsor_at:
-        description: 赞助时间
         type: string
       updated_at:
-        description: 更新时间
+        type: string
+    type: object
+  apiSponsor.SponsorChannelSimpleResponse:
+    properties:
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
         type: string
     type: object
   base.PaginationInfo:
@@ -1441,49 +1483,7 @@ definitions:
         description: 总页数
         type: integer
     type: object
-  dto.LinkColorDeleteConflictDTO:
-    properties:
-      id:
-        description: 友链ID
-        type: integer
-      name:
-        description: 友链名称
-        type: string
-      url:
-        description: 友链地址
-        type: string
-    type: object
-  dto.LinkColorListDTO:
-    properties:
-      hover_color:
-        description: 悬停颜色
-        type: string
-      id:
-        description: 颜色主键
-        type: integer
-      link_count:
-        description: 使用此颜色的友链数量
-        type: integer
-      name:
-        description: 颜色名称
-        type: string
-      primary_color:
-        description: 主颜色
-        type: string
-      sort_order:
-        description: 排序
-        type: integer
-      status:
-        description: 状态
-        type: integer
-      sub_color:
-        description: 副颜色
-        type: string
-      type:
-        description: '颜色类型（0: 普通, 1: 炫彩）'
-        type: integer
-    type: object
-  dto.LinkColorNormalDTO:
+  entity.LinkColor:
     properties:
       created_at:
         description: 创建时间
@@ -1492,11 +1492,13 @@ definitions:
         description: 悬停颜色
         type: string
       id:
-        description: 颜色主键
+        description: ID 使用 Snowflake ID 作为主键
         type: integer
-      link_count:
-        description: 使用此颜色的友链数量
-        type: integer
+      links_f_key:
+        description: 关联关系
+        items:
+          $ref: '#/definitions/entity.LinkFriend'
+        type: array
       name:
         description: 颜色名称
         type: string
@@ -1504,75 +1506,36 @@ definitions:
         description: 主颜色
         type: string
       sort_order:
-        description: 排序
+        description: 颜色排序
         type: integer
       status:
-        description: '状态（0: 禁用, 1: 启用）'
-        type: integer
+        description: 颜色状态
+        type: boolean
       sub_color:
         description: 副颜色
         type: string
       type:
-        description: '颜色类型（0: 普通, 1: 炫彩）'
+        description: 颜色类型
         type: integer
-      type_text:
-        description: 颜色类型文本
-        type: string
       updated_at:
         description: 更新时间
         type: string
     type: object
-  dto.LinkColorSimpleDTO:
-    properties:
-      hover_color:
-        description: 悬停颜色
-        type: string
-      id:
-        description: 颜色主键
-        type: integer
-      name:
-        description: 颜色名称
-        type: string
-      primary_color:
-        description: 主颜色
-        type: string
-      sub_color:
-        description: 副颜色
-        type: string
-      type:
-        description: '颜色类型（0: 普通, 1: 炫彩）'
-        type: integer
-    type: object
-  dto.LinkFriendBasicInfo:
-    properties:
-      avatar:
-        description: 友链头像
-        type: string
-      id:
-        description: 友链主键
-        type: integer
-      name:
-        description: 友链名称
-        type: string
-      url:
-        description: 友链地址
-        type: string
-    type: object
-  dto.LinkFriendDetailDTO:
+  entity.LinkFriend:
     properties:
       apply_remark:
-        description: 申请备注
+        description: 申请者备注
         type: string
       avatar:
-        description: 友链头像
+        description: 友链头像URL
         type: string
-      color_id:
-        description: 颜色ID
-        type: integer
-      color_info:
+      color_f_key:
         allOf:
-        - $ref: '#/definitions/dto.LinkColorSimpleDTO'
-        description: 颜色信息（可选）
+        - $ref: '#/definitions/entity.LinkColor'
+        description: 友链颜色外键
+      color_id:
+        description: 友链颜色ID
+        type: integer
       created_at:
         description: 创建时间
         type: string
@@ -1580,26 +1543,23 @@ definitions:
         description: 友链描述
         type: string
       email:
-        description: 联系邮箱
+        description: 友链联系邮箱
         type: string
       fail_reason:
-        description: 失效原因
+        description: 友链失效原因
         type: string
-      failure_text:
-        description: 失效状态文本
-        type: string
+      group_f_key:
+        allOf:
+        - $ref: '#/definitions/entity.LinkGroup'
+        description: 关联关系
       group_id:
         description: 所属分组ID
         type: integer
-      group_info:
-        allOf:
-        - $ref: '#/definitions/dto.LinkGroupSimpleDTO'
-        description: 关联信息
       id:
-        description: 友链主键
+        description: ID 使用 Snowflake ID 作为主键
         type: integer
       is_failure:
-        description: 是否失效
+        description: 友链失效标志
         type: integer
       name:
         description: 友链名称
@@ -1608,70 +1568,22 @@ definitions:
         description: 审核备注
         type: string
       rss:
-        description: RSS地址
+        description: 友链RSS地址
         type: string
       sort_order:
-        description: 排序
+        description: 友链排序
         type: integer
       status:
         description: 友链状态
         type: integer
-      status_text:
-        description: 友链状态文本
-        type: string
       updated_at:
         description: 更新时间
         type: string
       url:
-        description: 友链地址
+        description: 友链URL地址
         type: string
     type: object
-  dto.LinkFriendSimpleDTO:
-    properties:
-      avatar:
-        description: 友链头像
-        type: string
-      id:
-        description: 友链主键
-        type: integer
-      name:
-        description: 友链名称
-        type: string
-      url:
-        description: 友链地址
-        type: string
-    type: object
-  dto.LinkGroupDeleteConflictDTO:
-    properties:
-      id:
-        description: 友链ID
-        type: integer
-      name:
-        description: 友链名称
-        type: string
-      url:
-        description: 友链地址
-        type: string
-    type: object
-  dto.LinkGroupListDTO:
-    properties:
-      id:
-        description: 分组主键
-        type: integer
-      link_count:
-        description: 友链数量
-        type: integer
-      name:
-        description: 分组名称
-        type: string
-      sort_order:
-        description: 排序
-        type: integer
-      status:
-        description: 状态
-        type: integer
-    type: object
-  dto.LinkGroupNormalDTO:
+  entity.LinkGroup:
     properties:
       created_at:
         description: 创建时间
@@ -1680,198 +1592,30 @@ definitions:
         description: 分组描述
         type: string
       id:
-        description: 分组主键
+        description: ID 使用 Snowflake ID 作为主键
         type: integer
-      link_count:
-        description: 友链数量
-        type: integer
+      links_f_key:
+        description: 关联关系
+        items:
+          $ref: '#/definitions/entity.LinkFriend'
+        type: array
       name:
         description: 分组名称
         type: string
       sort_order:
-        description: 排序
+        description: 分组排序
         type: integer
       status:
-        description: 状态
-        type: integer
-      updated_at:
-        description: 更新时间
-        type: string
-    type: object
-  dto.LinkGroupSimpleDTO:
-    properties:
-      id:
-        description: 分组主键
-        type: integer
-      name:
-        description: 分组名称
-        type: string
-    type: object
-  dto.SponsorChannelDetailDTO:
-    properties:
-      created_at:
-        description: 创建时间
-        type: string
-      description:
-        description: 渠道描述
-        type: string
-      icon:
-        description: 渠道图标
-        type: string
-      id:
-        description: 渠道主键
-        type: integer
-      name:
-        description: 渠道名称
-        type: string
-      sort_order:
-        description: 排序
-        type: integer
-      sponsor_count:
-        description: 关联赞助记录数
-        type: integer
-      status:
-        description: 状态
+        description: 分组状态
         type: boolean
       updated_at:
         description: 更新时间
         type: string
     type: object
-  dto.SponsorChannelListDTO:
-    properties:
-      icon:
-        description: 渠道图标
-        type: string
-      id:
-        description: 渠道主键
-        type: integer
-      name:
-        description: 渠道名称
-        type: string
-      sort_order:
-        description: 排序
-        type: integer
-      sponsor_count:
-        description: 关联赞助记录数
-        type: integer
-      status:
-        description: 状态
-        type: boolean
-    type: object
-  dto.SponsorChannelNormalDTO:
-    properties:
-      created_at:
-        description: 创建时间
-        type: string
-      description:
-        description: 渠道描述
-        type: string
-      icon:
-        description: 渠道图标
-        type: string
-      id:
-        description: 渠道主键
-        type: integer
-      name:
-        description: 渠道名称
-        type: string
-      sort_order:
-        description: 排序
-        type: integer
-      sponsor_count:
-        description: 关联赞助记录数
-        type: integer
-      status:
-        description: 状态
-        type: boolean
-      updated_at:
-        description: 更新时间
-        type: string
-    type: object
-  dto.SponsorChannelSimpleDTO:
-    properties:
-      icon:
-        description: 渠道图标
-        type: string
-      id:
-        description: 渠道主键
-        type: integer
-      name:
-        description: 渠道名称
-        type: string
-    type: object
-  dto.SponsorRecordNormalDTO:
-    properties:
-      amount:
-        description: 赞助金额
-        type: integer
-      channel:
-        allOf:
-        - $ref: '#/definitions/dto.SponsorChannelSimpleDTO'
-        description: 赞助渠道
-      channel_id:
-        description: 渠道ID
-        type: integer
-      created_at:
-        description: 创建时间
-        type: string
-      id:
-        description: 赞助记录主键
-        type: integer
-      is_anonymous:
-        description: 是否匿名
-        type: boolean
-      is_hidden:
-        description: 是否隐藏
-        type: boolean
-      message:
-        description: 赞助留言
-        type: string
-      nickname:
-        description: 赞助者昵称
-        type: string
-      redirect_url:
-        description: 跳转链接
-        type: string
-      sort_order:
-        description: 排序
-        type: integer
-      sponsor_at:
-        description: 赞助时间
-        type: string
-      updated_at:
-        description: 更新时间
-        type: string
-    type: object
-  dto.SponsorRecordSimpleDTO:
-    properties:
-      amount:
-        description: 赞助金额
-        type: integer
-      channel:
-        allOf:
-        - $ref: '#/definitions/dto.SponsorChannelSimpleDTO'
-        description: 赞助渠道
-      id:
-        description: 赞助记录主键
-        type: integer
-      message:
-        description: 赞助留言
-        type: string
-      nickname:
-        description: 赞助者昵称(匿名时显示"匿名用户")
-        type: string
-      redirect_url:
-        description: 跳转链接
-        type: string
-      sponsor_at:
-        description: 赞助时间
-        type: string
-    type: object
-  dto.SystemUserDetailDTO:
+  entity.SystemUser:
     properties:
       avatar:
-        description: 头像
+        description: 头像URL
         type: string
       created_at:
         description: 创建时间
@@ -1883,7 +1627,7 @@ definitions:
         description: 邮箱验证状态
         type: boolean
       id:
-        description: 用户主键
+        description: ID 使用 Snowflake ID 作为主键
         type: integer
       last_login_at:
         description: 最后登录时间
@@ -2245,7 +1989,7 @@ paths:
           description: 获取成功
           schema:
             items:
-              $ref: '#/definitions/dto.LinkColorListDTO'
+              $ref: '#/definitions/entity.LinkColor'
             type: array
         "400":
           description: 请求参数错误
@@ -2637,7 +2381,7 @@ paths:
           description: 获取成功
           schema:
             items:
-              $ref: '#/definitions/dto.LinkGroupListDTO'
+              $ref: '#/definitions/entity.LinkGroup'
             type: array
         "400":
           description: 请求参数错误
@@ -3205,7 +2949,7 @@ paths:
         "200":
           description: 添加成功
           schema:
-            $ref: '#/definitions/dto.SponsorChannelDetailDTO'
+            $ref: '#/definitions/apiSponsor.ChannelAddResponse'
         "400":
           description: 请求参数错误
           schema:
@@ -3244,8 +2988,7 @@ paths:
         "200":
           description: 删除成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/apiSponsor.ChannelDeleteResponse'
         "400":
           description: 请求参数错误
           schema:
@@ -3288,7 +3031,7 @@ paths:
         "200":
           description: 获取成功
           schema:
-            $ref: '#/definitions/dto.SponsorChannelDetailDTO'
+            $ref: '#/definitions/apiSponsor.ChannelDetailResponse'
         "400":
           description: 请求参数错误
           schema:
@@ -3337,7 +3080,7 @@ paths:
         "200":
           description: 更新成功
           schema:
-            $ref: '#/definitions/dto.SponsorChannelDetailDTO'
+            $ref: '#/definitions/apiSponsor.ChannelUpdateResponse'
         "400":
           description: 请求参数错误
           schema:
@@ -3387,8 +3130,7 @@ paths:
         "200":
           description: 状态更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/apiSponsor.ChannelStatusResponse'
         "400":
           description: 请求参数错误
           schema:
@@ -3447,7 +3189,7 @@ paths:
           description: 获取成功
           schema:
             items:
-              $ref: '#/definitions/dto.SponsorChannelListDTO'
+              $ref: '#/definitions/apiSponsor.ChannelListItemResponse'
             type: array
         "400":
           description: 请求参数错误
@@ -4112,7 +3854,7 @@ paths:
           description: 获取成功
           schema:
             items:
-              $ref: '#/definitions/dto.SponsorChannelListDTO'
+              $ref: '#/definitions/apiSponsor.ChannelListItemResponse'
             type: array
         "500":
           description: 服务器内部错误

@@ -1,27 +1,23 @@
 package logic
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
 	"unicode"
 
 	"github.com/bamboo-services/bamboo-main/internal/entity"
-	"github.com/bamboo-services/bamboo-main/internal/models/dto"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
 	xError "github.com/bamboo-services/bamboo-base-go/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/log"
 	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
 	"github.com/gin-gonic/gin"
 	bSdkLogic "github.com/phalanx/beacon-sso-sdk/logic"
 	bSdkModels "github.com/phalanx/beacon-sso-sdk/models"
-	"gorm.io/gorm"
 )
 
-func (a *AuthLogic) LoginByOAuth(ctx *gin.Context, userinfo *bSdkModels.OAuthUserinfo, accessToken string) (*dto.SystemUserDetailDTO, string, *time.Time, *time.Time, *xError.Error) {
+func (a *AuthLogic) LoginByOAuth(ctx *gin.Context, userinfo *bSdkModels.OAuthUserinfo, accessToken string) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
 	if accessToken == "" {
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterEmpty, "访问令牌不能为空", false)
 	}
@@ -42,7 +38,7 @@ func (a *AuthLogic) LoginByOAuth(ctx *gin.Context, userinfo *bSdkModels.OAuthUse
 		expiredAt = time.Unix(introspection.Exp, 0)
 	}
 
-	return buildSystemUserDetailDTO(user), accessToken, &now, &expiredAt, nil
+	return user, accessToken, &now, &expiredAt, nil
 }
 
 func (a *AuthLogic) SyncOAuthUser(ctx *gin.Context, userinfo *bSdkModels.OAuthUserinfo) (*entity.SystemUser, *xError.Error) {
@@ -50,42 +46,41 @@ func (a *AuthLogic) SyncOAuthUser(ctx *gin.Context, userinfo *bSdkModels.OAuthUs
 		return nil, xError.NewError(ctx, xError.ParameterError, "OAuth 用户标识无效", false)
 	}
 
-	db := xCtxUtil.MustGetDB(ctx)
-	var user entity.SystemUser
+	var user *entity.SystemUser
 	now := time.Now()
 
-	err := db.Where("oauth_user_id = ?", userinfo.Sub).First(&user).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询 OAuth 用户失败", false, err)
+	user, found, xErr := a.repo.user.GetByOAuthUserID(ctx, userinfo.Sub)
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	if err == nil {
+	if found {
 		if user.Status == constants.StatusInactive {
 			return nil, xError.NewError(ctx, xError.Forbidden, "用户已被禁用", false)
 		}
-		if xErr := a.updateOAuthProfile(ctx, db, &user, userinfo, &now); xErr != nil {
+		if xErr := a.updateOAuthProfile(ctx, user, userinfo, &now); xErr != nil {
 			return nil, xErr
 		}
-		return &user, nil
+		return user, nil
 	}
 
 	oauthEmail := strings.TrimSpace(userinfo.Email)
 	if oauthEmail != "" {
-		err = db.Where("email = ?", oauthEmail).First(&user).Error
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, xError.NewError(ctx, xError.DatabaseError, "按邮箱查询用户失败", false, err)
+		user, found, xErr = a.repo.user.GetByEmail(ctx, oauthEmail)
+		if xErr != nil {
+			return nil, xErr
 		}
-		if err == nil {
+		if found {
 			if user.Status == constants.StatusInactive {
 				return nil, xError.NewError(ctx, xError.Forbidden, "用户已被禁用", false)
 			}
 			if user.OAuthUserID != nil && *user.OAuthUserID != "" && *user.OAuthUserID != userinfo.Sub {
 				return nil, xError.NewError(ctx, xError.Unauthorized, "该本地账户已绑定其他 OAuth 用户", false)
 			}
-			if xErr := a.updateOAuthProfile(ctx, db, &user, userinfo, &now); xErr != nil {
+			if xErr := a.updateOAuthProfile(ctx, user, userinfo, &now); xErr != nil {
 				return nil, xErr
 			}
-			return &user, nil
+			return user, nil
 		}
 	}
 
@@ -95,7 +90,7 @@ func (a *AuthLogic) SyncOAuthUser(ctx *gin.Context, userinfo *bSdkModels.OAuthUs
 		return nil, xError.NewError(ctx, xError.ServerInternalError, "初始化本地账户密码失败", false, hashErr)
 	}
 
-	username, xErr := a.generateUniqueOAuthUsername(ctx, db, userinfo)
+	username, xErr := a.generateUniqueOAuthUsername(ctx, userinfo)
 	if xErr != nil {
 		return nil, xErr
 	}
@@ -114,21 +109,22 @@ func (a *AuthLogic) SyncOAuthUser(ctx *gin.Context, userinfo *bSdkModels.OAuthUs
 		LastLoginAt: &now,
 	}
 
-	if err = db.Create(&newUser).Error; err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "创建本地映射用户失败", false, err)
+	user, xErr = a.repo.user.Create(ctx, &newUser)
+	if xErr != nil {
+		return nil, xErr
 	}
 
-	return &newUser, nil
+	return user, nil
 }
 
-func (a *AuthLogic) updateOAuthProfile(ctx *gin.Context, db *gorm.DB, user *entity.SystemUser, userinfo *bSdkModels.OAuthUserinfo, now *time.Time) *xError.Error {
+func (a *AuthLogic) updateOAuthProfile(ctx *gin.Context, user *entity.SystemUser, userinfo *bSdkModels.OAuthUserinfo, now *time.Time) *xError.Error {
 	updates := map[string]any{
 		"oauth_user_id": userinfo.Sub,
 		"last_login_at": now,
 	}
 
 	if oauthEmail := strings.TrimSpace(userinfo.Email); oauthEmail != "" && oauthEmail != user.Email {
-		exists, xErr := a.emailExists(ctx, db, oauthEmail, user.ID)
+		exists, xErr := a.repo.user.ExistsByEmailExceptID(ctx, oauthEmail, user.ID)
 		if xErr != nil {
 			return xErr
 		}
@@ -148,27 +144,16 @@ func (a *AuthLogic) updateOAuthProfile(ctx *gin.Context, db *gorm.DB, user *enti
 		updates["avatar"] = avatar
 	}
 
-	if err := db.Model(user).Updates(updates).Error; err != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "更新本地映射用户失败", false, err)
+	updatedUser, xErr := a.repo.user.UpdateFieldsByID(ctx, user.ID, updates)
+	if xErr != nil {
+		return xErr
 	}
-
-	if err := db.Where("id = ?", user.ID).First(user).Error; err != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "刷新本地映射用户失败", false, err)
-	}
+	*user = *updatedUser
 
 	return nil
 }
 
-func (a *AuthLogic) emailExists(ctx *gin.Context, db *gorm.DB, email string, exceptID int64) (bool, *xError.Error) {
-	var count int64
-	err := db.Model(&entity.SystemUser{}).Where("email = ? AND id <> ?", email, exceptID).Count(&count).Error
-	if err != nil {
-		return false, xError.NewError(ctx, xError.DatabaseError, "检查邮箱唯一性失败", false, err)
-	}
-	return count > 0, nil
-}
-
-func (a *AuthLogic) generateUniqueOAuthUsername(ctx *gin.Context, db *gorm.DB, userinfo *bSdkModels.OAuthUserinfo) (string, *xError.Error) {
+func (a *AuthLogic) generateUniqueOAuthUsername(ctx *gin.Context, userinfo *bSdkModels.OAuthUserinfo) (string, *xError.Error) {
 	base := sanitizeOAuthIdentifier(userinfo.PreferredUsername)
 	if base == "" {
 		base = sanitizeOAuthIdentifier(userinfo.Nickname)
@@ -194,12 +179,11 @@ func (a *AuthLogic) generateUniqueOAuthUsername(ctx *gin.Context, db *gorm.DB, u
 			candidate += suffix
 		}
 
-		var count int64
-		err := db.Model(&entity.SystemUser{}).Where("username = ?", candidate).Count(&count).Error
-		if err != nil {
-			return "", xError.NewError(ctx, xError.DatabaseError, "检查用户名唯一性失败", false, err)
+		exists, xErr := a.repo.user.ExistsByUsername(ctx, candidate)
+		if xErr != nil {
+			return "", xErr
 		}
-		if count == 0 {
+		if !exists {
 			return candidate, nil
 		}
 	}
@@ -285,20 +269,4 @@ func sanitizeOAuthIdentifier(value string) string {
 
 	result := strings.Trim(builder.String(), "_.-")
 	return result
-}
-
-func buildSystemUserDetailDTO(user *entity.SystemUser) *dto.SystemUserDetailDTO {
-	return &dto.SystemUserDetailDTO{
-		ID:          user.ID,
-		Username:    user.Username,
-		Email:       user.Email,
-		Nickname:    user.Nickname,
-		Avatar:      user.Avatar,
-		Role:        user.Role,
-		Status:      user.Status,
-		EmailVerify: user.EmailVerify,
-		LastLoginAt: user.LastLoginAt,
-		CreatedAt:   user.CreatedAt,
-		UpdatedAt:   user.UpdatedAt,
-	}
 }
