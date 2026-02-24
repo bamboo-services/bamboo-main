@@ -17,20 +17,11 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/app/startup"
 	"github.com/bamboo-services/bamboo-main/internal/app/startup/worker"
 
-	xLog "github.com/bamboo-services/bamboo-base-go/log"
-	xMain "github.com/bamboo-services/bamboo-base-go/main"
-	xReg "github.com/bamboo-services/bamboo-base-go/register"
+	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xMain "github.com/bamboo-services/bamboo-base-go/major/main"
+	xReg "github.com/bamboo-services/bamboo-base-go/major/register"
 )
 
-// @title BambooMain
-// @version v1.0.0
-// @description 友情链接管理系统
-// @termsOfService https://www.aiawaken.top/
-// @contact.name 筱锋 xiao_lfeng
-// @contact.url https://www.x-lf.com/
-// @contact.email gm@x-lf.cn
-// @host localhost:23333
-// @BasePath /api/v1
 func main() {
 	reg := xReg.Register(startup.Init())
 	log := xLog.WithName(xLog.NamedMAIN)

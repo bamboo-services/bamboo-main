@@ -15,10 +15,10 @@ import (
 	"errors"
 	"time"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/snowflake"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	"gorm.io/gorm"
 
-	xCtx "github.com/bamboo-services/bamboo-base-go/context"
+	xCtx "github.com/bamboo-services/bamboo-base-go/defined/context"
 )
 
 // SponsorChannel 表示一个赞助渠道实体，用于管理不同的赞助来源渠道。

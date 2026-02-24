@@ -16,8 +16,8 @@ import (
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
-	xError "github.com/bamboo-services/bamboo-base-go/error"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
+	xError "github.com/bamboo-services/bamboo-base-go/common/error"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/common/utility/context"
 	"github.com/gin-gonic/gin"
 )
 

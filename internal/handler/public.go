@@ -14,7 +14,7 @@ package handler
 import (
 	apiPublic "github.com/bamboo-services/bamboo-main/api/public"
 
-	xResult "github.com/bamboo-services/bamboo-base-go/result"
+	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
 	"github.com/gin-gonic/gin"
 )
 

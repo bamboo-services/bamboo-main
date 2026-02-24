@@ -7,7 +7,7 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
-	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
+	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +21,7 @@ func (p *Prepare) prepareDefaultUser() error {
 		return err
 	}
 
-	passwordString, err := xUtil.EncryptPasswordString("xiao_lfeng")
+	passwordString, err := xUtil.Password().EncryptString("xiao_lfeng")
 	if err != nil {
 		return err
 	}

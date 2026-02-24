@@ -1,18 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "友情链接管理系统",
-        "title": "BambooMain",
-        "termsOfService": "https://www.aiawaken.top/",
-        "contact": {
-            "name": "筱锋 xiao_lfeng",
-            "url": "https://www.x-lf.com/",
-            "email": "gm@x-lf.cn"
-        },
-        "version": "v1.0.0"
+        "contact": {}
     },
-    "host": "localhost:23333",
-    "basePath": "/api/v1",
     "paths": {
         "/api/v1/admin/colors": {
             "get": {

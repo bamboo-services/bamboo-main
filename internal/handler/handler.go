@@ -3,9 +3,9 @@ package handler
 import (
 	"context"
 
-	xLog "github.com/bamboo-services/bamboo-base-go/log"
+	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	"github.com/bamboo-services/bamboo-main/internal/logic"
-	bSdkLogic "github.com/phalanx/beacon-sso-sdk/logic"
+	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/logic"
 )
 
 type service struct {

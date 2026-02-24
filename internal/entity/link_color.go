@@ -15,10 +15,10 @@ import (
 	"errors"
 	"time"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/snowflake"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	"gorm.io/gorm"
 
-	xCtx "github.com/bamboo-services/bamboo-base-go/context"
+	xCtx "github.com/bamboo-services/bamboo-base-go/defined/context"
 )
 
 // LinkColor 表示一个友链颜色实体，用于友情链接的颜色主题管理。

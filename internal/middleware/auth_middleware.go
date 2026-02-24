@@ -14,10 +14,10 @@ package middleware
 import (
 	"github.com/bamboo-services/bamboo-main/internal/logic"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
-	bSdkLogic "github.com/phalanx/beacon-sso-sdk/logic"
-	bSdkUtil "github.com/phalanx/beacon-sso-sdk/utility"
+	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/logic"
+	bSdkUtil "github.com/phalanx-labs/beacon-sso-sdk/utility"
 
-	xError "github.com/bamboo-services/bamboo-base-go/error"
+	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	"github.com/gin-gonic/gin"
 )
 

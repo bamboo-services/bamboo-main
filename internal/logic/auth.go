@@ -17,6 +17,7 @@ import (
 	"strconv"
 	"time"
 
+	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
 	apiAuth "github.com/bamboo-services/bamboo-main/api/auth"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
@@ -26,12 +27,11 @@ import (
 
 	"crypto/rand"
 
-	xError "github.com/bamboo-services/bamboo-base-go/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/log"
-	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
+	xError "github.com/bamboo-services/bamboo-base-go/common/error"
+	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/common/utility/context"
 	"github.com/gin-gonic/gin"
-	bSdkLogic "github.com/phalanx/beacon-sso-sdk/logic"
+	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/logic"
 )
 
 type authRepo struct {
@@ -78,12 +78,12 @@ func (a *AuthLogic) Login(ctx *gin.Context, req *apiAuth.LoginRequest) (*entity.
 	}
 
 	// 验证密码
-	if !xUtil.IsPasswordValid(req.Password, user.Password) {
+	if !xUtil.Password().IsValid(req.Password, user.Password) {
 		return nil, "", nil, nil, xError.NewError(ctx, xError.LoginFailed, "用户名或密码错误", false)
 	}
 
 	// 生成 token
-	token := xUtil.GenerateSecurityKey()
+	token := xUtil.Security().GenerateKey()
 
 	// 记录时间信息
 	now := time.Now()
@@ -122,7 +122,7 @@ func (a *AuthLogic) Register(ctx *gin.Context, req *apiAuth.RegisterRequest) (*e
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterError, "邮箱已被注册", false)
 	}
 
-	hashedPassword, err := xUtil.EncryptPasswordString(req.Password)
+	hashedPassword, err := xUtil.Password().EncryptString(req.Password)
 	if err != nil {
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ServerInternalError, "密码加密失败", false, err)
 	}
@@ -141,7 +141,7 @@ func (a *AuthLogic) Register(ctx *gin.Context, req *apiAuth.RegisterRequest) (*e
 		return nil, "", nil, nil, xErr
 	}
 
-	token := xUtil.GenerateSecurityKey()
+	token := xUtil.Security().GenerateKey()
 
 	now := time.Now()
 	expireAt := now.Add(24 * time.Hour) // 24小时过期
@@ -181,12 +181,12 @@ func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID int64, req *apiAuth.
 	}
 
 	// 验证旧密码
-	if !xUtil.IsPasswordValid(req.OldPassword, user.Password) {
+	if !xUtil.Password().IsValid(req.OldPassword, user.Password) {
 		return xError.NewError(ctx, xError.ParameterError, "旧密码错误", false)
 	}
 
 	// 加密新密码
-	hashedPassword, err := xUtil.EncryptPasswordString(req.NewPassword)
+	hashedPassword, err := xUtil.Password().EncryptString(req.NewPassword)
 	if err != nil {
 		return xError.NewError(ctx, xError.ServerInternalError, "密码加密失败", false, err)
 	}
@@ -350,7 +350,7 @@ func (a *AuthLogic) ConfirmResetPassword(ctx *gin.Context, req *apiAuth.ConfirmR
 	rdb.Del(ctx.Request.Context(), redisKey)
 
 	// 加密新密码
-	hashedPassword, err := xUtil.EncryptPasswordString(req.NewPassword)
+	hashedPassword, err := xUtil.Password().EncryptString(req.NewPassword)
 	if err != nil {
 		return xError.NewError(ctx, xError.ServerInternalError, "密码加密失败", false, err)
 	}

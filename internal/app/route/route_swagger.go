@@ -1,7 +1,7 @@
 package route
 
 import (
-	xEnv "github.com/bamboo-services/bamboo-base-go/env"
+	xEnv "github.com/bamboo-services/bamboo-base-go/defined/env"
 	"github.com/bamboo-services/bamboo-main/docs"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"

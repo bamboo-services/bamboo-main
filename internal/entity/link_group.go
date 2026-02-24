@@ -15,10 +15,10 @@ import (
 	"errors"
 	"time"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/snowflake"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	"gorm.io/gorm"
 
-	xCtx "github.com/bamboo-services/bamboo-base-go/context"
+	xCtx "github.com/bamboo-services/bamboo-base-go/defined/context"
 )
 
 // LinkGroup 表示一个友链分组实体，用于对友情链接进行分类管理。

@@ -19,8 +19,8 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/task"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
-	xLog "github.com/bamboo-services/bamboo-base-go/log"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/utility/ctxutil"
+	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/common/utility/context"
 	"go.uber.org/zap"
 )
 

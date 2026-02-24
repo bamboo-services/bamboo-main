@@ -1,4 +1,3 @@
-basePath: /api/v1
 definitions:
   apiAuth.ConfirmResetPasswordRequest:
     properties:
@@ -1648,16 +1647,8 @@ definitions:
         description: 用户名
         type: string
     type: object
-host: localhost:23333
 info:
-  contact:
-    email: gm@x-lf.cn
-    name: 筱锋 xiao_lfeng
-    url: https://www.x-lf.com/
-  description: 友情链接管理系统
-  termsOfService: https://www.aiawaken.top/
-  title: BambooMain
-  version: v1.0.0
+  contact: {}
 paths:
   /api/v1/admin/colors:
     get:

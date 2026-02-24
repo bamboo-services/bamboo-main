@@ -15,10 +15,10 @@ import (
 	"errors"
 	"time"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/snowflake"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	"gorm.io/gorm"
 
-	xCtx "github.com/bamboo-services/bamboo-base-go/context"
+	xCtx "github.com/bamboo-services/bamboo-base-go/defined/context"
 )
 
 // System 表示一个系统配置实体，用于存储键值对配置信息。

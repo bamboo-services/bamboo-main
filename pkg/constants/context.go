@@ -11,7 +11,7 @@
 
 package constants
 
-import xCtx "github.com/bamboo-services/bamboo-base-go/context"
+import xCtx "github.com/bamboo-services/bamboo-base-go/defined/context"
 
 const (
 	// 上下文键

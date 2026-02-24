@@ -15,10 +15,10 @@ import (
 	"errors"
 	"time"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/snowflake"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	"gorm.io/gorm"
 
-	xCtx "github.com/bamboo-services/bamboo-base-go/context"
+	xCtx "github.com/bamboo-services/bamboo-base-go/defined/context"
 )
 
 // SystemUser 表示一个系统用户实体，用于管理员用户的管理。

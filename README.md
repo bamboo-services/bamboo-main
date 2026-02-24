@@ -186,4 +186,4 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 
 - 基于 [demo](demo/) 项目的架构设计
 - 从 [old](old/) 项目迁移业务逻辑
-- 使用 [bamboo-base-go](https://github.com/bamboo-services/bamboo-base-go) 基础库
+- 使用 [bamboo-base-go](https://github.com/bamboo-services/bamboo-base-go/major) 基础库

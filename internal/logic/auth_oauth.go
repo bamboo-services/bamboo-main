@@ -9,12 +9,12 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
-	xError "github.com/bamboo-services/bamboo-base-go/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/log"
-	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
+	xError "github.com/bamboo-services/bamboo-base-go/common/error"
+	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
 	"github.com/gin-gonic/gin"
-	bSdkLogic "github.com/phalanx/beacon-sso-sdk/logic"
-	bSdkModels "github.com/phalanx/beacon-sso-sdk/models"
+	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/logic"
+	bSdkModels "github.com/phalanx-labs/beacon-sso-sdk/models"
 )
 
 func (a *AuthLogic) LoginByOAuth(ctx *gin.Context, userinfo *bSdkModels.OAuthUserinfo, accessToken string) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
@@ -85,7 +85,7 @@ func (a *AuthLogic) SyncOAuthUser(ctx *gin.Context, userinfo *bSdkModels.OAuthUs
 	}
 
 	passwordRaw := fmt.Sprintf("oauth:%s:%d", userinfo.Sub, now.UnixNano())
-	hashedPassword, hashErr := xUtil.EncryptPasswordString(passwordRaw)
+	hashedPassword, hashErr := xUtil.Password().EncryptString(passwordRaw)
 	if hashErr != nil {
 		return nil, xError.NewError(ctx, xError.ServerInternalError, "初始化本地账户密码失败", false, hashErr)
 	}

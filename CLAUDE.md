@@ -266,28 +266,28 @@ chore: 更新依赖版本
 
 ```go
 // 初始化
-xInit "github.com/bamboo-services/bamboo-base-go/init"
+xInit "github.com/bamboo-services/bamboo-base-go/major/init"
 
 // 响应封装
-xResult "github.com/bamboo-services/bamboo-base-go/result"
+xResult "github.com/bamboo-services/bamboo-base-go/major/result"
 xResult.Success(ctx, "成功消息", data)
 xResult.Error(ctx, xError.ParamError)
 
 // 错误处理
-xError "github.com/bamboo-services/bamboo-base-go/error"
+xError "github.com/bamboo-services/bamboo-base-go/common/error"
 xError.ParamError       // 参数错误
 xError.UnauthorizedError // 未授权
 
 // 数据库
-xDatabase "github.com/bamboo-services/bamboo-base-go/database"
+xDatabase "github.com/bamboo-services/bamboo-base-go/major/database"
 xDatabase.DB.Model(&entity.LinkFriend{}).Find(&links)
 
 // Redis
-xRedis "github.com/bamboo-services/bamboo-base-go/nosql"
+xRedis "github.com/bamboo-services/bamboo-base-go/major/nosql"
 xRedis.Redis.Set(ctx, key, value, expiration)
 
 // 上下文工具
-xCtx "github.com/bamboo-services/bamboo-base-go/utility/ctx"
+xCtx "github.com/bamboo-services/bamboo-base-go/common/utility/ctx"
 user, _ := xCtx.GetCurrentUser(ctx)  // 获取当前登录用户
 ```
 
@@ -316,7 +316,7 @@ user, _ := xCtx.GetCurrentUser(ctx)  // 获取当前登录用户
 
 **解决**: 检查 `go.mod` 中的 `replace` 指令路径是否正确:
 ```
-replace github.com/bamboo-services/bamboo-base-go v1.0.0-202508212147
+replace github.com/bamboo-services/bamboo-base-go/major v1.0.0-202508212147
     => /Users/xiaolfeng/ProgramProjects/Cooperate/bamboo-service/bamboo-base
 ```
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	xEnv "github.com/bamboo-services/bamboo-base-go/env"
+	xEnv "github.com/bamboo-services/bamboo-base-go/defined/env"
 )
 
 type RedisKey string

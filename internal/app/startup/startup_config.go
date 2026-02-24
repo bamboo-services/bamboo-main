@@ -6,11 +6,11 @@ import (
 	"strconv"
 
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
-	bSdkConst "github.com/phalanx/beacon-sso-sdk/constant"
+	bSdkConst "github.com/phalanx-labs/beacon-sso-sdk/constant"
 
-	xEnv "github.com/bamboo-services/bamboo-base-go/env"
-	xLog "github.com/bamboo-services/bamboo-base-go/log"
-	xUtil "github.com/bamboo-services/bamboo-base-go/utility"
+	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
+	xEnv "github.com/bamboo-services/bamboo-base-go/defined/env"
 )
 
 func (r *reg) configInit(ctx context.Context) (any, error) {
