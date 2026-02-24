@@ -15,7 +15,7 @@ import (
 	"net"
 	"strings"
 
-	pack "github.com/bamboo-services/bamboo-base-go/common/utility/package"
+	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,7 +39,7 @@ func GetClientIP(c *gin.Context) string {
 				ip = strings.TrimSpace(strings.Split(ip, ",")[0])
 			}
 			// 使用 bamboo-base-go 的工具验证IP是否有效
-			if pack.IsValidIP(ip) {
+			if xUtil.Valid().IsIP(ip) {
 				return ip
 			}
 		}
