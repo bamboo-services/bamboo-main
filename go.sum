@@ -1,10 +1,7 @@
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
-github.com/bamboo-services/bamboo-base-go/common v1.0.0-202602241923 h1:hK4omEPrgU/wgWoBs9x4Jkys8G8D1SpAdBaZTVPChos=
-github.com/bamboo-services/bamboo-base-go/common v1.0.0-202602241923/go.mod h1:vzW9wX2j9yrCm4wz2ENFnEk6igrw0073/3M0F2ZqCQw=
+github.com/bamboo-services/bamboo-base-go/common v1.0.0-202602242007 h1:6+Nx3knFw2RpoEteTjvIZo58a/axtFLSfXadK0Klhos=
 github.com/bamboo-services/bamboo-base-go/common v1.0.0-202602242007/go.mod h1:vzW9wX2j9yrCm4wz2ENFnEk6igrw0073/3M0F2ZqCQw=
-github.com/bamboo-services/bamboo-base-go/defined v1.0.0-202602241812 h1:OWRF0+L0SvpblN8FfikrDzvC584FkREQMHK3JPDAD/I=
-github.com/bamboo-services/bamboo-base-go/defined v1.0.0-202602241812/go.mod h1:HeZrdm3jyUYr9QK0ciS9Qs0aXKanwuxnW40XZi1DS3M=
 github.com/bamboo-services/bamboo-base-go/defined v1.0.0-202602241921 h1:qSGjexmOggcuXtB1VwgAyGzuYzQoQqsExGaXICG8Clc=
 github.com/bamboo-services/bamboo-base-go/defined v1.0.0-202602241921/go.mod h1:HeZrdm3jyUYr9QK0ciS9Qs0aXKanwuxnW40XZi1DS3M=
 github.com/bamboo-services/bamboo-base-go/major v1.0.0-202602241924 h1:CeyKah9VJI57k+JpXtSzcvqrHVV6HzEf5EUtzm4iUOU=
@@ -86,8 +83,8 @@ github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsI
 github.com/jackc/pgpassfile v1.0.0/go.mod h1:CEx0iS5ambNFdcRtxPj5JhEz+xB6uRky5eyVu/W2HEg=
 github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 h1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo=
 github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761/go.mod h1:5TJZWKEWniPve33vlWYSoGYefn3gLQRzjfDlhSJ9ZKM=
-github.com/jackc/pgx/v5 v5.8.0 h1:TYPDoleBBme0xGSAX3/+NujXXtpZn9HBONkQC7IEZSo=
-github.com/jackc/pgx/v5 v5.8.0/go.mod h1:QVeDInX2m9VyzvNeiCJVjCkNFqzsNb43204HshNSZKw=
+github.com/jackc/pgx/v5 v5.9.2 h1:3ZhOzMWnR4yJ+RW1XImIPsD1aNSz4T4fyP7zlQb56hw=
+github.com/jackc/pgx/v5 v5.9.2/go.mod h1:mal1tBGAFfLHvZzaYh77YS/eC6IX9OWbRV1QIIM0Jn4=
 github.com/jackc/puddle/v2 v2.2.2 h1:PR8nw+E/1w0GLuRFSmiioY6UooMp6KJv0/61nB7icHo=
 github.com/jackc/puddle/v2 v2.2.2/go.mod h1:vriiEXHvEE654aYKXXjOvZM39qJ0q+azkZFrfEOc3H4=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
