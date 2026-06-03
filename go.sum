@@ -1,10 +1,7 @@
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
-github.com/bamboo-services/bamboo-base-go/common v1.0.0-202602241923 h1:hK4omEPrgU/wgWoBs9x4Jkys8G8D1SpAdBaZTVPChos=
-github.com/bamboo-services/bamboo-base-go/common v1.0.0-202602241923/go.mod h1:vzW9wX2j9yrCm4wz2ENFnEk6igrw0073/3M0F2ZqCQw=
+github.com/bamboo-services/bamboo-base-go/common v1.0.0-202602242007 h1:6+Nx3knFw2RpoEteTjvIZo58a/axtFLSfXadK0Klhos=
 github.com/bamboo-services/bamboo-base-go/common v1.0.0-202602242007/go.mod h1:vzW9wX2j9yrCm4wz2ENFnEk6igrw0073/3M0F2ZqCQw=
-github.com/bamboo-services/bamboo-base-go/defined v1.0.0-202602241812 h1:OWRF0+L0SvpblN8FfikrDzvC584FkREQMHK3JPDAD/I=
-github.com/bamboo-services/bamboo-base-go/defined v1.0.0-202602241812/go.mod h1:HeZrdm3jyUYr9QK0ciS9Qs0aXKanwuxnW40XZi1DS3M=
 github.com/bamboo-services/bamboo-base-go/defined v1.0.0-202602241921 h1:qSGjexmOggcuXtB1VwgAyGzuYzQoQqsExGaXICG8Clc=
 github.com/bamboo-services/bamboo-base-go/defined v1.0.0-202602241921/go.mod h1:HeZrdm3jyUYr9QK0ciS9Qs0aXKanwuxnW40XZi1DS3M=
 github.com/bamboo-services/bamboo-base-go/major v1.0.0-202602241924 h1:CeyKah9VJI57k+JpXtSzcvqrHVV6HzEf5EUtzm4iUOU=
@@ -123,8 +120,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/quic-go/qpack v0.6.0 h1:g7W+BMYynC1LbYLSqRt8PBg5Tgwxn214ZZR34VIOjz8=
 github.com/quic-go/qpack v0.6.0/go.mod h1:lUpLKChi8njB4ty2bFLX2x4gzDqXwUpaO1DP9qMDZII=
-github.com/quic-go/quic-go v0.59.0 h1:OLJkp1Mlm/aS7dpKgTc6cnpynnD2Xg7C1pwL6vy/SAw=
-github.com/quic-go/quic-go v0.59.0/go.mod h1:upnsH4Ju1YkqpLXC305eW3yDZ4NfnNbmQRCMWS58IKU=
+github.com/quic-go/quic-go v0.59.1 h1:0Gmua0HW1Tv7ANR7hUYwRyD0MG5OJfgvYSZasGZzBic=
+github.com/quic-go/quic-go v0.59.1/go.mod h1:upnsH4Ju1YkqpLXC305eW3yDZ4NfnNbmQRCMWS58IKU=
 github.com/redis/go-redis/v9 v9.18.0 h1:pMkxYPkEbMPwRdenAzUNyFNrDgHx9U+DrBabWNfSRQs=
 github.com/redis/go-redis/v9 v9.18.0/go.mod h1:k3ufPphLU5YXwNTUcCRXGxUoF1fqxnhFQmscfkCoDA0=
 github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjRBZyWFQ=
