@@ -15,16 +15,43 @@ import (
 	_ "github.com/bamboo-services/bamboo-main/docs"
 	"github.com/bamboo-services/bamboo-main/internal/app/route"
 	"github.com/bamboo-services/bamboo-main/internal/app/startup"
+	"github.com/bamboo-services/bamboo-main/internal/app/startup/prepare"
 	"github.com/bamboo-services/bamboo-main/internal/app/startup/worker"
+	"github.com/bamboo-services/bamboo-main/internal/entity"
 
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xMain "github.com/bamboo-services/bamboo-base-go/major/main"
+	xOption "github.com/bamboo-services/bamboo-base-go/major/option"
+	xOptionCache "github.com/bamboo-services/bamboo-base-go/major/option/cache"
+	xOptionDB "github.com/bamboo-services/bamboo-base-go/major/option/database"
 	xReg "github.com/bamboo-services/bamboo-base-go/major/register"
 )
 
 func main() {
-	reg := xReg.Register(startup.Init())
+	ctx, nodeList := startup.Init()
+
+	opts := []xOption.Option{
+		xOption.WithDatabase(
+			xOptionDB.FromEnv(),
+			xOptionDB.WithTablePrefix("bm_"),
+			xOptionDB.WithAutoMigrate(
+				&entity.SystemUser{},
+				&entity.LinkGroup{},
+				&entity.LinkColor{},
+				&entity.LinkFriend{},
+				&entity.SystemLog{},
+				&entity.System{},
+				&entity.SponsorChannel{},
+				&entity.SponsorRecord{},
+			),
+			xOptionDB.WithPrepare(prepare.DefaultData),
+		),
+		xOption.WithCache(xOptionCache.FromEnv()),
+		xOption.WithRoute(route.NewRoute),
+	}
+
+	reg := xReg.Register(ctx, nodeList, opts...)
 	log := xLog.WithName(xLog.NamedMAIN)
 
-	xMain.Runner(reg, log, route.NewRoute, worker.MailWorkerRunner)
+	xMain.Runner(reg, log, worker.MailWorkerRunner)
 }

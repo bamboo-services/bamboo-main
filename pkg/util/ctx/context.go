@@ -16,7 +16,7 @@ import (
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
 	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/common/utility/context"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 )

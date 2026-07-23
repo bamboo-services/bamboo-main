@@ -5,7 +5,6 @@ import (
 
 	xEnv "github.com/bamboo-services/bamboo-base-go/defined/env"
 	xMiddle "github.com/bamboo-services/bamboo-base-go/major/middleware"
-	xReg "github.com/bamboo-services/bamboo-base-go/major/register"
 	xRoute "github.com/bamboo-services/bamboo-base-go/major/route"
 	"github.com/gin-gonic/gin"
 	bSdkRoute "github.com/phalanx-labs/beacon-sso-sdk/route"
@@ -16,10 +15,10 @@ type route struct {
 	context context.Context
 }
 
-func NewRoute(reg *xReg.Reg) {
+func NewRoute(ctx context.Context, serve *gin.Engine) {
 	r := &route{
-		engine:  reg.Serve,
-		context: reg.Init.Ctx,
+		engine:  serve,
+		context: ctx,
 	}
 
 	r.engine.NoMethod(xRoute.NoMethod)
@@ -27,13 +26,13 @@ func NewRoute(reg *xReg.Reg) {
 
 	r.engine.Use(xMiddle.ResponseMiddleware)
 	r.engine.Use(xMiddle.ReleaseAllCors)
-	r.engine.Use(xMiddle.AllowOption)
+	r.engine.Use(xMiddle.AllowOptionRequest)
 
 	if xEnv.GetEnvBool(xEnv.Debug, false) {
 		swaggerRegister(r.engine)
 	}
 
-	oauthRoute := bSdkRoute.NewOAuthRoute(r.context)
+	oauthRoute := bSdkRoute.NewRoute(r.context)
 
 	{
 		apiRouter := r.engine.Group("/api/v1")

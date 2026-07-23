@@ -17,7 +17,7 @@ import (
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/common/utility/context"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,13 +33,13 @@ func RequireRole(roles ...string) gin.HandlerFunc {
 
 		// 从数据库获取用户信息
 		db := xCtxUtil.MustGetDB(c)
-		rdb := xCtxUtil.MustGetRDB(c)
+		m := xCtxUtil.MustGetCacheManager(c)
 		if db == nil {
 			_ = c.Error(xError.NewError(c, xError.DatabaseError, "数据库连接异常", false))
 			return
 		}
 
-		repo := repository.NewSystemUserRepo(db, rdb)
+		repo := repository.NewSystemUserRepo(db, m)
 		user, found, xErr := repo.GetByID(c, userID)
 		if xErr != nil {
 			_ = c.Error(xError.NewError(c, xError.DatabaseError, "用户信息查询失败", false, xErr))

@@ -6,7 +6,7 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/common/utility/context"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	apiLinkColor "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
@@ -26,17 +26,17 @@ type LinkColorLogic struct {
 
 func NewLinkColorLogic(ctx context.Context) *LinkColorLogic {
 	db := xCtxUtil.MustGetDB(ctx)
-	rdb := xCtxUtil.MustGetRDB(ctx)
+	m := xCtxUtil.MustGetCacheManager(ctx)
 
 	return &LinkColorLogic{
 		logic: logic{
-			db:  db,
-			rdb: rdb,
-			log: xLog.WithName(xLog.NamedLOGC, "LinkColorLogic"),
+			db:    db,
+			cache: m,
+			log:   xLog.WithName(xLog.NamedLOGC, "LinkColorLogic"),
 		},
 		repo: linkColorRepo{
-			color: repository.NewLinkColorRepo(db, rdb),
-			link:  repository.NewLinkRepo(db, rdb),
+			color: repository.NewLinkColorRepo(db, m),
+			link:  repository.NewLinkRepo(db, m),
 		},
 	}
 }

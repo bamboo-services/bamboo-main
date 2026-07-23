@@ -6,9 +6,9 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -17,7 +17,7 @@ type SystemRepo struct {
 	log *xLog.LogNamedLogger
 }
 
-func NewSystemRepo(db *gorm.DB, _ *redis.Client) *SystemRepo {
+func NewSystemRepo(db *gorm.DB, _ *xCache.Manager) *SystemRepo {
 	return &SystemRepo{
 		db:  db,
 		log: xLog.WithName(xLog.NamedREPO, "SystemRepo"),

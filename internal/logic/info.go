@@ -21,7 +21,7 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/common/utility/context"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	"github.com/gin-gonic/gin"
 )
 
@@ -45,16 +45,16 @@ type InfoLogic struct {
 
 func NewInfoLogic(ctx context.Context) *InfoLogic {
 	db := xCtxUtil.MustGetDB(ctx)
-	rdb := xCtxUtil.MustGetRDB(ctx)
+	m := xCtxUtil.MustGetCacheManager(ctx)
 
 	return &InfoLogic{
 		logic: logic{
-			db:  db,
-			rdb: rdb,
-			log: xLog.WithName(xLog.NamedLOGC, "InfoLogic"),
+			db:    db,
+			cache: m,
+			log:   xLog.WithName(xLog.NamedLOGC, "InfoLogic"),
 		},
 		repo: infoRepo{
-			system: repository.NewSystemRepo(db, rdb),
+			system: repository.NewSystemRepo(db, m),
 		},
 	}
 }

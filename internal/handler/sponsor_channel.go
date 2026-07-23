@@ -14,7 +14,7 @@ package handler
 import (
 	apiSponsorChannel "github.com/bamboo-services/bamboo-main/api/sponsor"
 
-	xValid "github.com/bamboo-services/bamboo-base-go/common/validator"
+	xValid "github.com/bamboo-services/bamboo-base-go/major/validator"
 	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
 	"github.com/gin-gonic/gin"
 )

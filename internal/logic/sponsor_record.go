@@ -6,7 +6,7 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/common/utility/context"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	apiSponsor "github.com/bamboo-services/bamboo-main/api/sponsor"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
@@ -26,17 +26,17 @@ type SponsorRecordLogic struct {
 
 func NewSponsorRecordLogic(ctx context.Context) *SponsorRecordLogic {
 	db := xCtxUtil.MustGetDB(ctx)
-	rdb := xCtxUtil.MustGetRDB(ctx)
+	m := xCtxUtil.MustGetCacheManager(ctx)
 
 	return &SponsorRecordLogic{
 		logic: logic{
-			db:  db,
-			rdb: rdb,
-			log: xLog.WithName(xLog.NamedLOGC, "SponsorRecordLogic"),
+			db:    db,
+			cache: m,
+			log:   xLog.WithName(xLog.NamedLOGC, "SponsorRecordLogic"),
 		},
 		repo: sponsorRecordRepo{
-			record:  repository.NewSponsorRecordRepo(db, rdb),
-			channel: repository.NewSponsorChannelRepo(db, rdb),
+			record:  repository.NewSponsorRecordRepo(db, m),
+			channel: repository.NewSponsorChannelRepo(db, m),
 		},
 	}
 }

@@ -7,26 +7,23 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
-	"github.com/bamboo-services/bamboo-main/internal/repository/cache"
+	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 type SystemUserRepo struct {
-	db    *gorm.DB
-	cache *cache.SystemUserCache
-	log   *xLog.LogNamedLogger
+	db  *gorm.DB
+	kc  xCache.KeyCache[string, entity.SystemUser]
+	log *xLog.LogNamedLogger
 }
 
-func NewSystemUserRepo(db *gorm.DB, rdb *redis.Client) *SystemUserRepo {
+func NewSystemUserRepo(db *gorm.DB, m *xCache.Manager) *SystemUserRepo {
 	return &SystemUserRepo{
-		db: db,
-		cache: &cache.SystemUserCache{
-			RDB: rdb,
-			TTL: time.Minute * 15,
-		},
+		db:  db,
+		kc:  xCache.KeyCacheOf[string, entity.SystemUser](m),
 		log: xLog.WithName(xLog.NamedREPO, "SystemUserRepo"),
 	}
 }
@@ -34,16 +31,16 @@ func NewSystemUserRepo(db *gorm.DB, rdb *redis.Client) *SystemUserRepo {
 func (r *SystemUserRepo) GetByID(ctx *gin.Context, id int64) (*entity.SystemUser, bool, *xError.Error) {
 	r.log.Info(ctx, "GetByID - 获取用户信息")
 
-	if user, err := r.cache.Get(ctx.Request.Context(), id); err != nil {
+	if user, ok, err := r.kc.Get(ctx.Request.Context(), constants.RedisSystemUser.Get(id).String()); err != nil {
 		return nil, false, xError.NewError(ctx, xError.CacheError, "获取用户缓存失败", true, err)
-	} else if user != nil {
+	} else if ok {
 		return user, true, nil
 	}
 
 	var user entity.SystemUser
 	err := r.db.WithContext(ctx).Where("id = ?", id).First(&user).Error
 	if err == nil {
-		if cacheErr := r.cache.Set(ctx.Request.Context(), &user); cacheErr != nil {
+		if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisSystemUser.Get(user.ID).String(), &user, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
 			r.log.Warn(ctx, cacheErr.Error())
 		}
 		return &user, true, nil
@@ -60,7 +57,7 @@ func (r *SystemUserRepo) GetByUsernameOrEmail(ctx *gin.Context, keyword string) 
 	var user entity.SystemUser
 	err := r.db.WithContext(ctx).Where("username = ? OR email = ?", keyword, keyword).First(&user).Error
 	if err == nil {
-		if cacheErr := r.cache.Set(ctx.Request.Context(), &user); cacheErr != nil {
+		if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisSystemUser.Get(user.ID).String(), &user, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
 			r.log.Warn(ctx, cacheErr.Error())
 		}
 		return &user, true, nil
@@ -82,7 +79,7 @@ func (r *SystemUserRepo) GetByEmail(ctx *gin.Context, email string) (*entity.Sys
 	var user entity.SystemUser
 	err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error
 	if err == nil {
-		if cacheErr := r.cache.Set(ctx.Request.Context(), &user); cacheErr != nil {
+		if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisSystemUser.Get(user.ID).String(), &user, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
 			r.log.Warn(ctx, cacheErr.Error())
 		}
 		return &user, true, nil
@@ -104,7 +101,7 @@ func (r *SystemUserRepo) GetByOAuthUserID(ctx *gin.Context, oauthUserID string) 
 	var user entity.SystemUser
 	err := r.db.WithContext(ctx).Where("oauth_user_id = ?", oauthUserID).First(&user).Error
 	if err == nil {
-		if cacheErr := r.cache.Set(ctx.Request.Context(), &user); cacheErr != nil {
+		if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisSystemUser.Get(user.ID).String(), &user, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
 			r.log.Warn(ctx, cacheErr.Error())
 		}
 		return &user, true, nil
@@ -149,7 +146,7 @@ func (r *SystemUserRepo) Create(ctx *gin.Context, user *entity.SystemUser) (*ent
 		return nil, xError.NewError(ctx, xError.DatabaseError, "创建用户失败", true, err)
 	}
 
-	if cacheErr := r.cache.Set(ctx.Request.Context(), user); cacheErr != nil {
+	if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisSystemUser.Get(user.ID).String(), user, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -164,7 +161,7 @@ func (r *SystemUserRepo) Save(ctx *gin.Context, user *entity.SystemUser) (*entit
 		return nil, xError.NewError(ctx, xError.DatabaseError, "保存用户失败", true, err)
 	}
 
-	if cacheErr := r.cache.Set(ctx.Request.Context(), user); cacheErr != nil {
+	if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisSystemUser.Get(user.ID).String(), user, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -179,7 +176,7 @@ func (r *SystemUserRepo) UpdateFieldsByID(ctx *gin.Context, userID int64, update
 		return nil, xError.NewError(ctx, xError.DatabaseError, "更新用户失败", true, err)
 	}
 
-	if cacheErr := r.cache.Delete(ctx.Request.Context(), userID); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisSystemUser.Get(userID).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 

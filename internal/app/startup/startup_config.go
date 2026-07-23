@@ -6,47 +6,22 @@ import (
 	"strconv"
 
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
-	bSdkConst "github.com/phalanx-labs/beacon-sso-sdk/constant"
 
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
 	xEnv "github.com/bamboo-services/bamboo-base-go/defined/env"
 )
 
-func (r *reg) configInit(ctx context.Context) (any, error) {
+// emailConfigInit 构造业务邮件配置并注入到上下文。
+//
+// 自 v1.0.4 起，数据库与缓存配置由 xOption 从环境变量自动装配，
+// 本节点仅负责框架未覆盖的 Email 业务配置，供 worker_mail 经
+// pkg/util/ctx.GetConfig 读取。
+func (r *reg) emailConfigInit(ctx context.Context) (any, error) {
 	log := xLog.WithName(xLog.NamedINIT)
-	log.Info(ctx, "加载环境变量配置")
-
-	nodeID := xEnv.GetEnvInt64(xEnv.SnowflakeNodeID, 1)
-	businessCache := getEnvBoolByKey(bSdkConst.EnvSsoBusinessCache.String(), false)
+	log.Info(ctx, "加载邮件环境变量配置")
 
 	cfg := &base.BambooConfig{
-		Xlf: base.BMConfig{
-			Debug: xEnv.GetEnvBool(xEnv.Debug, false),
-			Server: base.ServerConfig{
-				Port: xEnv.GetEnvInt(xEnv.Port, 23333),
-			},
-		},
-		Snowflake: base.SnowflakeConfig{
-			NodeID: &nodeID,
-		},
-		Database: base.DatabaseConfig{
-			Host:     xEnv.GetEnvString(xEnv.DatabaseHost, "localhost"),
-			Port:     xEnv.GetEnvInt(xEnv.DatabasePort, 5432),
-			User:     xEnv.GetEnvString(xEnv.DatabaseUser, "bamboo_main"),
-			Pass:     xEnv.GetEnvString(xEnv.DatabasePass, ""),
-			Name:     xEnv.GetEnvString(xEnv.DatabaseName, "bamboo_main"),
-			Prefix:   xEnv.GetEnvString(xEnv.DatabasePrefix, "bm_"),
-			SSLMode:  getEnvStringByKey("DATABASE_SSLMODE", "disable"),
-			TimeZone: xEnv.GetEnvString(xEnv.DatabaseTimezone, "Asia/Shanghai"),
-		},
-		NoSQL: base.NoSQLConfig{
-			Host:     xEnv.GetEnvString(xEnv.NoSqlHost, "localhost"),
-			Port:     xEnv.GetEnvInt(xEnv.NoSqlPort, 6379),
-			Pass:     xEnv.GetEnvString(xEnv.NoSqlPass, ""),
-			Database: xEnv.GetEnvInt(xEnv.NoSqlDatabase, 0),
-			Prefix:   xEnv.GetEnvString(xEnv.NoSqlPrefix, "bm"),
-		},
 		Email: base.EmailConfig{
 			SMTPHost:    xEnv.GetEnvString(xEnv.EmailHost, ""),
 			SMTPPort:    xEnv.GetEnvInt(xEnv.EmailPort, 465),
@@ -60,18 +35,6 @@ func (r *reg) configInit(ctx context.Context) (any, error) {
 			Timeout:     getEnvIntByKey("EMAIL_TIMEOUT", 10),
 			UseTLS:      getEnvBoolByKey("EMAIL_USE_TLS", true),
 			UseStartTLS: getEnvBoolByKey("EMAIL_USE_STARTTLS", false),
-		},
-		SSO: base.SSOConfig{
-			ClientID:                 getEnvStringByKey(bSdkConst.EnvSsoClientID.String(), ""),
-			ClientSecret:             getEnvStringByKey(bSdkConst.EnvSsoClientSecret.String(), ""),
-			WellKnownURI:             getEnvStringByKey(bSdkConst.EnvSsoWellKnownURI.String(), ""),
-			RedirectURI:              getEnvStringByKey(bSdkConst.EnvSsoRedirectURI.String(), ""),
-			EndpointAuthURI:          getEnvStringByKey(bSdkConst.EnvSsoEndpointAuthURI.String(), ""),
-			EndpointTokenURI:         getEnvStringByKey(bSdkConst.EnvSsoEndpointTokenURI.String(), ""),
-			EndpointUserinfoURI:      getEnvStringByKey(bSdkConst.EnvSsoEndpointUserinfoURI.String(), ""),
-			EndpointIntrospectionURI: getEnvStringByKey(bSdkConst.EnvSsoEndpointIntrospectionURI.String(), ""),
-			EndpointRevocationURI:    getEnvStringByKey(bSdkConst.EnvSsoEndpointRevocationURI.String(), ""),
-			BusinessCache:            &businessCache,
 		},
 	}
 

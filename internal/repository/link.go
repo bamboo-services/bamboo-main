@@ -7,27 +7,24 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	apiLink "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
-	"github.com/bamboo-services/bamboo-main/internal/repository/cache"
+	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 type LinkRepo struct {
-	db    *gorm.DB
-	cache *cache.LinkFriendCache
-	log   *xLog.LogNamedLogger
+	db  *gorm.DB
+	kc  xCache.KeyCache[string, entity.LinkFriend]
+	log *xLog.LogNamedLogger
 }
 
-func NewLinkRepo(db *gorm.DB, rdb *redis.Client) *LinkRepo {
+func NewLinkRepo(db *gorm.DB, m *xCache.Manager) *LinkRepo {
 	return &LinkRepo{
-		db: db,
-		cache: &cache.LinkFriendCache{
-			RDB: rdb,
-			TTL: time.Minute * 15,
-		},
+		db:  db,
+		kc:  xCache.KeyCacheOf[string, entity.LinkFriend](m),
 		log: xLog.WithName(xLog.NamedREPO, "LinkRepo"),
 	}
 }
@@ -47,7 +44,7 @@ func (r *LinkRepo) Create(ctx *gin.Context, link *entity.LinkFriend, tx *gorm.DB
 		return nil, xError.NewError(ctx, xError.DatabaseError, "创建友情链接失败", false, err)
 	}
 
-	if cacheErr := r.cache.Set(ctx.Request.Context(), link); cacheErr != nil {
+	if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisLinkFriend.Get(link.ID).String(), link, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -62,7 +59,7 @@ func (r *LinkRepo) Save(ctx *gin.Context, link *entity.LinkFriend, tx *gorm.DB) 
 		return nil, xError.NewError(ctx, xError.DatabaseError, "保存友情链接失败", false, err)
 	}
 
-	if cacheErr := r.cache.Delete(ctx.Request.Context(), link.ID); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisLinkFriend.Get(link.ID).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -73,9 +70,9 @@ func (r *LinkRepo) GetByID(ctx *gin.Context, id int64, withAssociations bool, tx
 	r.log.Info(ctx, "GetByID - 获取友情链接")
 
 	if !withAssociations {
-		if link, err := r.cache.Get(ctx.Request.Context(), id); err != nil {
+		if link, ok, err := r.kc.Get(ctx.Request.Context(), constants.RedisLinkFriend.Get(id).String()); err != nil {
 			return nil, false, xError.NewError(ctx, xError.CacheError, "获取友情链接缓存失败", true, err)
-		} else if link != nil {
+		} else if ok {
 			return link, true, nil
 		}
 	}
@@ -94,7 +91,7 @@ func (r *LinkRepo) GetByID(ctx *gin.Context, id int64, withAssociations bool, tx
 		return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
 	}
 
-	if cacheErr := r.cache.Set(ctx.Request.Context(), &link); cacheErr != nil {
+	if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisLinkFriend.Get(link.ID).String(), &link, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -112,7 +109,7 @@ func (r *LinkRepo) DeleteByID(ctx *gin.Context, id int64, tx *gorm.DB) (bool, *x
 		return false, nil
 	}
 
-	if cacheErr := r.cache.Delete(ctx.Request.Context(), id); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisLinkFriend.Get(id).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -188,7 +185,7 @@ func (r *LinkRepo) UpdateStatusByID(ctx *gin.Context, id int64, status int, revi
 		return false, nil
 	}
 
-	if cacheErr := r.cache.Delete(ctx.Request.Context(), id); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisLinkFriend.Get(id).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -211,7 +208,7 @@ func (r *LinkRepo) UpdateFailureByID(ctx *gin.Context, id int64, isFailure int, 
 		return false, nil
 	}
 
-	if cacheErr := r.cache.Delete(ctx.Request.Context(), id); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisLinkFriend.Get(id).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 

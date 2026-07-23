@@ -7,27 +7,24 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	apiLink "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
-	"github.com/bamboo-services/bamboo-main/internal/repository/cache"
+	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 type LinkGroupRepo struct {
-	db    *gorm.DB
-	cache *cache.LinkGroupCache
-	log   *xLog.LogNamedLogger
+	db  *gorm.DB
+	kc  xCache.KeyCache[string, entity.LinkGroup]
+	log *xLog.LogNamedLogger
 }
 
-func NewLinkGroupRepo(db *gorm.DB, rdb *redis.Client) *LinkGroupRepo {
+func NewLinkGroupRepo(db *gorm.DB, m *xCache.Manager) *LinkGroupRepo {
 	return &LinkGroupRepo{
-		db: db,
-		cache: &cache.LinkGroupCache{
-			RDB: rdb,
-			TTL: time.Minute * 15,
-		},
+		db:  db,
+		kc:  xCache.KeyCacheOf[string, entity.LinkGroup](m),
 		log: xLog.WithName(xLog.NamedREPO, "LinkGroupRepo"),
 	}
 }
@@ -55,7 +52,7 @@ func (r *LinkGroupRepo) Create(ctx *gin.Context, group *entity.LinkGroup, tx *go
 		return nil, xError.NewError(ctx, xError.DatabaseError, "创建友链分组失败", false, err)
 	}
 
-	if cacheErr := r.cache.Set(ctx.Request.Context(), group); cacheErr != nil {
+	if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisLinkGroup.Get(group.ID).String(), group, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -68,7 +65,7 @@ func (r *LinkGroupRepo) Save(ctx *gin.Context, group *entity.LinkGroup, tx *gorm
 		return nil, xError.NewError(ctx, xError.DatabaseError, "保存友链分组失败", false, err)
 	}
 
-	if cacheErr := r.cache.Delete(ctx.Request.Context(), group.ID); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisLinkGroup.Get(group.ID).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -77,9 +74,9 @@ func (r *LinkGroupRepo) Save(ctx *gin.Context, group *entity.LinkGroup, tx *gorm
 
 func (r *LinkGroupRepo) GetByID(ctx *gin.Context, id int64, withLinks bool, tx *gorm.DB) (*entity.LinkGroup, bool, *xError.Error) {
 	if !withLinks {
-		if group, err := r.cache.Get(ctx.Request.Context(), id); err != nil {
+		if group, ok, err := r.kc.Get(ctx.Request.Context(), constants.RedisLinkGroup.Get(id).String()); err != nil {
 			return nil, false, xError.NewError(ctx, xError.CacheError, "获取友链分组缓存失败", true, err)
-		} else if group != nil {
+		} else if ok {
 			return group, true, nil
 		}
 	}
@@ -98,7 +95,7 @@ func (r *LinkGroupRepo) GetByID(ctx *gin.Context, id int64, withLinks bool, tx *
 		return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询友链分组失败", false, err)
 	}
 
-	if cacheErr := r.cache.Set(ctx.Request.Context(), &group); cacheErr != nil {
+	if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisLinkGroup.Get(group.ID).String(), &group, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -114,7 +111,7 @@ func (r *LinkGroupRepo) UpdateStatusByID(ctx *gin.Context, id int64, status bool
 		return false, nil
 	}
 
-	if cacheErr := r.cache.Delete(ctx.Request.Context(), id); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisLinkGroup.Get(id).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -131,7 +128,7 @@ func (r *LinkGroupRepo) UpdateSortByIDs(ctx *gin.Context, ids []int64, startSort
 		if result.RowsAffected == 0 {
 			return xError.NewError(ctx, xError.NotFound, "分组不存在", false)
 		}
-		if cacheErr := r.cache.Delete(ctx.Request.Context(), id); cacheErr != nil {
+		if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisLinkGroup.Get(id).String()); cacheErr != nil {
 			r.log.Warn(ctx, cacheErr.Error())
 		}
 	}
@@ -148,7 +145,7 @@ func (r *LinkGroupRepo) DeleteByID(ctx *gin.Context, id int64, tx *gorm.DB) (boo
 		return false, nil
 	}
 
-	if cacheErr := r.cache.Delete(ctx.Request.Context(), id); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisLinkGroup.Get(id).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 

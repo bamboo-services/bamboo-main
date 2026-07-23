@@ -12,7 +12,7 @@
 package handler
 
 import (
-	xValid "github.com/bamboo-services/bamboo-base-go/common/validator"
+	xValid "github.com/bamboo-services/bamboo-base-go/major/validator"
 	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
 	apiSponsorRecord "github.com/bamboo-services/bamboo-main/api/sponsor"
 	"github.com/gin-gonic/gin"

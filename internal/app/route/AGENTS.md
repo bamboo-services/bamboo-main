@@ -1,32 +1,46 @@
-# ROUTE KNOWLEDGE BASE
+# ROUTE 知识库
 
-## OVERVIEW
-Central HTTP wiring for Gin groups, middleware chain, and handler registration.
-Routes are organized by domain (`auth`, `public`, `link`, `info`, `sponsor`, `admin`).
+## 概述
+HTTP 集中装配层，负责 Gin 分组、中间件链与 handler 注册；路由按领域（`auth`/`public`/`link`/`info`/`sponsor`/`admin`）拆分文件。
 
-## WHERE TO LOOK
-| Task | Location | Notes |
+## 目录结构
+```text
+internal/app/route/
+|- route.go                    # 全局中间件与 /api/v1 根分组
+|- route_auth.go               # 认证端点（公开子组 + 鉴权子组）
+|- route_admin.go              # admin 端点 + OAuth 校验 + 本地鉴权 + 角色中间件
+|- route_public.go             # 公开健康/ping 路由（无鉴权）
+|- route_link.go              # 友链及公开友链路由
+|- route_sponsor.go            # 赞助相关路由
+|- route_info.go               # 站点信息路由
+|- route_swagger.go            # Swagger 挂载（仅 debug 模式）
+```
+
+## 导航指南
+| 任务 | 位置 | 说明 |
 |---|---|---|
-| Global middleware and `/api/v1` root | `internal/app/route/route.go` | response/cors/options middleware order is defined here |
-| Auth endpoints | `internal/app/route/route_auth.go` | split public auth and auth-required subgroup |
-| Admin endpoints + auth gate | `internal/app/route/route_admin.go` | OAuth check + local auth + role middleware |
-| Public health/ping routes | `internal/app/route/route_public.go` | no auth middleware |
-| Link/public link routes | `internal/app/route/route_link.go` | public link listing endpoint |
-| Swagger mount behavior | `internal/app/route/route_swagger.go` | only register in debug mode |
+| 全局中间件与 `/api/v1` 根 | `route.go` | response/cors/options 中间件顺序在此定义 |
+| 认证端点 | `route_auth.go` | 拆分公开认证与鉴权子组 |
+| admin 端点 + 鉴权门 | `route_admin.go` | OAuth 校验 + 本地鉴权 + 角色中间件 |
+| 公开健康/ping 路由 | `route_public.go` | 无鉴权中间件 |
+| 友链/公开友链路由 | `route_link.go` | 公开友链列表端点 |
+| Swagger 挂载 | `route_swagger.go` | 仅 debug 模式注册 |
 
-## CONVENTIONS
-- Instantiate handlers with `handler.NewHandler[T](r.context, "Name")`.
-- Keep route files as wiring only; no request parsing or business branching.
-- Keep protected routes under explicit middleware chain.
-- Keep path naming stable (`/api/v1/...`) and domain-grouped.
-- Register Swagger route only when debug env is enabled.
+## 约定
+- handler 实例化统一用 `handler.NewHandler[T](r.context, "Name")`
+- 路由文件只做装配，不含请求解析或业务分支
+- 受保护路由必须显式挂在 OAuth + `AuthMiddleware` + 角色中间件链之下
+- 路径命名稳定在 `/api/v1/...`，按领域分组
+- Swagger 路由仅在 debug 环境开启
 
-## ANTI-PATTERNS
-- Adding business logic directly in route methods.
-- Exposing admin routes without OAuth + `AuthMiddleware` + role check.
-- Registering Swagger routes in production mode by default.
-- Duplicating handler construction patterns inconsistently across route files.
+## 反模式
+- 在路由方法中直接写业务逻辑
+- admin 路由未过 OAuth + `AuthMiddleware` + 角色校验
+- 生产模式默认注册 Swagger 路由
+- 各路由文件构造 handler 的方式不一致
 
-## NOTES
-- Route group root is `/api/v1` and should remain stable.
-- `systemUserAdminRouter` and `systemLogRouter` are placeholders today.
+## 调试路径
+1. 404/405：回到 `route.go` 确认 `NoRoute`/`NoMethod` 与领域子路由是否注册
+2. 鉴权漏放：核对 `route_admin.go` 的中间件链顺序（OAuth → 本地鉴权 → 角色）
+3. CORS 异常：检查 `xMiddle.ResponseMiddleware`/`ReleaseAllCors`/`AllowOptionRequest` 顺序
+4. Swagger 不显示：确认 `xEnv.Debug` 为真且 `swaggerRegister` 被调用

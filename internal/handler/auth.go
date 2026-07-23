@@ -16,7 +16,7 @@ import (
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xValid "github.com/bamboo-services/bamboo-base-go/common/validator"
+	xValid "github.com/bamboo-services/bamboo-base-go/major/validator"
 	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
 	"github.com/gin-gonic/gin"
 	bSdkUtil "github.com/phalanx-labs/beacon-sso-sdk/utility"

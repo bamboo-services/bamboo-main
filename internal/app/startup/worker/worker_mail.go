@@ -20,10 +20,11 @@ import (
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/common/utility/context"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	"go.uber.org/zap"
 )
 
+// MailWorkerRunner 启动邮件 worker 并阻塞直至上下文取消，随后执行优雅停止。
 func MailWorkerRunner(ctx context.Context, _ ...any) {
 	log := xLog.WithName(xLog.NamedMAIN, "MailWorker")
 	config, err := xCtxUtil.Get[*base.BambooConfig](ctx, constants.ContextCustomConfig)

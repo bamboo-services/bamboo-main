@@ -11,51 +11,16 @@
 
 package base
 
-// BambooConfig 主配置结构
+// BambooConfig 业务自定义配置结构。
+//
+// 自 v1.0.4 起，数据库与缓存配置已迁移至 bamboo-base-go 的 xOption 声明式配置
+// （xOption.WithDatabase / xOption.WithCache 从环境变量自动装配），
+// 本结构仅保留框架未覆盖的业务自定义配置（目前仅 Email）。
+//
+// 该结构通过 startup 节点注入到上下文，供 worker_mail 等模块经
+// pkg/util/ctx.GetConfig 读取。
 type BambooConfig struct {
-	Xlf       BMConfig        `mapstructure:"xlf" yaml:"xlf"`
-	Snowflake SnowflakeConfig `mapstructure:"snowflake" yaml:"snowflake"`
-	Database  DatabaseConfig  `mapstructure:"database" yaml:"database"`
-	NoSQL     NoSQLConfig     `mapstructure:"nosql" yaml:"nosql"`
-	Email     EmailConfig     `mapstructure:"email" yaml:"email"`
-	SSO       SSOConfig       `mapstructure:"sso" yaml:"sso"`
-}
-
-// BMConfig 应用配置
-type BMConfig struct {
-	Debug  bool         `mapstructure:"debug" yaml:"debug"`
-	Server ServerConfig `mapstructure:"server" yaml:"server"`
-}
-
-// ServerConfig 服务器配置
-type ServerConfig struct {
-	Port int `mapstructure:"port" yaml:"port"`
-}
-
-// SnowflakeConfig 表示用于配置 Snowflake ID 生成器的结构。
-type SnowflakeConfig struct {
-	NodeID *int64 `mapstructure:"node_id" yaml:"node_id"`
-}
-
-// DatabaseConfig 数据库配置
-type DatabaseConfig struct {
-	Host     string `mapstructure:"host" yaml:"host"`
-	Port     int    `mapstructure:"port" yaml:"port"`
-	User     string `mapstructure:"user" yaml:"user"`
-	Pass     string `mapstructure:"pass" yaml:"pass"`
-	Name     string `mapstructure:"name" yaml:"name"`
-	Prefix   string `mapstructure:"prefix" yaml:"prefix"`
-	SSLMode  string `mapstructure:"sslmode" yaml:"sslmode"`
-	TimeZone string `mapstructure:"timezone" yaml:"timezone"`
-}
-
-// NoSQLConfig Redis配置
-type NoSQLConfig struct {
-	Host     string `mapstructure:"host" yaml:"host"`
-	Port     int    `mapstructure:"port" yaml:"port"`
-	Pass     string `mapstructure:"pass" yaml:"pass"`
-	Database int    `mapstructure:"database" yaml:"database"`
-	Prefix   string `mapstructure:"prefix" yaml:"prefix"`
+	Email EmailConfig `mapstructure:"email" yaml:"email"`
 }
 
 // EmailConfig 邮件配置
@@ -72,17 +37,4 @@ type EmailConfig struct {
 	Timeout     int    `mapstructure:"timeout" yaml:"timeout"`           // 发送超时秒数（默认10）
 	UseTLS      bool   `mapstructure:"use_tls" yaml:"use_tls"`           // 是否使用 TLS 直连（465 端口）
 	UseStartTLS bool   `mapstructure:"use_starttls" yaml:"use_starttls"` // 是否使用 STARTTLS（587 端口）
-}
-
-type SSOConfig struct {
-	ClientID                 string `mapstructure:"client_id" yaml:"client_id"`
-	ClientSecret             string `mapstructure:"client_secret" yaml:"client_secret"`
-	WellKnownURI             string `mapstructure:"well_known_uri" yaml:"well_known_uri"`
-	RedirectURI              string `mapstructure:"redirect_uri" yaml:"redirect_uri"`
-	EndpointAuthURI          string `mapstructure:"endpoint_auth_uri" yaml:"endpoint_auth_uri"`
-	EndpointTokenURI         string `mapstructure:"endpoint_token_uri" yaml:"endpoint_token_uri"`
-	EndpointUserinfoURI      string `mapstructure:"endpoint_userinfo_uri" yaml:"endpoint_userinfo_uri"`
-	EndpointIntrospectionURI string `mapstructure:"endpoint_introspection_uri" yaml:"endpoint_introspection_uri"`
-	EndpointRevocationURI    string `mapstructure:"endpoint_revocation_uri" yaml:"endpoint_revocation_uri"`
-	BusinessCache            *bool  `mapstructure:"business_cache" yaml:"business_cache"`
 }

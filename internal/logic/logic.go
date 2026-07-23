@@ -2,12 +2,12 @@ package logic
 
 import (
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	"github.com/redis/go-redis/v9"
+	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	"gorm.io/gorm"
 )
 
 type logic struct {
-	db  *gorm.DB
-	rdb *redis.Client
-	log *xLog.LogNamedLogger
+	db    *gorm.DB
+	cache *xCache.Manager
+	log   *xLog.LogNamedLogger
 }

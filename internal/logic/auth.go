@@ -29,7 +29,7 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/common/utility/context"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	"github.com/gin-gonic/gin"
 	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/logic"
 )
@@ -47,17 +47,17 @@ type AuthLogic struct {
 
 func NewAuthLogic(ctx context.Context) *AuthLogic {
 	db := xCtxUtil.MustGetDB(ctx)
-	rdb := xCtxUtil.MustGetRDB(ctx)
+	m := xCtxUtil.MustGetCacheManager(ctx)
 
 	return &AuthLogic{
 		logic: logic{
-			db:  db,
-			rdb: rdb,
-			log: xLog.WithName(xLog.NamedLOGC, "AuthLogic"),
+			db:    db,
+			cache: m,
+			log:   xLog.WithName(xLog.NamedLOGC, "AuthLogic"),
 		},
 		SessionService: &logcHelper.SessionLogic{},
 		repo: authRepo{
-			user: repository.NewSystemUserRepo(db, rdb),
+			user: repository.NewSystemUserRepo(db, m),
 		},
 	}
 }

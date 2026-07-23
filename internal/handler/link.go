@@ -14,7 +14,7 @@ package handler
 import (
 	apiLink "github.com/bamboo-services/bamboo-main/api/link"
 
-	xValid "github.com/bamboo-services/bamboo-base-go/common/validator"
+	xValid "github.com/bamboo-services/bamboo-base-go/major/validator"
 	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
 	"github.com/gin-gonic/gin"
 )

@@ -6,17 +6,17 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
-	"github.com/bamboo-services/bamboo-main/internal/repository/cache"
+	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 type SponsorRecordRepo struct {
-	db    *gorm.DB
-	cache *cache.SponsorRecordCache
-	log   *xLog.LogNamedLogger
+	db  *gorm.DB
+	kc  xCache.KeyCache[string, entity.SponsorRecord]
+	log *xLog.LogNamedLogger
 }
 
 type SponsorRecordPageQuery struct {
@@ -38,13 +38,10 @@ type SponsorRecordPublicPageQuery struct {
 	Order     string
 }
 
-func NewSponsorRecordRepo(db *gorm.DB, rdb *redis.Client) *SponsorRecordRepo {
+func NewSponsorRecordRepo(db *gorm.DB, m *xCache.Manager) *SponsorRecordRepo {
 	return &SponsorRecordRepo{
-		db: db,
-		cache: &cache.SponsorRecordCache{
-			RDB: rdb,
-			TTL: time.Minute * 10,
-		},
+		db:  db,
+		kc:  xCache.KeyCacheOf[string, entity.SponsorRecord](m),
 		log: xLog.WithName(xLog.NamedREPO, "SponsorRecordRepo"),
 	}
 }
@@ -57,7 +54,7 @@ func (r *SponsorRecordRepo) Create(ctx *gin.Context, record *entity.SponsorRecor
 		return nil, xError.NewError(ctx, xError.DatabaseError, "创建赞助记录失败", true, err)
 	}
 
-	if cacheErr := r.cache.Set(ctx.Request.Context(), record); cacheErr != nil {
+	if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisSponsorRecord.Get(record.ID).String(), record, xCache.WithTTL(10*time.Minute)); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -74,16 +71,16 @@ func (r *SponsorRecordRepo) Create(ctx *gin.Context, record *entity.SponsorRecor
 func (r *SponsorRecordRepo) GetByID(ctx *gin.Context, id int64) (*entity.SponsorRecord, bool, *xError.Error) {
 	r.log.Info(ctx, "GetByID - 获取赞助记录")
 
-	if record, err := r.cache.Get(ctx.Request.Context(), id); err != nil {
+	if record, ok, err := r.kc.Get(ctx.Request.Context(), constants.RedisSponsorRecord.Get(id).String()); err != nil {
 		return nil, false, xError.NewError(ctx, xError.CacheError, "获取赞助记录缓存失败", true, err)
-	} else if record != nil {
+	} else if ok {
 		return record, true, nil
 	}
 
 	var record entity.SponsorRecord
 	err := r.db.WithContext(ctx).Where("id = ?", id).First(&record).Error
 	if err == nil {
-		if cacheErr := r.cache.Set(ctx.Request.Context(), &record); cacheErr != nil {
+		if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisSponsorRecord.Get(record.ID).String(), &record, xCache.WithTTL(10*time.Minute)); cacheErr != nil {
 			r.log.Warn(ctx, cacheErr.Error())
 		}
 		return &record, true, nil
@@ -100,7 +97,7 @@ func (r *SponsorRecordRepo) GetDetailByID(ctx *gin.Context, id int64) (*entity.S
 	var record entity.SponsorRecord
 	err := r.db.WithContext(ctx).Preload("ChannelFKey").Where("id = ?", id).First(&record).Error
 	if err == nil {
-		if cacheErr := r.cache.Set(ctx.Request.Context(), &record); cacheErr != nil {
+		if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisSponsorRecord.Get(record.ID).String(), &record, xCache.WithTTL(10*time.Minute)); cacheErr != nil {
 			r.log.Warn(ctx, cacheErr.Error())
 		}
 		return &record, true, nil
@@ -122,7 +119,7 @@ func (r *SponsorRecordRepo) UpdateByID(ctx *gin.Context, id int64, updates map[s
 		return nil, false, nil
 	}
 
-	if cacheErr := r.cache.Delete(ctx.Request.Context(), id); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisSponsorRecord.Get(id).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -144,7 +141,7 @@ func (r *SponsorRecordRepo) HardDeleteByID(ctx *gin.Context, id int64) (bool, *x
 		return false, nil
 	}
 
-	if cacheErr := r.cache.Delete(ctx.Request.Context(), id); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisSponsorRecord.Get(id).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 	return true, nil

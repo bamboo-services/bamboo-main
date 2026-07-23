@@ -6,7 +6,7 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/common/utility/context"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	apiLinkGroup "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
@@ -26,17 +26,17 @@ type LinkGroupLogic struct {
 
 func NewLinkGroupLogic(ctx context.Context) *LinkGroupLogic {
 	db := xCtxUtil.MustGetDB(ctx)
-	rdb := xCtxUtil.MustGetRDB(ctx)
+	m := xCtxUtil.MustGetCacheManager(ctx)
 
 	return &LinkGroupLogic{
 		logic: logic{
-			db:  db,
-			rdb: rdb,
-			log: xLog.WithName(xLog.NamedLOGC, "LinkGroupLogic"),
+			db:    db,
+			cache: m,
+			log:   xLog.WithName(xLog.NamedLOGC, "LinkGroupLogic"),
 		},
 		repo: linkGroupRepo{
-			group: repository.NewLinkGroupRepo(db, rdb),
-			link:  repository.NewLinkRepo(db, rdb),
+			group: repository.NewLinkGroupRepo(db, m),
+			link:  repository.NewLinkRepo(db, m),
 		},
 	}
 }
