@@ -1,0 +1,133 @@
+/*
+ * --------------------------------------------------------------------------------
+ * Copyright (c) 2016-NOW 筱锋
+ * Author: 筱锋(https://www.x-lf.com)
+ * License: MIT
+ * --------------------------------------------------------------------------------
+ */
+
+import { Link, useLocation } from '@tanstack/react-router'
+import {
+  LayoutDashboard,
+  Link as LinkIcon,
+  MapPin,
+  Palette,
+  Heart,
+  Settings,
+  LogOut,
+  Home,
+  Users,
+  MoreHorizontal,
+} from 'lucide-react'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar'
+import { BambooLogo } from '@/assets/svg/bamboo-logo'
+import { siteInfo } from '@/data/mock/site-info'
+
+const menuGroups = [
+  {
+    label: '首页',
+    icon: Home,
+    items: [
+      { title: '看板', url: '/admin/dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: '友链',
+    icon: Users,
+    items: [
+      { title: '友链管理', url: '/admin/link', icon: LinkIcon },
+      { title: '位置管理', url: '/admin/location', icon: MapPin },
+      { title: '颜色管理', url: '/admin/color', icon: Palette },
+    ],
+  },
+  {
+    label: '其他',
+    icon: MoreHorizontal,
+    items: [
+      { title: '赞助', url: '/admin/sponsor', icon: Heart },
+      { title: '设置', url: '/admin/setting', icon: Settings },
+    ],
+  },
+]
+
+export function AdminSidebar() {
+  const { pathname } = useLocation()
+
+  const isActive = (url: string) => {
+    if (url === '/admin/link') {
+      return pathname === url || pathname.startsWith('/admin/link/')
+    }
+    return pathname === url
+  }
+
+  return (
+    <Sidebar variant="inset" collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link to="/">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <BambooLogo size={32} />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">{siteInfo.site.siteName}</span>
+                  <span className="truncate text-xs text-muted-foreground">v{siteInfo.site.version}</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+
+      <SidebarContent>
+        {menuGroups.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel className="flex items-center gap-1">
+              <group.icon className="h-4 w-4" />
+              <span>{group.label}</span>
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                      <Link to={item.url}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
+      </SidebarContent>
+
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link to="/">
+                <LogOut className="h-4 w-4" />
+                <span>退出登录</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
+  )
+}
