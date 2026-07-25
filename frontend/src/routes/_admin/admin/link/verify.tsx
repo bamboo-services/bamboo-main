@@ -9,12 +9,18 @@
  * --------------------------------------------------------------------------------
  */
 
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { ArrowLeft, Check, ExternalLink, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { mockLinks } from '@/data/mock/links'
-import { ArrowLeft, Check, X, ExternalLink } from 'lucide-react'
 
 export const Route = createFileRoute('/_admin/admin/link/verify')({
   component: LinkVerifyPage,
@@ -86,24 +92,35 @@ function LinkVerifyPage() {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm font-medium mb-1">站点描述</p>
-                  <p className="text-sm text-muted-foreground">{link.siteDescription}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {link.siteDescription}
+                  </p>
                 </div>
                 <div className="grid gap-4 md:grid-cols-3">
                   <div>
                     <p className="text-sm font-medium mb-1">站长邮箱</p>
-                    <p className="text-sm text-muted-foreground">{link.webmasterEmail}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {link.webmasterEmail}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium mb-1">申请位置</p>
-                    <p className="text-sm text-muted-foreground">{link.locationName}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {link.locationName}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium mb-1">申请时间</p>
-                    <p className="text-sm text-muted-foreground">{link.createdAt}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {link.createdAt}
+                    </p>
                   </div>
                 </div>
                 <div className="flex justify-end gap-2 pt-4 border-t">
-                  <Button variant="outline" className="text-destructive hover:text-destructive">
+                  <Button
+                    variant="outline"
+                    className="text-destructive hover:text-destructive"
+                  >
                     <X className="mr-2 h-4 w-4" />
                     拒绝
                   </Button>

@@ -10,7 +10,11 @@
  */
 
 import { Outlet, createFileRoute } from '@tanstack/react-router'
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
 import { AdminSidebar } from '@/components/layout/admin-sidebar'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -37,7 +41,9 @@ function AdminLayout() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/admin/dashboard">管理后台</BreadcrumbLink>
+                <BreadcrumbLink href="/admin/dashboard">
+                  管理后台
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>

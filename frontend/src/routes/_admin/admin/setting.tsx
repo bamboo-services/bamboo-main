@@ -10,11 +10,17 @@
  */
 
 import { createFileRoute } from '@tanstack/react-router'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Save } from 'lucide-react'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Save } from 'lucide-react'
 import { siteInfo } from '@/data/mock/site-info'
 
 export const Route = createFileRoute('/_admin/admin/setting')({
@@ -81,7 +87,11 @@ function SettingPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="bloggerEmail">博主邮箱</Label>
-              <Input id="bloggerEmail" type="email" defaultValue={siteInfo.blogger.email} />
+              <Input
+                id="bloggerEmail"
+                type="email"
+                defaultValue={siteInfo.blogger.email}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="bloggerDescription">博主简介</Label>

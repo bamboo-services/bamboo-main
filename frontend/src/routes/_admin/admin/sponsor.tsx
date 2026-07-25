@@ -10,10 +10,16 @@
  */
 
 import { createFileRoute } from '@tanstack/react-router'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Plus } from 'lucide-react'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus } from 'lucide-react'
 
 export const Route = createFileRoute('/_admin/admin/sponsor')({
   component: SponsorPage,
@@ -101,11 +107,21 @@ function SponsorPage() {
             <table className="w-full caption-bottom text-sm">
               <thead className="[&_tr]:border-b">
                 <tr className="border-b transition-colors hover:bg-muted/50">
-                  <th className="h-12 px-4 text-left align-middle font-medium">赞助者</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium">金额</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium">方式</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium">留言</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium">时间</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium">
+                    赞助者
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium">
+                    金额
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium">
+                    方式
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium">
+                    留言
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium">
+                    时间
+                  </th>
                 </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0">

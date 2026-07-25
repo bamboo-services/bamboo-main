@@ -11,16 +11,16 @@
 
 import { Link, useLocation } from '@tanstack/react-router'
 import {
+  Heart,
+  Home,
   LayoutDashboard,
   Link as LinkIcon,
-  MapPin,
-  Palette,
-  Heart,
-  Settings,
   LogOut,
-  Home,
-  Users,
+  MapPin,
   MoreHorizontal,
+  Palette,
+  Settings,
+  Users,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -41,9 +41,7 @@ const menuGroups = [
   {
     label: '首页',
     icon: Home,
-    items: [
-      { title: '看板', url: '/admin/dashboard', icon: LayoutDashboard },
-    ],
+    items: [{ title: '看板', url: '/admin/dashboard', icon: LayoutDashboard }],
   },
   {
     label: '友链',
@@ -85,8 +83,12 @@ export function AdminSidebar() {
                   <BambooLogo size={32} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{siteInfo.site.siteName}</span>
-                  <span className="truncate text-xs text-muted-foreground">v{siteInfo.site.version}</span>
+                  <span className="truncate font-semibold">
+                    {siteInfo.site.siteName}
+                  </span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    v{siteInfo.site.version}
+                  </span>
                 </div>
               </Link>
             </SidebarMenuButton>

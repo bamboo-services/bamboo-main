@@ -9,16 +9,17 @@
  * --------------------------------------------------------------------------------
  */
 
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { motion, useReducedMotion } from 'motion/react'
 import { useState } from 'react'
+import { ArrowLeft, Eye, EyeOff, LockKeyhole, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import { BambooLogo } from '@/assets/svg/bamboo-logo'
 import { siteInfo } from '@/data/mock/site-info'
-import favicon from '@/assets/images/favicon.png'
-import authBackground from '@/assets/images/auth_background.jpg'
-import { User, Key, Send } from 'lucide-react'
+import defaultBackground from '@/assets/images/default-background.webp'
 
 export const Route = createFileRoute('/_authorization/auth/login')({
   component: LoginPage,
@@ -26,6 +27,8 @@ export const Route = createFileRoute('/_authorization/auth/login')({
 
 function LoginPage() {
   const navigate = useNavigate()
+  const reduced = useReducedMotion() ?? false
+  const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -39,122 +42,162 @@ function LoginPage() {
   }
 
   return (
-    <section className="bg-white min-h-dvh">
-      <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
-        {/* 左侧背景图区域 */}
-        <section className="relative flex h-32 items-end bg-gray-900 lg:col-span-5 lg:h-full xl:col-span-6">
-          <img
-            alt="Background"
-            src={authBackground}
-            className="absolute inset-0 h-full w-full object-cover opacity-80"
-          />
-          <div className="hidden lg:relative lg:block lg:p-12">
-            <div className="flex">
-              <Link to="/">
-                <img
-                  src={favicon}
-                  alt="Logo"
-                  className="rounded-3xl h-32 w-32 shadow-lg hover:scale-105 transition"
-                />
-              </Link>
-            </div>
-            <h2 className="mt-6 text-2xl font-bold text-white sm:text-3xl md:text-4xl">
+    <div className="grid min-h-dvh bg-background lg:grid-cols-2">
+      {/* 左侧：表单栏 */}
+      <div className="flex flex-col gap-6 p-6 md:p-10">
+        {/* 顶部 Logo（shadcn login-04 风格） */}
+        <div className="flex justify-center md:justify-start">
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 font-medium transition-opacity hover:opacity-80"
+          >
+            <BambooLogo size={30} />
+            <span className="text-lg font-semibold text-text-primary">
               {siteInfo.site.siteName}
-            </h2>
-            <p className="mt-4 leading-relaxed text-white/90">
-              {siteInfo.blogger.description}
-            </p>
-          </div>
-        </section>
+            </span>
+          </Link>
+        </div>
 
-        {/* 右侧登录表单区域 */}
-        <main className="flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6">
-          <div className="max-w-xl lg:max-w-3xl w-full">
-            {/* 移动端 Logo */}
-            <div className="relative -mt-16 block lg:hidden">
-              <Link
-                to="/"
-                className="inline-flex items-center justify-center rounded-full bg-white p-2 shadow-lg"
-              >
-                <img src={favicon} alt="Logo" className="rounded-2xl h-12" draggable={false} />
-              </Link>
-              <h1 className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl">
-                {siteInfo.site.siteName}
-              </h1>
-              <p className="mt-4 leading-relaxed text-gray-500">
-                {siteInfo.blogger.description}
-              </p>
-            </div>
-
-            {/* 登录表单 */}
-            <form className="mt-8 grid gap-6" onSubmit={handleSubmit}>
-              <div className="grid justify-center mb-6">
-                <h2 className="text-4xl font-bold text-center">用户登录</h2>
+        {/* 居中窄表单 */}
+        <div className="flex flex-1 items-center justify-center">
+          <motion.div
+            initial={reduced ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: 'easeOut' }}
+            className="w-full max-w-xs"
+          >
+            <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+              {/* 标题组 */}
+              <div className="flex flex-col gap-2 text-center">
+                <h1 className="text-2xl font-bold text-text-primary">
+                  欢迎回来
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  登录以管理你的友情链接
+                </p>
               </div>
 
-              {/* 用户名 */}
-              <div className="grid gap-2">
-                <Label htmlFor="username" className="flex gap-1">
-                  <span>用户名</span>
-                  <span className="text-xs text-red-500">*</span>
-                </Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="username"
-                    type="text"
-                    placeholder="请输入用户名"
-                    className="pl-10"
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  />
+              <div className="grid gap-4">
+                {/* 用户名 */}
+                <div className="grid gap-2">
+                  <Label htmlFor="username">用户名</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder="请输入用户名"
+                      autoComplete="username"
+                      className="pl-9"
+                      value={formData.username}
+                      onChange={(e) =>
+                        setFormData({ ...formData, username: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* 密码 */}
-              <div className="grid gap-2">
-                <Label htmlFor="password" className="flex gap-1">
-                  <span>密码</span>
-                  <span className="text-xs text-red-500">*</span>
-                </Label>
-                <div className="relative">
-                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="请输入密码"
-                    className="pl-10"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  />
+                {/* 密码（可见性切换） */}
+                <div className="grid gap-2">
+                  <Label htmlFor="password">密码</Label>
+                  <div className="relative">
+                    <LockKeyhole className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="请输入密码"
+                      autoComplete="current-password"
+                      className="pl-9 pr-9"
+                      value={formData.password}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password: e.target.value })
+                      }
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                      aria-label={showPassword ? '隐藏密码' : '显示密码'}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="size-4" />
+                      ) : (
+                        <Eye className="size-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              {/* 记住登录 */}
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="remember"
-                  checked={formData.remember}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, remember: checked as boolean })
-                  }
-                />
-                <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
-                  记住登录
-                </Label>
-              </div>
+                {/* 记住登录 */}
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="remember"
+                    checked={formData.remember}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, remember: checked === true })
+                    }
+                  />
+                  <Label
+                    htmlFor="remember"
+                    className="cursor-pointer text-sm font-normal text-muted-foreground"
+                  >
+                    记住登录状态
+                  </Label>
+                </div>
 
-              {/* 登录按钮 */}
-              <div className="grid justify-center mt-2">
-                <Button type="submit" size="lg" className="px-12">
-                  <Send className="mr-2 h-4 w-4" />
+                {/* 登录按钮（全宽） */}
+                <Button type="submit" className="w-full">
                   登录
                 </Button>
               </div>
+
+              {/* 返回首页 */}
+              <div className="text-center text-sm">
+                <Link
+                  to="/"
+                  className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-primary"
+                >
+                  <ArrowLeft className="size-3.5" />
+                  返回首页
+                </Link>
+              </div>
             </form>
-          </div>
-        </main>
+          </motion.div>
+        </div>
       </div>
-    </section>
+
+      {/* 右侧：图片栏（移动端隐藏，沿用首页竹林清晨图保持色调统一） */}
+      <motion.div
+        initial={reduced ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+        className="relative hidden lg:block"
+      >
+        <img
+          alt="Background"
+          src={defaultBackground}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        {/* 主题绿调遮罩：底部压深以便承载引言文字 */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(to top, oklch(0.35 0.08 155 / 0.82) 0%, oklch(0.5 0.08 155 / 0.25) 45%, oklch(0.96 0.03 110 / 0.2) 100%)',
+          }}
+        />
+        {/* 底部引言 */}
+        <div className="absolute inset-x-0 bottom-0 p-10">
+          <p className="text-lg font-medium leading-relaxed text-white">
+            {siteInfo.blogger.description}
+          </p>
+          <p className="mt-2 text-sm text-white/70">
+            {siteInfo.site.siteName} · 友情链接管理
+          </p>
+        </div>
+      </motion.div>
+    </div>
   )
 }

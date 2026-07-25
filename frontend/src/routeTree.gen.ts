@@ -12,8 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AdminRouteRouteImport } from './routes/_admin/route'
 import { Route as AuthorizationRouteRouteImport } from './routes/_authorization/route'
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
+import { Route as AboutRouteRouteImport } from './routes/about/route'
 import { Route as AdminAdminRouteRouteImport } from './routes/_admin/admin/route'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as AboutIndexRouteImport } from './routes/about/index'
+import { Route as AboutFriendsRouteImport } from './routes/about/friends'
+import { Route as AboutMeRouteImport } from './routes/about/me'
+import { Route as AboutSponsorRouteImport } from './routes/about/sponsor'
 import { Route as AdminAdminDashboardRouteImport } from './routes/_admin/admin/dashboard'
 import { Route as AdminAdminSettingRouteImport } from './routes/_admin/admin/setting'
 import { Route as AdminAdminSponsorRouteImport } from './routes/_admin/admin/sponsor'
@@ -35,6 +40,11 @@ const PublicRouteRoute = PublicRouteRouteImport.update({
   id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRouteRoute = AboutRouteRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAdminRouteRoute = AdminAdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -44,6 +54,26 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PublicRouteRoute,
+} as any)
+const AboutIndexRoute = AboutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AboutRouteRoute,
+} as any)
+const AboutFriendsRoute = AboutFriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => AboutRouteRoute,
+} as any)
+const AboutMeRoute = AboutMeRouteImport.update({
+  id: '/me',
+  path: '/me',
+  getParentRoute: () => AboutRouteRoute,
+} as any)
+const AboutSponsorRoute = AboutSponsorRouteImport.update({
+  id: '/sponsor',
+  path: '/sponsor',
+  getParentRoute: () => AboutRouteRoute,
 } as any)
 const AdminAdminDashboardRoute = AdminAdminDashboardRouteImport.update({
   id: '/dashboard',
@@ -88,7 +118,12 @@ const AdminAdminLinkIdEditRoute = AdminAdminLinkIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
+  '/about': typeof AboutRouteRouteWithChildren
   '/admin': typeof AdminAdminRouteRouteWithChildren
+  '/about/friends': typeof AboutFriendsRoute
+  '/about/me': typeof AboutMeRoute
+  '/about/sponsor': typeof AboutSponsorRoute
+  '/about/': typeof AboutIndexRoute
   '/admin/dashboard': typeof AdminAdminDashboardRoute
   '/admin/setting': typeof AdminAdminSettingRoute
   '/admin/sponsor': typeof AdminAdminSponsorRoute
@@ -101,6 +136,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/admin': typeof AdminAdminRouteRouteWithChildren
+  '/about/friends': typeof AboutFriendsRoute
+  '/about/me': typeof AboutMeRoute
+  '/about/sponsor': typeof AboutSponsorRoute
+  '/about': typeof AboutIndexRoute
   '/admin/dashboard': typeof AdminAdminDashboardRoute
   '/admin/setting': typeof AdminAdminSettingRoute
   '/admin/sponsor': typeof AdminAdminSponsorRoute
@@ -115,8 +154,13 @@ export interface FileRoutesById {
   '/_admin': typeof AdminRouteRouteWithChildren
   '/_authorization': typeof AuthorizationRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
+  '/about': typeof AboutRouteRouteWithChildren
   '/_admin/admin': typeof AdminAdminRouteRouteWithChildren
+  '/about/friends': typeof AboutFriendsRoute
+  '/about/me': typeof AboutMeRoute
+  '/about/sponsor': typeof AboutSponsorRoute
   '/_public/': typeof PublicIndexRoute
+  '/about/': typeof AboutIndexRoute
   '/_admin/admin/dashboard': typeof AdminAdminDashboardRoute
   '/_admin/admin/setting': typeof AdminAdminSettingRoute
   '/_admin/admin/sponsor': typeof AdminAdminSponsorRoute
@@ -130,7 +174,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/admin'
+    | '/about/friends'
+    | '/about/me'
+    | '/about/sponsor'
+    | '/about/'
     | '/admin/dashboard'
     | '/admin/setting'
     | '/admin/sponsor'
@@ -143,6 +192,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/about/friends'
+    | '/about/me'
+    | '/about/sponsor'
+    | '/about'
     | '/admin/dashboard'
     | '/admin/setting'
     | '/admin/sponsor'
@@ -156,8 +209,13 @@ export interface FileRouteTypes {
     | '/_admin'
     | '/_authorization'
     | '/_public'
+    | '/about'
     | '/_admin/admin'
+    | '/about/friends'
+    | '/about/me'
+    | '/about/sponsor'
     | '/_public/'
+    | '/about/'
     | '/_admin/admin/dashboard'
     | '/_admin/admin/setting'
     | '/_admin/admin/sponsor'
@@ -172,6 +230,7 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AuthorizationRouteRoute: typeof AuthorizationRouteRouteWithChildren
   PublicRouteRoute: typeof PublicRouteRouteWithChildren
+  AboutRouteRoute: typeof AboutRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -197,6 +256,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_admin/admin': {
       id: '/_admin/admin'
       path: '/admin'
@@ -210,6 +276,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRouteRoute
+    }
+    '/about/': {
+      id: '/about/'
+      path: '/'
+      fullPath: '/about/'
+      preLoaderRoute: typeof AboutIndexRouteImport
+      parentRoute: typeof AboutRouteRoute
+    }
+    '/about/friends': {
+      id: '/about/friends'
+      path: '/friends'
+      fullPath: '/about/friends'
+      preLoaderRoute: typeof AboutFriendsRouteImport
+      parentRoute: typeof AboutRouteRoute
+    }
+    '/about/me': {
+      id: '/about/me'
+      path: '/me'
+      fullPath: '/about/me'
+      preLoaderRoute: typeof AboutMeRouteImport
+      parentRoute: typeof AboutRouteRoute
+    }
+    '/about/sponsor': {
+      id: '/about/sponsor'
+      path: '/sponsor'
+      fullPath: '/about/sponsor'
+      preLoaderRoute: typeof AboutSponsorRouteImport
+      parentRoute: typeof AboutRouteRoute
     }
     '/_admin/admin/dashboard': {
       id: '/_admin/admin/dashboard'
@@ -329,10 +423,29 @@ const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(
   PublicRouteRouteChildren,
 )
 
+interface AboutRouteRouteChildren {
+  AboutFriendsRoute: typeof AboutFriendsRoute
+  AboutMeRoute: typeof AboutMeRoute
+  AboutSponsorRoute: typeof AboutSponsorRoute
+  AboutIndexRoute: typeof AboutIndexRoute
+}
+
+const AboutRouteRouteChildren: AboutRouteRouteChildren = {
+  AboutFriendsRoute: AboutFriendsRoute,
+  AboutMeRoute: AboutMeRoute,
+  AboutSponsorRoute: AboutSponsorRoute,
+  AboutIndexRoute: AboutIndexRoute,
+}
+
+const AboutRouteRouteWithChildren = AboutRouteRoute._addFileChildren(
+  AboutRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AuthorizationRouteRoute: AuthorizationRouteRouteWithChildren,
   PublicRouteRoute: PublicRouteRouteWithChildren,
+  AboutRouteRoute: AboutRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

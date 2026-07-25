@@ -9,13 +9,25 @@
  * --------------------------------------------------------------------------------
  */
 
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import {
+  CheckCircle,
+  ExternalLink,
+  MoreHorizontal,
+  Plus,
+  Search,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { mockLinks, mockLocations } from '@/data/mock/links'
-import { Plus, Search, CheckCircle, ExternalLink, MoreHorizontal } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -90,7 +102,9 @@ function LinkListPage() {
             <CardTitle className="text-sm font-medium">已通过</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{approvedLinks.length}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {approvedLinks.length}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -98,7 +112,9 @@ function LinkListPage() {
             <CardTitle className="text-sm font-medium">待审核</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{pendingLinks.length}</div>
+            <div className="text-2xl font-bold text-yellow-600">
+              {pendingLinks.length}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -142,21 +158,31 @@ function LinkListPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
-                    <Link to="/admin/link/$id/edit" params={{ id: String(link.id) }}>
+                    <Link
+                      to="/admin/link/$id/edit"
+                      params={{ id: String(link.id) }}
+                    >
                       编辑
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive">删除</DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive">
+                    删除
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground line-clamp-2">{link.siteDescription}</p>
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                {link.siteDescription}
+              </p>
               <div className="mt-3 flex items-center gap-2">
                 <Badge variant="secondary">{link.locationName}</Badge>
                 <Badge
                   variant="outline"
-                  style={{ borderColor: mockLinks.find((l) => l.id === link.id)?.colorName }}
+                  style={{
+                    borderColor: mockLinks.find((l) => l.id === link.id)
+                      ?.colorName,
+                  }}
                 >
                   {link.colorName}
                 </Badge>

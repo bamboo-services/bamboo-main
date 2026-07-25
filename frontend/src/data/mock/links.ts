@@ -39,20 +39,20 @@ export interface ColorItem {
   color: string
 }
 
-export const mockLocations: LocationItem[] = [
+export const mockLocations: Array<LocationItem> = [
   { id: 1, name: '技术博客', description: '分享技术文章的博客' },
   { id: 2, name: '个人博客', description: '记录生活的个人博客' },
   { id: 3, name: '资源站点', description: '提供资源下载的站点' },
 ]
 
-export const mockColors: ColorItem[] = [
+export const mockColors: Array<ColorItem> = [
   { id: 1, name: '默认', color: '#6366f1' },
   { id: 2, name: '绿色', color: '#22c55e' },
   { id: 3, name: '蓝色', color: '#3b82f6' },
   { id: 4, name: '紫色', color: '#a855f7' },
 ]
 
-export const mockLinks: LinkItem[] = [
+export const mockLinks: Array<LinkItem> = [
   {
     id: 1,
     siteName: '筱锋的博客',

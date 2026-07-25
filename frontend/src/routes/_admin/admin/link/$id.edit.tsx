@@ -9,15 +9,21 @@
  * --------------------------------------------------------------------------------
  */
 
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { ArrowLeft, Save } from 'lucide-react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { mockLinks, mockLocations, mockColors } from '@/data/mock/links'
-import { ArrowLeft, Save } from 'lucide-react'
-import { useState } from 'react'
+import { mockColors, mockLinks, mockLocations } from '@/data/mock/links'
 
 export const Route = createFileRoute('/_admin/admin/link/$id/edit')({
   component: LinkEditPage,
@@ -88,7 +94,9 @@ function LinkEditPage() {
                   id="siteName"
                   placeholder="请输入站点名称"
                   value={formData.siteName}
-                  onChange={(e) => setFormData({ ...formData, siteName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, siteName: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -99,7 +107,9 @@ function LinkEditPage() {
                   id="siteUrl"
                   placeholder="https://example.com"
                   value={formData.siteUrl}
-                  onChange={(e) => setFormData({ ...formData, siteUrl: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, siteUrl: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -108,7 +118,9 @@ function LinkEditPage() {
                   id="siteLogo"
                   placeholder="https://example.com/logo.png"
                   value={formData.siteLogo}
-                  onChange={(e) => setFormData({ ...formData, siteLogo: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, siteLogo: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -120,7 +132,9 @@ function LinkEditPage() {
                   type="email"
                   placeholder="admin@example.com"
                   value={formData.webmasterEmail}
-                  onChange={(e) => setFormData({ ...formData, webmasterEmail: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, webmasterEmail: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -129,7 +143,9 @@ function LinkEditPage() {
                   id="location"
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, location: e.target.value })
+                  }
                 >
                   <option value="">请选择位置</option>
                   {mockLocations.map((location) => (
@@ -145,7 +161,9 @@ function LinkEditPage() {
                   id="color"
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   value={formData.color}
-                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, color: e.target.value })
+                  }
                 >
                   <option value="">请选择颜色</option>
                   {mockColors.map((color) => (
@@ -164,7 +182,9 @@ function LinkEditPage() {
                 className="w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm"
                 placeholder="请输入站点描述"
                 value={formData.siteDescription}
-                onChange={(e) => setFormData({ ...formData, siteDescription: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, siteDescription: e.target.value })
+                }
               />
             </div>
 
@@ -172,7 +192,9 @@ function LinkEditPage() {
               <Checkbox
                 id="hasAdv"
                 checked={formData.hasAdv}
-                onCheckedChange={(checked) => setFormData({ ...formData, hasAdv: checked as boolean })}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, hasAdv: checked as boolean })
+                }
               />
               <Label htmlFor="hasAdv" className="font-normal">
                 包含广告

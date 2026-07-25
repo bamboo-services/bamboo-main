@@ -9,14 +9,14 @@
  * --------------------------------------------------------------------------------
  */
 
+import path from 'node:path'
+import { URL, fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
-import path from 'node:path'
-import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -36,7 +36,20 @@ export default defineConfig({
   },
   build: {
     // 将构建产物输出到后端内嵌资源目录，由 Go 通过 go:embed 打包进二进制
-    outDir: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../resources/frontend/dist'),
+    outDir: path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      '../resources/frontend/dist',
+    ),
     emptyOutDir: true,
+  },
+  server: {
+    port: 3000,
+    // dev 期间把 /api 转发到后端 5555，避免浏览器跨域预检
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5555',
+        changeOrigin: true,
+      },
+    },
   },
 })
