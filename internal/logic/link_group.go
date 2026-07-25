@@ -13,13 +13,13 @@ package logic
 
 import (
 	"context"
-	"strconv"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	apiLinkGroup "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
+	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
 	"github.com/gin-gonic/gin"
@@ -82,7 +82,7 @@ func (l *LinkGroupLogic) Add(ctx *gin.Context, req *apiLinkGroup.GroupAddRequest
 }
 
 func (l *LinkGroupLogic) Update(ctx *gin.Context, groupIDStr string, req *apiLinkGroup.GroupUpdateRequest) (*entity.LinkGroup, *xError.Error) {
-	groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
+	groupID, err := logcHelper.ParseSnowflakeID(groupIDStr)
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.BadRequest, "无效的分组ID", false)
 	}
@@ -150,7 +150,7 @@ func (l *LinkGroupLogic) UpdateSort(ctx *gin.Context, req *apiLinkGroup.GroupSor
 }
 
 func (l *LinkGroupLogic) UpdateStatus(ctx *gin.Context, groupIDStr string, req *apiLinkGroup.GroupStatusRequest) *xError.Error {
-	groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
+	groupID, err := logcHelper.ParseSnowflakeID(groupIDStr)
 	if err != nil {
 		return xError.NewError(ctx, xError.BadRequest, "无效的分组ID", false)
 	}
@@ -167,7 +167,7 @@ func (l *LinkGroupLogic) UpdateStatus(ctx *gin.Context, groupIDStr string, req *
 }
 
 func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupIDStr string, req *apiLinkGroup.GroupDeleteRequest) ([]entity.LinkFriend, *xError.Error) {
-	groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
+	groupID, err := logcHelper.ParseSnowflakeID(groupIDStr)
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.BadRequest, "无效的分组ID", false)
 	}
@@ -225,7 +225,7 @@ func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupIDStr string, req *apiLin
 }
 
 func (l *LinkGroupLogic) Get(ctx *gin.Context, groupIDStr string) (*entity.LinkGroup, *xError.Error) {
-	groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
+	groupID, err := logcHelper.ParseSnowflakeID(groupIDStr)
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.BadRequest, "无效的分组ID", false)
 	}

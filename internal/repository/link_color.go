@@ -18,6 +18,7 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	apiLink "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
@@ -83,7 +84,7 @@ func (r *LinkColorRepo) Save(ctx *gin.Context, color *entity.LinkColor, tx *gorm
 	return color, nil
 }
 
-func (r *LinkColorRepo) GetByID(ctx *gin.Context, id int64, withLinks bool, tx *gorm.DB) (*entity.LinkColor, bool, *xError.Error) {
+func (r *LinkColorRepo) GetByID(ctx *gin.Context, id xSnowflake.SnowflakeID, withLinks bool, tx *gorm.DB) (*entity.LinkColor, bool, *xError.Error) {
 	if !withLinks {
 		if color, ok, err := r.kc.Get(ctx.Request.Context(), constants.RedisLinkColor.Get(id).String()); err != nil {
 			return nil, false, xError.NewError(ctx, xError.CacheError, "获取友链颜色缓存失败", true, err)
@@ -113,7 +114,7 @@ func (r *LinkColorRepo) GetByID(ctx *gin.Context, id int64, withLinks bool, tx *
 	return &color, true, nil
 }
 
-func (r *LinkColorRepo) UpdateStatusByID(ctx *gin.Context, id int64, status bool, tx *gorm.DB) (bool, *xError.Error) {
+func (r *LinkColorRepo) UpdateStatusByID(ctx *gin.Context, id xSnowflake.SnowflakeID, status bool, tx *gorm.DB) (bool, *xError.Error) {
 	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkColor{}).Where("id = ?", id).Update("status", status)
 	if result.Error != nil {
 		return false, xError.NewError(ctx, xError.DatabaseError, "更新颜色状态失败", false, result.Error)
@@ -129,7 +130,7 @@ func (r *LinkColorRepo) UpdateStatusByID(ctx *gin.Context, id int64, status bool
 	return true, nil
 }
 
-func (r *LinkColorRepo) UpdateSortByIDs(ctx *gin.Context, ids []int64, startSort int, tx *gorm.DB) *xError.Error {
+func (r *LinkColorRepo) UpdateSortByIDs(ctx *gin.Context, ids []xSnowflake.SnowflakeID, startSort int, tx *gorm.DB) *xError.Error {
 	db := r.pickDB(tx).WithContext(ctx)
 	for i, id := range ids {
 		result := db.Model(&entity.LinkColor{}).Where("id = ?", id).Update("sort_order", startSort+i)
@@ -147,7 +148,7 @@ func (r *LinkColorRepo) UpdateSortByIDs(ctx *gin.Context, ids []int64, startSort
 	return nil
 }
 
-func (r *LinkColorRepo) DeleteByID(ctx *gin.Context, id int64, tx *gorm.DB) (bool, *xError.Error) {
+func (r *LinkColorRepo) DeleteByID(ctx *gin.Context, id xSnowflake.SnowflakeID, tx *gorm.DB) (bool, *xError.Error) {
 	result := r.pickDB(tx).WithContext(ctx).Unscoped().Where("id = ?", id).Delete(&entity.LinkColor{})
 	if result.Error != nil {
 		return false, xError.NewError(ctx, xError.DatabaseError, "删除友链颜色失败", false, result.Error)

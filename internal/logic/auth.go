@@ -14,9 +14,9 @@ package logic
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
 	apiAuth "github.com/bamboo-services/bamboo-main/api/auth"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
@@ -171,7 +171,7 @@ func (a *AuthLogic) Logout(ctx *gin.Context, token string) *xError.Error {
 }
 
 // ChangePassword 修改密码
-func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID int64, req *apiAuth.PasswordChangeRequest) *xError.Error {
+func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID xSnowflake.SnowflakeID, req *apiAuth.PasswordChangeRequest) *xError.Error {
 	user, found, xErr := a.repo.user.GetByID(ctx, userID)
 	if xErr != nil {
 		return xErr
@@ -232,7 +232,7 @@ func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *apiAuth.PasswordResetRe
 }
 
 // GetUserInfo 获取用户信息
-func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID int64) (*entity.SystemUser, *xError.Error) {
+func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID xSnowflake.SnowflakeID) (*entity.SystemUser, *xError.Error) {
 	user, found, xErr := a.repo.user.GetByID(ctx, userID)
 	if xErr != nil {
 		return nil, xErr
@@ -244,7 +244,7 @@ func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID int64) (*entity.SystemU
 }
 
 // UpdateLastLogin 更新最后登录时间
-func (a *AuthLogic) UpdateLastLogin(ctx *gin.Context, userID int64) *xError.Error {
+func (a *AuthLogic) UpdateLastLogin(ctx *gin.Context, userID xSnowflake.SnowflakeID) *xError.Error {
 	now := time.Now()
 	return a.repo.user.UpdateLastLoginByID(ctx, userID, &now)
 }
@@ -274,8 +274,8 @@ func generateRandomString(length int) string {
 	return string(result)
 }
 
-func parseUserID(value string) int64 {
-	userID, err := strconv.ParseInt(value, 10, 64)
+func parseUserID(value string) xSnowflake.SnowflakeID {
+	userID, err := logcHelper.ParseSnowflakeID(value)
 	if err != nil {
 		return 0
 	}

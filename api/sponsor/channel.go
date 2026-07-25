@@ -12,6 +12,7 @@
 package apiSponsor
 
 import (
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	"time"
 
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
@@ -58,24 +59,24 @@ type ChannelPageRequest struct {
 }
 
 type ChannelEntityResponse struct {
-	ID           int64     `json:"id"`
-	Name         string    `json:"name"`
-	Icon         *string   `json:"icon"`
-	Description  *string   `json:"description"`
-	SortOrder    int       `json:"sort_order"`
-	Status       bool      `json:"status"`
-	SponsorCount int       `json:"sponsor_count"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           xSnowflake.SnowflakeID `json:"id"`
+	Name         string                 `json:"name"`
+	Icon         *string                `json:"icon"`
+	Description  *string                `json:"description"`
+	SortOrder    int                    `json:"sort_order"`
+	Status       bool                   `json:"status"`
+	SponsorCount int                    `json:"sponsor_count"`
+	CreatedAt    time.Time              `json:"created_at"`
+	UpdatedAt    time.Time              `json:"updated_at"`
 }
 
 type ChannelListItemResponse struct {
-	ID           int64   `json:"id"`
-	Name         string  `json:"name"`
-	Icon         *string `json:"icon"`
-	SortOrder    int     `json:"sort_order"`
-	Status       bool    `json:"status"`
-	SponsorCount int     `json:"sponsor_count"`
+	ID           xSnowflake.SnowflakeID `json:"id"`
+	Name         string                 `json:"name"`
+	Icon         *string                `json:"icon"`
+	SortOrder    int                    `json:"sort_order"`
+	Status       bool                   `json:"status"`
+	SponsorCount int                    `json:"sponsor_count"`
 }
 
 // ChannelAddResponse 添加渠道响应
@@ -122,15 +123,15 @@ type ChannelDeleteConflictResponse struct {
 }
 
 type ChannelDeleteConflictRecordItem struct {
-	ID       int64  `json:"id"`
-	Nickname string `json:"nickname"`
-	Amount   int64  `json:"amount"`
+	ID       xSnowflake.SnowflakeID `json:"id"`
+	Nickname string                 `json:"nickname"`
+	Amount   int64                  `json:"amount"`
 }
 
 // ChannelDeleteConflictInfo 删除冲突的详细信息
 type ChannelDeleteConflictInfo struct {
-	ChannelID     int64  `json:"channel_id"`     // 渠道ID
-	ChannelName   string `json:"channel_name"`   // 渠道名称
-	TotalSponsors int    `json:"total_sponsors"` // 总赞助记录数量
-	DisplayCount  int    `json:"display_count"`  // 显示的赞助记录数量（最多10个）
+	ChannelID     xSnowflake.SnowflakeID `json:"channel_id"`     // 渠道ID
+	ChannelName   string                 `json:"channel_name"`   // 渠道名称
+	TotalSponsors int                    `json:"total_sponsors"` // 总赞助记录数量
+	DisplayCount  int                    `json:"display_count"`  // 显示的赞助记录数量（最多10个）
 }

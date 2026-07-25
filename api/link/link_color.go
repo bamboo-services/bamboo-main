@@ -12,6 +12,7 @@
 package apiLink
 
 import (
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 )
@@ -38,8 +39,8 @@ type ColorUpdateRequest struct {
 
 // ColorSortRequest 颜色排序请求
 type ColorSortRequest struct {
-	ColorIDs  []int64 `json:"color_ids" binding:"required,min=1" validate:"required"` // 颜色ID数组，按新的排序传入
-	SortOrder *int    `json:"sort_order" binding:"omitempty,min=0" example:"10"`      // 可选的起始排序值，不填则从0开始递增
+	ColorIDs  []xSnowflake.SnowflakeID `json:"color_ids" binding:"required,min=1" validate:"required"` // 颜色ID数组，按新的排序传入
+	SortOrder *int                     `json:"sort_order" binding:"omitempty,min=0" example:"10"`      // 可选的起始排序值，不填则从0开始递增
 }
 
 // ColorStatusRequest 颜色状态切换请求
@@ -124,8 +125,8 @@ type ColorDeleteConflictResponse struct {
 
 // ColorDeleteConflictInfo 删除冲突的详细信息
 type ColorDeleteConflictInfo struct {
-	ColorID      int64  `json:"color_id"`      // 颜色ID
-	ColorName    string `json:"color_name"`    // 颜色名称
-	TotalLinks   int    `json:"total_links"`   // 总友链数量
-	DisplayCount int    `json:"display_count"` // 显示的友链数量（最多10个）
+	ColorID      xSnowflake.SnowflakeID `json:"color_id"`      // 颜色ID
+	ColorName    string                 `json:"color_name"`    // 颜色名称
+	TotalLinks   int                    `json:"total_links"`   // 总友链数量
+	DisplayCount int                    `json:"display_count"` // 显示的友链数量（最多10个）
 }

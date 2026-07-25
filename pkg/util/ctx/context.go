@@ -73,18 +73,18 @@ func GetRedisClient(c *gin.Context) *redis.Client {
 //   - c: Gin 上下文指针，用于存储和传递请求相关的数据。
 //
 // 返回值:
-//   - 用户ID(int64)，如果用户未认证则为0。
+//   - 用户ID(xSnowflake.SnowflakeID)，如果用户未认证则为0。
 //   - 布尔值，表示是否成功获取到用户ID。
-func GetUserID(c *gin.Context) (int64, bool) {
+func GetUserID(c *gin.Context) (xSnowflake.SnowflakeID, bool) {
 	userID, exists := c.Get(constants.ContextKeyUserID)
 	if !exists {
 		return 0, false
 	}
 
-	userIDInt64, ok := userID.(int64)
+	userIDSnowflake, ok := userID.(xSnowflake.SnowflakeID)
 	if !ok {
 		return 0, false
 	}
 
-	return userIDInt64, true
+	return userIDSnowflake, true
 }

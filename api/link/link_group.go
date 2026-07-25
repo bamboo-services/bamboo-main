@@ -12,6 +12,7 @@
 package apiLink
 
 import (
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 )
@@ -33,8 +34,8 @@ type GroupUpdateRequest struct {
 
 // GroupSortRequest 分组排序请求
 type GroupSortRequest struct {
-	GroupIDs  []int64 `json:"group_ids" binding:"required,min=1" validate:"required"` // 分组ID数组，按新的排序传入
-	SortOrder *int    `json:"sort_order" binding:"omitempty,min=0" example:"10"`      // 可选的起始排序值，不填则从0开始递增
+	GroupIDs  []xSnowflake.SnowflakeID `json:"group_ids" binding:"required,min=1" validate:"required"` // 分组ID数组，按新的排序传入
+	SortOrder *int                     `json:"sort_order" binding:"omitempty,min=0" example:"10"`      // 可选的起始排序值，不填则从0开始递增
 }
 
 // GroupStatusRequest 分组状态切换请求
@@ -118,10 +119,10 @@ type GroupDeleteConflictResponse struct {
 
 // GroupDeleteConflictInfo 删除冲突的详细信息
 type GroupDeleteConflictInfo struct {
-	GroupID      int64  `json:"group_id"`
-	GroupName    string `json:"group_name"`    // 分组名称
-	TotalLinks   int    `json:"total_links"`   // 总友链数量
-	DisplayCount int    `json:"display_count"` // 显示的友链数量（最多10个）
+	GroupID      xSnowflake.SnowflakeID `json:"group_id"`
+	GroupName    string                 `json:"group_name"`    // 分组名称
+	TotalLinks   int                    `json:"total_links"`   // 总友链数量
+	DisplayCount int                    `json:"display_count"` // 显示的友链数量（最多10个）
 }
 
 // 为了保持一致性，定义一些类型别名（引用现有的MessageResponse）

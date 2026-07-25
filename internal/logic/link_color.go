@@ -13,13 +13,13 @@ package logic
 
 import (
 	"context"
-	"strconv"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	apiLinkColor "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
+	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
 	"github.com/gin-gonic/gin"
@@ -96,7 +96,7 @@ func (l *LinkColorLogic) Add(ctx *gin.Context, req *apiLinkColor.ColorAddRequest
 }
 
 func (l *LinkColorLogic) Update(ctx *gin.Context, colorIDStr string, req *apiLinkColor.ColorUpdateRequest) (*entity.LinkColor, *xError.Error) {
-	colorID, err := strconv.ParseInt(colorIDStr, 10, 64)
+	colorID, err := logcHelper.ParseSnowflakeID(colorIDStr)
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.BadRequest, "无效的颜色ID", false)
 	}
@@ -189,7 +189,7 @@ func (l *LinkColorLogic) UpdateSort(ctx *gin.Context, req *apiLinkColor.ColorSor
 }
 
 func (l *LinkColorLogic) UpdateStatus(ctx *gin.Context, colorIDStr string, req *apiLinkColor.ColorStatusRequest) *xError.Error {
-	colorID, err := strconv.ParseInt(colorIDStr, 10, 64)
+	colorID, err := logcHelper.ParseSnowflakeID(colorIDStr)
 	if err != nil {
 		return xError.NewError(ctx, xError.BadRequest, "无效的颜色ID", false)
 	}
@@ -206,7 +206,7 @@ func (l *LinkColorLogic) UpdateStatus(ctx *gin.Context, colorIDStr string, req *
 }
 
 func (l *LinkColorLogic) Delete(ctx *gin.Context, colorIDStr string, req *apiLinkColor.ColorDeleteRequest) ([]entity.LinkFriend, *xError.Error) {
-	colorID, err := strconv.ParseInt(colorIDStr, 10, 64)
+	colorID, err := logcHelper.ParseSnowflakeID(colorIDStr)
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.BadRequest, "无效的颜色ID", false)
 	}
@@ -264,7 +264,7 @@ func (l *LinkColorLogic) Delete(ctx *gin.Context, colorIDStr string, req *apiLin
 }
 
 func (l *LinkColorLogic) Get(ctx *gin.Context, colorIDStr string) (*entity.LinkColor, *xError.Error) {
-	colorID, err := strconv.ParseInt(colorIDStr, 10, 64)
+	colorID, err := logcHelper.ParseSnowflakeID(colorIDStr)
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.BadRequest, "无效的颜色ID", false)
 	}

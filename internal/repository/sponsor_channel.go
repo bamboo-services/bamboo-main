@@ -17,6 +17,7 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
@@ -69,7 +70,7 @@ func (r *SponsorChannelRepo) Create(ctx *gin.Context, channel *entity.SponsorCha
 	return channel, nil
 }
 
-func (r *SponsorChannelRepo) GetByID(ctx *gin.Context, id int64) (*entity.SponsorChannel, bool, *xError.Error) {
+func (r *SponsorChannelRepo) GetByID(ctx *gin.Context, id xSnowflake.SnowflakeID) (*entity.SponsorChannel, bool, *xError.Error) {
 	r.log.Info(ctx, "GetByID - 获取赞助渠道")
 
 	if channel, ok, err := r.kc.Get(ctx.Request.Context(), constants.RedisSponsorChan.Get(id).String()); err != nil {
@@ -92,7 +93,7 @@ func (r *SponsorChannelRepo) GetByID(ctx *gin.Context, id int64) (*entity.Sponso
 	return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询赞助渠道失败", true, err)
 }
 
-func (r *SponsorChannelRepo) UpdateByID(ctx *gin.Context, id int64, updates map[string]any) (*entity.SponsorChannel, bool, *xError.Error) {
+func (r *SponsorChannelRepo) UpdateByID(ctx *gin.Context, id xSnowflake.SnowflakeID, updates map[string]any) (*entity.SponsorChannel, bool, *xError.Error) {
 	r.log.Info(ctx, "UpdateByID - 更新赞助渠道")
 
 	result := r.db.WithContext(ctx).Model(&entity.SponsorChannel{}).Where("id = ?", id).Updates(updates)
@@ -114,7 +115,7 @@ func (r *SponsorChannelRepo) UpdateByID(ctx *gin.Context, id int64, updates map[
 	return channel, found, nil
 }
 
-func (r *SponsorChannelRepo) HardDeleteByID(ctx *gin.Context, id int64) (bool, *xError.Error) {
+func (r *SponsorChannelRepo) HardDeleteByID(ctx *gin.Context, id xSnowflake.SnowflakeID) (bool, *xError.Error) {
 	r.log.Info(ctx, "HardDeleteByID - 删除赞助渠道")
 
 	result := r.db.WithContext(ctx).Unscoped().Where("id = ?", id).Delete(&entity.SponsorChannel{})
@@ -131,7 +132,7 @@ func (r *SponsorChannelRepo) HardDeleteByID(ctx *gin.Context, id int64) (bool, *
 	return true, nil
 }
 
-func (r *SponsorChannelRepo) CountSponsorsByChannelID(ctx *gin.Context, channelID int64) (int64, *xError.Error) {
+func (r *SponsorChannelRepo) CountSponsorsByChannelID(ctx *gin.Context, channelID xSnowflake.SnowflakeID) (int64, *xError.Error) {
 	r.log.Info(ctx, "CountSponsorsByChannelID - 统计赞助记录数量")
 
 	var total int64
@@ -142,17 +143,17 @@ func (r *SponsorChannelRepo) CountSponsorsByChannelID(ctx *gin.Context, channelI
 	return total, nil
 }
 
-func (r *SponsorChannelRepo) CountSponsorsByChannelIDs(ctx *gin.Context, channelIDs []int64) (map[int64]int64, *xError.Error) {
+func (r *SponsorChannelRepo) CountSponsorsByChannelIDs(ctx *gin.Context, channelIDs []xSnowflake.SnowflakeID) (map[xSnowflake.SnowflakeID]int64, *xError.Error) {
 	r.log.Info(ctx, "CountSponsorsByChannelIDs - 批量统计赞助记录数量")
 
-	sponsorCounts := make(map[int64]int64)
+	sponsorCounts := make(map[xSnowflake.SnowflakeID]int64)
 	if len(channelIDs) == 0 {
 		return sponsorCounts, nil
 	}
 
 	var countResults []struct {
-		ChannelID int64 `gorm:"column:channel_id"`
-		Count     int64 `gorm:"column:count"`
+		ChannelID xSnowflake.SnowflakeID `gorm:"column:channel_id"`
+		Count     int64                  `gorm:"column:count"`
 	}
 
 	err := r.db.WithContext(ctx).

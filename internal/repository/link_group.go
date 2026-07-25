@@ -18,6 +18,7 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	apiLink "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
@@ -83,7 +84,7 @@ func (r *LinkGroupRepo) Save(ctx *gin.Context, group *entity.LinkGroup, tx *gorm
 	return group, nil
 }
 
-func (r *LinkGroupRepo) GetByID(ctx *gin.Context, id int64, withLinks bool, tx *gorm.DB) (*entity.LinkGroup, bool, *xError.Error) {
+func (r *LinkGroupRepo) GetByID(ctx *gin.Context, id xSnowflake.SnowflakeID, withLinks bool, tx *gorm.DB) (*entity.LinkGroup, bool, *xError.Error) {
 	if !withLinks {
 		if group, ok, err := r.kc.Get(ctx.Request.Context(), constants.RedisLinkGroup.Get(id).String()); err != nil {
 			return nil, false, xError.NewError(ctx, xError.CacheError, "获取友链分组缓存失败", true, err)
@@ -113,7 +114,7 @@ func (r *LinkGroupRepo) GetByID(ctx *gin.Context, id int64, withLinks bool, tx *
 	return &group, true, nil
 }
 
-func (r *LinkGroupRepo) UpdateStatusByID(ctx *gin.Context, id int64, status bool, tx *gorm.DB) (bool, *xError.Error) {
+func (r *LinkGroupRepo) UpdateStatusByID(ctx *gin.Context, id xSnowflake.SnowflakeID, status bool, tx *gorm.DB) (bool, *xError.Error) {
 	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkGroup{}).Where("id = ?", id).Update("status", status)
 	if result.Error != nil {
 		return false, xError.NewError(ctx, xError.DatabaseError, "更新分组状态失败", false, result.Error)
@@ -129,7 +130,7 @@ func (r *LinkGroupRepo) UpdateStatusByID(ctx *gin.Context, id int64, status bool
 	return true, nil
 }
 
-func (r *LinkGroupRepo) UpdateSortByIDs(ctx *gin.Context, ids []int64, startSort int, tx *gorm.DB) *xError.Error {
+func (r *LinkGroupRepo) UpdateSortByIDs(ctx *gin.Context, ids []xSnowflake.SnowflakeID, startSort int, tx *gorm.DB) *xError.Error {
 	db := r.pickDB(tx).WithContext(ctx)
 	for i, id := range ids {
 		result := db.Model(&entity.LinkGroup{}).Where("id = ?", id).Update("sort_order", startSort+i)
@@ -147,7 +148,7 @@ func (r *LinkGroupRepo) UpdateSortByIDs(ctx *gin.Context, ids []int64, startSort
 	return nil
 }
 
-func (r *LinkGroupRepo) DeleteByID(ctx *gin.Context, id int64, tx *gorm.DB) (bool, *xError.Error) {
+func (r *LinkGroupRepo) DeleteByID(ctx *gin.Context, id xSnowflake.SnowflakeID, tx *gorm.DB) (bool, *xError.Error) {
 	result := r.pickDB(tx).WithContext(ctx).Unscoped().Where("id = ?", id).Delete(&entity.LinkGroup{})
 	if result.Error != nil {
 		return false, xError.NewError(ctx, xError.DatabaseError, "删除友链分组失败", false, result.Error)

@@ -14,12 +14,15 @@ package entity
 import (
 	"encoding/json"
 	"testing"
+
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
+	xModels "github.com/bamboo-services/bamboo-base-go/major/models"
 )
 
 func TestSystemUserJSON_HidesSensitiveFields(t *testing.T) {
 	oauthID := "oauth-uid"
 	user := SystemUser{
-		ID:          1,
+		BaseEntity:  xModels.BaseEntity{ID: xSnowflake.SnowflakeID(1)},
 		OAuthUserID: &oauthID,
 		Username:    "admin",
 		Password:    "hashed-password",

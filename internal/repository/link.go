@@ -18,6 +18,7 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	apiLink "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
@@ -77,7 +78,7 @@ func (r *LinkRepo) Save(ctx *gin.Context, link *entity.LinkFriend, tx *gorm.DB) 
 	return link, nil
 }
 
-func (r *LinkRepo) GetByID(ctx *gin.Context, id int64, withAssociations bool, tx *gorm.DB) (*entity.LinkFriend, bool, *xError.Error) {
+func (r *LinkRepo) GetByID(ctx *gin.Context, id xSnowflake.SnowflakeID, withAssociations bool, tx *gorm.DB) (*entity.LinkFriend, bool, *xError.Error) {
 	r.log.Info(ctx, "GetByID - 获取友情链接")
 
 	if !withAssociations {
@@ -109,7 +110,7 @@ func (r *LinkRepo) GetByID(ctx *gin.Context, id int64, withAssociations bool, tx
 	return &link, true, nil
 }
 
-func (r *LinkRepo) DeleteByID(ctx *gin.Context, id int64, tx *gorm.DB) (bool, *xError.Error) {
+func (r *LinkRepo) DeleteByID(ctx *gin.Context, id xSnowflake.SnowflakeID, tx *gorm.DB) (bool, *xError.Error) {
 	r.log.Info(ctx, "DeleteByID - 删除友情链接")
 
 	result := r.pickDB(tx).WithContext(ctx).Where("id = ?", id).Delete(&entity.LinkFriend{})
@@ -180,7 +181,7 @@ func (r *LinkRepo) List(ctx *gin.Context, req *apiLink.FriendQueryRequest, tx *g
 	return links, total, nil
 }
 
-func (r *LinkRepo) UpdateStatusByID(ctx *gin.Context, id int64, status int, reviewRemark string, tx *gorm.DB) (bool, *xError.Error) {
+func (r *LinkRepo) UpdateStatusByID(ctx *gin.Context, id xSnowflake.SnowflakeID, status int, reviewRemark string, tx *gorm.DB) (bool, *xError.Error) {
 	r.log.Info(ctx, "UpdateStatusByID - 更新友情链接状态")
 
 	updates := map[string]any{
@@ -203,7 +204,7 @@ func (r *LinkRepo) UpdateStatusByID(ctx *gin.Context, id int64, status int, revi
 	return true, nil
 }
 
-func (r *LinkRepo) UpdateFailureByID(ctx *gin.Context, id int64, isFailure int, failReason string, tx *gorm.DB) (bool, *xError.Error) {
+func (r *LinkRepo) UpdateFailureByID(ctx *gin.Context, id xSnowflake.SnowflakeID, isFailure int, failReason string, tx *gorm.DB) (bool, *xError.Error) {
 	r.log.Info(ctx, "UpdateFailureByID - 更新友情链接失效状态")
 
 	updates := map[string]any{
@@ -226,7 +227,7 @@ func (r *LinkRepo) UpdateFailureByID(ctx *gin.Context, id int64, isFailure int, 
 	return true, nil
 }
 
-func (r *LinkRepo) ListPublic(ctx *gin.Context, groupID *int64, approvedStatus int, normalFail int, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
+func (r *LinkRepo) ListPublic(ctx *gin.Context, groupID *xSnowflake.SnowflakeID, approvedStatus int, normalFail int, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
 	r.log.Info(ctx, "ListPublic - 查询公开友情链接")
 
 	query := r.pickDB(tx).WithContext(ctx).
@@ -245,7 +246,7 @@ func (r *LinkRepo) ListPublic(ctx *gin.Context, groupID *int64, approvedStatus i
 	return links, nil
 }
 
-func (r *LinkRepo) CountByGroupID(ctx *gin.Context, groupID int64, tx *gorm.DB) (int64, *xError.Error) {
+func (r *LinkRepo) CountByGroupID(ctx *gin.Context, groupID xSnowflake.SnowflakeID, tx *gorm.DB) (int64, *xError.Error) {
 	var count int64
 	err := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).Where("group_id = ?", groupID).Count(&count).Error
 	if err != nil {
@@ -254,7 +255,7 @@ func (r *LinkRepo) CountByGroupID(ctx *gin.Context, groupID int64, tx *gorm.DB) 
 	return count, nil
 }
 
-func (r *LinkRepo) CountByColorID(ctx *gin.Context, colorID int64, tx *gorm.DB) (int64, *xError.Error) {
+func (r *LinkRepo) CountByColorID(ctx *gin.Context, colorID xSnowflake.SnowflakeID, tx *gorm.DB) (int64, *xError.Error) {
 	var count int64
 	err := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).Where("color_id = ?", colorID).Count(&count).Error
 	if err != nil {
@@ -263,7 +264,7 @@ func (r *LinkRepo) CountByColorID(ctx *gin.Context, colorID int64, tx *gorm.DB) 
 	return count, nil
 }
 
-func (r *LinkRepo) ListByGroupID(ctx *gin.Context, groupID int64, limit int, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
+func (r *LinkRepo) ListByGroupID(ctx *gin.Context, groupID xSnowflake.SnowflakeID, limit int, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
 	query := r.pickDB(tx).WithContext(ctx).Where("group_id = ?", groupID)
 	if limit > 0 {
 		query = query.Limit(limit)
@@ -278,7 +279,7 @@ func (r *LinkRepo) ListByGroupID(ctx *gin.Context, groupID int64, limit int, tx 
 	return links, nil
 }
 
-func (r *LinkRepo) ListByColorID(ctx *gin.Context, colorID int64, limit int, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
+func (r *LinkRepo) ListByColorID(ctx *gin.Context, colorID xSnowflake.SnowflakeID, limit int, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
 	query := r.pickDB(tx).WithContext(ctx).Where("color_id = ?", colorID)
 	if limit > 0 {
 		query = query.Limit(limit)
@@ -293,7 +294,7 @@ func (r *LinkRepo) ListByColorID(ctx *gin.Context, colorID int64, limit int, tx 
 	return links, nil
 }
 
-func (r *LinkRepo) ClearGroupID(ctx *gin.Context, groupID int64, tx *gorm.DB) *xError.Error {
+func (r *LinkRepo) ClearGroupID(ctx *gin.Context, groupID xSnowflake.SnowflakeID, tx *gorm.DB) *xError.Error {
 	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).Where("group_id = ?", groupID).Update("group_id", nil)
 	if result.Error != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "清空友链分组关联失败", false, result.Error)
@@ -301,7 +302,7 @@ func (r *LinkRepo) ClearGroupID(ctx *gin.Context, groupID int64, tx *gorm.DB) *x
 	return nil
 }
 
-func (r *LinkRepo) ClearColorID(ctx *gin.Context, colorID int64, tx *gorm.DB) *xError.Error {
+func (r *LinkRepo) ClearColorID(ctx *gin.Context, colorID xSnowflake.SnowflakeID, tx *gorm.DB) *xError.Error {
 	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).Where("color_id = ?", colorID).Update("color_id", nil)
 	if result.Error != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "清空友链颜色关联失败", false, result.Error)

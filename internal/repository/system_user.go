@@ -18,6 +18,7 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
@@ -39,7 +40,7 @@ func NewSystemUserRepo(db *gorm.DB, m *xCache.Manager) *SystemUserRepo {
 	}
 }
 
-func (r *SystemUserRepo) GetByID(ctx *gin.Context, id int64) (*entity.SystemUser, bool, *xError.Error) {
+func (r *SystemUserRepo) GetByID(ctx *gin.Context, id xSnowflake.SnowflakeID) (*entity.SystemUser, bool, *xError.Error) {
 	r.log.Info(ctx, "GetByID - 获取用户信息")
 
 	if user, ok, err := r.kc.Get(ctx.Request.Context(), constants.RedisSystemUser.Get(id).String()); err != nil {
@@ -134,7 +135,7 @@ func (r *SystemUserRepo) ExistsByUsername(ctx *gin.Context, username string) (bo
 	return count > 0, nil
 }
 
-func (r *SystemUserRepo) ExistsByEmailExceptID(ctx *gin.Context, email string, exceptID int64) (bool, *xError.Error) {
+func (r *SystemUserRepo) ExistsByEmailExceptID(ctx *gin.Context, email string, exceptID xSnowflake.SnowflakeID) (bool, *xError.Error) {
 	r.log.Info(ctx, "ExistsByEmailExceptID - 检查邮箱")
 
 	var count int64
@@ -179,7 +180,7 @@ func (r *SystemUserRepo) Save(ctx *gin.Context, user *entity.SystemUser) (*entit
 	return user, nil
 }
 
-func (r *SystemUserRepo) UpdateFieldsByID(ctx *gin.Context, userID int64, updates map[string]any) (*entity.SystemUser, *xError.Error) {
+func (r *SystemUserRepo) UpdateFieldsByID(ctx *gin.Context, userID xSnowflake.SnowflakeID, updates map[string]any) (*entity.SystemUser, *xError.Error) {
 	r.log.Info(ctx, "UpdateFieldsByID - 更新用户字段")
 
 	err := r.db.WithContext(ctx).Model(&entity.SystemUser{}).Where("id = ?", userID).Updates(updates).Error
@@ -202,12 +203,12 @@ func (r *SystemUserRepo) UpdateFieldsByID(ctx *gin.Context, userID int64, update
 	return user, nil
 }
 
-func (r *SystemUserRepo) UpdatePasswordByID(ctx *gin.Context, userID int64, hashedPassword string) *xError.Error {
+func (r *SystemUserRepo) UpdatePasswordByID(ctx *gin.Context, userID xSnowflake.SnowflakeID, hashedPassword string) *xError.Error {
 	_, xErr := r.UpdateFieldsByID(ctx, userID, map[string]any{"password": hashedPassword})
 	return xErr
 }
 
-func (r *SystemUserRepo) UpdateLastLoginByID(ctx *gin.Context, userID int64, loginAt *time.Time) *xError.Error {
+func (r *SystemUserRepo) UpdateLastLoginByID(ctx *gin.Context, userID xSnowflake.SnowflakeID, loginAt *time.Time) *xError.Error {
 	updates := map[string]any{"last_login_at": loginAt}
 	_, xErr := r.UpdateFieldsByID(ctx, userID, updates)
 	return xErr

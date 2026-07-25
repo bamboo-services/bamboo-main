@@ -14,7 +14,6 @@ package logic
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	apiLink "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
@@ -26,6 +25,7 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	"github.com/gin-gonic/gin"
@@ -101,7 +101,7 @@ func (l *LinkLogic) Add(ctx *gin.Context, req *apiLink.FriendAddRequest) (*entit
 // Update 更新友情链接
 func (l *LinkLogic) Update(ctx *gin.Context, linkIDStr string, req *apiLink.FriendUpdateRequest) (*entity.LinkFriend, *xError.Error) {
 	// 解析ID
-	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
+	linkID, err := logcHelper.ParseSnowflakeID(linkIDStr)
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
 	}
@@ -165,7 +165,7 @@ func (l *LinkLogic) Update(ctx *gin.Context, linkIDStr string, req *apiLink.Frie
 // Delete 删除友情链接
 func (l *LinkLogic) Delete(ctx *gin.Context, linkIDStr string) *xError.Error {
 	// 解析ID
-	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
+	linkID, err := logcHelper.ParseSnowflakeID(linkIDStr)
 	if err != nil {
 		return xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
 	}
@@ -183,7 +183,7 @@ func (l *LinkLogic) Delete(ctx *gin.Context, linkIDStr string) *xError.Error {
 // Get 获取友情链接详情
 func (l *LinkLogic) Get(ctx *gin.Context, linkIDStr string) (*entity.LinkFriend, *xError.Error) {
 	// 解析ID
-	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
+	linkID, err := logcHelper.ParseSnowflakeID(linkIDStr)
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
 	}
@@ -220,7 +220,7 @@ func (l *LinkLogic) List(ctx *gin.Context, req *apiLink.FriendQueryRequest) (*ba
 // UpdateStatus 更新友情链接状态
 func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkIDStr string, req *apiLink.FriendStatusRequest) *xError.Error {
 	// 解析ID
-	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
+	linkID, err := logcHelper.ParseSnowflakeID(linkIDStr)
 	if err != nil {
 		return xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
 	}
@@ -251,7 +251,7 @@ func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkIDStr string, req *apiLin
 // UpdateFailStatus 更新友情链接失效状态
 func (l *LinkLogic) UpdateFailStatus(ctx *gin.Context, linkIDStr string, req *apiLink.FriendFailRequest) *xError.Error {
 	// 解析ID
-	linkID, err := strconv.ParseInt(linkIDStr, 10, 64)
+	linkID, err := logcHelper.ParseSnowflakeID(linkIDStr)
 	if err != nil {
 		return xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
 	}
@@ -269,9 +269,9 @@ func (l *LinkLogic) UpdateFailStatus(ctx *gin.Context, linkIDStr string, req *ap
 
 // GetPublicLinks 获取公开的友情链接列表
 func (l *LinkLogic) GetPublicLinks(ctx *gin.Context, groupIDStr string) ([]entity.LinkFriend, *xError.Error) {
-	var groupID *int64
+	var groupID *xSnowflake.SnowflakeID
 	if groupIDStr != "" {
-		parsedID, err := strconv.ParseInt(groupIDStr, 10, 64)
+		parsedID, err := logcHelper.ParseSnowflakeID(groupIDStr)
 		if err == nil {
 			groupID = &parsedID
 		}

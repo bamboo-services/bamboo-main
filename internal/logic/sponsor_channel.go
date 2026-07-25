@@ -13,13 +13,14 @@ package logic
 
 import (
 	"context"
-	"strconv"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	apiSponsor "github.com/bamboo-services/bamboo-main/api/sponsor"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
+	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
 	"github.com/gin-gonic/gin"
@@ -273,16 +274,16 @@ func (l *SponsorChannelLogic) GetPublicList(ctx *gin.Context) ([]apiSponsor.Chan
 	return resp, nil
 }
 
-func parseSponsorChannelID(ctx *gin.Context, idStr string) (int64, *xError.Error) {
-	id, err := strconv.ParseInt(idStr, 10, 64)
+func parseSponsorChannelID(ctx *gin.Context, idStr string) (xSnowflake.SnowflakeID, *xError.Error) {
+	id, err := logcHelper.ParseSnowflakeID(idStr)
 	if err != nil {
 		return 0, xError.NewError(ctx, xError.BadRequest, "无效的渠道ID", false)
 	}
 	return id, nil
 }
 
-func collectChannelIDs(channels []entity.SponsorChannel) []int64 {
-	ids := make([]int64, 0, len(channels))
+func collectChannelIDs(channels []entity.SponsorChannel) []xSnowflake.SnowflakeID {
+	ids := make([]xSnowflake.SnowflakeID, 0, len(channels))
 	for _, item := range channels {
 		ids = append(ids, item.ID)
 	}

@@ -17,6 +17,7 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
@@ -33,7 +34,7 @@ type SponsorRecordRepo struct {
 type SponsorRecordPageQuery struct {
 	Page        int
 	PageSize    int
-	ChannelID   *int64
+	ChannelID   *xSnowflake.SnowflakeID
 	Nickname    string
 	IsAnonymous *bool
 	IsHidden    *bool
@@ -44,7 +45,7 @@ type SponsorRecordPageQuery struct {
 type SponsorRecordPublicPageQuery struct {
 	Page      int
 	PageSize  int
-	ChannelID *int64
+	ChannelID *xSnowflake.SnowflakeID
 	OrderBy   string
 	Order     string
 }
@@ -79,7 +80,7 @@ func (r *SponsorRecordRepo) Create(ctx *gin.Context, record *entity.SponsorRecor
 	return detail, nil
 }
 
-func (r *SponsorRecordRepo) GetByID(ctx *gin.Context, id int64) (*entity.SponsorRecord, bool, *xError.Error) {
+func (r *SponsorRecordRepo) GetByID(ctx *gin.Context, id xSnowflake.SnowflakeID) (*entity.SponsorRecord, bool, *xError.Error) {
 	r.log.Info(ctx, "GetByID - 获取赞助记录")
 
 	if record, ok, err := r.kc.Get(ctx.Request.Context(), constants.RedisSponsorRecord.Get(id).String()); err != nil {
@@ -102,7 +103,7 @@ func (r *SponsorRecordRepo) GetByID(ctx *gin.Context, id int64) (*entity.Sponsor
 	return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询赞助记录失败", true, err)
 }
 
-func (r *SponsorRecordRepo) GetDetailByID(ctx *gin.Context, id int64) (*entity.SponsorRecord, bool, *xError.Error) {
+func (r *SponsorRecordRepo) GetDetailByID(ctx *gin.Context, id xSnowflake.SnowflakeID) (*entity.SponsorRecord, bool, *xError.Error) {
 	r.log.Info(ctx, "GetDetailByID - 获取赞助记录详情")
 
 	var record entity.SponsorRecord
@@ -119,7 +120,7 @@ func (r *SponsorRecordRepo) GetDetailByID(ctx *gin.Context, id int64) (*entity.S
 	return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询赞助记录失败", true, err)
 }
 
-func (r *SponsorRecordRepo) UpdateByID(ctx *gin.Context, id int64, updates map[string]any) (*entity.SponsorRecord, bool, *xError.Error) {
+func (r *SponsorRecordRepo) UpdateByID(ctx *gin.Context, id xSnowflake.SnowflakeID, updates map[string]any) (*entity.SponsorRecord, bool, *xError.Error) {
 	r.log.Info(ctx, "UpdateByID - 更新赞助记录")
 
 	result := r.db.WithContext(ctx).Model(&entity.SponsorRecord{}).Where("id = ?", id).Updates(updates)
@@ -141,7 +142,7 @@ func (r *SponsorRecordRepo) UpdateByID(ctx *gin.Context, id int64, updates map[s
 	return detail, found, nil
 }
 
-func (r *SponsorRecordRepo) HardDeleteByID(ctx *gin.Context, id int64) (bool, *xError.Error) {
+func (r *SponsorRecordRepo) HardDeleteByID(ctx *gin.Context, id xSnowflake.SnowflakeID) (bool, *xError.Error) {
 	r.log.Info(ctx, "HardDeleteByID - 删除赞助记录")
 
 	result := r.db.WithContext(ctx).Unscoped().Where("id = ?", id).Delete(&entity.SponsorRecord{})
@@ -206,7 +207,7 @@ func (r *SponsorRecordRepo) PublicPage(ctx *gin.Context, query SponsorRecordPubl
 	return records, total, nil
 }
 
-func (r *SponsorRecordRepo) applyAdminFilters(query *gorm.DB, channelID *int64, nickname string, isAnonymous *bool, isHidden *bool) *gorm.DB {
+func (r *SponsorRecordRepo) applyAdminFilters(query *gorm.DB, channelID *xSnowflake.SnowflakeID, nickname string, isAnonymous *bool, isHidden *bool) *gorm.DB {
 	if channelID != nil {
 		query = query.Where("channel_id = ?", *channelID)
 	}

@@ -13,7 +13,6 @@ package prepare
 
 import (
 	"errors"
-	"strconv"
 
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
@@ -50,7 +49,7 @@ func (p *Prepare) prepareDefaultUser() error {
 		return err
 	}
 
-	adminID := strconv.FormatInt(user.ID, 10)
+	adminID := user.ID.String()
 	return p.db.WithContext(p.ctx).Create(&entity.System{
 		Key:   "system.admin.id",
 		Value: &adminID,
