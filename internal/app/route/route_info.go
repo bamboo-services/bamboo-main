@@ -18,7 +18,7 @@ import (
 )
 
 func (r *route) infoRouter(route gin.IRouter) {
-	infoHandler := handler.NewHandler[handler.InfoHandler](r.context, "InfoHandler")
+	infoHandler := handler.NewHandler[handler.InfoHandler](r.context)
 	infoGroup := route.Group("/info")
 	{
 		infoGroup.GET("/site", infoHandler.GetSiteInfo)
@@ -27,7 +27,7 @@ func (r *route) infoRouter(route gin.IRouter) {
 }
 
 func (r *route) infoAdminRouter(route gin.IRouter) {
-	infoHandler := handler.NewHandler[handler.InfoHandler](r.context, "InfoHandler")
+	infoHandler := handler.NewHandler[handler.InfoHandler](r.context)
 	infoGroup := route.Group("/info")
 	{
 		infoGroup.PUT("/site", infoHandler.UpdateSiteInfo)

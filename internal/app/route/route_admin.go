@@ -36,7 +36,7 @@ func (r *route) adminRouter(route gin.IRouter) {
 }
 
 func (r *route) linkAdminRouter(route gin.IRouter) {
-	linkHandler := handler.NewHandler[handler.LinkHandler](r.context, "LinkHandler")
+	linkHandler := handler.NewHandler[handler.LinkHandler](r.context)
 	linkGroup := route.Group("/links")
 	{
 		linkGroup.POST("", linkHandler.Add)
@@ -50,7 +50,7 @@ func (r *route) linkAdminRouter(route gin.IRouter) {
 }
 
 func (r *route) linkGroupAdminRouter(route gin.IRouter) {
-	groupHandler := handler.NewHandler[handler.LinkGroupHandler](r.context, "LinkGroupHandler")
+	groupHandler := handler.NewHandler[handler.LinkGroupHandler](r.context)
 	groupRouter := route.Group("/groups")
 	{
 		groupRouter.POST("", groupHandler.Add)
@@ -65,7 +65,7 @@ func (r *route) linkGroupAdminRouter(route gin.IRouter) {
 }
 
 func (r *route) linkColorAdminRouter(route gin.IRouter) {
-	colorHandler := handler.NewHandler[handler.LinkColorHandler](r.context, "LinkColorHandler")
+	colorHandler := handler.NewHandler[handler.LinkColorHandler](r.context)
 	colorRouter := route.Group("/colors")
 	{
 		colorRouter.POST("", colorHandler.Add)

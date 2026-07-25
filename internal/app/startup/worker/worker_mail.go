@@ -39,5 +39,4 @@ func MailWorkerRunner(ctx context.Context, _ ...any) {
 	<-ctx.Done()
 	worker.Stop()
 	log.Info(ctx, "邮件 worker 已优雅停止")
-	return
 }

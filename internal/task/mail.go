@@ -97,10 +97,11 @@ func (w *MailWorker) Start() {
 	useTLS := w.config.UseTLS
 	if !useTLS && !w.config.UseStartTLS {
 		// 如果两者都未配置，根据端口自动判断
-		if w.config.SMTPPort == 465 {
+		switch w.config.SMTPPort {
+		case 465:
 			useTLS = true
 			w.logger.Info("检测到 465 端口，自动启用 TLS 直连模式")
-		} else if w.config.SMTPPort == 587 {
+		case 587:
 			useTLS = false
 			w.logger.Info("检测到 587 端口，自动启用 STARTTLS 模式")
 		}
@@ -279,9 +280,11 @@ func (w *MailWorker) processRetryQueue() {
 	now := float64(time.Now().Unix())
 
 	// 获取已到期的重试任务
-	tasks, err := w.rdb.ZRangeByScore(w.ctx, constants.RedisMailRetry.Get().String(), &redis.ZRangeBy{
-		Min: "0",
-		Max: fmt.Sprintf("%f", now),
+	tasks, err := w.rdb.ZRangeArgs(w.ctx, redis.ZRangeArgs{
+		Key:     constants.RedisMailRetry.Get().String(),
+		Start:   0,
+		Stop:    now,
+		ByScore: true,
 	}).Result()
 
 	if err != nil {

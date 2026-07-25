@@ -17,7 +17,7 @@ import (
 )
 
 func (r *route) linkRouter(route gin.IRouter) {
-	linkHandler := handler.NewHandler[handler.LinkHandler](r.context, "LinkHandler")
+	linkHandler := handler.NewHandler[handler.LinkHandler](r.context)
 	linkGroup := route.Group("/links")
 	{
 		linkGroup.GET("", linkHandler.GetPublicLinks)

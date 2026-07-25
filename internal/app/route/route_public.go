@@ -17,7 +17,7 @@ import (
 )
 
 func (r *route) publicRouter(route gin.IRouter) {
-	publicHandler := handler.NewHandler[handler.PublicHandler](r.context, "PublicHandler")
+	publicHandler := handler.NewHandler[handler.PublicHandler](r.context)
 	publicGroup := route.Group("/public")
 	{
 		publicGroup.GET("/health", publicHandler.HealthCheck)

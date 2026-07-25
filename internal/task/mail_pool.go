@@ -94,7 +94,7 @@ func (p *TLSMailPool) buildConnection() (*smtpClient, error) {
 		host, _, _ := net.SplitHostPort(p.addr)
 		client, err = smtp.NewClient(conn, host)
 		if err != nil {
-			conn.Close()
+			_ = conn.Close()
 			return nil, err
 		}
 	} else {
@@ -107,7 +107,7 @@ func (p *TLSMailPool) buildConnection() (*smtpClient, error) {
 		// 检查是否支持 STARTTLS
 		if ok, _ := client.Extension("STARTTLS"); ok {
 			if err := client.StartTLS(p.tlsConfig); err != nil {
-				client.Close()
+				_ = client.Close()
 				return nil, err
 			}
 		}
@@ -117,7 +117,7 @@ func (p *TLSMailPool) buildConnection() (*smtpClient, error) {
 	if p.auth != nil {
 		if ok, _ := client.Extension("AUTH"); ok {
 			if err := client.Auth(p.auth); err != nil {
-				client.Close()
+				_ = client.Close()
 				return nil, err
 			}
 		}
@@ -145,7 +145,7 @@ func (p *TLSMailPool) getConnection(timeout time.Duration) (*smtpClient, error) 
 	case conn := <-p.conns:
 		// 验证连接是否有效
 		if err := conn.Noop(); err != nil {
-			conn.Close()
+			_ = conn.Close()
 			p.mu.Lock()
 			p.activeConns--
 			p.mu.Unlock()
@@ -178,7 +178,7 @@ func (p *TLSMailPool) getConnection(timeout time.Duration) (*smtpClient, error) 
 	case conn := <-p.conns:
 		// 验证连接
 		if err := conn.Noop(); err != nil {
-			conn.Close()
+			_ = conn.Close()
 			p.mu.Lock()
 			p.activeConns--
 			p.mu.Unlock()
@@ -222,7 +222,7 @@ func (p *TLSMailPool) releaseConnection(conn *smtpClient, sendErr error) {
 		conn.failCount++
 		// 连续失败超过 3 次，关闭连接
 		if conn.failCount >= 3 {
-			conn.Close()
+			_ = conn.Close()
 			p.mu.Lock()
 			p.activeConns--
 			p.mu.Unlock()
@@ -234,7 +234,7 @@ func (p *TLSMailPool) releaseConnection(conn *smtpClient, sendErr error) {
 
 	// 重置连接状态
 	if err := conn.Reset(); err != nil {
-		conn.Close()
+		_ = conn.Close()
 		p.mu.Lock()
 		p.activeConns--
 		p.mu.Unlock()
@@ -247,7 +247,7 @@ func (p *TLSMailPool) releaseConnection(conn *smtpClient, sendErr error) {
 		// 成功放回
 	default:
 		// 池已满，关闭连接
-		conn.Close()
+		_ = conn.Close()
 		p.mu.Lock()
 		p.activeConns--
 		p.mu.Unlock()
@@ -362,7 +362,7 @@ func (p *TLSMailPool) Close() {
 	close(p.conns)
 	for conn := range p.conns {
 		if conn != nil {
-			conn.Close()
+			_ = conn.Close()
 		}
 	}
 }

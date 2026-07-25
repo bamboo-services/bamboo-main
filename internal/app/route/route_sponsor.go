@@ -18,8 +18,8 @@ import (
 )
 
 func (r *route) sponsorAdminRouter(route gin.IRouter) {
-	channelHandler := handler.NewHandler[handler.SponsorChannelHandler](r.context, "SponsorChannelHandler")
-	recordHandler := handler.NewHandler[handler.SponsorRecordHandler](r.context, "SponsorRecordHandler")
+	channelHandler := handler.NewHandler[handler.SponsorChannelHandler](r.context)
+	recordHandler := handler.NewHandler[handler.SponsorRecordHandler](r.context)
 
 	sponsorGroup := route.Group("/sponsors")
 	{
@@ -46,8 +46,8 @@ func (r *route) sponsorAdminRouter(route gin.IRouter) {
 }
 
 func (r *route) sponsorRouter(route gin.IRouter) {
-	channelHandler := handler.NewHandler[handler.SponsorChannelHandler](r.context, "SponsorChannelHandler")
-	recordHandler := handler.NewHandler[handler.SponsorRecordHandler](r.context, "SponsorRecordHandler")
+	channelHandler := handler.NewHandler[handler.SponsorChannelHandler](r.context)
+	recordHandler := handler.NewHandler[handler.SponsorRecordHandler](r.context)
 
 	sponsorGroup := route.Group("/sponsors")
 	{

@@ -15,6 +15,7 @@ import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
+import path from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
@@ -32,5 +33,10 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
+  },
+  build: {
+    // 将构建产物输出到后端内嵌资源目录，由 Go 通过 go:embed 打包进二进制
+    outDir: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../resources/frontend/dist'),
+    emptyOutDir: true,
   },
 })

@@ -33,7 +33,7 @@ func NewRoute(ctx context.Context, serve *gin.Engine) {
 	}
 
 	r.engine.NoMethod(xRoute.NoMethod)
-	r.engine.NoRoute(xRoute.NoRoute)
+	r.engine.NoRoute(noRouteHandler)
 
 	r.engine.Use(xMiddle.ResponseMiddleware)
 	r.engine.Use(xMiddle.ReleaseAllCors)

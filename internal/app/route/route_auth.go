@@ -20,7 +20,7 @@ import (
 
 func (r *route) authRouter(route gin.IRouter) {
 	authGroup := route.Group("/auth")
-	authHandler := handler.NewHandler[handler.AuthHandler](r.context, "AuthHandler")
+	authHandler := handler.NewHandler[handler.AuthHandler](r.context)
 	{
 		authGroup.POST("/login", bSdkMiddle.CheckAuth(r.context), authHandler.Login)
 		authGroup.POST("/register", authHandler.Register)

@@ -59,9 +59,11 @@ func TestBuildRecordEntityResponse_IncludesChannelSummary(t *testing.T) {
 	resp := buildRecordEntityResponse(record)
 	if resp == nil {
 		t.Fatal("expected non-nil response")
+		return
 	}
 	if resp.Channel == nil {
 		t.Fatal("expected non-nil channel summary")
+		return
 	}
 	if resp.Channel.ID != 3001 {
 		t.Fatalf("expected channel id=3001, got=%d", resp.Channel.ID)
@@ -81,6 +83,7 @@ func TestBuildChannelEntityResponse_MapsSponsorCount(t *testing.T) {
 	resp := buildChannelEntityResponse(channel, 7)
 	if resp == nil {
 		t.Fatal("expected non-nil response")
+		return
 	}
 	if resp.SponsorCount != 7 {
 		t.Fatalf("expected sponsor_count=7, got=%d", resp.SponsorCount)
@@ -105,6 +108,7 @@ func TestBuildRecordChannelResponse_MinimalFields(t *testing.T) {
 	resp := buildRecordChannelResponse(channel)
 	if resp == nil {
 		t.Fatal("expected non-nil channel response")
+		return
 	}
 	want := apiSponsor.SponsorChannelSimpleResponse{ID: 5001, Name: "Patreon", Icon: &icon}
 	if resp.ID != want.ID || resp.Name != want.Name || *resp.Icon != *want.Icon {

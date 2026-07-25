@@ -14,7 +14,6 @@ package handler
 import (
 	"context"
 
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	"github.com/bamboo-services/bamboo-main/internal/logic"
 	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/logic"
 )
@@ -32,23 +31,17 @@ type service struct {
 }
 
 type handler struct {
-	name    string
-	log     *xLog.LogNamedLogger
 	service *service
 }
 
 type IHandler interface {
 	~struct {
-		name    string
-		log     *xLog.LogNamedLogger
 		service *service
 	}
 }
 
-func NewHandler[T IHandler](ctx context.Context, handlerName string) *T {
+func NewHandler[T IHandler](ctx context.Context) *T {
 	return &T{
-		name: handlerName,
-		log:  xLog.WithName(xLog.NamedCONT, handlerName),
 		service: &service{
 			authLogic:           logic.NewAuthLogic(ctx),
 			infoLogic:           logic.NewInfoLogic(ctx),

@@ -233,7 +233,7 @@ func (m *MailLogic) SendWithTemplateAndCC(ctx *gin.Context, templateName string,
 func (m *MailLogic) enqueueMailTask(ctx *gin.Context, task *redisModel.MailTask) error {
 	rdb := ctxUtil.GetRedisClient(ctx)
 	if rdb == nil {
-		return fmt.Errorf("Redis 客户端不可用")
+		return fmt.Errorf("redis 客户端不可用")
 	}
 
 	// 序列化任务

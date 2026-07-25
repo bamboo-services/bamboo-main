@@ -261,7 +261,10 @@ func generateRandomString(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 	b := make([]byte, length)
-	rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		// crypto/rand.Read 在正常环境下几乎不会失败；失败时无法安全继续
+		panic(fmt.Sprintf("generateRandomString: rand.Read failed: %v", err))
+	}
 
 	result := make([]byte, length)
 	for i := range b {
