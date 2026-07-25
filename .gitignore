@@ -50,3 +50,7 @@ diff.txt
 ### Project Specific ###
 demo/
 old/
+
+### AI ###
+.omo/
+.zcode/

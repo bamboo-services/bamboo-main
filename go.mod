@@ -3,9 +3,9 @@ module github.com/bamboo-services/bamboo-main
 go 1.25.11
 
 require (
-	github.com/bamboo-services/bamboo-base-go/common v1.1.0
-	github.com/bamboo-services/bamboo-base-go/defined v1.1.0
-	github.com/bamboo-services/bamboo-base-go/major v1.1.0
+	github.com/bamboo-services/bamboo-base-go/common v1.1.2
+	github.com/bamboo-services/bamboo-base-go/defined v1.1.2
+	github.com/bamboo-services/bamboo-base-go/major v1.1.2
 	github.com/gin-gonic/gin v1.12.0
 	github.com/google/uuid v1.6.0
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
@@ -23,7 +23,7 @@ require (
 	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/VictoriaMetrics/easyproto v1.1.3 // indirect
-	github.com/bamboo-services/bamboo-base-go/plugins/email v1.1.0 // indirect
+	github.com/bamboo-services/bamboo-base-go/plugins/email v1.1.2 // indirect
 	github.com/bamboo-services/bamboo-base-go/plugins/grpc v1.1.0 // indirect
 	github.com/bytedance/gopkg v0.1.4 // indirect
 	github.com/bytedance/sonic v1.15.2 // indirect
@@ -67,6 +67,7 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/libtnb/sqlite v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.23 // indirect
+	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/microsoft/go-mssqldb v1.8.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
@@ -97,6 +98,7 @@ require (
 	gorm.io/datatypes v1.2.7 // indirect
 	gorm.io/driver/mysql v1.6.0 // indirect
 	gorm.io/driver/postgres v1.6.0 // indirect
+	gorm.io/driver/sqlite v1.6.0 // indirect
 	gorm.io/driver/sqlserver v1.6.3 // indirect
 	modernc.org/libc v1.74.2 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
