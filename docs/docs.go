@@ -30,9 +30,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链颜色管理"
+                    "友链颜色接口"
                 ],
-                "summary": "获取友链颜色分页列表",
+                "summary": "[管理] 获取友链颜色分页列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -81,28 +81,37 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.ColorPageResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.ColorPageResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -121,9 +130,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链颜色管理"
+                    "友链颜色接口"
                 ],
-                "summary": "添加友链颜色",
+                "summary": "[管理] 添加友链颜色",
                 "parameters": [
                     {
                         "description": "添加友链颜色请求",
@@ -139,28 +148,37 @@ const docTemplate = `{
                     "200": {
                         "description": "添加成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.ColorAddResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.ColorAddResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -181,9 +199,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链颜色管理"
+                    "友链颜色接口"
                 ],
-                "summary": "获取友链颜色列表",
+                "summary": "[管理] 获取友链颜色列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -226,31 +244,40 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.LinkColor"
-                            }
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.LinkColor"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -271,9 +298,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链颜色管理"
+                    "友链颜色接口"
                 ],
-                "summary": "批量更新友链颜色排序",
+                "summary": "[管理] 批量更新友链颜色排序",
                 "parameters": [
                     {
                         "description": "颜色排序请求",
@@ -289,35 +316,43 @@ const docTemplate = `{
                     "200": {
                         "description": "排序更新成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.ColorSortResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.ColorSortResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "颜色不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -338,13 +373,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链颜色管理"
+                    "友链颜色接口"
                 ],
-                "summary": "获取友链颜色详情",
+                "summary": "[管理] 获取友链颜色详情",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "友链颜色ID",
                         "name": "id",
                         "in": "path",
@@ -355,35 +389,43 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.ColorDetailResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.ColorDetailResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "友链颜色不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -402,13 +444,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链颜色管理"
+                    "友链颜色接口"
                 ],
-                "summary": "更新友链颜色",
+                "summary": "[管理] 更新友链颜色",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "友链颜色ID",
                         "name": "id",
                         "in": "path",
@@ -428,35 +469,43 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.ColorUpdateResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.ColorUpdateResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "友链颜色不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -475,13 +524,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链颜色管理"
+                    "友链颜色接口"
                 ],
-                "summary": "删除友链颜色",
+                "summary": "[管理] 删除友链颜色",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "友链颜色ID",
                         "name": "id",
                         "in": "path",
@@ -498,28 +546,25 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.ColorDeleteResponse"
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "友链颜色不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "409": {
@@ -531,8 +576,7 @@ const docTemplate = `{
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -553,13 +597,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链颜色管理"
+                    "友链颜色接口"
                 ],
-                "summary": "更新友链颜色状态",
+                "summary": "[管理] 更新友链颜色状态",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "友链颜色ID",
                         "name": "id",
                         "in": "path",
@@ -579,35 +622,43 @@ const docTemplate = `{
                     "200": {
                         "description": "状态更新成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.ColorStatusResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.ColorStatusResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "友链颜色不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -628,9 +679,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链分组管理"
+                    "友链分组接口"
                 ],
-                "summary": "获取友链分组分页列表",
+                "summary": "[管理] 获取友链分组分页列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -673,28 +724,37 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.GroupPageResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.GroupPageResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -713,9 +773,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链分组管理"
+                    "友链分组接口"
                 ],
-                "summary": "添加友链分组",
+                "summary": "[管理] 添加友链分组",
                 "parameters": [
                     {
                         "description": "添加友链分组请求",
@@ -731,28 +791,37 @@ const docTemplate = `{
                     "200": {
                         "description": "添加成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.GroupAddResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.GroupAddResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -773,9 +842,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链分组管理"
+                    "友链分组接口"
                 ],
-                "summary": "获取友链分组列表",
+                "summary": "[管理] 获取友链分组列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -818,31 +887,40 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.LinkGroup"
-                            }
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.LinkGroup"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -863,9 +941,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链分组管理"
+                    "友链分组接口"
                 ],
-                "summary": "批量更新友链分组排序",
+                "summary": "[管理] 批量更新友链分组排序",
                 "parameters": [
                     {
                         "description": "分组排序请求",
@@ -881,35 +959,43 @@ const docTemplate = `{
                     "200": {
                         "description": "排序更新成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.GroupSortResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.GroupSortResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "分组不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -930,13 +1016,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链分组管理"
+                    "友链分组接口"
                 ],
-                "summary": "获取友链分组详情",
+                "summary": "[管理] 获取友链分组详情",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "友链分组ID",
                         "name": "id",
                         "in": "path",
@@ -947,35 +1032,43 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.GroupDetailResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.GroupDetailResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "友链分组不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -994,13 +1087,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链分组管理"
+                    "友链分组接口"
                 ],
-                "summary": "更新友链分组",
+                "summary": "[管理] 更新友链分组",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "友链分组ID",
                         "name": "id",
                         "in": "path",
@@ -1020,35 +1112,43 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.GroupUpdateResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.GroupUpdateResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "友链分组不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -1067,13 +1167,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链分组管理"
+                    "友链分组接口"
                 ],
-                "summary": "删除友链分组",
+                "summary": "[管理] 删除友链分组",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "友链分组ID",
                         "name": "id",
                         "in": "path",
@@ -1090,28 +1189,25 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.GroupDeleteResponse"
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "友链分组不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "409": {
@@ -1123,8 +1219,7 @@ const docTemplate = `{
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -1145,13 +1240,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友链分组管理"
+                    "友链分组接口"
                 ],
-                "summary": "更新友链分组状态",
+                "summary": "[管理] 更新友链分组状态",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "友链分组ID",
                         "name": "id",
                         "in": "path",
@@ -1171,35 +1265,43 @@ const docTemplate = `{
                     "200": {
                         "description": "状态更新成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.GroupStatusResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.GroupStatusResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "友链分组不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -1220,9 +1322,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "站点信息管理"
+                    "站点信息接口"
                 ],
-                "summary": "更新自我介绍",
+                "summary": "[管理] 更新自我介绍",
                 "parameters": [
                     {
                         "description": "自我介绍更新请求",
@@ -1238,28 +1340,37 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/apiInfo.AboutResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.AboutResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -1280,9 +1391,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "站点信息管理"
+                    "站点信息接口"
                 ],
-                "summary": "更新站点信息",
+                "summary": "[管理] 更新站点信息",
                 "parameters": [
                     {
                         "description": "站点信息更新请求",
@@ -1298,28 +1409,37 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/apiInfo.SiteResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.SiteResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -1340,9 +1460,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友情链接管理"
+                    "友情链接接口"
                 ],
-                "summary": "获取友情链接列表",
+                "summary": "[管理] 获取友情链接列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1410,28 +1530,37 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.FriendListResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.FriendListResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -1450,9 +1579,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友情链接管理"
+                    "友情链接接口"
                 ],
-                "summary": "添加友情链接",
+                "summary": "[管理] 添加友情链接",
                 "parameters": [
                     {
                         "description": "添加友情链接请求",
@@ -1468,28 +1597,37 @@ const docTemplate = `{
                     "200": {
                         "description": "添加成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.FriendAddResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.FriendAddResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -1510,13 +1648,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友情链接管理"
+                    "友情链接接口"
                 ],
-                "summary": "获取友情链接详情",
+                "summary": "[管理] 获取友情链接详情",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "友情链接ID",
                         "name": "id",
                         "in": "path",
@@ -1527,35 +1664,43 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.FriendDetailResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.FriendDetailResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -1574,13 +1719,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友情链接管理"
+                    "友情链接接口"
                 ],
-                "summary": "更新友情链接",
+                "summary": "[管理] 更新友情链接",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "友情链接ID",
                         "name": "id",
                         "in": "path",
@@ -1600,35 +1744,43 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.FriendUpdateResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.FriendUpdateResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -1647,13 +1799,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友情链接管理"
+                    "友情链接接口"
                 ],
-                "summary": "删除友情链接",
+                "summary": "[管理] 删除友情链接",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "友情链接ID",
                         "name": "id",
                         "in": "path",
@@ -1664,35 +1815,31 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.MessageResponse"
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -1713,13 +1860,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友情链接管理"
+                    "友情链接接口"
                 ],
-                "summary": "更新友情链接失效状态",
+                "summary": "[管理] 更新友情链接失效状态",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "友情链接ID",
                         "name": "id",
                         "in": "path",
@@ -1739,35 +1885,31 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.MessageResponse"
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -1788,13 +1930,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "友情链接管理"
+                    "友情链接接口"
                 ],
-                "summary": "更新友情链接状态",
+                "summary": "[管理] 更新友情链接状态",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "友情链接ID",
                         "name": "id",
                         "in": "path",
@@ -1814,35 +1955,31 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.MessageResponse"
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -1863,9 +2000,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "赞助渠道管理"
+                    "赞助渠道接口"
                 ],
-                "summary": "获取赞助渠道分页列表",
+                "summary": "[管理] 获取赞助渠道分页列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1908,28 +2045,37 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/apiSponsor.ChannelPageResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiSponsor.ChannelPageResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -1948,9 +2094,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "赞助渠道管理"
+                    "赞助渠道接口"
                 ],
-                "summary": "添加赞助渠道",
+                "summary": "[管理] 添加赞助渠道",
                 "parameters": [
                     {
                         "description": "添加赞助渠道请求",
@@ -1966,28 +2112,37 @@ const docTemplate = `{
                     "200": {
                         "description": "添加成功",
                         "schema": {
-                            "$ref": "#/definitions/apiSponsor.ChannelAddResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiSponsor.ChannelAddResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2008,9 +2163,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "赞助渠道管理"
+                    "赞助渠道接口"
                 ],
-                "summary": "获取赞助渠道列表",
+                "summary": "[管理] 获取赞助渠道列表",
                 "parameters": [
                     {
                         "type": "boolean",
@@ -2047,31 +2202,40 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/apiSponsor.ChannelListItemResponse"
-                            }
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/apiSponsor.ChannelListItemResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2092,13 +2256,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "赞助渠道管理"
+                    "赞助渠道接口"
                 ],
-                "summary": "获取赞助渠道详情",
+                "summary": "[管理] 获取赞助渠道详情",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "赞助渠道ID",
                         "name": "id",
                         "in": "path",
@@ -2109,35 +2272,43 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/apiSponsor.ChannelDetailResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiSponsor.ChannelDetailResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "赞助渠道不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2156,13 +2327,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "赞助渠道管理"
+                    "赞助渠道接口"
                 ],
-                "summary": "更新赞助渠道",
+                "summary": "[管理] 更新赞助渠道",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "赞助渠道ID",
                         "name": "id",
                         "in": "path",
@@ -2182,35 +2352,43 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/apiSponsor.ChannelUpdateResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiSponsor.ChannelUpdateResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "赞助渠道不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2229,13 +2407,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "赞助渠道管理"
+                    "赞助渠道接口"
                 ],
-                "summary": "删除赞助渠道",
+                "summary": "[管理] 删除赞助渠道",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "赞助渠道ID",
                         "name": "id",
                         "in": "path",
@@ -2246,35 +2423,31 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "$ref": "#/definitions/apiSponsor.ChannelDeleteResponse"
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "赞助渠道不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2295,13 +2468,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "赞助渠道管理"
+                    "赞助渠道接口"
                 ],
-                "summary": "更新赞助渠道状态",
+                "summary": "[管理] 更新赞助渠道状态",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "赞助渠道ID",
                         "name": "id",
                         "in": "path",
@@ -2321,35 +2493,43 @@ const docTemplate = `{
                     "200": {
                         "description": "状态更新成功",
                         "schema": {
-                            "$ref": "#/definitions/apiSponsor.ChannelStatusResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiSponsor.ChannelStatusResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "赞助渠道不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2370,9 +2550,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "赞助记录管理"
+                    "赞助记录接口"
                 ],
-                "summary": "获取赞助记录分页列表",
+                "summary": "[管理] 获取赞助记录分页列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -2428,28 +2608,37 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/apiSponsor.RecordPageResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiSponsor.RecordPageResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2468,9 +2657,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "赞助记录管理"
+                    "赞助记录接口"
                 ],
-                "summary": "添加赞助记录",
+                "summary": "[管理] 添加赞助记录",
                 "parameters": [
                     {
                         "description": "添加赞助记录请求",
@@ -2486,28 +2675,37 @@ const docTemplate = `{
                     "200": {
                         "description": "添加成功",
                         "schema": {
-                            "$ref": "#/definitions/apiSponsor.RecordAddResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiSponsor.RecordAddResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2528,13 +2726,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "赞助记录管理"
+                    "赞助记录接口"
                 ],
-                "summary": "获取赞助记录详情",
+                "summary": "[管理] 获取赞助记录详情",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "赞助记录ID",
                         "name": "id",
                         "in": "path",
@@ -2545,35 +2742,43 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/apiSponsor.RecordDetailResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiSponsor.RecordDetailResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "赞助记录不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2592,13 +2797,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "赞助记录管理"
+                    "赞助记录接口"
                 ],
-                "summary": "更新赞助记录",
+                "summary": "[管理] 更新赞助记录",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "赞助记录ID",
                         "name": "id",
                         "in": "path",
@@ -2618,35 +2822,43 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/apiSponsor.RecordUpdateResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiSponsor.RecordUpdateResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "赞助记录不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2665,13 +2877,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "赞助记录管理"
+                    "赞助记录接口"
                 ],
-                "summary": "删除赞助记录",
+                "summary": "[管理] 删除赞助记录",
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "赞助记录ID",
                         "name": "id",
                         "in": "path",
@@ -2682,35 +2893,31 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "$ref": "#/definitions/apiSponsor.RecordDeleteResponse"
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "赞助记录不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2731,28 +2938,38 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "认证管理"
+                    "认证接口"
                 ],
-                "summary": "用户登录",
+                "summary": "[用户] 用户登录",
                 "responses": {
                     "200": {
                         "description": "登录成功，包含用户信息、Token及时间信息",
                         "schema": {
-                            "$ref": "#/definitions/apiAuth.LoginResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiAuth.LoginResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
                         "description": "认证失败",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2773,28 +2990,26 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "认证管理"
+                    "认证接口"
                 ],
-                "summary": "用户登出",
+                "summary": "[用户] 用户登出",
                 "responses": {
                     "200": {
                         "description": "登出成功",
                         "schema": {
-                            "$ref": "#/definitions/apiAuth.LogoutResponse"
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2815,9 +3030,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "认证管理"
+                    "认证接口"
                 ],
-                "summary": "修改密码",
+                "summary": "[用户] 修改密码",
                 "parameters": [
                     {
                         "description": "修改密码请求",
@@ -2833,28 +3048,25 @@ const docTemplate = `{
                     "200": {
                         "description": "修改成功",
                         "schema": {
-                            "$ref": "#/definitions/apiAuth.PasswordChangeResponse"
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "401": {
                         "description": "未认证或旧密码错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2870,9 +3082,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "认证管理"
+                    "认证接口"
                 ],
-                "summary": "重置密码",
+                "summary": "[用户] 重置密码",
                 "parameters": [
                     {
                         "description": "重置密码请求",
@@ -2888,28 +3100,25 @@ const docTemplate = `{
                     "200": {
                         "description": "重置链接已发送",
                         "schema": {
-                            "$ref": "#/definitions/apiAuth.PasswordResetResponse"
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "404": {
                         "description": "邮箱不存在",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2925,9 +3134,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "认证管理"
+                    "认证接口"
                 ],
-                "summary": "用户注册",
+                "summary": "[用户] 用户注册",
                 "parameters": [
                     {
                         "description": "注册请求",
@@ -2943,21 +3152,31 @@ const docTemplate = `{
                     "200": {
                         "description": "注册成功，包含用户信息、Token及时间信息",
                         "schema": {
-                            "$ref": "#/definitions/apiAuth.RegisterResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiAuth.RegisterResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误（用户名或邮箱已存在）",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -2973,9 +3192,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "认证管理"
+                    "认证接口"
                 ],
-                "summary": "验证重置密码Token",
+                "summary": "[用户] 验证重置密码Token",
                 "parameters": [
                     {
                         "type": "string",
@@ -2989,22 +3208,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Token有效",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "Token无效或已过期",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -3018,9 +3234,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "认证管理"
+                    "认证接口"
                 ],
-                "summary": "确认重置密码",
+                "summary": "[用户] 确认重置密码",
                 "parameters": [
                     {
                         "description": "确认重置密码请求",
@@ -3036,22 +3252,19 @@ const docTemplate = `{
                     "200": {
                         "description": "密码重置成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "Token无效或已过期",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -3072,28 +3285,38 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "认证管理"
+                    "认证接口"
                 ],
-                "summary": "获取用户信息",
+                "summary": "[用户] 获取用户信息",
                 "responses": {
                     "200": {
                         "description": "用户信息",
                         "schema": {
-                            "$ref": "#/definitions/apiAuth.UserInfoResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiAuth.UserInfoResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -3109,9 +3332,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "认证管理"
+                    "认证接口"
                 ],
-                "summary": "验证邮箱",
+                "summary": "[用户] 验证邮箱",
                 "parameters": [
                     {
                         "type": "string",
@@ -3125,22 +3348,19 @@ const docTemplate = `{
                     "200": {
                         "description": "验证成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "400": {
                         "description": "Token无效或已过期",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -3156,21 +3376,32 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "站点信息"
+                    "站点信息接口"
                 ],
-                "summary": "获取自我介绍",
+                "summary": "[用户] 获取自我介绍",
                 "responses": {
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/apiInfo.AboutResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.AboutResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -3186,21 +3417,32 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "站点信息"
+                    "站点信息接口"
                 ],
-                "summary": "获取站点信息",
+                "summary": "[用户] 获取站点信息",
                 "responses": {
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/apiInfo.SiteResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.SiteResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -3218,19 +3460,30 @@ const docTemplate = `{
                 "tags": [
                     "公开接口"
                 ],
-                "summary": "系统健康检查",
+                "summary": "[用户] 系统健康检查",
                 "responses": {
                     "200": {
                         "description": "健康检查成功",
                         "schema": {
-                            "$ref": "#/definitions/apiPublic.HealthResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiPublic.HealthResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -3248,7 +3501,7 @@ const docTemplate = `{
                 "tags": [
                     "公开接口"
                 ],
-                "summary": "获取公开友情链接",
+                "summary": "[用户] 获取公开友情链接",
                 "parameters": [
                     {
                         "type": "integer",
@@ -3262,14 +3515,25 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/apiLink.FriendPublicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.FriendPublicResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -3287,19 +3551,30 @@ const docTemplate = `{
                 "tags": [
                     "公开接口"
                 ],
-                "summary": "连通性测试",
+                "summary": "[用户] 连通性测试",
                 "responses": {
                     "200": {
                         "description": "连通测试成功",
                         "schema": {
-                            "$ref": "#/definitions/apiPublic.PingResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiPublic.PingResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -3315,24 +3590,35 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "赞助渠道"
+                    "赞助渠道接口"
                 ],
-                "summary": "获取公开的赞助渠道列表",
+                "summary": "[用户] 获取公开的赞助渠道列表",
                 "responses": {
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/apiSponsor.ChannelListItemResponse"
-                            }
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/apiSponsor.ChannelListItemResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -3348,9 +3634,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "赞助记录公开接口"
+                    "赞助记录接口"
                 ],
-                "summary": "获取赞助记录公开分页列表",
+                "summary": "[用户] 获取赞助记录公开分页列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -3388,21 +3674,31 @@ const docTemplate = `{
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/apiSponsor.RecordPublicPageResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiSponsor.RecordPublicPageResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     }
                 }
@@ -3448,14 +3744,6 @@ const docTemplate = `{
                 }
             }
         },
-        "apiAuth.LogoutResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
         "apiAuth.PasswordChangeRequest": {
             "type": "object",
             "required": [
@@ -3477,14 +3765,6 @@ const docTemplate = `{
                 }
             }
         },
-        "apiAuth.PasswordChangeResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
         "apiAuth.PasswordResetRequest": {
             "type": "object",
             "required": [
@@ -3494,14 +3774,6 @@ const docTemplate = `{
                 "email": {
                     "type": "string",
                     "example": "admin@example.com"
-                }
-            }
-        },
-        "apiAuth.PasswordResetResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
                 }
             }
         },
@@ -3674,7 +3946,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "hover_color": {
@@ -3682,7 +3953,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -3717,7 +3987,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
-                    "description": "更新时间",
                     "type": "string"
                 }
             }
@@ -3767,19 +4036,10 @@ const docTemplate = `{
                 }
             }
         },
-        "apiLink.ColorDeleteResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
         "apiLink.ColorDetailResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "hover_color": {
@@ -3787,7 +4047,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -3822,7 +4081,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
-                    "description": "更新时间",
                     "type": "string"
                 }
             }
@@ -3875,9 +4133,6 @@ const docTemplate = `{
                 "count": {
                     "description": "更新的颜色数量",
                     "type": "integer"
-                },
-                "message": {
-                    "type": "string"
                 }
             }
         },
@@ -3894,9 +4149,6 @@ const docTemplate = `{
         "apiLink.ColorStatusResponse": {
             "type": "object",
             "properties": {
-                "message": {
-                    "type": "string"
-                },
                 "status": {
                     "description": "更新后的状态",
                     "type": "boolean"
@@ -3949,7 +4201,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "hover_color": {
@@ -3957,7 +4208,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -3992,7 +4242,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
-                    "description": "更新时间",
                     "type": "string"
                 }
             }
@@ -4079,7 +4328,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "description": {
@@ -4107,7 +4355,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "id": {
-                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "is_failure": {
@@ -4135,7 +4382,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
-                    "description": "更新时间",
                     "type": "string"
                 },
                 "url": {
@@ -4168,7 +4414,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "description": {
@@ -4196,7 +4441,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "id": {
-                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "is_failure": {
@@ -4224,7 +4468,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
-                    "description": "更新时间",
                     "type": "string"
                 },
                 "url": {
@@ -4385,7 +4628,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "description": {
@@ -4413,7 +4655,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "id": {
-                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "is_failure": {
@@ -4441,7 +4682,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
-                    "description": "更新时间",
                     "type": "string"
                 },
                 "url": {
@@ -4478,7 +4718,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "description": {
@@ -4486,7 +4725,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -4509,7 +4747,6 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "updated_at": {
-                    "description": "更新时间",
                     "type": "string"
                 }
             }
@@ -4558,19 +4795,10 @@ const docTemplate = `{
                 }
             }
         },
-        "apiLink.GroupDeleteResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
         "apiLink.GroupDetailResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "description": {
@@ -4578,7 +4806,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -4601,7 +4828,6 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "updated_at": {
-                    "description": "更新时间",
                     "type": "string"
                 }
             }
@@ -4654,9 +4880,6 @@ const docTemplate = `{
                 "count": {
                     "description": "更新的分组数量",
                     "type": "integer"
-                },
-                "message": {
-                    "type": "string"
                 }
             }
         },
@@ -4673,9 +4896,6 @@ const docTemplate = `{
         "apiLink.GroupStatusResponse": {
             "type": "object",
             "properties": {
-                "message": {
-                    "type": "string"
-                },
                 "status": {
                     "description": "更新后的状态",
                     "type": "boolean"
@@ -4715,7 +4935,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "description": {
@@ -4723,7 +4942,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -4746,15 +4964,6 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "updated_at": {
-                    "description": "更新时间",
-                    "type": "string"
-                }
-            }
-        },
-        "apiLink.MessageResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
                     "type": "string"
                 }
             }
@@ -4908,14 +5117,6 @@ const docTemplate = `{
                 }
             }
         },
-        "apiSponsor.ChannelDeleteResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
         "apiSponsor.ChannelDetailResponse": {
             "type": "object",
             "properties": {
@@ -5036,9 +5237,6 @@ const docTemplate = `{
         "apiSponsor.ChannelStatusResponse": {
             "type": "object",
             "properties": {
-                "message": {
-                    "type": "string"
-                },
                 "status": {
                     "description": "更新后的状态",
                     "type": "boolean"
@@ -5207,14 +5405,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "apiSponsor.RecordDeleteResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
                     "type": "string"
                 }
             }
@@ -5520,7 +5710,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "hover_color": {
@@ -5528,7 +5717,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -5563,7 +5751,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
-                    "description": "更新时间",
                     "type": "string"
                 }
             }
@@ -5592,7 +5779,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "description": {
@@ -5620,7 +5806,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "id": {
-                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "is_failure": {
@@ -5648,7 +5833,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
-                    "description": "更新时间",
                     "type": "string"
                 },
                 "url": {
@@ -5661,7 +5845,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "description": {
@@ -5669,7 +5852,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -5692,7 +5874,6 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "updated_at": {
-                    "description": "更新时间",
                     "type": "string"
                 }
             }
@@ -5705,7 +5886,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "created_at": {
-                    "description": "创建时间",
                     "type": "string"
                 },
                 "email": {
@@ -5717,7 +5897,6 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "id": {
-                    "description": "ID 使用 Snowflake ID 作为主键",
                     "type": "integer"
                 },
                 "last_login_at": {
@@ -5737,12 +5916,35 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
-                    "description": "更新时间",
                     "type": "string"
                 },
                 "username": {
                     "description": "用户名",
                     "type": "string"
+                }
+            }
+        },
+        "xBase.BaseResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "context": {
+                    "type": "string"
+                },
+                "data": {},
+                "error_message": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "output": {
+                    "type": "string"
+                },
+                "overhead": {
+                    "type": "integer"
                 }
             }
         }

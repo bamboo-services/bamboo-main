@@ -20,7 +20,6 @@ import (
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	apiSponsor "github.com/bamboo-services/bamboo-main/api/sponsor"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
-	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
 	"github.com/gin-gonic/gin"
@@ -81,12 +80,7 @@ func (l *SponsorRecordLogic) Add(ctx *gin.Context, req *apiSponsor.RecordAddRequ
 	return buildRecordEntityResponse(record), nil
 }
 
-func (l *SponsorRecordLogic) Update(ctx *gin.Context, idStr string, req *apiSponsor.RecordUpdateRequest) (*apiSponsor.RecordEntityResponse, *xError.Error) {
-	recordID, xErr := parseSponsorRecordID(ctx, idStr)
-	if xErr != nil {
-		return nil, xErr
-	}
-
+func (l *SponsorRecordLogic) Update(ctx *gin.Context, recordID xSnowflake.SnowflakeID, req *apiSponsor.RecordUpdateRequest) (*apiSponsor.RecordEntityResponse, *xError.Error) {
 	_, found, xErr := l.repo.record.GetByID(ctx, recordID)
 	if xErr != nil {
 		return nil, xErr
@@ -156,12 +150,7 @@ func (l *SponsorRecordLogic) Update(ctx *gin.Context, idStr string, req *apiSpon
 	return buildRecordEntityResponse(record), nil
 }
 
-func (l *SponsorRecordLogic) Delete(ctx *gin.Context, idStr string) *xError.Error {
-	recordID, xErr := parseSponsorRecordID(ctx, idStr)
-	if xErr != nil {
-		return xErr
-	}
-
+func (l *SponsorRecordLogic) Delete(ctx *gin.Context, recordID xSnowflake.SnowflakeID) *xError.Error {
 	_, found, xErr := l.repo.record.GetByID(ctx, recordID)
 	if xErr != nil {
 		return xErr
@@ -180,12 +169,7 @@ func (l *SponsorRecordLogic) Delete(ctx *gin.Context, idStr string) *xError.Erro
 	return nil
 }
 
-func (l *SponsorRecordLogic) Get(ctx *gin.Context, idStr string) (*apiSponsor.RecordEntityResponse, *xError.Error) {
-	recordID, xErr := parseSponsorRecordID(ctx, idStr)
-	if xErr != nil {
-		return nil, xErr
-	}
-
+func (l *SponsorRecordLogic) Get(ctx *gin.Context, recordID xSnowflake.SnowflakeID) (*apiSponsor.RecordEntityResponse, *xError.Error) {
 	record, found, xErr := l.repo.record.GetDetailByID(ctx, recordID)
 	if xErr != nil {
 		return nil, xErr
@@ -256,14 +240,6 @@ func (l *SponsorRecordLogic) GetPublicPage(ctx *gin.Context, req *apiSponsor.Rec
 		resp = append(resp, buildRecordPublicItemResponse(&item))
 	}
 	return base.NewPaginationResponse(resp, req.Page, req.PageSize, total), nil
-}
-
-func parseSponsorRecordID(ctx *gin.Context, idStr string) (xSnowflake.SnowflakeID, *xError.Error) {
-	id, err := logcHelper.ParseSnowflakeID(idStr)
-	if err != nil {
-		return 0, xError.NewError(ctx, xError.BadRequest, "无效的记录ID", false)
-	}
-	return id, nil
 }
 
 func buildRecordEntityResponse(record *entity.SponsorRecord) *apiSponsor.RecordEntityResponse {

@@ -99,13 +99,7 @@ func (l *LinkLogic) Add(ctx *gin.Context, req *apiLink.FriendAddRequest) (*entit
 }
 
 // Update 更新友情链接
-func (l *LinkLogic) Update(ctx *gin.Context, linkIDStr string, req *apiLink.FriendUpdateRequest) (*entity.LinkFriend, *xError.Error) {
-	// 解析ID
-	linkID, err := logcHelper.ParseSnowflakeID(linkIDStr)
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
-	}
-
+func (l *LinkLogic) Update(ctx *gin.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendUpdateRequest) (*entity.LinkFriend, *xError.Error) {
 	link, found, xErr := l.repo.link.GetByID(ctx, linkID, false, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -163,13 +157,7 @@ func (l *LinkLogic) Update(ctx *gin.Context, linkIDStr string, req *apiLink.Frie
 }
 
 // Delete 删除友情链接
-func (l *LinkLogic) Delete(ctx *gin.Context, linkIDStr string) *xError.Error {
-	// 解析ID
-	linkID, err := logcHelper.ParseSnowflakeID(linkIDStr)
-	if err != nil {
-		return xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
-	}
-
+func (l *LinkLogic) Delete(ctx *gin.Context, linkID xSnowflake.SnowflakeID) *xError.Error {
 	ok, xErr := l.repo.link.DeleteByID(ctx, linkID, nil)
 	if xErr != nil {
 		return xErr
@@ -181,13 +169,7 @@ func (l *LinkLogic) Delete(ctx *gin.Context, linkIDStr string) *xError.Error {
 }
 
 // Get 获取友情链接详情
-func (l *LinkLogic) Get(ctx *gin.Context, linkIDStr string) (*entity.LinkFriend, *xError.Error) {
-	// 解析ID
-	linkID, err := logcHelper.ParseSnowflakeID(linkIDStr)
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
-	}
-
+func (l *LinkLogic) Get(ctx *gin.Context, linkID xSnowflake.SnowflakeID) (*entity.LinkFriend, *xError.Error) {
 	link, found, xErr := l.repo.link.GetByID(ctx, linkID, true, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -218,13 +200,7 @@ func (l *LinkLogic) List(ctx *gin.Context, req *apiLink.FriendQueryRequest) (*ba
 }
 
 // UpdateStatus 更新友情链接状态
-func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkIDStr string, req *apiLink.FriendStatusRequest) *xError.Error {
-	// 解析ID
-	linkID, err := logcHelper.ParseSnowflakeID(linkIDStr)
-	if err != nil {
-		return xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
-	}
-
+func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendStatusRequest) *xError.Error {
 	// 先查询友链信息（用于发送邮件通知）
 	link, found, xErr := l.repo.link.GetByID(ctx, linkID, false, nil)
 	if xErr != nil {
@@ -249,13 +225,7 @@ func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkIDStr string, req *apiLin
 }
 
 // UpdateFailStatus 更新友情链接失效状态
-func (l *LinkLogic) UpdateFailStatus(ctx *gin.Context, linkIDStr string, req *apiLink.FriendFailRequest) *xError.Error {
-	// 解析ID
-	linkID, err := logcHelper.ParseSnowflakeID(linkIDStr)
-	if err != nil {
-		return xError.NewError(ctx, xError.BadRequest, "无效的友链ID", false)
-	}
-
+func (l *LinkLogic) UpdateFailStatus(ctx *gin.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendFailRequest) *xError.Error {
 	ok, xErr := l.repo.link.UpdateFailureByID(ctx, linkID, req.LinkFail, req.LinkFailReason, nil)
 	if xErr != nil {
 		return xErr

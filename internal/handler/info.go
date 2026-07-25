@@ -20,14 +20,15 @@ import (
 )
 
 // GetSiteInfo 获取站点信息
-// @Summary 获取站点信息
+//
+// @Summary [用户] 获取站点信息
 // @Description 获取站点名称、描述、主页介绍等公开信息
-// @Tags 站点信息
+// @Tags 站点信息接口
 // @Accept json
 // @Produce json
-// @Success 200 {object} apiInfo.SiteResponse "获取成功"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/info/site [get]
+// @Success 200 {object} xBase.BaseResponse{data=apiInfo.SiteResponse} "获取成功"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/info/site [GET]
 func (h *InfoHandler) GetSiteInfo(c *gin.Context) {
 	result, err := h.service.infoLogic.GetSiteInfo(c)
 	if err != nil {
@@ -39,18 +40,19 @@ func (h *InfoHandler) GetSiteInfo(c *gin.Context) {
 }
 
 // UpdateSiteInfo 更新站点信息
-// @Summary 更新站点信息
+//
+// @Summary [管理] 更新站点信息
 // @Description 管理员更新站点名称、描述、主页介绍
-// @Tags 站点信息管理
+// @Tags 站点信息接口
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param request body apiInfo.SiteUpdateRequest true "站点信息更新请求"
-// @Success 200 {object} apiInfo.SiteResponse "更新成功"
-// @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 401 {object} map[string]interface{} "未认证"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/info/site [put]
+// @Success 200 {object} xBase.BaseResponse{data=apiInfo.SiteResponse} "更新成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/info/site [PUT]
 func (h *InfoHandler) UpdateSiteInfo(c *gin.Context) {
 	var req apiInfo.SiteUpdateRequest
 
@@ -69,14 +71,15 @@ func (h *InfoHandler) UpdateSiteInfo(c *gin.Context) {
 }
 
 // GetAbout 获取自我介绍
-// @Summary 获取自我介绍
+//
+// @Summary [用户] 获取自我介绍
 // @Description 获取 Markdown 格式的自我介绍内容
-// @Tags 站点信息
+// @Tags 站点信息接口
 // @Accept json
 // @Produce json
-// @Success 200 {object} apiInfo.AboutResponse "获取成功"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/info/about [get]
+// @Success 200 {object} xBase.BaseResponse{data=apiInfo.AboutResponse} "获取成功"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/info/about [GET]
 func (h *InfoHandler) GetAbout(c *gin.Context) {
 	result, err := h.service.infoLogic.GetAbout(c)
 	if err != nil {
@@ -88,18 +91,19 @@ func (h *InfoHandler) GetAbout(c *gin.Context) {
 }
 
 // UpdateAbout 更新自我介绍
-// @Summary 更新自我介绍
+//
+// @Summary [管理] 更新自我介绍
 // @Description 管理员更新 Markdown 格式的自我介绍
-// @Tags 站点信息管理
+// @Tags 站点信息接口
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param request body apiInfo.AboutUpdateRequest true "自我介绍更新请求"
-// @Success 200 {object} apiInfo.AboutResponse "更新成功"
-// @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 401 {object} map[string]interface{} "未认证"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/info/about [put]
+// @Success 200 {object} xBase.BaseResponse{data=apiInfo.AboutResponse} "更新成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/info/about [PUT]
 func (h *InfoHandler) UpdateAbout(c *gin.Context) {
 	var req apiInfo.AboutUpdateRequest
 

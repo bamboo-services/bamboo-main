@@ -18,6 +18,11 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 )
 
+// ChannelIDRequest 赞助渠道路径参数
+type ChannelIDRequest struct {
+	ID xSnowflake.SnowflakeID `uri:"id" binding:"required"`
+}
+
 // ChannelAddRequest 添加赞助渠道请求
 type ChannelAddRequest struct {
 	Name        string  `json:"name" binding:"required,min=1,max=50" example:"支付宝"`                      // 渠道名称
@@ -106,13 +111,7 @@ type ChannelPageResponse struct {
 
 // ChannelStatusResponse 状态切换响应
 type ChannelStatusResponse struct {
-	Message string `json:"message"`
-	Status  bool   `json:"status"` // 更新后的状态
-}
-
-// ChannelDeleteResponse 删除响应
-type ChannelDeleteResponse struct {
-	Message string `json:"message"`
+	Status bool `json:"status"` // 更新后的状态
 }
 
 // ChannelDeleteConflictResponse 删除冲突响应

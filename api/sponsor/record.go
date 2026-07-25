@@ -18,6 +18,11 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 )
 
+// RecordIDRequest 赞助记录路径参数
+type RecordIDRequest struct {
+	ID xSnowflake.SnowflakeID `uri:"id" binding:"required"`
+}
+
 // RecordAddRequest 添加赞助记录请求
 type RecordAddRequest struct {
 	Nickname    string                  `json:"nickname" binding:"required,min=1,max=100" example:"张三"`                 // 赞助者昵称
@@ -120,9 +125,4 @@ type RecordPageResponse struct {
 // RecordPublicPageResponse 公开分页响应（前台）
 type RecordPublicPageResponse struct {
 	base.PaginationResponse[RecordPublicItemResponse]
-}
-
-// RecordDeleteResponse 删除响应
-type RecordDeleteResponse struct {
-	Message string `json:"message"`
 }

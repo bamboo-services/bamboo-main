@@ -44,14 +44,18 @@ func main() {
 				&entity.SponsorChannel{},
 				&entity.SponsorRecord{},
 			),
-			xOptionDB.WithPrepare(prepare.DefaultData),
+			xOptionDB.WithPrepare(
+				prepare.DefaultUser,
+				prepare.DefaultInfo,
+			),
 		),
 		xOption.WithCache(xOptionCache.FromEnv()),
 		xOption.WithRoute(route.NewRoute),
 	}
 
-	reg := xReg.Register(ctx, nodeList, opts...)
-	log := xLog.WithName(xLog.NamedMAIN)
-
-	xMain.Runner(reg, log, worker.MailWorkerRunner)
+	xMain.Runner(
+		xReg.Register(ctx, nodeList, opts...),
+		xLog.WithName(xLog.NamedMAIN),
+		worker.MailWorkerRunner,
+	)
 }

@@ -28,6 +28,3 @@ type ConfirmResetPasswordRequest struct {
 type VerifyResetTokenRequest struct {
 	Token string `form:"token" binding:"required,min=32,max=64" example:"abc123..."`
 }
-
-type PasswordChangeResponse = MessageResponse
-type PasswordResetResponse = MessageResponse

@@ -36,6 +36,7 @@ func MailWorkerRunner(ctx context.Context, _ ...any) {
 	worker := task.NewMailWorker(rdb, &config.Email, zap.NewNop().Sugar())
 
 	worker.Start()
+
 	<-ctx.Done()
 	worker.Stop()
 	log.Info(ctx, "邮件 worker 已优雅停止")

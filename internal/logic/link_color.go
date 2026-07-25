@@ -16,10 +16,10 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	apiLinkColor "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
-	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
 	"github.com/gin-gonic/gin"
@@ -95,12 +95,7 @@ func (l *LinkColorLogic) Add(ctx *gin.Context, req *apiLinkColor.ColorAddRequest
 	return reloaded, nil
 }
 
-func (l *LinkColorLogic) Update(ctx *gin.Context, colorIDStr string, req *apiLinkColor.ColorUpdateRequest) (*entity.LinkColor, *xError.Error) {
-	colorID, err := logcHelper.ParseSnowflakeID(colorIDStr)
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.BadRequest, "无效的颜色ID", false)
-	}
-
+func (l *LinkColorLogic) Update(ctx *gin.Context, colorID xSnowflake.SnowflakeID, req *apiLinkColor.ColorUpdateRequest) (*entity.LinkColor, *xError.Error) {
 	color, found, xErr := l.repo.color.GetByID(ctx, colorID, false, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -188,12 +183,7 @@ func (l *LinkColorLogic) UpdateSort(ctx *gin.Context, req *apiLinkColor.ColorSor
 	return nil
 }
 
-func (l *LinkColorLogic) UpdateStatus(ctx *gin.Context, colorIDStr string, req *apiLinkColor.ColorStatusRequest) *xError.Error {
-	colorID, err := logcHelper.ParseSnowflakeID(colorIDStr)
-	if err != nil {
-		return xError.NewError(ctx, xError.BadRequest, "无效的颜色ID", false)
-	}
-
+func (l *LinkColorLogic) UpdateStatus(ctx *gin.Context, colorID xSnowflake.SnowflakeID, req *apiLinkColor.ColorStatusRequest) *xError.Error {
 	ok, xErr := l.repo.color.UpdateStatusByID(ctx, colorID, req.Status, nil)
 	if xErr != nil {
 		return xErr
@@ -205,12 +195,7 @@ func (l *LinkColorLogic) UpdateStatus(ctx *gin.Context, colorIDStr string, req *
 	return nil
 }
 
-func (l *LinkColorLogic) Delete(ctx *gin.Context, colorIDStr string, req *apiLinkColor.ColorDeleteRequest) ([]entity.LinkFriend, *xError.Error) {
-	colorID, err := logcHelper.ParseSnowflakeID(colorIDStr)
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.BadRequest, "无效的颜色ID", false)
-	}
-
+func (l *LinkColorLogic) Delete(ctx *gin.Context, colorID xSnowflake.SnowflakeID, req *apiLinkColor.ColorDeleteRequest) ([]entity.LinkFriend, *xError.Error) {
 	_, found, xErr := l.repo.color.GetByID(ctx, colorID, false, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -256,19 +241,14 @@ func (l *LinkColorLogic) Delete(ctx *gin.Context, colorIDStr string, req *apiLin
 		return nil, xError.NewError(ctx, xError.NotFound, "友链颜色不存在", false)
 	}
 
-	if err = tx.Commit().Error; err != nil {
+	if err := tx.Commit().Error; err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "提交删除操作失败", false, err)
 	}
 
 	return nil, nil
 }
 
-func (l *LinkColorLogic) Get(ctx *gin.Context, colorIDStr string) (*entity.LinkColor, *xError.Error) {
-	colorID, err := logcHelper.ParseSnowflakeID(colorIDStr)
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.BadRequest, "无效的颜色ID", false)
-	}
-
+func (l *LinkColorLogic) Get(ctx *gin.Context, colorID xSnowflake.SnowflakeID) (*entity.LinkColor, *xError.Error) {
 	color, found, xErr := l.repo.color.GetByID(ctx, colorID, true, nil)
 	if xErr != nil {
 		return nil, xErr

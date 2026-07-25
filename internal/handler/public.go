@@ -19,14 +19,15 @@ import (
 )
 
 // HealthCheck 健康检查接口
-// @Summary 系统健康检查
+//
+// @Summary [用户] 系统健康检查
 // @Description 检查系统、数据库、Redis连接状态
 // @Tags 公开接口
 // @Accept json
 // @Produce json
-// @Success 200 {object} apiPublic.HealthResponse "健康检查成功"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/public/health [get]
+// @Success 200 {object} xBase.BaseResponse{data=apiPublic.HealthResponse} "健康检查成功"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/public/health [GET]
 func (h *PublicHandler) HealthCheck(c *gin.Context) {
 	// 调用服务层
 	result, err := h.service.publicLogic.HealthCheck(c)
@@ -44,14 +45,15 @@ func (h *PublicHandler) HealthCheck(c *gin.Context) {
 }
 
 // Ping 简单连通性测试接口
-// @Summary 连通性测试
+//
+// @Summary [用户] 连通性测试
 // @Description 简单的服务连通性测试
 // @Tags 公开接口
 // @Accept json
 // @Produce json
-// @Success 200 {object} apiPublic.PingResponse "连通测试成功"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/public/ping [get]
+// @Success 200 {object} xBase.BaseResponse{data=apiPublic.PingResponse} "连通测试成功"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/public/ping [GET]
 func (h *PublicHandler) Ping(c *gin.Context) {
 	// 调用服务层
 	result, err := h.service.publicLogic.Ping(c)

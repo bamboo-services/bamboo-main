@@ -13,24 +13,26 @@ package handler
 
 import (
 	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
+	xUtil "github.com/bamboo-services/bamboo-base-go/major/utility"
 	xValid "github.com/bamboo-services/bamboo-base-go/major/validator"
 	apiSponsorRecord "github.com/bamboo-services/bamboo-main/api/sponsor"
 	"github.com/gin-gonic/gin"
 )
 
 // Add 添加赞助记录
-// @Summary 添加赞助记录
+//
+// @Summary [管理] 添加赞助记录
 // @Description 创建新的赞助记录
-// @Tags 赞助记录管理
+// @Tags 赞助记录接口
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param request body apiSponsorRecord.RecordAddRequest true "添加赞助记录请求"
-// @Success 200 {object} apiSponsorRecord.RecordAddResponse "添加成功"
-// @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 401 {object} map[string]interface{} "未认证"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/sponsors/records [post]
+// @Success 200 {object} xBase.BaseResponse{data=apiSponsorRecord.RecordAddResponse} "添加成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/sponsors/records [POST]
 func (h *SponsorRecordHandler) Add(c *gin.Context) {
 	var req apiSponsorRecord.RecordAddRequest
 
@@ -54,22 +56,27 @@ func (h *SponsorRecordHandler) Add(c *gin.Context) {
 }
 
 // Update 更新赞助记录
-// @Summary 更新赞助记录
+//
+// @Summary [管理] 更新赞助记录
 // @Description 更新指定赞助记录的信息
-// @Tags 赞助记录管理
+// @Tags 赞助记录接口
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path int64 true "赞助记录ID"
+// @Param id path int true "赞助记录ID"
 // @Param request body apiSponsorRecord.RecordUpdateRequest true "更新赞助记录请求"
-// @Success 200 {object} apiSponsorRecord.RecordUpdateResponse "更新成功"
-// @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 401 {object} map[string]interface{} "未认证"
-// @Failure 404 {object} map[string]interface{} "赞助记录不存在"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/sponsors/records/{id} [put]
+// @Success 200 {object} xBase.BaseResponse{data=apiSponsorRecord.RecordUpdateResponse} "更新成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 404 {object} xBase.BaseResponse "赞助记录不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/sponsors/records/{id} [PUT]
 func (h *SponsorRecordHandler) Update(c *gin.Context) {
-	recordIDStr := c.Param("id")
+	uri := xUtil.Bind(c, &apiSponsorRecord.RecordIDRequest{}).URI()
+	if uri == nil {
+		return
+	}
+
 	var req apiSponsorRecord.RecordUpdateRequest
 
 	// 绑定请求数据
@@ -80,7 +87,7 @@ func (h *SponsorRecordHandler) Update(c *gin.Context) {
 	}
 
 	// 调用服务层
-	record, err := h.service.sponsorRecordLogic.Update(c, recordIDStr, &req)
+	record, err := h.service.sponsorRecordLogic.Update(c, uri.ID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -92,55 +99,60 @@ func (h *SponsorRecordHandler) Update(c *gin.Context) {
 }
 
 // Delete 删除赞助记录
-// @Summary 删除赞助记录
+//
+// @Summary [管理] 删除赞助记录
 // @Description 删除指定的赞助记录
-// @Tags 赞助记录管理
+// @Tags 赞助记录接口
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path int64 true "赞助记录ID"
-// @Success 200 {object} apiSponsorRecord.RecordDeleteResponse "删除成功"
-// @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 401 {object} map[string]interface{} "未认证"
-// @Failure 404 {object} map[string]interface{} "赞助记录不存在"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/sponsors/records/{id} [delete]
+// @Param id path int true "赞助记录ID"
+// @Success 200 {object} xBase.BaseResponse "删除成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 404 {object} xBase.BaseResponse "赞助记录不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/sponsors/records/{id} [DELETE]
 func (h *SponsorRecordHandler) Delete(c *gin.Context) {
-	recordIDStr := c.Param("id")
+	uri := xUtil.Bind(c, &apiSponsorRecord.RecordIDRequest{}).URI()
+	if uri == nil {
+		return
+	}
 
 	// 调用服务层
-	err := h.service.sponsorRecordLogic.Delete(c, recordIDStr)
+	err := h.service.sponsorRecordLogic.Delete(c, uri.ID)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	resp := apiSponsorRecord.RecordDeleteResponse{
-		Message: "赞助记录删除成功",
-	}
-	xResult.SuccessHasData(c, "赞助记录删除成功", resp)
+	xResult.Success(c, "赞助记录删除成功")
 }
 
 // Get 获取赞助记录详情
-// @Summary 获取赞助记录详情
+//
+// @Summary [管理] 获取赞助记录详情
 // @Description 根据ID获取指定赞助记录的详细信息
-// @Tags 赞助记录管理
+// @Tags 赞助记录接口
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path int64 true "赞助记录ID"
-// @Success 200 {object} apiSponsorRecord.RecordDetailResponse "获取成功"
-// @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 401 {object} map[string]interface{} "未认证"
-// @Failure 404 {object} map[string]interface{} "赞助记录不存在"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/sponsors/records/{id} [get]
+// @Param id path int true "赞助记录ID"
+// @Success 200 {object} xBase.BaseResponse{data=apiSponsorRecord.RecordDetailResponse} "获取成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 404 {object} xBase.BaseResponse "赞助记录不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/sponsors/records/{id} [GET]
 func (h *SponsorRecordHandler) Get(c *gin.Context) {
-	recordIDStr := c.Param("id")
+	uri := xUtil.Bind(c, &apiSponsorRecord.RecordIDRequest{}).URI()
+	if uri == nil {
+		return
+	}
 
 	// 调用服务层
-	record, err := h.service.sponsorRecordLogic.Get(c, recordIDStr)
+	record, err := h.service.sponsorRecordLogic.Get(c, uri.ID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -152,9 +164,10 @@ func (h *SponsorRecordHandler) Get(c *gin.Context) {
 }
 
 // GetPage 获取赞助记录分页列表
-// @Summary 获取赞助记录分页列表
+//
+// @Summary [管理] 获取赞助记录分页列表
 // @Description 分页获取赞助记录列表，支持过滤和排序
-// @Tags 赞助记录管理
+// @Tags 赞助记录接口
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -166,11 +179,11 @@ func (h *SponsorRecordHandler) Get(c *gin.Context) {
 // @Param is_hidden query bool false "是否隐藏过滤"
 // @Param order_by query string false "排序字段（nickname, amount, sponsor_at, sort_order, created_at）"
 // @Param order query string false "排序方向（asc, desc）"
-// @Success 200 {object} apiSponsorRecord.RecordPageResponse "获取成功"
-// @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 401 {object} map[string]interface{} "未认证"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/admin/sponsors/records [get]
+// @Success 200 {object} xBase.BaseResponse{data=apiSponsorRecord.RecordPageResponse} "获取成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/sponsors/records [GET]
 func (h *SponsorRecordHandler) GetPage(c *gin.Context) {
 	var req apiSponsorRecord.RecordPageRequest
 
@@ -194,9 +207,10 @@ func (h *SponsorRecordHandler) GetPage(c *gin.Context) {
 }
 
 // GetPublicPage 获取赞助记录公开分页列表
-// @Summary 获取赞助记录公开分页列表
+//
+// @Summary [用户] 获取赞助记录公开分页列表
 // @Description 分页获取前台赞助墙展示的记录列表，只返回未隐藏的记录，匿名记录显示为"匿名用户"
-// @Tags 赞助记录公开接口
+// @Tags 赞助记录接口
 // @Accept json
 // @Produce json
 // @Param page query int false "页码（默认1）"
@@ -204,10 +218,10 @@ func (h *SponsorRecordHandler) GetPage(c *gin.Context) {
 // @Param channel_id query int64 false "渠道ID过滤"
 // @Param order_by query string false "排序字段（amount, sponsor_at, sort_order）"
 // @Param order query string false "排序方向（asc, desc）"
-// @Success 200 {object} apiSponsorRecord.RecordPublicPageResponse "获取成功"
-// @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/sponsors/records [get]
+// @Success 200 {object} xBase.BaseResponse{data=apiSponsorRecord.RecordPublicPageResponse} "获取成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/sponsors/records [GET]
 func (h *SponsorRecordHandler) GetPublicPage(c *gin.Context) {
 	var req apiSponsorRecord.RecordPublicPageRequest
 

@@ -17,6 +17,11 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 )
 
+// GroupIDRequest 友链分组路径参数
+type GroupIDRequest struct {
+	ID xSnowflake.SnowflakeID `uri:"id" binding:"required"`
+}
+
 // GroupAddRequest 添加友链分组请求
 type GroupAddRequest struct {
 	GroupName  string `json:"group_name" binding:"required,min=1,max=100" example:"技术博客"`
@@ -95,19 +100,12 @@ type GroupPageResponse struct {
 
 // GroupSortResponse 友链分组排序响应
 type GroupSortResponse struct {
-	Message string `json:"message"`
-	Count   int    `json:"count"` // 更新的分组数量
+	Count int `json:"count"` // 更新的分组数量
 }
 
 // GroupStatusResponse 友链分组状态切换响应
 type GroupStatusResponse struct {
-	Message string `json:"message"`
-	Status  bool   `json:"status"` // 更新后的状态
-}
-
-// GroupDeleteResponse 友链分组删除响应
-type GroupDeleteResponse struct {
-	Message string `json:"message"`
+	Status bool `json:"status"` // 更新后的状态
 }
 
 // GroupDeleteConflictResponse 友链分组删除冲突响应
@@ -124,16 +122,3 @@ type GroupDeleteConflictInfo struct {
 	TotalLinks   int                    `json:"total_links"`   // 总友链数量
 	DisplayCount int                    `json:"display_count"` // 显示的友链数量（最多10个）
 }
-
-// 为了保持一致性，定义一些类型别名（引用现有的MessageResponse）
-type (
-	// GroupDeleteSimpleResponse 简单删除响应（成功时）
-	GroupDeleteSimpleResponse struct {
-		Message string `json:"message"`
-	}
-
-	// GroupStatusSimpleResponse 简单状态切换响应（不需要返回详细状态时）
-	GroupStatusSimpleResponse struct {
-		Message string `json:"message"`
-	}
-)

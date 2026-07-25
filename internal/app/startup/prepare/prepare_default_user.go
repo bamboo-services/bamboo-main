@@ -12,18 +12,26 @@
 package prepare
 
 import (
+	"context"
 	"errors"
 
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
+	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
 	"gorm.io/gorm"
 )
 
-func (p *Prepare) prepareDefaultUser() error {
+// DefaultUser 初始化默认管理员用户的 xOptionDB.PrepareFunc。
+//
+// 幂等：基于 system.admin.id 标记判定是否已初始化，已存在则直接跳过。
+// 失败时返回 error，由 xOption 启动流程中断并向上传递。
+func DefaultUser(ctx context.Context, db *gorm.DB) error {
+	log := xLog.WithName(xLog.NamedINIT)
+
 	var adminSystem entity.System
-	err := p.db.WithContext(p.ctx).Model(&entity.System{}).Where("key = ?", "system.admin.id").First(&adminSystem).Error
+	err := db.WithContext(ctx).Model(&entity.System{}).Where("key = ?", "system.admin.id").First(&adminSystem).Error
 	if err == nil && adminSystem.Value != nil && *adminSystem.Value != "" {
 		return nil
 	}
@@ -45,13 +53,18 @@ func (p *Prepare) prepareDefaultUser() error {
 		Role:     constants.RoleAdmin,
 		Status:   constants.StatusActive,
 	}
-	if err = p.db.WithContext(p.ctx).Create(user).Error; err != nil {
+	if err = db.WithContext(ctx).Create(user).Error; err != nil {
 		return err
 	}
 
 	adminID := user.ID.String()
-	return p.db.WithContext(p.ctx).Create(&entity.System{
+	if err = db.WithContext(ctx).Create(&entity.System{
 		Key:   "system.admin.id",
 		Value: &adminID,
-	}).Error
+	}).Error; err != nil {
+		return err
+	}
+
+	log.Info(ctx, "默认管理员用户初始化完成")
+	return nil
 }

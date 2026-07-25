@@ -17,6 +17,11 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 )
 
+// LinkIDRequest 友情链接路径参数
+type LinkIDRequest struct {
+	ID xSnowflake.SnowflakeID `uri:"id" binding:"required"`
+}
+
 // FriendAddRequest 添加友情链接请求
 type FriendAddRequest struct {
 	LinkName        string                 `json:"link_name" binding:"required,min=1,max=100" example:"示例网站"`
@@ -92,8 +97,4 @@ type FriendListResponse struct {
 // FriendPublicResponse 公开友情链接响应
 type FriendPublicResponse struct {
 	Links []entity.LinkFriend `json:"links"`
-}
-
-type MessageResponse struct {
-	Message string `json:"message"`
 }

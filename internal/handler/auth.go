@@ -23,16 +23,17 @@ import (
 )
 
 // Login 用户登录
-// @Summary 用户登录
+//
+// @Summary [用户] 用户登录
 // @Description 管理员用户登录，返回用户信息、访问令牌及Token时间信息
-// @Tags 认证管理
+// @Tags 认证接口
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} apiAuth.LoginResponse "登录成功，包含用户信息、Token及时间信息"
-// @Failure 401 {object} map[string]interface{} "认证失败"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/auth/login [post]
+// @Success 200 {object} xBase.BaseResponse{data=apiAuth.LoginResponse} "登录成功，包含用户信息、Token及时间信息"
+// @Failure 401 {object} xBase.BaseResponse "认证失败"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/auth/login [POST]
 func (h *AuthHandler) Login(c *gin.Context) {
 	accessToken := bSdkUtil.GetAuthorization(c)
 	userinfo, xErr := h.service.oauthLogic.Userinfo(c, accessToken)
@@ -58,16 +59,17 @@ func (h *AuthHandler) Login(c *gin.Context) {
 }
 
 // Register 用户注册
-// @Summary 用户注册
+//
+// @Summary [用户] 用户注册
 // @Description 注册新用户账户，注册成功后自动登录并返回访问令牌
-// @Tags 认证管理
+// @Tags 认证接口
 // @Accept json
 // @Produce json
 // @Param request body apiAuth.RegisterRequest true "注册请求"
-// @Success 200 {object} apiAuth.RegisterResponse "注册成功，包含用户信息、Token及时间信息"
-// @Failure 400 {object} map[string]interface{} "请求参数错误（用户名或邮箱已存在）"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/auth/register [post]
+// @Success 200 {object} xBase.BaseResponse{data=apiAuth.RegisterResponse} "注册成功，包含用户信息、Token及时间信息"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误（用户名或邮箱已存在）"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/auth/register [POST]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req apiAuth.RegisterRequest
 
@@ -96,16 +98,17 @@ func (h *AuthHandler) Register(c *gin.Context) {
 }
 
 // Logout 用户登出
-// @Summary 用户登出
+//
+// @Summary [用户] 用户登出
 // @Description 注销当前登录会话
-// @Tags 认证管理
+// @Tags 认证接口
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} apiAuth.LogoutResponse "登出成功"
-// @Failure 401 {object} map[string]interface{} "未认证"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/auth/logout [patch]
+// @Success 200 {object} xBase.BaseResponse "登出成功"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/auth/logout [PATCH]
 func (h *AuthHandler) Logout(c *gin.Context) {
 	token := bSdkUtil.GetAuthorization(c)
 	if token == "" {
@@ -130,16 +133,17 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 }
 
 // GetUserInfo 获取当前用户信息
-// @Summary 获取用户信息
+//
+// @Summary [用户] 获取用户信息
 // @Description 获取当前登录用户的详细信息
-// @Tags 认证管理
+// @Tags 认证接口
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} apiAuth.UserInfoResponse "用户信息"
-// @Failure 401 {object} map[string]interface{} "未认证"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/auth/user [get]
+// @Success 200 {object} xBase.BaseResponse{data=apiAuth.UserInfoResponse} "用户信息"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/auth/user [GET]
 func (h *AuthHandler) GetUserInfo(c *gin.Context) {
 	userUUID, exists := ctxUtil.GetUserID(c)
 	if !exists {
@@ -160,18 +164,19 @@ func (h *AuthHandler) GetUserInfo(c *gin.Context) {
 }
 
 // ChangePassword 修改密码
-// @Summary 修改密码
+//
+// @Summary [用户] 修改密码
 // @Description 修改当前用户的登录密码
-// @Tags 认证管理
+// @Tags 认证接口
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param request body apiAuth.PasswordChangeRequest true "修改密码请求"
-// @Success 200 {object} apiAuth.PasswordChangeResponse "修改成功"
-// @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 401 {object} map[string]interface{} "未认证或旧密码错误"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/auth/password/change [put]
+// @Success 200 {object} xBase.BaseResponse "修改成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证或旧密码错误"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/auth/password/change [PUT]
 func (h *AuthHandler) ChangePassword(c *gin.Context) {
 	var req apiAuth.PasswordChangeRequest
 
@@ -200,17 +205,18 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 }
 
 // ResetPassword 重置密码
-// @Summary 重置密码
+//
+// @Summary [用户] 重置密码
 // @Description 通过邮箱重置用户密码，发送重置链接到邮箱
-// @Tags 认证管理
+// @Tags 认证接口
 // @Accept json
 // @Produce json
 // @Param request body apiAuth.PasswordResetRequest true "重置密码请求"
-// @Success 200 {object} apiAuth.PasswordResetResponse "重置链接已发送"
-// @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 404 {object} map[string]interface{} "邮箱不存在"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/auth/password/reset [patch]
+// @Success 200 {object} xBase.BaseResponse "重置链接已发送"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 404 {object} xBase.BaseResponse "邮箱不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/auth/password/reset [PATCH]
 func (h *AuthHandler) ResetPassword(c *gin.Context) {
 	var req apiAuth.PasswordResetRequest
 
@@ -233,16 +239,17 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 }
 
 // VerifyEmail 验证邮箱
-// @Summary 验证邮箱
+//
+// @Summary [用户] 验证邮箱
 // @Description 通过邮箱中的验证链接验证用户邮箱
-// @Tags 认证管理
+// @Tags 认证接口
 // @Accept json
 // @Produce json
 // @Param token query string true "验证Token"
-// @Success 200 {object} map[string]interface{} "验证成功"
-// @Failure 400 {object} map[string]interface{} "Token无效或已过期"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/auth/verify-email [get]
+// @Success 200 {object} xBase.BaseResponse "验证成功"
+// @Failure 400 {object} xBase.BaseResponse "Token无效或已过期"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/auth/verify-email [GET]
 func (h *AuthHandler) VerifyEmail(c *gin.Context) {
 	var req apiAuth.VerifyEmailRequest
 
@@ -265,16 +272,17 @@ func (h *AuthHandler) VerifyEmail(c *gin.Context) {
 }
 
 // VerifyResetToken 验证重置密码Token
-// @Summary 验证重置密码Token
+//
+// @Summary [用户] 验证重置密码Token
 // @Description 检查密码重置链接是否有效
-// @Tags 认证管理
+// @Tags 认证接口
 // @Accept json
 // @Produce json
 // @Param token query string true "重置Token"
-// @Success 200 {object} map[string]interface{} "Token有效"
-// @Failure 400 {object} map[string]interface{} "Token无效或已过期"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/auth/reset-password [get]
+// @Success 200 {object} xBase.BaseResponse "Token有效"
+// @Failure 400 {object} xBase.BaseResponse "Token无效或已过期"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/auth/reset-password [GET]
 func (h *AuthHandler) VerifyResetToken(c *gin.Context) {
 	var req apiAuth.VerifyResetTokenRequest
 
@@ -302,16 +310,17 @@ func (h *AuthHandler) VerifyResetToken(c *gin.Context) {
 }
 
 // ConfirmResetPassword 确认重置密码
-// @Summary 确认重置密码
+//
+// @Summary [用户] 确认重置密码
 // @Description 通过重置Token设置新密码
-// @Tags 认证管理
+// @Tags 认证接口
 // @Accept json
 // @Produce json
 // @Param request body apiAuth.ConfirmResetPasswordRequest true "确认重置密码请求"
-// @Success 200 {object} map[string]interface{} "密码重置成功"
-// @Failure 400 {object} map[string]interface{} "Token无效或已过期"
-// @Failure 500 {object} map[string]interface{} "服务器内部错误"
-// @Router /api/v1/auth/reset-password [post]
+// @Success 200 {object} xBase.BaseResponse "密码重置成功"
+// @Failure 400 {object} xBase.BaseResponse "Token无效或已过期"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/auth/reset-password [POST]
 func (h *AuthHandler) ConfirmResetPassword(c *gin.Context) {
 	var req apiAuth.ConfirmResetPasswordRequest
 

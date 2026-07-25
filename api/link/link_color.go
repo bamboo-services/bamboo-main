@@ -53,6 +53,11 @@ type ColorDeleteRequest struct {
 	Force bool `json:"force" binding:"omitempty" example:"false"` // 是否强制删除：false=检查关联，true=强制删除并清空关联
 }
 
+// ColorIDRequest 友链颜色路径参数
+type ColorIDRequest struct {
+	ID xSnowflake.SnowflakeID `uri:"id" binding:"required"`
+}
+
 // ColorListRequest 颜色列表查询请求
 type ColorListRequest struct {
 	Status      *int    `form:"status" binding:"omitempty,oneof=0 1" example:"1"`                                   // 状态过滤：0=禁用，1=启用，不传=全部
@@ -101,19 +106,12 @@ type ColorPageResponse struct {
 
 // ColorSortResponse 友链颜色排序响应
 type ColorSortResponse struct {
-	Message string `json:"message"`
-	Count   int    `json:"count"` // 更新的颜色数量
+	Count int `json:"count"` // 更新的颜色数量
 }
 
 // ColorStatusResponse 友链颜色状态切换响应
 type ColorStatusResponse struct {
-	Message string `json:"message"`
-	Status  bool   `json:"status"` // 更新后的状态
-}
-
-// ColorDeleteResponse 友链颜色删除响应
-type ColorDeleteResponse struct {
-	Message string `json:"message"`
+	Status bool `json:"status"` // 更新后的状态
 }
 
 // ColorDeleteConflictResponse 友链颜色删除冲突响应

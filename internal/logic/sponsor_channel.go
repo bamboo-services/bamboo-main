@@ -20,7 +20,6 @@ import (
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	apiSponsor "github.com/bamboo-services/bamboo-main/api/sponsor"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
-	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
 	"github.com/gin-gonic/gin"
@@ -70,12 +69,7 @@ func (l *SponsorChannelLogic) Add(ctx *gin.Context, req *apiSponsor.ChannelAddRe
 	return buildChannelEntityResponse(channel, int(sponsorCount)), nil
 }
 
-func (l *SponsorChannelLogic) Update(ctx *gin.Context, idStr string, req *apiSponsor.ChannelUpdateRequest) (*apiSponsor.ChannelEntityResponse, *xError.Error) {
-	channelID, xErr := parseSponsorChannelID(ctx, idStr)
-	if xErr != nil {
-		return nil, xErr
-	}
-
+func (l *SponsorChannelLogic) Update(ctx *gin.Context, channelID xSnowflake.SnowflakeID, req *apiSponsor.ChannelUpdateRequest) (*apiSponsor.ChannelEntityResponse, *xError.Error) {
 	channel, found, xErr := l.repo.channel.GetByID(ctx, channelID)
 	if xErr != nil {
 		return nil, xErr
@@ -115,12 +109,7 @@ func (l *SponsorChannelLogic) Update(ctx *gin.Context, idStr string, req *apiSpo
 	return buildChannelEntityResponse(channel, int(sponsorCount)), nil
 }
 
-func (l *SponsorChannelLogic) UpdateStatus(ctx *gin.Context, idStr string, req *apiSponsor.ChannelStatusRequest) (bool, *xError.Error) {
-	channelID, xErr := parseSponsorChannelID(ctx, idStr)
-	if xErr != nil {
-		return false, xErr
-	}
-
+func (l *SponsorChannelLogic) UpdateStatus(ctx *gin.Context, channelID xSnowflake.SnowflakeID, req *apiSponsor.ChannelStatusRequest) (bool, *xError.Error) {
 	_, found, xErr := l.repo.channel.UpdateByID(ctx, channelID, map[string]any{"status": req.Status})
 	if xErr != nil {
 		return false, xErr
@@ -131,12 +120,7 @@ func (l *SponsorChannelLogic) UpdateStatus(ctx *gin.Context, idStr string, req *
 	return req.Status, nil
 }
 
-func (l *SponsorChannelLogic) Delete(ctx *gin.Context, idStr string) *xError.Error {
-	channelID, xErr := parseSponsorChannelID(ctx, idStr)
-	if xErr != nil {
-		return xErr
-	}
-
+func (l *SponsorChannelLogic) Delete(ctx *gin.Context, channelID xSnowflake.SnowflakeID) *xError.Error {
 	_, found, xErr := l.repo.channel.GetByID(ctx, channelID)
 	if xErr != nil {
 		return xErr
@@ -163,12 +147,7 @@ func (l *SponsorChannelLogic) Delete(ctx *gin.Context, idStr string) *xError.Err
 	return nil
 }
 
-func (l *SponsorChannelLogic) Get(ctx *gin.Context, idStr string) (*apiSponsor.ChannelEntityResponse, *xError.Error) {
-	channelID, xErr := parseSponsorChannelID(ctx, idStr)
-	if xErr != nil {
-		return nil, xErr
-	}
-
+func (l *SponsorChannelLogic) Get(ctx *gin.Context, channelID xSnowflake.SnowflakeID) (*apiSponsor.ChannelEntityResponse, *xError.Error) {
 	channel, found, xErr := l.repo.channel.GetByID(ctx, channelID)
 	if xErr != nil {
 		return nil, xErr
@@ -272,14 +251,6 @@ func (l *SponsorChannelLogic) GetPublicList(ctx *gin.Context) ([]apiSponsor.Chan
 		resp = append(resp, buildChannelListItemResponse(&channel, int(sponsorCounts[channel.ID])))
 	}
 	return resp, nil
-}
-
-func parseSponsorChannelID(ctx *gin.Context, idStr string) (xSnowflake.SnowflakeID, *xError.Error) {
-	id, err := logcHelper.ParseSnowflakeID(idStr)
-	if err != nil {
-		return 0, xError.NewError(ctx, xError.BadRequest, "无效的渠道ID", false)
-	}
-	return id, nil
 }
 
 func collectChannelIDs(channels []entity.SponsorChannel) []xSnowflake.SnowflakeID {
