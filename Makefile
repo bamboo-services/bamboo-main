@@ -68,7 +68,7 @@ test:
 dev-backend: generate run
 
 # 后端开发：生成 Swagger 文档后运行（跳过前端构建）
-dev: swag run
+dev: swag generate run
 
 # 前端开发服务器
 dev-frontend:

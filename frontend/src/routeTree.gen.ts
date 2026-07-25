@@ -9,50 +9,45 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as PublicRouteRouteImport } from './routes/_public/route'
-import { Route as AuthorizationRouteRouteImport } from './routes/_authorization/route'
 import { Route as AdminRouteRouteImport } from './routes/_admin/route'
-import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as AuthorizationRouteRouteImport } from './routes/_authorization/route'
+import { Route as PublicRouteRouteImport } from './routes/_public/route'
 import { Route as AdminAdminRouteRouteImport } from './routes/_admin/admin/route'
-import { Route as AuthorizationAuthLoginRouteImport } from './routes/_authorization/auth/login'
-import { Route as AdminAdminSponsorRouteImport } from './routes/_admin/admin/sponsor'
-import { Route as AdminAdminSettingRouteImport } from './routes/_admin/admin/setting'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as AdminAdminDashboardRouteImport } from './routes/_admin/admin/dashboard'
+import { Route as AdminAdminSettingRouteImport } from './routes/_admin/admin/setting'
+import { Route as AdminAdminSponsorRouteImport } from './routes/_admin/admin/sponsor'
+import { Route as AuthorizationAuthLoginRouteImport } from './routes/_authorization/auth/login'
 import { Route as AdminAdminLinkIndexRouteImport } from './routes/_admin/admin/link/index'
-import { Route as AdminAdminLinkVerifyRouteImport } from './routes/_admin/admin/link/verify'
 import { Route as AdminAdminLinkAddRouteImport } from './routes/_admin/admin/link/add'
+import { Route as AdminAdminLinkVerifyRouteImport } from './routes/_admin/admin/link/verify'
 import { Route as AdminAdminLinkIdEditRouteImport } from './routes/_admin/admin/link/$id.edit'
 
-const PublicRouteRoute = PublicRouteRouteImport.update({
-  id: '/_public',
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/_admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthorizationRouteRoute = AuthorizationRouteRouteImport.update({
   id: '/_authorization',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRouteRoute = AdminRouteRouteImport.update({
-  id: '/_admin',
+const PublicRouteRoute = PublicRouteRouteImport.update({
+  id: '/_public',
   getParentRoute: () => rootRouteImport,
-} as any)
-const PublicIndexRoute = PublicIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => PublicRouteRoute,
 } as any)
 const AdminAdminRouteRoute = AdminAdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const AuthorizationAuthLoginRoute = AuthorizationAuthLoginRouteImport.update({
-  id: '/auth/login',
-  path: '/auth/login',
-  getParentRoute: () => AuthorizationRouteRoute,
+const PublicIndexRoute = PublicIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PublicRouteRoute,
 } as any)
-const AdminAdminSponsorRoute = AdminAdminSponsorRouteImport.update({
-  id: '/sponsor',
-  path: '/sponsor',
+const AdminAdminDashboardRoute = AdminAdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
 const AdminAdminSettingRoute = AdminAdminSettingRouteImport.update({
@@ -60,24 +55,29 @@ const AdminAdminSettingRoute = AdminAdminSettingRouteImport.update({
   path: '/setting',
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
-const AdminAdminDashboardRoute = AdminAdminDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AdminAdminSponsorRoute = AdminAdminSponsorRouteImport.update({
+  id: '/sponsor',
+  path: '/sponsor',
   getParentRoute: () => AdminAdminRouteRoute,
+} as any)
+const AuthorizationAuthLoginRoute = AuthorizationAuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => AuthorizationRouteRoute,
 } as any)
 const AdminAdminLinkIndexRoute = AdminAdminLinkIndexRouteImport.update({
   id: '/link/',
   path: '/link/',
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
-const AdminAdminLinkVerifyRoute = AdminAdminLinkVerifyRouteImport.update({
-  id: '/link/verify',
-  path: '/link/verify',
-  getParentRoute: () => AdminAdminRouteRoute,
-} as any)
 const AdminAdminLinkAddRoute = AdminAdminLinkAddRouteImport.update({
   id: '/link/add',
   path: '/link/add',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
+const AdminAdminLinkVerifyRoute = AdminAdminLinkVerifyRouteImport.update({
+  id: '/link/verify',
+  path: '/link/verify',
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
 const AdminAdminLinkIdEditRoute = AdminAdminLinkIdEditRouteImport.update({
@@ -87,20 +87,20 @@ const AdminAdminLinkIdEditRoute = AdminAdminLinkIdEditRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/admin': typeof AdminAdminRouteRouteWithChildren
   '/': typeof PublicIndexRoute
+  '/admin': typeof AdminAdminRouteRouteWithChildren
   '/admin/dashboard': typeof AdminAdminDashboardRoute
   '/admin/setting': typeof AdminAdminSettingRoute
   '/admin/sponsor': typeof AdminAdminSponsorRoute
   '/auth/login': typeof AuthorizationAuthLoginRoute
   '/admin/link/add': typeof AdminAdminLinkAddRoute
   '/admin/link/verify': typeof AdminAdminLinkVerifyRoute
-  '/admin/link': typeof AdminAdminLinkIndexRoute
+  '/admin/link/': typeof AdminAdminLinkIndexRoute
   '/admin/link/$id/edit': typeof AdminAdminLinkIdEditRoute
 }
 export interface FileRoutesByTo {
-  '/admin': typeof AdminAdminRouteRouteWithChildren
   '/': typeof PublicIndexRoute
+  '/admin': typeof AdminAdminRouteRouteWithChildren
   '/admin/dashboard': typeof AdminAdminDashboardRoute
   '/admin/setting': typeof AdminAdminSettingRoute
   '/admin/sponsor': typeof AdminAdminSponsorRoute
@@ -129,20 +129,20 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/admin'
     | '/'
+    | '/admin'
     | '/admin/dashboard'
     | '/admin/setting'
     | '/admin/sponsor'
     | '/auth/login'
     | '/admin/link/add'
     | '/admin/link/verify'
-    | '/admin/link'
+    | '/admin/link/'
     | '/admin/link/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/admin'
     | '/'
+    | '/admin'
     | '/admin/dashboard'
     | '/admin/setting'
     | '/admin/sponsor'
@@ -176,33 +176,26 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_public': {
-      id: '/_public'
+    '/_admin': {
+      id: '/_admin'
       path: ''
-      fullPath: ''
-      preLoaderRoute: typeof PublicRouteRouteImport
+      fullPath: '/'
+      preLoaderRoute: typeof AdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authorization': {
       id: '/_authorization'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthorizationRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_admin': {
-      id: '/_admin'
+    '/_public': {
+      id: '/_public'
       path: ''
-      fullPath: ''
-      preLoaderRoute: typeof AdminRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_public/': {
-      id: '/_public/'
-      path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof PublicIndexRouteImport
-      parentRoute: typeof PublicRouteRoute
+      preLoaderRoute: typeof PublicRouteRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_admin/admin': {
       id: '/_admin/admin'
@@ -211,18 +204,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminRouteRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/_authorization/auth/login': {
-      id: '/_authorization/auth/login'
-      path: '/auth/login'
-      fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthorizationAuthLoginRouteImport
-      parentRoute: typeof AuthorizationRouteRoute
+    '/_public/': {
+      id: '/_public/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof PublicIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
-    '/_admin/admin/sponsor': {
-      id: '/_admin/admin/sponsor'
-      path: '/sponsor'
-      fullPath: '/admin/sponsor'
-      preLoaderRoute: typeof AdminAdminSponsorRouteImport
+    '/_admin/admin/dashboard': {
+      id: '/_admin/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminAdminDashboardRouteImport
       parentRoute: typeof AdminAdminRouteRoute
     }
     '/_admin/admin/setting': {
@@ -232,25 +225,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminSettingRouteImport
       parentRoute: typeof AdminAdminRouteRoute
     }
-    '/_admin/admin/dashboard': {
-      id: '/_admin/admin/dashboard'
-      path: '/dashboard'
-      fullPath: '/admin/dashboard'
-      preLoaderRoute: typeof AdminAdminDashboardRouteImport
+    '/_admin/admin/sponsor': {
+      id: '/_admin/admin/sponsor'
+      path: '/sponsor'
+      fullPath: '/admin/sponsor'
+      preLoaderRoute: typeof AdminAdminSponsorRouteImport
       parentRoute: typeof AdminAdminRouteRoute
+    }
+    '/_authorization/auth/login': {
+      id: '/_authorization/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthorizationAuthLoginRouteImport
+      parentRoute: typeof AuthorizationRouteRoute
     }
     '/_admin/admin/link/': {
       id: '/_admin/admin/link/'
       path: '/link'
-      fullPath: '/admin/link'
+      fullPath: '/admin/link/'
       preLoaderRoute: typeof AdminAdminLinkIndexRouteImport
-      parentRoute: typeof AdminAdminRouteRoute
-    }
-    '/_admin/admin/link/verify': {
-      id: '/_admin/admin/link/verify'
-      path: '/link/verify'
-      fullPath: '/admin/link/verify'
-      preLoaderRoute: typeof AdminAdminLinkVerifyRouteImport
       parentRoute: typeof AdminAdminRouteRoute
     }
     '/_admin/admin/link/add': {
@@ -258,6 +251,13 @@ declare module '@tanstack/react-router' {
       path: '/link/add'
       fullPath: '/admin/link/add'
       preLoaderRoute: typeof AdminAdminLinkAddRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
+    '/_admin/admin/link/verify': {
+      id: '/_admin/admin/link/verify'
+      path: '/link/verify'
+      fullPath: '/admin/link/verify'
+      preLoaderRoute: typeof AdminAdminLinkVerifyRouteImport
       parentRoute: typeof AdminAdminRouteRoute
     }
     '/_admin/admin/link/$id/edit': {
