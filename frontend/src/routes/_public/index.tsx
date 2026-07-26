@@ -10,12 +10,13 @@
  */
 
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { motion, useReducedMotion } from 'motion/react'
+import { useQuery } from '@tanstack/react-query'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useMemo, useState } from 'react'
 import type { ComponentProps } from 'react'
 import { BambooLogo } from '@/assets/svg/bamboo-logo'
 import { FallingLeaves } from '@/components/decorative/falling-leaves'
-import { siteInfo } from '@/data/mock/site-info'
+import { getSiteInfo } from '@/api/info'
 import myAvatar from '@/assets/images/my_avatar.png'
 import defaultBackground from '@/assets/images/default-background.webp'
 
@@ -188,15 +189,59 @@ function simulateGuidePath(): GuidePath {
   }
 }
 
-function HomePage() {
+/* ------------------------------------------------------------------ */
+/* Loading 界面：数据未就绪时展示的全屏呼吸动画                          */
+/* ------------------------------------------------------------------ */
+
+function LoadingScreen() {
+  return (
+    <motion.div
+      key="loading"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-background"
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 1.02 }}
+      transition={{ duration: 0.5, ease: 'easeInOut' }}
+    >
+      <motion.div
+        animate={{ scale: [1, 1.08, 1], opacity: [0.85, 1, 0.85] }}
+        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+      >
+        <BambooLogo size={72} />
+      </motion.div>
+      <motion.p
+        className="text-sm tracking-widest text-text-secondary"
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+      >
+        正在加载…
+      </motion.p>
+    </motion.div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* 主页内容：数据就绪后挂载，入场动画自然播放                            */
+/* ------------------------------------------------------------------ */
+
+interface HomeContentProps {
+  siteName: string
+  description: string
+}
+
+function HomeContent({ siteName, description }: HomeContentProps) {
   const thisYear = new Date().getFullYear()
   const reduced = useReducedMotion() ?? false
-  const siteName = siteInfo.site.siteName
   const [guideDone, setGuideDone] = useState(false)
   const guidePath = useMemo(() => simulateGuidePath(), [])
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-background">
+    <motion.div
+      key="content"
+      className="relative min-h-dvh overflow-hidden bg-background"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+    >
       {/* 背景图：晨雾中显现（模糊放大 → 清晰） */}
       <motion.div
         initial={
@@ -398,7 +443,7 @@ function HomePage() {
             })}
             className="max-w-2xl text-base leading-relaxed text-text-secondary lg:text-lg"
           >
-            {siteInfo.blogger.description}
+            {description}
           </motion.p>
 
           {/* 按钮组：春笋破土，Q 弹错峰 */}
@@ -498,6 +543,32 @@ function HomePage() {
           粤ICP备 2022014822 号
         </a>
       </motion.footer>
-    </div>
+    </motion.div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* 页面入口：数据加载 → loading / 内容 切换                             */
+/* ------------------------------------------------------------------ */
+
+function HomePage() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['public', 'site'],
+    queryFn: getSiteInfo,
+  })
+
+  const ready = !isLoading && data != null
+
+  return (
+    <AnimatePresence mode="wait">
+      {ready ? (
+        <HomeContent
+          siteName={data.site_name}
+          description={data.introduction}
+        />
+      ) : (
+        <LoadingScreen />
+      )}
+    </AnimatePresence>
   )
 }

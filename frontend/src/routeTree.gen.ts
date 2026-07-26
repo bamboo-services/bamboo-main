@@ -24,6 +24,7 @@ import { Route as AdminAdminSettingRouteImport } from './routes/_admin/admin/set
 import { Route as AdminAdminSponsorRouteImport } from './routes/_admin/admin/sponsor'
 import { Route as AuthorizationAuthLoginRouteImport } from './routes/_authorization/auth/login'
 import { Route as AdminAdminLinkIndexRouteImport } from './routes/_admin/admin/link/index'
+import { Route as AdminAdminLinkIdRouteImport } from './routes/_admin/admin/link/$id'
 import { Route as AdminAdminLinkAddRouteImport } from './routes/_admin/admin/link/add'
 import { Route as AdminAdminLinkVerifyRouteImport } from './routes/_admin/admin/link/verify'
 import { Route as AdminAdminLinkIdEditRouteImport } from './routes/_admin/admin/link/$id.edit'
@@ -100,6 +101,11 @@ const AdminAdminLinkIndexRoute = AdminAdminLinkIndexRouteImport.update({
   path: '/link/',
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
+const AdminAdminLinkIdRoute = AdminAdminLinkIdRouteImport.update({
+  id: '/link/$id',
+  path: '/link/$id',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
 const AdminAdminLinkAddRoute = AdminAdminLinkAddRouteImport.update({
   id: '/link/add',
   path: '/link/add',
@@ -111,9 +117,9 @@ const AdminAdminLinkVerifyRoute = AdminAdminLinkVerifyRouteImport.update({
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
 const AdminAdminLinkIdEditRoute = AdminAdminLinkIdEditRouteImport.update({
-  id: '/link/$id/edit',
-  path: '/link/$id/edit',
-  getParentRoute: () => AdminAdminRouteRoute,
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => AdminAdminLinkIdRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/admin/setting': typeof AdminAdminSettingRoute
   '/admin/sponsor': typeof AdminAdminSponsorRoute
   '/auth/login': typeof AuthorizationAuthLoginRoute
+  '/admin/link/$id': typeof AdminAdminLinkIdRouteWithChildren
   '/admin/link/add': typeof AdminAdminLinkAddRoute
   '/admin/link/verify': typeof AdminAdminLinkVerifyRoute
   '/admin/link/': typeof AdminAdminLinkIndexRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/admin/setting': typeof AdminAdminSettingRoute
   '/admin/sponsor': typeof AdminAdminSponsorRoute
   '/auth/login': typeof AuthorizationAuthLoginRoute
+  '/admin/link/$id': typeof AdminAdminLinkIdRouteWithChildren
   '/admin/link/add': typeof AdminAdminLinkAddRoute
   '/admin/link/verify': typeof AdminAdminLinkVerifyRoute
   '/admin/link': typeof AdminAdminLinkIndexRoute
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   '/_admin/admin/setting': typeof AdminAdminSettingRoute
   '/_admin/admin/sponsor': typeof AdminAdminSponsorRoute
   '/_authorization/auth/login': typeof AuthorizationAuthLoginRoute
+  '/_admin/admin/link/$id': typeof AdminAdminLinkIdRouteWithChildren
   '/_admin/admin/link/add': typeof AdminAdminLinkAddRoute
   '/_admin/admin/link/verify': typeof AdminAdminLinkVerifyRoute
   '/_admin/admin/link/': typeof AdminAdminLinkIndexRoute
@@ -184,6 +193,7 @@ export interface FileRouteTypes {
     | '/admin/setting'
     | '/admin/sponsor'
     | '/auth/login'
+    | '/admin/link/$id'
     | '/admin/link/add'
     | '/admin/link/verify'
     | '/admin/link/'
@@ -200,6 +210,7 @@ export interface FileRouteTypes {
     | '/admin/setting'
     | '/admin/sponsor'
     | '/auth/login'
+    | '/admin/link/$id'
     | '/admin/link/add'
     | '/admin/link/verify'
     | '/admin/link'
@@ -220,6 +231,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/setting'
     | '/_admin/admin/sponsor'
     | '/_authorization/auth/login'
+    | '/_admin/admin/link/$id'
     | '/_admin/admin/link/add'
     | '/_admin/admin/link/verify'
     | '/_admin/admin/link/'
@@ -340,6 +352,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminLinkIndexRouteImport
       parentRoute: typeof AdminAdminRouteRoute
     }
+    '/_admin/admin/link/$id': {
+      id: '/_admin/admin/link/$id'
+      path: '/link/$id'
+      fullPath: '/admin/link/$id'
+      preLoaderRoute: typeof AdminAdminLinkIdRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
     '/_admin/admin/link/add': {
       id: '/_admin/admin/link/add'
       path: '/link/add'
@@ -356,32 +375,43 @@ declare module '@tanstack/react-router' {
     }
     '/_admin/admin/link/$id/edit': {
       id: '/_admin/admin/link/$id/edit'
-      path: '/link/$id/edit'
+      path: '/edit'
       fullPath: '/admin/link/$id/edit'
       preLoaderRoute: typeof AdminAdminLinkIdEditRouteImport
-      parentRoute: typeof AdminAdminRouteRoute
+      parentRoute: typeof AdminAdminLinkIdRoute
     }
   }
 }
+
+interface AdminAdminLinkIdRouteChildren {
+  AdminAdminLinkIdEditRoute: typeof AdminAdminLinkIdEditRoute
+}
+
+const AdminAdminLinkIdRouteChildren: AdminAdminLinkIdRouteChildren = {
+  AdminAdminLinkIdEditRoute: AdminAdminLinkIdEditRoute,
+}
+
+const AdminAdminLinkIdRouteWithChildren =
+  AdminAdminLinkIdRoute._addFileChildren(AdminAdminLinkIdRouteChildren)
 
 interface AdminAdminRouteRouteChildren {
   AdminAdminDashboardRoute: typeof AdminAdminDashboardRoute
   AdminAdminSettingRoute: typeof AdminAdminSettingRoute
   AdminAdminSponsorRoute: typeof AdminAdminSponsorRoute
+  AdminAdminLinkIdRoute: typeof AdminAdminLinkIdRouteWithChildren
   AdminAdminLinkAddRoute: typeof AdminAdminLinkAddRoute
   AdminAdminLinkVerifyRoute: typeof AdminAdminLinkVerifyRoute
   AdminAdminLinkIndexRoute: typeof AdminAdminLinkIndexRoute
-  AdminAdminLinkIdEditRoute: typeof AdminAdminLinkIdEditRoute
 }
 
 const AdminAdminRouteRouteChildren: AdminAdminRouteRouteChildren = {
   AdminAdminDashboardRoute: AdminAdminDashboardRoute,
   AdminAdminSettingRoute: AdminAdminSettingRoute,
   AdminAdminSponsorRoute: AdminAdminSponsorRoute,
+  AdminAdminLinkIdRoute: AdminAdminLinkIdRouteWithChildren,
   AdminAdminLinkAddRoute: AdminAdminLinkAddRoute,
   AdminAdminLinkVerifyRoute: AdminAdminLinkVerifyRoute,
   AdminAdminLinkIndexRoute: AdminAdminLinkIndexRoute,
-  AdminAdminLinkIdEditRoute: AdminAdminLinkIdEditRoute,
 }
 
 const AdminAdminRouteRouteWithChildren = AdminAdminRouteRoute._addFileChildren(

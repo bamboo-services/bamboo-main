@@ -9,9 +9,9 @@
  * --------------------------------------------------------------------------------
  */
 
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Save } from 'lucide-react'
 import { useState } from 'react'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { ArrowLeft, Check, Save, Unlink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -33,62 +33,72 @@ function LinkEditPage() {
   const { id } = Route.useParams()
   const navigate = useNavigate()
 
-  // 从假数据中获取对应的链接
   const link = mockLinks.find((l) => l.id === Number(id))
 
   const [formData, setFormData] = useState({
-    siteName: link?.siteName || '',
-    siteUrl: link?.siteUrl || '',
-    siteLogo: link?.siteLogo || '',
-    siteDescription: link?.siteDescription || '',
-    webmasterEmail: link?.webmasterEmail || '',
-    location: String(link?.location || ''),
-    color: String(link?.color || ''),
-    hasAdv: link?.hasAdv || false,
+    siteName: link?.siteName ?? '',
+    siteUrl: link?.siteUrl ?? '',
+    siteLogo: link?.siteLogo ?? '',
+    siteDescription: link?.siteDescription ?? '',
+    webmasterEmail: link?.webmasterEmail ?? '',
+    location: link?.location ?? null,
+    color: link?.color ?? null,
+    hasAdv: link?.hasAdv ?? false,
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // 静态界面，直接返回列表
     navigate({ to: '/admin/link' })
   }
 
   if (!link) {
     return (
-      <div className="flex flex-col items-center justify-center h-[50vh] space-y-4">
-        <p className="text-muted-foreground">友链不存在</p>
+      <div className="mx-auto flex max-w-md flex-col items-center justify-center gap-4 py-24 text-center">
+        <div className="flex size-16 items-center justify-center rounded-full bg-muted">
+          <Unlink className="size-7 text-muted-foreground" />
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold">友链不存在</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            该友链可能已被删除或链接有误
+          </p>
+        </div>
         <Link to="/admin/link">
-          <Button>返回列表</Button>
+          <Button className="cursor-pointer">返回列表</Button>
         </Link>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
+      {/* 页头 */}
       <div className="flex items-center gap-4">
         <Link to="/admin/link">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-4 w-4" />
+          <Button variant="ghost" size="icon" className="cursor-pointer">
+            <ArrowLeft className="size-4" />
           </Button>
         </Link>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">编辑友链</h1>
-          <p className="text-muted-foreground">编辑 {link.siteName} 的信息</p>
+          <p className="mt-1 text-muted-foreground">
+            正在编辑「{link.siteName}」的信息
+          </p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>友链信息</CardTitle>
-          <CardDescription>修改友链的基本信息</CardDescription>
+          <CardDescription>修改友链的基本信息，带 * 为必填项</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* 基本信息 */}
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="siteName">
-                  站点名称 <span className="text-red-500">*</span>
+                  站点名称 <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="siteName"
@@ -101,7 +111,7 @@ function LinkEditPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="siteUrl">
-                  站点地址 <span className="text-red-500">*</span>
+                  站点地址 <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="siteUrl"
@@ -125,7 +135,7 @@ function LinkEditPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="webmasterEmail">
-                  站长邮箱 <span className="text-red-500">*</span>
+                  站长邮箱 <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="webmasterEmail"
@@ -137,50 +147,15 @@ function LinkEditPage() {
                   }
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="location">位置分类</Label>
-                <select
-                  id="location"
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  value={formData.location}
-                  onChange={(e) =>
-                    setFormData({ ...formData, location: e.target.value })
-                  }
-                >
-                  <option value="">请选择位置</option>
-                  {mockLocations.map((location) => (
-                    <option key={location.id} value={location.id}>
-                      {location.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="color">颜色分类</Label>
-                <select
-                  id="color"
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  value={formData.color}
-                  onChange={(e) =>
-                    setFormData({ ...formData, color: e.target.value })
-                  }
-                >
-                  <option value="">请选择颜色</option>
-                  {mockColors.map((color) => (
-                    <option key={color.id} value={color.id}>
-                      {color.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
 
+            {/* 站点描述 */}
             <div className="space-y-2">
               <Label htmlFor="siteDescription">站点描述</Label>
               <textarea
                 id="siteDescription"
-                className="w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm"
-                placeholder="请输入站点描述"
+                className="min-h-[110px] w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                placeholder="介绍一下这个站点吧…"
                 value={formData.siteDescription}
                 onChange={(e) =>
                   setFormData({ ...formData, siteDescription: e.target.value })
@@ -188,7 +163,61 @@ function LinkEditPage() {
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* 位置分类：药丸按钮 */}
+            <div className="space-y-2">
+              <Label>位置分类</Label>
+              <div className="flex flex-wrap gap-2">
+                {mockLocations.map((location) => (
+                  <button
+                    key={location.id}
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, location: location.id })
+                    }
+                    className={`cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200 ${
+                      formData.location === location.id
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+                    }`}
+                  >
+                    {location.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 颜色分类：可视化色块 */}
+            <div className="space-y-2">
+              <Label>颜色分类</Label>
+              <div className="flex flex-wrap gap-3">
+                {mockColors.map((color) => {
+                  const selected = formData.color === color.id
+                  return (
+                    <button
+                      key={color.id}
+                      type="button"
+                      title={color.name}
+                      onClick={() =>
+                        setFormData({ ...formData, color: color.id })
+                      }
+                      className={`flex size-9 cursor-pointer items-center justify-center rounded-full ring-offset-2 ring-offset-background transition-all duration-200 ${
+                        selected
+                          ? 'scale-110 ring-2 ring-ring'
+                          : 'hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: color.color }}
+                    >
+                      {selected && (
+                        <Check className="size-4 text-white" strokeWidth={3} />
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* 包含广告 */}
+            <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 p-3">
               <Checkbox
                 id="hasAdv"
                 checked={formData.hasAdv}
@@ -196,17 +225,20 @@ function LinkEditPage() {
                   setFormData({ ...formData, hasAdv: checked as boolean })
                 }
               />
-              <Label htmlFor="hasAdv" className="font-normal">
-                包含广告
+              <Label htmlFor="hasAdv" className="cursor-pointer font-normal">
+                该站点包含广告内容
               </Label>
             </div>
 
-            <div className="flex justify-end gap-4">
+            {/* 操作按钮 */}
+            <div className="flex justify-end gap-3 border-t border-border/60 pt-6">
               <Link to="/admin/link">
-                <Button variant="outline">取消</Button>
+                <Button variant="outline" className="cursor-pointer">
+                  取消
+                </Button>
               </Link>
-              <Button type="submit">
-                <Save className="mr-2 h-4 w-4" />
+              <Button type="submit" className="cursor-pointer">
+                <Save className="mr-2 size-4" />
                 保存
               </Button>
             </div>

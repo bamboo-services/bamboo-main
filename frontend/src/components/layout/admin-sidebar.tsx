@@ -73,7 +73,7 @@ export function AdminSidebar() {
   }
 
   return (
-    <Sidebar variant="inset" collapsible="icon">
+    <Sidebar variant="floating" collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
