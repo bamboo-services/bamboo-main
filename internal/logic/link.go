@@ -21,13 +21,13 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
-	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
+	xAsync "github.com/bamboo-services/bamboo-base-go/plugins/async"
 	"github.com/gin-gonic/gin"
 )
 
@@ -92,8 +92,10 @@ func (l *LinkLogic) Add(ctx *gin.Context, req *apiLink.FriendAddRequest) (*entit
 		return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
 
-	// 发送邮件通知管理员（异步，不阻断主流程）
-	go l.sendApplyNotification(ctx, reloaded)
+	// 发送邮件通知管理员（xAsync 解耦请求上下文，不阻断主流程）
+	xAsync.Async(ctx.Request.Context(), func(asyncCtx context.Context) {
+		l.sendApplyNotification(asyncCtx, reloaded)
+	}, xAsync.WithName("MAIL"))
 
 	return reloaded, nil
 }
@@ -218,8 +220,10 @@ func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkID xSnowflake.SnowflakeID
 		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
 
-	// 发送审核结果邮件通知（异步，不阻断主流程）
-	go l.sendStatusNotification(ctx, link, req.LinkStatus, req.LinkReviewRemark)
+	// 发送审核结果邮件通知（xAsync 解耦请求上下文，不阻断主流程）
+	xAsync.Async(ctx.Request.Context(), func(asyncCtx context.Context) {
+		l.sendStatusNotification(asyncCtx, link, req.LinkStatus, req.LinkReviewRemark)
+	}, xAsync.WithName("MAIL"))
 
 	return nil
 }
@@ -252,13 +256,13 @@ func (l *LinkLogic) GetPublicLinks(ctx *gin.Context, groupIDStr string) ([]entit
 
 // sendApplyNotification 发送友链申请通知邮件给管理员
 //
-// 此函数应在 goroutine 中异步调用，不会阻断主流程
-func (l *LinkLogic) sendApplyNotification(ctx *gin.Context, link *entity.LinkFriend) {
+// 此函数应在 xAsync 异步任务中调用，ctx 为解耦后的独立上下文，不会阻断主流程
+func (l *LinkLogic) sendApplyNotification(ctx context.Context, link *entity.LinkFriend) {
 	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
 
 	// 获取配置
-	config := ctxUtil.GetConfig(ctx)
-	if config == nil {
+	config, xerr := xCtxUtil.Get[*base.BambooConfig](ctx, constants.ContextCustomConfig)
+	if xerr != nil {
 		logger.Warn(ctx, "无法获取配置，跳过发送申请通知邮件")
 		return
 	}
@@ -286,11 +290,10 @@ func (l *LinkLogic) sendApplyNotification(ctx *gin.Context, link *entity.LinkFri
 		"LinkDesc": linkDesc,
 		"Email":    linkEmail,
 		"AdminURL": "", // 可后续配置后台管理链接
-		"FromName": config.Email.FromName,
 	}
 
 	// 发送邮件
-	mailLogic := &MailLogic{TemplateService: &logcHelper.MailTemplateLogic{}, MaxRetry: 3}
+	mailLogic := NewMailLogic()
 	err := mailLogic.SendWithTemplate(
 		ctx,
 		"apply",
@@ -305,20 +308,13 @@ func (l *LinkLogic) sendApplyNotification(ctx *gin.Context, link *entity.LinkFri
 
 // sendStatusNotification 发送审核结果通知邮件给申请者
 //
-// 此函数应在 goroutine 中异步调用，不会阻断主流程
-func (l *LinkLogic) sendStatusNotification(ctx *gin.Context, link *entity.LinkFriend, status int, reviewRemark string) {
+// 此函数应在 xAsync 异步任务中调用，ctx 为解耦后的独立上下文，不会阻断主流程
+func (l *LinkLogic) sendStatusNotification(ctx context.Context, link *entity.LinkFriend, status int, reviewRemark string) {
 	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
 
 	// 检查友链是否有邮箱
 	if link.Email == nil || *link.Email == "" {
 		logger.Info(ctx, fmt.Sprintf("友链 %s 无联系邮箱，跳过发送审核通知", link.Name))
-		return
-	}
-
-	// 获取配置
-	config := ctxUtil.GetConfig(ctx)
-	if config == nil {
-		logger.Warn(ctx, "无法获取配置，跳过发送审核通知邮件")
 		return
 	}
 
@@ -342,11 +338,10 @@ func (l *LinkLogic) sendStatusNotification(ctx *gin.Context, link *entity.LinkFr
 		"LinkName":     link.Name,
 		"LinkURL":      link.URL,
 		"RejectReason": reviewRemark,
-		"FromName":     config.Email.FromName,
 	}
 
 	// 发送邮件
-	mailLogic := &MailLogic{TemplateService: &logcHelper.MailTemplateLogic{}, MaxRetry: 3}
+	mailLogic := NewMailLogic()
 	err := mailLogic.SendWithTemplate(
 		ctx,
 		templateName,

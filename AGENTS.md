@@ -12,31 +12,30 @@ file-based routing + shadcn/ui。基于 `bamboo-base-go` v1.1.2（defined/common
 ## 目录结构
 ```text
 .
-|- main.go                    # 进程入口；xOption 声明式配置（DB/Cache/Route）+ Runner + mail worker
+|- main.go                    # 进程入口；xOption 声明式配置（DB/Cache/Route）+ Runner
 |- go.mod                     # bamboo-base-go v1.1.2；beacon-sso-sdk 本地 replace
 |- Makefile                   # dev/swag 等快捷命令
 |- frontend/                  # 独立前端子项目（pnpm + Vite + React 19 + TanStack）
 |- internal/
-|  |- app/startup/            # 仅邮件配置 + SSO 节点（DB/Cache 由 xOption）；prepare 钩子用于种子数据
+|  |- app/startup/            # 邮件客户端 + 邮件业务配置 + SSO 节点（DB/Cache 由 xOption）；prepare 钩子用于种子数据
 |  |- app/route/              # 路由注册 + 中间件链（RouteRegistrar 模式）
 |  |- handler/                # 仅 HTTP bind/validate/respond
 |  |- logic/                  # 业务编排、事务、异步触发
 |  |- repository/             # DB 访问 + 经 xCache.Manager 的缓存失效
 |  |- entity/                 # GORM 实体（Snowflake ID 钩子）
-|  |- task/                   # 异步邮件队列 worker + TLS 连接池
 |  |- middleware/             # 鉴权与角色中间件
 |  |- models/                 # 基础配置模型与 redis 缓存模型
 |- api/                       # 按领域分组的请求/响应 DTO
 |- pkg/constants/             # 状态/角色/context/redis 键常量
 |- docs/                      # 生成的 swagger 产物（禁止手改）
-|- templates/mail/            # 邮件 HTML 模板 + embed.go
+|- templates/mail/            # 邮件模板内容块（框架 xEmail 外部模板目录）
 |- test/                      # SMTP E2E 测试（按 env 开启）
 ```
 
 ## 导航指南
 | 任务 | 位置 | 说明 |
 |---|---|---|
-| 启动流程/启动失败 | `main.go`、`internal/app/startup/` | main 使用 xOption；startup 仅注册 Email 配置 + SSO 节点 |
+| 启动流程/启动失败 | `main.go`、`internal/app/startup/` | main 使用 xOption；startup 注册 Email 客户端 + Email 业务配置 + SSO 节点 |
 | 数据库/缓存配置 | `main.go`、`.env` | xOption.WithDatabase(FromEnv) + WithCache(FromEnv)；需 DATABASE_DRIVER/NOSQL_DRIVER 环境变量 |
 | 种子数据（默认 admin/info） | `internal/app/startup/prepare/` | xOptionDB.WithPrepare 钩子，在 AutoMigrate 之后运行 |
 | 注册端点 | `internal/app/route/` | admin 路由应用 OAuth 校验 + 本地鉴权中间件 |
@@ -44,8 +43,8 @@ file-based routing + shadcn/ui。基于 `bamboo-base-go` v1.1.2（defined/common
 | DB 查询/事务 | `internal/repository/`、`internal/logic/*` | logic 开启 tx，repo 支持可选 `tx *gorm.DB` |
 | 缓存接入 | 各 repo 构造器 + `pkg/constants/cache.go` | `xCache.KeyCacheOf[string, entity.X](m)`；键经 `RedisX.Get(id).String()` |
 | Redis 键使用 | `pkg/constants/cache.go` | 键构建器自动追加 `NOSQL_PREFIX` + `:` |
-| 邮件异步管线 | `internal/task/mail.go`、`internal/task/mail_pool.go` | queue、retry zset、退避、TLS/STARTTLS |
-| 邮件模板 | `templates/mail/*.html` + `embed.go` | 申请/通过/拒绝/验证/重置模板 |
+| 邮件发送 | `internal/logic/mail.go` | 框架 xEmail 插件发送；调用点经 `xAsync.Async` 解耦请求上下文异步触发，`SendTemplate` 内 `xCtxUtil.GetEmailClient(ctx)` |
+| 邮件模板 | `templates/mail/*.html` | `{{define "名称"}}` 内容块，经 `EMAIL_TEMPLATE_DIR` 加载，套用框架 `_base.html` 布局 |
 | 鉴权/会话问题 | `internal/logic/auth.go`、`internal/middleware/` | token/user context + OAuth 集成 |
 | 前端开发 | `frontend/` | pnpm + Vite，独立子项目 |
 | 前端路由 | `frontend/src/routes/` | TanStack Router file-based，自动生成 routeTree |
@@ -55,12 +54,11 @@ file-based routing + shadcn/ui。基于 `bamboo-base-go` v1.1.2（defined/common
 | 符号/区域 | 类型 | 位置 | 作用 |
 |---|---|---|---|
 | `main` | func | `main.go` | 进程装配；xOption 声明式配置 + Runner 入口 |
-| `startup.Init` | func | `internal/app/startup/startup.go` | 返回 ctx + Email/SSO 自定义节点（DB/Cache 由 xOption） |
+| `startup.Init` | func | `internal/app/startup/startup.go` | 返回 ctx + Email 客户端/业务配置/SSO 自定义节点（DB/Cache 由 xOption） |
 | `prepare.DefaultData` | func | `internal/app/startup/prepare/prepare.go` | xOptionDB.PrepareFunc：种子默认 admin + 站点信息 |
 | `route.NewRoute` | func | `internal/app/route/route.go` | RouteRegistrar：`func(ctx, serve)` 路由 + 中间件 + 子路由 |
 | `handler.NewHandler[T]` | 泛型构造器 | `internal/handler/handler.go` | 注入全部 logic 依赖 |
 | `New*Repo` | 构造器 | `internal/repository/*.go` | 接受 `db *gorm.DB` + `m *xCache.Manager`，内部建 `kc` |
-| `MailWorkerRunner` | worker 入口 | `internal/app/startup/worker/worker_mail.go` | 启停异步邮件 worker |
 | `router` / `Route` | 前端入口 | `frontend/src/main.tsx` | RouterProvider + createRouter(routeTree) |
 
 ## 模块架构
@@ -68,12 +66,11 @@ file-based routing + shadcn/ui。基于 `bamboo-base-go` v1.1.2（defined/common
 后端
 main.go (xOption 装配 DB/Cache/Route + Runner)
    |
-   +-- startup.Init()      -> 自定义注册节点（Email 配置 + SSO）
+   +-- startup.Init()      -> 自定义注册节点（Email 客户端 + Email 业务配置 + SSO）
    +-- route.NewRoute       -> Gin 路由 + 中间件 + 领域子路由
    |       +-- handler      -> bind/validate/respond（瘦）
-   |              +-- logic -> 业务规则 + 事务 + 异步触发
+   |              +-- logic -> 业务规则 + 事务 + 异步触发（邮件经 xAsync 解耦 + 框架 xEmail 发送）
    |                     +-- repository (+xCache.Manager) -> GORM + cache-aside
-   +-- worker.MailWorkerRunner -> 异步邮件队列 worker
 
 前端（独立子项目）
 frontend/ (pnpm + Vite + React 19)
@@ -186,9 +183,8 @@ pnpm check         # prettier --write . && eslint --fix
 
 ## 引用
 - [frontend](./frontend/AGENTS.md) — 前端子项目（React 19 + TanStack + shadcn/ui）
-- [internal/app/startup](./internal/app/startup/AGENTS.md) — 启动引导与种子/worker 钩子
+- [internal/app/startup](./internal/app/startup/AGENTS.md) — 启动引导与种子钩子
 - [internal/app/route](./internal/app/route/AGENTS.md) — 路由装配与中间件链
 - [internal/handler](./internal/handler/AGENTS.md) — HTTP bind/validate/respond
 - [internal/logic](./internal/logic/AGENTS.md) — 业务编排与事务
 - [internal/repository](./internal/repository/AGENTS.md) — DB 访问与缓存失效
-- [internal/task](./internal/task/AGENTS.md) — 异步邮件管线与连接池

@@ -16,7 +16,6 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/app/route"
 	"github.com/bamboo-services/bamboo-main/internal/app/startup"
 	"github.com/bamboo-services/bamboo-main/internal/app/startup/prepare"
-	"github.com/bamboo-services/bamboo-main/internal/app/startup/worker"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
@@ -56,6 +55,6 @@ func main() {
 	xMain.Runner(
 		xReg.Register(ctx, nodeList, opts...),
 		xLog.WithName(xLog.NamedMAIN),
-		worker.MailWorkerRunner,
+		nil,
 	)
 }

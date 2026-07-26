@@ -16,10 +16,10 @@ internal/logic/
 |- sponsor_record.go           # 赞助记录编排
 |- public.go                   # 公开/健康检查逻辑
 |- info.go                     # 站点信息读写逻辑
-|- mail.go                     # 异步邮件触发入口
-|- helper/                     # 跨域 helper（session/mail）
+|- mail.go                     # 邮件发送入口（框架 xEmail 插件，经 xAsync 异步触发）
+|- helper/                     # 跨域 helper（session/snowflake）
 |  |- session.go
-|  |- mail.go
+|  |- snowflake.go
 ```
 
 ## 导航指南
@@ -30,13 +30,13 @@ internal/logic/
 | 友链分类管理 | `link_group.go`、`link_color.go` | 排序/状态/删除约束 |
 | 赞助领域逻辑 | `sponsor_channel.go`、`sponsor_record.go` | 渠道/记录编排与数据塑形 |
 | 公开/系统信息 | `public.go`、`info.go` | 健康/信息读写行为 |
-| 跨域 helper | `helper/` | session/mail 复用逻辑 |
+| 跨域 helper | `helper/` | session/snowflake 复用逻辑 |
 
 ## 约定
 - 构造器统一为 `New*Logic(ctx context.Context)`，在内部初始化 repo/helper
 - 领域规则与事务边界留在 logic，不下沉到 handler/repository
 - 使用项目 typed constants 表达 status/role/context 语义，避免裸字符串
-- 异步触发（邮件/通知）为非阻塞副作用，失败不应回滚主流程
+- 异步触发（邮件/通知）经 `xAsync.Async(ctx.Request.Context(), ...)` 解耦请求上下文，为非阻塞副作用，失败不应回滚主流程；禁止裸 `go func()` 持有 gin.Context
 - 错误返回统一使用 `*xError.Error`，交由上游错误中间件渲染
 
 ## 反模式
@@ -48,5 +48,5 @@ internal/logic/
 ## 调试路径
 1. 业务规则不符预期：从对应 domain 文件入手，`auth.go` 与 `link.go` 是当前复杂度热点
 2. 事务边界异常：检查 logic 中 `tx` 开启点与 repository 的 `pickDB(tx)` 调用链
-3. 副作用丢失/延迟：定位 `helper/mail.go` 与 `internal/task/` 的队列投递路径
+3. 邮件发送失败：定位 `mail.go` 的 `SendWithTemplate`，核对 `EMAIL_*` 配置与 `templates/mail/` 模板是否就绪
 4. 错误未渲染：确认返回类型为 `*xError.Error` 且 handler 已 `_ = c.Error(err)`

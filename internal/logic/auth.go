@@ -30,6 +30,7 @@ import (
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
+	xAsync "github.com/bamboo-services/bamboo-base-go/plugins/async"
 	"github.com/gin-gonic/gin"
 	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/logic"
 )
@@ -151,7 +152,10 @@ func (a *AuthLogic) Register(ctx *gin.Context, req *apiAuth.RegisterRequest) (*e
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ServerInternalError, "创建用户会话失败", false, err)
 	}
 
-	go a.sendEmailVerification(ctx, &newUser)
+	// 异步发送邮箱验证邮件（xAsync 解耦请求上下文，不阻断主流程）
+	xAsync.Async(ctx.Request.Context(), func(asyncCtx context.Context) {
+		a.sendEmailVerification(asyncCtx, &newUser)
+	}, xAsync.WithName("MAIL"))
 	return &newUser, token, &now, &expireAt, nil
 }
 
@@ -225,8 +229,10 @@ func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *apiAuth.PasswordResetRe
 		return xError.NewError(ctx, xError.ServerInternalError, "保存重置Token失败", false, err)
 	}
 
-	// 发送重置密码邮件（异步，不阻断主流程）
-	go a.sendPasswordResetEmail(ctx, user, resetToken)
+	// 发送重置密码邮件（xAsync 解耦请求上下文，不阻断主流程）
+	xAsync.Async(ctx.Request.Context(), func(asyncCtx context.Context) {
+		a.sendPasswordResetEmail(asyncCtx, user, resetToken)
+	}, xAsync.WithName("MAIL"))
 
 	return nil
 }
@@ -370,20 +376,13 @@ func (a *AuthLogic) ConfirmResetPassword(ctx *gin.Context, req *apiAuth.ConfirmR
 
 // sendEmailVerification 发送邮箱验证邮件
 //
-// 此函数应在 goroutine 中异步调用，不会阻断主流程
-func (a *AuthLogic) sendEmailVerification(ctx *gin.Context, user *entity.SystemUser) {
+// 此函数应在 xAsync 异步任务中调用，ctx 为解耦后的独立上下文，不会阻断主流程
+func (a *AuthLogic) sendEmailVerification(ctx context.Context, user *entity.SystemUser) {
 	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
 
-	// 获取配置
-	config := ctxUtil.GetConfig(ctx)
-	if config == nil {
-		logger.Warn(ctx, "无法获取配置，跳过发送邮箱验证邮件")
-		return
-	}
-
 	// 获取 Redis 客户端
-	rdb := ctxUtil.GetRedisClient(ctx)
-	if rdb == nil {
+	rdb, xerr := xCtxUtil.GetRDB(ctx)
+	if xerr != nil {
 		logger.Warn(ctx, "Redis 客户端不可用，跳过发送邮箱验证邮件")
 		return
 	}
@@ -393,7 +392,7 @@ func (a *AuthLogic) sendEmailVerification(ctx *gin.Context, user *entity.SystemU
 
 	// 存储到 Redis（24小时过期）
 	redisKey := constants.RedisEmailVerify.Get(verifyToken).String()
-	err := rdb.Set(ctx.Request.Context(), redisKey, user.ID, 24*time.Hour).Err()
+	err := rdb.Set(ctx, redisKey, user.ID, 24*time.Hour).Err()
 	if err != nil {
 		logger.Warn(ctx, fmt.Sprintf("保存验证Token失败: %v", err))
 		return
@@ -413,11 +412,10 @@ func (a *AuthLogic) sendEmailVerification(ctx *gin.Context, user *entity.SystemU
 		"Username":   username,
 		"VerifyLink": verifyLink,
 		"ExpireTime": "24小时",
-		"FromName":   config.Email.FromName,
 	}
 
 	// 发送邮件
-	mailLogic := &MailLogic{TemplateService: &logcHelper.MailTemplateLogic{}, MaxRetry: 3}
+	mailLogic := NewMailLogic()
 	mailErr := mailLogic.SendWithTemplate(
 		ctx,
 		"email_verify",
@@ -434,16 +432,9 @@ func (a *AuthLogic) sendEmailVerification(ctx *gin.Context, user *entity.SystemU
 
 // sendPasswordResetEmail 发送密码重置邮件
 //
-// 此函数应在 goroutine 中异步调用，不会阻断主流程
-func (a *AuthLogic) sendPasswordResetEmail(ctx *gin.Context, user *entity.SystemUser, resetToken string) {
+// 此函数应在 xAsync 异步任务中调用，ctx 为解耦后的独立上下文，不会阻断主流程
+func (a *AuthLogic) sendPasswordResetEmail(ctx context.Context, user *entity.SystemUser, resetToken string) {
 	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
-
-	// 获取配置
-	config := ctxUtil.GetConfig(ctx)
-	if config == nil {
-		logger.Warn(ctx, "无法获取配置，跳过发送密码重置邮件")
-		return
-	}
 
 	// 构建重置链接（TODO: 从配置读取域名前缀）
 	resetLink := fmt.Sprintf("https://localhost/api/v1/auth/reset-password?token=%s", resetToken)
@@ -459,11 +450,10 @@ func (a *AuthLogic) sendPasswordResetEmail(ctx *gin.Context, user *entity.System
 		"Username":   username,
 		"ResetLink":  resetLink,
 		"ExpireTime": "1小时",
-		"FromName":   config.Email.FromName,
 	}
 
 	// 发送邮件
-	mailLogic := &MailLogic{TemplateService: &logcHelper.MailTemplateLogic{}, MaxRetry: 3}
+	mailLogic := NewMailLogic()
 	mailErr := mailLogic.SendWithTemplate(
 		ctx,
 		"password_reset",

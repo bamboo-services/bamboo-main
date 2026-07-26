@@ -17,7 +17,9 @@ import (
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	bSdkStartup "github.com/phalanx-labs/beacon-sso-sdk/startup"
 
+	xCtx "github.com/bamboo-services/bamboo-base-go/defined/context"
 	xRegNode "github.com/bamboo-services/bamboo-base-go/major/register/node"
+	xEmail "github.com/bamboo-services/bamboo-base-go/plugins/email"
 )
 
 type reg struct {
@@ -34,12 +36,14 @@ func newInit() *reg {
 //
 // 自 v1.0.4 起，数据库与缓存由 main.go 的 xOption 声明式配置装配，
 // 本函数仅注册框架未覆盖的业务节点：
-//   - Email 业务配置（供 worker_mail 读取）
+//   - Email 邮件客户端（框架 xEmail 插件，SMTP 配置经 EMAIL_* 环境变量装配）
+//   - Email 业务配置（管理员邮箱等，供 logic 读取）
 //   - SSO SDK 依赖节点（OAuth 配置 + gRPC 客户端）
 func Init() (context.Context, []xRegNode.RegNodeList) {
 	businessReg := newInit()
 	var regNode []xRegNode.RegNodeList
 
+	regNode = append(regNode, xRegNode.RegNodeList{Key: xCtx.EmailClientKey, Node: xEmail.InitClient})
 	regNode = append(regNode, xRegNode.RegNodeList{Key: constants.ContextCustomConfig, Node: businessReg.emailConfigInit})
 	regNode = append(regNode, bSdkStartup.NewStartupConfig()...)
 
