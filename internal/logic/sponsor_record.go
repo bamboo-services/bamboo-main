@@ -22,7 +22,6 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
-	"github.com/gin-gonic/gin"
 )
 
 type sponsorRecordRepo struct {
@@ -30,11 +29,13 @@ type sponsorRecordRepo struct {
 	channel *repository.SponsorChannelRepo
 }
 
+// SponsorRecordLogic 赞助记录业务逻辑
 type SponsorRecordLogic struct {
 	logic
 	repo sponsorRecordRepo
 }
 
+// NewSponsorRecordLogic 创建 SponsorRecordLogic 实例，从上下文获取数据库与缓存并初始化赞助记录与渠道仓储依赖。
 func NewSponsorRecordLogic(ctx context.Context) *SponsorRecordLogic {
 	db := xCtxUtil.MustGetDB(ctx)
 	m := xCtxUtil.MustGetCacheManager(ctx)
@@ -52,7 +53,8 @@ func NewSponsorRecordLogic(ctx context.Context) *SponsorRecordLogic {
 	}
 }
 
-func (l *SponsorRecordLogic) Add(ctx *gin.Context, req *apiSponsor.RecordAddRequest) (*apiSponsor.RecordEntityResponse, *xError.Error) {
+// Add 添加赞助记录，校验指定渠道存在后创建记录。
+func (l *SponsorRecordLogic) Add(ctx context.Context, req *apiSponsor.RecordAddRequest) (*apiSponsor.RecordEntityResponse, *xError.Error) {
 	if req.ChannelID != nil {
 		_, found, xErr := l.repo.channel.GetByID(ctx, *req.ChannelID)
 		if xErr != nil {
@@ -80,7 +82,8 @@ func (l *SponsorRecordLogic) Add(ctx *gin.Context, req *apiSponsor.RecordAddRequ
 	return buildRecordEntityResponse(record), nil
 }
 
-func (l *SponsorRecordLogic) Update(ctx *gin.Context, recordID xSnowflake.SnowflakeID, req *apiSponsor.RecordUpdateRequest) (*apiSponsor.RecordEntityResponse, *xError.Error) {
+// Update 更新赞助记录，校验记录与渠道存在后按字段增量更新。
+func (l *SponsorRecordLogic) Update(ctx context.Context, recordID xSnowflake.SnowflakeID, req *apiSponsor.RecordUpdateRequest) (*apiSponsor.RecordEntityResponse, *xError.Error) {
 	_, found, xErr := l.repo.record.GetByID(ctx, recordID)
 	if xErr != nil {
 		return nil, xErr
@@ -150,7 +153,8 @@ func (l *SponsorRecordLogic) Update(ctx *gin.Context, recordID xSnowflake.Snowfl
 	return buildRecordEntityResponse(record), nil
 }
 
-func (l *SponsorRecordLogic) Delete(ctx *gin.Context, recordID xSnowflake.SnowflakeID) *xError.Error {
+// Delete 删除赞助记录，校验存在后硬删除。
+func (l *SponsorRecordLogic) Delete(ctx context.Context, recordID xSnowflake.SnowflakeID) *xError.Error {
 	_, found, xErr := l.repo.record.GetByID(ctx, recordID)
 	if xErr != nil {
 		return xErr
@@ -169,7 +173,8 @@ func (l *SponsorRecordLogic) Delete(ctx *gin.Context, recordID xSnowflake.Snowfl
 	return nil
 }
 
-func (l *SponsorRecordLogic) Get(ctx *gin.Context, recordID xSnowflake.SnowflakeID) (*apiSponsor.RecordEntityResponse, *xError.Error) {
+// Get 获取赞助记录详情（含渠道信息）。
+func (l *SponsorRecordLogic) Get(ctx context.Context, recordID xSnowflake.SnowflakeID) (*apiSponsor.RecordEntityResponse, *xError.Error) {
 	record, found, xErr := l.repo.record.GetDetailByID(ctx, recordID)
 	if xErr != nil {
 		return nil, xErr
@@ -180,7 +185,8 @@ func (l *SponsorRecordLogic) Get(ctx *gin.Context, recordID xSnowflake.Snowflake
 	return buildRecordEntityResponse(record), nil
 }
 
-func (l *SponsorRecordLogic) GetPage(ctx *gin.Context, req *apiSponsor.RecordPageRequest) (*base.PaginationResponse[apiSponsor.RecordEntityResponse], *xError.Error) {
+// GetPage 分页获取赞助记录。
+func (l *SponsorRecordLogic) GetPage(ctx context.Context, req *apiSponsor.RecordPageRequest) (*base.PaginationResponse[apiSponsor.RecordEntityResponse], *xError.Error) {
 	if req.Page <= 0 {
 		req.Page = 1
 	}
@@ -214,7 +220,8 @@ func (l *SponsorRecordLogic) GetPage(ctx *gin.Context, req *apiSponsor.RecordPag
 	return base.NewPaginationResponse(resp, req.Page, req.PageSize, total), nil
 }
 
-func (l *SponsorRecordLogic) GetPublicPage(ctx *gin.Context, req *apiSponsor.RecordPublicPageRequest) (*base.PaginationResponse[apiSponsor.RecordPublicItemResponse], *xError.Error) {
+// GetPublicPage 分页获取公开的赞助记录，匿名记录隐藏昵称与跳转链接。
+func (l *SponsorRecordLogic) GetPublicPage(ctx context.Context, req *apiSponsor.RecordPublicPageRequest) (*base.PaginationResponse[apiSponsor.RecordPublicItemResponse], *xError.Error) {
 	if req.Page <= 0 {
 		req.Page = 1
 	}

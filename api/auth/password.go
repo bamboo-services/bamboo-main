@@ -11,20 +11,24 @@
 
 package apiAuth
 
+// PasswordChangeRequest 密码修改请求
 type PasswordChangeRequest struct {
 	OldPassword string `json:"old_password" binding:"required,min=6,max=100" example:"oldpassword123"`
 	NewPassword string `json:"new_password" binding:"required,min=6,max=100" example:"newpassword123"`
 }
 
+// PasswordResetRequest 密码重置请求
 type PasswordResetRequest struct {
 	Email string `json:"email" binding:"required,email" example:"admin@example.com"`
 }
 
+// ConfirmResetPasswordRequest 确认重置密码请求
 type ConfirmResetPasswordRequest struct {
 	Token       string `json:"token" binding:"required,min=32,max=64" example:"abc123..."`
 	NewPassword string `json:"new_password" binding:"required,min=6,max=100" example:"newpassword123"`
 }
 
+// VerifyResetTokenRequest 重置令牌验证请求
 type VerifyResetTokenRequest struct {
 	Token string `form:"token" binding:"required,min=32,max=64" example:"abc123..."`
 }

@@ -12,6 +12,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -21,16 +22,21 @@ import (
 	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
+// SponsorChannelRepo 赞助渠道数据访问层
+//
+// 收口赞助渠道实体的 CRUD、列表与分页查询及赞助记录统计，缓存经 xCache.Manager 统一失效。
 type SponsorChannelRepo struct {
 	db  *gorm.DB
 	kc  xCache.KeyCache[string, entity.SponsorChannel]
 	log *xLog.LogNamedLogger
 }
 
+// SponsorChannelListQuery 赞助渠道列表查询条件
+//
+// repository 层自有查询模型，由 logic 层从 transport DTO 转换而来。
 type SponsorChannelListQuery struct {
 	Status      *bool
 	OnlyEnabled bool
@@ -39,6 +45,9 @@ type SponsorChannelListQuery struct {
 	Order       string
 }
 
+// SponsorChannelPageQuery 赞助渠道分页查询条件
+//
+// repository 层自有查询模型，由 logic 层从 transport DTO 转换而来。
 type SponsorChannelPageQuery struct {
 	Page     int
 	PageSize int
@@ -48,6 +57,7 @@ type SponsorChannelPageQuery struct {
 	Order    string
 }
 
+// NewSponsorChannelRepo 创建 SponsorChannelRepo 实例
 func NewSponsorChannelRepo(db *gorm.DB, m *xCache.Manager) *SponsorChannelRepo {
 	return &SponsorChannelRepo{
 		db:  db,
@@ -56,7 +66,8 @@ func NewSponsorChannelRepo(db *gorm.DB, m *xCache.Manager) *SponsorChannelRepo {
 	}
 }
 
-func (r *SponsorChannelRepo) Create(ctx *gin.Context, channel *entity.SponsorChannel) (*entity.SponsorChannel, *xError.Error) {
+// Create 创建赞助渠道
+func (r *SponsorChannelRepo) Create(ctx context.Context, channel *entity.SponsorChannel) (*entity.SponsorChannel, *xError.Error) {
 	r.log.Info(ctx, "Create - 创建赞助渠道")
 
 	err := r.db.WithContext(ctx).Create(channel).Error
@@ -64,16 +75,17 @@ func (r *SponsorChannelRepo) Create(ctx *gin.Context, channel *entity.SponsorCha
 		return nil, xError.NewError(ctx, xError.DatabaseError, "创建赞助渠道失败", true, err)
 	}
 
-	if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisSponsorChan.Get(channel.ID).String(), channel, xCache.WithTTL(10*time.Minute)); cacheErr != nil {
+	if cacheErr := r.kc.Set(ctx, constants.RedisSponsorChan.Get(channel.ID).String(), channel, xCache.WithTTL(10*time.Minute)); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 	return channel, nil
 }
 
-func (r *SponsorChannelRepo) GetByID(ctx *gin.Context, id xSnowflake.SnowflakeID) (*entity.SponsorChannel, bool, *xError.Error) {
+// GetByID 根据ID获取赞助渠道
+func (r *SponsorChannelRepo) GetByID(ctx context.Context, id xSnowflake.SnowflakeID) (*entity.SponsorChannel, bool, *xError.Error) {
 	r.log.Info(ctx, "GetByID - 获取赞助渠道")
 
-	if channel, ok, err := r.kc.Get(ctx.Request.Context(), constants.RedisSponsorChan.Get(id).String()); err != nil {
+	if channel, ok, err := r.kc.Get(ctx, constants.RedisSponsorChan.Get(id).String()); err != nil {
 		return nil, false, xError.NewError(ctx, xError.CacheError, "获取赞助渠道缓存失败", true, err)
 	} else if ok {
 		return channel, true, nil
@@ -82,7 +94,7 @@ func (r *SponsorChannelRepo) GetByID(ctx *gin.Context, id xSnowflake.SnowflakeID
 	var channel entity.SponsorChannel
 	err := r.db.WithContext(ctx).Where("id = ?", id).First(&channel).Error
 	if err == nil {
-		if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisSponsorChan.Get(channel.ID).String(), &channel, xCache.WithTTL(10*time.Minute)); cacheErr != nil {
+		if cacheErr := r.kc.Set(ctx, constants.RedisSponsorChan.Get(channel.ID).String(), &channel, xCache.WithTTL(10*time.Minute)); cacheErr != nil {
 			r.log.Warn(ctx, cacheErr.Error())
 		}
 		return &channel, true, nil
@@ -93,7 +105,8 @@ func (r *SponsorChannelRepo) GetByID(ctx *gin.Context, id xSnowflake.SnowflakeID
 	return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询赞助渠道失败", true, err)
 }
 
-func (r *SponsorChannelRepo) UpdateByID(ctx *gin.Context, id xSnowflake.SnowflakeID, updates map[string]any) (*entity.SponsorChannel, bool, *xError.Error) {
+// UpdateByID 根据ID更新赞助渠道的指定字段
+func (r *SponsorChannelRepo) UpdateByID(ctx context.Context, id xSnowflake.SnowflakeID, updates map[string]any) (*entity.SponsorChannel, bool, *xError.Error) {
 	r.log.Info(ctx, "UpdateByID - 更新赞助渠道")
 
 	result := r.db.WithContext(ctx).Model(&entity.SponsorChannel{}).Where("id = ?", id).Updates(updates)
@@ -104,7 +117,7 @@ func (r *SponsorChannelRepo) UpdateByID(ctx *gin.Context, id xSnowflake.Snowflak
 		return nil, false, nil
 	}
 
-	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisSponsorChan.Get(id).String()); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx, constants.RedisSponsorChan.Get(id).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -115,7 +128,8 @@ func (r *SponsorChannelRepo) UpdateByID(ctx *gin.Context, id xSnowflake.Snowflak
 	return channel, found, nil
 }
 
-func (r *SponsorChannelRepo) HardDeleteByID(ctx *gin.Context, id xSnowflake.SnowflakeID) (bool, *xError.Error) {
+// HardDeleteByID 物理删除赞助渠道
+func (r *SponsorChannelRepo) HardDeleteByID(ctx context.Context, id xSnowflake.SnowflakeID) (bool, *xError.Error) {
 	r.log.Info(ctx, "HardDeleteByID - 删除赞助渠道")
 
 	result := r.db.WithContext(ctx).Unscoped().Where("id = ?", id).Delete(&entity.SponsorChannel{})
@@ -126,13 +140,14 @@ func (r *SponsorChannelRepo) HardDeleteByID(ctx *gin.Context, id xSnowflake.Snow
 		return false, nil
 	}
 
-	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisSponsorChan.Get(id).String()); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx, constants.RedisSponsorChan.Get(id).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 	return true, nil
 }
 
-func (r *SponsorChannelRepo) CountSponsorsByChannelID(ctx *gin.Context, channelID xSnowflake.SnowflakeID) (int64, *xError.Error) {
+// CountSponsorsByChannelID 统计指定渠道下赞助记录数量
+func (r *SponsorChannelRepo) CountSponsorsByChannelID(ctx context.Context, channelID xSnowflake.SnowflakeID) (int64, *xError.Error) {
 	r.log.Info(ctx, "CountSponsorsByChannelID - 统计赞助记录数量")
 
 	var total int64
@@ -143,7 +158,8 @@ func (r *SponsorChannelRepo) CountSponsorsByChannelID(ctx *gin.Context, channelI
 	return total, nil
 }
 
-func (r *SponsorChannelRepo) CountSponsorsByChannelIDs(ctx *gin.Context, channelIDs []xSnowflake.SnowflakeID) (map[xSnowflake.SnowflakeID]int64, *xError.Error) {
+// CountSponsorsByChannelIDs 批量统计各渠道下赞助记录数量
+func (r *SponsorChannelRepo) CountSponsorsByChannelIDs(ctx context.Context, channelIDs []xSnowflake.SnowflakeID) (map[xSnowflake.SnowflakeID]int64, *xError.Error) {
 	r.log.Info(ctx, "CountSponsorsByChannelIDs - 批量统计赞助记录数量")
 
 	sponsorCounts := make(map[xSnowflake.SnowflakeID]int64)
@@ -172,7 +188,8 @@ func (r *SponsorChannelRepo) CountSponsorsByChannelIDs(ctx *gin.Context, channel
 	return sponsorCounts, nil
 }
 
-func (r *SponsorChannelRepo) List(ctx *gin.Context, query SponsorChannelListQuery) ([]entity.SponsorChannel, *xError.Error) {
+// List 查询赞助渠道列表
+func (r *SponsorChannelRepo) List(ctx context.Context, query SponsorChannelListQuery) ([]entity.SponsorChannel, *xError.Error) {
 	r.log.Info(ctx, "List - 查询赞助渠道列表")
 
 	gormQuery := r.applyListFilters(r.db.WithContext(ctx).Model(&entity.SponsorChannel{}), query.Status, query.OnlyEnabled, query.Name)
@@ -186,7 +203,8 @@ func (r *SponsorChannelRepo) List(ctx *gin.Context, query SponsorChannelListQuer
 	return channels, nil
 }
 
-func (r *SponsorChannelRepo) Page(ctx *gin.Context, query SponsorChannelPageQuery) ([]entity.SponsorChannel, int64, *xError.Error) {
+// Page 分页查询赞助渠道
+func (r *SponsorChannelRepo) Page(ctx context.Context, query SponsorChannelPageQuery) ([]entity.SponsorChannel, int64, *xError.Error) {
 	r.log.Info(ctx, "Page - 分页查询赞助渠道")
 
 	gormQuery := r.applyListFilters(r.db.WithContext(ctx).Model(&entity.SponsorChannel{}), query.Status, false, query.Name)
@@ -208,7 +226,8 @@ func (r *SponsorChannelRepo) Page(ctx *gin.Context, query SponsorChannelPageQuer
 	return channels, total, nil
 }
 
-func (r *SponsorChannelRepo) PublicList(ctx *gin.Context) ([]entity.SponsorChannel, *xError.Error) {
+// PublicList 查询公开的赞助渠道列表
+func (r *SponsorChannelRepo) PublicList(ctx context.Context) ([]entity.SponsorChannel, *xError.Error) {
 	r.log.Info(ctx, "PublicList - 查询公开赞助渠道列表")
 
 	var channels []entity.SponsorChannel

@@ -22,18 +22,19 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
-	"github.com/gin-gonic/gin"
 )
 
 type sponsorChannelRepo struct {
 	channel *repository.SponsorChannelRepo
 }
 
+// SponsorChannelLogic 赞助渠道业务逻辑
 type SponsorChannelLogic struct {
 	logic
 	repo sponsorChannelRepo
 }
 
+// NewSponsorChannelLogic 创建 SponsorChannelLogic 实例，从上下文获取数据库与缓存并初始化赞助渠道仓储依赖。
 func NewSponsorChannelLogic(ctx context.Context) *SponsorChannelLogic {
 	db := xCtxUtil.MustGetDB(ctx)
 	m := xCtxUtil.MustGetCacheManager(ctx)
@@ -50,7 +51,8 @@ func NewSponsorChannelLogic(ctx context.Context) *SponsorChannelLogic {
 	}
 }
 
-func (l *SponsorChannelLogic) Add(ctx *gin.Context, req *apiSponsor.ChannelAddRequest) (*apiSponsor.ChannelEntityResponse, *xError.Error) {
+// Add 添加赞助渠道并附带统计其下赞助记录数量。
+func (l *SponsorChannelLogic) Add(ctx context.Context, req *apiSponsor.ChannelAddRequest) (*apiSponsor.ChannelEntityResponse, *xError.Error) {
 	channel, xErr := l.repo.channel.Create(ctx, &entity.SponsorChannel{
 		Name:        req.Name,
 		Icon:        req.Icon,
@@ -69,7 +71,8 @@ func (l *SponsorChannelLogic) Add(ctx *gin.Context, req *apiSponsor.ChannelAddRe
 	return buildChannelEntityResponse(channel, int(sponsorCount)), nil
 }
 
-func (l *SponsorChannelLogic) Update(ctx *gin.Context, channelID xSnowflake.SnowflakeID, req *apiSponsor.ChannelUpdateRequest) (*apiSponsor.ChannelEntityResponse, *xError.Error) {
+// Update 更新赞助渠道，按请求字段增量更新并返回带统计数量的详情。
+func (l *SponsorChannelLogic) Update(ctx context.Context, channelID xSnowflake.SnowflakeID, req *apiSponsor.ChannelUpdateRequest) (*apiSponsor.ChannelEntityResponse, *xError.Error) {
 	channel, found, xErr := l.repo.channel.GetByID(ctx, channelID)
 	if xErr != nil {
 		return nil, xErr
@@ -109,7 +112,8 @@ func (l *SponsorChannelLogic) Update(ctx *gin.Context, channelID xSnowflake.Snow
 	return buildChannelEntityResponse(channel, int(sponsorCount)), nil
 }
 
-func (l *SponsorChannelLogic) UpdateStatus(ctx *gin.Context, channelID xSnowflake.SnowflakeID, req *apiSponsor.ChannelStatusRequest) (bool, *xError.Error) {
+// UpdateStatus 更新赞助渠道启用状态。
+func (l *SponsorChannelLogic) UpdateStatus(ctx context.Context, channelID xSnowflake.SnowflakeID, req *apiSponsor.ChannelStatusRequest) (bool, *xError.Error) {
 	_, found, xErr := l.repo.channel.UpdateByID(ctx, channelID, map[string]any{"status": req.Status})
 	if xErr != nil {
 		return false, xErr
@@ -120,7 +124,8 @@ func (l *SponsorChannelLogic) UpdateStatus(ctx *gin.Context, channelID xSnowflak
 	return req.Status, nil
 }
 
-func (l *SponsorChannelLogic) Delete(ctx *gin.Context, channelID xSnowflake.SnowflakeID) *xError.Error {
+// Delete 删除赞助渠道，存在关联赞助记录时拒绝删除。
+func (l *SponsorChannelLogic) Delete(ctx context.Context, channelID xSnowflake.SnowflakeID) *xError.Error {
 	_, found, xErr := l.repo.channel.GetByID(ctx, channelID)
 	if xErr != nil {
 		return xErr
@@ -147,7 +152,8 @@ func (l *SponsorChannelLogic) Delete(ctx *gin.Context, channelID xSnowflake.Snow
 	return nil
 }
 
-func (l *SponsorChannelLogic) Get(ctx *gin.Context, channelID xSnowflake.SnowflakeID) (*apiSponsor.ChannelEntityResponse, *xError.Error) {
+// Get 获取赞助渠道详情并附带统计其下赞助记录数量。
+func (l *SponsorChannelLogic) Get(ctx context.Context, channelID xSnowflake.SnowflakeID) (*apiSponsor.ChannelEntityResponse, *xError.Error) {
 	channel, found, xErr := l.repo.channel.GetByID(ctx, channelID)
 	if xErr != nil {
 		return nil, xErr
@@ -163,7 +169,8 @@ func (l *SponsorChannelLogic) Get(ctx *gin.Context, channelID xSnowflake.Snowfla
 	return buildChannelEntityResponse(channel, int(sponsorCount)), nil
 }
 
-func (l *SponsorChannelLogic) GetList(ctx *gin.Context, req *apiSponsor.ChannelListRequest) ([]apiSponsor.ChannelListItemResponse, *xError.Error) {
+// GetList 获取赞助渠道列表并附带各渠道赞助记录数量。
+func (l *SponsorChannelLogic) GetList(ctx context.Context, req *apiSponsor.ChannelListRequest) ([]apiSponsor.ChannelListItemResponse, *xError.Error) {
 	listQuery := repository.SponsorChannelListQuery{
 		OnlyEnabled: req.OnlyEnabled != nil && *req.OnlyEnabled,
 		OrderBy:     stringPointerValue(req.OrderBy),
@@ -193,7 +200,8 @@ func (l *SponsorChannelLogic) GetList(ctx *gin.Context, req *apiSponsor.ChannelL
 	return resp, nil
 }
 
-func (l *SponsorChannelLogic) GetPage(ctx *gin.Context, req *apiSponsor.ChannelPageRequest) (*base.PaginationResponse[apiSponsor.ChannelEntityResponse], *xError.Error) {
+// GetPage 分页获取赞助渠道并附带各渠道赞助记录数量。
+func (l *SponsorChannelLogic) GetPage(ctx context.Context, req *apiSponsor.ChannelPageRequest) (*base.PaginationResponse[apiSponsor.ChannelEntityResponse], *xError.Error) {
 	if req.Page <= 0 {
 		req.Page = 1
 	}
@@ -235,7 +243,8 @@ func (l *SponsorChannelLogic) GetPage(ctx *gin.Context, req *apiSponsor.ChannelP
 	return base.NewPaginationResponse(resp, req.Page, req.PageSize, total), nil
 }
 
-func (l *SponsorChannelLogic) GetPublicList(ctx *gin.Context) ([]apiSponsor.ChannelListItemResponse, *xError.Error) {
+// GetPublicList 获取公开的赞助渠道列表并附带各渠道赞助记录数量。
+func (l *SponsorChannelLogic) GetPublicList(ctx context.Context) ([]apiSponsor.ChannelListItemResponse, *xError.Error) {
 	channels, xErr := l.repo.channel.PublicList(ctx)
 	if xErr != nil {
 		return nil, xErr

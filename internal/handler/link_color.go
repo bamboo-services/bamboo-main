@@ -41,7 +41,7 @@ func (h *LinkColorHandler) Add(c *gin.Context) {
 		return
 	}
 
-	color, err := h.service.linkColorLogic.Add(c, &req)
+	color, err := h.service.linkColorLogic.Add(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -79,7 +79,7 @@ func (h *LinkColorHandler) Update(c *gin.Context) {
 		return
 	}
 
-	color, err := h.service.linkColorLogic.Update(c, uri.ID, &req)
+	color, err := h.service.linkColorLogic.Update(c.Request.Context(), uri.ID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -112,7 +112,7 @@ func (h *LinkColorHandler) UpdateSort(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.linkColorLogic.UpdateSort(c, &req); err != nil {
+	if err := h.service.linkColorLogic.UpdateSort(c.Request.Context(), &req); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -151,7 +151,7 @@ func (h *LinkColorHandler) UpdateStatus(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.linkColorLogic.UpdateStatus(c, uri.ID, &req); err != nil {
+	if err := h.service.linkColorLogic.UpdateStatus(c.Request.Context(), uri.ID, &req); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -192,7 +192,7 @@ func (h *LinkColorHandler) Delete(c *gin.Context) {
 	var req apiLinkColor.ColorDeleteRequest
 	req.Force = c.Query("force") == "true"
 
-	if _, err := h.service.linkColorLogic.Delete(c, uri.ID, &req); err != nil {
+	if _, err := h.service.linkColorLogic.Delete(c.Request.Context(), uri.ID, &req); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -221,7 +221,7 @@ func (h *LinkColorHandler) Get(c *gin.Context) {
 		return
 	}
 
-	color, err := h.service.linkColorLogic.Get(c, uri.ID)
+	color, err := h.service.linkColorLogic.Get(c.Request.Context(), uri.ID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -258,7 +258,7 @@ func (h *LinkColorHandler) GetList(c *gin.Context) {
 		return
 	}
 
-	colors, err := h.service.linkColorLogic.GetList(c, &req)
+	colors, err := h.service.linkColorLogic.GetList(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -295,7 +295,7 @@ func (h *LinkColorHandler) GetPage(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.linkColorLogic.GetPage(c, &req)
+	result, err := h.service.linkColorLogic.GetPage(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return

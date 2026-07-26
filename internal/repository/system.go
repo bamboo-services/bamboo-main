@@ -12,6 +12,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"strings"
 
@@ -19,15 +20,18 @@ import (
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
+// SystemRepo 系统配置数据访问层
+//
+// 收口系统配置实体的按键查询与按键更新，供 logic 层读取和修改全局配置项。
 type SystemRepo struct {
 	db  *gorm.DB
 	log *xLog.LogNamedLogger
 }
 
+// NewSystemRepo 创建 SystemRepo 实例
 func NewSystemRepo(db *gorm.DB, _ *xCache.Manager) *SystemRepo {
 	return &SystemRepo{
 		db:  db,
@@ -35,7 +39,8 @@ func NewSystemRepo(db *gorm.DB, _ *xCache.Manager) *SystemRepo {
 	}
 }
 
-func (r *SystemRepo) ListByKeys(ctx *gin.Context, keys []string) ([]entity.System, *xError.Error) {
+// ListByKeys 根据键集合批量查询系统配置
+func (r *SystemRepo) ListByKeys(ctx context.Context, keys []string) ([]entity.System, *xError.Error) {
 	r.log.Info(ctx, "ListByKeys - 查询系统配置")
 
 	if len(keys) == 0 {
@@ -51,7 +56,8 @@ func (r *SystemRepo) ListByKeys(ctx *gin.Context, keys []string) ([]entity.Syste
 	return configs, nil
 }
 
-func (r *SystemRepo) GetByKey(ctx *gin.Context, key string) (*entity.System, bool, *xError.Error) {
+// GetByKey 根据键获取单条系统配置
+func (r *SystemRepo) GetByKey(ctx context.Context, key string) (*entity.System, bool, *xError.Error) {
 	r.log.Info(ctx, "GetByKey - 查询系统配置")
 
 	key = strings.TrimSpace(key)
@@ -71,7 +77,8 @@ func (r *SystemRepo) GetByKey(ctx *gin.Context, key string) (*entity.System, boo
 	return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询系统配置失败", true, err)
 }
 
-func (r *SystemRepo) UpdateValueByKey(ctx *gin.Context, key string, value *string) *xError.Error {
+// UpdateValueByKey 根据键更新系统配置的值
+func (r *SystemRepo) UpdateValueByKey(ctx context.Context, key string, value *string) *xError.Error {
 	r.log.Info(ctx, "UpdateValueByKey - 更新系统配置")
 
 	key = strings.TrimSpace(key)

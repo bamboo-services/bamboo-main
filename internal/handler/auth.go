@@ -13,7 +13,9 @@ package handler
 
 import (
 	apiAuth "github.com/bamboo-services/bamboo-main/api/auth"
+	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
+	"github.com/bamboo-services/bamboo-main/pkg/util/netUtil"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
@@ -36,13 +38,13 @@ import (
 // @Router /api/v1/auth/login [POST]
 func (h *AuthHandler) Login(c *gin.Context) {
 	accessToken := bSdkUtil.GetAuthorization(c)
-	userinfo, xErr := h.service.oauthLogic.Userinfo(c, accessToken)
+	userinfo, xErr := h.service.oauthLogic.Userinfo(c.Request.Context(), accessToken)
 	if xErr != nil {
 		_ = c.Error(xErr)
 		return
 	}
 
-	user, token, createdAt, expiredAt, err := h.service.authLogic.LoginByOAuth(c, userinfo, accessToken)
+	user, token, createdAt, expiredAt, err := h.service.authLogic.LoginByOAuth(c.Request.Context(), userinfo, accessToken)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -81,7 +83,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	// 调用服务层
-	user, token, createdAt, expiredAt, err := h.service.authLogic.Register(c, &req)
+	meta := logcHelper.SessionMeta{
+		ClientIP:  netUtil.GetClientIP(c),
+		UserAgent: c.GetHeader("User-Agent"),
+	}
+	user, token, createdAt, expiredAt, err := h.service.authLogic.Register(c.Request.Context(), &req, meta)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -122,7 +128,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		return
 	}
 
-	err := h.service.authLogic.Logout(c, token)
+	err := h.service.authLogic.Logout(c.Request.Context(), token)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -152,7 +158,7 @@ func (h *AuthHandler) GetUserInfo(c *gin.Context) {
 	}
 
 	// 调用服务层
-	userInfo, err := h.service.authLogic.GetUserInfo(c, userUUID)
+	userInfo, err := h.service.authLogic.GetUserInfo(c.Request.Context(), userUUID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -194,7 +200,7 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.service.authLogic.ChangePassword(c, userUUID, &req)
+	err := h.service.authLogic.ChangePassword(c.Request.Context(), userUUID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -228,7 +234,7 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.service.authLogic.ResetPassword(c, &req)
+	err := h.service.authLogic.ResetPassword(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -261,7 +267,7 @@ func (h *AuthHandler) VerifyEmail(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.service.authLogic.VerifyEmail(c, &req)
+	err := h.service.authLogic.VerifyEmail(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -293,15 +299,10 @@ func (h *AuthHandler) VerifyResetToken(c *gin.Context) {
 		return
 	}
 
-	// 调用服务层
-	valid, err := h.service.authLogic.VerifyResetToken(c, &req)
+	// 调用服务层（令牌无效或已过期时 logic 直接返回业务错误）
+	err := h.service.authLogic.VerifyResetToken(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
-		return
-	}
-
-	if !valid {
-		_ = c.Error(xError.NewError(c, xError.BadRequest, "重置链接无效或已过期", false))
 		return
 	}
 
@@ -332,7 +333,7 @@ func (h *AuthHandler) ConfirmResetPassword(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.service.authLogic.ConfirmResetPassword(c, &req)
+	err := h.service.authLogic.ConfirmResetPassword(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return

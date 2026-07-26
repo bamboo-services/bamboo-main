@@ -14,43 +14,56 @@ package constants
 import xCtx "github.com/bamboo-services/bamboo-base-go/defined/context"
 
 const (
-	// 上下文键
-	ContextKeyUser   = "user"
+	// ContextKeyUser 用户信息上下文键
+	ContextKeyUser = "user"
+	// ContextKeyUserID 用户 ID 上下文键
 	ContextKeyUserID = "user_id"
-	ContextKeyToken  = "token"
+	// ContextKeyToken 认证令牌上下文键
+	ContextKeyToken = "token"
 
-	// HTTP 头部
+	// HeaderAuthorization 认证请求头名称
 	HeaderAuthorization = "Authorization"
-	HeaderContentType   = "Content-Type"
+	// HeaderContentType 内容类型请求头名称
+	HeaderContentType = "Content-Type"
 
-	// 认证相关
+	// TokenPrefix Bearer 认证令牌前缀
 	TokenPrefix = "Bearer "
 
-	// 系统状态
-	StatusActive   = 1
+	// StatusActive 启用状态值
+	StatusActive = 1
+	// StatusInactive 停用状态值
 	StatusInactive = 0
 
-	// 链接状态
-	LinkStatusPending  = 0 // 待审核
-	LinkStatusApproved = 1 // 已通过
-	LinkStatusRejected = 2 // 已拒绝
+	// LinkStatusPending 链接待审核状态
+	LinkStatusPending = 0
+	// LinkStatusApproved 链接已通过状态
+	LinkStatusApproved = 1
+	// LinkStatusRejected 链接已拒绝状态
+	LinkStatusRejected = 2
 
-	// 链接失效状态
-	LinkFailNormal = 0 // 正常
-	LinkFailBroken = 1 // 失效
+	// LinkFailNormal 链接正常状态
+	LinkFailNormal = 0
+	// LinkFailBroken 链接失效状态
+	LinkFailBroken = 1
 
-	// 用户角色
-	RoleAdmin     = "admin"     // 管理员
-	RoleModerator = "moderator" // 审核员
-	RoleUser      = "user"      // 普通用户
+	// RoleAdmin 管理员角色标识
+	RoleAdmin = "admin"
+	// RoleModerator 审核员角色标识
+	RoleModerator = "moderator"
+	// RoleUser 普通用户角色标识
+	RoleUser = "user"
 
-	// 邮件类型
-	EmailTypeApply         = "apply"
-	EmailTypeApproved      = "approved"
-	EmailTypeRejected      = "rejected"
+	// EmailTypeApply 申请邮件类型
+	EmailTypeApply = "apply"
+	// EmailTypeApproved 审核通过邮件类型
+	EmailTypeApproved = "approved"
+	// EmailTypeRejected 审核拒绝邮件类型
+	EmailTypeRejected = "rejected"
+	// EmailTypePasswordReset 密码重置邮件类型
 	EmailTypePasswordReset = "password_reset"
 )
 
 const (
+	// ContextCustomConfig 自定义配置上下文键
 	ContextCustomConfig xCtx.ContextKey = "context_custom_config"
 )

@@ -31,6 +31,7 @@ import (
 // 组件容器引用），而非 gin.Context 本身。
 type MailLogic struct{}
 
+// NewMailLogic 创建 MailLogic 实例。
 func NewMailLogic() *MailLogic {
 	return &MailLogic{}
 }

@@ -44,7 +44,7 @@ func (h *LinkGroupHandler) Add(c *gin.Context) {
 	}
 
 	// 调用服务层
-	group, err := h.service.linkGroupLogic.Add(c, &req)
+	group, err := h.service.linkGroupLogic.Add(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -87,7 +87,7 @@ func (h *LinkGroupHandler) Update(c *gin.Context) {
 	}
 
 	// 调用服务层
-	group, err := h.service.linkGroupLogic.Update(c, uri.ID, &req)
+	group, err := h.service.linkGroupLogic.Update(c.Request.Context(), uri.ID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -124,7 +124,7 @@ func (h *LinkGroupHandler) UpdateSort(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.service.linkGroupLogic.UpdateSort(c, &req)
+	err := h.service.linkGroupLogic.UpdateSort(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -169,7 +169,7 @@ func (h *LinkGroupHandler) UpdateStatus(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.service.linkGroupLogic.UpdateStatus(c, uri.ID, &req)
+	err := h.service.linkGroupLogic.UpdateStatus(c.Request.Context(), uri.ID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -214,7 +214,7 @@ func (h *LinkGroupHandler) Delete(c *gin.Context) {
 	req.Force = c.Query("force") == "true"
 
 	// 调用服务层
-	_, err := h.service.linkGroupLogic.Delete(c, uri.ID, &req)
+	_, err := h.service.linkGroupLogic.Delete(c.Request.Context(), uri.ID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -246,7 +246,7 @@ func (h *LinkGroupHandler) Get(c *gin.Context) {
 	}
 
 	// 调用服务层
-	group, err := h.service.linkGroupLogic.Get(c, uri.ID)
+	group, err := h.service.linkGroupLogic.Get(c.Request.Context(), uri.ID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -287,7 +287,7 @@ func (h *LinkGroupHandler) GetList(c *gin.Context) {
 	}
 
 	// 调用服务层
-	groups, err := h.service.linkGroupLogic.GetList(c, &req)
+	groups, err := h.service.linkGroupLogic.GetList(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -327,7 +327,7 @@ func (h *LinkGroupHandler) GetPage(c *gin.Context) {
 	}
 
 	// 调用服务层
-	result, err := h.service.linkGroupLogic.GetPage(c, &req)
+	result, err := h.service.linkGroupLogic.GetPage(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return

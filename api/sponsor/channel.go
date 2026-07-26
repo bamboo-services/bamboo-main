@@ -63,6 +63,7 @@ type ChannelPageRequest struct {
 	Order    *string `form:"order" binding:"omitempty,oneof=asc desc" example:"asc"`                             // 排序方向
 }
 
+// ChannelEntityResponse 赞助渠道实体响应
 type ChannelEntityResponse struct {
 	ID           xSnowflake.SnowflakeID `json:"id"`
 	Name         string                 `json:"name"`
@@ -75,6 +76,7 @@ type ChannelEntityResponse struct {
 	UpdatedAt    time.Time              `json:"updated_at"`
 }
 
+// ChannelListItemResponse 赞助渠道列表条目响应
 type ChannelListItemResponse struct {
 	ID           xSnowflake.SnowflakeID `json:"id"`
 	Name         string                 `json:"name"`
@@ -121,6 +123,7 @@ type ChannelDeleteConflictResponse struct {
 	Sponsors     []ChannelDeleteConflictRecordItem `json:"sponsors"`      // 冲突的赞助记录列表（前10个）
 }
 
+// ChannelDeleteConflictRecordItem 删除赞助渠道时的冲突记录条目
 type ChannelDeleteConflictRecordItem struct {
 	ID       xSnowflake.SnowflakeID `json:"id"`
 	Nickname string                 `json:"nickname"`

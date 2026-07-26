@@ -18,7 +18,6 @@ import (
 	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 )
 
 // GetConfig 从 Gin 的上下文中获取 `BambooConfig` 配置实例。
@@ -46,23 +45,6 @@ func GetConfig(c *gin.Context) *base.BambooConfig {
 // 返回值为指向 Snowflake 节点的指针或 nil。
 func GetSnowflake(c *gin.Context) *xSnowflake.Node {
 	return xCtxUtil.GetSnowflakeNode(c)
-}
-
-// GetRedisClient 从 Gin 的上下文中获取 Redis 客户端实例。
-//
-// 如果上下文中存在 Redis 客户端，则返回其指针；如果不存在，则返回 `nil`。
-//
-// 参数说明:
-//   - c: Gin 上下文指针，用于存储和传递请求相关的数据。
-//
-// 返回值:
-//   - Redis 客户端实例指针 (`*redis.Client`)，如果客户端不存在则为 `nil`。
-func GetRedisClient(c *gin.Context) *redis.Client {
-	value, err := xCtxUtil.GetRDB(c)
-	if err == nil {
-		return value
-	}
-	return nil
 }
 
 // GetUserID 从上下文获取用户ID

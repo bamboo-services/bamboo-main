@@ -22,7 +22,6 @@ import (
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
-	"github.com/gin-gonic/gin"
 )
 
 // 站点信息键名常量
@@ -33,16 +32,18 @@ const (
 	KeyProfileAbout     = "profile.about"
 )
 
-// InfoLogic 站点信息业务逻辑
+// infoRepo 站点信息仓储依赖集合
 type infoRepo struct {
 	system *repository.SystemRepo
 }
 
+// InfoLogic 站点信息业务逻辑
 type InfoLogic struct {
 	logic
 	repo infoRepo
 }
 
+// NewInfoLogic 创建 InfoLogic 实例，从上下文获取数据库与缓存并初始化系统配置仓储依赖。
 func NewInfoLogic(ctx context.Context) *InfoLogic {
 	db := xCtxUtil.MustGetDB(ctx)
 	m := xCtxUtil.MustGetCacheManager(ctx)
@@ -60,7 +61,7 @@ func NewInfoLogic(ctx context.Context) *InfoLogic {
 }
 
 // GetSiteInfo 获取站点信息
-func (l *InfoLogic) GetSiteInfo(ctx *gin.Context) (*apiInfo.SiteResponse, *xError.Error) {
+func (l *InfoLogic) GetSiteInfo(ctx context.Context) (*apiInfo.SiteResponse, *xError.Error) {
 	// 批量查询站点相关配置
 	keys := []string{KeySiteName, KeySiteDescription, KeySiteIntroduction}
 	configs, xErr := l.repo.system.ListByKeys(ctx, keys)
@@ -85,7 +86,7 @@ func (l *InfoLogic) GetSiteInfo(ctx *gin.Context) (*apiInfo.SiteResponse, *xErro
 }
 
 // UpdateSiteInfo 更新站点信息
-func (l *InfoLogic) UpdateSiteInfo(ctx *gin.Context, req *apiInfo.SiteUpdateRequest) (*apiInfo.SiteResponse, *xError.Error) {
+func (l *InfoLogic) UpdateSiteInfo(ctx context.Context, req *apiInfo.SiteUpdateRequest) (*apiInfo.SiteResponse, *xError.Error) {
 	// 收集需要更新的字段（仅更新非 nil 的字段）
 	updates := make(map[string]*string)
 	if req.SiteName != nil {
@@ -115,7 +116,7 @@ func (l *InfoLogic) UpdateSiteInfo(ctx *gin.Context, req *apiInfo.SiteUpdateRequ
 }
 
 // GetAbout 获取自我介绍
-func (l *InfoLogic) GetAbout(ctx *gin.Context) (*apiInfo.AboutResponse, *xError.Error) {
+func (l *InfoLogic) GetAbout(ctx context.Context) (*apiInfo.AboutResponse, *xError.Error) {
 	config, found, xErr := l.repo.system.GetByKey(ctx, KeyProfileAbout)
 	if xErr != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "获取自我介绍失败", false, xErr)
@@ -136,7 +137,7 @@ func (l *InfoLogic) GetAbout(ctx *gin.Context) (*apiInfo.AboutResponse, *xError.
 }
 
 // UpdateAbout 更新自我介绍
-func (l *InfoLogic) UpdateAbout(ctx *gin.Context, req *apiInfo.AboutUpdateRequest) (*apiInfo.AboutResponse, *xError.Error) {
+func (l *InfoLogic) UpdateAbout(ctx context.Context, req *apiInfo.AboutUpdateRequest) (*apiInfo.AboutResponse, *xError.Error) {
 	content := req.Content
 	xErr := l.repo.system.UpdateValueByKey(ctx, KeyProfileAbout, &content)
 	if xErr != nil {

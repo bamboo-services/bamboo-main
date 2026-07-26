@@ -34,12 +34,14 @@ type handler struct {
 	service *service
 }
 
+// IHandler handler 泛型约束，限定由 NewHandler 构造的处理器结构
 type IHandler interface {
 	~struct {
 		service *service
 	}
 }
 
+// NewHandler 泛型构造器，装配全部 logic 依赖并返回具体 handler 实例
 func NewHandler[T IHandler](ctx context.Context) *T {
 	return &T{
 		service: &service{
@@ -56,11 +58,26 @@ func NewHandler[T IHandler](ctx context.Context) *T {
 	}
 }
 
+// AuthHandler 认证接口处理器
 type AuthHandler handler
+
+// InfoHandler 站点信息接口处理器
 type InfoHandler handler
+
+// LinkHandler 友情链接接口处理器
 type LinkHandler handler
+
+// LinkColorHandler 友链颜色接口处理器
 type LinkColorHandler handler
+
+// LinkGroupHandler 友链分组接口处理器
 type LinkGroupHandler handler
+
+// SponsorChannelHandler 赞助渠道接口处理器
 type SponsorChannelHandler handler
+
+// SponsorRecordHandler 赞助记录接口处理器
 type SponsorRecordHandler handler
+
+// PublicHandler 公开接口处理器
 type PublicHandler handler

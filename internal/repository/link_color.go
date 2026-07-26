@@ -12,6 +12,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"time"
@@ -20,19 +21,44 @@ import (
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
-	apiLink "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
+// LinkColorRepo 友链颜色数据访问层
+//
+// 收口友链颜色实体的 CRUD、列表与分页查询，缓存经 xCache.Manager 统一失效。
 type LinkColorRepo struct {
 	db  *gorm.DB
 	kc  xCache.KeyCache[string, entity.LinkColor]
 	log *xLog.LogNamedLogger
 }
 
+// ColorListQuery 友链颜色列表查询条件
+//
+// repository 层自有查询模型，由 logic 层从 transport DTO（api/link）转换而来。
+type ColorListQuery struct {
+	Status      *int
+	Type        *int
+	Name        *string
+	OnlyEnabled *bool
+	OrderBy     *string
+	Order       *string
+}
+
+// ColorPageQuery 友链颜色分页查询条件
+type ColorPageQuery struct {
+	Page     int
+	PageSize int
+	Status   *int
+	Type     *int
+	Name     *string
+	OrderBy  *string
+	Order    *string
+}
+
+// NewLinkColorRepo 创建 LinkColorRepo 实例
 func NewLinkColorRepo(db *gorm.DB, m *xCache.Manager) *LinkColorRepo {
 	return &LinkColorRepo{
 		db:  db,
@@ -48,7 +74,8 @@ func (r *LinkColorRepo) pickDB(tx *gorm.DB) *gorm.DB {
 	return r.db
 }
 
-func (r *LinkColorRepo) GetMaxSortOrder(ctx *gin.Context, tx *gorm.DB) (int, *xError.Error) {
+// GetMaxSortOrder 获取友链颜色当前最大排序值
+func (r *LinkColorRepo) GetMaxSortOrder(ctx context.Context, tx *gorm.DB) (int, *xError.Error) {
 	var maxSort int
 	err := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkColor{}).Select("COALESCE(MAX(sort_order), 0)").Scan(&maxSort).Error
 	if err != nil {
@@ -58,35 +85,38 @@ func (r *LinkColorRepo) GetMaxSortOrder(ctx *gin.Context, tx *gorm.DB) (int, *xE
 	return maxSort, nil
 }
 
-func (r *LinkColorRepo) Create(ctx *gin.Context, color *entity.LinkColor, tx *gorm.DB) (*entity.LinkColor, *xError.Error) {
+// Create 创建友链颜色
+func (r *LinkColorRepo) Create(ctx context.Context, color *entity.LinkColor, tx *gorm.DB) (*entity.LinkColor, *xError.Error) {
 	err := r.pickDB(tx).WithContext(ctx).Create(color).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "创建友链颜色失败", false, err)
 	}
 
-	if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisLinkColor.Get(color.ID).String(), color, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
+	if cacheErr := r.kc.Set(ctx, constants.RedisLinkColor.Get(color.ID).String(), color, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
 	return color, nil
 }
 
-func (r *LinkColorRepo) Save(ctx *gin.Context, color *entity.LinkColor, tx *gorm.DB) (*entity.LinkColor, *xError.Error) {
+// Save 保存友链颜色（存在则更新）
+func (r *LinkColorRepo) Save(ctx context.Context, color *entity.LinkColor, tx *gorm.DB) (*entity.LinkColor, *xError.Error) {
 	err := r.pickDB(tx).WithContext(ctx).Save(color).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "保存友链颜色失败", false, err)
 	}
 
-	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisLinkColor.Get(color.ID).String()); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx, constants.RedisLinkColor.Get(color.ID).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
 	return color, nil
 }
 
-func (r *LinkColorRepo) GetByID(ctx *gin.Context, id xSnowflake.SnowflakeID, withLinks bool, tx *gorm.DB) (*entity.LinkColor, bool, *xError.Error) {
+// GetByID 根据ID获取友链颜色
+func (r *LinkColorRepo) GetByID(ctx context.Context, id xSnowflake.SnowflakeID, withLinks bool, tx *gorm.DB) (*entity.LinkColor, bool, *xError.Error) {
 	if !withLinks {
-		if color, ok, err := r.kc.Get(ctx.Request.Context(), constants.RedisLinkColor.Get(id).String()); err != nil {
+		if color, ok, err := r.kc.Get(ctx, constants.RedisLinkColor.Get(id).String()); err != nil {
 			return nil, false, xError.NewError(ctx, xError.CacheError, "获取友链颜色缓存失败", true, err)
 		} else if ok {
 			return color, true, nil
@@ -107,14 +137,15 @@ func (r *LinkColorRepo) GetByID(ctx *gin.Context, id xSnowflake.SnowflakeID, wit
 		return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询友链颜色失败", false, err)
 	}
 
-	if cacheErr := r.kc.Set(ctx.Request.Context(), constants.RedisLinkColor.Get(color.ID).String(), &color, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
+	if cacheErr := r.kc.Set(ctx, constants.RedisLinkColor.Get(color.ID).String(), &color, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
 	return &color, true, nil
 }
 
-func (r *LinkColorRepo) UpdateStatusByID(ctx *gin.Context, id xSnowflake.SnowflakeID, status bool, tx *gorm.DB) (bool, *xError.Error) {
+// UpdateStatusByID 更新友链颜色的启用状态
+func (r *LinkColorRepo) UpdateStatusByID(ctx context.Context, id xSnowflake.SnowflakeID, status bool, tx *gorm.DB) (bool, *xError.Error) {
 	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkColor{}).Where("id = ?", id).Update("status", status)
 	if result.Error != nil {
 		return false, xError.NewError(ctx, xError.DatabaseError, "更新颜色状态失败", false, result.Error)
@@ -123,14 +154,15 @@ func (r *LinkColorRepo) UpdateStatusByID(ctx *gin.Context, id xSnowflake.Snowfla
 		return false, nil
 	}
 
-	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisLinkColor.Get(id).String()); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx, constants.RedisLinkColor.Get(id).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
 	return true, nil
 }
 
-func (r *LinkColorRepo) UpdateSortByIDs(ctx *gin.Context, ids []xSnowflake.SnowflakeID, startSort int, tx *gorm.DB) *xError.Error {
+// UpdateSortByIDs 批量更新友链颜色的排序值
+func (r *LinkColorRepo) UpdateSortByIDs(ctx context.Context, ids []xSnowflake.SnowflakeID, startSort int, tx *gorm.DB) *xError.Error {
 	db := r.pickDB(tx).WithContext(ctx)
 	for i, id := range ids {
 		result := db.Model(&entity.LinkColor{}).Where("id = ?", id).Update("sort_order", startSort+i)
@@ -140,7 +172,7 @@ func (r *LinkColorRepo) UpdateSortByIDs(ctx *gin.Context, ids []xSnowflake.Snowf
 		if result.RowsAffected == 0 {
 			return xError.NewError(ctx, xError.NotFound, "颜色不存在", false)
 		}
-		if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisLinkColor.Get(id).String()); cacheErr != nil {
+		if cacheErr := r.kc.Delete(ctx, constants.RedisLinkColor.Get(id).String()); cacheErr != nil {
 			r.log.Warn(ctx, cacheErr.Error())
 		}
 	}
@@ -148,7 +180,8 @@ func (r *LinkColorRepo) UpdateSortByIDs(ctx *gin.Context, ids []xSnowflake.Snowf
 	return nil
 }
 
-func (r *LinkColorRepo) DeleteByID(ctx *gin.Context, id xSnowflake.SnowflakeID, tx *gorm.DB) (bool, *xError.Error) {
+// DeleteByID 物理删除友链颜色
+func (r *LinkColorRepo) DeleteByID(ctx context.Context, id xSnowflake.SnowflakeID, tx *gorm.DB) (bool, *xError.Error) {
 	result := r.pickDB(tx).WithContext(ctx).Unscoped().Where("id = ?", id).Delete(&entity.LinkColor{})
 	if result.Error != nil {
 		return false, xError.NewError(ctx, xError.DatabaseError, "删除友链颜色失败", false, result.Error)
@@ -157,14 +190,15 @@ func (r *LinkColorRepo) DeleteByID(ctx *gin.Context, id xSnowflake.SnowflakeID, 
 		return false, nil
 	}
 
-	if cacheErr := r.kc.Delete(ctx.Request.Context(), constants.RedisLinkColor.Get(id).String()); cacheErr != nil {
+	if cacheErr := r.kc.Delete(ctx, constants.RedisLinkColor.Get(id).String()); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
 	return true, nil
 }
 
-func (r *LinkColorRepo) List(ctx *gin.Context, req *apiLink.ColorListRequest, tx *gorm.DB) ([]entity.LinkColor, *xError.Error) {
+// List 查询友链颜色列表
+func (r *LinkColorRepo) List(ctx context.Context, req *ColorListQuery, tx *gorm.DB) ([]entity.LinkColor, *xError.Error) {
 	query := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkColor{})
 
 	if req.Status != nil {
@@ -202,7 +236,8 @@ func (r *LinkColorRepo) List(ctx *gin.Context, req *apiLink.ColorListRequest, tx
 	return colors, nil
 }
 
-func (r *LinkColorRepo) Page(ctx *gin.Context, req *apiLink.ColorPageRequest, tx *gorm.DB) ([]entity.LinkColor, int64, *xError.Error) {
+// Page 分页查询友链颜色
+func (r *LinkColorRepo) Page(ctx context.Context, req *ColorPageQuery, tx *gorm.DB) ([]entity.LinkColor, int64, *xError.Error) {
 	query := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkColor{})
 
 	if req.Status != nil {

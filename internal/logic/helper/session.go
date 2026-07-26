@@ -1,84 +1,70 @@
-/*
- * --------------------------------------------------------------------------------
- * Copyright (c) 2016-NOW(至今) 筱锋
- * Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
- * --------------------------------------------------------------------------------
- * 许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
- * 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
- * https://opensource.org/licenses/MIT
- * --------------------------------------------------------------------------------
- */
+// --------------------------------------------------------------------------------
+// Copyright (c) 2016-NOW(至今) 筱锋
+// Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
+// --------------------------------------------------------------------------------
+// 许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
+// 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+// https://opensource.org/licenses/MIT
+// --------------------------------------------------------------------------------
 
 package logcHelper
 
 import (
-	"encoding/json"
-	"fmt"
+	"context"
 	"time"
 
+	xError "github.com/bamboo-services/bamboo-base-go/common/error"
+	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	redisModel "github.com/bamboo-services/bamboo-main/internal/models/cache/redis"
-	"github.com/bamboo-services/bamboo-main/pkg/constants"
-	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
-	"github.com/bamboo-services/bamboo-main/pkg/util/netUtil"
-
-	"github.com/gin-gonic/gin"
+	"github.com/bamboo-services/bamboo-main/internal/repository"
 )
 
+// sessionTTL 登录会话有效期
+const sessionTTL = 24 * time.Hour
+
+// SessionMeta 会话元数据
+//
+// 承载来自传输层（HTTP 请求）的客户端信息。由 handler 提取后以纯值下传，
+// 避免 logic/repository 层耦合 gin.Context。
+type SessionMeta struct {
+	ClientIP  string
+	UserAgent string
+}
+
 // SessionLogic 会话管理服务实现
-type SessionLogic struct{}
+//
+// 负责组装领域会话对象（TokenSession）并交由 SessionRepo 持久化，
+// 自身不再直接接触 Redis 命令。
+type SessionLogic struct {
+	repo *repository.SessionRepo
+}
+
+// NewSessionLogic 创建 SessionLogic 实例，基于缓存管理器初始化会话仓储依赖。
+func NewSessionLogic(m *xCache.Manager) *SessionLogic {
+	return &SessionLogic{
+		repo: repository.NewSessionRepo(m),
+	}
+}
 
 // CreateUserSession 创建用户会话
-func (s *SessionLogic) CreateUserSession(c *gin.Context, user *entity.SystemUser, token string) error {
-	// 获取 Redis 客户端
-	rdb := ctxUtil.GetRedisClient(c)
-	if rdb == nil {
-		return fmt.Errorf("redis 客户端不可用")
-	}
-
-	// 获取客户端真实IP地址
-	clientIP := netUtil.GetClientIP(c)
-
-	// 获取用户代理
-	userAgent := c.GetHeader("User-Agent")
-
-	// 创建Token会话数据
+func (s *SessionLogic) CreateUserSession(ctx context.Context, user *entity.SystemUser, token string, meta SessionMeta) *xError.Error {
 	now := time.Now()
-	tokenSession := redisModel.TokenSession{
+	tokenSession := &redisModel.TokenSession{
 		UserID:    user.ID,
 		Username:  user.Username,
 		Email:     user.Email,
 		Role:      user.Role,
-		LoginIP:   clientIP,
-		UserAgent: userAgent,
+		LoginIP:   meta.ClientIP,
+		UserAgent: meta.UserAgent,
 		CreatedAt: now,
-		ExpiredAt: now.Add(24 * time.Hour), // 24小时过期
+		ExpiredAt: now.Add(sessionTTL),
 	}
 
-	// 序列化会话数据
-	sessionData, err := json.Marshal(tokenSession)
-	if err != nil {
-		return err
-	}
-
-	// 存储到 Redis
-	redisKey := constants.RedisAuthToken.Get(token).String()
-	err = rdb.Set(c.Request.Context(), redisKey, sessionData, 24*time.Hour).Err()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return s.repo.SaveSession(ctx, token, tokenSession, sessionTTL)
 }
 
 // DeleteUserSession 删除用户会话
-func (s *SessionLogic) DeleteUserSession(c *gin.Context, token string) error {
-	// 获取 Redis 客户端
-	rdb := ctxUtil.GetRedisClient(c)
-	if rdb == nil {
-		return fmt.Errorf("redis 客户端不可用")
-	}
-
-	redisKey := constants.RedisAuthToken.Get(token).String()
-	return rdb.Del(c.Request.Context(), redisKey).Err()
+func (s *SessionLogic) DeleteUserSession(ctx context.Context, token string) *xError.Error {
+	return s.repo.DeleteSession(ctx, token)
 }

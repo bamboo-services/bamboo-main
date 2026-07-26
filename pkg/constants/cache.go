@@ -18,21 +18,33 @@ import (
 	xEnv "github.com/bamboo-services/bamboo-base-go/defined/env"
 )
 
+// RedisKey Redis 缓存键类型
 type RedisKey string
 
 const (
-	RedisSystemConfig  RedisKey = "system:config:%s"
-	RedisSystemUser    RedisKey = "system:user:%d"
-	RedisAuthToken     RedisKey = "auth:token:%s"
-	RedisEmailVerify   RedisKey = "email:verify:%s"
+	// RedisSystemConfig 系统配置实体缓存键
+	RedisSystemConfig RedisKey = "system:config:%s"
+	// RedisSystemUser 系统用户实体缓存键
+	RedisSystemUser RedisKey = "system:user:%d"
+	// RedisAuthToken 认证令牌缓存键
+	RedisAuthToken RedisKey = "auth:token:%s"
+	// RedisEmailVerify 邮箱验证码缓存键
+	RedisEmailVerify RedisKey = "email:verify:%s"
+	// RedisPasswordReset 密码重置凭证缓存键
 	RedisPasswordReset RedisKey = "password:reset:%s"
-	RedisLinkFriend    RedisKey = "link:friend:%d"
-	RedisLinkGroup     RedisKey = "link:group:%d"
-	RedisLinkColor     RedisKey = "link:color:%d"
+	// RedisLinkFriend 友情链接缓存键
+	RedisLinkFriend RedisKey = "link:friend:%d"
+	// RedisLinkGroup 友链分组缓存键
+	RedisLinkGroup RedisKey = "link:group:%d"
+	// RedisLinkColor 友链颜色缓存键
+	RedisLinkColor RedisKey = "link:color:%d"
+	// RedisSponsorRecord 赞助记录缓存键
 	RedisSponsorRecord RedisKey = "sponsor:record:%d"
-	RedisSponsorChan   RedisKey = "sponsor:channel:%d"
+	// RedisSponsorChan 赞助渠道缓存键
+	RedisSponsorChan RedisKey = "sponsor:channel:%d"
 )
 
+// Get 构造带统一前缀的缓存键
 func (k RedisKey) Get(args ...any) RedisKey {
 	prefix := xEnv.GetEnvString(xEnv.NoSqlPrefix, "bm:")
 	if !strings.HasSuffix(prefix, ":") {

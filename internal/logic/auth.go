@@ -1,13 +1,11 @@
-/*
- * --------------------------------------------------------------------------------
- * Copyright (c) 2016-NOW(至今) 筱锋
- * Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
- * --------------------------------------------------------------------------------
- * 许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
- * 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
- * https://opensource.org/licenses/MIT
- * --------------------------------------------------------------------------------
- */
+// --------------------------------------------------------------------------------
+// Copyright (c) 2016-NOW(至今) 筱锋
+// Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
+// --------------------------------------------------------------------------------
+// 许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
+// 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+// https://opensource.org/licenses/MIT
+// --------------------------------------------------------------------------------
 
 package logic
 
@@ -22,8 +20,6 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
-	"github.com/bamboo-services/bamboo-main/pkg/constants"
-	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
 	"crypto/rand"
 
@@ -31,12 +27,12 @@ import (
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	xAsync "github.com/bamboo-services/bamboo-base-go/plugins/async"
-	"github.com/gin-gonic/gin"
 	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/logic"
 )
 
 type authRepo struct {
-	user *repository.SystemUserRepo
+	user  *repository.SystemUserRepo
+	token *repository.TokenRepo
 }
 
 // AuthLogic 认证业务逻辑
@@ -46,6 +42,7 @@ type AuthLogic struct {
 	repo           authRepo
 }
 
+// NewAuthLogic 创建 AuthLogic 实例，从上下文获取数据库与缓存管理器并初始化会话与认证仓储依赖。
 func NewAuthLogic(ctx context.Context) *AuthLogic {
 	db := xCtxUtil.MustGetDB(ctx)
 	m := xCtxUtil.MustGetCacheManager(ctx)
@@ -56,15 +53,16 @@ func NewAuthLogic(ctx context.Context) *AuthLogic {
 			cache: m,
 			log:   xLog.WithName(xLog.NamedLOGC, "AuthLogic"),
 		},
-		SessionService: &logcHelper.SessionLogic{},
+		SessionService: logcHelper.NewSessionLogic(m),
 		repo: authRepo{
-			user: repository.NewSystemUserRepo(db, m),
+			user:  repository.NewSystemUserRepo(db, m),
+			token: repository.NewTokenRepo(m),
 		},
 	}
 }
 
 // Login 用户登录
-func (a *AuthLogic) Login(ctx *gin.Context, req *apiAuth.LoginRequest) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
+func (a *AuthLogic) Login(ctx context.Context, req *apiAuth.LoginRequest, meta logcHelper.SessionMeta) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
 	user, found, xErr := a.repo.user.GetByUsernameOrEmail(ctx, req.Username)
 	if xErr != nil {
 		return nil, "", nil, nil, xErr
@@ -91,22 +89,21 @@ func (a *AuthLogic) Login(ctx *gin.Context, req *apiAuth.LoginRequest) (*entity.
 	expireAt := now.Add(24 * time.Hour) // 24小时过期
 
 	// 创建用户会话
-	err := a.SessionService.CreateUserSession(ctx, user, token)
-	if err != nil {
-		return nil, "", nil, nil, xError.NewError(ctx, xError.ServerInternalError, "创建用户会话失败", false, err)
+	if xErr := a.SessionService.CreateUserSession(ctx, user, token, meta); xErr != nil {
+		return nil, "", nil, nil, xErr
 	}
 
 	// 更新最后登录时间
 	xErr = a.repo.user.UpdateLastLoginByID(ctx, user.ID, &now)
 	if xErr != nil {
 		// 记录错误但不影响登录
-		xLog.WithName(xLog.NamedLOGC, "AUTH").Error(ctx, fmt.Sprintf("更新最后登录时间失败: %v", xErr))
+		a.log.Error(ctx, fmt.Sprintf("更新最后登录时间失败: %v", xErr))
 	}
 	return user, token, &now, &expireAt, nil
 }
 
 // Register 用户注册
-func (a *AuthLogic) Register(ctx *gin.Context, req *apiAuth.RegisterRequest) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
+func (a *AuthLogic) Register(ctx context.Context, req *apiAuth.RegisterRequest, meta logcHelper.SessionMeta) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
 	exists, xErr := a.repo.user.ExistsByUsername(ctx, req.Username)
 	if xErr != nil {
 		return nil, "", nil, nil, xErr
@@ -147,20 +144,19 @@ func (a *AuthLogic) Register(ctx *gin.Context, req *apiAuth.RegisterRequest) (*e
 	now := time.Now()
 	expireAt := now.Add(24 * time.Hour) // 24小时过期
 
-	err = a.SessionService.CreateUserSession(ctx, &newUser, token)
-	if err != nil {
-		return nil, "", nil, nil, xError.NewError(ctx, xError.ServerInternalError, "创建用户会话失败", false, err)
+	if xErr := a.SessionService.CreateUserSession(ctx, &newUser, token, meta); xErr != nil {
+		return nil, "", nil, nil, xErr
 	}
 
 	// 异步发送邮箱验证邮件（xAsync 解耦请求上下文，不阻断主流程）
-	xAsync.Async(ctx.Request.Context(), func(asyncCtx context.Context) {
+	xAsync.Async(ctx, func(asyncCtx context.Context) {
 		a.sendEmailVerification(asyncCtx, &newUser)
 	}, xAsync.WithName("MAIL"))
 	return &newUser, token, &now, &expireAt, nil
 }
 
 // Logout 用户登出
-func (a *AuthLogic) Logout(ctx *gin.Context, token string) *xError.Error {
+func (a *AuthLogic) Logout(ctx context.Context, token string) *xError.Error {
 	if token == "" {
 		return xError.NewError(ctx, xError.ParameterEmpty, "访问令牌不能为空", false)
 	}
@@ -175,7 +171,7 @@ func (a *AuthLogic) Logout(ctx *gin.Context, token string) *xError.Error {
 }
 
 // ChangePassword 修改密码
-func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID xSnowflake.SnowflakeID, req *apiAuth.PasswordChangeRequest) *xError.Error {
+func (a *AuthLogic) ChangePassword(ctx context.Context, userID xSnowflake.SnowflakeID, req *apiAuth.PasswordChangeRequest) *xError.Error {
 	user, found, xErr := a.repo.user.GetByID(ctx, userID)
 	if xErr != nil {
 		return xErr
@@ -205,7 +201,7 @@ func (a *AuthLogic) ChangePassword(ctx *gin.Context, userID xSnowflake.Snowflake
 }
 
 // ResetPassword 重置密码（发送重置链接）
-func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *apiAuth.PasswordResetRequest) *xError.Error {
+func (a *AuthLogic) ResetPassword(ctx context.Context, req *apiAuth.PasswordResetRequest) *xError.Error {
 	user, found, xErr := a.repo.user.GetByEmail(ctx, req.Email)
 	if xErr != nil {
 		return xErr
@@ -214,23 +210,14 @@ func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *apiAuth.PasswordResetRe
 		return xError.NewError(ctx, xError.NotFound, "邮箱不存在", false)
 	}
 
-	// 生成重置 Token（32位随机字符串）
+	// 生成重置 Token（32位随机字符串）并存储（1小时过期）
 	resetToken := generateRandomString(32)
-
-	// 存储到 Redis（1小时过期）
-	rdb := ctxUtil.GetRedisClient(ctx)
-	if rdb == nil {
-		return xError.NewError(ctx, xError.ServerInternalError, "Redis 客户端不可用", false)
-	}
-
-	redisKey := constants.RedisPasswordReset.Get(resetToken).String()
-	err := rdb.Set(ctx.Request.Context(), redisKey, user.ID, time.Hour).Err()
-	if err != nil {
-		return xError.NewError(ctx, xError.ServerInternalError, "保存重置Token失败", false, err)
+	if xErr := a.repo.token.SavePasswordResetToken(ctx, resetToken, user.ID); xErr != nil {
+		return xErr
 	}
 
 	// 发送重置密码邮件（xAsync 解耦请求上下文，不阻断主流程）
-	xAsync.Async(ctx.Request.Context(), func(asyncCtx context.Context) {
+	xAsync.Async(ctx, func(asyncCtx context.Context) {
 		a.sendPasswordResetEmail(asyncCtx, user, resetToken)
 	}, xAsync.WithName("MAIL"))
 
@@ -238,7 +225,7 @@ func (a *AuthLogic) ResetPassword(ctx *gin.Context, req *apiAuth.PasswordResetRe
 }
 
 // GetUserInfo 获取用户信息
-func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID xSnowflake.SnowflakeID) (*entity.SystemUser, *xError.Error) {
+func (a *AuthLogic) GetUserInfo(ctx context.Context, userID xSnowflake.SnowflakeID) (*entity.SystemUser, *xError.Error) {
 	user, found, xErr := a.repo.user.GetByID(ctx, userID)
 	if xErr != nil {
 		return nil, xErr
@@ -250,13 +237,13 @@ func (a *AuthLogic) GetUserInfo(ctx *gin.Context, userID xSnowflake.SnowflakeID)
 }
 
 // UpdateLastLogin 更新最后登录时间
-func (a *AuthLogic) UpdateLastLogin(ctx *gin.Context, userID xSnowflake.SnowflakeID) *xError.Error {
+func (a *AuthLogic) UpdateLastLogin(ctx context.Context, userID xSnowflake.SnowflakeID) *xError.Error {
 	now := time.Now()
 	return a.repo.user.UpdateLastLoginByID(ctx, userID, &now)
 }
 
 // ValidateToken 验证令牌
-func (a *AuthLogic) ValidateToken(ctx *gin.Context, token string) (*entity.SystemUser, *xError.Error) {
+func (a *AuthLogic) ValidateToken(ctx context.Context, token string) (*entity.SystemUser, *xError.Error) {
 	// 这个方法主要通过中间件来处理，这里提供一个备用实现
 	// 实际项目中可以根据需要实现更复杂的验证逻辑
 	return nil, xError.NewError(ctx, xError.OperationInvalid, "请通过认证中间件验证令牌", false)
@@ -280,83 +267,50 @@ func generateRandomString(length int) string {
 	return string(result)
 }
 
-func parseUserID(value string) xSnowflake.SnowflakeID {
-	userID, err := logcHelper.ParseSnowflakeID(value)
-	if err != nil {
-		return 0
-	}
-	return userID
-}
-
 // VerifyEmail 验证邮箱
-func (a *AuthLogic) VerifyEmail(ctx *gin.Context, req *apiAuth.VerifyEmailRequest) *xError.Error {
-	logger := xLog.WithName(xLog.NamedLOGC, "AUTH")
-
-	// 获取 Redis 客户端
-	rdb := ctxUtil.GetRedisClient(ctx)
-	if rdb == nil {
-		return xError.NewError(ctx, xError.ServerInternalError, "Redis 客户端不可用", false)
-	}
-
-	// 从 Redis 获取用户 ID
-	redisKey := constants.RedisEmailVerify.Get(req.Token).String()
-	userIDStr, err := rdb.Get(ctx.Request.Context(), redisKey).Result()
-	if err != nil {
-		logger.Warn(ctx, fmt.Sprintf("邮箱验证Token无效或已过期: %s", req.Token))
-		return xError.NewError(ctx, xError.BadRequest, "验证链接无效或已过期", false)
-	}
-
-	// 删除已使用的 Token
-	rdb.Del(ctx.Request.Context(), redisKey)
-
-	// 更新用户邮箱验证状态
-	_, xErr := a.repo.user.UpdateFieldsByID(ctx, parseUserID(userIDStr), map[string]any{"email_verify": true})
+func (a *AuthLogic) VerifyEmail(ctx context.Context, req *apiAuth.VerifyEmailRequest) *xError.Error {
+	userID, found, xErr := a.repo.token.ConsumeEmailVerifyToken(ctx, req.Token)
 	if xErr != nil {
 		return xErr
 	}
+	if !found {
+		a.log.Warn(ctx, fmt.Sprintf("邮箱验证Token无效或已过期: %s", req.Token))
+		return xError.NewError(ctx, xError.BadRequest, "验证链接无效或已过期", false)
+	}
 
-	logger.Info(ctx, fmt.Sprintf("用户 %s 邮箱验证成功", userIDStr))
+	// 更新用户邮箱验证状态
+	if _, xErr := a.repo.user.UpdateFieldsByID(ctx, userID, map[string]any{"email_verify": true}); xErr != nil {
+		return xErr
+	}
+
+	a.log.Info(ctx, fmt.Sprintf("用户 %d 邮箱验证成功", userID))
 	return nil
 }
 
 // VerifyResetToken 验证重置密码Token
-func (a *AuthLogic) VerifyResetToken(ctx *gin.Context, req *apiAuth.VerifyResetTokenRequest) (bool, *xError.Error) {
-	// 获取 Redis 客户端
-	rdb := ctxUtil.GetRedisClient(ctx)
-	if rdb == nil {
-		return false, xError.NewError(ctx, xError.ServerInternalError, "Redis 客户端不可用", false)
+//
+// 令牌无效或已过期时直接返回业务错误，handler 无需再做有效性判断。
+func (a *AuthLogic) VerifyResetToken(ctx context.Context, req *apiAuth.VerifyResetTokenRequest) *xError.Error {
+	exists, xErr := a.repo.token.ExistsPasswordResetToken(ctx, req.Token)
+	if xErr != nil {
+		return xErr
 	}
-
-	// 检查 Token 是否存在
-	redisKey := constants.RedisPasswordReset.Get(req.Token).String()
-	exists, err := rdb.Exists(ctx.Request.Context(), redisKey).Result()
-	if err != nil {
-		return false, xError.NewError(ctx, xError.ServerInternalError, "验证Token失败", false, err)
+	if !exists {
+		return xError.NewError(ctx, xError.BadRequest, "重置链接无效或已过期", false)
 	}
-
-	return exists > 0, nil
+	return nil
 }
 
 // ConfirmResetPassword 确认重置密码
-func (a *AuthLogic) ConfirmResetPassword(ctx *gin.Context, req *apiAuth.ConfirmResetPasswordRequest) *xError.Error {
-	logger := xLog.WithName(xLog.NamedLOGC, "AUTH")
-
-	// 获取 Redis 客户端
-	rdb := ctxUtil.GetRedisClient(ctx)
-	if rdb == nil {
-		return xError.NewError(ctx, xError.ServerInternalError, "Redis 客户端不可用", false)
+func (a *AuthLogic) ConfirmResetPassword(ctx context.Context, req *apiAuth.ConfirmResetPasswordRequest) *xError.Error {
+	userID, found, xErr := a.repo.token.ConsumePasswordResetToken(ctx, req.Token)
+	if xErr != nil {
+		return xErr
 	}
-
-	// 从 Redis 获取用户 ID
-	redisKey := constants.RedisPasswordReset.Get(req.Token).String()
-	userIDStr, err := rdb.Get(ctx.Request.Context(), redisKey).Result()
-	if err != nil {
-		logger.Warn(ctx, fmt.Sprintf("密码重置Token无效或已过期: %s", req.Token))
+	if !found {
+		a.log.Warn(ctx, fmt.Sprintf("密码重置Token无效或已过期: %s", req.Token))
 		return xError.NewError(ctx, xError.BadRequest, "重置链接无效或已过期", false)
 	}
-
-	// 删除已使用的 Token
-	rdb.Del(ctx.Request.Context(), redisKey)
 
 	// 加密新密码
 	hashedPassword, err := xUtil.Password().EncryptString(req.NewPassword)
@@ -365,12 +319,11 @@ func (a *AuthLogic) ConfirmResetPassword(ctx *gin.Context, req *apiAuth.ConfirmR
 	}
 
 	// 更新用户密码
-	xErr := a.repo.user.UpdatePasswordByID(ctx, parseUserID(userIDStr), hashedPassword)
-	if xErr != nil {
+	if xErr := a.repo.user.UpdatePasswordByID(ctx, userID, hashedPassword); xErr != nil {
 		return xErr
 	}
 
-	logger.Info(ctx, fmt.Sprintf("用户 %s 密码重置成功", userIDStr))
+	a.log.Info(ctx, fmt.Sprintf("用户 %d 密码重置成功", userID))
 	return nil
 }
 
@@ -380,21 +333,10 @@ func (a *AuthLogic) ConfirmResetPassword(ctx *gin.Context, req *apiAuth.ConfirmR
 func (a *AuthLogic) sendEmailVerification(ctx context.Context, user *entity.SystemUser) {
 	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
 
-	// 获取 Redis 客户端
-	rdb, xerr := xCtxUtil.GetRDB(ctx)
-	if xerr != nil {
-		logger.Warn(ctx, "Redis 客户端不可用，跳过发送邮箱验证邮件")
-		return
-	}
-
-	// 生成验证 Token
+	// 生成验证 Token 并存储（24小时过期）
 	verifyToken := generateRandomString(32)
-
-	// 存储到 Redis（24小时过期）
-	redisKey := constants.RedisEmailVerify.Get(verifyToken).String()
-	err := rdb.Set(ctx, redisKey, user.ID, 24*time.Hour).Err()
-	if err != nil {
-		logger.Warn(ctx, fmt.Sprintf("保存验证Token失败: %v", err))
+	if xErr := a.repo.token.SaveEmailVerifyToken(ctx, verifyToken, user.ID); xErr != nil {
+		logger.Warn(ctx, fmt.Sprintf("保存验证Token失败: %v", xErr))
 		return
 	}
 

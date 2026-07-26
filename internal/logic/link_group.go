@@ -22,7 +22,6 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
-	"github.com/gin-gonic/gin"
 )
 
 type linkGroupRepo struct {
@@ -30,11 +29,13 @@ type linkGroupRepo struct {
 	link  *repository.LinkRepo
 }
 
+// LinkGroupLogic 友链分组业务逻辑
 type LinkGroupLogic struct {
 	logic
 	repo linkGroupRepo
 }
 
+// NewLinkGroupLogic 创建 LinkGroupLogic 实例，从上下文获取数据库与缓存并初始化分组与友链仓储依赖。
 func NewLinkGroupLogic(ctx context.Context) *LinkGroupLogic {
 	db := xCtxUtil.MustGetDB(ctx)
 	m := xCtxUtil.MustGetCacheManager(ctx)
@@ -52,7 +53,8 @@ func NewLinkGroupLogic(ctx context.Context) *LinkGroupLogic {
 	}
 }
 
-func (l *LinkGroupLogic) Add(ctx *gin.Context, req *apiLinkGroup.GroupAddRequest) (*entity.LinkGroup, *xError.Error) {
+// Add 添加友链分组，按当前最大排序值自增生成新分组。
+func (l *LinkGroupLogic) Add(ctx context.Context, req *apiLinkGroup.GroupAddRequest) (*entity.LinkGroup, *xError.Error) {
 	maxSort, xErr := l.repo.group.GetMaxSortOrder(ctx, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -81,7 +83,8 @@ func (l *LinkGroupLogic) Add(ctx *gin.Context, req *apiLinkGroup.GroupAddRequest
 	return reloaded, nil
 }
 
-func (l *LinkGroupLogic) Update(ctx *gin.Context, groupID xSnowflake.SnowflakeID, req *apiLinkGroup.GroupUpdateRequest) (*entity.LinkGroup, *xError.Error) {
+// Update 更新友链分组，按请求字段覆盖名称、描述、排序与状态。
+func (l *LinkGroupLogic) Update(ctx context.Context, groupID xSnowflake.SnowflakeID, req *apiLinkGroup.GroupUpdateRequest) (*entity.LinkGroup, *xError.Error) {
 	group, found, xErr := l.repo.group.GetByID(ctx, groupID, false, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -119,7 +122,8 @@ func (l *LinkGroupLogic) Update(ctx *gin.Context, groupID xSnowflake.SnowflakeID
 	return reloaded, nil
 }
 
-func (l *LinkGroupLogic) UpdateSort(ctx *gin.Context, req *apiLinkGroup.GroupSortRequest) *xError.Error {
+// UpdateSort 更新友链分组排序，在事务内按 ID 列表批量重置排序值。
+func (l *LinkGroupLogic) UpdateSort(ctx context.Context, req *apiLinkGroup.GroupSortRequest) *xError.Error {
 	tx := l.db.WithContext(ctx).Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -144,7 +148,8 @@ func (l *LinkGroupLogic) UpdateSort(ctx *gin.Context, req *apiLinkGroup.GroupSor
 	return nil
 }
 
-func (l *LinkGroupLogic) UpdateStatus(ctx *gin.Context, groupID xSnowflake.SnowflakeID, req *apiLinkGroup.GroupStatusRequest) *xError.Error {
+// UpdateStatus 更新友链分组启用状态。
+func (l *LinkGroupLogic) UpdateStatus(ctx context.Context, groupID xSnowflake.SnowflakeID, req *apiLinkGroup.GroupStatusRequest) *xError.Error {
 	ok, xErr := l.repo.group.UpdateStatusByID(ctx, groupID, req.Status, nil)
 	if xErr != nil {
 		return xErr
@@ -156,7 +161,8 @@ func (l *LinkGroupLogic) UpdateStatus(ctx *gin.Context, groupID xSnowflake.Snowf
 	return nil
 }
 
-func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupID xSnowflake.SnowflakeID, req *apiLinkGroup.GroupDeleteRequest) ([]entity.LinkFriend, *xError.Error) {
+// Delete 删除友链分组，存在关联友链时按 Force 决定阻断或事务清空外键后删除。
+func (l *LinkGroupLogic) Delete(ctx context.Context, groupID xSnowflake.SnowflakeID, req *apiLinkGroup.GroupDeleteRequest) ([]entity.LinkFriend, *xError.Error) {
 	_, found, xErr := l.repo.group.GetByID(ctx, groupID, false, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -209,7 +215,8 @@ func (l *LinkGroupLogic) Delete(ctx *gin.Context, groupID xSnowflake.SnowflakeID
 	return nil, nil
 }
 
-func (l *LinkGroupLogic) Get(ctx *gin.Context, groupID xSnowflake.SnowflakeID) (*entity.LinkGroup, *xError.Error) {
+// Get 获取友链分组详情。
+func (l *LinkGroupLogic) Get(ctx context.Context, groupID xSnowflake.SnowflakeID) (*entity.LinkGroup, *xError.Error) {
 	group, found, xErr := l.repo.group.GetByID(ctx, groupID, true, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -221,11 +228,20 @@ func (l *LinkGroupLogic) Get(ctx *gin.Context, groupID xSnowflake.SnowflakeID) (
 	return group, nil
 }
 
-func (l *LinkGroupLogic) GetList(ctx *gin.Context, req *apiLinkGroup.GroupListRequest) ([]entity.LinkGroup, *xError.Error) {
-	return l.repo.group.List(ctx, req, nil)
+// GetList 获取友链分组列表。
+func (l *LinkGroupLogic) GetList(ctx context.Context, req *apiLinkGroup.GroupListRequest) ([]entity.LinkGroup, *xError.Error) {
+	return l.repo.group.List(ctx, &repository.GroupListQuery{
+		Status:      req.Status,
+		Name:        req.Name,
+		WithLinks:   req.WithLinks,
+		OnlyEnabled: req.OnlyEnabled,
+		OrderBy:     req.OrderBy,
+		Order:       req.Order,
+	}, nil)
 }
 
-func (l *LinkGroupLogic) GetPage(ctx *gin.Context, req *apiLinkGroup.GroupPageRequest) (*base.PaginationResponse[entity.LinkGroup], *xError.Error) {
+// GetPage 分页获取友链分组。
+func (l *LinkGroupLogic) GetPage(ctx context.Context, req *apiLinkGroup.GroupPageRequest) (*base.PaginationResponse[entity.LinkGroup], *xError.Error) {
 	if req.Page <= 0 {
 		req.Page = 1
 	}
@@ -233,7 +249,14 @@ func (l *LinkGroupLogic) GetPage(ctx *gin.Context, req *apiLinkGroup.GroupPageRe
 		req.PageSize = 10
 	}
 
-	groups, total, xErr := l.repo.group.Page(ctx, req, nil)
+	groups, total, xErr := l.repo.group.Page(ctx, &repository.GroupPageQuery{
+		Page:     req.Page,
+		PageSize: req.PageSize,
+		Status:   req.Status,
+		Name:     req.Name,
+		OrderBy:  req.OrderBy,
+		Order:    req.Order,
+	}, nil)
 	if xErr != nil {
 		return nil, xErr
 	}

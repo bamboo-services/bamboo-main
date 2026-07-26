@@ -44,7 +44,7 @@ func (h *SponsorRecordHandler) Add(c *gin.Context) {
 	}
 
 	// 调用服务层
-	record, err := h.service.sponsorRecordLogic.Add(c, &req)
+	record, err := h.service.sponsorRecordLogic.Add(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -87,7 +87,7 @@ func (h *SponsorRecordHandler) Update(c *gin.Context) {
 	}
 
 	// 调用服务层
-	record, err := h.service.sponsorRecordLogic.Update(c, uri.ID, &req)
+	record, err := h.service.sponsorRecordLogic.Update(c.Request.Context(), uri.ID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -120,7 +120,7 @@ func (h *SponsorRecordHandler) Delete(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.service.sponsorRecordLogic.Delete(c, uri.ID)
+	err := h.service.sponsorRecordLogic.Delete(c.Request.Context(), uri.ID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -152,7 +152,7 @@ func (h *SponsorRecordHandler) Get(c *gin.Context) {
 	}
 
 	// 调用服务层
-	record, err := h.service.sponsorRecordLogic.Get(c, uri.ID)
+	record, err := h.service.sponsorRecordLogic.Get(c.Request.Context(), uri.ID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -195,7 +195,7 @@ func (h *SponsorRecordHandler) GetPage(c *gin.Context) {
 	}
 
 	// 调用服务层
-	result, err := h.service.sponsorRecordLogic.GetPage(c, &req)
+	result, err := h.service.sponsorRecordLogic.GetPage(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -233,7 +233,7 @@ func (h *SponsorRecordHandler) GetPublicPage(c *gin.Context) {
 	}
 
 	// 调用服务层
-	result, err := h.service.sponsorRecordLogic.GetPublicPage(c, &req)
+	result, err := h.service.sponsorRecordLogic.GetPublicPage(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return

@@ -1,13 +1,11 @@
-/*
- * --------------------------------------------------------------------------------
- * Copyright (c) 2016-NOW(至今) 筱锋
- * Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
- * --------------------------------------------------------------------------------
- * 许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
- * 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
- * https://opensource.org/licenses/MIT
- * --------------------------------------------------------------------------------
- */
+// --------------------------------------------------------------------------------
+// Copyright (c) 2016-NOW(至今) 筱锋
+// Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
+// --------------------------------------------------------------------------------
+// 许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
+// 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+// https://opensource.org/licenses/MIT
+// --------------------------------------------------------------------------------
 
 package logic
 
@@ -17,18 +15,24 @@ import (
 	"time"
 
 	apiPublic "github.com/bamboo-services/bamboo-main/api/public"
+	"github.com/bamboo-services/bamboo-main/internal/repository"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
-	"github.com/gin-gonic/gin"
 )
+
+type publicRepo struct {
+	health *repository.HealthRepo
+}
 
 // PublicLogic 公开接口业务逻辑
 type PublicLogic struct {
 	logic
+	repo publicRepo
 }
 
+// NewPublicLogic 创建 PublicLogic 实例，从上下文获取数据库与缓存并初始化健康检查仓储依赖。
 func NewPublicLogic(ctx context.Context) *PublicLogic {
 	db := xCtxUtil.MustGetDB(ctx)
 	m := xCtxUtil.MustGetCacheManager(ctx)
@@ -39,25 +43,17 @@ func NewPublicLogic(ctx context.Context) *PublicLogic {
 			cache: m,
 			log:   xLog.WithName(xLog.NamedLOGC, "PublicLogic"),
 		},
+		repo: publicRepo{
+			health: repository.NewHealthRepo(db, m),
+		},
 	}
 }
 
 // HealthCheck 健康检查
-func (p *PublicLogic) HealthCheck(ctx *gin.Context) (*apiPublic.HealthResponse, *xError.Error) {
+func (p *PublicLogic) HealthCheck(ctx context.Context) (*apiPublic.HealthResponse, *xError.Error) {
 	// 检查数据库连接
-	db := p.db
-	if db == nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "数据库连接失败", false)
-	}
-
-	// 执行简单查询测试数据库连接
-	sqlDB, err := db.DB()
-	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "获取数据库连接失败", false, err)
-	}
-
-	if err := sqlDB.Ping(); err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "数据库连接测试失败", false, err)
+	if _, xErr := p.repo.health.DatabaseReady(ctx); xErr != nil {
+		return nil, xErr
 	}
 
 	// 检查 Redis 连接（可选，如果 Redis 不可用不影响基本功能）
@@ -85,7 +81,7 @@ func (p *PublicLogic) HealthCheck(ctx *gin.Context) (*apiPublic.HealthResponse, 
 }
 
 // Ping 简单连通性测试
-func (p *PublicLogic) Ping(ctx *gin.Context) (*apiPublic.PingResponse, *xError.Error) {
+func (p *PublicLogic) Ping(ctx context.Context) (*apiPublic.PingResponse, *xError.Error) {
 	pingResponse := &apiPublic.PingResponse{
 		Message:   "pong",
 		Timestamp: time.Now(),

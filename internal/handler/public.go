@@ -30,7 +30,7 @@ import (
 // @Router /api/v1/public/health [GET]
 func (h *PublicHandler) HealthCheck(c *gin.Context) {
 	// 调用服务层
-	result, err := h.service.publicLogic.HealthCheck(c)
+	result, err := h.service.publicLogic.HealthCheck(c.Request.Context())
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -56,10 +56,9 @@ func (h *PublicHandler) HealthCheck(c *gin.Context) {
 // @Router /api/v1/public/ping [GET]
 func (h *PublicHandler) Ping(c *gin.Context) {
 	// 调用服务层
-	result, err := h.service.publicLogic.Ping(c)
+	result, err := h.service.publicLogic.Ping(c.Request.Context())
 	if err != nil {
-		// Logic 层返回的是 *xError.Error
-		xResult.Error(c, err.GetErrorCode(), err.GetErrorMessage(), err.GetData())
+		_ = c.Error(err)
 		return
 	}
 

@@ -30,7 +30,7 @@ import (
 // @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
 // @Router /api/v1/info/site [GET]
 func (h *InfoHandler) GetSiteInfo(c *gin.Context) {
-	result, err := h.service.infoLogic.GetSiteInfo(c)
+	result, err := h.service.infoLogic.GetSiteInfo(c.Request.Context())
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -61,7 +61,7 @@ func (h *InfoHandler) UpdateSiteInfo(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.infoLogic.UpdateSiteInfo(c, &req)
+	result, err := h.service.infoLogic.UpdateSiteInfo(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -81,7 +81,7 @@ func (h *InfoHandler) UpdateSiteInfo(c *gin.Context) {
 // @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
 // @Router /api/v1/info/about [GET]
 func (h *InfoHandler) GetAbout(c *gin.Context) {
-	result, err := h.service.infoLogic.GetAbout(c)
+	result, err := h.service.infoLogic.GetAbout(c.Request.Context())
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -112,7 +112,7 @@ func (h *InfoHandler) UpdateAbout(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.infoLogic.UpdateAbout(c, &req)
+	result, err := h.service.infoLogic.UpdateAbout(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return

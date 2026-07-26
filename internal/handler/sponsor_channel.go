@@ -45,7 +45,7 @@ func (h *SponsorChannelHandler) Add(c *gin.Context) {
 	}
 
 	// 调用服务层
-	channel, err := h.service.sponsorChannelLogic.Add(c, &req)
+	channel, err := h.service.sponsorChannelLogic.Add(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -88,7 +88,7 @@ func (h *SponsorChannelHandler) Update(c *gin.Context) {
 	}
 
 	// 调用服务层
-	channel, err := h.service.sponsorChannelLogic.Update(c, uri.ID, &req)
+	channel, err := h.service.sponsorChannelLogic.Update(c.Request.Context(), uri.ID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -131,7 +131,7 @@ func (h *SponsorChannelHandler) UpdateStatus(c *gin.Context) {
 	}
 
 	// 调用服务层
-	status, err := h.service.sponsorChannelLogic.UpdateStatus(c, uri.ID, &req)
+	status, err := h.service.sponsorChannelLogic.UpdateStatus(c.Request.Context(), uri.ID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -169,7 +169,7 @@ func (h *SponsorChannelHandler) Delete(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.service.sponsorChannelLogic.Delete(c, uri.ID)
+	err := h.service.sponsorChannelLogic.Delete(c.Request.Context(), uri.ID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -201,7 +201,7 @@ func (h *SponsorChannelHandler) Get(c *gin.Context) {
 	}
 
 	// 调用服务层
-	channel, err := h.service.sponsorChannelLogic.Get(c, uri.ID)
+	channel, err := h.service.sponsorChannelLogic.Get(c.Request.Context(), uri.ID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -241,7 +241,7 @@ func (h *SponsorChannelHandler) GetList(c *gin.Context) {
 	}
 
 	// 调用服务层
-	channels, err := h.service.sponsorChannelLogic.GetList(c, &req)
+	channels, err := h.service.sponsorChannelLogic.GetList(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -281,7 +281,7 @@ func (h *SponsorChannelHandler) GetPage(c *gin.Context) {
 	}
 
 	// 调用服务层
-	result, err := h.service.sponsorChannelLogic.GetPage(c, &req)
+	result, err := h.service.sponsorChannelLogic.GetPage(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -303,7 +303,7 @@ func (h *SponsorChannelHandler) GetPage(c *gin.Context) {
 // @Router /api/v1/sponsors/channels [GET]
 func (h *SponsorChannelHandler) GetPublicList(c *gin.Context) {
 	// 调用服务层
-	channels, err := h.service.sponsorChannelLogic.GetPublicList(c)
+	channels, err := h.service.sponsorChannelLogic.GetPublicList(c.Request.Context())
 	if err != nil {
 		_ = c.Error(err)
 		return

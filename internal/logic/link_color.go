@@ -22,7 +22,6 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
-	"github.com/gin-gonic/gin"
 )
 
 type linkColorRepo struct {
@@ -30,11 +29,13 @@ type linkColorRepo struct {
 	link  *repository.LinkRepo
 }
 
+// LinkColorLogic 友链颜色业务逻辑
 type LinkColorLogic struct {
 	logic
 	repo linkColorRepo
 }
 
+// NewLinkColorLogic 创建 LinkColorLogic 实例，从上下文获取数据库与缓存并初始化颜色与友链仓储依赖。
 func NewLinkColorLogic(ctx context.Context) *LinkColorLogic {
 	db := xCtxUtil.MustGetDB(ctx)
 	m := xCtxUtil.MustGetCacheManager(ctx)
@@ -52,7 +53,8 @@ func NewLinkColorLogic(ctx context.Context) *LinkColorLogic {
 	}
 }
 
-func (l *LinkColorLogic) Add(ctx *gin.Context, req *apiLinkColor.ColorAddRequest) (*entity.LinkColor, *xError.Error) {
+// Add 添加友链颜色，校验普通颜色类型必填字段并按当前最大排序值自增生成新颜色。
+func (l *LinkColorLogic) Add(ctx context.Context, req *apiLinkColor.ColorAddRequest) (*entity.LinkColor, *xError.Error) {
 	if req.ColorType == 0 {
 		if req.PrimaryColor == nil || req.SubColor == nil || req.HoverColor == nil {
 			return nil, xError.NewError(ctx, xError.BadRequest, "普通颜色类型需要设置主颜色、副颜色和悬停颜色", false)
@@ -95,7 +97,8 @@ func (l *LinkColorLogic) Add(ctx *gin.Context, req *apiLinkColor.ColorAddRequest
 	return reloaded, nil
 }
 
-func (l *LinkColorLogic) Update(ctx *gin.Context, colorID xSnowflake.SnowflakeID, req *apiLinkColor.ColorUpdateRequest) (*entity.LinkColor, *xError.Error) {
+// Update 更新友链颜色，按请求字段覆盖颜色属性并校验普通颜色类型的必填项。
+func (l *LinkColorLogic) Update(ctx context.Context, colorID xSnowflake.SnowflakeID, req *apiLinkColor.ColorUpdateRequest) (*entity.LinkColor, *xError.Error) {
 	color, found, xErr := l.repo.color.GetByID(ctx, colorID, false, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -158,7 +161,8 @@ func (l *LinkColorLogic) Update(ctx *gin.Context, colorID xSnowflake.SnowflakeID
 	return reloaded, nil
 }
 
-func (l *LinkColorLogic) UpdateSort(ctx *gin.Context, req *apiLinkColor.ColorSortRequest) *xError.Error {
+// UpdateSort 更新友链颜色排序，在事务内按 ID 列表批量重置排序值。
+func (l *LinkColorLogic) UpdateSort(ctx context.Context, req *apiLinkColor.ColorSortRequest) *xError.Error {
 	tx := l.db.WithContext(ctx).Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -183,7 +187,8 @@ func (l *LinkColorLogic) UpdateSort(ctx *gin.Context, req *apiLinkColor.ColorSor
 	return nil
 }
 
-func (l *LinkColorLogic) UpdateStatus(ctx *gin.Context, colorID xSnowflake.SnowflakeID, req *apiLinkColor.ColorStatusRequest) *xError.Error {
+// UpdateStatus 更新友链颜色启用状态。
+func (l *LinkColorLogic) UpdateStatus(ctx context.Context, colorID xSnowflake.SnowflakeID, req *apiLinkColor.ColorStatusRequest) *xError.Error {
 	ok, xErr := l.repo.color.UpdateStatusByID(ctx, colorID, req.Status, nil)
 	if xErr != nil {
 		return xErr
@@ -195,7 +200,8 @@ func (l *LinkColorLogic) UpdateStatus(ctx *gin.Context, colorID xSnowflake.Snowf
 	return nil
 }
 
-func (l *LinkColorLogic) Delete(ctx *gin.Context, colorID xSnowflake.SnowflakeID, req *apiLinkColor.ColorDeleteRequest) ([]entity.LinkFriend, *xError.Error) {
+// Delete 删除友链颜色，存在关联友链时按 Force 决定阻断或事务清空外键后删除。
+func (l *LinkColorLogic) Delete(ctx context.Context, colorID xSnowflake.SnowflakeID, req *apiLinkColor.ColorDeleteRequest) ([]entity.LinkFriend, *xError.Error) {
 	_, found, xErr := l.repo.color.GetByID(ctx, colorID, false, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -248,7 +254,8 @@ func (l *LinkColorLogic) Delete(ctx *gin.Context, colorID xSnowflake.SnowflakeID
 	return nil, nil
 }
 
-func (l *LinkColorLogic) Get(ctx *gin.Context, colorID xSnowflake.SnowflakeID) (*entity.LinkColor, *xError.Error) {
+// Get 获取友链颜色详情。
+func (l *LinkColorLogic) Get(ctx context.Context, colorID xSnowflake.SnowflakeID) (*entity.LinkColor, *xError.Error) {
 	color, found, xErr := l.repo.color.GetByID(ctx, colorID, true, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -260,11 +267,20 @@ func (l *LinkColorLogic) Get(ctx *gin.Context, colorID xSnowflake.SnowflakeID) (
 	return color, nil
 }
 
-func (l *LinkColorLogic) GetList(ctx *gin.Context, req *apiLinkColor.ColorListRequest) ([]entity.LinkColor, *xError.Error) {
-	return l.repo.color.List(ctx, req, nil)
+// GetList 获取友链颜色列表。
+func (l *LinkColorLogic) GetList(ctx context.Context, req *apiLinkColor.ColorListRequest) ([]entity.LinkColor, *xError.Error) {
+	return l.repo.color.List(ctx, &repository.ColorListQuery{
+		Status:      req.Status,
+		Type:        req.Type,
+		Name:        req.Name,
+		OnlyEnabled: req.OnlyEnabled,
+		OrderBy:     req.OrderBy,
+		Order:       req.Order,
+	}, nil)
 }
 
-func (l *LinkColorLogic) GetPage(ctx *gin.Context, req *apiLinkColor.ColorPageRequest) (*base.PaginationResponse[entity.LinkColor], *xError.Error) {
+// GetPage 分页获取友链颜色。
+func (l *LinkColorLogic) GetPage(ctx context.Context, req *apiLinkColor.ColorPageRequest) (*base.PaginationResponse[entity.LinkColor], *xError.Error) {
 	if req.Page <= 0 {
 		req.Page = 1
 	}
@@ -272,7 +288,15 @@ func (l *LinkColorLogic) GetPage(ctx *gin.Context, req *apiLinkColor.ColorPageRe
 		req.PageSize = 10
 	}
 
-	colors, total, xErr := l.repo.color.Page(ctx, req, nil)
+	colors, total, xErr := l.repo.color.Page(ctx, &repository.ColorPageQuery{
+		Page:     req.Page,
+		PageSize: req.PageSize,
+		Status:   req.Status,
+		Type:     req.Type,
+		Name:     req.Name,
+		OrderBy:  req.OrderBy,
+		Order:    req.Order,
+	}, nil)
 	if xErr != nil {
 		return nil, xErr
 	}

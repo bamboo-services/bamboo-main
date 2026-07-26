@@ -28,7 +28,6 @@ import (
 	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	xAsync "github.com/bamboo-services/bamboo-base-go/plugins/async"
-	"github.com/gin-gonic/gin"
 )
 
 type linkRepo struct {
@@ -41,6 +40,7 @@ type LinkLogic struct {
 	repo linkRepo
 }
 
+// NewLinkLogic 创建 LinkLogic 实例，从上下文获取数据库与缓存并初始化友链仓储依赖。
 func NewLinkLogic(ctx context.Context) *LinkLogic {
 	db := xCtxUtil.MustGetDB(ctx)
 	m := xCtxUtil.MustGetCacheManager(ctx)
@@ -56,7 +56,7 @@ func NewLinkLogic(ctx context.Context) *LinkLogic {
 }
 
 // Add 添加友情链接
-func (l *LinkLogic) Add(ctx *gin.Context, req *apiLink.FriendAddRequest) (*entity.LinkFriend, *xError.Error) {
+func (l *LinkLogic) Add(ctx context.Context, req *apiLink.FriendAddRequest) (*entity.LinkFriend, *xError.Error) {
 	// 创建友情链接实体
 	link := &entity.LinkFriend{
 		Name:        req.LinkName,
@@ -93,7 +93,7 @@ func (l *LinkLogic) Add(ctx *gin.Context, req *apiLink.FriendAddRequest) (*entit
 	}
 
 	// 发送邮件通知管理员（xAsync 解耦请求上下文，不阻断主流程）
-	xAsync.Async(ctx.Request.Context(), func(asyncCtx context.Context) {
+	xAsync.Async(ctx, func(asyncCtx context.Context) {
 		l.sendApplyNotification(asyncCtx, reloaded)
 	}, xAsync.WithName("MAIL"))
 
@@ -101,7 +101,7 @@ func (l *LinkLogic) Add(ctx *gin.Context, req *apiLink.FriendAddRequest) (*entit
 }
 
 // Update 更新友情链接
-func (l *LinkLogic) Update(ctx *gin.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendUpdateRequest) (*entity.LinkFriend, *xError.Error) {
+func (l *LinkLogic) Update(ctx context.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendUpdateRequest) (*entity.LinkFriend, *xError.Error) {
 	link, found, xErr := l.repo.link.GetByID(ctx, linkID, false, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -159,7 +159,7 @@ func (l *LinkLogic) Update(ctx *gin.Context, linkID xSnowflake.SnowflakeID, req 
 }
 
 // Delete 删除友情链接
-func (l *LinkLogic) Delete(ctx *gin.Context, linkID xSnowflake.SnowflakeID) *xError.Error {
+func (l *LinkLogic) Delete(ctx context.Context, linkID xSnowflake.SnowflakeID) *xError.Error {
 	ok, xErr := l.repo.link.DeleteByID(ctx, linkID, nil)
 	if xErr != nil {
 		return xErr
@@ -171,7 +171,7 @@ func (l *LinkLogic) Delete(ctx *gin.Context, linkID xSnowflake.SnowflakeID) *xEr
 }
 
 // Get 获取友情链接详情
-func (l *LinkLogic) Get(ctx *gin.Context, linkID xSnowflake.SnowflakeID) (*entity.LinkFriend, *xError.Error) {
+func (l *LinkLogic) Get(ctx context.Context, linkID xSnowflake.SnowflakeID) (*entity.LinkFriend, *xError.Error) {
 	link, found, xErr := l.repo.link.GetByID(ctx, linkID, true, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -184,7 +184,7 @@ func (l *LinkLogic) Get(ctx *gin.Context, linkID xSnowflake.SnowflakeID) (*entit
 }
 
 // List 获取友情链接列表
-func (l *LinkLogic) List(ctx *gin.Context, req *apiLink.FriendQueryRequest) (*base.PaginationResponse[entity.LinkFriend], *xError.Error) {
+func (l *LinkLogic) List(ctx context.Context, req *apiLink.FriendQueryRequest) (*base.PaginationResponse[entity.LinkFriend], *xError.Error) {
 	// 设置默认值
 	if req.Page <= 0 {
 		req.Page = 1
@@ -193,7 +193,16 @@ func (l *LinkLogic) List(ctx *gin.Context, req *apiLink.FriendQueryRequest) (*ba
 		req.PageSize = 10
 	}
 
-	links, total, xErr := l.repo.link.List(ctx, req, nil)
+	links, total, xErr := l.repo.link.List(ctx, &repository.FriendQuery{
+		Page:        req.Page,
+		PageSize:    req.PageSize,
+		LinkName:    req.LinkName,
+		LinkStatus:  req.LinkStatus,
+		LinkFail:    req.LinkFail,
+		LinkGroupID: req.LinkGroupID,
+		SortBy:      req.SortBy,
+		SortOrder:   req.SortOrder,
+	}, nil)
 	if xErr != nil {
 		return nil, xErr
 	}
@@ -202,7 +211,7 @@ func (l *LinkLogic) List(ctx *gin.Context, req *apiLink.FriendQueryRequest) (*ba
 }
 
 // UpdateStatus 更新友情链接状态
-func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendStatusRequest) *xError.Error {
+func (l *LinkLogic) UpdateStatus(ctx context.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendStatusRequest) *xError.Error {
 	// 先查询友链信息（用于发送邮件通知）
 	link, found, xErr := l.repo.link.GetByID(ctx, linkID, false, nil)
 	if xErr != nil {
@@ -221,7 +230,7 @@ func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkID xSnowflake.SnowflakeID
 	}
 
 	// 发送审核结果邮件通知（xAsync 解耦请求上下文，不阻断主流程）
-	xAsync.Async(ctx.Request.Context(), func(asyncCtx context.Context) {
+	xAsync.Async(ctx, func(asyncCtx context.Context) {
 		l.sendStatusNotification(asyncCtx, link, req.LinkStatus, req.LinkReviewRemark)
 	}, xAsync.WithName("MAIL"))
 
@@ -229,7 +238,7 @@ func (l *LinkLogic) UpdateStatus(ctx *gin.Context, linkID xSnowflake.SnowflakeID
 }
 
 // UpdateFailStatus 更新友情链接失效状态
-func (l *LinkLogic) UpdateFailStatus(ctx *gin.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendFailRequest) *xError.Error {
+func (l *LinkLogic) UpdateFailStatus(ctx context.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendFailRequest) *xError.Error {
 	ok, xErr := l.repo.link.UpdateFailureByID(ctx, linkID, req.LinkFail, req.LinkFailReason, nil)
 	if xErr != nil {
 		return xErr
@@ -242,7 +251,7 @@ func (l *LinkLogic) UpdateFailStatus(ctx *gin.Context, linkID xSnowflake.Snowfla
 }
 
 // GetPublicLinks 获取公开的友情链接列表
-func (l *LinkLogic) GetPublicLinks(ctx *gin.Context, groupIDStr string) ([]entity.LinkFriend, *xError.Error) {
+func (l *LinkLogic) GetPublicLinks(ctx context.Context, groupIDStr string) ([]entity.LinkFriend, *xError.Error) {
 	var groupID *xSnowflake.SnowflakeID
 	if groupIDStr != "" {
 		parsedID, err := logcHelper.ParseSnowflakeID(groupIDStr)

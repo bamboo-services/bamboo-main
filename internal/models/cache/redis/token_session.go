@@ -17,6 +17,7 @@ import (
 	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 )
 
+// TokenSession 登录会话数据，序列化后存储于 Redis
 type TokenSession struct {
 	UserID    xSnowflake.SnowflakeID `json:"user_id"`
 	Username  string                 `json:"username"`

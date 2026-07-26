@@ -45,7 +45,7 @@ func (h *LinkHandler) Add(c *gin.Context) {
 	}
 
 	// 调用服务层
-	link, err := h.service.linkLogic.Add(c, &req)
+	link, err := h.service.linkLogic.Add(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -87,7 +87,7 @@ func (h *LinkHandler) Update(c *gin.Context) {
 	}
 
 	// 调用服务层
-	link, err := h.service.linkLogic.Update(c, uri.ID, &req)
+	link, err := h.service.linkLogic.Update(c.Request.Context(), uri.ID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -120,7 +120,7 @@ func (h *LinkHandler) Delete(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.service.linkLogic.Delete(c, uri.ID)
+	err := h.service.linkLogic.Delete(c.Request.Context(), uri.ID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -152,7 +152,7 @@ func (h *LinkHandler) Get(c *gin.Context) {
 	}
 
 	// 调用服务层
-	link, err := h.service.linkLogic.Get(c, uri.ID)
+	link, err := h.service.linkLogic.Get(c.Request.Context(), uri.ID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -195,7 +195,7 @@ func (h *LinkHandler) List(c *gin.Context) {
 	}
 
 	// 调用服务层
-	result, err := h.service.linkLogic.List(c, &req)
+	result, err := h.service.linkLogic.List(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -237,7 +237,7 @@ func (h *LinkHandler) UpdateStatus(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.service.linkLogic.UpdateStatus(c, uri.ID, &req)
+	err := h.service.linkLogic.UpdateStatus(c.Request.Context(), uri.ID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -278,7 +278,7 @@ func (h *LinkHandler) UpdateFailStatus(c *gin.Context) {
 	}
 
 	// 调用服务层
-	err := h.service.linkLogic.UpdateFailStatus(c, uri.ID, &req)
+	err := h.service.linkLogic.UpdateFailStatus(c.Request.Context(), uri.ID, &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -303,7 +303,7 @@ func (h *LinkHandler) GetPublicLinks(c *gin.Context) {
 	groupIDStr := c.Query("group_id")
 
 	// 调用服务层
-	links, err := h.service.linkLogic.GetPublicLinks(c, groupIDStr)
+	links, err := h.service.linkLogic.GetPublicLinks(c.Request.Context(), groupIDStr)
 	if err != nil {
 		_ = c.Error(err)
 		return

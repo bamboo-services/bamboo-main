@@ -11,6 +11,7 @@
 
 package apiAuth
 
+// VerifyEmailRequest 邮箱验证请求
 type VerifyEmailRequest struct {
 	Token string `form:"token" binding:"required,min=32,max=64" example:"abc123..."`
 }

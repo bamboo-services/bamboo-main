@@ -17,6 +17,7 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 )
 
+// RegisterRequest 用户注册请求
 type RegisterRequest struct {
 	Username string  `json:"username" binding:"required,min=1,max=50" example:"admin"`
 	Email    string  `json:"email" binding:"required,email" example:"admin@example.com"`
@@ -24,6 +25,7 @@ type RegisterRequest struct {
 	Password string  `json:"password" binding:"required,min=6,max=100" example:"password123"`
 }
 
+// RegisterResponse 用户注册响应
 type RegisterResponse struct {
 	User      entity.SystemUser `json:"user"`
 	Token     string            `json:"token"`

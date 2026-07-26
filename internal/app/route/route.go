@@ -26,6 +26,7 @@ type route struct {
 	context context.Context
 }
 
+// NewRoute 路由注册器，装配中间件链与各领域子路由
 func NewRoute(ctx context.Context, serve *gin.Engine) {
 	r := &route{
 		engine:  serve,

@@ -13,6 +13,7 @@ package apiAuth
 
 import "github.com/bamboo-services/bamboo-main/internal/entity"
 
+// UserInfoResponse 用户信息响应
 type UserInfoResponse struct {
 	User entity.SystemUser `json:"user"`
 }

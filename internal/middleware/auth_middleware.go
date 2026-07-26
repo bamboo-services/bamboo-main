@@ -21,6 +21,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// AuthMiddleware OAuth2 认证中间件，校验访问令牌并同步本地用户、注入用户上下文
 func AuthMiddleware(c *gin.Context) {
 	accessToken := bSdkUtil.GetAuthorization(c)
 	if accessToken == "" {
@@ -38,7 +39,7 @@ func AuthMiddleware(c *gin.Context) {
 	}
 
 	authLogic := logic.NewAuthLogic(c)
-	localUser, xErr := authLogic.SyncOAuthUser(c, userinfo)
+	localUser, xErr := authLogic.SyncOAuthUser(c.Request.Context(), userinfo)
 	if xErr != nil {
 		_ = c.Error(xErr)
 		c.Abort()

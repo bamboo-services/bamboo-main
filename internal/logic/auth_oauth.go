@@ -12,6 +12,7 @@
 package logic
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -23,12 +24,12 @@ import (
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
-	"github.com/gin-gonic/gin"
 	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/logic"
 	bSdkModels "github.com/phalanx-labs/beacon-sso-sdk/models"
 )
 
-func (a *AuthLogic) LoginByOAuth(ctx *gin.Context, userinfo *bSdkModels.OAuthUserinfo, accessToken string) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
+// LoginByOAuth 通过 OAuth 登录，同步 OAuth 用户到本地账户并基于 introspection 校正访问令牌过期时间。
+func (a *AuthLogic) LoginByOAuth(ctx context.Context, userinfo *bSdkModels.OAuthUserinfo, accessToken string) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
 	if accessToken == "" {
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterEmpty, "访问令牌不能为空", false)
 	}
@@ -52,7 +53,8 @@ func (a *AuthLogic) LoginByOAuth(ctx *gin.Context, userinfo *bSdkModels.OAuthUse
 	return user, accessToken, &now, &expiredAt, nil
 }
 
-func (a *AuthLogic) SyncOAuthUser(ctx *gin.Context, userinfo *bSdkModels.OAuthUserinfo) (*entity.SystemUser, *xError.Error) {
+// SyncOAuthUser 同步 OAuth 用户到本地账户，按 sub/邮箱匹配既有用户或创建新账户并更新资料。
+func (a *AuthLogic) SyncOAuthUser(ctx context.Context, userinfo *bSdkModels.OAuthUserinfo) (*entity.SystemUser, *xError.Error) {
 	if userinfo == nil || strings.TrimSpace(userinfo.Sub) == "" {
 		return nil, xError.NewError(ctx, xError.ParameterError, "OAuth 用户标识无效", false)
 	}
@@ -128,7 +130,7 @@ func (a *AuthLogic) SyncOAuthUser(ctx *gin.Context, userinfo *bSdkModels.OAuthUs
 	return user, nil
 }
 
-func (a *AuthLogic) updateOAuthProfile(ctx *gin.Context, user *entity.SystemUser, userinfo *bSdkModels.OAuthUserinfo, now *time.Time) *xError.Error {
+func (a *AuthLogic) updateOAuthProfile(ctx context.Context, user *entity.SystemUser, userinfo *bSdkModels.OAuthUserinfo, now *time.Time) *xError.Error {
 	updates := map[string]any{
 		"oauth_user_id": userinfo.Sub,
 		"last_login_at": now,
@@ -164,7 +166,7 @@ func (a *AuthLogic) updateOAuthProfile(ctx *gin.Context, user *entity.SystemUser
 	return nil
 }
 
-func (a *AuthLogic) generateUniqueOAuthUsername(ctx *gin.Context, userinfo *bSdkModels.OAuthUserinfo) (string, *xError.Error) {
+func (a *AuthLogic) generateUniqueOAuthUsername(ctx context.Context, userinfo *bSdkModels.OAuthUserinfo) (string, *xError.Error) {
 	base := sanitizeOAuthIdentifier(userinfo.PreferredUsername)
 	if base == "" {
 		base = sanitizeOAuthIdentifier(userinfo.Nickname)

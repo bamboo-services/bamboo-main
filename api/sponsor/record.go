@@ -70,12 +70,14 @@ type RecordPublicPageRequest struct {
 	Order     *string                 `form:"order" binding:"omitempty,oneof=asc desc" example:"desc"`                              // 排序方向
 }
 
+// SponsorChannelSimpleResponse 赞助渠道简要响应
 type SponsorChannelSimpleResponse struct {
 	ID   xSnowflake.SnowflakeID `json:"id"`
 	Name string                 `json:"name"`
 	Icon *string                `json:"icon"`
 }
 
+// RecordEntityResponse 赞助记录实体响应
 type RecordEntityResponse struct {
 	ID          xSnowflake.SnowflakeID        `json:"id"`
 	Nickname    string                        `json:"nickname"`
@@ -92,6 +94,7 @@ type RecordEntityResponse struct {
 	Channel     *SponsorChannelSimpleResponse `json:"channel,omitempty"`
 }
 
+// RecordPublicItemResponse 赞助记录公开条目响应
 type RecordPublicItemResponse struct {
 	ID          xSnowflake.SnowflakeID        `json:"id"`
 	Nickname    string                        `json:"nickname"`
