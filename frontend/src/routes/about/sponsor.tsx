@@ -92,7 +92,7 @@ function SponsorPage() {
         ) : channels.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {channels.map((ch) => (
-              <ChannelCard key={ch.id} channel={ch} />
+              <ChannelCard key={ch.id.toString()} channel={ch} />
             ))}
           </div>
         ) : (
@@ -120,7 +120,7 @@ function SponsorPage() {
         ) : records.length > 0 ? (
           <div className="space-y-3">
             {records.map((rec) => (
-              <RecordRow key={rec.id} record={rec} />
+              <RecordRow key={rec.id.toString()} record={rec} />
             ))}
           </div>
         ) : (

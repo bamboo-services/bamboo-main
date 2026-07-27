@@ -191,10 +191,11 @@ function AboutLayout() {
         </Link>
       </motion.div>
 
-      {/* 页脚：仅版权，不加额外背景。mt-auto 让它内容不足时贴底 */
-      }
+      {/* 页脚：仅版权，不加额外背景。mt-auto 让它内容不足时贴底 */}
       <footer className="relative z-10 mt-auto px-4 py-6 text-center text-sm text-text-secondary md:px-8">
-        <p>Copyright (C) 2016-{thisYear} 筱锋 xiao_lfeng. All Rights Reserved.</p>
+        <p>
+          Copyright (C) 2016-{thisYear} 筱锋 xiao_lfeng. All Rights Reserved.
+        </p>
       </footer>
     </div>
   )

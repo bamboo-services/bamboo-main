@@ -35,7 +35,9 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { BambooLogo } from '@/assets/svg/bamboo-logo'
-import { siteInfo } from '@/data/mock/site-info'
+import { siteConfig } from '@/lib/site'
+import { useAuth } from '@/hooks/use-auth'
+import { useSiteInfo } from '@/hooks/use-site-info'
 
 const menuGroups = [
   {
@@ -64,12 +66,23 @@ const menuGroups = [
 
 export function AdminSidebar() {
   const { pathname } = useLocation()
+  const { user, signOut } = useAuth()
+  const { data: site } = useSiteInfo()
+  const siteName = site?.site_name || siteConfig.defaultName
 
   const isActive = (url: string) => {
     if (url === '/admin/link') {
       return pathname === url || pathname.startsWith('/admin/link/')
     }
     return pathname === url
+  }
+
+  const displayName = user?.nickname || user?.username || '管理员'
+  const userInitial = (user?.username ?? '?').charAt(0).toUpperCase()
+
+  const handleLogout = async () => {
+    await signOut()
+    window.location.href = '/auth/login'
   }
 
   return (
@@ -83,11 +96,9 @@ export function AdminSidebar() {
                   <BambooLogo size={32} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">
-                    {siteInfo.site.siteName}
-                  </span>
+                  <span className="truncate font-semibold">{siteName}</span>
                   <span className="truncate text-xs text-muted-foreground">
-                    v{siteInfo.site.version}
+                    v{siteConfig.version}
                   </span>
                 </div>
               </Link>
@@ -123,12 +134,25 @@ export function AdminSidebar() {
 
       <SidebarFooter>
         <SidebarMenu>
+          {/* 当前登录用户 */}
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/">
-                <LogOut className="h-4 w-4" />
-                <span>退出登录</span>
-              </Link>
+            <SidebarMenuButton size="lg">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">
+                {userInitial}
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold">{displayName}</span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {user?.email ?? ''}
+                </span>
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          {/* 退出登录 */}
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleLogout}>
+              <LogOut className="h-4 w-4" />
+              <span>退出登录</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

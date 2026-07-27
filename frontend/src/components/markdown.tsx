@@ -76,7 +76,8 @@ export const MarkdownView = memo(function MarkdownView({
             </blockquote>
           ),
           code: ({ className: cls, children }) => {
-            const isBlock = typeof cls === 'string' && cls.startsWith('language-')
+            const isBlock =
+              typeof cls === 'string' && cls.startsWith('language-')
             if (isBlock) {
               return (
                 <code className="block overflow-x-auto rounded-md bg-text-primary/5 p-3 text-sm text-text-primary">

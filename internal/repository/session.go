@@ -46,6 +46,19 @@ func (r *SessionRepo) SaveSession(ctx context.Context, token string, session *re
 	return nil
 }
 
+// GetSession 读取指定令牌对应的会话；会话不存在时 found=false（非错误）
+func (r *SessionRepo) GetSession(ctx context.Context, token string) (*rediscache.TokenSession, bool, *xError.Error) {
+	key := constants.RedisAuthToken.Get(token).String()
+	session, found, err := r.kc.Get(ctx, key)
+	if err != nil {
+		return nil, false, xError.NewError(ctx, xError.ServerInternalError, "读取用户会话失败", false, err)
+	}
+	if !found {
+		return nil, false, nil
+	}
+	return session, true, nil
+}
+
 // DeleteSession 删除指定令牌对应的会话
 func (r *SessionRepo) DeleteSession(ctx context.Context, token string) *xError.Error {
 	key := constants.RedisAuthToken.Get(token).String()

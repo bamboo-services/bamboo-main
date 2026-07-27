@@ -16,12 +16,10 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/middleware"
 
 	"github.com/gin-gonic/gin"
-	bSdkMiddle "github.com/phalanx-labs/beacon-sso-sdk/middleware"
 )
 
 func (r *route) adminRouter(route gin.IRouter) {
 	adminGroup := route.Group("/admin")
-	adminGroup.Use(bSdkMiddle.CheckAuth(r.context))
 	adminGroup.Use(middleware.AuthMiddleware)
 	adminGroup.Use(middleware.RequireRole("admin"))
 	{
@@ -29,9 +27,18 @@ func (r *route) adminRouter(route gin.IRouter) {
 		r.linkGroupAdminRouter(adminGroup)
 		r.linkColorAdminRouter(adminGroup)
 		r.infoAdminRouter(adminGroup)
+		r.dashboardAdminRouter(adminGroup)
 		r.systemUserAdminRouter(adminGroup)
 		r.systemLogRouter(adminGroup)
 		r.sponsorAdminRouter(adminGroup)
+	}
+}
+
+func (r *route) dashboardAdminRouter(route gin.IRouter) {
+	dashboardHandler := handler.NewHandler[handler.DashboardHandler](r.context)
+	dashboardRouter := route.Group("/dashboard")
+	{
+		dashboardRouter.GET("/stats", dashboardHandler.Stats)
 	}
 }
 

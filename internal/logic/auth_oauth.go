@@ -19,6 +19,7 @@ import (
 	"unicode"
 
 	"github.com/bamboo-services/bamboo-main/internal/entity"
+	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
@@ -28,8 +29,11 @@ import (
 	bSdkModels "github.com/phalanx-labs/beacon-sso-sdk/models"
 )
 
-// LoginByOAuth 通过 OAuth 登录，同步 OAuth 用户到本地账户并基于 introspection 校正访问令牌过期时间。
-func (a *AuthLogic) LoginByOAuth(ctx context.Context, userinfo *bSdkModels.OAuthUserinfo, accessToken string) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
+// LoginByOAuth 通过 OAuth 登录，同步 OAuth 用户到本地账户、创建本地会话并基于 introspection 校正访问令牌过期时间。
+//
+// 与密码登录一致，SSO 登录的 access token 同样写入本地 Redis 会话，使后续鉴权
+// 中间件可统一通过会话校验，不再每请求回查 SSO Userinfo。
+func (a *AuthLogic) LoginByOAuth(ctx context.Context, userinfo *bSdkModels.OAuthUserinfo, accessToken string, meta logcHelper.SessionMeta) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
 	if accessToken == "" {
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterEmpty, "访问令牌不能为空", false)
 	}
@@ -40,7 +44,7 @@ func (a *AuthLogic) LoginByOAuth(ctx context.Context, userinfo *bSdkModels.OAuth
 	}
 
 	now := time.Now()
-	expiredAt := now.Add(24 * time.Hour)
+	expiredAt := now.Add(logcHelper.SessionTTL)
 
 	oauthLogic := bSdkLogic.NewBusiness(ctx)
 	introspection, introspectionErr := oauthLogic.Introspection(ctx, "access_token", accessToken)
@@ -48,6 +52,15 @@ func (a *AuthLogic) LoginByOAuth(ctx context.Context, userinfo *bSdkModels.OAuth
 		xLog.WithName(xLog.NamedLOGC, "AUTH").Warn(ctx, fmt.Sprintf("OAuth introspection 获取失败: %v", introspectionErr))
 	} else if introspection != nil && introspection.Exp > 0 {
 		expiredAt = time.Unix(introspection.Exp, 0)
+	}
+
+	// 以 introspection 校正后的剩余有效期为会话 TTL，使 SSO 令牌与密码令牌统一走会话校验
+	ttl := expiredAt.Sub(now)
+	if ttl <= 0 {
+		ttl = logcHelper.SessionTTL
+	}
+	if xErr := a.SessionService.CreateUserSession(ctx, user, accessToken, meta, ttl); xErr != nil {
+		return nil, "", nil, nil, xErr
 	}
 
 	return user, accessToken, &now, &expiredAt, nil

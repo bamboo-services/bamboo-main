@@ -8,7 +8,12 @@
 // --------------------------------------------------------------------------------
 
 import { request } from './client'
-import type { AboutResponse, SiteInfoResponse } from './types'
+import type {
+  AboutResponse,
+  SiteInfoResponse,
+  UpdateAboutRequest,
+  UpdateSiteRequest,
+} from './types'
 
 /** 获取站点信息（站名、描述、主页介绍） */
 export function getSiteInfo(): Promise<SiteInfoResponse> {
@@ -18,4 +23,24 @@ export function getSiteInfo(): Promise<SiteInfoResponse> {
 /** 获取 Markdown 格式的自我介绍 */
 export function getAbout(): Promise<AboutResponse> {
   return request<AboutResponse>({ method: 'GET', url: '/info/about' })
+}
+
+/** 更新站点信息（管理端） */
+export function updateSiteInfo(
+  req: UpdateSiteRequest,
+): Promise<SiteInfoResponse> {
+  return request<SiteInfoResponse>({
+    method: 'PUT',
+    url: '/admin/info/site',
+    data: req,
+  })
+}
+
+/** 更新自我介绍（管理端） */
+export function updateAbout(req: UpdateAboutRequest): Promise<AboutResponse> {
+  return request<AboutResponse>({
+    method: 'PUT',
+    url: '/admin/info/about',
+    data: req,
+  })
 }

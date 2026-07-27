@@ -22,7 +22,8 @@ func (r *route) authRouter(route gin.IRouter) {
 	authGroup := route.Group("/auth")
 	authHandler := handler.NewHandler[handler.AuthHandler](r.context)
 	{
-		authGroup.POST("/login", bSdkMiddle.CheckAuth(r.context), authHandler.Login)
+		authGroup.POST("/login", authHandler.Login)
+		authGroup.POST("/oauth/login", bSdkMiddle.CheckAuth(r.context), authHandler.OAuthLogin)
 		authGroup.POST("/register", authHandler.Register)
 		authGroup.PATCH("/password/reset", authHandler.ResetPassword)
 		authGroup.GET("/verify-email", authHandler.VerifyEmail)
@@ -30,7 +31,6 @@ func (r *route) authRouter(route gin.IRouter) {
 		authGroup.POST("/reset-password", authHandler.ConfirmResetPassword)
 
 		authRequiredGroup := authGroup.Group("")
-		authRequiredGroup.Use(bSdkMiddle.CheckAuth(r.context))
 		authRequiredGroup.Use(middleware.AuthMiddleware)
 		{
 			authRequiredGroup.PATCH("/logout", authHandler.Logout)

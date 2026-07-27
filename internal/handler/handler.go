@@ -26,6 +26,7 @@ type service struct {
 	linkGroupLogic      *logic.LinkGroupLogic
 	sponsorChannelLogic *logic.SponsorChannelLogic
 	sponsorRecordLogic  *logic.SponsorRecordLogic
+	dashboardLogic      *logic.DashboardLogic
 	publicLogic         *logic.PublicLogic
 	oauthLogic          *bSdkLogic.BusinessLogic
 }
@@ -52,6 +53,7 @@ func NewHandler[T IHandler](ctx context.Context) *T {
 			linkGroupLogic:      logic.NewLinkGroupLogic(ctx),
 			sponsorChannelLogic: logic.NewSponsorChannelLogic(ctx),
 			sponsorRecordLogic:  logic.NewSponsorRecordLogic(ctx),
+			dashboardLogic:      logic.NewDashboardLogic(ctx),
 			publicLogic:         logic.NewPublicLogic(ctx),
 			oauthLogic:          bSdkLogic.NewBusiness(ctx),
 		},
@@ -78,6 +80,9 @@ type SponsorChannelHandler handler
 
 // SponsorRecordHandler 赞助记录接口处理器
 type SponsorRecordHandler handler
+
+// DashboardHandler 仪表盘接口处理器
+type DashboardHandler handler
 
 // PublicHandler 公开接口处理器
 type PublicHandler handler

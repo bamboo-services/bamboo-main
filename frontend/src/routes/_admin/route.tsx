@@ -14,6 +14,7 @@ import {
   Link,
   Outlet,
   createFileRoute,
+  redirect,
   useRouterState,
 } from '@tanstack/react-router'
 import { motion } from 'motion/react'
@@ -23,6 +24,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { AdminSidebar } from '@/components/layout/admin-sidebar'
+import { getToken } from '@/lib/auth'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -33,6 +35,15 @@ import {
 } from '@/components/ui/breadcrumb'
 
 export const Route = createFileRoute('/_admin')({
+  // 路由守卫：无登录令牌时回跳登录页，并携带来源路径以便登录后返回
+  beforeLoad: ({ location }) => {
+    if (!getToken()) {
+      throw redirect({
+        to: '/auth/login',
+        search: { redirect: location.pathname },
+      })
+    }
+  },
   component: AdminLayout,
 })
 
@@ -48,9 +59,7 @@ interface Crumb {
  */
 function getCrumbs(pathname: string): Array<Crumb> {
   const path = pathname.replace(/\/+$/, '') || '/'
-  const crumbs: Array<Crumb> = [
-    { label: '管理后台', to: '/admin/dashboard' },
-  ]
+  const crumbs: Array<Crumb> = [{ label: '管理后台', to: '/admin/dashboard' }]
 
   if (path === '/admin' || path === '/admin/dashboard') {
     crumbs.push({ label: '仪表盘' })

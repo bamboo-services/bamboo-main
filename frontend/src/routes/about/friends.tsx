@@ -17,7 +17,6 @@ import { getPublicLinks } from '@/api/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { mockColors, mockLocations } from '@/data/mock/links'
 
 export const Route = createFileRoute('/about/friends')({
   component: FriendsPage,
@@ -38,44 +37,47 @@ function enter(
   }
 }
 
-/** 友链按分组聚合 */
-function groupLinksByGroupId(links: Array<LinkFriend>): Array<{
-  groupId: number | null
+/** 友链按分组聚合（分组名取自后端嵌套的 group_f_key） */
+function groupLinksByGroup(links: Array<LinkFriend>): Array<{
+  groupId: string
   name: string
   links: Array<LinkFriend>
 }> {
-  const map = new Map<number | null, Array<LinkFriend>>()
+  const map = new Map<string, { name: string; links: Array<LinkFriend> }>()
   for (const link of links) {
-    const key = link.group_id
-    const arr = map.get(key) ?? []
-    arr.push(link)
-    map.set(key, arr)
+    const key = link.group_id != null ? link.group_id.toString() : 'none'
+    const entry = map.get(key) ?? {
+      name: link.group_f_key?.name ?? '未分组',
+      links: [],
+    }
+    entry.links.push(link)
+    map.set(key, entry)
   }
   return Array.from(map.entries())
-    .map(([groupId, groupLinks]) => ({
+    .map(([groupId, entry]) => ({
       groupId,
-      name:
-        (groupId != null
-          ? mockLocations.find((g) => g.id === groupId)?.name
-          : undefined) ?? '未分组',
-      links: groupLinks.sort((a, b) => a.sort_order - b.sort_order),
+      name: entry.name,
+      links: entry.links.sort((a, b) => a.sort_order - b.sort_order),
     }))
     .sort((a, b) => {
-      if (a.groupId == null) return 1
-      if (b.groupId == null) return -1
-      return a.groupId - b.groupId
+      if (a.groupId === 'none') return 1
+      if (b.groupId === 'none') return -1
+      return 0
     })
 }
 
-/** 颜色 ID → hex */
-function colorOf(colorId: number | null): string | null {
-  if (colorId == null) return null
-  return mockColors.find((c) => c.id === colorId)?.color ?? null
+/** 取友链主色（后端嵌套的 color_f_key.primary_color） */
+function colorOf(link: LinkFriend): string | null {
+  return link.color_f_key?.primary_color ?? null
 }
 
 function FriendsPage() {
   const reduced = useReducedMotion() ?? false
-  const { data: links, isLoading, error } = useQuery({
+  const {
+    data: links,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['public', 'links'],
     queryFn: () => getPublicLinks(),
   })
@@ -98,7 +100,7 @@ function FriendsPage() {
     )
   }
 
-  const groups = groupLinksByGroupId(links)
+  const groups = groupLinksByGroup(links)
 
   return (
     <motion.div
@@ -110,7 +112,7 @@ function FriendsPage() {
       className="space-y-8"
     >
       {groups.map((group) => (
-        <section key={`g-${group.groupId ?? 'none'}`}>
+        <section key={`g-${group.groupId}`}>
           <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-text-primary">
             <span className="size-2 rounded-full bg-primary" />
             {group.name}
@@ -120,7 +122,7 @@ function FriendsPage() {
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {group.links.map((link) => (
-              <FriendCard key={link.id} link={link} />
+              <FriendCard key={link.id.toString()} link={link} />
             ))}
           </div>
         </section>
@@ -130,7 +132,7 @@ function FriendsPage() {
 }
 
 function FriendCard({ link }: { link: LinkFriend }) {
-  const accent = colorOf(link.color_id)
+  const accent = colorOf(link)
   return (
     <a
       href={link.url}

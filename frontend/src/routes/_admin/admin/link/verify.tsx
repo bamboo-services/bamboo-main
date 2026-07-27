@@ -9,12 +9,11 @@
  * --------------------------------------------------------------------------------
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import {
   ArrowLeft,
-  CalendarDays,
   Check,
   ChevronRight,
   ExternalLink,
@@ -22,14 +21,17 @@ import {
   Inbox,
   Mail,
   MapPin,
+  RefreshCcw,
   X,
 } from 'lucide-react'
+import type { LinkFriend, SnowflakeID } from '@/api/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { mockLinks } from '@/data/mock/links'
-import type { LinkItem } from '@/data/mock/links'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+import { useAdminLinks, useUpdateLinkStatus } from '@/hooks/use-links'
 
 export const Route = createFileRoute('/_admin/admin/link/verify')({
   component: LinkVerifyPage,
@@ -45,11 +47,11 @@ function SiteAvatar({
   className,
 }: {
   name: string
-  url: string
+  url: string | null
   className?: string
 }) {
   const [failed, setFailed] = useState(false)
-  if (failed) {
+  if (failed || !url) {
     return (
       <div
         className={cn(
@@ -99,10 +101,10 @@ function VerifyItem({
   active,
   onSelect,
 }: {
-  link: LinkItem
+  link: LinkFriend
   compact: boolean
   active: boolean
-  onSelect: (id: number) => void
+  onSelect: (id: SnowflakeID) => void
 }) {
   return (
     <motion.button
@@ -121,8 +123,8 @@ function VerifyItem({
       {/* 常驻头部：头像 + 名称 + 元信息 */}
       <div className="flex items-center gap-3">
         <SiteAvatar
-          name={link.siteName}
-          url={link.siteLogo}
+          name={link.name}
+          url={link.avatar}
           className={cn(
             'transition-all duration-300',
             compact ? 'size-8 text-xs' : 'size-11 text-sm',
@@ -136,7 +138,7 @@ function VerifyItem({
                 compact ? 'text-sm' : 'text-base',
               )}
             >
-              {link.siteName}
+              {link.name}
             </h3>
             {compact ? (
               active && (
@@ -150,8 +152,12 @@ function VerifyItem({
             )}
           </div>
           <div className="mt-0.5 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-            <span className="truncate">{link.locationName}</span>
-            <span className="shrink-0 tabular-nums">{link.createdAt}</span>
+            <span className="truncate">
+              {link.group_f_key?.name ?? '未分组'}
+            </span>
+            <span className="shrink-0 tabular-nums">
+              {new Date(link.updated_at).toLocaleDateString('zh-CN')}
+            </span>
           </div>
         </div>
       </div>
@@ -165,12 +171,12 @@ function VerifyItem({
       >
         <div className="overflow-hidden">
           <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-            {link.siteDescription}
+            {link.description || '暂无描述'}
           </p>
           <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/40 pt-3 text-xs">
             <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
               <Mail className="size-3.5 shrink-0" />
-              <span className="truncate">{link.webmasterEmail}</span>
+              <span className="truncate">{link.email ?? '未提供'}</span>
             </span>
             <span className="flex shrink-0 items-center gap-0.5 font-medium text-amber-600">
               审核
@@ -184,7 +190,21 @@ function VerifyItem({
 }
 
 /** 选中后右侧的审核详情面板 */
-function VerifyDetail({ link }: { link: LinkItem }) {
+function VerifyDetail({
+  link,
+  remark,
+  onRemarkChange,
+  onApprove,
+  onReject,
+  isPending,
+}: {
+  link: LinkFriend
+  remark: string
+  onRemarkChange: (value: string) => void
+  onApprove: () => void
+  onReject: () => void
+  isPending: boolean
+}) {
   return (
     <div className="space-y-4">
       {/* 申请横幅：琥珀色呼应待审核状态 */}
@@ -203,25 +223,23 @@ function VerifyDetail({ link }: { link: LinkItem }) {
         />
         <CardContent className="relative flex flex-wrap items-center gap-5 p-6 pl-9">
           <SiteAvatar
-            name={link.siteName}
-            url={link.siteLogo}
+            name={link.name}
+            url={link.avatar}
             className="size-20 rounded-2xl text-3xl"
           />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="text-2xl font-bold tracking-tight">
-                {link.siteName}
-              </h2>
+              <h2 className="text-2xl font-bold tracking-tight">{link.name}</h2>
               <PendingBadge />
             </div>
             <a
-              href={link.siteUrl}
+              href={link.url}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-2 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
             >
               <Globe className="size-4" />
-              {link.siteUrl}
+              {link.url}
               <ExternalLink className="size-3.5" />
             </a>
           </div>
@@ -236,8 +254,14 @@ function VerifyDetail({ link }: { link: LinkItem }) {
           </CardHeader>
           <CardContent>
             <p className="leading-relaxed text-muted-foreground">
-              {link.siteDescription || '暂无描述'}
+              {link.description || '暂无描述'}
             </p>
+            {link.apply_remark && (
+              <div className="mt-4 border-t border-border/40 pt-3">
+                <p className="text-xs text-muted-foreground">申请备注</p>
+                <p className="mt-1 leading-relaxed">{link.apply_remark}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -248,15 +272,17 @@ function VerifyDetail({ link }: { link: LinkItem }) {
           <CardContent className="space-y-3 pt-1">
             <div className="flex items-center gap-2.5 text-sm">
               <Mail className="size-4 shrink-0 text-muted-foreground" />
-              <span className="truncate">{link.webmasterEmail}</span>
+              <span className="truncate">{link.email ?? '未提供'}</span>
             </div>
             <div className="flex items-center gap-2.5 text-sm">
               <MapPin className="size-4 shrink-0 text-muted-foreground" />
-              <span>{link.locationName}</span>
+              <span>{link.group_f_key?.name ?? '未分组'}</span>
             </div>
             <div className="flex items-center gap-2.5 text-sm">
-              <CalendarDays className="size-4 shrink-0 text-muted-foreground" />
-              <span className="tabular-nums">{link.createdAt}</span>
+              <RefreshCcw className="size-4 shrink-0 text-muted-foreground" />
+              <span className="tabular-nums">
+                {new Date(link.updated_at).toLocaleString('zh-CN')}
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -264,22 +290,49 @@ function VerifyDetail({ link }: { link: LinkItem }) {
 
       {/* 审核操作 */}
       <Card>
-        <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
-          <p className="text-sm text-muted-foreground">
-            审核通过后该站点将展示在友链页面
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              className="cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">审核操作</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <label
+              htmlFor="review-remark"
+              className="text-xs text-muted-foreground"
             >
-              <X className="mr-2 size-4" />
-              拒绝
-            </Button>
-            <Button className="cursor-pointer bg-green-600 hover:bg-green-700">
-              <Check className="mr-2 size-4" />
-              通过
-            </Button>
+              审核备注（可选）
+            </label>
+            <Textarea
+              id="review-remark"
+              placeholder="填写审核说明，将反馈给申请人…"
+              value={remark}
+              onChange={(e) => onRemarkChange(e.target.value)}
+              rows={3}
+              disabled={isPending}
+            />
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              审核通过后该站点将展示在友链页面
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
+                onClick={onReject}
+                disabled={isPending}
+              >
+                <X className="mr-2 size-4" />
+                {isPending ? '处理中…' : '拒绝'}
+              </Button>
+              <Button
+                className="cursor-pointer bg-green-600 hover:bg-green-700"
+                onClick={onApprove}
+                disabled={isPending}
+              >
+                <Check className="mr-2 size-4" />
+                {isPending ? '处理中…' : '通过'}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -288,14 +341,66 @@ function VerifyDetail({ link }: { link: LinkItem }) {
 }
 
 function LinkVerifyPage() {
-  const pendingLinks = mockLinks.filter((link) => link.status === 'pending')
-  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const linksQuery = useAdminLinks({ link_status: 0, page: 1, page_size: 50 })
+  const pendingLinks = linksQuery.data?.data ?? []
+  const updateStatus = useUpdateLinkStatus()
+
+  const [selectedId, setSelectedId] = useState<SnowflakeID | null>(null)
+  const [remark, setRemark] = useState('')
+
   const selected = pendingLinks.find((l) => l.id === selectedId) ?? null
   const hasSelection = selected !== null
 
   /** 点击已选中项则取消选中 */
-  const toggle = (id: number) =>
+  const toggle = (id: SnowflakeID) =>
     setSelectedId((prev) => (prev === id ? null : id))
+
+  // 审核成功后清空选中与备注（列表会因 hook invalidate 自动刷新）
+  const handleApprove = () => {
+    if (!selected) return
+    updateStatus.mutate(
+      {
+        id: selected.id,
+        req: {
+          link_status: 1,
+          link_review_remark: remark.trim() || undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          setSelectedId(null)
+          setRemark('')
+        },
+      },
+    )
+  }
+
+  const handleReject = () => {
+    if (!selected) return
+    updateStatus.mutate(
+      {
+        id: selected.id,
+        req: {
+          link_status: 2,
+          link_review_remark: remark.trim() || undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          setSelectedId(null)
+          setRemark('')
+        },
+      },
+    )
+  }
+
+  // 列表刷新后若当前选中项已不在列表中，则清空选中
+  useEffect(() => {
+    if (selectedId && !pendingLinks.some((l) => l.id === selectedId)) {
+      setSelectedId(null)
+      setRemark('')
+    }
+  }, [selectedId, pendingLinks])
 
   return (
     <div className="space-y-5">
@@ -317,7 +422,13 @@ function LinkVerifyPage() {
         </div>
       </div>
 
-      {pendingLinks.length === 0 ? (
+      {linksQuery.isLoading ? (
+        <div className="grid flex-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-40 w-full rounded-xl" />
+          ))}
+        </div>
+      ) : pendingLinks.length === 0 ? (
         /* 空状态 */
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center gap-3 py-20 text-center">
@@ -341,7 +452,7 @@ function LinkVerifyPage() {
         /*
          * 主从布局：列表始终完整存在。
          * 未选中 → 列表占满（多列网格，富密度）；
-         * 选中后 → 列表原地收紧为窄列（2），详情面板从右侧弹出（8）。
+         * 选中后 → 列表原地收紧为窄列，详情面板从右侧弹出。
          * 全程同一批条目、同一个界面，仅密度与占比变化。
          */
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
@@ -357,7 +468,7 @@ function LinkVerifyPage() {
           >
             {pendingLinks.map((link) => (
               <VerifyItem
-                key={link.id}
+                key={link.id.toString()}
                 link={link}
                 compact={hasSelection}
                 active={link.id === selectedId}
@@ -375,7 +486,14 @@ function LinkVerifyPage() {
               transition={morphSpring}
               className="min-w-0 flex-1"
             >
-              <VerifyDetail link={selected} />
+              <VerifyDetail
+                link={selected}
+                remark={remark}
+                onRemarkChange={setRemark}
+                onApprove={handleApprove}
+                onReject={handleReject}
+                isPending={updateStatus.isPending}
+              />
             </motion.div>
           )}
         </div>

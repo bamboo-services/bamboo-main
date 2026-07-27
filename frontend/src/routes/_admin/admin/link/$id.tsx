@@ -13,50 +13,67 @@ import { useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   ArrowLeft,
-  CalendarDays,
   Check,
-  Clock3,
   Copy,
   ExternalLink,
   Globe,
   Mail,
   MapPin,
+  MessageSquareText,
   Pencil,
   RefreshCcw,
+  ShieldCheck,
   Trash2,
   Unlink,
 } from 'lucide-react'
+import type { LinkFriend } from '@/api/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { mockColors, mockLinks } from '@/data/mock/links'
-import type { LinkItem } from '@/data/mock/links'
-import { cn } from '@/lib/utils'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { useAdminLink, useDeleteLink } from '@/hooks/use-links'
 
 export const Route = createFileRoute('/_admin/admin/link/$id')({
   component: LinkDetailPage,
 })
 
-function colorHex(id: number): string {
-  return mockColors.find((c) => c.id === id)?.color ?? '#6366f1'
-}
-
-function colorName(id: number): string {
-  return mockColors.find((c) => c.id === id)?.name ?? '默认'
-}
-
-/** 计算收录天数 */
-function daysSince(dateStr: string): number {
-  const diff = Date.now() - new Date(dateStr).getTime()
-  return Math.max(0, Math.floor(diff / 86_400_000))
+/** 友链状态徽章：is_failure=1 已失效；status 1=已通过 2=已拒绝 0=待审核 */
+function StatusBadge({ link }: { link: LinkFriend }) {
+  if (link.is_failure === 1) {
+    return <Badge variant="destructive">已失效</Badge>
+  }
+  switch (link.status) {
+    case 1:
+      return (
+        <Badge className="bg-green-500/15 text-green-700 hover:bg-green-500/15">
+          已通过
+        </Badge>
+      )
+    case 2:
+      return <Badge variant="destructive">已拒绝</Badge>
+    default:
+      return (
+        <Badge className="bg-amber-500/15 text-amber-700 hover:bg-amber-500/15">
+          待审核
+        </Badge>
+      )
+  }
 }
 
 /** 复制按钮：成功后短暂显示对勾反馈 */
 function CopyButton({ text, label }: { text: string; label: string }) {
   const [copied, setCopied] = useState(false)
   const onCopy = () => {
-    void navigator.clipboard?.writeText(text).then(() => {
+    void navigator.clipboard.writeText(text).then(() => {
       setCopied(true)
       window.setTimeout(() => setCopied(false), 1500)
     })
@@ -75,24 +92,6 @@ function CopyButton({ text, label }: { text: string; label: string }) {
         <Copy className="size-3.5" />
       )}
     </button>
-  )
-}
-
-/** 可访问状态徽章：可访问时带脉冲呼吸点 */
-function StatusPill({ link }: { link: LinkItem }) {
-  return link.ableConnect ? (
-    <Badge className="bg-green-500/15 text-green-700 hover:bg-green-500/15">
-      <span className="relative mr-1.5 flex size-2">
-        <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-500 opacity-60 motion-reduce:animate-none" />
-        <span className="relative inline-flex size-2 rounded-full bg-green-500" />
-      </span>
-      可访问
-    </Badge>
-  ) : (
-    <Badge variant="destructive">
-      <span className="mr-1.5 size-2 rounded-full bg-current opacity-70" />
-      不可访问
-    </Badge>
   )
 }
 
@@ -118,14 +117,13 @@ function InfoRow({
 }
 
 /** 友链预览：1:1 还原公开页的展示卡片 */
-function FriendPreview({ link }: { link: LinkItem }) {
-  const accent = colorHex(link.color)
+function FriendPreview({ link, accent }: { link: LinkFriend; accent: string }) {
   return (
     <a
-      href={link.siteUrl}
+      href={link.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative flex gap-3 overflow-hidden rounded-xl border border-leaf-muted/40 bg-card/80 p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+      className="group relative flex gap-3 overflow-hidden rounded-xl border border-border/40 bg-card/80 p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
     >
       <span
         className="absolute inset-y-0 left-0 w-1"
@@ -133,20 +131,18 @@ function FriendPreview({ link }: { link: LinkItem }) {
         aria-hidden="true"
       />
       <Avatar className="size-12 shrink-0 rounded-full">
-        <AvatarImage src={link.siteLogo} alt={link.siteName} />
-        <AvatarFallback className="bg-leaf-light/40 text-text-primary">
-          {link.siteName.slice(0, 1)}
-        </AvatarFallback>
+        <AvatarImage src={link.avatar ?? undefined} alt={link.name} />
+        <AvatarFallback>{link.name.slice(0, 1)}</AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <h4 className="truncate font-medium text-text-primary group-hover:text-primary">
-            {link.siteName}
+          <h4 className="truncate font-medium group-hover:text-primary">
+            {link.name}
           </h4>
-          <ExternalLink className="size-4 shrink-0 text-text-secondary opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+          <ExternalLink className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
         </div>
-        <p className="mt-1 line-clamp-2 text-sm text-text-secondary">
-          {link.siteDescription || '这个站点很神秘，没有留下描述。'}
+        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+          {link.description || '这个站点很神秘，没有留下描述。'}
         </p>
       </div>
     </a>
@@ -156,7 +152,37 @@ function FriendPreview({ link }: { link: LinkItem }) {
 function LinkDetailPage() {
   const { id } = Route.useParams()
   const navigate = useNavigate()
-  const link = mockLinks.find((l) => l.id === Number(id))
+  const [deleteOpen, setDeleteOpen] = useState(false)
+
+  const linkQuery = useAdminLink(BigInt(id))
+  const deleteLink = useDeleteLink()
+  const link = linkQuery.data
+
+  const handleDelete = () => {
+    if (!link) return
+    deleteLink.mutate(link.id, {
+      onSuccess: () => {
+        setDeleteOpen(false)
+        navigate({ to: '/admin/link' })
+      },
+    })
+  }
+
+  if (linkQuery.isLoading) {
+    return (
+      <div className="space-y-5">
+        <Skeleton className="h-5 w-40" />
+        <Skeleton className="h-40 w-full rounded-xl" />
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div className="space-y-4 lg:col-span-2">
+            <Skeleton className="h-32 w-full rounded-xl" />
+            <Skeleton className="h-28 w-full rounded-xl" />
+          </div>
+          <Skeleton className="h-64 w-full rounded-xl" />
+        </div>
+      </div>
+    )
+  }
 
   if (!link) {
     return (
@@ -177,7 +203,7 @@ function LinkDetailPage() {
     )
   }
 
-  const accent = colorHex(link.color)
+  const accent = link.color_f_key?.primary_color ?? '#6366f1'
 
   return (
     <div className="space-y-5">
@@ -190,9 +216,8 @@ function LinkDetailPage() {
         返回友链管理
       </Link>
 
-      {/* 站点档案头：整卡沉浸渐变背景（absolute inset-0 天然贴满，无置顶问题） */}
+      {/* 站点档案头：整卡沉浸渐变背景 */}
       <Card className="relative overflow-hidden">
-        {/* 多层站点色渐变：左上方主光晕 + 右下方副光晕 + 斜向底色 */}
         <div
           className="absolute inset-0"
           style={{
@@ -200,7 +225,6 @@ function LinkDetailPage() {
           }}
           aria-hidden="true"
         />
-        {/* 柔光光斑，增加层次 */}
         <div
           className="pointer-events-none absolute -right-14 -top-24 size-64 rounded-full opacity-30 blur-3xl"
           style={{ backgroundColor: accent }}
@@ -209,40 +233,35 @@ function LinkDetailPage() {
 
         <CardContent className="relative flex flex-wrap items-center gap-5">
           <Avatar className="size-24 shrink-0 rounded-2xl shadow-xl ring-4 ring-white/90">
-            <AvatarImage src={link.siteLogo} alt={link.siteName} />
+            <AvatarImage src={link.avatar ?? undefined} alt={link.name} />
             <AvatarFallback className="rounded-2xl bg-white/70 text-3xl font-semibold text-primary">
-              {link.siteName.charAt(0)}
+              {link.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2.5">
               <h1 className="truncate text-2xl font-bold tracking-tight lg:text-3xl">
-                {link.siteName}
+                {link.name}
               </h1>
-              <StatusPill link={link} />
-              {link.hasAdv && (
-                <Badge className="bg-amber-500/15 text-amber-700 hover:bg-amber-500/15">
-                  含广告
-                </Badge>
-              )}
+              <StatusBadge link={link} />
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
               <span className="flex min-w-0 items-center gap-1.5">
                 <Globe className="size-4 shrink-0" />
                 <a
-                  href={link.siteUrl}
+                  href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="truncate transition-colors duration-150 hover:text-primary"
                 >
-                  {link.siteUrl}
+                  {link.url}
                 </a>
-                <CopyButton text={link.siteUrl} label="复制站点地址" />
+                <CopyButton text={link.url} label="复制站点地址" />
               </span>
               <span className="flex items-center gap-1.5">
                 <MapPin className="size-4" />
-                {link.locationName}
+                {link.group_f_key?.name ?? '未分组'}
               </span>
               <span className="flex items-center gap-1.5">
                 <span
@@ -250,14 +269,14 @@ function LinkDetailPage() {
                   style={{ backgroundColor: accent }}
                   aria-hidden="true"
                 />
-                {colorName(link.color)}
+                {link.color_f_key?.name ?? '默认'}
               </span>
             </div>
           </div>
 
           <div className="flex shrink-0 flex-wrap gap-2">
             <a
-              href={link.siteUrl}
+              href={link.url}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium text-white transition duration-150 hover:brightness-95"
@@ -275,7 +294,7 @@ function LinkDetailPage() {
               onClick={() =>
                 navigate({
                   to: '/admin/link/$id/edit',
-                  params: { id: String(link.id) },
+                  params: { id: link.id.toString() },
                 })
               }
             >
@@ -285,6 +304,7 @@ function LinkDetailPage() {
             <Button
               variant="outline"
               className="cursor-pointer bg-white/80 text-destructive backdrop-blur-sm hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => setDeleteOpen(true)}
             >
               <Trash2 className="mr-2 size-4" />
               删除
@@ -302,7 +322,7 @@ function LinkDetailPage() {
             </CardHeader>
             <CardContent>
               <p className="leading-relaxed text-muted-foreground">
-                {link.siteDescription || '暂无描述'}
+                {link.description || '暂无描述'}
               </p>
             </CardContent>
           </Card>
@@ -317,9 +337,41 @@ function LinkDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <FriendPreview link={link} />
+              <FriendPreview link={link} accent={accent} />
             </CardContent>
           </Card>
+
+          {(link.apply_remark || link.review_remark) && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">备注信息</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {link.apply_remark && (
+                  <div className="flex items-start gap-2.5 text-sm">
+                    <MessageSquareText className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-muted-foreground">申请备注</p>
+                      <p className="mt-0.5 leading-relaxed">
+                        {link.apply_remark}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {link.review_remark && (
+                  <div className="flex items-start gap-2.5 text-sm">
+                    <ShieldCheck className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-muted-foreground">审核备注</p>
+                      <p className="mt-0.5 leading-relaxed">
+                        {link.review_remark}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <Card className="h-fit">
@@ -328,43 +380,62 @@ function LinkDetailPage() {
           </CardHeader>
           <CardContent className="pt-1">
             <InfoRow icon={<Mail className="size-4" />} label="站长邮箱">
-              <span className="flex items-center gap-1">
-                {link.webmasterEmail}
-                <CopyButton text={link.webmasterEmail} label="复制站长邮箱" />
-              </span>
+              {link.email ? (
+                <span className="flex items-center gap-1">
+                  {link.email}
+                  <CopyButton text={link.email} label="复制站长邮箱" />
+                </span>
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )}
             </InfoRow>
-            <InfoRow icon={<Clock3 className="size-4" />} label="收录时长">
-              <span className="font-semibold text-primary tabular-nums">
-                {daysSince(link.createdAt)} 天
-              </span>
-            </InfoRow>
-            <InfoRow
-              icon={<CalendarDays className="size-4" />}
-              label="创建时间"
-            >
-              <span className="tabular-nums">{link.createdAt}</span>
-            </InfoRow>
-            <InfoRow icon={<RefreshCcw className="size-4" />} label="更新时间">
-              <span className="tabular-nums">{link.updatedAt}</span>
+            <InfoRow icon={<MapPin className="size-4" />} label="所在位置">
+              {link.group_f_key?.name ?? '未分组'}
             </InfoRow>
             <InfoRow icon={<Globe className="size-4" />} label="审核状态">
-              <span
-                className={cn(
-                  link.status === 'approved' && 'text-green-600',
-                  link.status === 'pending' && 'text-amber-600',
-                  link.status === 'rejected' && 'text-destructive',
-                )}
-              >
-                {link.status === 'approved'
-                  ? '已通过'
-                  : link.status === 'pending'
-                    ? '待审核'
-                    : '已拒绝'}
+              <StatusBadge link={link} />
+            </InfoRow>
+            <InfoRow icon={<RefreshCcw className="size-4" />} label="更新时间">
+              <span className="tabular-nums">
+                {new Date(link.updated_at).toLocaleString('zh-CN')}
               </span>
             </InfoRow>
           </CardContent>
         </Card>
       </div>
+
+      {/* 删除确认弹窗 */}
+      <Dialog
+        open={deleteOpen}
+        onOpenChange={(open) => {
+          if (!open) setDeleteOpen(false)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>删除友链</DialogTitle>
+            <DialogDescription>
+              确定要删除友链「{link.name}」吗？此操作不可撤销。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+              disabled={deleteLink.isPending}
+            >
+              取消
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleteLink.isPending}
+            >
+              {deleteLink.isPending ? '删除中…' : '确认删除'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

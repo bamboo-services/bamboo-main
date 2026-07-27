@@ -59,3 +59,4 @@ resources/frontend/dist/*
 ### AI ###
 .omo/
 .zcode/
+.playwright-mcp/

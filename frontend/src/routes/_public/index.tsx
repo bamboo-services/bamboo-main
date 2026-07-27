@@ -204,14 +204,22 @@ function LoadingScreen() {
     >
       <motion.div
         animate={{ scale: [1, 1.08, 1], opacity: [0.85, 1, 0.85] }}
-        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+        transition={{
+          duration: 2,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: 'easeInOut',
+        }}
       >
         <BambooLogo size={72} />
       </motion.div>
       <motion.p
         className="text-sm tracking-widest text-text-secondary"
         animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+        transition={{
+          duration: 2,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: 'easeInOut',
+        }}
       >
         正在加载…
       </motion.p>

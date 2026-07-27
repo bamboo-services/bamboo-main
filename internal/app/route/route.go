@@ -14,6 +14,8 @@ package route
 import (
 	"context"
 
+	"github.com/bamboo-services/bamboo-main/internal/metrics"
+
 	xEnv "github.com/bamboo-services/bamboo-base-go/defined/env"
 	xMiddle "github.com/bamboo-services/bamboo-base-go/major/middleware"
 	xRoute "github.com/bamboo-services/bamboo-base-go/major/route"
@@ -39,10 +41,14 @@ func NewRoute(ctx context.Context, serve *gin.Engine) {
 	r.engine.Use(xMiddle.ResponseMiddleware)
 	r.engine.Use(xMiddle.ReleaseAllCors)
 	r.engine.Use(xMiddle.AllowOptionRequest)
+	r.engine.Use(metrics.Middleware())
 
 	if xEnv.GetEnvBool(xEnv.Debug, false) {
 		swaggerRegister(r.engine)
 	}
+
+	// Prometheus 指标端点（根路径，公开无鉴权；promhttp 直写，不经 BaseResponse）
+	r.engine.GET("/metrics", metrics.Handler())
 
 	oauthRoute := bSdkRoute.NewRoute(r.context)
 

@@ -12,41 +12,41 @@
 package middleware
 
 import (
-	"github.com/bamboo-services/bamboo-main/internal/logic"
+	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
-	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/logic"
-	bSdkUtil "github.com/phalanx-labs/beacon-sso-sdk/utility"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
+	xHttp "github.com/bamboo-services/bamboo-base-go/defined/http"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	"github.com/gin-gonic/gin"
 )
 
-// AuthMiddleware OAuth2 认证中间件，校验访问令牌并同步本地用户、注入用户上下文
+// AuthMiddleware 认证中间件，基于本地 Redis 会话校验访问令牌并注入用户上下文。
+//
+// 令牌来源无关：密码登录与 SSO 登录均在登录时写入本地会话，此处统一读取会话，
+// 不再每请求回查 SSO Userinfo。
 func AuthMiddleware(c *gin.Context) {
-	accessToken := bSdkUtil.GetAuthorization(c)
+	accessToken := xHttp.GetToken(c, xHttp.HeaderAuthorization)
 	if accessToken == "" {
-		_ = c.Error(xError.NewError(c, xError.Unauthorized, "未检测到 OAuth2 访问令牌", false))
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "未检测到访问令牌", false))
 		c.Abort()
 		return
 	}
 
-	oauthLogic := bSdkLogic.NewBusiness(c)
-	userinfo, xErr := oauthLogic.Userinfo(c, accessToken)
+	sessionLogic := logcHelper.NewSessionLogic(xCtxUtil.MustGetCacheManager(c))
+	session, found, xErr := sessionLogic.GetUserSession(c.Request.Context(), accessToken)
 	if xErr != nil {
 		_ = c.Error(xErr)
 		c.Abort()
 		return
 	}
-
-	authLogic := logic.NewAuthLogic(c)
-	localUser, xErr := authLogic.SyncOAuthUser(c.Request.Context(), userinfo)
-	if xErr != nil {
-		_ = c.Error(xErr)
+	if !found {
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "登录状态无效或已过期", false))
 		c.Abort()
 		return
 	}
 
-	c.Set(constants.ContextKeyUserID, localUser.ID)
+	c.Set(constants.ContextKeyUserID, session.UserID)
 	c.Set(constants.ContextKeyToken, accessToken)
 
 	c.Next()

@@ -664,6 +664,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/admin/dashboard/stats": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "管理员获取友链总数、待审核、已通过计数及最近友链申请列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "仪表盘接口"
+                ],
+                "summary": "[管理] 获取仪表盘统计数据",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiDashboard.StatsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/groups": {
             "get": {
                 "security": [
@@ -2925,12 +2977,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/login": {
             "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "管理员用户登录，返回用户信息、访问令牌及Token时间信息",
+                "description": "使用用户名/邮箱 + 密码登录，返回用户信息、访问令牌及Token时间信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -2940,7 +2987,18 @@ const docTemplate = `{
                 "tags": [
                     "认证接口"
                 ],
-                "summary": "[用户] 用户登录",
+                "summary": "[公开] 用户登录",
+                "parameters": [
+                    {
+                        "description": "登录请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiAuth.LoginRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "登录成功，包含用户信息、Token及时间信息",
@@ -2960,8 +3018,14 @@ const docTemplate = `{
                             ]
                         }
                     },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
                     "401": {
-                        "description": "认证失败",
+                        "description": "用户名或密码错误",
                         "schema": {
                             "$ref": "#/definitions/xBase.BaseResponse"
                         }
@@ -3002,6 +3066,58 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/oauth/login": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "携带 SSO 访问令牌换取本地会话，返回用户信息、访问令牌及Token时间信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证接口"
+                ],
+                "summary": "[用户] SSO OAuth 登录",
+                "responses": {
+                    "200": {
+                        "description": "登录成功，包含用户信息、Token及时间信息",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiAuth.LoginResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "认证失败",
                         "schema": {
                             "$ref": "#/definitions/xBase.BaseResponse"
                         }
@@ -3727,6 +3843,27 @@ const docTemplate = `{
                 }
             }
         },
+        "apiAuth.LoginRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 6,
+                    "example": "password123"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 1,
+                    "example": "admin"
+                }
+            }
+        },
         "apiAuth.LoginResponse": {
             "type": "object",
             "properties": {
@@ -3831,6 +3968,55 @@ const docTemplate = `{
             "properties": {
                 "user": {
                     "$ref": "#/definitions/entity.SystemUser"
+                }
+            }
+        },
+        "apiDashboard.RecentApplicationItem": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "友链头像URL",
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "申请时间",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "友链ID",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "友链名称",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "友链URL地址",
+                    "type": "string"
+                }
+            }
+        },
+        "apiDashboard.StatsResponse": {
+            "type": "object",
+            "properties": {
+                "approved_links": {
+                    "description": "已通过友链数",
+                    "type": "integer"
+                },
+                "pending_links": {
+                    "description": "待审核友链数",
+                    "type": "integer"
+                },
+                "recent_applications": {
+                    "description": "最近友链申请列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/apiDashboard.RecentApplicationItem"
+                    }
+                },
+                "total_links": {
+                    "description": "友链总数",
+                    "type": "integer"
                 }
             }
         },

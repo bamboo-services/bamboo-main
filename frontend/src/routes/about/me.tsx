@@ -17,7 +17,7 @@ import { MarkdownView } from '@/components/markdown'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
-import { siteInfo } from '@/data/mock/site-info'
+import { siteConfig } from '@/lib/site'
 import myAvatar from '@/assets/images/my_avatar.png'
 
 export const Route = createFileRoute('/about/me')({
@@ -50,10 +50,10 @@ function AboutMePage() {
     queryFn: getAbout,
   })
 
-  const nick = siteInfo.blogger.nick
-  const desc = siteInfo.blogger.description
-  const email = siteInfo.blogger.email
-  const displayName = site?.site_name ?? siteInfo.site.siteName
+  const nick = siteConfig.blogger.nick
+  const desc = siteConfig.blogger.description
+  const email = siteConfig.blogger.email
+  const displayName = site?.site_name ?? siteConfig.defaultName
   const introduction = site?.introduction ?? ''
 
   return (

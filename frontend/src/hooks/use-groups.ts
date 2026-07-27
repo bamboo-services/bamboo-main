@@ -1,0 +1,105 @@
+// --------------------------------------------------------------------------------
+// Copyright (c) 2016-NOW(至今) 筱锋
+// Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
+// --------------------------------------------------------------------------------
+// 许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
+// 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+// https://opensource.org/licenses/MIT
+// --------------------------------------------------------------------------------
+
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import type {
+  CreateGroupRequest,
+  GroupListParams,
+  GroupPageParams,
+  SnowflakeID,
+  UpdateGroupRequest,
+} from '@/api/types'
+import {
+  createGroup,
+  deleteGroup,
+  getAllGroups,
+  listGroups,
+  updateGroup,
+  updateGroupStatus,
+} from '@/api/group'
+
+/** 友链分组 queryKey 工厂 */
+export const groupKeys = {
+  all: ['admin', 'groups'] as const,
+  lists: () => [...groupKeys.all, 'list'] as const,
+  list: (params: GroupPageParams) => [...groupKeys.lists(), params] as const,
+  allList: () => [...groupKeys.all, 'all'] as const,
+}
+
+/** 友链分组分页列表 */
+export function useGroups(params: GroupPageParams = {}) {
+  return useQuery({
+    queryKey: groupKeys.list(params),
+    queryFn: () => listGroups(params),
+  })
+}
+
+/** 友链分组全量列表（供选择器使用） */
+export function useAllGroups(params: GroupListParams = {}) {
+  return useQuery({
+    queryKey: [...groupKeys.allList(), params],
+    queryFn: () => getAllGroups(params),
+  })
+}
+
+/** 添加友链分组 */
+export function useCreateGroup() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (req: CreateGroupRequest) => createGroup(req),
+    onSuccess: () => {
+      toast.success('分组添加成功')
+      void qc.invalidateQueries({ queryKey: groupKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '分组添加失败'),
+  })
+}
+
+/** 更新友链分组 */
+export function useUpdateGroup() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, req }: { id: SnowflakeID; req: UpdateGroupRequest }) =>
+      updateGroup(id, req),
+    onSuccess: () => {
+      toast.success('分组更新成功')
+      void qc.invalidateQueries({ queryKey: groupKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '分组更新失败'),
+  })
+}
+
+/** 切换友链分组启用/禁用 */
+export function useUpdateGroupStatus() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, status }: { id: SnowflakeID; status: boolean }) =>
+      updateGroupStatus(id, status),
+    onSuccess: () => {
+      toast.success('分组状态已更新')
+      void qc.invalidateQueries({ queryKey: groupKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '分组状态更新失败'),
+  })
+}
+
+/** 删除友链分组 */
+export function useDeleteGroup() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, force }: { id: SnowflakeID; force?: boolean }) =>
+      deleteGroup(id, force),
+    onSuccess: () => {
+      toast.success('分组删除成功')
+      void qc.invalidateQueries({ queryKey: groupKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '分组删除失败'),
+  })
+}

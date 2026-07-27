@@ -272,6 +272,20 @@ func (r *LinkRepo) ListPublic(ctx context.Context, groupID *xSnowflake.Snowflake
 	return links, nil
 }
 
+// CountByStatus 按审核状态统计友情链接数量；status 为负数时统计全部
+func (r *LinkRepo) CountByStatus(ctx context.Context, status int, tx *gorm.DB) (int64, *xError.Error) {
+	query := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{})
+	if status >= 0 {
+		query = query.Where("status = ?", status)
+	}
+
+	var count int64
+	if err := query.Count(&count).Error; err != nil {
+		return 0, xError.NewError(ctx, xError.DatabaseError, "统计友情链接数量失败", true, err)
+	}
+	return count, nil
+}
+
 // CountByGroupID 统计指定分组下友情链接数量
 func (r *LinkRepo) CountByGroupID(ctx context.Context, groupID xSnowflake.SnowflakeID, tx *gorm.DB) (int64, *xError.Error) {
 	var count int64

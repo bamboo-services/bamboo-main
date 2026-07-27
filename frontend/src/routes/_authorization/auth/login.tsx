@@ -9,36 +9,79 @@
  * --------------------------------------------------------------------------------
  */
 
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import { useState } from 'react'
-import { ArrowLeft, Eye, EyeOff, LockKeyhole, User } from 'lucide-react'
+import {
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  KeyRound,
+  LockKeyhole,
+  User,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { BambooLogo } from '@/assets/svg/bamboo-logo'
-import { siteInfo } from '@/data/mock/site-info'
+import { siteConfig } from '@/lib/site'
 import defaultBackground from '@/assets/images/default-background.webp'
+import { SSO_OAUTH_LOGIN_URL, login } from '@/api/auth'
+import { setSession } from '@/lib/auth'
+
+/** 登录页 search 参数：redirect 为登录成功后的回跳路径 */
+interface LoginSearch {
+  redirect?: string
+}
 
 export const Route = createFileRoute('/_authorization/auth/login')({
+  validateSearch: (search: Record<string, unknown>): LoginSearch => ({
+    redirect: typeof search.redirect === 'string' ? search.redirect : undefined,
+  }),
   component: LoginPage,
 })
 
 function LoginPage() {
-  const navigate = useNavigate()
   const reduced = useReducedMotion() ?? false
+  const { redirect: redirectTarget } = Route.useSearch()
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     username: '',
     password: '',
     remember: false,
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 仅信任同源内部路径（以单个 / 开头），避免开放重定向
+  const safeRedirect =
+    redirectTarget &&
+    redirectTarget.startsWith('/') &&
+    !redirectTarget.startsWith('//')
+      ? redirectTarget
+      : '/admin/dashboard'
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // 静态界面，直接跳转到管理后台
-    navigate({ to: '/admin/dashboard' })
+    setError(null)
+    setLoading(true)
+    try {
+      const res = await login({
+        username: formData.username,
+        password: formData.password,
+      })
+      setSession(res.token, res.user, formData.remember)
+      // 登录后整页跳转，确保应用以干净状态重新装载
+      window.location.href = safeRedirect
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '登录失败，请稍后重试')
+      setLoading(false)
+    }
+  }
+
+  const handleSsoLogin = () => {
+    window.location.href = SSO_OAUTH_LOGIN_URL
   }
 
   return (
@@ -53,7 +96,7 @@ function LoginPage() {
           >
             <BambooLogo size={30} />
             <span className="text-lg font-semibold text-text-primary">
-              {siteInfo.site.siteName}
+              {siteConfig.defaultName}
             </span>
           </Link>
         </div>
@@ -147,9 +190,34 @@ function LoginPage() {
                   </Label>
                 </div>
 
+                {/* 错误提示 */}
+                {error && (
+                  <p role="alert" className="text-sm text-destructive">
+                    {error}
+                  </p>
+                )}
+
                 {/* 登录按钮（全宽） */}
-                <Button type="submit" className="w-full">
-                  登录
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? '登录中…' : '登录'}
+                </Button>
+
+                {/* SSO 辅助登录 */}
+                <div className="relative flex items-center justify-center">
+                  <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-border" />
+                  <span className="relative bg-background px-2 text-xs text-muted-foreground">
+                    或
+                  </span>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleSsoLogin}
+                  disabled={loading}
+                >
+                  <KeyRound className="size-4" />
+                  使用 SSO 账号登录
                 </Button>
               </div>
 
@@ -191,10 +259,10 @@ function LoginPage() {
         {/* 底部引言 */}
         <div className="absolute inset-x-0 bottom-0 p-10">
           <p className="text-lg font-medium leading-relaxed text-white">
-            {siteInfo.blogger.description}
+            {siteConfig.blogger.description}
           </p>
           <p className="mt-2 text-sm text-white/70">
-            {siteInfo.site.siteName} · 友情链接管理
+            {siteConfig.defaultName} · 友情链接管理
           </p>
         </div>
       </motion.div>

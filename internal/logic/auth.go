@@ -86,10 +86,10 @@ func (a *AuthLogic) Login(ctx context.Context, req *apiAuth.LoginRequest, meta l
 
 	// 记录时间信息
 	now := time.Now()
-	expireAt := now.Add(24 * time.Hour) // 24小时过期
+	expireAt := now.Add(logcHelper.SessionTTL) // 24小时过期
 
 	// 创建用户会话
-	if xErr := a.SessionService.CreateUserSession(ctx, user, token, meta); xErr != nil {
+	if xErr := a.SessionService.CreateUserSession(ctx, user, token, meta, logcHelper.SessionTTL); xErr != nil {
 		return nil, "", nil, nil, xErr
 	}
 
@@ -142,9 +142,9 @@ func (a *AuthLogic) Register(ctx context.Context, req *apiAuth.RegisterRequest, 
 	token := xUtil.Security().GenerateKey()
 
 	now := time.Now()
-	expireAt := now.Add(24 * time.Hour) // 24小时过期
+	expireAt := now.Add(logcHelper.SessionTTL) // 24小时过期
 
-	if xErr := a.SessionService.CreateUserSession(ctx, &newUser, token, meta); xErr != nil {
+	if xErr := a.SessionService.CreateUserSession(ctx, &newUser, token, meta, logcHelper.SessionTTL); xErr != nil {
 		return nil, "", nil, nil, xErr
 	}
 
@@ -156,15 +156,21 @@ func (a *AuthLogic) Register(ctx context.Context, req *apiAuth.RegisterRequest, 
 }
 
 // Logout 用户登出
+//
+// 以删除本地会话为准（密码登录与 SSO 登录的令牌均存有本地会话）；
+// SSO 令牌额外best-effort 撤销，失败仅记录日志，不影响登出结果。
 func (a *AuthLogic) Logout(ctx context.Context, token string) *xError.Error {
 	if token == "" {
 		return xError.NewError(ctx, xError.ParameterEmpty, "访问令牌不能为空", false)
 	}
 
-	oauthLogic := bSdkLogic.NewOAuth(ctx)
-	xErr := oauthLogic.Logout(ctx, "access_token", token)
-	if xErr != nil {
+	if xErr := a.SessionService.DeleteUserSession(ctx, token); xErr != nil {
 		return xErr
+	}
+
+	oauthLogic := bSdkLogic.NewOAuth(ctx)
+	if xErr := oauthLogic.Logout(ctx, "access_token", token); xErr != nil {
+		a.log.Warn(ctx, fmt.Sprintf("SSO 令牌撤销失败（已忽略）: %v", xErr))
 	}
 
 	return nil

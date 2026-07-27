@@ -24,10 +24,54 @@ import (
 	bSdkUtil "github.com/phalanx-labs/beacon-sso-sdk/utility"
 )
 
-// Login 用户登录
+// Login 用户登录（账号密码）
 //
-// @Summary [用户] 用户登录
-// @Description 管理员用户登录，返回用户信息、访问令牌及Token时间信息
+// @Summary [公开] 用户登录
+// @Description 使用用户名/邮箱 + 密码登录，返回用户信息、访问令牌及Token时间信息
+// @Tags 认证接口
+// @Accept json
+// @Produce json
+// @Param request body apiAuth.LoginRequest true "登录请求"
+// @Success 200 {object} xBase.BaseResponse{data=apiAuth.LoginResponse} "登录成功，包含用户信息、Token及时间信息"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "用户名或密码错误"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/auth/login [POST]
+func (h *AuthHandler) Login(c *gin.Context) {
+	var req apiAuth.LoginRequest
+
+	// 绑定请求数据
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	meta := logcHelper.SessionMeta{
+		ClientIP:  netUtil.GetClientIP(c),
+		UserAgent: c.GetHeader("User-Agent"),
+	}
+	user, token, createdAt, expiredAt, err := h.service.authLogic.Login(c.Request.Context(), &req, meta)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	resp := apiAuth.LoginResponse{
+		User:      *user,
+		Token:     token,
+		CreatedAt: *createdAt,
+		ExpiredAt: *expiredAt,
+	}
+	xResult.SuccessHasData(c, "登录成功", resp)
+}
+
+// OAuthLogin 用户登录（SSO OAuth）
+//
+// @Summary [用户] SSO OAuth 登录
+// @Description 携带 SSO 访问令牌换取本地会话，返回用户信息、访问令牌及Token时间信息
 // @Tags 认证接口
 // @Accept json
 // @Produce json
@@ -35,8 +79,8 @@ import (
 // @Success 200 {object} xBase.BaseResponse{data=apiAuth.LoginResponse} "登录成功，包含用户信息、Token及时间信息"
 // @Failure 401 {object} xBase.BaseResponse "认证失败"
 // @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
-// @Router /api/v1/auth/login [POST]
-func (h *AuthHandler) Login(c *gin.Context) {
+// @Router /api/v1/auth/oauth/login [POST]
+func (h *AuthHandler) OAuthLogin(c *gin.Context) {
 	accessToken := bSdkUtil.GetAuthorization(c)
 	userinfo, xErr := h.service.oauthLogic.Userinfo(c.Request.Context(), accessToken)
 	if xErr != nil {
@@ -44,7 +88,11 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	user, token, createdAt, expiredAt, err := h.service.authLogic.LoginByOAuth(c.Request.Context(), userinfo, accessToken)
+	meta := logcHelper.SessionMeta{
+		ClientIP:  netUtil.GetClientIP(c),
+		UserAgent: c.GetHeader("User-Agent"),
+	}
+	user, token, createdAt, expiredAt, err := h.service.authLogic.LoginByOAuth(c.Request.Context(), userinfo, accessToken, meta)
 	if err != nil {
 		_ = c.Error(err)
 		return

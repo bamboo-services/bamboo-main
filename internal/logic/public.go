@@ -11,10 +11,12 @@ package logic
 
 import (
 	"context"
+	"fmt"
 	"runtime"
 	"time"
 
 	apiPublic "github.com/bamboo-services/bamboo-main/api/public"
+	"github.com/bamboo-services/bamboo-main/internal/metrics"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
@@ -56,8 +58,8 @@ func (p *PublicLogic) HealthCheck(ctx context.Context) (*apiPublic.HealthRespons
 		return nil, xErr
 	}
 
-	// 检查 Redis 连接（可选，如果 Redis 不可用不影响基本功能）
-	// 注意：暂时注释Redis检查，等待Redis相关工具函数实现
+	// 采集真实运行时指标（运行时长 / 协程数 / 内存 / CPU）
+	snap := metrics.Snapshot()
 
 	// 构建健康检查响应
 	healthResponse := &apiPublic.HealthResponse{
@@ -70,14 +72,49 @@ func (p *PublicLogic) HealthCheck(ctx context.Context) (*apiPublic.HealthRespons
 			GoVersion:   runtime.Version(),
 		},
 		Runtime: apiPublic.RuntimeInfo{
-			Uptime:      "0m", // 可以计算实际运行时间
-			Goroutines:  runtime.NumGoroutine(),
-			MemoryUsage: "N/A", // 可以计算实际内存使用
-			CPUUsage:    "N/A", // 可以计算实际CPU使用率
+			Uptime:      formatDuration(snap.Uptime),
+			Goroutines:  snap.Goroutines,
+			MemoryUsage: formatBytes(snap.MemoryBytes),
+			CPUUsage:    fmt.Sprintf("%.2f%%", snap.CPUPercent),
 		},
 	}
 
 	return healthResponse, nil
+}
+
+// formatDuration 将运行时长格式化为紧凑形式（如 1h2m3s）
+func formatDuration(d time.Duration) string {
+	d = d.Round(time.Second)
+	h := int(d.Hours())
+	m := int(d.Minutes()) % 60
+	s := int(d.Seconds()) % 60
+	switch {
+	case h > 0:
+		return fmt.Sprintf("%dh%dm%ds", h, m, s)
+	case m > 0:
+		return fmt.Sprintf("%dm%ds", m, s)
+	default:
+		return fmt.Sprintf("%ds", s)
+	}
+}
+
+// formatBytes 将字节数格式化为人类可读形式（B/KB/MB/GB）
+func formatBytes(bytes uint64) string {
+	const (
+		kb = 1024
+		mb = 1024 * kb
+		gb = 1024 * mb
+	)
+	switch {
+	case bytes >= gb:
+		return fmt.Sprintf("%.2f GB", float64(bytes)/float64(gb))
+	case bytes >= mb:
+		return fmt.Sprintf("%.2f MB", float64(bytes)/float64(mb))
+	case bytes >= kb:
+		return fmt.Sprintf("%.2f KB", float64(bytes)/float64(kb))
+	default:
+		return fmt.Sprintf("%d B", bytes)
+	}
 }
 
 // Ping 简单连通性测试

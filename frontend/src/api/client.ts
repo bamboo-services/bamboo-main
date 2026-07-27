@@ -8,19 +8,86 @@
 // --------------------------------------------------------------------------------
 
 import axios from 'axios'
-import type {AxiosRequestConfig} from 'axios';
+import type { AxiosRequestConfig } from 'axios'
 import type { BaseResponse } from './types'
+import { clearSession, getToken } from '@/lib/auth'
+
+/** 匹配 id 或 *_id 字段名（这些字段均为雪花 ID） */
+const ID_KEY_PATTERN = /^(id|.*_id)$/
+/** 匹配纯数字字符串 */
+const NUMERIC_PATTERN = /^\d+$/
+
+/**
+ * JSON reviver：将 id / *_id 的纯数字字符串还原为 bigint。
+ * 后端 SnowflakeID 以字符串传输，此处还原无损，规避 JS 安全整数精度问题。
+ */
+function reviveBigInt(key: string, value: unknown): unknown {
+  if (
+    typeof value === 'string' &&
+    ID_KEY_PATTERN.test(key) &&
+    NUMERIC_PATTERN.test(value)
+  ) {
+    return BigInt(value)
+  }
+  return value
+}
 
 /**
  * 统一 axios 实例。
  * - baseURL 优先取 VITE_API_BASE_URL，缺省走 Vite dev proxy（/api → 后端 5555）
  * - timeout 15s，匹配后端大部分公开接口
+ * - transformResponse 将雪花 ID 字符串还原为 bigint
+ * - transformRequest 将 bigint 序列化为字符串（后端反序列化兼容字符串）
  */
 const client = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api/v1',
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
+  transformResponse: [
+    (data: unknown) => {
+      if (typeof data !== 'string') return data
+      try {
+        return JSON.parse(data, reviveBigInt)
+      } catch {
+        return data
+      }
+    },
+  ],
+  transformRequest: [
+    (data: unknown) => {
+      if (data === undefined || data === null) return data
+      return JSON.stringify(data, (_key, value) =>
+        typeof value === 'bigint' ? value.toString() : value,
+      )
+    },
+  ],
 })
+
+// 请求拦截器：存在登录令牌时自动注入 Authorization（调用方已显式指定则不覆盖）
+client.interceptors.request.use((config) => {
+  const token = getToken()
+  if (token && !config.headers.Authorization) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+// 响应拦截器：401 视为登录态失效，清空会话并回跳登录页（避免在登录页反复重定向）
+client.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      clearSession()
+      if (!window.location.pathname.startsWith('/auth/login')) {
+        const redirect = encodeURIComponent(
+          window.location.pathname + window.location.search,
+        )
+        window.location.href = `/auth/login?redirect=${redirect}`
+      }
+    }
+    return Promise.reject(error)
+  },
+)
 
 /**
  * 请求辅助函数：拆 BaseResponse 包装。

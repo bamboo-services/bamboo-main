@@ -19,9 +19,12 @@ import { Route as AboutIndexRouteImport } from './routes/about/index'
 import { Route as AboutFriendsRouteImport } from './routes/about/friends'
 import { Route as AboutMeRouteImport } from './routes/about/me'
 import { Route as AboutSponsorRouteImport } from './routes/about/sponsor'
+import { Route as AdminAdminColorRouteImport } from './routes/_admin/admin/color'
 import { Route as AdminAdminDashboardRouteImport } from './routes/_admin/admin/dashboard'
+import { Route as AdminAdminLocationRouteImport } from './routes/_admin/admin/location'
 import { Route as AdminAdminSettingRouteImport } from './routes/_admin/admin/setting'
 import { Route as AdminAdminSponsorRouteImport } from './routes/_admin/admin/sponsor'
+import { Route as AuthorizationAuthCallbackRouteImport } from './routes/_authorization/auth/callback'
 import { Route as AuthorizationAuthLoginRouteImport } from './routes/_authorization/auth/login'
 import { Route as AdminAdminLinkIndexRouteImport } from './routes/_admin/admin/link/index'
 import { Route as AdminAdminLinkIdRouteImport } from './routes/_admin/admin/link/$id'
@@ -76,9 +79,19 @@ const AboutSponsorRoute = AboutSponsorRouteImport.update({
   path: '/sponsor',
   getParentRoute: () => AboutRouteRoute,
 } as any)
+const AdminAdminColorRoute = AdminAdminColorRouteImport.update({
+  id: '/color',
+  path: '/color',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
 const AdminAdminDashboardRoute = AdminAdminDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
+const AdminAdminLocationRoute = AdminAdminLocationRouteImport.update({
+  id: '/location',
+  path: '/location',
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
 const AdminAdminSettingRoute = AdminAdminSettingRouteImport.update({
@@ -91,6 +104,12 @@ const AdminAdminSponsorRoute = AdminAdminSponsorRouteImport.update({
   path: '/sponsor',
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
+const AuthorizationAuthCallbackRoute =
+  AuthorizationAuthCallbackRouteImport.update({
+    id: '/auth/callback',
+    path: '/auth/callback',
+    getParentRoute: () => AuthorizationRouteRoute,
+  } as any)
 const AuthorizationAuthLoginRoute = AuthorizationAuthLoginRouteImport.update({
   id: '/auth/login',
   path: '/auth/login',
@@ -130,9 +149,12 @@ export interface FileRoutesByFullPath {
   '/about/me': typeof AboutMeRoute
   '/about/sponsor': typeof AboutSponsorRoute
   '/about/': typeof AboutIndexRoute
+  '/admin/color': typeof AdminAdminColorRoute
   '/admin/dashboard': typeof AdminAdminDashboardRoute
+  '/admin/location': typeof AdminAdminLocationRoute
   '/admin/setting': typeof AdminAdminSettingRoute
   '/admin/sponsor': typeof AdminAdminSponsorRoute
+  '/auth/callback': typeof AuthorizationAuthCallbackRoute
   '/auth/login': typeof AuthorizationAuthLoginRoute
   '/admin/link/$id': typeof AdminAdminLinkIdRouteWithChildren
   '/admin/link/add': typeof AdminAdminLinkAddRoute
@@ -147,9 +169,12 @@ export interface FileRoutesByTo {
   '/about/me': typeof AboutMeRoute
   '/about/sponsor': typeof AboutSponsorRoute
   '/about': typeof AboutIndexRoute
+  '/admin/color': typeof AdminAdminColorRoute
   '/admin/dashboard': typeof AdminAdminDashboardRoute
+  '/admin/location': typeof AdminAdminLocationRoute
   '/admin/setting': typeof AdminAdminSettingRoute
   '/admin/sponsor': typeof AdminAdminSponsorRoute
+  '/auth/callback': typeof AuthorizationAuthCallbackRoute
   '/auth/login': typeof AuthorizationAuthLoginRoute
   '/admin/link/$id': typeof AdminAdminLinkIdRouteWithChildren
   '/admin/link/add': typeof AdminAdminLinkAddRoute
@@ -169,9 +194,12 @@ export interface FileRoutesById {
   '/about/sponsor': typeof AboutSponsorRoute
   '/_public/': typeof PublicIndexRoute
   '/about/': typeof AboutIndexRoute
+  '/_admin/admin/color': typeof AdminAdminColorRoute
   '/_admin/admin/dashboard': typeof AdminAdminDashboardRoute
+  '/_admin/admin/location': typeof AdminAdminLocationRoute
   '/_admin/admin/setting': typeof AdminAdminSettingRoute
   '/_admin/admin/sponsor': typeof AdminAdminSponsorRoute
+  '/_authorization/auth/callback': typeof AuthorizationAuthCallbackRoute
   '/_authorization/auth/login': typeof AuthorizationAuthLoginRoute
   '/_admin/admin/link/$id': typeof AdminAdminLinkIdRouteWithChildren
   '/_admin/admin/link/add': typeof AdminAdminLinkAddRoute
@@ -189,9 +217,12 @@ export interface FileRouteTypes {
     | '/about/me'
     | '/about/sponsor'
     | '/about/'
+    | '/admin/color'
     | '/admin/dashboard'
+    | '/admin/location'
     | '/admin/setting'
     | '/admin/sponsor'
+    | '/auth/callback'
     | '/auth/login'
     | '/admin/link/$id'
     | '/admin/link/add'
@@ -206,9 +237,12 @@ export interface FileRouteTypes {
     | '/about/me'
     | '/about/sponsor'
     | '/about'
+    | '/admin/color'
     | '/admin/dashboard'
+    | '/admin/location'
     | '/admin/setting'
     | '/admin/sponsor'
+    | '/auth/callback'
     | '/auth/login'
     | '/admin/link/$id'
     | '/admin/link/add'
@@ -227,9 +261,12 @@ export interface FileRouteTypes {
     | '/about/sponsor'
     | '/_public/'
     | '/about/'
+    | '/_admin/admin/color'
     | '/_admin/admin/dashboard'
+    | '/_admin/admin/location'
     | '/_admin/admin/setting'
     | '/_admin/admin/sponsor'
+    | '/_authorization/auth/callback'
     | '/_authorization/auth/login'
     | '/_admin/admin/link/$id'
     | '/_admin/admin/link/add'
@@ -317,11 +354,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutSponsorRouteImport
       parentRoute: typeof AboutRouteRoute
     }
+    '/_admin/admin/color': {
+      id: '/_admin/admin/color'
+      path: '/color'
+      fullPath: '/admin/color'
+      preLoaderRoute: typeof AdminAdminColorRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
     '/_admin/admin/dashboard': {
       id: '/_admin/admin/dashboard'
       path: '/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminAdminDashboardRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
+    '/_admin/admin/location': {
+      id: '/_admin/admin/location'
+      path: '/location'
+      fullPath: '/admin/location'
+      preLoaderRoute: typeof AdminAdminLocationRouteImport
       parentRoute: typeof AdminAdminRouteRoute
     }
     '/_admin/admin/setting': {
@@ -337,6 +388,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/sponsor'
       preLoaderRoute: typeof AdminAdminSponsorRouteImport
       parentRoute: typeof AdminAdminRouteRoute
+    }
+    '/_authorization/auth/callback': {
+      id: '/_authorization/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthorizationAuthCallbackRouteImport
+      parentRoute: typeof AuthorizationRouteRoute
     }
     '/_authorization/auth/login': {
       id: '/_authorization/auth/login'
@@ -395,7 +453,9 @@ const AdminAdminLinkIdRouteWithChildren =
   AdminAdminLinkIdRoute._addFileChildren(AdminAdminLinkIdRouteChildren)
 
 interface AdminAdminRouteRouteChildren {
+  AdminAdminColorRoute: typeof AdminAdminColorRoute
   AdminAdminDashboardRoute: typeof AdminAdminDashboardRoute
+  AdminAdminLocationRoute: typeof AdminAdminLocationRoute
   AdminAdminSettingRoute: typeof AdminAdminSettingRoute
   AdminAdminSponsorRoute: typeof AdminAdminSponsorRoute
   AdminAdminLinkIdRoute: typeof AdminAdminLinkIdRouteWithChildren
@@ -405,7 +465,9 @@ interface AdminAdminRouteRouteChildren {
 }
 
 const AdminAdminRouteRouteChildren: AdminAdminRouteRouteChildren = {
+  AdminAdminColorRoute: AdminAdminColorRoute,
   AdminAdminDashboardRoute: AdminAdminDashboardRoute,
+  AdminAdminLocationRoute: AdminAdminLocationRoute,
   AdminAdminSettingRoute: AdminAdminSettingRoute,
   AdminAdminSponsorRoute: AdminAdminSponsorRoute,
   AdminAdminLinkIdRoute: AdminAdminLinkIdRouteWithChildren,
@@ -431,10 +493,12 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 )
 
 interface AuthorizationRouteRouteChildren {
+  AuthorizationAuthCallbackRoute: typeof AuthorizationAuthCallbackRoute
   AuthorizationAuthLoginRoute: typeof AuthorizationAuthLoginRoute
 }
 
 const AuthorizationRouteRouteChildren: AuthorizationRouteRouteChildren = {
+  AuthorizationAuthCallbackRoute: AuthorizationAuthCallbackRoute,
   AuthorizationAuthLoginRoute: AuthorizationAuthLoginRoute,
 }
 

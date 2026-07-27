@@ -20,8 +20,8 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/repository"
 )
 
-// sessionTTL 登录会话有效期
-const sessionTTL = 24 * time.Hour
+// SessionTTL 默认登录会话有效期
+const SessionTTL = 24 * time.Hour
 
 // SessionMeta 会话元数据
 //
@@ -48,7 +48,9 @@ func NewSessionLogic(m *xCache.Manager) *SessionLogic {
 }
 
 // CreateUserSession 创建用户会话
-func (s *SessionLogic) CreateUserSession(ctx context.Context, user *entity.SystemUser, token string, meta SessionMeta) *xError.Error {
+//
+// ttl 为会话有效期；会话对象的 ExpiredAt 与 Redis TTL 均以此为准。
+func (s *SessionLogic) CreateUserSession(ctx context.Context, user *entity.SystemUser, token string, meta SessionMeta, ttl time.Duration) *xError.Error {
 	now := time.Now()
 	tokenSession := &redisModel.TokenSession{
 		UserID:    user.ID,
@@ -58,10 +60,15 @@ func (s *SessionLogic) CreateUserSession(ctx context.Context, user *entity.Syste
 		LoginIP:   meta.ClientIP,
 		UserAgent: meta.UserAgent,
 		CreatedAt: now,
-		ExpiredAt: now.Add(sessionTTL),
+		ExpiredAt: now.Add(ttl),
 	}
 
-	return s.repo.SaveSession(ctx, token, tokenSession, sessionTTL)
+	return s.repo.SaveSession(ctx, token, tokenSession, ttl)
+}
+
+// GetUserSession 读取用户会话；会话不存在时 found=false（非错误）
+func (s *SessionLogic) GetUserSession(ctx context.Context, token string) (*redisModel.TokenSession, bool, *xError.Error) {
+	return s.repo.GetSession(ctx, token)
 }
 
 // DeleteUserSession 删除用户会话
