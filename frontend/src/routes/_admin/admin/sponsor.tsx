@@ -4,21 +4,19 @@
  * Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
  * --------------------------------------------------------------------------------
  * 许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
- * 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+ * 有关MIT许可证的更多信息，请查看项目根目录下的 LICENSE 文件或访问：
  * https://opensource.org/licenses/MIT
  * --------------------------------------------------------------------------------
  */
 
 import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import { motion, useReducedMotion } from 'motion/react'
 import {
-  Heart,
   MoreHorizontal,
   Pencil,
   Plus,
   Search,
-  SearchX,
-  Sprout,
   Trash2,
 } from 'lucide-react'
 import type {
@@ -26,9 +24,7 @@ import type {
   SponsorChannelAdmin,
   SponsorRecordAdmin,
 } from '@/api/types'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
@@ -59,6 +55,20 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  BambooRule,
+  EnsoEmpty,
+  InkBadge,
+  InkStat,
+  InkSwitch,
+  PageHead,
+  inkTableHeadRow,
+  inkTableRow,
+  inkTableWrap,
+  inkTd,
+  inkTh,
+} from '@/components/ink-wash'
+import { enter } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 import {
   useAdminChannels,
@@ -81,7 +91,7 @@ const PAGE_SIZE = 10
 
 /** 原生 select 样式（与 Input 视觉对齐） */
 const selectClass =
-  'border-input dark:bg-input/30 h-9 w-full cursor-pointer rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50'
+  'h-9 w-full cursor-pointer rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-leaf-deep focus-visible:ring-leaf-deep/30 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50'
 
 /** 金额（分）转元展示 */
 function formatYuan(cents: number) {
@@ -111,7 +121,7 @@ function ChannelIcon({
     return (
       <div
         className={cn(
-          'flex shrink-0 items-center justify-center rounded-lg bg-primary/10 font-semibold text-primary',
+          'flex shrink-0 items-center justify-center rounded-lg bg-muted font-serif font-semibold text-text-secondary',
           className,
         )}
       >
@@ -137,39 +147,8 @@ function ChannelIcon({
   )
 }
 
-/** 启用/禁用开关（button + role=switch 实现） */
-function StatusSwitch({
-  checked,
-  disabled,
-  onToggle,
-}: {
-  checked: boolean
-  disabled?: boolean
-  onToggle: () => void
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      disabled={disabled}
-      onClick={onToggle}
-      className={cn(
-        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50',
-        checked ? 'bg-primary' : 'bg-muted-foreground/25',
-      )}
-    >
-      <span
-        className={cn(
-          'inline-block size-4 rounded-full bg-background shadow-sm transition-transform duration-200',
-          checked ? 'translate-x-[18px]' : 'translate-x-0.5',
-        )}
-      />
-    </button>
-  )
-}
-
 function SponsorPage() {
+  const reduced = useReducedMotion() ?? false
   // 统计仅取总数：轻量查询（page_size=1），与面板内的分页查询互不影响
   const recordsTotal = useAdminRecords({ page: 1, page_size: 1 })
   const allChannels = useAllChannels()
@@ -178,49 +157,47 @@ function SponsorPage() {
   const channelCount = allChannels.data?.length ?? 0
 
   return (
-    <div className="space-y-6">
-      {/* 页头 */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">赞助管理</h1>
-        <p className="mt-1 text-muted-foreground">管理所有赞助记录与赞助渠道</p>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <PageHead
+        kicker="SPONSOR · 赞助"
+        title="赞助管理"
+        sub="管理所有赞助记录与赞助渠道，记录每一份支持。"
+      />
+
+      <BambooRule reduced={reduced} delay={0.12} />
 
       {/* 统计卡片 */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card className="transition-colors duration-200 hover:border-rose-300/60">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-rose-500/10">
-              <Heart className="size-5 text-rose-500" />
-            </div>
-            <div>
-              {recordsTotal.isLoading ? (
-                <Skeleton className="mb-1 h-7 w-16" />
-              ) : (
-                <div className="text-2xl font-bold tabular-nums">
-                  {recordCount}
-                </div>
-              )}
-              <p className="text-sm text-muted-foreground">赞助记录数</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="transition-colors duration-200 hover:border-emerald-300/60">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-              <Sprout className="size-5 text-emerald-500" />
-            </div>
-            <div>
-              {allChannels.isLoading ? (
-                <Skeleton className="mb-1 h-7 w-16" />
-              ) : (
-                <div className="text-2xl font-bold tabular-nums">
-                  {channelCount}
-                </div>
-              )}
-              <p className="text-sm text-muted-foreground">赞助渠道数</p>
-            </div>
-          </CardContent>
-        </Card>
+        <motion.div
+          {...enter(reduced, 0.18, {
+            initial: { opacity: 0, y: 10 },
+            animate: { opacity: 1, y: 0 },
+            transition: { duration: 0.4, ease: 'easeOut' },
+          })}
+        >
+          <InkStat
+            label="赞助记录数"
+            value={recordCount}
+            watermark="赞"
+            hint="累计收到的赞助"
+            loading={recordsTotal.isLoading}
+          />
+        </motion.div>
+        <motion.div
+          {...enter(reduced, 0.24, {
+            initial: { opacity: 0, y: 10 },
+            animate: { opacity: 1, y: 0 },
+            transition: { duration: 0.4, ease: 'easeOut' },
+          })}
+        >
+          <InkStat
+            label="赞助渠道数"
+            value={channelCount}
+            watermark="渠"
+            hint="已配置的收款渠道"
+            loading={allChannels.isLoading}
+          />
+        </motion.div>
       </div>
 
       {/* 双标签：赞助记录 + 赞助渠道 */}
@@ -230,10 +207,10 @@ function SponsorPage() {
           <TabsTrigger value="channels">赞助渠道</TabsTrigger>
         </TabsList>
         <TabsContent value="records" className="mt-4">
-          <RecordsPanel />
+          <RecordsPanel reduced={reduced} />
         </TabsContent>
         <TabsContent value="channels" className="mt-4">
-          <ChannelsPanel />
+          <ChannelsPanel reduced={reduced} />
         </TabsContent>
       </Tabs>
     </div>
@@ -245,7 +222,7 @@ function SponsorPage() {
 // ---------------------------------------------------------------------------
 
 /** 赞助记录面板：搜索 / 渠道筛选 / 服务端分页表格 / 增删改 */
-function RecordsPanel() {
+function RecordsPanel({ reduced }: { reduced: boolean }) {
   const [page, setPage] = useState(1)
   const [keyword, setKeyword] = useState('')
   const [channelFilter, setChannelFilter] = useState<SnowflakeID | null>(null)
@@ -284,7 +261,7 @@ function RecordsPanel() {
       {/* 工具栏：搜索 + 渠道筛选 + 添加 */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative w-full max-w-xs">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
           <Input
             placeholder="搜索赞助者昵称…"
             className="pl-9"
@@ -320,86 +297,105 @@ function RecordsPanel() {
       </div>
 
       {/* 记录表格 */}
-      <div className="overflow-hidden rounded-xl border border-border/70 bg-card">
+      <motion.div
+        {...enter(reduced, 0.2, {
+          initial: { opacity: 0 },
+          animate: { opacity: 1 },
+          transition: { duration: 0.4, ease: 'easeOut' },
+        })}
+        className={inkTableWrap}
+      >
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/40 hover:bg-muted/40">
-              <TableHead className="px-4">赞助者</TableHead>
-              <TableHead className="px-4">金额</TableHead>
-              <TableHead className="px-4">渠道</TableHead>
-              <TableHead className="hidden px-4 md:table-cell">留言</TableHead>
-              <TableHead className="px-4">状态</TableHead>
-              <TableHead className="hidden px-4 lg:table-cell">时间</TableHead>
-              <TableHead className="px-4 text-right">操作</TableHead>
+            <TableRow className={cn(inkTableHeadRow, 'hover:bg-muted/30')}>
+              <TableHead className={inkTh}>赞助者</TableHead>
+              <TableHead className={inkTh}>金额</TableHead>
+              <TableHead className={inkTh}>渠道</TableHead>
+              <TableHead className={cn(inkTh, 'hidden md:table-cell')}>
+                留言
+              </TableHead>
+              <TableHead className={inkTh}>状态</TableHead>
+              <TableHead className={cn(inkTh, 'hidden lg:table-cell')}>
+                时间
+              </TableHead>
+              <TableHead className={cn(inkTh, 'text-right')}>操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {recordsQuery.isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell colSpan={7} className="px-4 py-3">
+                  <TableCell colSpan={7} className={inkTd}>
                     <Skeleton className="h-6 w-full" />
                   </TableCell>
                 </TableRow>
               ))
             ) : records.length === 0 ? (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={7} className="px-4 py-14">
-                  <div className="flex flex-col items-center gap-3 text-center">
-                    <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-                      <SearchX className="size-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-medium">没有找到赞助记录</p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        试试调整搜索条件，或添加一条新的赞助记录
-                      </p>
-                    </div>
-                  </div>
+                <TableCell colSpan={7} className="px-4 py-10">
+                  <EnsoEmpty
+                    title="没有找到赞助记录"
+                    hint="试试调整搜索条件，或添加一条新的赞助记录"
+                  />
                 </TableCell>
               </TableRow>
             ) : (
               records.map((record) => (
-                <TableRow key={record.id.toString()} className="group">
-                  <TableCell className="px-4 py-3">
-                    <span className="font-medium">{record.nickname}</span>
+                <TableRow
+                  key={record.id.toString()}
+                  className={cn('group', inkTableRow)}
+                >
+                  <TableCell className={inkTd}>
+                    <span className="font-serif font-semibold text-text-primary">
+                      {record.nickname}
+                    </span>
                   </TableCell>
-                  <TableCell className="px-4 py-3 font-medium tabular-nums text-green-600">
+                  <TableCell
+                    className={cn(
+                      inkTd,
+                      'font-mono font-semibold tabular-nums text-leaf-deep',
+                    )}
+                  >
                     {formatYuan(record.amount)}
                   </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <Badge variant="secondary">
+                  <TableCell className={inkTd}>
+                    <InkBadge tone="neutral">
                       {record.channel?.name ?? '未分类'}
-                    </Badge>
+                    </InkBadge>
                   </TableCell>
-                  <TableCell className="hidden max-w-[220px] px-4 py-3 md:table-cell">
+                  <TableCell
+                    className={cn(
+                      inkTd,
+                      'hidden max-w-[220px] md:table-cell',
+                    )}
+                  >
                     <span
-                      className="block truncate text-muted-foreground"
+                      className="block truncate text-text-secondary"
                       title={record.message ?? undefined}
                     >
                       {record.message || '—'}
                     </span>
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     <div className="flex flex-wrap gap-1">
                       {record.is_hidden ? (
-                        <Badge variant="destructive">隐藏</Badge>
+                        <InkBadge tone="danger">隐藏</InkBadge>
                       ) : (
-                        <Badge className="bg-green-500/15 text-green-700 hover:bg-green-500/15">
-                          公开
-                        </Badge>
+                        <InkBadge tone="leaf">公开</InkBadge>
                       )}
                       {record.is_anonymous && (
-                        <Badge variant="outline">匿名</Badge>
+                        <InkBadge tone="neutral">匿名</InkBadge>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="hidden px-4 py-3 lg:table-cell">
-                    <span className="tabular-nums text-muted-foreground">
+                  <TableCell
+                    className={cn(inkTd, 'hidden lg:table-cell')}
+                  >
+                    <span className="font-mono tabular-nums text-text-secondary">
                       {formatDate(record.sponsor_at ?? record.created_at)}
                     </span>
                   </TableCell>
-                  <TableCell className="px-4 py-3 text-right">
+                  <TableCell className={cn(inkTd, 'text-right')}>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -436,8 +432,8 @@ function RecordsPanel() {
         </Table>
 
         {/* 分页 */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/70 px-4 py-3">
-          <span className="text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
+          <span className="font-mono text-xs text-text-secondary">
             共 {total} 条 · 第 {page} / {Math.max(totalPages, 1)} 页
           </span>
           <Pagination
@@ -446,7 +442,7 @@ function RecordsPanel() {
             onPageChange={(i) => setPage(i + 1)}
           />
         </div>
-      </div>
+      </motion.div>
 
       {/* 新增 / 编辑弹窗 */}
       <RecordFormDialog
@@ -728,7 +724,7 @@ function RecordFormDialog({
 // ---------------------------------------------------------------------------
 
 /** 赞助渠道面板：搜索 / 服务端分页表格 / 增删改 / 状态切换 */
-function ChannelsPanel() {
+function ChannelsPanel({ reduced }: { reduced: boolean }) {
   const [page, setPage] = useState(1)
   const [keyword, setKeyword] = useState('')
   const [formTarget, setFormTarget] = useState<
@@ -764,7 +760,7 @@ function ChannelsPanel() {
       {/* 工具栏：搜索 + 添加 */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative w-full max-w-xs">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
           <Input
             placeholder="搜索渠道名称…"
             className="pl-9"
@@ -783,41 +779,43 @@ function ChannelsPanel() {
       </div>
 
       {/* 渠道表格 */}
-      <div className="overflow-hidden rounded-xl border border-border/70 bg-card">
+      <motion.div
+        {...enter(reduced, 0.2, {
+          initial: { opacity: 0 },
+          animate: { opacity: 1 },
+          transition: { duration: 0.4, ease: 'easeOut' },
+        })}
+        className={inkTableWrap}
+      >
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/40 hover:bg-muted/40">
-              <TableHead className="px-4">渠道</TableHead>
-              <TableHead className="hidden px-4 md:table-cell">描述</TableHead>
-              <TableHead className="px-4">排序</TableHead>
-              <TableHead className="px-4">赞助次数</TableHead>
-              <TableHead className="px-4">状态</TableHead>
-              <TableHead className="px-4 text-right">操作</TableHead>
+            <TableRow className={cn(inkTableHeadRow, 'hover:bg-muted/30')}>
+              <TableHead className={inkTh}>渠道</TableHead>
+              <TableHead className={cn(inkTh, 'hidden md:table-cell')}>
+                描述
+              </TableHead>
+              <TableHead className={inkTh}>排序</TableHead>
+              <TableHead className={inkTh}>赞助次数</TableHead>
+              <TableHead className={inkTh}>状态</TableHead>
+              <TableHead className={cn(inkTh, 'text-right')}>操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {channelsQuery.isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell colSpan={6} className="px-4 py-3">
+                  <TableCell colSpan={6} className={inkTd}>
                     <Skeleton className="h-6 w-full" />
                   </TableCell>
                 </TableRow>
               ))
             ) : channels.length === 0 ? (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={6} className="px-4 py-14">
-                  <div className="flex flex-col items-center gap-3 text-center">
-                    <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-                      <SearchX className="size-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-medium">没有找到赞助渠道</p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        试试调整搜索关键词，或添加一个新的赞助渠道
-                      </p>
-                    </div>
-                  </div>
+                <TableCell colSpan={6} className="px-4 py-10">
+                  <EnsoEmpty
+                    title="没有找到赞助渠道"
+                    hint="试试调整搜索关键词，或添加一个新的赞助渠道"
+                  />
                 </TableCell>
               </TableRow>
             ) : (
@@ -826,34 +824,54 @@ function ChannelsPanel() {
                   updateStatus.isPending &&
                   updateStatus.variables.id === channel.id
                 return (
-                  <TableRow key={channel.id.toString()} className="group">
-                    <TableCell className="px-4 py-3">
+                  <TableRow
+                    key={channel.id.toString()}
+                    className={cn('group', inkTableRow)}
+                  >
+                    <TableCell className={inkTd}>
                       <div className="flex items-center gap-3">
                         <ChannelIcon
                           name={channel.name}
                           icon={channel.icon}
                           className="size-8 text-xs"
                         />
-                        <span className="font-medium">{channel.name}</span>
+                        <span className="font-serif font-semibold text-text-primary">
+                          {channel.name}
+                        </span>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden max-w-[260px] px-4 py-3 md:table-cell">
+                    <TableCell
+                      className={cn(
+                        inkTd,
+                        'hidden max-w-[260px] md:table-cell',
+                      )}
+                    >
                       <span
-                        className="block truncate text-muted-foreground"
+                        className="block truncate text-text-secondary"
                         title={channel.description ?? undefined}
                       >
                         {channel.description || '—'}
                       </span>
                     </TableCell>
-                    <TableCell className="px-4 py-3 tabular-nums text-muted-foreground">
+                    <TableCell
+                      className={cn(
+                        inkTd,
+                        'font-mono tabular-nums text-text-secondary',
+                      )}
+                    >
                       {channel.sort_order}
                     </TableCell>
-                    <TableCell className="px-4 py-3 font-medium tabular-nums">
+                    <TableCell
+                      className={cn(
+                        inkTd,
+                        'font-mono font-medium tabular-nums text-text-primary',
+                      )}
+                    >
                       {channel.sponsor_count}
                     </TableCell>
-                    <TableCell className="px-4 py-3">
+                    <TableCell className={inkTd}>
                       <div className="flex items-center gap-2">
-                        <StatusSwitch
+                        <InkSwitch
                           checked={channel.status}
                           disabled={statusPending}
                           onToggle={() =>
@@ -867,8 +885,8 @@ function ChannelsPanel() {
                           className={cn(
                             'text-sm',
                             channel.status
-                              ? 'text-foreground'
-                              : 'text-muted-foreground',
+                              ? 'text-text-primary'
+                              : 'text-text-secondary',
                           )}
                         >
                           {statusPending
@@ -879,7 +897,7 @@ function ChannelsPanel() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-right">
+                    <TableCell className={cn(inkTd, 'text-right')}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -917,8 +935,8 @@ function ChannelsPanel() {
         </Table>
 
         {/* 分页 */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/70 px-4 py-3">
-          <span className="text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
+          <span className="font-mono text-xs text-text-secondary">
             共 {total} 条 · 第 {page} / {Math.max(totalPages, 1)} 页
           </span>
           <Pagination
@@ -927,7 +945,7 @@ function ChannelsPanel() {
             onPageChange={(i) => setPage(i + 1)}
           />
         </div>
-      </div>
+      </motion.div>
 
       {/* 新增 / 编辑弹窗 */}
       <ChannelFormDialog

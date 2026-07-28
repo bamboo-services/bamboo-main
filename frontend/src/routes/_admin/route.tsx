@@ -77,6 +77,10 @@ function getCrumbs(pathname: string): Array<Crumb> {
     crumbs.push({ label: '赞助管理' })
   } else if (path === '/admin/setting') {
     crumbs.push({ label: '系统设置' })
+  } else if (path === '/admin/color') {
+    crumbs.push({ label: '颜色管理' })
+  } else if (path === '/admin/location') {
+    crumbs.push({ label: '位置管理' })
   } else {
     crumbs.push({ label: '未知页面' })
   }

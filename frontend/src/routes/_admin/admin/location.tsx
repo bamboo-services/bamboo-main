@@ -4,17 +4,17 @@
  * Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
  * --------------------------------------------------------------------------------
  * 许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
- * 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+ * 有关MIT许可证的更多信息，请查看项目根目录下的 LICENSE 文件或访问：
  * https://opensource.org/licenses/MIT
  * --------------------------------------------------------------------------------
  */
 
 import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { FolderOpen, Pencil, Plus, Power, PowerOff, Trash2 } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
+import { Pencil, Plus, Power, PowerOff, Trash2 } from 'lucide-react'
 import type { LinkGroup } from '@/api/types'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -38,6 +38,19 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import {
+  BambooRule,
+  EnsoEmpty,
+  InkBadge,
+  PageHead,
+  inkTableHeadRow,
+  inkTableRow,
+  inkTableWrap,
+  inkTd,
+  inkTh,
+} from '@/components/ink-wash'
+import { enter } from '@/lib/motion'
+import { cn } from '@/lib/utils'
+import {
   useCreateGroup,
   useDeleteGroup,
   useGroups,
@@ -52,6 +65,7 @@ export const Route = createFileRoute('/_admin/admin/location')({
 const PAGE_SIZE = 10
 
 function LocationPage() {
+  const reduced = useReducedMotion() ?? false
   const [pageIndex, setPageIndex] = useState(0)
 
   // 新建 / 编辑弹窗（共用一个受控表单）
@@ -144,52 +158,59 @@ function LocationPage() {
   }
 
   return (
-    <div className="space-y-5">
-      {/* 页头 */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">位置管理</h1>
-          <p className="mt-1 text-muted-foreground">
-            管理友链的展示位置（分组），控制友链在页面上的归类方式
-          </p>
-        </div>
-        <Button className="cursor-pointer" onClick={openCreate}>
-          <Plus className="mr-2 size-4" />
-          新建分组
-        </Button>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <PageHead
+        kicker="GROUPS · 位置"
+        title="位置管理"
+        sub="管理友链的展示位置（分组），控制友链在页面上的归类方式。"
+        actions={
+          <Button className="cursor-pointer" onClick={openCreate}>
+            <Plus className="mr-2 size-4" />
+            新建分组
+          </Button>
+        }
+      />
+
+      <BambooRule reduced={reduced} delay={0.12} />
 
       {/* 分组表格 */}
-      <div className="overflow-hidden rounded-xl border border-border/70 bg-card">
+      <motion.section
+        {...enter(reduced, 0.18, {
+          initial: { opacity: 0, y: 10 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.4, ease: 'easeOut' },
+        })}
+        className={inkTableWrap}
+      >
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/40 hover:bg-muted/40">
-              <TableHead className="px-4 py-2.5">名称</TableHead>
-              <TableHead className="hidden px-4 py-2.5 md:table-cell">
+            <TableRow className={cn(inkTableHeadRow, 'hover:bg-muted/30')}>
+              <TableHead className={inkTh}>名称</TableHead>
+              <TableHead className={cn(inkTh, 'hidden md:table-cell')}>
                 描述
               </TableHead>
-              <TableHead className="px-4 py-2.5">排序</TableHead>
-              <TableHead className="px-4 py-2.5">状态</TableHead>
-              <TableHead className="px-4 py-2.5 text-right">操作</TableHead>
+              <TableHead className={inkTh}>排序</TableHead>
+              <TableHead className={inkTh}>状态</TableHead>
+              <TableHead className={cn(inkTh, 'text-right')}>操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {groupsQuery.isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     <Skeleton className="h-4 w-24" />
                   </TableCell>
-                  <TableCell className="hidden px-4 py-3 md:table-cell">
+                  <TableCell className={cn(inkTd, 'hidden md:table-cell')}>
                     <Skeleton className="h-4 w-48" />
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     <Skeleton className="h-4 w-8" />
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     <Skeleton className="h-5 w-12 rounded-full" />
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     <div className="flex justify-end gap-1">
                       <Skeleton className="size-8 rounded-md" />
                       <Skeleton className="size-8 rounded-md" />
@@ -199,61 +220,50 @@ function LocationPage() {
                 </TableRow>
               ))
             ) : groups.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="px-4 py-14">
-                  <div className="flex flex-col items-center gap-3 text-center">
-                    <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-                      <FolderOpen className="size-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-medium">暂无分组</p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        创建一个分组，让友链展示更有条理
-                      </p>
-                    </div>
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={5} className="px-4 py-10">
+                  <EnsoEmpty
+                    title="暂无分组"
+                    hint="创建一个分组，让友链展示更有条理"
+                  >
                     <Button
                       variant="outline"
                       size="sm"
-                      className="cursor-pointer"
+                      className="ml-auto cursor-pointer"
                       onClick={openCreate}
                     >
                       <Plus className="mr-2 size-4" />
                       新建分组
                     </Button>
-                  </div>
+                  </EnsoEmpty>
                 </TableCell>
               </TableRow>
             ) : (
               groups.map((group) => (
-                <TableRow key={group.id.toString()}>
-                  <TableCell className="px-4 py-3">
-                    <span className="font-medium">{group.name}</span>
+                <TableRow key={group.id.toString()} className={inkTableRow}>
+                  <TableCell className={inkTd}>
+                    <span className="font-serif font-semibold text-text-primary">
+                      {group.name}
+                    </span>
                   </TableCell>
-                  <TableCell className="hidden px-4 py-3 md:table-cell">
-                    <span className="block max-w-xs truncate text-muted-foreground">
+                  <TableCell className={cn(inkTd, 'hidden md:table-cell')}>
+                    <span className="block max-w-xs truncate text-text-secondary">
                       {group.description ?? '—'}
                     </span>
                   </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <span className="tabular-nums text-muted-foreground">
+                  <TableCell className={inkTd}>
+                    <span className="font-mono tabular-nums text-text-secondary">
                       {group.sort_order}
                     </span>
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     {group.status ? (
-                      <Badge className="bg-green-500/15 text-green-700 hover:bg-green-500/15">
-                        启用
-                      </Badge>
+                      <InkBadge tone="leaf">启用</InkBadge>
                     ) : (
-                      <Badge
-                        variant="secondary"
-                        className="text-muted-foreground"
-                      >
-                        禁用
-                      </Badge>
+                      <InkBadge tone="neutral">禁用</InkBadge>
                     )}
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     <div className="flex items-center justify-end gap-1">
                       <Button
                         variant="ghost"
@@ -301,9 +311,10 @@ function LocationPage() {
         </Table>
 
         {!groupsQuery.isLoading && groups.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/70 px-4 py-3">
-            <span className="text-sm text-muted-foreground">
-              第 {pageIndex + 1} / {Math.max(totalPages, 1)} 页 · 共 {total} 条
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
+            <span className="font-mono text-xs text-text-secondary">
+              第 {pageIndex + 1} / {Math.max(totalPages, 1)} 页 · 共 {total}{' '}
+              条
             </span>
             <Pagination
               pageIndex={pageIndex}
@@ -312,7 +323,7 @@ function LocationPage() {
             />
           </div>
         )}
-      </div>
+      </motion.section>
 
       {/* 新建 / 编辑分组弹窗 */}
       <Dialog
@@ -358,7 +369,7 @@ function LocationPage() {
                 value={order}
                 onChange={(e) => setOrder(e.target.value)}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-text-secondary">
                 数值越小越靠前，默认为 0
               </p>
             </div>
@@ -398,7 +409,7 @@ function LocationPage() {
               确定要删除分组「{deleteTarget?.name}」吗？此操作不可撤销。
             </DialogDescription>
           </DialogHeader>
-          <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border/70 bg-muted/30 px-3 py-2.5 text-sm transition-colors duration-150 hover:bg-muted/50">
+          <label className="flex cursor-pointer items-center gap-2.5 rounded-md border border-border bg-muted/30 px-3 py-2.5 text-sm transition-colors duration-150 hover:bg-muted/50">
             <Checkbox
               checked={forceDelete}
               onCheckedChange={(checked) => setForceDelete(checked === true)}

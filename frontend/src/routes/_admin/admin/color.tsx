@@ -4,16 +4,16 @@
  * Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
  * --------------------------------------------------------------------------------
  * 许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
- * 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+ * 有关MIT许可证的更多信息，请查看项目根目录下的 LICENSE 文件或访问：
  * https://opensource.org/licenses/MIT
  * --------------------------------------------------------------------------------
  */
 
 import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import { motion, useReducedMotion } from 'motion/react'
 import {
   CircleDot,
-  Palette,
   Pencil,
   Plus,
   Power,
@@ -23,7 +23,6 @@ import {
 } from 'lucide-react'
 import type { LinkColor } from '@/api/types'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -45,6 +44,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  BambooRule,
+  EnsoEmpty,
+  InkBadge,
+  PageHead,
+  inkTableHeadRow,
+  inkTableRow,
+  inkTableWrap,
+  inkTd,
+  inkTh,
+} from '@/components/ink-wash'
+import { enter } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 import {
   useColors,
@@ -94,7 +105,7 @@ function ColorField({
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
-      <div className="flex items-center gap-2.5 rounded-lg border border-input bg-background px-2.5 py-1.5 transition-colors duration-150 focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]">
+      <div className="flex items-center gap-2.5 rounded-md border border-input bg-background px-2.5 py-1.5 transition-colors duration-150 focus-within:border-leaf-deep focus-within:ring-leaf-deep/30 focus-within:ring-[3px]">
         <input
           id={id}
           type="color"
@@ -102,13 +113,16 @@ function ColorField({
           onChange={(e) => onChange(e.target.value)}
           className="size-7 shrink-0 cursor-pointer appearance-none rounded-md border-0 bg-transparent p-0 [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded-md [&::-webkit-color-swatch]:border-0"
         />
-        <code className="text-xs uppercase text-muted-foreground">{value}</code>
+        <code className="font-mono text-xs uppercase text-text-secondary">
+          {value}
+        </code>
       </div>
     </div>
   )
 }
 
 function ColorPage() {
+  const reduced = useReducedMotion() ?? false
   const [pageIndex, setPageIndex] = useState(0)
 
   // 新建 / 编辑弹窗（共用一个受控表单）
@@ -218,54 +232,61 @@ function ColorPage() {
   }
 
   return (
-    <div className="space-y-5">
-      {/* 页头 */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">颜色管理</h1>
-          <p className="mt-1 text-muted-foreground">
-            管理友链的展示颜色，支持普通配色与炫彩效果
-          </p>
-        </div>
-        <Button className="cursor-pointer" onClick={openCreate}>
-          <Plus className="mr-2 size-4" />
-          新建颜色
-        </Button>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <PageHead
+        kicker="COLORS · 颜色"
+        title="颜色管理"
+        sub="管理友链的展示颜色，支持普通配色与炫彩效果。"
+        actions={
+          <Button className="cursor-pointer" onClick={openCreate}>
+            <Plus className="mr-2 size-4" />
+            新建颜色
+          </Button>
+        }
+      />
+
+      <BambooRule reduced={reduced} delay={0.12} />
 
       {/* 颜色表格 */}
-      <div className="overflow-hidden rounded-xl border border-border/70 bg-card">
+      <motion.section
+        {...enter(reduced, 0.18, {
+          initial: { opacity: 0, y: 10 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.4, ease: 'easeOut' },
+        })}
+        className={inkTableWrap}
+      >
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/40 hover:bg-muted/40">
-              <TableHead className="px-4 py-2.5">预览</TableHead>
-              <TableHead className="px-4 py-2.5">名称</TableHead>
-              <TableHead className="px-4 py-2.5">类型</TableHead>
-              <TableHead className="px-4 py-2.5">排序</TableHead>
-              <TableHead className="px-4 py-2.5">状态</TableHead>
-              <TableHead className="px-4 py-2.5 text-right">操作</TableHead>
+            <TableRow className={cn(inkTableHeadRow, 'hover:bg-muted/30')}>
+              <TableHead className={inkTh}>预览</TableHead>
+              <TableHead className={inkTh}>名称</TableHead>
+              <TableHead className={inkTh}>类型</TableHead>
+              <TableHead className={inkTh}>排序</TableHead>
+              <TableHead className={inkTh}>状态</TableHead>
+              <TableHead className={cn(inkTh, 'text-right')}>操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {colorsQuery.isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     <Skeleton className="size-7 rounded-md" />
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     <Skeleton className="h-4 w-24" />
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     <Skeleton className="h-5 w-12 rounded-full" />
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     <Skeleton className="h-4 w-8" />
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     <Skeleton className="h-5 w-12 rounded-full" />
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     <div className="flex justify-end gap-1">
                       <Skeleton className="size-8 rounded-md" />
                       <Skeleton className="size-8 rounded-md" />
@@ -275,34 +296,28 @@ function ColorPage() {
                 </TableRow>
               ))
             ) : colors.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="px-4 py-14">
-                  <div className="flex flex-col items-center gap-3 text-center">
-                    <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-                      <Palette className="size-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-medium">暂无颜色</p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        创建一种颜色，让友链卡片更有个性
-                      </p>
-                    </div>
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={6} className="px-4 py-10">
+                  <EnsoEmpty
+                    title="暂无颜色"
+                    hint="创建一种颜色，让友链卡片更有个性"
+                  >
                     <Button
                       variant="outline"
                       size="sm"
-                      className="cursor-pointer"
+                      className="ml-auto cursor-pointer"
                       onClick={openCreate}
                     >
                       <Plus className="mr-2 size-4" />
                       新建颜色
                     </Button>
-                  </div>
+                  </EnsoEmpty>
                 </TableCell>
               </TableRow>
             ) : (
               colors.map((color) => (
-                <TableRow key={color.id.toString()}>
-                  <TableCell className="px-4 py-3">
+                <TableRow key={color.id.toString()} className={inkTableRow}>
+                  <TableCell className={inkTd}>
                     {color.type === 1 ? (
                       <span
                         className="block size-7 rounded-md ring-1 ring-inset ring-border/60"
@@ -315,7 +330,8 @@ function ColorPage() {
                         <span
                           className="block size-7 rounded-md ring-1 ring-inset ring-border/60"
                           style={{
-                            backgroundColor: color.primary_color ?? '#6366f1',
+                            backgroundColor:
+                              color.primary_color ?? 'var(--leaf-deep)',
                           }}
                           title={`主色 ${color.primary_color ?? '未设置'}`}
                           aria-hidden="true"
@@ -341,44 +357,39 @@ function ColorPage() {
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <span className="font-medium">{color.name}</span>
+                  <TableCell className={inkTd}>
+                    <span className="font-serif font-semibold text-text-primary">
+                      {color.name}
+                    </span>
                     {color.type === 0 && color.primary_color && (
-                      <div className="font-mono text-xs uppercase text-muted-foreground">
+                      <div className="font-mono text-xs uppercase text-text-secondary">
                         {color.primary_color}
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     {color.type === 1 ? (
-                      <Badge className="border-transparent bg-gradient-to-r from-rose-500/15 via-amber-500/15 to-sky-500/15 text-foreground">
+                      <InkBadge tone="leaf">
                         <Sparkles className="size-3" />
                         炫彩
-                      </Badge>
+                      </InkBadge>
                     ) : (
-                      <Badge variant="secondary">普通</Badge>
+                      <InkBadge tone="neutral">普通</InkBadge>
                     )}
                   </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <span className="tabular-nums text-muted-foreground">
+                  <TableCell className={inkTd}>
+                    <span className="font-mono tabular-nums text-text-secondary">
                       {color.sort_order}
                     </span>
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     {color.status ? (
-                      <Badge className="bg-green-500/15 text-green-700 hover:bg-green-500/15">
-                        启用
-                      </Badge>
+                      <InkBadge tone="leaf">启用</InkBadge>
                     ) : (
-                      <Badge
-                        variant="secondary"
-                        className="text-muted-foreground"
-                      >
-                        禁用
-                      </Badge>
+                      <InkBadge tone="neutral">禁用</InkBadge>
                     )}
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell className={inkTd}>
                     <div className="flex items-center justify-end gap-1">
                       <Button
                         variant="ghost"
@@ -426,9 +437,10 @@ function ColorPage() {
         </Table>
 
         {!colorsQuery.isLoading && colors.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/70 px-4 py-3">
-            <span className="text-sm text-muted-foreground">
-              第 {pageIndex + 1} / {Math.max(totalPages, 1)} 页 · 共 {total} 条
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
+            <span className="font-mono text-xs text-text-secondary">
+              第 {pageIndex + 1} / {Math.max(totalPages, 1)} 页 · 共 {total}{' '}
+              条
             </span>
             <Pagination
               pageIndex={pageIndex}
@@ -437,7 +449,7 @@ function ColorPage() {
             />
           </div>
         )}
-      </div>
+      </motion.section>
 
       {/* 新建 / 编辑颜色弹窗 */}
       <Dialog
@@ -467,15 +479,15 @@ function ColorPage() {
             </div>
             <div className="space-y-2">
               <Label>颜色类型</Label>
-              <div className="flex rounded-lg border border-input bg-background p-0.5">
+              <div className="flex rounded-md border border-input bg-background p-0.5">
                 <button
                   type="button"
                   onClick={() => setColorType(0)}
                   className={cn(
-                    'flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-200',
+                    'flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium transition-colors duration-200',
                     colorType === 0
-                      ? 'bg-muted text-foreground shadow-xs'
-                      : 'text-muted-foreground hover:text-foreground',
+                      ? 'bg-leaf-deep/12 text-leaf-deep'
+                      : 'text-text-secondary hover:text-text-primary',
                   )}
                 >
                   <CircleDot className="size-4" />
@@ -485,17 +497,17 @@ function ColorPage() {
                   type="button"
                   onClick={() => setColorType(1)}
                   className={cn(
-                    'flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-200',
+                    'flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium transition-colors duration-200',
                     colorType === 1
-                      ? 'bg-muted text-foreground shadow-xs'
-                      : 'text-muted-foreground hover:text-foreground',
+                      ? 'bg-leaf-deep/12 text-leaf-deep'
+                      : 'text-text-secondary hover:text-text-primary',
                   )}
                 >
                   <Sparkles className="size-4" />
                   炫彩
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-text-secondary">
                 {colorType === 1
                   ? '炫彩类型由前端主题渲染动态效果，无需配置颜色。'
                   : '普通类型需配置主色、副色与悬停色。'}
@@ -531,7 +543,7 @@ function ColorPage() {
                 value={order}
                 onChange={(e) => setOrder(e.target.value)}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-text-secondary">
                 数值越小越靠前，默认为 0
               </p>
             </div>
@@ -571,7 +583,7 @@ function ColorPage() {
               确定要删除颜色「{deleteTarget?.name}」吗？此操作不可撤销。
             </DialogDescription>
           </DialogHeader>
-          <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border/70 bg-muted/30 px-3 py-2.5 text-sm transition-colors duration-150 hover:bg-muted/50">
+          <label className="flex cursor-pointer items-center gap-2.5 rounded-md border border-border bg-muted/30 px-3 py-2.5 text-sm transition-colors duration-150 hover:bg-muted/50">
             <Checkbox
               checked={forceDelete}
               onCheckedChange={(checked) => setForceDelete(checked === true)}

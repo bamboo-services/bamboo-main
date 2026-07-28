@@ -4,20 +4,18 @@
  * Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
  * --------------------------------------------------------------------------------
  * 许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
- * 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+ * 有关MIT许可证的更多信息，请查看项目根目录下的 LICENSE 文件或访问：
  * https://opensource.org/licenses/MIT
  * --------------------------------------------------------------------------------
  */
 
 import { useMemo, useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { motion, useReducedMotion } from 'motion/react'
 import {
-  
-  
-  
   flexRender,
   getCoreRowModel,
-  useReactTable
+  useReactTable,
 } from '@tanstack/react-table'
 import {
   CheckCircle2,
@@ -27,16 +25,17 @@ import {
   Pencil,
   Plus,
   Search,
-  SearchX,
   Table2,
   Trash2,
 } from 'lucide-react'
-import type {ColumnDef, OnChangeFn, PaginationState} from '@tanstack/react-table';
+import type {
+  ColumnDef,
+  OnChangeFn,
+  PaginationState,
+} from '@tanstack/react-table'
 import type { LinkFriend, SnowflakeID } from '@/api/types'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Pagination } from '@/components/ui/pagination'
 import {
@@ -54,6 +53,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  BambooRule,
+  EnsoEmpty,
+  InkBadge,
+  InkPill,
+  PageHead,
+  inkCard,
+  inkTableHeadRow,
+  inkTableRow,
+  inkTableWrap,
+  inkTd,
+  inkTh,
+  linkStatus,
+} from '@/components/ink-wash'
+import { enter } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 import { useAdminLinks, useDeleteLink } from '@/hooks/use-links'
 import { useAllGroups } from '@/hooks/use-groups'
@@ -67,30 +81,7 @@ type ViewMode = 'list' | 'table'
 
 const PAGE_SIZE = 9
 
-/** 友链状态徽章：0=待审核 1=已通过 2=已拒绝 */
-function StatusBadge({ link }: { link: LinkFriend }) {
-  if (link.is_failure === 1) {
-    return <Badge variant="destructive">已失效</Badge>
-  }
-  switch (link.status) {
-    case 1:
-      return (
-        <Badge className="bg-green-500/15 text-green-700 hover:bg-green-500/15">
-          已通过
-        </Badge>
-      )
-    case 2:
-      return <Badge variant="destructive">已拒绝</Badge>
-    default:
-      return (
-        <Badge className="bg-amber-500/15 text-amber-700 hover:bg-amber-500/15">
-          待审核
-        </Badge>
-      )
-  }
-}
-
-/** 头像加载失败时回退为首字色块 */
+/** 头像加载失败时回退为首字色块（宣纸底 + 墨色衬线字） */
 function SiteAvatar({
   name,
   url,
@@ -105,7 +96,7 @@ function SiteAvatar({
     return (
       <div
         className={cn(
-          'flex shrink-0 items-center justify-center rounded-lg bg-primary/10 font-semibold text-primary',
+          'flex shrink-0 items-center justify-center rounded-lg bg-muted font-serif font-semibold text-text-secondary',
           className,
         )}
       >
@@ -214,8 +205,10 @@ function LinkTable({
                 className="size-8 text-xs"
               />
               <div className="min-w-0">
-                <div className="truncate font-medium">{link.name}</div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="truncate font-serif font-semibold text-text-primary">
+                  {link.name}
+                </div>
+                <div className="flex items-center gap-1 font-mono text-xs text-text-secondary">
                   <span className="truncate">{link.url}</span>
                   <ExternalLink className="size-3 shrink-0" />
                 </div>
@@ -228,9 +221,9 @@ function LinkTable({
         id: 'group',
         header: '位置',
         cell: ({ row }) => (
-          <Badge variant="secondary">
+          <InkBadge tone="neutral">
             {row.original.group_f_key?.name ?? '未分组'}
-          </Badge>
+          </InkBadge>
         ),
       },
       {
@@ -239,10 +232,12 @@ function LinkTable({
         cell: ({ row }) => {
           const color = row.original.color_f_key
           return (
-            <span className="flex items-center gap-1.5 text-muted-foreground">
+            <span className="flex items-center gap-1.5 text-text-secondary">
               <span
                 className="size-2.5 rounded-full"
-                style={{ backgroundColor: color?.primary_color ?? '#6366f1' }}
+                style={{
+                  backgroundColor: color?.primary_color ?? 'var(--leaf-deep)',
+                }}
                 aria-hidden="true"
               />
               {color?.name ?? '默认'}
@@ -253,14 +248,17 @@ function LinkTable({
       {
         id: 'status',
         header: '状态',
-        cell: ({ row }) => <StatusBadge link={row.original} />,
+        cell: ({ row }) => {
+          const s = linkStatus(row.original)
+          return <InkBadge tone={s.tone}>{s.label}</InkBadge>
+        },
       },
       {
         accessorKey: 'updated_at',
         id: 'updatedAt',
         header: '更新时间',
         cell: ({ row }) => (
-          <span className="tabular-nums text-muted-foreground">
+          <span className="font-mono tabular-nums text-text-secondary">
             {new Date(row.original.updated_at).toLocaleDateString('zh-CN')}
           </span>
         ),
@@ -287,21 +285,15 @@ function LinkTable({
   })
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border/70 bg-card">
+    <div className={inkTableWrap}>
       <table className="w-full text-sm">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr
-              key={headerGroup.id}
-              className="border-b border-border/70 bg-muted/40 text-left text-xs text-muted-foreground"
-            >
+            <tr key={headerGroup.id} className={inkTableHeadRow}>
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className={cn(
-                    'px-4 py-2.5 font-medium',
-                    columnClass[header.column.id],
-                  )}
+                  className={cn(inkTh, columnClass[header.column.id])}
                 >
                   {flexRender(
                     header.column.columnDef.header,
@@ -317,12 +309,15 @@ function LinkTable({
             <tr
               key={row.id}
               onClick={() => onOpenDetail(row.original.id)}
-              className="group cursor-pointer border-b border-border/40 transition-colors duration-150 last:border-0 hover:bg-muted/40"
+              className={cn(
+                'group cursor-pointer',
+                inkTableRow,
+              )}
             >
               {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}
-                  className={cn('px-4 py-2.5', columnClass[cell.column.id])}
+                  className={cn(inkTd, columnClass[cell.column.id])}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
@@ -332,8 +327,8 @@ function LinkTable({
         </tbody>
       </table>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/70 px-4 py-3">
-        <span className="text-sm text-muted-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
+        <span className="font-mono text-xs text-text-secondary">
           第 {pagination.pageIndex + 1} / {Math.max(pageCount, 1)} 页
         </span>
         <Pagination
@@ -349,6 +344,7 @@ function LinkTable({
 }
 
 function LinkListPage() {
+  const reduced = useReducedMotion() ?? false
   const navigate = useNavigate()
   const [keyword, setKeyword] = useState('')
   const [statusFilter, setStatusFilter] = useState<number | null>(null)
@@ -397,74 +393,86 @@ function LinkListPage() {
     { label: '已拒绝', value: 2 },
   ]
 
+  const statItems = [
+    {
+      label: '总收录',
+      value: stats?.total_links ?? 0,
+      dot: 'var(--chart-1)',
+    },
+    {
+      label: '已通过',
+      value: stats?.approved_links ?? 0,
+      dot: 'var(--leaf-deep)',
+    },
+    {
+      label: '待审核',
+      value: stats?.pending_links ?? 0,
+      dot: 'var(--chart-4)',
+    },
+  ]
+
   return (
-    <div className="space-y-5">
-      {/* 页头 */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">友链管理</h1>
-          <p className="mt-1 text-muted-foreground">管理所有友情链接</p>
-        </div>
-        <div className="flex gap-2">
-          <Link to="/admin/link/verify">
-            <Button variant="outline" className="cursor-pointer">
-              <CheckCircle2 className="mr-2 size-4" />
-              友链审核
-              {(stats?.pending_links ?? 0) > 0 && (
-                <Badge variant="destructive" className="ml-2">
-                  {stats?.pending_links}
-                </Badge>
-              )}
-            </Button>
-          </Link>
-          <Link to="/admin/link/add">
-            <Button className="cursor-pointer">
-              <Plus className="mr-2 size-4" />
-              添加友链
-            </Button>
-          </Link>
-        </div>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <PageHead
+        kicker="LINKS · 友链"
+        title="友链管理"
+        sub="管理所有友情链接，审核申请、维护站点信息。"
+        actions={
+          <>
+            <Link to="/admin/link/verify">
+              <Button variant="outline" className="cursor-pointer">
+                <CheckCircle2 className="mr-2 size-4" />
+                友链审核
+                {(stats?.pending_links ?? 0) > 0 && (
+                  <InkBadge tone="pending" className="ml-2">
+                    {stats?.pending_links}
+                  </InkBadge>
+                )}
+              </Button>
+            </Link>
+            <Link to="/admin/link/add">
+              <Button className="cursor-pointer">
+                <Plus className="mr-2 size-4" />
+                添加友链
+              </Button>
+            </Link>
+          </>
+        }
+      />
 
-      {/* 紧凑统计条 + 视图切换 */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-5 text-sm">
-          <span className="flex items-center gap-1.5">
+      <BambooRule reduced={reduced} delay={0.12} />
+
+      {/* 统计条 + 视图切换 */}
+      <motion.div
+        {...enter(reduced, 0.18, {
+          initial: { opacity: 0, y: 10 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.4, ease: 'easeOut' },
+        })}
+        className="flex flex-wrap items-center justify-between gap-3"
+      >
+        <div className={`${inkCard} flex items-center gap-7 px-5 py-3`}>
+          {statItems.map((item) => (
             <span
-              className="size-2 rounded-full"
-              style={{ backgroundColor: '#0891b2' }}
-              aria-hidden="true"
-            />
-            <span className="font-semibold tabular-nums">
-              {stats?.total_links ?? 0}
+              key={item.label}
+              className="flex items-center gap-2"
+            >
+              <span
+                className="size-2 rounded-full"
+                style={{ backgroundColor: item.dot }}
+                aria-hidden="true"
+              />
+              <span className="font-serif text-xl font-semibold tabular-nums text-text-primary">
+                {item.value}
+              </span>
+              <span className="font-mono text-xs text-text-secondary">
+                {item.label}
+              </span>
             </span>
-            <span className="text-muted-foreground">总收录</span>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span
-              className="size-2 rounded-full"
-              style={{ backgroundColor: '#22c55e' }}
-              aria-hidden="true"
-            />
-            <span className="font-semibold tabular-nums">
-              {stats?.approved_links ?? 0}
-            </span>
-            <span className="text-muted-foreground">已通过</span>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span
-              className="size-2 rounded-full"
-              style={{ backgroundColor: '#f59e0b' }}
-              aria-hidden="true"
-            />
-            <span className="font-semibold tabular-nums">
-              {stats?.pending_links ?? 0}
-            </span>
-            <span className="text-muted-foreground">待审核</span>
-          </span>
+          ))}
         </div>
 
-        <div className="flex rounded-lg border border-input bg-background p-0.5">
+        <div className="flex rounded-lg border border-border bg-background p-0.5">
           <button
             type="button"
             title="列表视图"
@@ -472,8 +480,8 @@ function LinkListPage() {
             className={cn(
               'cursor-pointer rounded-md p-1.5 transition-colors duration-200',
               viewMode === 'list'
-                ? 'bg-muted text-foreground shadow-xs'
-                : 'text-muted-foreground hover:text-foreground',
+                ? 'bg-leaf-deep/12 text-leaf-deep'
+                : 'text-text-secondary hover:text-text-primary',
             )}
           >
             <List className="size-4" />
@@ -485,19 +493,26 @@ function LinkListPage() {
             className={cn(
               'cursor-pointer rounded-md p-1.5 transition-colors duration-200',
               viewMode === 'table'
-                ? 'bg-muted text-foreground shadow-xs'
-                : 'text-muted-foreground hover:text-foreground',
+                ? 'bg-leaf-deep/12 text-leaf-deep'
+                : 'text-text-secondary hover:text-text-primary',
             )}
           >
             <Table2 className="size-4" />
           </button>
         </div>
-      </div>
+      </motion.div>
 
-      {/* 筛选区：搜索 + 状态 + 分组 */}
-      <div className="flex flex-wrap items-center gap-3">
+      {/* 筛选区：搜索 + 状态 */}
+      <motion.div
+        {...enter(reduced, 0.24, {
+          initial: { opacity: 0, y: 10 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.4, ease: 'easeOut' },
+        })}
+        className="flex flex-wrap items-center gap-3"
+      >
         <div className="relative w-full max-w-xs">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
           <Input
             placeholder="搜索站点…"
             className="pl-9"
@@ -510,60 +525,42 @@ function LinkListPage() {
         </div>
         <div className="flex flex-wrap gap-1.5">
           {statusPills.map((pill) => (
-            <button
+            <InkPill
               key={pill.label}
-              type="button"
+              active={statusFilter === pill.value}
               onClick={() => {
                 setStatusFilter(pill.value)
                 setPagination((old) => ({ ...old, pageIndex: 0 }))
               }}
-              className={cn(
-                'cursor-pointer rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors duration-200',
-                statusFilter === pill.value
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'bg-muted text-muted-foreground hover:text-foreground',
-              )}
             >
               {pill.label}
-            </button>
+            </InkPill>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {groups.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
-          <button
-            type="button"
+          <InkPill
+            active={groupFilter === null}
             onClick={() => {
               setGroupFilter(null)
               setPagination((old) => ({ ...old, pageIndex: 0 }))
             }}
-            className={cn(
-              'cursor-pointer rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors duration-200',
-              groupFilter === null
-                ? 'bg-foreground text-background shadow-sm'
-                : 'bg-muted text-muted-foreground hover:text-foreground',
-            )}
           >
             全部位置
-          </button>
+          </InkPill>
           {groups.map((group) => (
-            <button
+            <InkPill
               key={group.id.toString()}
-              type="button"
+              active={groupFilter === group.id}
               onClick={() => {
                 setGroupFilter(group.id)
                 setPagination((old) => ({ ...old, pageIndex: 0 }))
               }}
-              className={cn(
-                'cursor-pointer rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors duration-200',
-                groupFilter === group.id
-                  ? 'bg-foreground text-background shadow-sm'
-                  : 'bg-muted text-muted-foreground hover:text-foreground',
-              )}
             >
               {group.name}
-            </button>
+            </InkPill>
           ))}
         </div>
       )}
@@ -572,105 +569,115 @@ function LinkListPage() {
       {linksQuery.isLoading ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-44 w-full rounded-xl" />
+            <Skeleton key={i} className="h-44 w-full rounded-lg" />
           ))}
         </div>
       ) : links.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center gap-3 py-14 text-center">
-            <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-              <SearchX className="size-5 text-muted-foreground" />
-            </div>
-            <div>
-              <p className="font-medium">没有找到匹配的友链</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                试试调整搜索关键词或筛选条件
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="cursor-pointer"
-              onClick={() => {
-                setKeyword('')
-                setStatusFilter(null)
-                setGroupFilter(null)
-              }}
+        <div className={inkTableWrap}>
+          <div className="py-6">
+            <EnsoEmpty
+              title="没有找到匹配的友链"
+              hint="试试调整搜索关键词或筛选条件"
             >
-              清除筛选
-            </Button>
-          </CardContent>
-        </Card>
-      ) : viewMode === 'list' ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {links.map((link) => (
-            <div
-              key={link.id.toString()}
-              role="button"
-              tabIndex={0}
-              onClick={() => openDetail(link.id)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') openDetail(link.id)
-              }}
-              className="group relative flex w-full cursor-pointer flex-col overflow-hidden rounded-xl border border-border/70 bg-card text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
-            >
-              <span
-                className="h-1 w-full"
-                style={{
-                  backgroundColor: link.color_f_key?.primary_color ?? '#6366f1',
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto cursor-pointer"
+                onClick={() => {
+                  setKeyword('')
+                  setStatusFilter(null)
+                  setGroupFilter(null)
                 }}
-                aria-hidden="true"
-              />
-              <div className="flex flex-1 flex-col p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <SiteAvatar
-                      name={link.name}
-                      url={link.avatar}
-                      className="size-11 text-sm"
-                    />
-                    <div className="min-w-0">
-                      <h3 className="truncate font-semibold">{link.name}</h3>
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="mt-0.5 inline-flex max-w-full items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-primary"
-                      >
-                        <span className="truncate">{link.url}</span>
-                        <ExternalLink className="size-3 shrink-0" />
-                      </a>
-                    </div>
-                  </div>
-                  <RowMenu link={link} onConfirmDelete={setDeleteTarget} />
-                </div>
-
-                <p className="mt-3 line-clamp-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                  {link.description ?? '这个站点没有留下描述。'}
-                </p>
-
-                <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                  <Badge variant="secondary">
-                    {link.group_f_key?.name ?? '未分组'}
-                  </Badge>
-                  <Badge variant="outline" className="gap-1.5">
-                    <span
-                      className="size-2 rounded-full"
-                      style={{
-                        backgroundColor:
-                          link.color_f_key?.primary_color ?? '#6366f1',
-                      }}
-                      aria-hidden="true"
-                    />
-                    {link.color_f_key?.name ?? '默认'}
-                  </Badge>
-                  <StatusBadge link={link} />
-                </div>
-              </div>
-            </div>
-          ))}
+              >
+                清除筛选
+              </Button>
+            </EnsoEmpty>
+          </div>
         </div>
+      ) : viewMode === 'list' ? (
+        <motion.div
+          {...enter(reduced, 0.3, {
+            initial: { opacity: 0 },
+            animate: { opacity: 1 },
+            transition: { duration: 0.4, ease: 'easeOut' },
+          })}
+          className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
+        >
+          {links.map((link, i) => {
+            const accent = link.color_f_key?.primary_color ?? 'var(--leaf-deep)'
+            const s = linkStatus(link)
+            return (
+              <motion.div
+                key={link.id.toString()}
+                {...enter(reduced, 0.3 + i * 0.05, {
+                  initial: { opacity: 0, y: 12 },
+                  animate: { opacity: 1, y: 0 },
+                  transition: { duration: 0.4, ease: 'easeOut' },
+                })}
+                role="button"
+                tabIndex={0}
+                onClick={() => openDetail(link.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') openDetail(link.id)
+                }}
+                className={cn(inkCard, 'cursor-pointer text-left')}
+              >
+                {/* 左侧墨色竖条：取站点配色作为数据签名 */}
+                <span
+                  className="absolute inset-y-0 left-0 w-1"
+                  style={{ backgroundColor: accent }}
+                  aria-hidden="true"
+                />
+                <div className="flex flex-1 flex-col">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <SiteAvatar
+                        name={link.name}
+                        url={link.avatar}
+                        className="size-11 text-sm"
+                      />
+                      <div className="min-w-0">
+                        <h3 className="truncate font-serif text-base font-semibold text-text-primary">
+                          {link.name}
+                        </h3>
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="mt-0.5 inline-flex max-w-full items-center gap-1 font-mono text-xs text-text-secondary transition-colors hover:text-leaf-deep"
+                        >
+                          <span className="truncate">{link.url}</span>
+                          <ExternalLink className="size-3 shrink-0" />
+                        </a>
+                      </div>
+                    </div>
+                    <RowMenu link={link} onConfirmDelete={setDeleteTarget} />
+                  </div>
+
+                  <p className="mt-3 line-clamp-2 flex-1 text-sm leading-relaxed text-text-secondary">
+                    {link.description ?? '这个站点没有留下描述。'}
+                  </p>
+
+                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                    <InkBadge tone="neutral">
+                      {link.group_f_key?.name ?? '未分组'}
+                    </InkBadge>
+                    <InkBadge tone="neutral" className="gap-1.5">
+                      <span
+                        className="size-2 rounded-full"
+                        style={{ backgroundColor: accent }}
+                        aria-hidden="true"
+                      />
+                      {link.color_f_key?.name ?? '默认'}
+                    </InkBadge>
+                    <InkBadge tone={s.tone}>{s.label}</InkBadge>
+                  </div>
+                </div>
+              </motion.div>
+            )
+          })}
+        </motion.div>
       ) : (
         <LinkTable
           links={links}
@@ -685,7 +692,9 @@ function LinkListPage() {
       {/* 列表视图分页 */}
       {viewMode === 'list' && links.length > 0 && (
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">共 {total} 条</span>
+          <span className="font-mono text-xs text-text-secondary">
+            共 {total} 条
+          </span>
           <Pagination
             pageIndex={pagination.pageIndex}
             pageCount={Math.max(totalPages, 1)}

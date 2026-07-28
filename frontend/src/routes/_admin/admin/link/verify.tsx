@@ -4,21 +4,19 @@
  * Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
  * --------------------------------------------------------------------------------
  * 许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
- * 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+ * 有关MIT许可证的更多信息，请查看项目根目录下的 LICENSE 文件或访问：
  * https://opensource.org/licenses/MIT
  * --------------------------------------------------------------------------------
  */
 
 import { useEffect, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import {
-  ArrowLeft,
   Check,
   ChevronRight,
   ExternalLink,
   Globe,
-  Inbox,
   Mail,
   MapPin,
   RefreshCcw,
@@ -26,10 +24,18 @@ import {
 } from 'lucide-react'
 import type { LinkFriend, SnowflakeID } from '@/api/types'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  BambooRule,
+  CardHead,
+  EnsoEmpty,
+  InkBadge,
+  PageHead,
+  inkCard,
+  inkTableWrap,
+} from '@/components/ink-wash'
+import { enter } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 import { useAdminLinks, useUpdateLinkStatus } from '@/hooks/use-links'
 
@@ -55,7 +61,7 @@ function SiteAvatar({
     return (
       <div
         className={cn(
-          'flex shrink-0 items-center justify-center rounded-lg bg-amber-500/10 font-semibold text-amber-600',
+          'flex shrink-0 items-center justify-center rounded-lg bg-muted font-serif font-semibold text-text-secondary',
           className,
         )}
       >
@@ -78,15 +84,6 @@ function SiteAvatar({
         onError={() => setFailed(true)}
       />
     </div>
-  )
-}
-
-/** 待审核徽章 */
-function PendingBadge() {
-  return (
-    <Badge className="bg-amber-500/15 text-amber-700 hover:bg-amber-500/15">
-      待审核
-    </Badge>
   )
 }
 
@@ -113,10 +110,10 @@ function VerifyItem({
       onClick={() => onSelect(link.id)}
       transition={morphSpring}
       className={cn(
-        'group w-full cursor-pointer overflow-hidden rounded-xl border bg-card text-left transition-colors duration-200',
+        'group w-full cursor-pointer overflow-hidden rounded-lg border bg-card text-left transition-colors duration-200',
         active
-          ? 'border-amber-500/60 bg-amber-500/10 shadow-sm'
-          : 'border-border/70 hover:border-amber-500/40 hover:shadow-sm',
+          ? 'border-leaf-deep/60 bg-leaf-deep/6 shadow-[0_10px_24px_-18px_oklch(0.55_0.12_155/0.5)]'
+          : 'border-border hover:border-leaf-muted hover:shadow-[0_10px_24px_-20px_oklch(0.32_0.06_155/0.35)]',
         compact ? 'p-2.5' : 'p-4',
       )}
     >
@@ -134,7 +131,7 @@ function VerifyItem({
           <div className="flex items-center justify-between gap-2">
             <h3
               className={cn(
-                'truncate font-semibold transition-all duration-300',
+                'truncate font-serif font-semibold text-text-primary transition-all duration-300',
                 compact ? 'text-sm' : 'text-base',
               )}
             >
@@ -143,15 +140,15 @@ function VerifyItem({
             {compact ? (
               active && (
                 <span
-                  className="size-2 shrink-0 rounded-full bg-amber-500"
+                  className="size-2 shrink-0 rounded-full bg-leaf-deep"
                   aria-hidden="true"
                 />
               )
             ) : (
-              <PendingBadge />
+              <InkBadge tone="pending">待审核</InkBadge>
             )}
           </div>
-          <div className="mt-0.5 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+          <div className="mt-0.5 flex items-center justify-between gap-2 font-mono text-xs text-text-secondary">
             <span className="truncate">
               {link.group_f_key?.name ?? '未分组'}
             </span>
@@ -170,15 +167,15 @@ function VerifyItem({
         )}
       >
         <div className="overflow-hidden">
-          <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-text-secondary">
             {link.description || '暂无描述'}
           </p>
-          <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/40 pt-3 text-xs">
-            <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
+          <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/60 pt-3 text-xs">
+            <span className="flex min-w-0 items-center gap-1.5 text-text-secondary">
               <Mail className="size-3.5 shrink-0" />
               <span className="truncate">{link.email ?? '未提供'}</span>
             </span>
-            <span className="flex shrink-0 items-center gap-0.5 font-medium text-amber-600">
+            <span className="flex shrink-0 items-center gap-0.5 font-medium text-leaf-deep">
               审核
               <ChevronRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
             </span>
@@ -207,21 +204,21 @@ function VerifyDetail({
 }) {
   return (
     <div className="space-y-4">
-      {/* 申请横幅：琥珀色呼应待审核状态 */}
-      <Card className="relative overflow-hidden">
+      {/* 申请横幅：左侧墨条 + 晨光墨晕呼应待审核状态 */}
+      <div className={`${inkCard} relative overflow-hidden p-0`}>
         <span
-          className="absolute inset-y-0 left-0 z-10 w-1.5 bg-amber-500"
+          className="absolute inset-y-0 left-0 z-10 w-1.5 bg-leaf-deep"
           aria-hidden="true"
         />
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'linear-gradient(120deg, rgb(245 158 11 / 0.14) 0%, rgb(245 158 11 / 0.05) 40%, transparent 70%)',
+              'radial-gradient(520px 240px at 88% 0%, oklch(0.88 0.1 105 / 0.22), transparent 70%)',
           }}
           aria-hidden="true"
         />
-        <CardContent className="relative flex flex-wrap items-center gap-5 p-6 pl-9">
+        <div className="relative flex flex-wrap items-center gap-5 p-6 pl-9">
           <SiteAvatar
             name={link.name}
             url={link.avatar}
@@ -229,118 +226,115 @@ function VerifyDetail({
           />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="text-2xl font-bold tracking-tight">{link.name}</h2>
-              <PendingBadge />
+              <h2 className="font-serif text-2xl font-bold tracking-tight text-text-primary">
+                {link.name}
+              </h2>
+              <InkBadge tone="pending">待审核</InkBadge>
             </div>
             <a
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-2 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
+              className="mt-2 inline-flex items-center gap-1.5 font-mono text-sm text-text-secondary transition-colors hover:text-leaf-deep"
             >
               <Globe className="size-4" />
               {link.url}
               <ExternalLink className="size-3.5" />
             </a>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* 描述 + 申请信息 */}
       <div className="grid gap-4 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">站点描述</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="leading-relaxed text-muted-foreground">
-              {link.description || '暂无描述'}
-            </p>
-            {link.apply_remark && (
-              <div className="mt-4 border-t border-border/40 pt-3">
-                <p className="text-xs text-muted-foreground">申请备注</p>
-                <p className="mt-1 leading-relaxed">{link.apply_remark}</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <div className={`${inkCard} xl:col-span-2`}>
+          <CardHead title="站点描述" />
+          <p className="leading-relaxed text-text-secondary">
+            {link.description || '暂无描述'}
+          </p>
+          {link.apply_remark && (
+            <div className="mt-4 border-t border-border/60 pt-3">
+              <p className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">
+                申请备注
+              </p>
+              <p className="mt-1 leading-relaxed text-text-primary">
+                {link.apply_remark}
+              </p>
+            </div>
+          )}
+        </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">申请信息</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 pt-1">
-            <div className="flex items-center gap-2.5 text-sm">
-              <Mail className="size-4 shrink-0 text-muted-foreground" />
+        <div className={inkCard}>
+          <CardHead title="申请信息" />
+          <div className="space-y-3">
+            <div className="flex items-center gap-2.5 text-sm text-text-primary">
+              <Mail className="size-4 shrink-0 text-text-secondary" />
               <span className="truncate">{link.email ?? '未提供'}</span>
             </div>
-            <div className="flex items-center gap-2.5 text-sm">
-              <MapPin className="size-4 shrink-0 text-muted-foreground" />
+            <div className="flex items-center gap-2.5 text-sm text-text-primary">
+              <MapPin className="size-4 shrink-0 text-text-secondary" />
               <span>{link.group_f_key?.name ?? '未分组'}</span>
             </div>
-            <div className="flex items-center gap-2.5 text-sm">
-              <RefreshCcw className="size-4 shrink-0 text-muted-foreground" />
-              <span className="tabular-nums">
+            <div className="flex items-center gap-2.5 text-sm text-text-primary">
+              <RefreshCcw className="size-4 shrink-0 text-text-secondary" />
+              <span className="font-mono tabular-nums">
                 {new Date(link.updated_at).toLocaleString('zh-CN')}
               </span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* 审核操作 */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">审核操作</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label
-              htmlFor="review-remark"
-              className="text-xs text-muted-foreground"
-            >
-              审核备注（可选）
-            </label>
-            <Textarea
-              id="review-remark"
-              placeholder="填写审核说明，将反馈给申请人…"
-              value={remark}
-              onChange={(e) => onRemarkChange(e.target.value)}
-              rows={3}
+      <div className={inkCard}>
+        <CardHead title="审核操作" meta="REVIEW" />
+        <div className="space-y-2">
+          <label
+            htmlFor="review-remark"
+            className="font-mono text-[11px] uppercase tracking-widest text-text-secondary"
+          >
+            审核备注（可选）
+          </label>
+          <Textarea
+            id="review-remark"
+            placeholder="填写审核说明，将反馈给申请人…"
+            value={remark}
+            onChange={(e) => onRemarkChange(e.target.value)}
+            rows={3}
+            disabled={isPending}
+          />
+        </div>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-text-secondary">
+            审核通过后该站点将展示在友链页面
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={onReject}
               disabled={isPending}
-            />
+            >
+              <X className="mr-2 size-4" />
+              {isPending ? '处理中…' : '拒绝'}
+            </Button>
+            <Button
+              className="cursor-pointer"
+              onClick={onApprove}
+              disabled={isPending}
+            >
+              <Check className="mr-2 size-4" />
+              {isPending ? '处理中…' : '通过'}
+            </Button>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
-              审核通过后该站点将展示在友链页面
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={onReject}
-                disabled={isPending}
-              >
-                <X className="mr-2 size-4" />
-                {isPending ? '处理中…' : '拒绝'}
-              </Button>
-              <Button
-                className="cursor-pointer bg-green-600 hover:bg-green-700"
-                onClick={onApprove}
-                disabled={isPending}
-              >
-                <Check className="mr-2 size-4" />
-                {isPending ? '处理中…' : '通过'}
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }
 
 function LinkVerifyPage() {
+  const reduced = useReducedMotion() ?? false
   const linksQuery = useAdminLinks({ link_status: 0, page: 1, page_size: 50 })
   const pendingLinks = linksQuery.data?.data ?? []
   const updateStatus = useUpdateLinkStatus()
@@ -403,51 +397,53 @@ function LinkVerifyPage() {
   }, [selectedId, pendingLinks])
 
   return (
-    <div className="space-y-5">
-      {/* 页头 */}
-      <div className="flex items-center gap-4">
-        <Link to="/admin/link">
-          <Button variant="ghost" size="icon" className="cursor-pointer">
-            <ArrowLeft className="size-4" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">友链审核</h1>
-          <p className="mt-1 flex items-center gap-2 text-muted-foreground">
-            待审核的友链申请
-            {pendingLinks.length > 0 && (
-              <Badge variant="secondary">{pendingLinks.length}</Badge>
-            )}
-          </p>
-        </div>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <PageHead
+        backTo="/admin/link"
+        backLabel="返回友链管理"
+        kicker="REVIEW · 审核"
+        title="友链审核"
+        sub="逐条审阅新提交的友链申请，通过后即可展示在友链页面。"
+        actions={
+          pendingLinks.length > 0 ? (
+            <InkBadge tone="pending" className="px-2.5 py-1 text-sm">
+              {pendingLinks.length} 项待处理
+            </InkBadge>
+          ) : undefined
+        }
+      />
+
+      <BambooRule reduced={reduced} delay={0.12} />
 
       {linksQuery.isLoading ? (
         <div className="grid flex-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-40 w-full rounded-xl" />
+            <Skeleton key={i} className="h-40 w-full rounded-lg" />
           ))}
         </div>
       ) : pendingLinks.length === 0 ? (
         /* 空状态 */
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center gap-3 py-20 text-center">
-            <div className="flex size-14 items-center justify-center rounded-full bg-muted">
-              <Inbox className="size-6 text-muted-foreground" />
-            </div>
-            <div>
-              <p className="font-medium">暂无待审核的友链申请</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                新的友链申请会出现在这里
-              </p>
-            </div>
-            <Link to="/admin/link">
-              <Button variant="outline" size="sm" className="cursor-pointer">
-                返回列表
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <motion.div
+          {...enter(reduced, 0.2, {
+            initial: { opacity: 0, y: 10 },
+            animate: { opacity: 1, y: 0 },
+            transition: { duration: 0.4, ease: 'easeOut' },
+          })}
+          className={inkTableWrap}
+        >
+          <div className="py-8">
+            <EnsoEmpty
+              title="暂无待审核的友链申请"
+              hint="新的友链申请会出现在这里"
+            >
+              <Link to="/admin/link" className="ml-auto">
+                <Button variant="outline" size="sm" className="cursor-pointer">
+                  返回列表
+                </Button>
+              </Link>
+            </EnsoEmpty>
+          </div>
+        </motion.div>
       ) : (
         /*
          * 主从布局：列表始终完整存在。

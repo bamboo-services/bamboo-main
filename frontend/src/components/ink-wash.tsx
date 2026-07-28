@@ -7,9 +7,15 @@
 // https://opensource.org/licenses/MIT
 // --------------------------------------------------------------------------------
 
+import { Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
+import { ArrowLeft } from 'lucide-react'
 import type { ReactNode } from 'react'
+import type { LinkFriend } from '@/api/types'
+import { CountUp } from '@/components/dashboard/count-up'
+import { Skeleton } from '@/components/ui/skeleton'
 import { enter } from '@/lib/motion'
+import { cn } from '@/lib/utils'
 
 /**
  * 竹林水墨 · 共享视觉原语。
@@ -200,4 +206,224 @@ export function BambooArt({ className }: { className?: string }) {
       </g>
     </svg>
   )
+}
+
+/* ───────── 页面级原语：供 dashboard 之外的后台各页收编进同一套语言 ───────── */
+
+/**
+ * 页头：mono kicker + 衬线大标题 + 笔刷下划线 + 描述 + 右侧动作区。
+ * 取代旧版 `text-3xl font-bold tracking-tight` 通用页头，是全后台页面的统一开场。
+ * `backTo` 提供时渲染返回链接（箭头悬停微移）。
+ */
+export function PageHead({
+  kicker,
+  title,
+  sub,
+  backTo,
+  backLabel,
+  actions,
+}: {
+  kicker?: string
+  title: string
+  sub?: string
+  backTo?: string
+  backLabel?: string
+  actions?: ReactNode
+}) {
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="min-w-0">
+        {backTo && (
+          <Link
+            to={backTo}
+            className="group mb-2.5 inline-flex items-center gap-1.5 font-mono text-xs text-text-secondary transition-colors duration-150 hover:text-leaf-deep"
+          >
+            <ArrowLeft className="size-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
+            {backLabel ?? '返回'}
+          </Link>
+        )}
+        {kicker && (
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-leaf-deep">
+            {kicker}
+          </p>
+        )}
+        <h1 className="font-serif text-4xl font-bold leading-tight tracking-tight text-text-primary">
+          {title}
+        </h1>
+        <BrushUnderline className="mt-2.5" />
+        {sub && (
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-text-secondary">
+            {sub}
+          </p>
+        )}
+      </div>
+      {actions && (
+        <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * KPI 统计块：宣纸卡片 + 顶部扫入墨线 + 衬线水印字 + CountUp 大数字。
+ * 与 dashboard 的 KPI 三块同源，供列表统计条 / 赞助统计等复用。
+ */
+export function InkStat({
+  label,
+  value,
+  hint,
+  watermark,
+  loading,
+}: {
+  label: string
+  value: number
+  hint?: string
+  watermark?: string
+  loading?: boolean
+}) {
+  return (
+    <div className={`${inkCard} p-5`}>
+      <span className="absolute left-5 right-5 top-[-1px] h-0.5 origin-left scale-x-0 rounded-full bg-leaf-deep transition-transform duration-400 group-hover:scale-x-100" />
+      {watermark && (
+        <span
+          className="pointer-events-none absolute -bottom-4 right-1.5 font-serif text-[80px] font-black leading-none text-text-primary opacity-5"
+          aria-hidden
+        >
+          {watermark}
+        </span>
+      )}
+      <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-text-secondary">
+        {label}
+      </p>
+      {loading ? (
+        <Skeleton className="mt-2.5 h-10 w-14" />
+      ) : (
+        <CountUp
+          value={value}
+          className="mt-2.5 block font-serif text-[42px] font-semibold leading-none tabular-nums text-text-primary"
+        />
+      )}
+      {hint && <p className="mt-2.5 text-xs text-text-secondary">{hint}</p>}
+    </div>
+  )
+}
+
+/** 筛选药丸：选中 leaf-deep 实底，未选 muted。供状态 / 分组 / 视图切换复用 */
+export function InkPill({
+  active,
+  onClick,
+  title,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  title?: string
+  children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      onClick={onClick}
+      className={cn(
+        'cursor-pointer rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors duration-200',
+        active
+          ? 'bg-leaf-deep text-card shadow-sm'
+          : 'bg-muted text-text-secondary hover:bg-muted/70 hover:text-text-primary',
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+
+/** 表格壳与单元格排版常量：衬线/mono 排印 + 宣纸行 hover，配合 shadcn Table 使用 */
+export const inkTableWrap =
+  'overflow-hidden rounded-lg border border-border bg-card'
+export const inkTableHeadRow = 'border-b border-border bg-muted/30'
+export const inkTh =
+  'px-4 py-2.5 font-mono text-[11px] font-medium uppercase tracking-widest text-text-secondary'
+export const inkTd = 'px-4 py-3 text-sm'
+export const inkTableRow =
+  'border-b border-border/60 transition-colors duration-150 last:border-0 hover:bg-muted/30'
+
+/** 状态开关：leaf-deep 通断，role=switch */
+export function InkSwitch({
+  checked,
+  disabled,
+  onToggle,
+}: {
+  checked: boolean
+  disabled?: boolean
+  onToggle: () => void
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      disabled={disabled}
+      onClick={onToggle}
+      className={cn(
+        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50',
+        checked ? 'bg-leaf-deep' : 'bg-border',
+      )}
+    >
+      <span
+        className={cn(
+          'inline-block size-4 rounded-full bg-card shadow-sm transition-transform duration-200',
+          checked ? 'translate-x-[18px]' : 'translate-x-0.5',
+        )}
+      />
+    </button>
+  )
+}
+
+/** 徽章色调：一律走 styles.css 既有 token，与 donut 分段同源，禁自创颜色 */
+const badgeTones = {
+  leaf: 'border-chart-1/30 bg-chart-1/12 text-leaf-deep',
+  pending: 'border-chart-4/50 bg-chart-4/20 text-leaf-deep',
+  danger: 'border-destructive/25 bg-destructive/10 text-destructive',
+  neutral: 'border-border bg-muted/60 text-text-secondary',
+} as const
+
+export type InkBadgeTone = keyof typeof badgeTones
+
+/** 状态徽章：圆角方片 + 细边框 + 色调 token */
+export function InkBadge({
+  tone = 'neutral',
+  className,
+  children,
+}: {
+  tone?: InkBadgeTone
+  className?: string
+  children: ReactNode
+}) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-[4px] border px-1.5 py-0.5 text-xs font-medium',
+        badgeTones[tone],
+        className,
+      )}
+    >
+      {children}
+    </span>
+  )
+}
+
+/** 友链状态 → 徽章（is_failure=1 已失效；status 1=已通过 2=已拒绝 0=待审核） */
+export function linkStatus(link: LinkFriend): {
+  label: string
+  tone: InkBadgeTone
+} {
+  if (link.is_failure === 1) return { label: '已失效', tone: 'danger' }
+  switch (link.status) {
+    case 1:
+      return { label: '已通过', tone: 'leaf' }
+    case 2:
+      return { label: '已拒绝', tone: 'danger' }
+    default:
+      return { label: '待审核', tone: 'pending' }
+  }
 }
