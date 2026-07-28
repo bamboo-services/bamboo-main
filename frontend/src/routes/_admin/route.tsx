@@ -9,7 +9,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import {
   Link,
   Outlet,
@@ -128,42 +128,47 @@ function AdminBreadcrumb({ pathname }: { pathname: string }) {
 function AdminLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const [isScrolled, setIsScrolled] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
 
+  // 内容实际由 window 滚动：sidebar 布局仅 min-h-svh 保底、不约束高度，
+  // 内容会把布局撑高（内部 div 并不可滚），故滚动感知必须监听 window。
   useEffect(() => {
-    const el = scrollRef.current
-    if (!el) return
     const handleScroll = () => {
-      setIsScrolled(el.scrollTop > 0)
+      setIsScrolled(window.scrollY > 0)
     }
-    el.addEventListener('scroll', handleScroll, { passive: true })
-    return () => el.removeEventListener('scroll', handleScroll)
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (
     <SidebarProvider>
       <AdminSidebar />
       <SidebarInset className="flex flex-col">
-        {/* 滚动感知 header：置顶透明，滑动时浮起 */}
-        <motion.header
-          className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 px-4"
-          animate={{
-            backgroundColor: isScrolled
-              ? 'oklch(0.975 0.016 110 / 0.75)'
-              : 'oklch(0.975 0.016 110 / 0)',
-            boxShadow: isScrolled
-              ? '0 1px 3px 0 rgb(0 0 0 / 0.08)'
-              : '0 0 0 0 rgb(0 0 0 / 0)',
-            backdropFilter: isScrolled ? 'blur(12px)' : 'blur(0px)',
-          }}
-          transition={{ duration: 0.25, ease: 'easeOut' }}
-        >
-          <SidebarTrigger className="-ml-1" />
-          <AdminBreadcrumb pathname={pathname} />
-        </motion.header>
+        {/* 滚动感知 header：置顶时透明无缝、满高；下滑后收缩为脱离顶缘的圆角宣纸浮条。
+            z-30 压住内容区（hero 等为 z-10）；bg-background 实底确保浮条悬浮间隙不透出滚动内容 */}
+        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center bg-background px-3">
+          <motion.div
+            className="flex w-full items-center gap-2 px-2"
+            initial={false}
+            animate={{
+              height: isScrolled ? 48 : 64,
+              borderRadius: isScrolled ? 14 : 0,
+              backgroundColor: isScrolled
+                ? 'oklch(0.985 0.012 110)'
+                : 'oklch(0.975 0.016 110 / 0)',
+              boxShadow: isScrolled
+                ? '0 16px 40px -16px oklch(0.32 0.06 155 / 0.28), 0 0 0 1px oklch(0.9 0.03 120)'
+                : '0 0 0 0 oklch(0.32 0.06 155 / 0), 0 0 0 0 oklch(0.9 0.03 120 / 0)',
+            }}
+            transition={{ duration: 0.32, ease: [0.32, 0.72, 0, 1] as const }}
+          >
+            <SidebarTrigger className="-ml-1" />
+            <AdminBreadcrumb pathname={pathname} />
+          </motion.div>
+        </header>
 
-        {/* 可滚动内容区 */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto">
+        {/* 内容区：随 window 滚动 */}
+        <div className="flex-1">
           <main className="p-4 md:p-6">
             <motion.div
               key={pathname}
