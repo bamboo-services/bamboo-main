@@ -9,7 +9,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, redirect } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import { useState } from 'react'
 import {
@@ -28,17 +28,30 @@ import { BambooLogo } from '@/assets/svg/bamboo-logo'
 import { siteConfig } from '@/lib/site'
 import defaultBackground from '@/assets/images/default-background.webp'
 import { SSO_OAUTH_LOGIN_URL, login } from '@/api/auth'
-import { setSession } from '@/lib/auth'
+import { getToken, setSession } from '@/lib/auth'
 
 /** 登录页 search 参数：redirect 为登录成功后的回跳路径 */
 interface LoginSearch {
   redirect?: string
 }
 
+/** 仅信任同源内部路径（以单个 / 开头），避免开放重定向 */
+function resolveSafeRedirect(redirect?: string): string {
+  return redirect && redirect.startsWith('/') && !redirect.startsWith('//')
+    ? redirect
+    : '/admin/dashboard'
+}
+
 export const Route = createFileRoute('/_authorization/auth/login')({
   validateSearch: (search: Record<string, unknown>): LoginSearch => ({
     redirect: typeof search.redirect === 'string' ? search.redirect : undefined,
   }),
+  // 反向守卫：已登录用户直接跳走，避免重复看到登录界面
+  beforeLoad: ({ search }) => {
+    if (getToken()) {
+      throw redirect({ to: resolveSafeRedirect(search.redirect) })
+    }
+  },
   component: LoginPage,
 })
 
@@ -54,13 +67,7 @@ function LoginPage() {
     remember: false,
   })
 
-  // 仅信任同源内部路径（以单个 / 开头），避免开放重定向
-  const safeRedirect =
-    redirectTarget &&
-    redirectTarget.startsWith('/') &&
-    !redirectTarget.startsWith('//')
-      ? redirectTarget
-      : '/admin/dashboard'
+  const safeRedirect = resolveSafeRedirect(redirectTarget)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

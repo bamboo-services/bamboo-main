@@ -149,8 +149,8 @@ function AdminLayout() {
           className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 px-4"
           animate={{
             backgroundColor: isScrolled
-              ? 'oklch(0.96 0.03 110 / 0.75)'
-              : 'oklch(0.96 0.03 110 / 0)',
+              ? 'oklch(0.975 0.016 110 / 0.75)'
+              : 'oklch(0.975 0.016 110 / 0)',
             boxShadow: isScrolled
               ? '0 1px 3px 0 rgb(0 0 0 / 0.08)'
               : '0 0 0 0 rgb(0 0 0 / 0)',
