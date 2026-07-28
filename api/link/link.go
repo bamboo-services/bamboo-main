@@ -33,6 +33,7 @@ type FriendAddRequest struct {
 	LinkGroupID     xSnowflake.SnowflakeID `json:"link_group_id" binding:"omitempty,number" example:"1"`
 	LinkColorID     xSnowflake.SnowflakeID `json:"link_color_id" binding:"omitempty,number" example:"1"`
 	LinkOrder       int                    `json:"link_order" binding:"omitempty,min=0" example:"0"`
+	LinkLevel       int                    `json:"link_level" binding:"omitempty,oneof=0 1 2 3" example:"0"`
 	LinkApplyRemark string                 `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
 }
 
@@ -47,6 +48,7 @@ type FriendUpdateRequest struct {
 	LinkGroupID     xSnowflake.SnowflakeID `json:"link_group_id" binding:"omitempty,number" example:"1"`
 	LinkColorID     xSnowflake.SnowflakeID `json:"link_color_id" binding:"omitempty,number" example:"1"`
 	LinkOrder       *int                   `json:"link_order" binding:"omitempty,min=0" example:"0"`
+	LinkLevel       *int                   `json:"link_level" binding:"omitempty,oneof=0 1 2 3" example:"0"`
 	LinkApplyRemark string                 `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
 }
 

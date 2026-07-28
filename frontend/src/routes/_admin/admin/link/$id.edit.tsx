@@ -46,7 +46,16 @@ interface LinkFormState {
   colorId: SnowflakeID | null
   order: string
   applyRemark: string
+  level: number
 }
+
+/** 友链级别选项（与后端 pkg/constants LinkLevel 枚举对齐） */
+const LEVEL_OPTIONS = [
+  { value: 0, label: '一般' },
+  { value: 1, label: '好友' },
+  { value: 2, label: '高级' },
+  { value: 3, label: '广告' },
+] as const
 
 /** 色块背景：type=1（炫彩）且有副色时渲染渐变，否则取主色 */
 function colorBackground(color: LinkColor): string {
@@ -79,6 +88,7 @@ function LinkEditPage() {
     colorId: null,
     order: '',
     applyRemark: '',
+    level: 0,
   })
 
   // 详情加载完成后预填表单
@@ -94,6 +104,7 @@ function LinkEditPage() {
         colorId: link.color_id,
         order: String(link.sort_order),
         applyRemark: link.apply_remark ?? '',
+        level: link.level,
       })
     }
   }, [link])
@@ -111,6 +122,7 @@ function LinkEditPage() {
       link_color_id: form.colorId ?? undefined,
       link_order: Number.isNaN(order) ? undefined : order,
       link_apply_remark: form.applyRemark.trim() || undefined,
+      link_level: form.level,
     }
     updateLink.mutate(
       { id: linkId, req },
@@ -280,6 +292,33 @@ function LinkEditPage() {
                       setForm({ ...form, applyRemark: e.target.value })
                     }
                   />
+                </div>
+              </div>
+
+              {/* 友链级别：药丸按钮 */}
+              <div className="space-y-2">
+                <div className="flex items-baseline justify-between">
+                  <Label>友链级别</Label>
+                  <span className="text-xs text-muted-foreground">
+                    决定前台展示样式
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {LEVEL_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setForm({ ...form, level: opt.value })}
+                      className={cn(
+                        'cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200',
+                        form.level === opt.value
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground',
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 

@@ -197,6 +197,7 @@ export interface LinkFriend {
   sort_order: number
   status: number
   is_failure: number
+  level: number
   fail_reason: string | null
   apply_remark: string | null
   review_remark: string | null
@@ -233,6 +234,7 @@ export interface CreateLinkRequest {
   link_group_id?: SnowflakeID
   link_color_id?: SnowflakeID
   link_order?: number
+  link_level?: number
   link_apply_remark?: string
 }
 
@@ -247,6 +249,7 @@ export interface UpdateLinkRequest {
   link_group_id?: SnowflakeID
   link_color_id?: SnowflakeID
   link_order?: number
+  link_level?: number
   link_apply_remark?: string
 }
 

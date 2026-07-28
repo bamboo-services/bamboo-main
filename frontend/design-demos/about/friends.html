@@ -1,0 +1,525 @@
+<!doctype html>
+<!--
+  设计稿 · /about/friends「群贤帖」v4.1 · Bento 栅格 + 沉浸式跳转引导
+  v4：Bento 栅格（1×1 / 2×2 高级）、grid-auto-flow dense 混排自适应、高级 hover 截图展开。
+  v4.1 新增「沉浸式跳转引导」：
+    - 点击友链卡不直接跳转，先从卡片中心 clip-path circle() 扩散至全屏
+    - 引导层展示头像 + 站名 + 域名 + 进度线，动画完毕后才执行真实跳转（window.open）
+    - 高级链接以站点截图为全屏背景 + 顶部浏览器地址栏，营造「进入对方小站」的沉浸感
+  双击即可在浏览器打开。占位数据仅示意；为便于演示，动画结束后引导层会收拢（真实实现即跳转）。
+-->
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>友链 · 群贤帖 v4.1</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&family=Noto+Serif+SC:wght@400..700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              background: 'oklch(0.975 0.016 110)',
+              card: 'oklch(0.99 0.005 110)',
+              border: 'oklch(0.9 0.03 120)',
+              muted: 'oklch(0.94 0.03 115)',
+              primary: 'oklch(0.72 0.13 155)',
+              'leaf-light': 'oklch(0.88 0.1 105)',
+              'leaf-muted': 'oklch(0.8 0.08 130)',
+              'leaf-deep': 'oklch(0.55 0.12 155)',
+              'text-primary': 'oklch(0.32 0.06 155)',
+              'text-secondary': 'oklch(0.5 0.05 130)',
+              'ring-glow': 'oklch(0.72 0.13 155 / 0.28)',
+            },
+            fontFamily: {
+              serif: ['Source Serif 4', 'Noto Serif SC', 'Songti SC', 'STSong', 'serif'],
+              mono: ['source-code-pro', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+            },
+          },
+        },
+      }
+    </script>
+
+    <style>
+      @keyframes ink-sway { from { transform: rotate(-1.1deg); } to { transform: rotate(1.4deg); } }
+      .ink-sway { transform-box: fill-box; transform-origin: 50% 100%; animation: ink-sway 13s ease-in-out infinite alternate; }
+      .ink-sway-slow { animation-duration: 17s; animation-delay: -6s; }
+
+      .reveal { opacity: 0; transform: translateY(30px); transition: opacity .9s cubic-bezier(.22,.9,.3,1), transform .9s cubic-bezier(.22,.9,.3,1); }
+      .reveal.in { opacity: 1; transform: none; }
+      .reveal-d1 { transition-delay: .12s; } .reveal-d2 { transition-delay: .24s; }
+
+      #nav { transition: background .4s ease, border-color .4s ease; border-bottom: 1px solid transparent; }
+      #nav.scrolled { background: oklch(0.975 0.016 110 / 0.94); border-bottom-color: oklch(0.9 0.03 120); }
+      .nav-link { position: relative; font-size: 11px; letter-spacing: .28em; text-transform: uppercase; color: oklch(0.5 0.05 130); transition: color .3s; }
+      .nav-link::after { content: ''; position: absolute; left: 0; bottom: -7px; height: 2px; width: 100%; background: oklch(0.55 0.12 155); transform: scaleX(0); transform-origin: left; transition: transform .35s cubic-bezier(.22,.9,.3,1); }
+      .nav-link:hover, .nav-link.active { color: oklch(0.32 0.06 155); }
+      .nav-link:hover::after, .nav-link.active::after { transform: scaleX(1); }
+
+      /* ───────── Bento 栅格系统 ───────── */
+      .bento { display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: 168px; grid-auto-flow: dense; gap: 1rem; }
+      @media (min-width: 640px) { .bento { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 158px; } }
+      @media (min-width: 768px) { .bento { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 150px; } }
+      .bento .span-2x2 { grid-column: span 2; grid-row: span 2; }
+
+      /* ───────── 高级友链 · hover 截图展开 ───────── */
+      .premium-shot { position: absolute; inset: 0; z-index: 10; transform: translateY(101%); transition: transform .6s cubic-bezier(.22,.9,.3,1); display: flex; flex-direction: column; }
+      .card-premium:hover .premium-shot, .card-premium:focus-within .premium-shot { transform: translateY(0); }
+      .card-premium .premium-default { transition: opacity .35s ease; }
+      .card-premium:hover .premium-default { opacity: 0; }
+
+      /* ───────── 沉浸式跳转引导（Interlude） ───────── */
+      #interlude {
+        position: fixed; inset: 0; z-index: 100;
+        display: flex; align-items: center; justify-content: center;
+        clip-path: circle(0px at 50% 50%);
+        visibility: hidden; pointer-events: none;
+      }
+      #interlude.active { visibility: visible; pointer-events: auto; }
+
+      .il-bg {
+        position: absolute; inset: 0;
+        background:
+          radial-gradient(900px 620px at 50% 38%, oklch(0.88 0.1 105 / 0.4), transparent 70%),
+          radial-gradient(700px 500px at 8% 100%, oklch(0.88 0.1 105 / 0.18), transparent 70%),
+          oklch(0.975 0.016 110);
+      }
+      #interlude.is-shot .il-bg {
+        /* 设计稿用渐变示意截图；真实实现替换为 background-image: url(站点截图) */
+        background:
+          linear-gradient(180deg, oklch(0.32 0.06 155 / 0.28), oklch(0.32 0.06 155 / 0.5)),
+          linear-gradient(135deg, oklch(0.88 0.1 105 / 0.55), oklch(0.99 0.005 110) 42%, oklch(0.8 0.08 130 / 0.5));
+      }
+
+      .il-chrome { position: absolute; top: 0; left: 0; right: 0; display: none; align-items: center; gap: 7px; padding: 16px 22px; opacity: 0; }
+      #interlude.is-shot .il-chrome { display: flex; }
+      #interlude.show .il-chrome { opacity: 1; transition: opacity .5s ease .55s; }
+      .il-dot { width: 11px; height: 11px; border-radius: 50%; background: oklch(0.99 0.005 110 / 0.35); }
+      .il-url { margin-left: 12px; font-size: 12px; letter-spacing: .08em; color: oklch(0.99 0.005 110 / 0.75); }
+
+      .il-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 24px; }
+      .il-avatar {
+        width: 96px; height: 96px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        background: oklch(0.88 0.1 105 / 0.55);
+        font-family: var(--font-serif, serif); font-size: 40px; font-weight: 700; color: oklch(0.55 0.12 155);
+        box-shadow: 0 0 0 4px oklch(0.72 0.13 155 / 0.3);
+        opacity: 0; transform: scale(0.7);
+      }
+      #interlude.show .il-avatar { opacity: 1; transform: scale(1); transition: opacity .5s ease .25s, transform .5s cubic-bezier(.22,.9,.3,1) .25s; }
+      .il-name { margin-top: 26px; font-family: var(--font-serif, serif); font-size: clamp(2rem, 6vw, 2.75rem); font-weight: 700; color: oklch(0.32 0.06 155); opacity: 0; transform: translateY(18px); }
+      #interlude.show .il-name { opacity: 1; transform: none; transition: opacity .5s ease .35s, transform .5s cubic-bezier(.22,.9,.3,1) .35s; }
+      .il-domain { margin-top: 12px; font-size: 13px; letter-spacing: .18em; color: oklch(0.5 0.05 130); opacity: 0; transform: translateY(14px); }
+      #interlude.show .il-domain { opacity: 1; transform: none; transition: opacity .5s ease .45s, transform .5s cubic-bezier(.22,.9,.3,1) .45s; }
+      .il-progress { margin-top: 34px; width: 190px; height: 2px; border-radius: 2px; background: oklch(0.9 0.03 120); overflow: hidden; opacity: 0; }
+      #interlude.show .il-progress { opacity: 1; transition: opacity .4s ease .55s; }
+      .il-progress-bar { display: block; height: 100%; width: 0; border-radius: 2px; background: oklch(0.55 0.12 155); }
+      #interlude.show .il-progress-bar { animation: il-fill .9s cubic-bezier(.4,0,.2,1) .6s forwards; }
+      @keyframes il-fill { to { width: 100%; } }
+      .il-hint { margin-top: 16px; font-size: 11px; letter-spacing: .4em; text-transform: uppercase; color: oklch(0.5 0.05 130); opacity: 0; }
+      #interlude.show .il-hint { opacity: 1; transition: opacity .4s ease .65s; }
+
+      /* 截图模式：文字反白 */
+      #interlude.is-shot .il-name { color: oklch(0.99 0.005 110); }
+      #interlude.is-shot .il-domain { color: oklch(0.99 0.005 110 / 0.72); }
+      #interlude.is-shot .il-hint { color: oklch(0.99 0.005 110 / 0.6); }
+      #interlude.is-shot .il-avatar { box-shadow: 0 0 0 4px oklch(0.99 0.005 110 / 0.35); }
+      #interlude.is-shot .il-progress { background: oklch(0.99 0.005 110 / 0.25); }
+      #interlude.is-shot .il-progress-bar { background: oklch(0.88 0.1 105); }
+
+      body { background: oklch(0.975 0.016 110); }
+      @media (prefers-reduced-motion: reduce) {
+        .ink-sway { animation: none; }
+        .reveal { opacity: 1; transform: none; transition: none; }
+        .premium-shot { transition: none; }
+      }
+      @media (hover: none) {
+        .premium-shot { transform: translateY(60%); }
+        .card-premium .premium-default { opacity: .4; }
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen bg-background font-sans text-text-primary antialiased">
+    <!-- ═══════════ 顶部导航 ═══════════ -->
+    <nav id="nav" class="fixed inset-x-0 top-0 z-50">
+      <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5 md:px-10">
+        <a href="me.html" class="flex items-center gap-2.5">
+          <svg width="20" height="20" viewBox="0 0 48 32" fill="oklch(0.55 0.12 155)" aria-hidden><path d="M2 30C10 18 26 6 46 2c-3 12-16 24-44 28z"/></svg>
+          <span class="font-serif text-base font-semibold tracking-wide text-text-primary">关于小站</span>
+        </a>
+        <div class="flex items-center gap-7 md:gap-9">
+          <a href="me.html" class="nav-link font-mono">关于我</a>
+          <a href="friends.html" class="nav-link active font-mono">友链</a>
+          <a href="sponsor.html" class="nav-link font-mono">赞助</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ═══════════ 开场 · 群贤帖 ═══════════ -->
+    <section class="relative flex min-h-[72vh] items-center overflow-hidden">
+      <div class="pointer-events-none absolute inset-0"
+        style="background: radial-gradient(860px 520px at 12% -4%, oklch(0.88 0.1 105 / 0.24), transparent 68%), radial-gradient(640px 440px at 102% 100%, oklch(0.88 0.1 105 / 0.12), transparent 70%);"></div>
+      <svg class="pointer-events-none absolute -left-20 top-0 h-full w-[560px] -scale-x-100 text-text-primary md:w-[680px]" viewBox="0 0 580 432" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
+        <defs>
+          <path id="bzleaf" d="M0 0 C12 -7 34 -11 58 -3 C36 4 12 5 0 0 Z"/>
+          <g id="spray">
+            <path d="M0 0 Q26 -9 56 -7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <use href="#bzleaf" transform="translate(12 -3) rotate(-44) scale(1.08)"/>
+            <use href="#bzleaf" transform="translate(28 -6) rotate(-14)"/>
+            <use href="#bzleaf" transform="translate(44 -7) rotate(14) scale(.95)"/>
+            <use href="#bzleaf" transform="translate(56 -7) rotate(42) scale(.72)"/>
+          </g>
+        </defs>
+        <g class="ink-sway" opacity="0.09">
+          <path d="M392 432 C388 366 393 314 390 258 C387 202 392 142 389 86 C388 56 390 30 388 8" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"/>
+          <ellipse cx="390" cy="350" rx="7.5" ry="2.8" fill="none" stroke="currentColor" stroke-width="2"/>
+          <ellipse cx="389.5" cy="258" rx="7.5" ry="2.8" fill="none" stroke="currentColor" stroke-width="2"/>
+          <ellipse cx="390" cy="166" rx="7.5" ry="2.8" fill="none" stroke="currentColor" stroke-width="2"/>
+          <use href="#spray" transform="translate(391 318) rotate(-16)"/>
+          <use href="#spray" transform="translate(389 226) scale(-1 1) rotate(-22)"/>
+          <use href="#spray" transform="translate(390 134) rotate(-28) scale(1.12)"/>
+        </g>
+        <g class="ink-sway ink-sway-slow" opacity="0.05">
+          <path d="M498 432 C495 380 499 338 497 294 C495 248 498 202 496 156 C495 132 497 106 496 84" fill="none" stroke="currentColor" stroke-width="4.6" stroke-linecap="round"/>
+          <use href="#spray" transform="translate(497 326) rotate(-12) scale(.88)"/>
+        </g>
+      </svg>
+
+      <div class="relative z-10 mx-auto w-full max-w-6xl px-6 pb-16 pt-36 md:px-10">
+        <p class="reveal flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.35em] text-text-secondary">
+          <span class="h-px w-10 bg-leaf-deep"></span>
+          竹林友链 · 以文会友 · 共十二位
+        </p>
+        <h1 class="reveal reveal-d1 mt-7 font-serif text-[clamp(3.4rem,9.5vw,6.5rem)] font-bold leading-[1.05] tracking-[0.03em] text-text-primary">
+          群贤<span class="text-leaf-deep">毕至</span>
+        </h1>
+        <svg class="reveal reveal-d1 mt-5 block h-3 w-40 md:w-52" viewBox="0 0 224 12" aria-hidden>
+          <path d="M2 7 C 48 1 118 0 222 3 C 150 11 60 12 2 7 Z" fill="oklch(0.55 0.12 155)"/>
+        </svg>
+        <p class="reveal reveal-d2 mt-7 max-w-xl font-serif text-lg italic leading-relaxed text-text-secondary md:text-xl">
+          少长咸集，各美其美。轻点任意一位朋友，随墨而入其小站。
+        </p>
+      </div>
+    </section>
+
+    <!-- ═══════════ 分组一 · 技术博友（混排：1 高级 + 1 好友 + 3 一般） ═══════════ -->
+    <section class="mx-auto w-full max-w-6xl px-6 py-16 md:px-10 md:py-20">
+      <div class="reveal mb-8 flex items-end justify-between gap-4">
+        <div>
+          <p class="font-mono text-[11px] uppercase tracking-[0.35em] text-leaf-deep">壹</p>
+          <h2 class="mt-2.5 font-serif text-2xl font-bold text-text-primary md:text-3xl">技术博友</h2>
+        </div>
+        <span class="font-mono text-[11px] uppercase tracking-[0.25em] text-text-secondary">5 位 · 混排</span>
+      </div>
+
+      <div class="reveal bento">
+        <!-- 高级友链 · 2×2 · hover 截图 · 点击沉浸式引导（截图背景） -->
+        <a href="https://blog.zhulin.dev" target="_blank" rel="noopener noreferrer" class="card-premium span-2x2 group relative flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-all duration-500 hover:-translate-y-1 hover:border-leaf-muted hover:shadow-[0_24px_50px_-30px_oklch(0.32_0.06_155/0.45)]">
+          <!-- 左侧墨条：hover 时加宽并延伸全高（深化既有左侧 accent，取代原顶部墨线） -->
+          <span class="absolute inset-y-5 left-0 z-20 w-[3px] rounded-r-full bg-leaf-deep transition-all duration-500 group-hover:inset-y-0 group-hover:w-[6px]"></span>
+          <!-- 默认内容：头像 + 名/址 + 描述，水平垂直居中 -->
+          <div class="premium-default relative z-10 flex h-full flex-col items-center justify-center p-6 text-center">
+            <div class="flex size-16 items-center justify-center rounded-full bg-leaf-light/50 font-serif text-2xl font-bold text-leaf-deep ring-2 ring-ring-glow">竹</div>
+            <h3 class="mt-4 font-serif text-xl font-bold text-text-primary">竹林听雨</h3>
+            <p class="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary">blog.zhulin.dev</p>
+            <p class="mt-4 max-w-xs text-[14px] leading-[1.8] text-text-secondary">
+              记录 Go 与分布式系统的踩坑日常，深度长文，偶有诗酒。与小站相识于微时，互换链接多年。
+            </p>
+            <p class="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-leaf-deep/70">
+              <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              悬停查看站点截图
+            </p>
+          </div>
+          <div class="premium-shot">
+            <div class="flex items-center gap-1.5 border-b border-border bg-card px-3.5 py-2">
+              <span class="size-2.5 rounded-full bg-leaf-muted/60"></span>
+              <span class="size-2.5 rounded-full bg-leaf-muted/40"></span>
+              <span class="size-2.5 rounded-full bg-leaf-muted/25"></span>
+              <span class="ml-2.5 truncate font-mono text-[10px] text-text-secondary">https://blog.zhulin.dev</span>
+            </div>
+            <div class="relative flex-1 overflow-hidden">
+              <div class="flex h-full items-center justify-center bg-gradient-to-br from-leaf-light/30 via-card to-leaf-muted/25">
+                <span class="font-mono text-xs text-text-secondary">站点截图 · 占位</span>
+              </div>
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-card via-card/85 to-transparent px-5 pb-4 pt-10">
+                <div class="flex items-end justify-between gap-3">
+                  <div>
+                    <h3 class="font-serif text-lg font-bold text-text-primary">竹林听雨</h3>
+                    <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary">blog.zhulin.dev</p>
+                  </div>
+                  <span class="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.3em] text-leaf-deep">访问
+                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+
+        <a href="https://xishan.blog" target="_blank" rel="noopener noreferrer" class="group relative flex items-center gap-3 overflow-hidden rounded-lg border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]">
+          <span class="absolute inset-y-3 left-0 w-[3px] rounded-r-full bg-leaf-deep transition-all duration-500 group-hover:inset-y-0 group-hover:w-[5px]"></span>
+          <div class="flex size-11 shrink-0 items-center justify-center rounded-full bg-leaf-light/40 font-serif text-base font-semibold text-leaf-deep ring-1 ring-ring-glow">溪</div>
+          <div class="min-w-0 flex-1">
+            <h3 class="truncate font-serif text-[15px] font-bold text-text-primary transition-colors group-hover:text-leaf-deep">溪山行旅</h3>
+            <p class="mt-0.5 truncate text-xs leading-snug text-text-secondary">前端工程师的碎碎念，Vue 与工程化。</p>
+          </div>
+        </a>
+
+        <a href="https://yunbian.dev" target="_blank" rel="noopener noreferrer" class="group relative flex items-center gap-3 overflow-hidden rounded-lg border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]">
+          <span class="absolute inset-y-3 left-0 w-[2px] rounded-r-full transition-all duration-500 group-hover:inset-y-0 group-hover:w-[4px]" style="background: oklch(0.72 0.13 155)"></span>
+          <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-leaf-light/30 font-serif text-sm font-semibold text-leaf-deep">云</div>
+          <div class="min-w-0 flex-1">
+            <h3 class="truncate font-serif text-sm font-semibold text-text-primary transition-colors group-hover:text-leaf-deep">云边有个站</h3>
+            <p class="mt-0.5 truncate text-xs leading-snug text-text-secondary">云原生与 K8s 实战分享。</p>
+          </div>
+        </a>
+
+        <a href="https://shibei.io" target="_blank" rel="noopener noreferrer" class="group relative flex items-center gap-3 overflow-hidden rounded-lg border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]">
+          <span class="absolute inset-y-3 left-0 w-[2px] rounded-r-full transition-all duration-500 group-hover:inset-y-0 group-hover:w-[4px]" style="background: oklch(0.8 0.1 130)"></span>
+          <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-leaf-light/30 font-serif text-sm font-semibold text-leaf-deep">拾</div>
+          <div class="min-w-0 flex-1">
+            <h3 class="truncate font-serif text-sm font-semibold text-text-primary transition-colors group-hover:text-leaf-deep">拾贝集</h3>
+            <p class="mt-0.5 truncate text-xs leading-snug text-text-secondary">数据库内核研究笔记。</p>
+          </div>
+        </a>
+
+        <a href="https://yehang.dev" target="_blank" rel="noopener noreferrer" class="group relative flex items-center gap-3 overflow-hidden rounded-lg border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]">
+          <span class="absolute inset-y-3 left-0 w-[2px] rounded-r-full transition-all duration-500 group-hover:inset-y-0 group-hover:w-[4px]" style="background: oklch(0.88 0.1 105)"></span>
+          <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-leaf-light/30 font-serif text-sm font-semibold text-leaf-deep">灯</div>
+          <div class="min-w-0 flex-1">
+            <h3 class="truncate font-serif text-sm font-semibold text-text-primary transition-colors group-hover:text-leaf-deep">夜航灯</h3>
+            <p class="mt-0.5 truncate text-xs leading-snug text-text-secondary">深夜写代码，记录灵感与 bug。</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ═══════════ 分组二 · 生活随笔（全 1×1） ═══════════ -->
+    <section class="mx-auto w-full max-w-6xl px-6 py-16 md:px-10 md:py-20">
+      <div class="reveal mb-8 flex items-end justify-between gap-4">
+        <div>
+          <p class="font-mono text-[11px] uppercase tracking-[0.35em] text-leaf-deep">贰</p>
+          <h2 class="mt-2.5 font-serif text-2xl font-bold text-text-primary md:text-3xl">生活随笔</h2>
+        </div>
+        <span class="font-mono text-[11px] uppercase tracking-[0.25em] text-text-secondary">4 位 · 全 1×1</span>
+      </div>
+
+      <div class="reveal bento">
+        <a href="https://manlife.me" target="_blank" rel="noopener noreferrer" class="group relative flex items-center gap-3 overflow-hidden rounded-lg border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]">
+          <span class="absolute inset-y-3 left-0 w-[3px] rounded-r-full bg-leaf-deep transition-all duration-500 group-hover:inset-y-0 group-hover:w-[5px]"></span>
+          <div class="flex size-11 shrink-0 items-center justify-center rounded-full bg-leaf-light/40 font-serif text-base font-semibold text-leaf-deep ring-1 ring-ring-glow">慢</div>
+          <div class="min-w-0 flex-1">
+            <h3 class="truncate font-serif text-[15px] font-bold text-text-primary transition-colors group-hover:text-leaf-deep">慢生活手账</h3>
+            <p class="mt-0.5 truncate text-xs leading-snug text-text-secondary">摄影、咖啡与慢节奏生活。</p>
+          </div>
+        </a>
+        <a href="https://shanjian.org" target="_blank" rel="noopener noreferrer" class="group relative flex items-center gap-3 overflow-hidden rounded-lg border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]">
+          <span class="absolute inset-y-3 left-0 w-[3px] rounded-r-full bg-leaf-deep transition-all duration-500 group-hover:inset-y-0 group-hover:w-[5px]"></span>
+          <div class="flex size-11 shrink-0 items-center justify-center rounded-full bg-leaf-light/40 font-serif text-base font-semibold text-leaf-deep ring-1 ring-ring-glow">山</div>
+          <div class="min-w-0 flex-1">
+            <h3 class="truncate font-serif text-[15px] font-bold text-text-primary transition-colors group-hover:text-leaf-deep">山间笔记</h3>
+            <p class="mt-0.5 truncate text-xs leading-snug text-text-secondary">徒步与自然的观察日记。</p>
+          </div>
+        </a>
+        <a href="https://chayu.life" target="_blank" rel="noopener noreferrer" class="group relative flex items-center gap-3 overflow-hidden rounded-lg border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]">
+          <span class="absolute inset-y-3 left-0 w-[2px] rounded-r-full transition-all duration-500 group-hover:inset-y-0 group-hover:w-[4px]" style="background: oklch(0.62 0.15 155)"></span>
+          <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-leaf-light/30 font-serif text-sm font-semibold text-leaf-deep">茶</div>
+          <div class="min-w-0 flex-1">
+            <h3 class="truncate font-serif text-sm font-semibold text-text-primary transition-colors group-hover:text-leaf-deep">茶余饭后</h3>
+            <p class="mt-0.5 truncate text-xs leading-snug text-text-secondary">品茶、读书与日常思考。</p>
+          </div>
+        </a>
+        <a href="https://muxin.craft" target="_blank" rel="noopener noreferrer" class="group relative flex items-center gap-3 overflow-hidden rounded-lg border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]">
+          <span class="absolute inset-y-3 left-0 w-[2px] rounded-r-full transition-all duration-500 group-hover:inset-y-0 group-hover:w-[4px]" style="background: oklch(0.55 0.12 170)"></span>
+          <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-leaf-light/30 font-serif text-sm font-semibold text-leaf-deep">木</div>
+          <div class="min-w-0 flex-1">
+            <h3 class="truncate font-serif text-sm font-semibold text-text-primary transition-colors group-hover:text-leaf-deep">木心手作</h3>
+            <p class="mt-0.5 truncate text-xs leading-snug text-text-secondary">木工与手作的记录。</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ═══════════ 分组三 · 推广合作（混排：1 高级 + 2 广告） ═══════════ -->
+    <section class="mx-auto w-full max-w-6xl px-6 py-16 md:px-10 md:py-20">
+      <div class="reveal mb-8 flex items-end justify-between gap-4">
+        <div>
+          <p class="font-mono text-[11px] uppercase tracking-[0.35em] text-leaf-deep">叁</p>
+          <h2 class="mt-2.5 font-serif text-2xl font-bold text-text-primary md:text-3xl">推广合作</h2>
+        </div>
+        <span class="font-mono text-[11px] uppercase tracking-[0.25em] text-text-secondary">3 位 · 混排</span>
+      </div>
+
+      <div class="reveal bento">
+        <a href="https://tools.x-lf.com" target="_blank" rel="noopener noreferrer" class="card-premium span-2x2 group relative flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-all duration-500 hover:-translate-y-1 hover:border-leaf-muted hover:shadow-[0_24px_50px_-30px_oklch(0.32_0.06_155/0.45)]">
+          <span class="absolute right-4 top-4 z-30 rounded border border-leaf-muted/60 bg-leaf-light/20 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.25em] text-leaf-deep">推广</span>
+          <span class="absolute inset-y-5 left-0 z-20 w-[3px] rounded-r-full bg-leaf-deep transition-all duration-500 group-hover:inset-y-0 group-hover:w-[6px]"></span>
+          <div class="premium-default relative z-10 flex h-full flex-col items-center justify-center p-6 text-center">
+            <div class="flex size-16 items-center justify-center rounded-full bg-leaf-light/50 font-serif text-2xl font-bold text-leaf-deep ring-2 ring-ring-glow">工</div>
+            <h3 class="mt-4 font-serif text-xl font-bold text-text-primary">工欲善其事</h3>
+            <p class="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary">tools.x-lf.com</p>
+            <p class="mt-4 max-w-xs text-[14px] leading-[1.8] text-text-secondary">
+              开发者效率工具集，小而美，值得收藏。涵盖终端、编辑器与命令行利器。
+            </p>
+            <p class="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-leaf-deep/70">
+              <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              悬停查看站点截图
+            </p>
+          </div>
+          <div class="premium-shot">
+            <div class="flex items-center gap-1.5 border-b border-border bg-card px-3.5 py-2">
+              <span class="size-2.5 rounded-full bg-leaf-muted/60"></span>
+              <span class="size-2.5 rounded-full bg-leaf-muted/40"></span>
+              <span class="size-2.5 rounded-full bg-leaf-muted/25"></span>
+              <span class="ml-2.5 truncate font-mono text-[10px] text-text-secondary">https://tools.x-lf.com</span>
+            </div>
+            <div class="relative flex-1 overflow-hidden">
+              <div class="flex h-full items-center justify-center bg-gradient-to-br from-leaf-light/30 via-card to-leaf-muted/25">
+                <span class="font-mono text-xs text-text-secondary">站点截图 · 占位</span>
+              </div>
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-card via-card/85 to-transparent px-5 pb-4 pt-10">
+                <div class="flex items-end justify-between gap-3">
+                  <div>
+                    <h3 class="font-serif text-lg font-bold text-text-primary">工欲善其事</h3>
+                    <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary">tools.x-lf.com</p>
+                  </div>
+                  <span class="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.3em] text-leaf-deep">访问
+                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+
+        <a href="https://cloud.example.com" target="_blank" rel="noopener noreferrer" class="group relative flex flex-col items-center justify-center overflow-hidden rounded-lg border border-border bg-card p-4 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]">
+          <span class="absolute right-2.5 top-2.5 rounded border border-leaf-muted/60 bg-leaf-light/20 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-leaf-deep">推广</span>
+          <span class="absolute inset-y-3 left-0 w-[2px] rounded-r-full bg-leaf-muted transition-all duration-500 group-hover:inset-y-0 group-hover:w-[4px]"></span>
+          <div class="flex size-11 items-center justify-center rounded-full bg-leaf-light/50 font-serif text-base font-bold text-leaf-deep ring-1 ring-ring-glow">云</div>
+          <h3 class="mt-2.5 truncate font-serif text-sm font-bold text-text-primary transition-colors group-hover:text-leaf-deep">云服务优选</h3>
+          <p class="mt-0.5 truncate text-[11px] leading-snug text-text-secondary">高性价比云服务器</p>
+        </a>
+        <a href="https://domains.example.com" target="_blank" rel="noopener noreferrer" class="group relative flex flex-col items-center justify-center overflow-hidden rounded-lg border border-border bg-card p-4 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]">
+          <span class="absolute right-2.5 top-2.5 rounded border border-leaf-muted/60 bg-leaf-light/20 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em] text-leaf-deep">推广</span>
+          <span class="absolute inset-y-3 left-0 w-[2px] rounded-r-full bg-leaf-muted transition-all duration-500 group-hover:inset-y-0 group-hover:w-[4px]"></span>
+          <div class="flex size-11 items-center justify-center rounded-full bg-leaf-light/50 font-serif text-base font-bold text-leaf-deep ring-1 ring-ring-glow">域</div>
+          <h3 class="mt-2.5 truncate font-serif text-sm font-bold text-text-primary transition-colors group-hover:text-leaf-deep">域名优选</h3>
+          <p class="mt-0.5 truncate text-[11px] leading-snug text-text-secondary">小众后缀域名注册</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- ═══════════ 空状态示意 ═══════════ -->
+    <section class="mx-auto w-full max-w-6xl px-6 py-16 md:px-10 md:py-20">
+      <div class="reveal rounded-lg border border-dashed border-border bg-card/60 p-5">
+        <p class="mb-2 font-mono text-[11px] uppercase tracking-widest text-text-secondary">空状态示意 · 无友链时</p>
+        <div class="flex items-center gap-4 py-2">
+          <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden class="shrink-0">
+            <path d="M27 7 A 17 17 0 1 0 41 31" fill="none" stroke="oklch(0.8 0.08 130)" stroke-width="2" stroke-linecap="round" />
+            <path d="M16 22 C 19 19 25 18 31 21 C 27 23 20 23 16 22 Z" fill="oklch(0.8 0.08 130)" opacity="0.55" />
+          </svg>
+          <div>
+            <p class="font-serif text-[15px] text-text-primary">还没有友链</p>
+            <p class="font-mono text-xs text-text-secondary">快来申请第一个，让竹林热闹起来</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 页脚 ═══════════ -->
+    <footer class="mx-auto w-full max-w-6xl px-6 py-14 md:px-10">
+      <div class="flex flex-col items-center gap-4 text-center">
+        <svg width="26" height="26" viewBox="0 0 48 32" fill="oklch(0.55 0.12 155)" aria-hidden><path d="M2 30C10 18 26 6 46 2c-3 12-16 24-44 28z"/></svg>
+        <p class="font-mono text-[11px] tracking-[0.2em] text-text-secondary">
+          Copyright (C) 2016-2026 筱锋 xiao_lfeng · All Rights Reserved
+        </p>
+      </div>
+    </footer>
+
+    <!-- ═══════════ 沉浸式跳转引导层（Interlude） ═══════════ -->
+    <div id="interlude" aria-hidden="true">
+      <div class="il-bg"></div>
+      <div class="il-chrome font-mono">
+        <span class="il-dot"></span><span class="il-dot"></span><span class="il-dot"></span>
+        <span class="il-url"></span>
+      </div>
+      <div class="il-content">
+        <div class="il-avatar"></div>
+        <h2 class="il-name"></h2>
+        <p class="il-domain font-mono"></p>
+        <div class="il-progress"><span class="il-progress-bar"></span></div>
+        <p class="il-hint font-mono">正在前往</p>
+      </div>
+    </div>
+
+    <script>
+      // 展卷 reveal
+      const io = new IntersectionObserver((es) => {
+        es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0.08 });
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+      // 导航着墨
+      const nav = document.getElementById('nav');
+      addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40), { passive: true });
+
+      /* ───────── 沉浸式跳转引导 ─────────
+         点击友链卡 → 阻止默认跳转 → 从卡片中心 clip-path 扩散至全屏 →
+         内容渐显 + 进度线走满 → 动画完毕执行真实跳转 window.open(url)。
+         高级链接（.card-premium）额外以站点截图为全屏背景 + 顶部地址栏。
+         设计稿为便于反复演示，跳转点改为「收拢引导层」；真实实现即 window.open。 */
+      const interlude = document.getElementById('interlude');
+      const ilAvatar = interlude.querySelector('.il-avatar');
+      const ilName = interlude.querySelector('.il-name');
+      const ilDomain = interlude.querySelector('.il-domain');
+      const ilUrl = interlude.querySelector('.il-url');
+      let ilTimer = null;
+
+      document.querySelectorAll('.bento a').forEach((card) => {
+        card.addEventListener('click', (e) => {
+          e.preventDefault();
+          const rect = card.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          const isPremium = card.classList.contains('card-premium');
+          const url = card.getAttribute('href');
+          const domain = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+          const name = (card.querySelector('.premium-default h3, h3') || {}).textContent || '';
+
+          ilAvatar.textContent = name.trim().charAt(0);
+          ilName.textContent = name.trim();
+          ilDomain.textContent = domain;
+          ilUrl.textContent = url;
+          interlude.classList.toggle('is-shot', isPremium);
+
+          // 从卡片中心扩散至全屏
+          interlude.style.transition = 'none';
+          interlude.style.clipPath = `circle(0px at ${cx}px ${cy}px)`;
+          interlude.classList.add('active');
+          interlude.getBoundingClientRect();
+          interlude.style.transition = 'clip-path .75s cubic-bezier(.22,.9,.3,1)';
+          interlude.style.clipPath = `circle(150% at ${cx}px ${cy}px)`;
+          requestAnimationFrame(() => interlude.classList.add('show'));
+
+          // 动画完毕 → 真实跳转（设计稿以收拢代替，便于反复演示）
+          clearTimeout(ilTimer);
+          ilTimer = setTimeout(() => {
+            // 真实实现：window.open(url, '_blank', 'noopener');
+            interlude.classList.remove('show');
+            interlude.style.clipPath = `circle(0px at ${cx}px ${cy}px)`;
+            setTimeout(() => interlude.classList.remove('active'), 780);
+          }, 1650);
+        });
+      });
+    </script>
+  </body>
+</html>

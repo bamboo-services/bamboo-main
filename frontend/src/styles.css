@@ -240,3 +240,67 @@ code {
     animation: none;
   }
 }
+
+/* ───────── Markdown 高级排版（.markdown-view，详见 markdown.tsx） ─────────
+   伪元素样式承载：首段首字下沉、列表斜墨条项目符、引用块拉风引语。
+   作用于 markdown.tsx 渲染容器，作者写常规 Markdown 即自动获得高级质感。 */
+
+/* 首段首字下沉：自动作用于第一段首字符 */
+.markdown-view > p:first-of-type::first-letter {
+  float: left;
+  font-family: var(--font-serif);
+  font-size: 3.4em;
+  line-height: 0.82;
+  padding-right: 0.14em;
+  padding-top: 0.06em;
+  color: var(--leaf-deep);
+  font-weight: 600;
+}
+
+/* 无序列表项目符：斜墨条（skewX(-12deg)，与 CardHead 签名同源） */
+.markdown-view ul > li {
+  position: relative;
+  padding-left: 1.75rem;
+}
+.markdown-view ul > li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.72rem;
+  width: 6px;
+  height: 6px;
+  transform: skewX(-12deg);
+  background: var(--leaf-deep);
+  border-radius: 1px;
+}
+
+/* 引用块 → 拉风引语：悬浮「 + 衬线斜体大字 + 右偏 + 底部斜墨条收束 */
+.markdown-view blockquote::before {
+  content: '「';
+  position: absolute;
+  left: -0.3rem;
+  top: -2.6rem;
+  font-family: var(--font-serif);
+  font-size: 4.5rem;
+  line-height: 1;
+  color: var(--leaf-light);
+  font-weight: 700;
+}
+.markdown-view blockquote p {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--text-primary);
+  letter-spacing: 0.015em;
+}
+.markdown-view blockquote::after {
+  content: '';
+  display: block;
+  margin-top: 1.75rem;
+  width: 3rem;
+  height: 3px;
+  transform: skewX(-12deg);
+  background: var(--leaf-deep);
+  border-radius: 2px;
+}

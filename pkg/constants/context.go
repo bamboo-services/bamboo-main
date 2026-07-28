@@ -46,6 +46,15 @@ const (
 	// LinkFailBroken 链接失效状态
 	LinkFailBroken = 1
 
+	// LinkLevelRegular 一般友链（1×1 紧凑卡片）
+	LinkLevelRegular = 0
+	// LinkLevelClose 好友友链（1×1 富式卡片）
+	LinkLevelClose = 1
+	// LinkLevelPremium 高级友链（2×2 特写卡片，hover 展开站点截图）
+	LinkLevelPremium = 2
+	// LinkLevelAd 广告友链（1×1 居中卡片，带推广标识）
+	LinkLevelAd = 3
+
 	// RoleAdmin 管理员角色标识
 	RoleAdmin = "admin"
 	// RoleModerator 审核员角色标识

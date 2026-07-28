@@ -68,6 +68,7 @@ func (l *LinkLogic) Add(ctx context.Context, req *apiLink.FriendAddRequest) (*en
 		SortOrder:   req.LinkOrder,
 		Status:      constants.LinkStatusPending, // 默认待审核
 		IsFailure:   constants.LinkFailNormal,    // 默认正常
+		Level:       req.LinkLevel,
 		ApplyRemark: xUtil.Ptr(req.LinkApplyRemark),
 	}
 
@@ -137,6 +138,9 @@ func (l *LinkLogic) Update(ctx context.Context, linkID xSnowflake.SnowflakeID, r
 	}
 	if req.LinkOrder != nil {
 		link.SortOrder = *req.LinkOrder
+	}
+	if req.LinkLevel != nil {
+		link.Level = *req.LinkLevel
 	}
 	if req.LinkApplyRemark != "" {
 		link.ApplyRemark = xUtil.Ptr(req.LinkApplyRemark)

@@ -462,6 +462,14 @@ definitions:
       link_group_id:
         example: 1
         type: integer
+      link_level:
+        enum:
+        - 0
+        - 1
+        - 2
+        - 3
+        example: 0
+        type: integer
       link_name:
         example: 示例网站
         maxLength: 100
@@ -521,6 +529,9 @@ definitions:
       is_failure:
         description: 友链失效标志
         type: integer
+      level:
+        description: 友链级别
+        type: integer
       name:
         description: 友链名称
         type: string
@@ -579,6 +590,9 @@ definitions:
         type: integer
       is_failure:
         description: 友链失效标志
+        type: integer
+      level:
+        description: 友链级别
         type: integer
       name:
         description: 友链名称
@@ -675,6 +689,14 @@ definitions:
       link_group_id:
         example: 1
         type: integer
+      link_level:
+        enum:
+        - 0
+        - 1
+        - 2
+        - 3
+        example: 0
+        type: integer
       link_name:
         example: 示例网站
         maxLength: 100
@@ -730,6 +752,9 @@ definitions:
         type: integer
       is_failure:
         description: 友链失效标志
+        type: integer
+      level:
+        description: 友链级别
         type: integer
       name:
         description: 友链名称
@@ -1528,6 +1553,9 @@ definitions:
         type: integer
       is_failure:
         description: 友链失效标志
+        type: integer
+      level:
+        description: 友链级别
         type: integer
       name:
         description: 友链名称

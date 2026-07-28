@@ -35,6 +35,7 @@ type LinkFriend struct {
 	SortOrder          int                     `json:"sort_order" gorm:"type:int;default:0;comment:友链排序"`                     // 友链排序
 	Status             int                     `json:"status" gorm:"type:int;default:0;comment:友链状态（0: 待审核, 1: 已通过, 2: 已拒绝）"` // 友链状态
 	IsFailure          int                     `json:"is_failure" gorm:"type:int;default:0;comment:友链失效标志（0: 正常, 1: 失效）"`     // 友链失效标志
+	Level              int                     `json:"level" gorm:"type:int;default:0;comment:友链级别（0: 一般, 1: 好友, 2: 高级, 3: 广告）"` // 友链级别
 	FailReason         *string                 `json:"fail_reason,omitempty" gorm:"type:text;comment:友链失效原因"`                 // 友链失效原因
 	ApplyRemark        *string                 `json:"apply_remark,omitempty" gorm:"type:text;comment:申请者备注"`                 // 申请者备注
 	ReviewRemark       *string                 `json:"review_remark,omitempty" gorm:"type:text;comment:审核备注"`                 // 审核备注

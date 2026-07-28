@@ -4467,6 +4467,16 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "link_level": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1,
+                        2,
+                        3
+                    ],
+                    "example": 0
+                },
                 "link_name": {
                     "type": "string",
                     "maxLength": 100,
@@ -4545,6 +4555,10 @@ const docTemplate = `{
                 },
                 "is_failure": {
                     "description": "友链失效标志",
+                    "type": "integer"
+                },
+                "level": {
+                    "description": "友链级别",
                     "type": "integer"
                 },
                 "name": {
@@ -4631,6 +4645,10 @@ const docTemplate = `{
                 },
                 "is_failure": {
                     "description": "友链失效标志",
+                    "type": "integer"
+                },
+                "level": {
+                    "description": "友链级别",
                     "type": "integer"
                 },
                 "name": {
@@ -4767,6 +4785,16 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "link_level": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1,
+                        2,
+                        3
+                    ],
+                    "example": 0
+                },
                 "link_name": {
                     "type": "string",
                     "maxLength": 100,
@@ -4845,6 +4873,10 @@ const docTemplate = `{
                 },
                 "is_failure": {
                     "description": "友链失效标志",
+                    "type": "integer"
+                },
+                "level": {
+                    "description": "友链级别",
                     "type": "integer"
                 },
                 "name": {
@@ -5996,6 +6028,10 @@ const docTemplate = `{
                 },
                 "is_failure": {
                     "description": "友链失效标志",
+                    "type": "integer"
+                },
+                "level": {
+                    "description": "友链级别",
                     "type": "integer"
                 },
                 "name": {

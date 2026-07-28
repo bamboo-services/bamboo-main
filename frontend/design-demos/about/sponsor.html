@@ -1,0 +1,261 @@
+<!doctype html>
+<!--
+  设计稿 · /about/sponsor「感恩帖」v3 · 高级感重塑
+  方向：竹林三帖 —— 手卷式编辑布局，与 me/friends v3 同一设计语言。
+  开场以巨型「谢」字为视觉锚点；渠道为雅致供奉；记录为感恩账册（衬线大字金额）。
+  双击即可在浏览器打开。占位数据仅示意。
+-->
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>赞助 · 感恩帖 v3</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&family=Noto+Serif+SC:wght@400..700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              background: 'oklch(0.975 0.016 110)',
+              card: 'oklch(0.99 0.005 110)',
+              border: 'oklch(0.9 0.03 120)',
+              muted: 'oklch(0.94 0.03 115)',
+              primary: 'oklch(0.72 0.13 155)',
+              'leaf-light': 'oklch(0.88 0.1 105)',
+              'leaf-muted': 'oklch(0.8 0.08 130)',
+              'leaf-deep': 'oklch(0.55 0.12 155)',
+              'text-primary': 'oklch(0.32 0.06 155)',
+              'text-secondary': 'oklch(0.5 0.05 130)',
+              'ring-glow': 'oklch(0.72 0.13 155 / 0.28)',
+            },
+            fontFamily: {
+              serif: ['Source Serif 4', 'Noto Serif SC', 'Songti SC', 'STSong', 'serif'],
+              mono: ['source-code-pro', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+            },
+          },
+        },
+      }
+    </script>
+
+    <style>
+      @keyframes ink-sway { from { transform: rotate(-1.1deg); } to { transform: rotate(1.4deg); } }
+      .ink-sway { transform-box: fill-box; transform-origin: 50% 100%; animation: ink-sway 13s ease-in-out infinite alternate; }
+      .ink-sway-slow { animation-duration: 17s; animation-delay: -6s; }
+
+      .reveal { opacity: 0; transform: translateY(30px); transition: opacity .9s cubic-bezier(.22,.9,.3,1), transform .9s cubic-bezier(.22,.9,.3,1); }
+      .reveal.in { opacity: 1; transform: none; }
+      .reveal-d1 { transition-delay: .12s; } .reveal-d2 { transition-delay: .24s; }
+
+      #nav { transition: background .4s ease, border-color .4s ease; border-bottom: 1px solid transparent; }
+      #nav.scrolled { background: oklch(0.975 0.016 110 / 0.94); border-bottom-color: oklch(0.9 0.03 120); }
+      .nav-link { position: relative; font-size: 11px; letter-spacing: .28em; text-transform: uppercase; color: oklch(0.5 0.05 130); transition: color .3s; }
+      .nav-link::after { content: ''; position: absolute; left: 0; bottom: -7px; height: 2px; width: 100%; background: oklch(0.55 0.12 155); transform: scaleX(0); transform-origin: left; transition: transform .35s cubic-bezier(.22,.9,.3,1); }
+      .nav-link:hover, .nav-link.active { color: oklch(0.32 0.06 155); }
+      .nav-link:hover::after, .nav-link.active::after { transform: scaleX(1); }
+
+      /* 账册行：hover 墨线自左扫入 */
+      .ledger-row { position: relative; transition: background .35s ease; }
+      .ledger-row::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: oklch(0.55 0.12 155); transform: scaleY(0); transform-origin: top; transition: transform .35s cubic-bezier(.22,.9,.3,1); }
+      .ledger-row:hover { background: oklch(0.94 0.03 115 / 0.45); }
+      .ledger-row:hover::before { transform: scaleY(1); }
+
+      body { background: oklch(0.975 0.016 110); }
+      @media (prefers-reduced-motion: reduce) {
+        .ink-sway { animation: none; }
+        .reveal { opacity: 1; transform: none; transition: none; }
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen bg-background font-sans text-text-primary antialiased">
+    <!-- ═══════════ 顶部导航 ═══════════ -->
+    <nav id="nav" class="fixed inset-x-0 top-0 z-50">
+      <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5 md:px-10">
+        <a href="me.html" class="flex items-center gap-2.5">
+          <svg width="20" height="20" viewBox="0 0 48 32" fill="oklch(0.55 0.12 155)" aria-hidden><path d="M2 30C10 18 26 6 46 2c-3 12-16 24-44 28z"/></svg>
+          <span class="font-serif text-base font-semibold tracking-wide text-text-primary">关于小站</span>
+        </a>
+        <div class="flex items-center gap-7 md:gap-9">
+          <a href="me.html" class="nav-link font-mono">关于我</a>
+          <a href="friends.html" class="nav-link font-mono">友链</a>
+          <a href="sponsor.html" class="nav-link active font-mono">赞助</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ═══════════ 开场 · 感恩帖（巨「谢」为锚） ═══════════ -->
+    <section class="relative flex min-h-[80vh] items-center overflow-hidden">
+      <div class="pointer-events-none absolute inset-0"
+        style="background: radial-gradient(820px 520px at 88% 0%, oklch(0.88 0.1 105 / 0.22), transparent 68%), radial-gradient(620px 420px at 0% 100%, oklch(0.88 0.1 105 / 0.12), transparent 70%);"></div>
+      <!-- 巨型「谢」字水印（视觉锚点） -->
+      <span class="pointer-events-none absolute -right-8 top-1/2 hidden -translate-y-1/2 select-none font-serif text-[26rem] font-black leading-none text-text-primary opacity-[0.045] md:block" aria-hidden>谢</span>
+      <!-- 墨韵竹叶（左下） -->
+      <svg class="pointer-events-none absolute -left-16 bottom-0 h-[70%] w-[480px] -scale-x-100 text-text-primary" viewBox="0 0 580 432" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
+        <defs>
+          <path id="bzleaf" d="M0 0 C12 -7 34 -11 58 -3 C36 4 12 5 0 0 Z"/>
+          <g id="spray">
+            <path d="M0 0 Q26 -9 56 -7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <use href="#bzleaf" transform="translate(12 -3) rotate(-44) scale(1.08)"/>
+            <use href="#bzleaf" transform="translate(28 -6) rotate(-14)"/>
+            <use href="#bzleaf" transform="translate(44 -7) rotate(14) scale(.95)"/>
+            <use href="#bzleaf" transform="translate(56 -7) rotate(42) scale(.72)"/>
+          </g>
+        </defs>
+        <g class="ink-sway" opacity="0.08">
+          <path d="M392 432 C388 366 393 314 390 258 C387 202 392 142 389 86 C388 56 390 30 388 8" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"/>
+          <ellipse cx="390" cy="350" rx="7.5" ry="2.8" fill="none" stroke="currentColor" stroke-width="2"/>
+          <ellipse cx="389.5" cy="258" rx="7.5" ry="2.8" fill="none" stroke="currentColor" stroke-width="2"/>
+          <use href="#spray" transform="translate(391 318) rotate(-16)"/>
+          <use href="#spray" transform="translate(389 226) scale(-1 1) rotate(-22)"/>
+          <use href="#spray" transform="translate(390 134) rotate(-28) scale(1.12)"/>
+        </g>
+      </svg>
+
+      <div class="relative z-10 mx-auto w-full max-w-6xl px-6 pb-20 pt-36 md:px-10">
+        <p class="reveal flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.35em] text-text-secondary">
+          <span class="h-px w-10 bg-leaf-deep"></span>
+          赞助 · 感恩录 · 共二十位
+        </p>
+        <h1 class="reveal reveal-d1 mt-8 font-serif text-[clamp(3.6rem,10vw,7rem)] font-bold leading-[1.05] tracking-[0.03em] text-text-primary">
+          感恩<span class="text-leaf-deep">有你</span>
+        </h1>
+        <svg class="reveal reveal-d1 mt-6 block h-3 w-44 md:w-56" viewBox="0 0 224 12" aria-hidden>
+          <path d="M2 7 C 48 1 118 0 222 3 C 150 11 60 12 2 7 Z" fill="oklch(0.55 0.12 155)"/>
+        </svg>
+        <p class="reveal reveal-d2 mt-8 max-w-xl font-serif text-xl italic leading-relaxed text-text-secondary md:text-2xl">
+          每一份支持，都是竹林里的一缕清风。<br class="hidden md:block" />它让小站得以安静地生长，也让我知道有人在听。
+        </p>
+      </div>
+    </section>
+
+    <!-- ═══════════ 壹 · 赞助渠道（雅致供奉） ═══════════ -->
+    <section class="mx-auto w-full max-w-6xl px-6 py-20 md:px-10 md:py-24">
+      <div class="reveal mb-10 flex items-end justify-between gap-4">
+        <div>
+          <p class="font-mono text-[11px] uppercase tracking-[0.35em] text-leaf-deep">壹 · 渠道</p>
+          <h2 class="mt-3 font-serif text-3xl font-bold text-text-primary md:text-4xl">随喜之门</h2>
+        </div>
+        <span class="font-mono text-[11px] uppercase tracking-[0.25em] text-text-secondary">Channels · 2</span>
+      </div>
+
+      <div class="grid gap-6 sm:grid-cols-2">
+        <div class="reveal group relative overflow-hidden rounded-lg border border-border bg-card p-8 transition-all duration-500 hover:-translate-y-1 hover:border-leaf-muted hover:shadow-[0_24px_50px_-30px_oklch(0.32_0.06_155/0.45)]">
+          <span class="absolute left-8 right-8 top-[-1px] h-0.5 origin-left scale-x-0 rounded-full bg-leaf-deep transition-transform duration-500 group-hover:scale-x-100"></span>
+          <div class="flex items-center gap-5">
+            <div class="flex size-16 shrink-0 items-center justify-center rounded-full bg-leaf-light/50 font-serif text-2xl font-bold text-leaf-deep ring-2 ring-ring-glow">微</div>
+            <div class="min-w-0">
+              <h3 class="font-serif text-xl font-bold text-text-primary">微信支付</h3>
+              <p class="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary">已收到 12 次随喜</p>
+            </div>
+            <span class="ml-auto shrink-0 rounded border border-leaf-muted/60 bg-leaf-light/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.25em] text-leaf-deep">开放</span>
+          </div>
+        </div>
+
+        <div class="reveal group relative overflow-hidden rounded-lg border border-border bg-card p-8 transition-all duration-500 hover:-translate-y-1 hover:border-leaf-muted hover:shadow-[0_24px_50px_-30px_oklch(0.32_0.06_155/0.45)]">
+          <span class="absolute left-8 right-8 top-[-1px] h-0.5 origin-left scale-x-0 rounded-full bg-leaf-deep transition-transform duration-500 group-hover:scale-x-100"></span>
+          <div class="flex items-center gap-5">
+            <div class="flex size-16 shrink-0 items-center justify-center rounded-full bg-leaf-light/50 font-serif text-2xl font-bold text-leaf-deep ring-2 ring-ring-glow">支</div>
+            <div class="min-w-0">
+              <h3 class="font-serif text-xl font-bold text-text-primary">支付宝</h3>
+              <p class="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary">已收到 8 次随喜</p>
+            </div>
+            <span class="ml-auto shrink-0 rounded border border-leaf-muted/60 bg-leaf-light/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.25em] text-leaf-deep">开放</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 贰 · 赞助记录（感恩账册） ═══════════ -->
+    <section class="relative overflow-hidden border-y border-border/70">
+      <div class="pointer-events-none absolute inset-0"
+        style="background: radial-gradient(720px 400px at 100% 0%, oklch(0.88 0.1 105 / 0.14), transparent 70%);"></div>
+      <span class="pointer-events-none absolute -bottom-12 right-4 select-none font-serif text-[170px] font-black leading-none text-text-primary opacity-[0.04]" aria-hidden>录</span>
+
+      <div class="relative mx-auto w-full max-w-6xl px-6 py-20 md:px-10 md:py-24">
+        <div class="reveal mb-4 flex items-end justify-between gap-4">
+          <div>
+            <p class="font-mono text-[11px] uppercase tracking-[0.35em] text-leaf-deep">贰 · 记录</p>
+            <h2 class="mt-3 font-serif text-3xl font-bold text-text-primary md:text-4xl">感恩账册</h2>
+          </div>
+          <span class="font-mono text-[11px] uppercase tracking-[0.25em] text-text-secondary">共 20 位 · 累计 ¥183.90</span>
+        </div>
+        <p class="reveal mb-10 max-w-lg text-[15px] leading-relaxed text-text-secondary">
+          账册所载，不分多寡，皆是心意。排名按时间倒序，新近的心意在前。
+        </p>
+
+        <!-- 账册：编辑式行列表，金额为衬线大字 -->
+        <div class="reveal divide-y divide-border border-y border-border">
+          <div class="ledger-row flex items-center gap-5 px-4 py-6 md:gap-7 md:px-6">
+            <span class="w-8 shrink-0 font-mono text-[11px] tabular-nums text-text-secondary">01</span>
+            <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-leaf-light/40 font-serif text-lg font-semibold text-leaf-deep">林</div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate font-serif text-lg font-semibold text-text-primary">林间小鹿</p>
+              <p class="mt-0.5 truncate font-mono text-[11px] text-text-secondary">微信支付 · 2026-07-20</p>
+              <p class="mt-1.5 truncate text-sm italic text-text-secondary">「博客写得真好，支持一下～」</p>
+            </div>
+            <span class="shrink-0 font-serif text-2xl font-semibold tabular-nums text-leaf-deep md:text-3xl">¥66<span class="text-lg">.00</span></span>
+          </div>
+
+          <div class="ledger-row flex items-center gap-5 px-4 py-6 md:gap-7 md:px-6">
+            <span class="w-8 shrink-0 font-mono text-[11px] tabular-nums text-text-secondary">02</span>
+            <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-leaf-light/40 font-serif text-lg font-semibold text-leaf-deep">竹</div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate font-serif text-lg font-semibold text-text-primary">竹林听雨</p>
+              <p class="mt-0.5 truncate font-mono text-[11px] text-text-secondary">支付宝 · 2026-07-12</p>
+              <p class="mt-1.5 truncate text-sm italic text-text-secondary">「友链互勉，一起把博客写下去。」</p>
+            </div>
+            <span class="shrink-0 font-serif text-2xl font-semibold tabular-nums text-leaf-deep md:text-3xl">¥88<span class="text-lg">.00</span></span>
+          </div>
+
+          <div class="ledger-row flex items-center gap-5 px-4 py-6 md:gap-7 md:px-6">
+            <span class="w-8 shrink-0 font-mono text-[11px] tabular-nums text-text-secondary">03</span>
+            <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-leaf-light/40 font-serif text-lg font-semibold text-leaf-deep">匿</div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate font-serif text-lg font-semibold text-text-primary">匿名友人</p>
+              <p class="mt-0.5 truncate font-mono text-[11px] text-text-secondary">微信支付 · 2026-06-30</p>
+            </div>
+            <span class="shrink-0 font-serif text-2xl font-semibold tabular-nums text-leaf-deep md:text-3xl">¥9<span class="text-lg">.90</span></span>
+          </div>
+
+          <div class="ledger-row flex items-center gap-5 px-4 py-6 md:gap-7 md:px-6">
+            <span class="w-8 shrink-0 font-mono text-[11px] tabular-nums text-text-secondary">04</span>
+            <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-leaf-light/40 font-serif text-lg font-semibold text-leaf-deep">溪</div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate font-serif text-lg font-semibold text-text-primary">溪山行旅</p>
+              <p class="mt-0.5 truncate font-mono text-[11px] text-text-secondary">支付宝 · 2026-06-18</p>
+              <p class="mt-1.5 truncate text-sm italic text-text-secondary">「感谢分享，受益匪浅。」</p>
+            </div>
+            <span class="shrink-0 font-serif text-2xl font-semibold tabular-nums text-leaf-deep md:text-3xl">¥20<span class="text-lg">.00</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 页脚 ═══════════ -->
+    <footer class="mx-auto w-full max-w-6xl px-6 py-14 md:px-10">
+      <div class="flex flex-col items-center gap-4 text-center">
+        <svg width="26" height="26" viewBox="0 0 48 32" fill="oklch(0.55 0.12 155)" aria-hidden><path d="M2 30C10 18 26 6 46 2c-3 12-16 24-44 28z"/></svg>
+        <p class="font-mono text-[11px] tracking-[0.2em] text-text-secondary">
+          Copyright (C) 2016-2026 筱锋 xiao_lfeng · All Rights Reserved
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      const io = new IntersectionObserver((es) => {
+        es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+      const nav = document.getElementById('nav');
+      addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40), { passive: true });
+    </script>
+  </body>
+</html>
