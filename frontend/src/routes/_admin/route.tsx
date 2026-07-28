@@ -170,10 +170,13 @@ function AdminLayout() {
         {/* 内容区：随 window 滚动 */}
         <div className="flex-1">
           <main className="p-4 md:p-6">
+            {/* 路由级过渡只做 opacity 淡入，不做位移：
+                各页面（如 dashboard）自带错峰入场编排，若此处再叠加 y 位移，
+                会与页面内部 section 的上滑嵌套叠加，产生「二次上滑」观感。 */}
             <motion.div
               key={pathname}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
               className="h-full"
             >

@@ -19,9 +19,18 @@ import { enter } from '@/lib/motion'
  * 动画（ink-sway 等）定义在 `styles.css`，reduced-motion 时静止。
  */
 
-/** 宣纸卡片块：hover 浮起 + 墨边软阴影。自带 `group` 供子元素联动 */
+/**
+ * 宣纸卡片块：hover 浮起 + 墨边软阴影。自带 `group` 供子元素联动。
+ *
+ * 过渡刻意收窄为 translate/border-color/box-shadow 三项 hover 属性，
+ * 不用 transition-all——本类会直接挂在带 motion 入场动画的 section 上
+ * （dashboard 的友链构成/系统状态/最近申请三块），若 transition-all 把
+ * transform/opacity 也纳入 CSS 过渡，会与 motion 入场动画叠加出「二次上滑」。
+ * Tailwind v4 的 translate-y 走原生 translate 属性，与 motion 的 transform
+ * 分属不同属性，收窄后 hover 浮起依旧平滑且互不干扰。
+ */
 export const inkCard =
-  'group relative overflow-hidden rounded-lg border border-border bg-card p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]'
+  'group relative overflow-hidden rounded-lg border border-border bg-card p-5 transition-[translate,border-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]'
 
 /** 卡片标题：斜墨条（leaf-deep）+ 衬线标题 + 右侧 mono uppercase meta */
 export function CardHead({ title, meta }: { title: string; meta?: string }) {

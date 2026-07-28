@@ -1,17 +1,13 @@
-/*
- * --------------------------------------------------------------------------------
- * Copyright (c) 2016-NOW(至今) 筱锋
- * Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
- * --------------------------------------------------------------------------------
- * 许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
- * 有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
- * https://opensource.org/licenses/MIT
- * --------------------------------------------------------------------------------
- */
+// --------------------------------------------------------------------------------
+// Copyright (c) 2016-NOW(至今) 筱锋
+// Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
+// --------------------------------------------------------------------------------
+// 许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
+// 有关MIT许可证的更多信息，请查看项目根目录下的 LICENSE文件或访问：
+// https://opensource.org/licenses/MIT
+// --------------------------------------------------------------------------------
 
-import {  useEffect } from 'react'
-import { animate, motion, useMotionValue, useReducedMotion, useTransform } from 'motion/react'
-import type {ReactNode} from 'react';
+import type { ReactNode } from 'react'
 
 /** 环形图分段：value 为绝对数值，color 为 CSS 颜色字符串（如 var(--chart-1)） */
 export interface DonutSegment {
@@ -30,7 +26,10 @@ interface DonutChartProps {
 
 /**
  * 手搓 SVG 环形图。pathLength=1 归一化，每段以 transform rotate 定位、
- * strokeDasharray 控制可见比例，MotionValue 驱动「从无到有」的生长动画。
+ * strokeDasharray 控制可见比例。
+ *
+ * 弧线在数据到达即直接画到位，不再做自生长动画——避免与外层 section 的
+ * 入场动画叠加，产生「二次加载」观感（见 dashboard.tsx 的 enter() 编排）。
  */
 export function DonutChart({
   segments,
@@ -38,7 +37,6 @@ export function DonutChart({
   thickness = 22,
   center,
 }: DonutChartProps) {
-  const reduced = useReducedMotion() ?? false
   const total = segments.reduce((sum, s) => sum + s.value, 0)
   const r = (size - thickness) / 2
   const cx = size / 2
@@ -71,8 +69,6 @@ export function DonutChart({
                 frac={frac}
                 color={seg.color}
                 rotate={rotate}
-                reduced={reduced}
-                delay={0.15 + i * 0.12}
                 thickness={thickness}
                 r={r}
                 cx={cx}
@@ -90,13 +86,11 @@ export function DonutChart({
   )
 }
 
-/** 单段弧：MotionValue 驱动 dasharray 从 0 生长到目标占比 */
+/** 单段弧：直接以目标占比画到位，无生长动画 */
 function DonutArc({
   frac,
   color,
   rotate,
-  reduced,
-  delay,
   thickness,
   r,
   cx,
@@ -105,34 +99,17 @@ function DonutArc({
   frac: number
   color: string
   rotate: number
-  reduced: boolean
-  delay: number
   thickness: number
   r: number
   cx: number
   cy: number
 }) {
-  const f = useMotionValue(reduced ? frac : 0)
-  useEffect(() => {
-    if (reduced) {
-      f.set(frac)
-      return
-    }
-    const controls = animate(f, frac, {
-      duration: 0.9,
-      ease: 'easeOut',
-      delay,
-    })
-    return () => controls.stop()
-  }, [frac, delay, reduced, f])
   // 留 0.002 间隙避免相邻段重叠出现锯齿
-  const dash = useTransform(f, (v) => {
-    const shown = Math.max(v - 0.002, 0)
-    return `${shown} ${1 - shown}`
-  })
+  const shown = Math.max(frac - 0.002, 0)
+  const dash = `${shown} ${1 - shown}`
   return (
     <g transform={`rotate(${rotate} ${cx} ${cy})`}>
-      <motion.circle
+      <circle
         cx={cx}
         cy={cy}
         r={r}
@@ -140,7 +117,7 @@ function DonutArc({
         stroke={color}
         strokeWidth={thickness}
         pathLength={1}
-        style={{ strokeDasharray: dash }}
+        strokeDasharray={dash}
       />
     </g>
   )

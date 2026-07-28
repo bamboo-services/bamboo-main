@@ -110,7 +110,7 @@ description: >-
 - **标杆页面**：`frontend/src/routes/_admin/admin/dashboard.tsx`（水墨叙事 + 双模式 hero）。
 - **共享组件**：`frontend/src/components/dashboard/`（count-up / donut-chart / radial-gauge）。
 - **token 与动画**：`frontend/src/styles.css`。
-- **完整设计文档**：`frontend/AGENTS.md` 的「设计语言 · 竹林水墨」章节。
+- **完整设计文档**：`frontend/ARCHITECTURE.md`（设计语言 + 动画架构单一真相源；`frontend/AGENTS.md` 仅作指引）。
 
 ---
 
