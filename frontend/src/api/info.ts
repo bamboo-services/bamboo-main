@@ -10,8 +10,10 @@
 import { request } from './client'
 import type {
   AboutResponse,
+  BloggerInfoResponse,
   SiteInfoResponse,
   UpdateAboutRequest,
+  UpdateBloggerRequest,
   UpdateSiteRequest,
 } from './types'
 
@@ -23,6 +25,11 @@ export function getSiteInfo(): Promise<SiteInfoResponse> {
 /** 获取 Markdown 格式的自我介绍 */
 export function getAbout(): Promise<AboutResponse> {
   return request<AboutResponse>({ method: 'GET', url: '/info/about' })
+}
+
+/** 获取博主信息（站名、描述、地址、图片、订阅、邮箱）— 供交换友链场景 */
+export function getBloggerInfo(): Promise<BloggerInfoResponse> {
+  return request<BloggerInfoResponse>({ method: 'GET', url: '/info/blogger' })
 }
 
 /** 更新站点信息（管理端） */
@@ -41,6 +48,17 @@ export function updateAbout(req: UpdateAboutRequest): Promise<AboutResponse> {
   return request<AboutResponse>({
     method: 'PUT',
     url: '/admin/info/about',
+    data: req,
+  })
+}
+
+/** 更新博主信息（管理端） */
+export function updateBloggerInfo(
+  req: UpdateBloggerRequest,
+): Promise<BloggerInfoResponse> {
+  return request<BloggerInfoResponse>({
+    method: 'PUT',
+    url: '/admin/info/blogger',
     data: req,
   })
 }

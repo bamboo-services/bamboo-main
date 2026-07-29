@@ -151,6 +151,39 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	xResult.SuccessHasData(c, "注册成功", resp)
 }
 
+// SendRegisterCode 发送注册邮箱验证码
+//
+// @Summary [公开] 发送注册验证码
+// @Description 向指定邮箱发送 6 位注册验证码，验证码 10 分钟内有效，60 秒内不可重复发送
+// @Tags 认证接口
+// @Accept json
+// @Produce json
+// @Param request body apiAuth.RegisterCodeRequest true "发送验证码请求"
+// @Success 200 {object} xBase.BaseResponse "验证码已发送"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误（邮箱已被注册）"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误或发送过于频繁"
+// @Router /api/v1/auth/register/code [POST]
+func (h *AuthHandler) SendRegisterCode(c *gin.Context) {
+	var req apiAuth.RegisterCodeRequest
+
+	// 绑定请求数据
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	err := h.service.authLogic.SendRegisterCode(c.Request.Context(), &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	xResult.Success(c, "验证码已发送到您的邮箱，请在10分钟内完成注册")
+}
+
 // Logout 用户登出
 //
 // @Summary [用户] 用户登出
@@ -215,6 +248,48 @@ func (h *AuthHandler) GetUserInfo(c *gin.Context) {
 	// 返回成功响应
 	resp := apiAuth.UserInfoResponse{User: *userInfo}
 	xResult.SuccessHasData(c, "获取成功", resp)
+}
+
+// UpdateProfile 更新用户资料
+//
+// @Summary [用户] 更新用户资料
+// @Description 更新当前用户的昵称与头像
+// @Tags 认证接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param request body apiAuth.UpdateProfileRequest true "更新资料请求"
+// @Success 200 {object} xBase.BaseResponse{data=apiAuth.UserInfoResponse} "更新成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/user/profile [PUT]
+func (h *AuthHandler) UpdateProfile(c *gin.Context) {
+	var req apiAuth.UpdateProfileRequest
+
+	// 绑定请求数据
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	userUUID, exists := ctxUtil.GetUserID(c)
+	if !exists {
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		return
+	}
+
+	// 调用服务层
+	user, err := h.service.authLogic.UpdateProfile(c.Request.Context(), userUUID, &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	resp := apiAuth.UserInfoResponse{User: *user}
+	xResult.SuccessHasData(c, "资料更新成功", resp)
 }
 
 // ChangePassword 修改密码

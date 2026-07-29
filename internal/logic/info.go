@@ -30,6 +30,14 @@ const (
 	KeySiteDescription  = "site.description"
 	KeySiteIntroduction = "site.introduction"
 	KeyProfileAbout     = "profile.about"
+
+	// 博主信息键名（供「交换友链」场景读取，语义独立于站点信息）
+	KeyBloggerSiteName = "blogger.site_name"
+	KeyBloggerSiteDesc = "blogger.site_description"
+	KeyBloggerSiteUrl  = "blogger.site_url"
+	KeyBloggerSiteImg  = "blogger.site_image"
+	KeyBloggerRss      = "blogger.rss"
+	KeyBloggerEmail    = "blogger.email"
 )
 
 // infoRepo 站点信息仓储依赖集合
@@ -113,6 +121,74 @@ func (l *InfoLogic) UpdateSiteInfo(ctx context.Context, req *apiInfo.SiteUpdateR
 	}
 
 	return l.GetSiteInfo(ctx)
+}
+
+// GetBloggerInfo 获取博主信息
+//
+// 博主信息用于「交换友链」场景：站点名字/描述/地址/图片/订阅/邮箱，
+// 供访客申请友链前在自站添加博主友链时复制。与站点信息语义独立，单独取数。
+func (l *InfoLogic) GetBloggerInfo(ctx context.Context) (*apiInfo.BloggerResponse, *xError.Error) {
+	keys := []string{
+		KeyBloggerSiteName, KeyBloggerSiteDesc, KeyBloggerSiteUrl,
+		KeyBloggerSiteImg, KeyBloggerRss, KeyBloggerEmail,
+	}
+	configs, xErr := l.repo.system.ListByKeys(ctx, keys)
+	if xErr != nil {
+		return nil, xError.NewError(ctx, xError.DatabaseError, "获取博主信息失败", false, xErr)
+	}
+
+	configMap := make(map[string]*entity.System)
+	for i := range configs {
+		configMap[configs[i].Key] = &configs[i]
+	}
+
+	result := &apiInfo.BloggerResponse{
+		SiteName:        getConfigValue(configMap, KeyBloggerSiteName),
+		SiteDescription: getConfigValue(configMap, KeyBloggerSiteDesc),
+		SiteUrl:         getConfigValue(configMap, KeyBloggerSiteUrl),
+		SiteImage:       getConfigValue(configMap, KeyBloggerSiteImg),
+		Rss:             getConfigValue(configMap, KeyBloggerRss),
+		Email:           getConfigValue(configMap, KeyBloggerEmail),
+		UpdatedAt:       getLatestUpdateTime(configMap, keys),
+	}
+
+	return result, nil
+}
+
+// UpdateBloggerInfo 更新博主信息
+func (l *InfoLogic) UpdateBloggerInfo(ctx context.Context, req *apiInfo.BloggerUpdateRequest) (*apiInfo.BloggerResponse, *xError.Error) {
+	updates := make(map[string]*string)
+	if req.SiteName != nil {
+		updates[KeyBloggerSiteName] = req.SiteName
+	}
+	if req.SiteDescription != nil {
+		updates[KeyBloggerSiteDesc] = req.SiteDescription
+	}
+	if req.SiteUrl != nil {
+		updates[KeyBloggerSiteUrl] = req.SiteUrl
+	}
+	if req.SiteImage != nil {
+		updates[KeyBloggerSiteImg] = req.SiteImage
+	}
+	if req.Rss != nil {
+		updates[KeyBloggerRss] = req.Rss
+	}
+	if req.Email != nil {
+		updates[KeyBloggerEmail] = req.Email
+	}
+
+	if len(updates) == 0 {
+		return l.GetBloggerInfo(ctx)
+	}
+
+	for key, value := range updates {
+		xErr := l.repo.system.UpdateValueByKey(ctx, key, value)
+		if xErr != nil {
+			return nil, xError.NewError(ctx, xError.DatabaseError, "更新博主信息失败", false, xErr)
+		}
+	}
+
+	return l.GetBloggerInfo(ctx)
 }
 
 // GetAbout 获取自我介绍

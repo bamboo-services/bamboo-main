@@ -23,6 +23,7 @@ func (r *route) infoRouter(route gin.IRouter) {
 	{
 		infoGroup.GET("/site", infoHandler.GetSiteInfo)
 		infoGroup.GET("/about", infoHandler.GetAbout)
+		infoGroup.GET("/blogger", infoHandler.GetBloggerInfo)
 	}
 }
 
@@ -32,5 +33,6 @@ func (r *route) infoAdminRouter(route gin.IRouter) {
 	{
 		infoGroup.PUT("/site", infoHandler.UpdateSiteInfo)
 		infoGroup.PUT("/about", infoHandler.UpdateAbout)
+		infoGroup.PUT("/blogger", infoHandler.UpdateBloggerInfo)
 	}
 }

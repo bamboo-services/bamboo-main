@@ -60,6 +60,7 @@ func NewRoute(ctx context.Context, serve *gin.Engine) {
 		r.publicRouter(apiRouter)
 		r.authRouter(apiRouter)
 		r.linkRouter(apiRouter)
+		r.userRouter(apiRouter)
 		r.infoRouter(apiRouter)
 		r.sponsorRouter(apiRouter)
 		r.adminRouter(apiRouter)

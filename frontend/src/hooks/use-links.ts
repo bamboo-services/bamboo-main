@@ -10,22 +10,33 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type {
+  ApplyLinkRequest,
   CreateLinkRequest,
   LinkListParams,
   SnowflakeID,
   UpdateLinkFailRequest,
   UpdateLinkRequest,
   UpdateLinkStatusRequest,
+  UpdateProfileRequest,
+  UpdateUserLinkRequest,
+  UserLinkParams,
 } from '@/api/types'
 import {
+  applyLink,
   createLink,
   deleteLink,
   getAdminLink,
+  getMyLink,
   listAdminLinks,
+  listMyLinks,
+  requestTakedown,
   updateLink,
   updateLinkFail,
   updateLinkStatus,
+  updateMyLink,
+  updateProfile,
 } from '@/api/link'
+import { AUTH_USER_QUERY_KEY } from '@/hooks/use-auth'
 
 /** 友链 queryKey 工厂（id 一律 toString，避免 bigint 进入哈希） */
 export const linkKeys = {
@@ -131,5 +142,91 @@ export function useUpdateLinkFail() {
       void qc.invalidateQueries({ queryKey: linkKeys.all })
     },
     onError: (err: Error) => toast.error(err.message || '失效状态更新失败'),
+  })
+}
+
+// ---------------------------------------------------------------------------
+// 用户自助友链（与 admin 查询缓存隔离）
+// ---------------------------------------------------------------------------
+
+/** 用户友链 queryKey 工厂（id 一律 toString，避免 bigint 进入哈希） */
+export const myLinkKeys = {
+  all: ['user', 'links'] as const,
+  lists: () => [...myLinkKeys.all, 'list'] as const,
+  list: (params: UserLinkParams) => [...myLinkKeys.lists(), { ...params }] as const,
+  details: () => [...myLinkKeys.all, 'detail'] as const,
+  detail: (id: SnowflakeID) => [...myLinkKeys.details(), id.toString()] as const,
+}
+
+/** 我的友链分页列表 */
+export function useMyLinks(params: UserLinkParams = {}) {
+  return useQuery({
+    queryKey: myLinkKeys.list(params),
+    queryFn: () => listMyLinks(params),
+  })
+}
+
+/** 我的友链详情 */
+export function useMyLink(id: SnowflakeID) {
+  return useQuery({
+    queryKey: myLinkKeys.detail(id),
+    queryFn: () => getMyLink(id),
+  })
+}
+
+/** 访客自助申请友链（成功后失效我的友链缓存，便于登录态下即时可见） */
+export function useApplyLink() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (req: ApplyLinkRequest) => applyLink(req),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: myLinkKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '友链申请失败'),
+  })
+}
+
+/** 更新我的友链 */
+export function useUpdateMyLink() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      id,
+      req,
+    }: {
+      id: SnowflakeID
+      req: UpdateUserLinkRequest
+    }) => updateMyLink(id, req),
+    onSuccess: () => {
+      toast.success('友链更新成功')
+      void qc.invalidateQueries({ queryKey: myLinkKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '友链更新失败'),
+  })
+}
+
+/** 申请下架我的友链 */
+export function useRequestTakedown() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: SnowflakeID) => requestTakedown(id),
+    onSuccess: () => {
+      toast.success('下架申请已提交，请等待管理员审核')
+      void qc.invalidateQueries({ queryKey: myLinkKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '下架申请失败'),
+  })
+}
+
+/** 更新用户资料（成功后失效当前用户缓存） */
+export function useUpdateProfile() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (req: UpdateProfileRequest) => updateProfile(req),
+    onSuccess: () => {
+      toast.success('资料更新成功')
+      void qc.invalidateQueries({ queryKey: AUTH_USER_QUERY_KEY })
+    },
+    onError: (err: Error) => toast.error(err.message || '资料更新失败'),
   })
 }

@@ -8,7 +8,14 @@
 // --------------------------------------------------------------------------------
 
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { getCurrentUser, logout } from '@/api/auth'
+import { toast } from 'sonner'
+import type { RegisterRequest } from '@/api/types'
+import {
+  getCurrentUser,
+  logout,
+  register,
+  sendRegisterCode,
+} from '@/api/auth'
 import { clearSession, getStoredUser, getToken } from '@/lib/auth'
 
 /** 当前用户查询 key */
@@ -50,4 +57,28 @@ export function useAuth() {
     signOut: () => signOutMutation.mutateAsync(),
     isSigningOut: signOutMutation.isPending,
   }
+}
+
+/**
+ * 发送注册邮箱验证码。
+ * 成功/失败均以 toast 提示；60s 防刷与 10min 有效期由后端控制。
+ */
+export function useSendRegisterCode() {
+  return useMutation({
+    mutationFn: (email: string) => sendRegisterCode(email),
+    onSuccess: () => toast.success('验证码已发送到您的邮箱'),
+    onError: (err: Error) => toast.error(err.message || '验证码发送失败'),
+  })
+}
+
+/**
+ * 用户注册。
+ * 错误以 toast 提示；注册成功后的会话写入与页面跳转交由调用方处理，
+ * 以便复用登录页同款的 setSession + 整页跳转逻辑。
+ */
+export function useRegister() {
+  return useMutation({
+    mutationFn: (req: RegisterRequest) => register(req),
+    onError: (err: Error) => toast.error(err.message || '注册失败，请稍后重试'),
+  })
 }

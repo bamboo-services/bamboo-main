@@ -14,23 +14,30 @@ import type { ComponentProps } from 'react'
 
 type ToasterProps = ComponentProps<typeof Sonner>
 
-/** 全局 toast 容器：富色彩 + 关闭按钮，样式对齐 shadcn 主题变量 */
+/** 全局 toast 容器：宣纸卡片底 + 衬线标题 + 类型左缘墨条（leaf-deep / destructive），样式对齐竹林水墨主题变量 */
 function Toaster({ ...props }: ToasterProps) {
   return (
     <Sonner
       position="top-center"
-      richColors
       closeButton
       className="toaster group"
       toastOptions={{
         classNames: {
           toast:
-            'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
+            'group toast group-[.toaster]:bg-card group-[.toaster]:text-foreground group-[.toaster]:border group-[.toaster]:border-border group-[.toaster]:shadow-lg group-[.toaster]:rounded-lg',
+          title: 'group-[.toast]:font-serif group-[.toast]:font-semibold',
           description: 'group-[.toast]:text-muted-foreground',
           actionButton:
-            'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
+            'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground group-[.toast]:rounded-md',
           cancelButton:
-            'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
+            'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground group-[.toast]:rounded-md',
+          success:
+            'group-[.toaster]:border-l-2 group-[.toaster]:border-l-leaf-deep',
+          error:
+            'group-[.toaster]:border-l-2 group-[.toaster]:border-l-destructive',
+          warning:
+            'group-[.toaster]:border-l-2 group-[.toaster]:border-l-leaf-muted',
+          info: 'group-[.toaster]:border-l-2 group-[.toaster]:border-l-leaf-deep',
         },
       }}
       {...props}

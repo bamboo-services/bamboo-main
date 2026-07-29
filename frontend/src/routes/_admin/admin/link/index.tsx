@@ -391,6 +391,8 @@ function LinkListPage() {
     { label: '待审核', value: 0 },
     { label: '已通过', value: 1 },
     { label: '已拒绝', value: 2 },
+    { label: '下架待审核', value: 3 },
+    { label: '已下架', value: 4 },
   ]
 
   const statItems = [

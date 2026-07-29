@@ -25,6 +25,7 @@ func (r *route) authRouter(route gin.IRouter) {
 		authGroup.POST("/login", authHandler.Login)
 		authGroup.POST("/oauth/login", bSdkMiddle.CheckAuth(r.context), authHandler.OAuthLogin)
 		authGroup.POST("/register", authHandler.Register)
+		authGroup.POST("/register/code", authHandler.SendRegisterCode)
 		authGroup.PATCH("/password/reset", authHandler.ResetPassword)
 		authGroup.GET("/verify-email", authHandler.VerifyEmail)
 		authGroup.GET("/reset-password", authHandler.VerifyResetToken)

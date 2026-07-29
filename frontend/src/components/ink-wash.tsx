@@ -9,7 +9,7 @@
 
 import { Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ChevronRight } from 'lucide-react'
 import type { ReactNode } from 'react'
 import type { LinkFriend } from '@/api/types'
 import { CountUp } from '@/components/dashboard/count-up'
@@ -412,7 +412,7 @@ export function InkBadge({
   )
 }
 
-/** 友链状态 → 徽章（is_failure=1 已失效；status 1=已通过 2=已拒绝 0=待审核） */
+/** 友链状态 → 徽章（is_failure=1 已失效；status 1=已通过 2=已拒绝 3=下架待审核 4=已下架 0=待审核） */
 export function linkStatus(link: LinkFriend): {
   label: string
   tone: InkBadgeTone
@@ -423,7 +423,91 @@ export function linkStatus(link: LinkFriend): {
       return { label: '已通过', tone: 'leaf' }
     case 2:
       return { label: '已拒绝', tone: 'danger' }
+    case 3:
+      return { label: '下架待审核', tone: 'pending' }
+    case 4:
+      return { label: '已下架', tone: 'neutral' }
     default:
       return { label: '待审核', tone: 'pending' }
   }
+}
+
+/**
+ * 晨光墨晕：单色淡绿径向，挂于 inkCard / 容器顶部，作「答卷纸」的晨光签名。
+ * 与 dialog 浮层、详情 hero 的晨光同源（仅 leaf-light，非多色光斑）。
+ * pointer-events-none 且淡度 0.18，覆于其上墨字标题/字段不影响可读，
+ * 反如晨光落在题跋首行。容器须为 relative + overflow-hidden（inkCard 已满足）。
+ */
+export function InkGlow({ className = '' }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={`pointer-events-none absolute inset-x-0 top-0 h-32 ${className}`}
+      style={{
+        background:
+          'radial-gradient(520px 140px at 50% 0%, oklch(0.88 0.1 105 / 0.18), transparent 72%)',
+      }}
+    />
+  )
+}
+
+/**
+ * 主从导航行：斜墨条（选中态）+ 图标块 + 衬线标题 + 淡墨描述 + chevron。
+ * 方案 C「主从面板」的左侧菜单签名，用于设置等页的内部导航。
+ * 图标块为功能性导航图标（随选中态着色），非标题装饰。
+ */
+export function InkNavRow({
+  icon,
+  title,
+  desc,
+  active,
+  onClick,
+}: {
+  icon: ReactNode
+  title: string
+  desc?: string
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-current={active || undefined}
+      className={cn(
+        'relative flex w-full cursor-pointer items-center gap-3 rounded-lg px-3.5 py-3 text-left transition-colors duration-150',
+        active ? 'bg-leaf-deep/10' : 'hover:bg-muted',
+      )}
+    >
+      <span
+        aria-hidden
+        className={cn(
+          'absolute bottom-2.5 left-0 top-2.5 w-[3px] rounded-sm bg-leaf-deep transition-opacity duration-150',
+          active ? 'opacity-100' : 'opacity-0',
+        )}
+      />
+      <span
+        className={cn(
+          'grid size-9 shrink-0 place-items-center rounded-lg transition-colors duration-150',
+          active ? 'bg-leaf-deep/15 text-leaf-deep' : 'bg-muted text-text-secondary',
+        )}
+      >
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-serif text-[15px] font-semibold leading-tight text-text-primary">
+          {title}
+        </span>
+        {desc && (
+          <span className="mt-0.5 block text-xs text-text-secondary">{desc}</span>
+        )}
+      </span>
+      <ChevronRight
+        className={cn(
+          'size-4 shrink-0 transition-colors duration-150',
+          active ? 'text-leaf-deep' : 'text-text-secondary/40',
+        )}
+      />
+    </button>
+  )
 }

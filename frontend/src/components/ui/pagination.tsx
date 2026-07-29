@@ -81,7 +81,7 @@ export function Pagination({
             className={cn(
               'inline-flex size-7 cursor-pointer items-center justify-center rounded-md text-xs font-medium tabular-nums transition-colors duration-150',
               item - 1 === pageIndex
-                ? 'bg-primary text-primary-foreground shadow-sm'
+                ? 'bg-primary text-primary-foreground shadow-[0_2px_8px_-2px_oklch(0.32_0.06_155/0.45)]'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground',
             )}
           >

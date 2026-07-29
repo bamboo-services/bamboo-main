@@ -23,6 +23,12 @@ type RegisterRequest struct {
 	Email    string  `json:"email" binding:"required,email" example:"admin@example.com"`
 	Nickname *string `json:"nickname" binding:"omitempty,min=1,max=50" example:"筱锋"`
 	Password string  `json:"password" binding:"required,min=6,max=100" example:"password123"`
+	Code     string  `json:"code" binding:"required,len=6" example:"123456"`
+}
+
+// RegisterCodeRequest 发送注册邮箱验证码请求
+type RegisterCodeRequest struct {
+	Email string `json:"email" binding:"required,email" example:"admin@example.com"`
 }
 
 // RegisterResponse 用户注册响应

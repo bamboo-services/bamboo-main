@@ -75,6 +75,27 @@ export interface UpdateAboutRequest {
   content: string
 }
 
+/** 博主信息（GET /api/v1/info/blogger）— 供交换友链场景读取博主站点资料 */
+export interface BloggerInfoResponse {
+  site_name: string
+  site_description: string
+  site_url: string
+  site_image: string
+  rss: string
+  email: string
+  updated_at: string
+}
+
+/** 更新博主信息请求（PUT /api/v1/admin/info/blogger） */
+export interface UpdateBloggerRequest {
+  site_name?: string
+  site_description?: string
+  site_url?: string
+  site_image?: string
+  rss?: string
+  email?: string
+}
+
 // ---------------------------------------------------------------------------
 // 友链分组
 // ---------------------------------------------------------------------------
@@ -179,7 +200,7 @@ export interface ColorPageParams extends ColorListParams {
 
 /**
  * 友情链接实体（后端 entity.LinkFriend）。
- * - status: 0=待审核 1=已通过 2=已拒绝
+ * - status: 0=待审核 1=已通过 2=已拒绝 3=下架待审核 4=已下架
  * - is_failure: 0=正常 1=失效
  * - group_f_key / color_f_key: 列表与详情接口已 Preload 的嵌套对象
  * - created_at 不序列化，仅有 updated_at
@@ -192,6 +213,7 @@ export interface LinkFriend {
   rss: string | null
   description: string | null
   email: string | null
+  user_id: SnowflakeID | null
   group_id: SnowflakeID | null
   color_id: SnowflakeID | null
   sort_order: number
@@ -204,6 +226,7 @@ export interface LinkFriend {
   updated_at: string
   group_f_key?: LinkGroup | null
   color_f_key?: LinkColor | null
+  user_f_key?: UserInfo | null
 }
 
 /** 公开友链列表响应（GET /api/v1/links） */
@@ -263,6 +286,35 @@ export interface UpdateLinkStatusRequest {
 export interface UpdateLinkFailRequest {
   link_fail: number
   link_fail_reason?: string
+}
+
+/** 访客自助申请友链请求（POST /api/v1/links/apply） */
+export interface ApplyLinkRequest {
+  link_name: string
+  link_url: string
+  link_avatar?: string
+  link_rss?: string
+  link_desc?: string
+  link_email: string
+  link_apply_remark?: string
+}
+
+/** 用户更新自己友链请求（PUT /api/v1/user/links/:id） */
+export interface UpdateUserLinkRequest {
+  link_name?: string
+  link_url?: string
+  link_avatar?: string
+  link_rss?: string
+  link_desc?: string
+  link_email?: string
+  link_apply_remark?: string
+}
+
+/** 用户查询自己友链参数（GET /api/v1/user/links） */
+export interface UserLinkParams {
+  page?: number
+  page_size?: number
+  link_status?: number
 }
 
 // ---------------------------------------------------------------------------
@@ -439,6 +491,40 @@ export interface OAuthToken {
   token_type: string
   refresh_token: string
   expiry: string
+}
+
+/** 注册请求（POST /api/v1/auth/register） */
+export interface RegisterRequest {
+  username: string
+  email: string
+  nickname?: string
+  password: string
+  code: string
+}
+
+/** 发送注册验证码请求（POST /api/v1/auth/register/code） */
+export interface RegisterCodeRequest {
+  email: string
+}
+
+/** 注册响应（注册成功后自动登录） */
+export interface RegisterResponse {
+  user: UserInfo
+  token: string
+  created_at: string
+  expired_at: string
+}
+
+/** 更新用户资料请求（PUT /api/v1/user/profile） */
+export interface UpdateProfileRequest {
+  nickname?: string
+  avatar?: string
+}
+
+/** 修改密码请求（PUT /api/v1/auth/password/change） */
+export interface PasswordChangeRequest {
+  old_password: string
+  new_password: string
 }
 
 // ---------------------------------------------------------------------------

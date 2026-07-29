@@ -21,16 +21,20 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        // 主操作：墨色实底 + 墨边软阴影（hover 晕开 / active 微沉），唯一 accent 落地处
+        default:
+          'bg-primary text-primary-foreground shadow-[0_2px_10px_-3px_oklch(0.32_0.06_155/0.4)] hover:bg-primary-hover hover:shadow-[0_6px_16px_-6px_oklch(0.32_0.06_155/0.5)] active:translate-y-px',
         destructive:
-          'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
+          'bg-destructive text-destructive-foreground shadow-[0_2px_10px_-3px_oklch(0.577_0.245_27.325/0.4)] hover:bg-destructive/90 active:translate-y-px focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
+        // 宣纸卡底 + 墨边，hover 淡墨染边，与 inkCard 同源
         outline:
-          'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
+          'border border-border bg-card text-text-primary shadow-xs hover:bg-muted hover:border-leaf-muted active:translate-y-px dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+          'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:translate-y-px',
         ghost:
-          'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
-        link: 'text-primary underline-offset-4 hover:underline',
+          'text-text-secondary hover:bg-muted hover:text-text-primary dark:hover:bg-accent/50',
+        // 文字链：leaf-deep 墨色 + 笔刷感下划线（hover 时墨色描实）
+        link: 'text-leaf-deep underline-offset-4 decoration-leaf-deep/40 hover:underline hover:decoration-leaf-deep',
       },
       size: {
         default: 'h-9 px-4 py-2 has-[>svg]:px-3',

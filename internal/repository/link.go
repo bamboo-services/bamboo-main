@@ -46,6 +46,7 @@ type FriendQuery struct {
 	LinkStatus  *int
 	LinkFail    *int
 	LinkGroupID xSnowflake.SnowflakeID
+	UserID      xSnowflake.SnowflakeID
 	SortBy      string
 	SortOrder   string
 }
@@ -80,6 +81,26 @@ func (r *LinkRepo) Create(ctx context.Context, link *entity.LinkFriend, tx *gorm
 	}
 
 	return link, nil
+}
+
+// BindUserByEmail 将指定邮箱名下尚未归属的友链绑定到用户
+//
+// 用于游客提交友链后注册/登录时的归属关联：把所有 user_id 为空且联系邮箱匹配的友链归属到该用户。
+func (r *LinkRepo) BindUserByEmail(ctx context.Context, userID xSnowflake.SnowflakeID, email string) *xError.Error {
+	r.log.Info(ctx, "BindUserByEmail - 按邮箱绑定友链归属")
+
+	email = strings.ToLower(strings.TrimSpace(email))
+	if email == "" {
+		return nil
+	}
+
+	result := r.db.WithContext(ctx).Model(&entity.LinkFriend{}).
+		Where("user_id IS NULL AND lower(email) = ?", email).
+		Update("user_id", userID)
+	if result.Error != nil {
+		return xError.NewError(ctx, xError.DatabaseError, "绑定友链归属失败", false, result.Error)
+	}
+	return nil
 }
 
 // Save 保存友情链接（存在则更新）
@@ -167,6 +188,9 @@ func (r *LinkRepo) List(ctx context.Context, req *FriendQuery, tx *gorm.DB) ([]e
 	}
 	if req.LinkGroupID != 0 {
 		query = query.Where("group_id = ?", req.LinkGroupID)
+	}
+	if req.UserID != 0 {
+		query = query.Where("user_id = ?", req.UserID)
 	}
 
 	orderBy := "created_at"

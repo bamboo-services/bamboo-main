@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/sidebar'
 import { AdminSidebar } from '@/components/layout/admin-sidebar'
 import { getToken } from '@/lib/auth'
+import { isAdmin } from '@/lib/role'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -35,13 +36,16 @@ import {
 } from '@/components/ui/breadcrumb'
 
 export const Route = createFileRoute('/_admin')({
-  // 路由守卫：无登录令牌时回跳登录页，并携带来源路径以便登录后返回
+  // 路由守卫：无登录令牌时回跳登录页；非管理员不得进入管理后台，重定向至用户中心
   beforeLoad: ({ location }) => {
     if (!getToken()) {
       throw redirect({
         to: '/auth/login',
         search: { redirect: location.pathname },
       })
+    }
+    if (!isAdmin()) {
+      throw redirect({ to: '/user/dashboard' })
     }
   },
   component: AdminLayout,

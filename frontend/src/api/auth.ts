@@ -12,6 +12,10 @@ import type {
   LoginRequest,
   LoginResponse,
   OAuthToken,
+  PasswordChangeRequest,
+  RegisterCodeRequest,
+  RegisterRequest,
+  RegisterResponse,
   UserInfoResponse,
 } from './types'
 
@@ -27,6 +31,25 @@ export function login(req: LoginRequest): Promise<LoginResponse> {
     method: 'POST',
     url: '/auth/login',
     data: req,
+  })
+}
+
+/** 用户注册（POST /api/v1/auth/register，需先经 sendRegisterCode 获取邮箱验证码） */
+export function register(req: RegisterRequest): Promise<RegisterResponse> {
+  return request<RegisterResponse>({
+    method: 'POST',
+    url: '/auth/register',
+    data: req,
+  })
+}
+
+/** 发送注册邮箱验证码（POST /api/v1/auth/register/code，60s 内不可重复发送） */
+export function sendRegisterCode(email: string): Promise<void> {
+  const payload: RegisterCodeRequest = { email }
+  return request<void>({
+    method: 'POST',
+    url: '/auth/register/code',
+    data: payload,
   })
 }
 
@@ -60,6 +83,15 @@ export function oauthLogin(accessToken: string): Promise<LoginResponse> {
 /** 获取当前登录用户信息（GET /api/v1/auth/user，需鉴权） */
 export function getCurrentUser(): Promise<UserInfoResponse> {
   return request<UserInfoResponse>({ method: 'GET', url: '/auth/user' })
+}
+
+/** 修改密码（PUT /api/v1/auth/password/change，需鉴权） */
+export function changePassword(req: PasswordChangeRequest): Promise<void> {
+  return request<void>({
+    method: 'PUT',
+    url: '/auth/password/change',
+    data: req,
+  })
 }
 
 /**

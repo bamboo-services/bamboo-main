@@ -90,6 +90,57 @@ func (h *InfoHandler) GetAbout(c *gin.Context) {
 	xResult.SuccessHasData(c, "获取自我介绍成功", result)
 }
 
+// GetBloggerInfo 获取博主信息
+//
+// @Summary [用户] 获取博主信息
+// @Description 获取博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供交换友链时复制添加
+// @Tags 站点信息接口
+// @Accept json
+// @Produce json
+// @Success 200 {object} xBase.BaseResponse{data=apiInfo.BloggerResponse} "获取成功"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/info/blogger [GET]
+func (h *InfoHandler) GetBloggerInfo(c *gin.Context) {
+	result, err := h.service.infoLogic.GetBloggerInfo(c.Request.Context())
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	xResult.SuccessHasData(c, "获取博主信息成功", result)
+}
+
+// UpdateBloggerInfo 更新博主信息
+//
+// @Summary [管理] 更新博主信息
+// @Description 管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱）
+// @Tags 站点信息接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param request body apiInfo.BloggerUpdateRequest true "博主信息更新请求"
+// @Success 200 {object} xBase.BaseResponse{data=apiInfo.BloggerResponse} "更新成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/info/blogger [PUT]
+func (h *InfoHandler) UpdateBloggerInfo(c *gin.Context) {
+	var req apiInfo.BloggerUpdateRequest
+
+	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	result, err := h.service.infoLogic.UpdateBloggerInfo(c.Request.Context(), &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	xResult.SuccessHasData(c, "博主信息更新成功", result)
+}
+
 // UpdateAbout 更新自我介绍
 //
 // @Summary [管理] 更新自我介绍

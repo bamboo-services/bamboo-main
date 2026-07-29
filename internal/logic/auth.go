@@ -33,6 +33,7 @@ import (
 type authRepo struct {
 	user  *repository.SystemUserRepo
 	token *repository.TokenRepo
+	link  *repository.LinkRepo
 }
 
 // AuthLogic 认证业务逻辑
@@ -57,6 +58,7 @@ func NewAuthLogic(ctx context.Context) *AuthLogic {
 		repo: authRepo{
 			user:  repository.NewSystemUserRepo(db, m),
 			token: repository.NewTokenRepo(m),
+			link:  repository.NewLinkRepo(db, m),
 		},
 	}
 }
@@ -99,6 +101,10 @@ func (a *AuthLogic) Login(ctx context.Context, req *apiAuth.LoginRequest, meta l
 		// 记录错误但不影响登录
 		a.log.Error(ctx, fmt.Sprintf("更新最后登录时间失败: %v", xErr))
 	}
+
+	// 按邮箱绑定该用户名下的孤儿友链（游客提交时尚未关联的友链）
+	a.bindLinksByEmail(ctx, user.ID, user.Email)
+
 	return user, token, &now, &expireAt, nil
 }
 
@@ -120,6 +126,15 @@ func (a *AuthLogic) Register(ctx context.Context, req *apiAuth.RegisterRequest, 
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterError, "邮箱已被注册", false)
 	}
 
+	// 校验注册邮箱验证码（OTP），校验通过后消费删除
+	matched, xErr := a.repo.token.ConsumeRegisterCode(ctx, req.Email, req.Code)
+	if xErr != nil {
+		return nil, "", nil, nil, xErr
+	}
+	if !matched {
+		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterError, "验证码错误或已过期", false)
+	}
+
 	hashedPassword, err := xUtil.Password().EncryptString(req.Password)
 	if err != nil {
 		return nil, "", nil, nil, xError.NewError(ctx, xError.ServerInternalError, "密码加密失败", false, err)
@@ -132,7 +147,7 @@ func (a *AuthLogic) Register(ctx context.Context, req *apiAuth.RegisterRequest, 
 		Nickname:    req.Nickname,
 		Role:        "user", // 新用户角色为 user
 		Status:      1,      // 默认启用
-		EmailVerify: false,  // 默认未验证邮箱
+		EmailVerify: true,   // 注册前已通过邮箱验证码校验，直接标记为已验证
 	}
 
 	if _, xErr = a.repo.user.Create(ctx, &newUser); xErr != nil {
@@ -148,11 +163,106 @@ func (a *AuthLogic) Register(ctx context.Context, req *apiAuth.RegisterRequest, 
 		return nil, "", nil, nil, xErr
 	}
 
-	// 异步发送邮箱验证邮件（xAsync 解耦请求上下文，不阻断主流程）
-	xAsync.Async(ctx, func(asyncCtx context.Context) {
-		a.sendEmailVerification(asyncCtx, &newUser)
-	}, xAsync.WithName("MAIL"))
+	// 按邮箱绑定该用户名下的孤儿友链（注册前以游客身份提交的友链）
+	a.bindLinksByEmail(ctx, newUser.ID, newUser.Email)
+
 	return &newUser, token, &now, &expireAt, nil
+}
+
+// SendRegisterCode 发送注册邮箱验证码
+//
+// 校验邮箱未被注册且未触发发送频率限制后，生成 6 位数字验证码存入 Redis（10min 过期），
+// 并经 xAsync 异步发送验证码邮件，不阻断主流程。
+func (a *AuthLogic) SendRegisterCode(ctx context.Context, req *apiAuth.RegisterCodeRequest) *xError.Error {
+	exists, xErr := a.repo.user.ExistsByEmailExceptID(ctx, req.Email, 0)
+	if xErr != nil {
+		return xErr
+	}
+	if exists {
+		return xError.NewError(ctx, xError.ParameterError, "邮箱已被注册", false)
+	}
+
+	limited, xErr := a.repo.token.ExistsRegisterCodeLimit(ctx, req.Email)
+	if xErr != nil {
+		return xErr
+	}
+	if limited {
+		return xError.NewError(ctx, xError.OperationInvalid, "验证码发送过于频繁，请稍后再试", false)
+	}
+
+	code := generateRegisterCode()
+
+	if xErr := a.repo.token.SaveRegisterCode(ctx, req.Email, code); xErr != nil {
+		return xErr
+	}
+	if xErr := a.repo.token.SetRegisterCodeLimit(ctx, req.Email); xErr != nil {
+		return xErr
+	}
+
+	// 异步发送验证码邮件（xAsync 解耦请求上下文，不阻断主流程）
+	xAsync.Async(ctx, func(asyncCtx context.Context) {
+		a.sendRegisterCodeEmail(asyncCtx, req.Email, code)
+	}, xAsync.WithName("MAIL"))
+
+	return nil
+}
+
+// bindLinksByEmail 按邮箱绑定该用户名下的孤儿友链
+//
+// 将以游客身份（UserID 为空）提交、且联系邮箱与当前用户邮箱一致的友链归属到该用户。
+// 失败仅记录日志，不阻断注册/登录主流程。
+func (a *AuthLogic) bindLinksByEmail(ctx context.Context, userID xSnowflake.SnowflakeID, email string) {
+	if email == "" {
+		return
+	}
+	if xErr := a.repo.link.BindUserByEmail(ctx, userID, email); xErr != nil {
+		a.log.Warn(ctx, fmt.Sprintf("绑定用户名下友链失败（已忽略）: %v", xErr))
+	}
+}
+
+// generateRegisterCode 生成 6 位数字注册验证码（密码学安全随机）
+func generateRegisterCode() string {
+	const digits = "0123456789"
+
+	b := make([]byte, 6)
+	if _, err := rand.Read(b); err != nil {
+		// crypto/rand.Read 在正常环境下几乎不会失败；失败时无法安全继续
+		panic(fmt.Sprintf("generateRegisterCode: rand.Read failed: %v", err))
+	}
+
+	code := make([]byte, 6)
+	for i := range b {
+		code[i] = digits[b[i]%10]
+	}
+
+	return string(code)
+}
+
+// sendRegisterCodeEmail 发送注册验证码邮件
+//
+// 此函数应在 xAsync 异步任务中调用，ctx 为解耦后的独立上下文，不会阻断主流程
+func (a *AuthLogic) sendRegisterCodeEmail(ctx context.Context, email, code string) {
+	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
+
+	variables := map[string]string{
+		"Username":   email,
+		"Code":       code,
+		"ExpireTime": "10分钟",
+	}
+
+	mailLogic := NewMailLogic()
+	mailErr := mailLogic.SendWithTemplate(
+		ctx,
+		"register_code",
+		[]string{email},
+		"注册验证码",
+		variables,
+	)
+	if mailErr != nil {
+		logger.Warn(ctx, fmt.Sprintf("发送注册验证码邮件失败: %v", mailErr))
+	} else {
+		logger.Info(ctx, fmt.Sprintf("已发送注册验证码邮件到: %s", email))
+	}
 }
 
 // Logout 用户登出
@@ -240,6 +350,24 @@ func (a *AuthLogic) GetUserInfo(ctx context.Context, userID xSnowflake.Snowflake
 		return nil, xError.NewError(ctx, xError.NotFound, "用户不存在", false)
 	}
 	return user, nil
+}
+
+// UpdateProfile 更新用户资料（昵称/头像）
+//
+// 仅更新请求中非空的字段；无任何待更新字段时直接返回当前用户信息。
+func (a *AuthLogic) UpdateProfile(ctx context.Context, userID xSnowflake.SnowflakeID, req *apiAuth.UpdateProfileRequest) (*entity.SystemUser, *xError.Error) {
+	updates := map[string]any{}
+	if req.Nickname != "" {
+		updates["nickname"] = req.Nickname
+	}
+	if req.Avatar != "" {
+		updates["avatar"] = req.Avatar
+	}
+	if len(updates) == 0 {
+		return a.GetUserInfo(ctx, userID)
+	}
+
+	return a.repo.user.UpdateFieldsByID(ctx, userID, updates)
 }
 
 // UpdateLastLogin 更新最后登录时间

@@ -10,23 +10,24 @@
  */
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { motion, useReducedMotion } from 'motion/react'
 import { LinkForm } from '@/components/link-form'
-import { CardHead, PageHead, inkCard } from '@/components/ink-wash'
-import { enter } from '@/lib/motion'
+import { PageHead } from '@/components/ink-wash'
 import { useCreateLink } from '@/hooks/use-links'
 
 export const Route = createFileRoute('/_admin/admin/link/add')({
   component: LinkAddPage,
 })
 
+/**
+ * 添加友链：方案 C「信息卡群」。
+ * 页面只给 PageHead（题跋开场），表单卡群由 LinkForm 自行编排。
+ */
 function LinkAddPage() {
-  const reduced = useReducedMotion() ?? false
   const navigate = useNavigate()
   const createLink = useCreateLink()
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       <PageHead
         backTo="/admin/link"
         backLabel="返回友链管理"
@@ -34,25 +35,14 @@ function LinkAddPage() {
         title="添加友链"
         sub="添加一个新的友情链接，带 * 为必填项。"
       />
-
-      <motion.section
-        {...enter(reduced, 0.12, {
-          initial: { opacity: 0, y: 10 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.4, ease: 'easeOut' },
-        })}
-        className={inkCard}
-      >
-        <CardHead title="友链信息" meta="NEW LINK" />
-        <LinkForm
-          submitting={createLink.isPending}
-          onSubmit={(req) =>
-            createLink.mutate(req, {
-              onSuccess: () => navigate({ to: '/admin/link' }),
-            })
-          }
-        />
-      </motion.section>
+      <LinkForm
+        submitting={createLink.isPending}
+        onSubmit={(req) =>
+          createLink.mutate(req, {
+            onSuccess: () => navigate({ to: '/admin/link' }),
+          })
+        }
+      />
     </div>
   )
 }

@@ -1,0 +1,51 @@
+<!--
+--------------------------------------------------------------------------------
+Copyright (c) 2016-NOW(至今) 筱锋
+Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
+--------------------------------------------------------------------------------
+许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
+有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+https://opensource.org/licenses/MIT
+--------------------------------------------------------------------------------
+-->
+
+{{define "takedown"}}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td style="padding-bottom: 16px;">
+            <h2 style="margin: 0 0 16px; font-size: 20px; font-weight: 600; color: #1a1a1a; border-bottom: 2px solid #9e9e9e; padding-bottom: 10px;">
+                📤 您的友链已下架
+            </h2>
+            <p style="margin: 0 0 12px; font-size: 15px; color: #555555; line-height: 1.8;">
+                亲爱的 <strong style="color: #1a1a1a;">{{.Username}}</strong>，您好！
+            </p>
+            <p style="margin: 0; font-size: 15px; color: #555555; line-height: 1.8;">
+                根据您的申请，您的友情链接已下架，不再公开展示：
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-bottom: 24px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #dddddd; background: #f9f9f9; width: 30%; font-size: 14px; color: #555555;">网站名称</td>
+                    <td style="padding: 12px; border: 1px solid #dddddd; font-size: 14px; color: #333333;">{{.LinkName}}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; border: 1px solid #dddddd; background: #f9f9f9; font-size: 14px; color: #555555;">网站地址</td>
+                    <td style="padding: 12px; border: 1px solid #dddddd; font-size: 14px;">
+                        <a href="{{.LinkURL}}" style="color: #1a73e8;">{{.LinkURL}}</a>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p style="margin: 0; font-size: 15px; color: #666666; line-height: 1.8;">
+                如需重新展示，可再次提交友链申请。
+            </p>
+        </td>
+    </tr>
+</table>
+{{end}}

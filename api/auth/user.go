@@ -17,3 +17,9 @@ import "github.com/bamboo-services/bamboo-main/internal/entity"
 type UserInfoResponse struct {
 	User entity.SystemUser `json:"user"`
 }
+
+// UpdateProfileRequest 更新用户资料请求（昵称/头像）
+type UpdateProfileRequest struct {
+	Nickname string `json:"nickname" binding:"omitempty,min=1,max=50" example:"筱锋"`
+	Avatar   string `json:"avatar" binding:"omitempty,url,max=500" example:"https://example.com/avatar.jpg"`
+}

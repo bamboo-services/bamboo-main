@@ -13,7 +13,9 @@ package handler
 
 import (
 	apiLink "github.com/bamboo-services/bamboo-main/api/link"
+	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
+	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
 	xUtil "github.com/bamboo-services/bamboo-base-go/major/utility"
 	xValid "github.com/bamboo-services/bamboo-base-go/major/validator"
@@ -312,4 +314,204 @@ func (h *LinkHandler) GetPublicLinks(c *gin.Context) {
 	// 返回成功响应
 	resp := apiLink.FriendPublicResponse{Links: links}
 	xResult.SuccessHasData(c, "获取成功", resp)
+}
+
+// ApplyLink 访客自助申请友情链接
+//
+// @Summary [公开] 申请友情链接
+// @Description 访客提交友情链接申请，进入待审核状态；联系邮箱用于确认友链归属
+// @Tags 公开接口
+// @Accept json
+// @Produce json
+// @Param request body apiLink.FriendApplyRequest true "申请友情链接请求"
+// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendAddResponse} "申请成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/links/apply [POST]
+func (h *LinkHandler) ApplyLink(c *gin.Context) {
+	var req apiLink.FriendApplyRequest
+
+	// 绑定请求数据
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	link, err := h.service.linkLogic.Apply(c.Request.Context(), &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	resp := apiLink.FriendAddResponse{LinkFriend: *link}
+	xResult.SuccessHasData(c, "友链申请已提交，请等待管理员审核", resp)
+}
+
+// ListMyLinks 获取当前用户的友情链接列表
+//
+// @Summary [用户] 获取我的友情链接列表
+// @Description 分页查询当前登录用户名下的友情链接
+// @Tags 用户友链接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param page query int false "页码" default(1)
+// @Param page_size query int false "每页数量" default(10)
+// @Param link_status query int false "友情链接状态 0:待审核 1:已通过 2:已拒绝 3:下架待审核 4:已下架"
+// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendListResponse} "获取成功"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/user/links [GET]
+func (h *LinkHandler) ListMyLinks(c *gin.Context) {
+	userID, exists := ctxUtil.GetUserID(c)
+	if !exists {
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		return
+	}
+
+	var req apiLink.FriendUserQueryRequest
+	// 绑定查询参数
+	bindErr := c.ShouldBindQuery(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	result, err := h.service.linkLogic.ListMine(c.Request.Context(), userID, &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	resp := apiLink.FriendListResponse{PaginationResponse: *result}
+	xResult.SuccessHasData(c, "获取成功", resp)
+}
+
+// GetMyLink 获取当前用户的友情链接详情
+//
+// @Summary [用户] 获取我的友情链接详情
+// @Description 获取当前登录用户名下指定友情链接的详细信息
+// @Tags 用户友链接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param id path int true "友情链接ID"
+// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendDetailResponse} "获取成功"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/user/links/{id} [GET]
+func (h *LinkHandler) GetMyLink(c *gin.Context) {
+	userID, exists := ctxUtil.GetUserID(c)
+	if !exists {
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		return
+	}
+
+	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	if uri == nil {
+		return
+	}
+
+	// 调用服务层
+	link, err := h.service.linkLogic.GetMine(c.Request.Context(), userID, uri.ID)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	resp := apiLink.FriendDetailResponse{LinkFriend: *link}
+	xResult.SuccessHasData(c, "获取成功", resp)
+}
+
+// UpdateMyLink 更新当前用户的友情链接
+//
+// @Summary [用户] 更新我的友情链接
+// @Description 更新当前登录用户名下指定友情链接的站点基础信息
+// @Tags 用户友链接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param id path int true "友情链接ID"
+// @Param request body apiLink.FriendUserUpdateRequest true "更新友情链接请求"
+// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendUpdateResponse} "更新成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/user/links/{id} [PUT]
+func (h *LinkHandler) UpdateMyLink(c *gin.Context) {
+	userID, exists := ctxUtil.GetUserID(c)
+	if !exists {
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		return
+	}
+
+	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	if uri == nil {
+		return
+	}
+
+	var req apiLink.FriendUserUpdateRequest
+	// 绑定请求数据
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	link, err := h.service.linkLogic.UpdateMine(c.Request.Context(), userID, uri.ID, &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	resp := apiLink.FriendUpdateResponse{LinkFriend: *link}
+	xResult.SuccessHasData(c, "友情链接更新成功", resp)
+}
+
+// RequestTakedown 当前用户申请下架自己的友情链接
+//
+// @Summary [用户] 申请下架我的友情链接
+// @Description 对已通过的友链发起下架申请，进入下架待审核状态
+// @Tags 用户友链接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param id path int true "友情链接ID"
+// @Success 200 {object} xBase.BaseResponse "申请成功"
+// @Failure 400 {object} xBase.BaseResponse "状态不允许下架"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/user/links/{id}/takedown [PUT]
+func (h *LinkHandler) RequestTakedown(c *gin.Context) {
+	userID, exists := ctxUtil.GetUserID(c)
+	if !exists {
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		return
+	}
+
+	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	if uri == nil {
+		return
+	}
+
+	// 调用服务层
+	err := h.service.linkLogic.RequestTakedown(c.Request.Context(), userID, uri.ID)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	xResult.Success(c, "下架申请已提交，请等待管理员审核")
 }

@@ -49,7 +49,7 @@ import {
 import { enter } from '@/lib/motion'
 import { useAdminLink, useDeleteLink } from '@/hooks/use-links'
 
-export const Route = createFileRoute('/_admin/admin/link/$id')({
+export const Route = createFileRoute('/_admin/admin/link/$id/')({
   component: LinkDetailPage,
 })
 

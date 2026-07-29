@@ -66,7 +66,7 @@ type FriendQueryRequest struct {
 
 // FriendStatusRequest 更新友情链接状态请求
 type FriendStatusRequest struct {
-	LinkStatus       int    `json:"link_status" binding:"required,oneof=0 1 2" example:"1"`
+	LinkStatus       int    `json:"link_status" binding:"required,oneof=0 1 2 3 4" example:"1"`
 	LinkReviewRemark string `json:"link_review_remark" binding:"omitempty,max=500" example:"审核通过"`
 }
 
@@ -99,4 +99,38 @@ type FriendListResponse struct {
 // FriendPublicResponse 公开友情链接响应
 type FriendPublicResponse struct {
 	Links []entity.LinkFriend `json:"links"`
+}
+
+// FriendApplyRequest 访客自助申请友情链接请求
+//
+// 面向游客与登录用户的公开申请入口：仅需站点基础信息，联系邮箱必填（用于确认友链归属），
+// 分组/颜色/级别/排序等管理员专属字段不在此开放，由管理员审核时分配。
+type FriendApplyRequest struct {
+	LinkName        string `json:"link_name" binding:"required,min=1,max=100" example:"示例网站"`
+	LinkURL         string `json:"link_url" binding:"required,url,max=500" example:"https://example.com"`
+	LinkAvatar      string `json:"link_avatar" binding:"omitempty,url,max=500" example:"https://example.com/avatar.jpg"`
+	LinkRSS         string `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
+	LinkDesc        string `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
+	LinkEmail       string `json:"link_email" binding:"required,email,max=100" example:"admin@example.com"`
+	LinkApplyRemark string `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
+}
+
+// FriendUserUpdateRequest 用户更新自己友情链接请求
+//
+// 仅允许更新站点基础信息字段，分组/颜色/级别/排序等管理员专属字段不可改，审核状态保持不变。
+type FriendUserUpdateRequest struct {
+	LinkName        string `json:"link_name" binding:"omitempty,min=1,max=100" example:"示例网站"`
+	LinkURL         string `json:"link_url" binding:"omitempty,url,max=500" example:"https://example.com"`
+	LinkAvatar      string `json:"link_avatar" binding:"omitempty,url,max=500" example:"https://example.com/avatar.jpg"`
+	LinkRSS         string `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
+	LinkDesc        string `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
+	LinkEmail       string `json:"link_email" binding:"omitempty,email,max=100" example:"admin@example.com"`
+	LinkApplyRemark string `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
+}
+
+// FriendUserQueryRequest 用户查询自己友情链接请求
+type FriendUserQueryRequest struct {
+	Page       int  `form:"page" binding:"omitempty,min=1" example:"1"`
+	PageSize   int  `form:"page_size" binding:"omitempty,min=1,max=100" example:"10"`
+	LinkStatus *int `form:"link_status" binding:"omitempty,oneof=0 1 2 3 4" example:"1"`
 }

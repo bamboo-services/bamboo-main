@@ -36,9 +36,13 @@ code {
   --card-foreground: oklch(0.32 0.06 155);
   --popover: oklch(0.99 0.005 110);
   --popover-foreground: oklch(0.32 0.06 155);
-  --primary: oklch(0.72 0.13 155);
+  /* 动作 / 焦点语义 token 统一对齐 --leaf-deep（深叶绿，唯一 accent）：
+     shadcn 组件（Button / Checkbox / Input 焦点环 / 分页当前页 / Sonner 动作钮）
+     经 bg-primary / ring-ring 等引用天然墨色化，无需逐个改写组件类。
+     --chart-1 刻意保留较亮叶绿，用于图表分段与徽章浅染，与实色 accent 分层。 */
+  --primary: oklch(0.55 0.12 155);
   --primary-foreground: oklch(0.99 0.005 110);
-  --primary-hover: oklch(0.62 0.15 155);
+  --primary-hover: oklch(0.48 0.13 155);
   --secondary: oklch(0.92 0.04 120);
   --secondary-foreground: oklch(0.35 0.06 155);
   --muted: oklch(0.94 0.03 115);
@@ -49,7 +53,7 @@ code {
   --destructive-foreground: oklch(0.99 0.005 110);
   --border: oklch(0.9 0.03 120);
   --input: oklch(0.9 0.03 120);
-  --ring: oklch(0.72 0.13 155);
+  --ring: oklch(0.55 0.12 155);
   --chart-1: oklch(0.72 0.13 155);
   --chart-2: oklch(0.8 0.1 130);
   --chart-3: oklch(0.62 0.15 155);
@@ -58,12 +62,12 @@ code {
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0.012 110);
   --sidebar-foreground: oklch(0.32 0.06 155);
-  --sidebar-primary: oklch(0.72 0.13 155);
+  --sidebar-primary: oklch(0.55 0.12 155);
   --sidebar-primary-foreground: oklch(0.99 0.005 110);
   --sidebar-accent: oklch(0.94 0.03 115);
   --sidebar-accent-foreground: oklch(0.35 0.06 155);
   --sidebar-border: oklch(0.9 0.03 120);
-  --sidebar-ring: oklch(0.72 0.13 155);
+  --sidebar-ring: oklch(0.55 0.12 155);
 
   /* 竹林清晨 — 清新淡绿主题专用 token */
   --leaf-light: oklch(0.88 0.1 105);
@@ -75,6 +79,14 @@ code {
   --overlay-from: oklch(0.96 0.03 110 / 0.78);
   --overlay-via: oklch(0.99 0.01 110 / 0.55);
   --overlay-to: oklch(0.96 0.03 110 / 0.78);
+  /* 竹影纱 — 模态遮罩专用暖黄绿 veil：宣纸底上如竹叶投下的晨影，
+     刻意取宣纸/晨光的黄绿 hue(~112) 而非墨色 hue(155)，
+     避免冷墨大面积压顶与暖宣纸色相冲突 */
+  --veil: oklch(0.48 0.07 112 / 0.55);
+  /* 字段纸 — 输入框的极淡竹青底 + 柔叶边：扁平、无凹凸阴影，
+     仅以底色在白卡上立起"可书写区"层级（较「竹青浅染」稿更轻，近乎宣纸） */
+  --field-surface: oklch(0.973 0.022 110);
+  --field-line: oklch(0.8 0.08 130 / 0.4);
 
   /* 竹林水墨 — 朱砂印章（唯一暖色 accent）+ 衬线字体栈 */
   --seal: oklch(0.55 0.18 25);
@@ -165,6 +177,9 @@ code {
   --color-overlay-from: var(--overlay-from);
   --color-overlay-via: var(--overlay-via);
   --color-overlay-to: var(--overlay-to);
+  --color-veil: var(--veil);
+  --color-field-surface: var(--field-surface);
+  --color-field-line: var(--field-line);
 
   /* 竹林水墨 — 朱砂 + 衬线 */
   --color-seal: var(--seal);
@@ -210,6 +225,29 @@ code {
     transform: rotate(-3deg) scale(1);
   }
 }
+/* 勾选微弹：checkbox indicator 选中时 scale 回弹，功能性反馈 */
+@keyframes ink-pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+/* 骨架扫光：leaf 调高光自左向右掠过，承载「加载中」语义 */
+@keyframes ink-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
 
 @layer utilities {
   .ink-sway {
@@ -231,12 +269,20 @@ code {
   .ink-stamp {
     animation: ink-stamp 0.55s cubic-bezier(0.2, 1.4, 0.3, 1) 0.7s both;
   }
+  .ink-pop {
+    animation: ink-pop 0.22s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+  }
+  .ink-shimmer {
+    animation: ink-shimmer 1.6s ease-in-out infinite;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ink-sway,
   .ink-pulse,
-  .ink-stamp {
+  .ink-stamp,
+  .ink-pop,
+  .ink-shimmer {
     animation: none;
   }
 }

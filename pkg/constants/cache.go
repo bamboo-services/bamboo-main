@@ -32,6 +32,10 @@ const (
 	RedisEmailVerify RedisKey = "email:verify:%s"
 	// RedisPasswordReset 密码重置凭证缓存键
 	RedisPasswordReset RedisKey = "password:reset:%s"
+	// RedisRegisterCode 注册邮箱验证码缓存键（按邮箱索引）
+	RedisRegisterCode RedisKey = "register:code:%s"
+	// RedisRegisterCodeLimit 注册验证码发送频率限制缓存键（按邮箱索引）
+	RedisRegisterCodeLimit RedisKey = "register:code:limit:%s"
 	// RedisLinkFriend 友情链接缓存键
 	RedisLinkFriend RedisKey = "link:friend:%d"
 	// RedisLinkGroup 友链分组缓存键

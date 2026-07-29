@@ -66,8 +66,19 @@ definitions:
     required:
     - email
     type: object
+  apiAuth.RegisterCodeRequest:
+    properties:
+      email:
+        example: admin@example.com
+        type: string
+    required:
+    - email
+    type: object
   apiAuth.RegisterRequest:
     properties:
+      code:
+        example: "123456"
+        type: string
       email:
         example: admin@example.com
         type: string
@@ -87,6 +98,7 @@ definitions:
         minLength: 1
         type: string
     required:
+    - code
     - email
     - password
     - username
@@ -101,6 +113,18 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/entity.SystemUser'
+    type: object
+  apiAuth.UpdateProfileRequest:
+    properties:
+      avatar:
+        example: https://example.com/avatar.jpg
+        maxLength: 500
+        type: string
+      nickname:
+        example: 筱锋
+        maxLength: 50
+        minLength: 1
+        type: string
     type: object
   apiAuth.UserInfoResponse:
     properties:
@@ -160,6 +184,50 @@ definitions:
         type: string
     required:
     - content
+    type: object
+  apiInfo.BloggerResponse:
+    properties:
+      email:
+        type: string
+      rss:
+        type: string
+      site_description:
+        type: string
+      site_image:
+        type: string
+      site_name:
+        type: string
+      site_url:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  apiInfo.BloggerUpdateRequest:
+    properties:
+      email:
+        example: gm@x-lf.cn
+        maxLength: 200
+        type: string
+      rss:
+        example: https://blog.example.com/atom.xml
+        maxLength: 500
+        type: string
+      site_description:
+        example: 不为如何，只为在茫茫人海中有自己的一片天空~
+        maxLength: 500
+        type: string
+      site_image:
+        example: https://example.com/logo.png
+        maxLength: 500
+        type: string
+      site_name:
+        example: 凌中的锋雨
+        maxLength: 100
+        type: string
+      site_url:
+        example: https://www.x-lf.com
+        maxLength: 500
+        type: string
     type: object
   apiInfo.SiteResponse:
     properties:
@@ -552,6 +620,49 @@ definitions:
       url:
         description: 友链URL地址
         type: string
+      user_f_key:
+        allOf:
+        - $ref: '#/definitions/entity.SystemUser'
+        description: 归属用户外键
+      user_id:
+        description: 归属用户ID（按邮箱确认归属，为空表示游客提交尚未关联）
+        type: integer
+    type: object
+  apiLink.FriendApplyRequest:
+    properties:
+      link_apply_remark:
+        example: 申请友链
+        maxLength: 500
+        type: string
+      link_avatar:
+        example: https://example.com/avatar.jpg
+        maxLength: 500
+        type: string
+      link_desc:
+        example: 这是一个示例网站
+        maxLength: 500
+        type: string
+      link_email:
+        example: admin@example.com
+        maxLength: 100
+        type: string
+      link_name:
+        example: 示例网站
+        maxLength: 100
+        minLength: 1
+        type: string
+      link_rss:
+        example: https://example.com/rss.xml
+        maxLength: 500
+        type: string
+      link_url:
+        example: https://example.com
+        maxLength: 500
+        type: string
+    required:
+    - link_email
+    - link_name
+    - link_url
     type: object
   apiLink.FriendDetailResponse:
     properties:
@@ -614,6 +725,13 @@ definitions:
       url:
         description: 友链URL地址
         type: string
+      user_f_key:
+        allOf:
+        - $ref: '#/definitions/entity.SystemUser'
+        description: 归属用户外键
+      user_id:
+        description: 归属用户ID（按邮箱确认归属，为空表示游客提交尚未关联）
+        type: integer
     type: object
   apiLink.FriendFailRequest:
     properties:
@@ -660,6 +778,8 @@ definitions:
         - 0
         - 1
         - 2
+        - 3
+        - 4
         example: 1
         type: integer
     required:
@@ -775,6 +895,45 @@ definitions:
         type: string
       url:
         description: 友链URL地址
+        type: string
+      user_f_key:
+        allOf:
+        - $ref: '#/definitions/entity.SystemUser'
+        description: 归属用户外键
+      user_id:
+        description: 归属用户ID（按邮箱确认归属，为空表示游客提交尚未关联）
+        type: integer
+    type: object
+  apiLink.FriendUserUpdateRequest:
+    properties:
+      link_apply_remark:
+        example: 申请友链
+        maxLength: 500
+        type: string
+      link_avatar:
+        example: https://example.com/avatar.jpg
+        maxLength: 500
+        type: string
+      link_desc:
+        example: 这是一个示例网站
+        maxLength: 500
+        type: string
+      link_email:
+        example: admin@example.com
+        maxLength: 100
+        type: string
+      link_name:
+        example: 示例网站
+        maxLength: 100
+        minLength: 1
+        type: string
+      link_rss:
+        example: https://example.com/rss.xml
+        maxLength: 500
+        type: string
+      link_url:
+        example: https://example.com
+        maxLength: 500
         type: string
     type: object
   apiLink.GroupAddRequest:
@@ -1577,6 +1736,13 @@ definitions:
       url:
         description: 友链URL地址
         type: string
+      user_f_key:
+        allOf:
+        - $ref: '#/definitions/entity.SystemUser'
+        description: 归属用户外键
+      user_id:
+        description: 归属用户ID（按邮箱确认归属，为空表示游客提交尚未关联）
+        type: integer
     type: object
   entity.LinkGroup:
     properties:
@@ -2517,6 +2683,47 @@ paths:
       security:
       - Bearer: []
       summary: '[管理] 更新自我介绍'
+      tags:
+      - 站点信息接口
+  /api/v1/admin/info/blogger:
+    put:
+      consumes:
+      - application/json
+      description: 管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱）
+      parameters:
+      - description: 博主信息更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiInfo.BloggerUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiInfo.BloggerResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[管理] 更新博主信息'
       tags:
       - 站点信息接口
   /api/v1/admin/info/site:
@@ -3674,6 +3881,36 @@ paths:
       summary: '[用户] 用户注册'
       tags:
       - 认证接口
+  /api/v1/auth/register/code:
+    post:
+      consumes:
+      - application/json
+      description: 向指定邮箱发送 6 位注册验证码，验证码 10 分钟内有效，60 秒内不可重复发送
+      parameters:
+      - description: 发送验证码请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiAuth.RegisterCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 验证码已发送
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "400":
+          description: 请求参数错误（邮箱已被注册）
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误或发送过于频繁
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      summary: '[公开] 发送注册验证码'
+      tags:
+      - 认证接口
   /api/v1/auth/reset-password:
     get:
       consumes:
@@ -3815,6 +4052,30 @@ paths:
       summary: '[用户] 获取自我介绍'
       tags:
       - 站点信息接口
+  /api/v1/info/blogger:
+    get:
+      consumes:
+      - application/json
+      description: 获取博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供交换友链时复制添加
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiInfo.BloggerResponse'
+              type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      summary: '[用户] 获取博主信息'
+      tags:
+      - 站点信息接口
   /api/v1/info/site:
     get:
       consumes:
@@ -3839,6 +4100,41 @@ paths:
       summary: '[用户] 获取站点信息'
       tags:
       - 站点信息接口
+  /api/v1/links/apply:
+    post:
+      consumes:
+      - application/json
+      description: 访客提交友情链接申请，进入待审核状态；联系邮箱用于确认友链归属
+      parameters:
+      - description: 申请友情链接请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiLink.FriendApplyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 申请成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiLink.FriendAddResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      summary: '[公开] 申请友情链接'
+      tags:
+      - 公开接口
   /api/v1/public/health:
     get:
       consumes:
@@ -3993,4 +4289,218 @@ paths:
       summary: '[用户] 获取赞助记录公开分页列表'
       tags:
       - 赞助记录接口
+  /api/v1/user/links:
+    get:
+      consumes:
+      - application/json
+      description: 分页查询当前登录用户名下的友情链接
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 友情链接状态 0:待审核 1:已通过 2:已拒绝 3:下架待审核 4:已下架
+        in: query
+        name: link_status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiLink.FriendListResponse'
+              type: object
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[用户] 获取我的友情链接列表'
+      tags:
+      - 用户友链接口
+  /api/v1/user/links/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前登录用户名下指定友情链接的详细信息
+      parameters:
+      - description: 友情链接ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiLink.FriendDetailResponse'
+              type: object
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "404":
+          description: 友情链接不存在
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[用户] 获取我的友情链接详情'
+      tags:
+      - 用户友链接口
+    put:
+      consumes:
+      - application/json
+      description: 更新当前登录用户名下指定友情链接的站点基础信息
+      parameters:
+      - description: 友情链接ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新友情链接请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiLink.FriendUserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiLink.FriendUpdateResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "404":
+          description: 友情链接不存在
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[用户] 更新我的友情链接'
+      tags:
+      - 用户友链接口
+  /api/v1/user/links/{id}/takedown:
+    put:
+      consumes:
+      - application/json
+      description: 对已通过的友链发起下架申请，进入下架待审核状态
+      parameters:
+      - description: 友情链接ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 申请成功
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "400":
+          description: 状态不允许下架
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "404":
+          description: 友情链接不存在
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[用户] 申请下架我的友情链接'
+      tags:
+      - 用户友链接口
+  /api/v1/user/profile:
+    put:
+      consumes:
+      - application/json
+      description: 更新当前用户的昵称与头像
+      parameters:
+      - description: 更新资料请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiAuth.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiAuth.UserInfoResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[用户] 更新用户资料'
+      tags:
+      - 认证接口
 swagger: "2.0"

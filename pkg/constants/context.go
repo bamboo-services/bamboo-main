@@ -40,6 +40,10 @@ const (
 	LinkStatusApproved = 1
 	// LinkStatusRejected 链接已拒绝状态
 	LinkStatusRejected = 2
+	// LinkStatusTakedownPending 链接下架待审核状态（用户申请下架，等待管理员审核）
+	LinkStatusTakedownPending = 3
+	// LinkStatusTakenDown 链接已下架状态（管理员批准下架，不再公开展示）
+	LinkStatusTakenDown = 4
 
 	// LinkFailNormal 链接正常状态
 	LinkFailNormal = 0

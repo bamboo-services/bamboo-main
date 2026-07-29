@@ -34,6 +34,7 @@ import {
   PageHead,
   inkCard,
   inkTableWrap,
+  linkStatus,
 } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
 import { cn } from '@/lib/utils'
@@ -103,6 +104,7 @@ function VerifyItem({
   active: boolean
   onSelect: (id: SnowflakeID) => void
 }) {
+  const status = linkStatus(link)
   return (
     <motion.button
       layout
@@ -145,7 +147,7 @@ function VerifyItem({
                 />
               )
             ) : (
-              <InkBadge tone="pending">待审核</InkBadge>
+              <InkBadge tone={status.tone}>{status.label}</InkBadge>
             )}
           </div>
           <div className="mt-0.5 flex items-center justify-between gap-2 font-mono text-xs text-text-secondary">
@@ -202,6 +204,8 @@ function VerifyDetail({
   onReject: () => void
   isPending: boolean
 }) {
+  const isTakedown = link.status === 3
+  const status = linkStatus(link)
   return (
     <div className="space-y-4">
       {/* 申请横幅：左侧墨条 + 晨光墨晕呼应待审核状态 */}
@@ -229,7 +233,7 @@ function VerifyDetail({
               <h2 className="font-serif text-2xl font-bold tracking-tight text-text-primary">
                 {link.name}
               </h2>
-              <InkBadge tone="pending">待审核</InkBadge>
+              <InkBadge tone={status.tone}>{status.label}</InkBadge>
             </div>
             <a
               href={link.url}
@@ -306,7 +310,9 @@ function VerifyDetail({
         </div>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-text-secondary">
-            审核通过后该站点将展示在友链页面
+            {isTakedown
+              ? '批准下架后该站点将从友链页面移除'
+              : '审核通过后该站点将展示在友链页面'}
           </p>
           <div className="flex gap-2">
             <Button
@@ -316,7 +322,7 @@ function VerifyDetail({
               disabled={isPending}
             >
               <X className="mr-2 size-4" />
-              {isPending ? '处理中…' : '拒绝'}
+              {isPending ? '处理中…' : isTakedown ? '驳回下架' : '拒绝'}
             </Button>
             <Button
               className="cursor-pointer"
@@ -324,7 +330,7 @@ function VerifyDetail({
               disabled={isPending}
             >
               <Check className="mr-2 size-4" />
-              {isPending ? '处理中…' : '通过'}
+              {isPending ? '处理中…' : isTakedown ? '批准下架' : '通过'}
             </Button>
           </div>
         </div>
@@ -335,8 +341,14 @@ function VerifyDetail({
 
 function LinkVerifyPage() {
   const reduced = useReducedMotion() ?? false
-  const linksQuery = useAdminLinks({ link_status: 0, page: 1, page_size: 50 })
-  const pendingLinks = linksQuery.data?.data ?? []
+  // 同时拉取「待审核(0)」与「下架待审核(3)」两类待处理友链
+  const pendingQuery = useAdminLinks({ link_status: 0, page: 1, page_size: 50 })
+  const takedownQuery = useAdminLinks({ link_status: 3, page: 1, page_size: 50 })
+  const isLoading = pendingQuery.isLoading || takedownQuery.isLoading
+  const pendingLinks = [
+    ...(pendingQuery.data?.data ?? []),
+    ...(takedownQuery.data?.data ?? []),
+  ]
   const updateStatus = useUpdateLinkStatus()
 
   const [selectedId, setSelectedId] = useState<SnowflakeID | null>(null)
@@ -349,14 +361,15 @@ function LinkVerifyPage() {
   const toggle = (id: SnowflakeID) =>
     setSelectedId((prev) => (prev === id ? null : id))
 
-  // 审核成功后清空选中与备注（列表会因 hook invalidate 自动刷新）
+  // 主操作：新申请 → 通过(1)；下架申请 → 批准下架(4)
   const handleApprove = () => {
     if (!selected) return
+    const targetStatus = selected.status === 3 ? 4 : 1
     updateStatus.mutate(
       {
         id: selected.id,
         req: {
-          link_status: 1,
+          link_status: targetStatus,
           link_review_remark: remark.trim() || undefined,
         },
       },
@@ -369,13 +382,15 @@ function LinkVerifyPage() {
     )
   }
 
+  // 次操作：新申请 → 拒绝(2)；下架申请 → 驳回下架（恢复已通过 1）
   const handleReject = () => {
     if (!selected) return
+    const targetStatus = selected.status === 3 ? 1 : 2
     updateStatus.mutate(
       {
         id: selected.id,
         req: {
-          link_status: 2,
+          link_status: targetStatus,
           link_review_remark: remark.trim() || undefined,
         },
       },
@@ -415,7 +430,7 @@ function LinkVerifyPage() {
 
       <BambooRule reduced={reduced} delay={0.12} />
 
-      {linksQuery.isLoading ? (
+      {isLoading ? (
         <div className="grid flex-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-40 w-full rounded-lg" />

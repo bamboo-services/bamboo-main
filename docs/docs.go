@@ -1428,6 +1428,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/admin/info/blogger": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点信息接口"
+                ],
+                "summary": "[管理] 更新博主信息",
+                "parameters": [
+                    {
+                        "description": "博主信息更新请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiInfo.BloggerUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.BloggerResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/info/site": {
             "put": {
                 "security": [
@@ -3298,6 +3367,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/auth/register/code": {
+            "post": {
+                "description": "向指定邮箱发送 6 位注册验证码，验证码 10 分钟内有效，60 秒内不可重复发送",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证接口"
+                ],
+                "summary": "[公开] 发送注册验证码",
+                "parameters": [
+                    {
+                        "description": "发送验证码请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiAuth.RegisterCodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "验证码已发送",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误（邮箱已被注册）",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误或发送过于频繁",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/auth/reset-password": {
             "get": {
                 "description": "检查密码重置链接是否有效",
@@ -3523,6 +3638,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/info/blogger": {
+            "get": {
+                "description": "获取博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供交换友链时复制添加",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点信息接口"
+                ],
+                "summary": "[用户] 获取博主信息",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.BloggerResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/info/site": {
             "get": {
                 "description": "获取站点名称、描述、主页介绍等公开信息",
@@ -3553,6 +3709,64 @@ const docTemplate = `{
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/links/apply": {
+            "post": {
+                "description": "访客提交友情链接申请，进入待审核状态；联系邮箱用于确认友链归属",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "公开接口"
+                ],
+                "summary": "[公开] 申请友情链接",
+                "parameters": [
+                    {
+                        "description": "申请友情链接请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiLink.FriendApplyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "申请成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.FriendAddResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
@@ -3819,6 +4033,357 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/user/links": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "分页查询当前登录用户名下的友情链接",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户友链接口"
+                ],
+                "summary": "[用户] 获取我的友情链接列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "友情链接状态 0:待审核 1:已通过 2:已拒绝 3:下架待审核 4:已下架",
+                        "name": "link_status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.FriendListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/links/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取当前登录用户名下指定友情链接的详细信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户友链接口"
+                ],
+                "summary": "[用户] 获取我的友情链接详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "友情链接ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.FriendDetailResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "友情链接不存在",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "更新当前登录用户名下指定友情链接的站点基础信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户友链接口"
+                ],
+                "summary": "[用户] 更新我的友情链接",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "友情链接ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新友情链接请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiLink.FriendUserUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.FriendUpdateResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "友情链接不存在",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/links/{id}/takedown": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "对已通过的友链发起下架申请，进入下架待审核状态",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户友链接口"
+                ],
+                "summary": "[用户] 申请下架我的友情链接",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "友情链接ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "申请成功",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "状态不允许下架",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "友情链接不存在",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/profile": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "更新当前用户的昵称与头像",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证接口"
+                ],
+                "summary": "[用户] 更新用户资料",
+                "parameters": [
+                    {
+                        "description": "更新资料请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiAuth.UpdateProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiAuth.UserInfoResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -3914,14 +4479,31 @@ const docTemplate = `{
                 }
             }
         },
+        "apiAuth.RegisterCodeRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "admin@example.com"
+                }
+            }
+        },
         "apiAuth.RegisterRequest": {
             "type": "object",
             "required": [
+                "code",
                 "email",
                 "password",
                 "username"
             ],
             "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "123456"
+                },
                 "email": {
                     "type": "string",
                     "example": "admin@example.com"
@@ -3960,6 +4542,22 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/entity.SystemUser"
+                }
+            }
+        },
+        "apiAuth.UpdateProfileRequest": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "https://example.com/avatar.jpg"
+                },
+                "nickname": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 1,
+                    "example": "筱锋"
                 }
             }
         },
@@ -4042,6 +4640,67 @@ const docTemplate = `{
                     "maxLength": 10000,
                     "minLength": 1,
                     "example": "# 关于我\n我是筱锋..."
+                }
+            }
+        },
+        "apiInfo.BloggerResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "rss": {
+                    "type": "string"
+                },
+                "site_description": {
+                    "type": "string"
+                },
+                "site_image": {
+                    "type": "string"
+                },
+                "site_name": {
+                    "type": "string"
+                },
+                "site_url": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiInfo.BloggerUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "example": "gm@x-lf.cn"
+                },
+                "rss": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "https://blog.example.com/atom.xml"
+                },
+                "site_description": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "不为如何，只为在茫茫人海中有自己的一片天空~"
+                },
+                "site_image": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "https://example.com/logo.png"
+                },
+                "site_name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "凌中的锋雨"
+                },
+                "site_url": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "https://www.x-lf.com"
                 }
             }
         },
@@ -4587,6 +5246,64 @@ const docTemplate = `{
                 "url": {
                     "description": "友链URL地址",
                     "type": "string"
+                },
+                "user_f_key": {
+                    "description": "归属用户外键",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.SystemUser"
+                        }
+                    ]
+                },
+                "user_id": {
+                    "description": "归属用户ID（按邮箱确认归属，为空表示游客提交尚未关联）",
+                    "type": "integer"
+                }
+            }
+        },
+        "apiLink.FriendApplyRequest": {
+            "type": "object",
+            "required": [
+                "link_email",
+                "link_name",
+                "link_url"
+            ],
+            "properties": {
+                "link_apply_remark": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "申请友链"
+                },
+                "link_avatar": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "https://example.com/avatar.jpg"
+                },
+                "link_desc": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "这是一个示例网站"
+                },
+                "link_email": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "admin@example.com"
+                },
+                "link_name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "example": "示例网站"
+                },
+                "link_rss": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "https://example.com/rss.xml"
+                },
+                "link_url": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "https://example.com"
                 }
             }
         },
@@ -4677,6 +5394,18 @@ const docTemplate = `{
                 "url": {
                     "description": "友链URL地址",
                     "type": "string"
+                },
+                "user_f_key": {
+                    "description": "归属用户外键",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.SystemUser"
+                        }
+                    ]
+                },
+                "user_id": {
+                    "description": "归属用户ID（按邮箱确认归属，为空表示游客提交尚未关联）",
+                    "type": "integer"
                 }
             }
         },
@@ -4748,7 +5477,9 @@ const docTemplate = `{
                     "enum": [
                         0,
                         1,
-                        2
+                        2,
+                        3,
+                        4
                     ],
                     "example": 1
                 }
@@ -4905,6 +5636,59 @@ const docTemplate = `{
                 "url": {
                     "description": "友链URL地址",
                     "type": "string"
+                },
+                "user_f_key": {
+                    "description": "归属用户外键",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.SystemUser"
+                        }
+                    ]
+                },
+                "user_id": {
+                    "description": "归属用户ID（按邮箱确认归属，为空表示游客提交尚未关联）",
+                    "type": "integer"
+                }
+            }
+        },
+        "apiLink.FriendUserUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "link_apply_remark": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "申请友链"
+                },
+                "link_avatar": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "https://example.com/avatar.jpg"
+                },
+                "link_desc": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "这是一个示例网站"
+                },
+                "link_email": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "admin@example.com"
+                },
+                "link_name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "example": "示例网站"
+                },
+                "link_rss": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "https://example.com/rss.xml"
+                },
+                "link_url": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "https://example.com"
                 }
             }
         },
@@ -6060,6 +6844,18 @@ const docTemplate = `{
                 "url": {
                     "description": "友链URL地址",
                     "type": "string"
+                },
+                "user_f_key": {
+                    "description": "归属用户外键",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.SystemUser"
+                        }
+                    ]
+                },
+                "user_id": {
+                    "description": "归属用户ID（按邮箱确认归属，为空表示游客提交尚未关联）",
+                    "type": "integer"
                 }
             }
         },

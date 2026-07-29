@@ -12,13 +12,18 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AdminRouteRouteImport } from './routes/_admin/route'
 import { Route as AuthorizationRouteRouteImport } from './routes/_authorization/route'
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
+import { Route as UserRouteRouteImport } from './routes/_user/route'
 import { Route as AboutRouteRouteImport } from './routes/about/route'
+import { Route as OperateRouteRouteImport } from './routes/operate/route'
 import { Route as AdminAdminRouteRouteImport } from './routes/_admin/admin/route'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as UserUserRouteRouteImport } from './routes/_user/user/route'
 import { Route as AboutIndexRouteImport } from './routes/about/index'
 import { Route as AboutFriendsRouteImport } from './routes/about/friends'
 import { Route as AboutMeRouteImport } from './routes/about/me'
 import { Route as AboutSponsorRouteImport } from './routes/about/sponsor'
+import { Route as OperateIndexRouteImport } from './routes/operate/index'
+import { Route as OperateApplyRouteImport } from './routes/operate/apply'
 import { Route as AdminAdminColorRouteImport } from './routes/_admin/admin/color'
 import { Route as AdminAdminDashboardRouteImport } from './routes/_admin/admin/dashboard'
 import { Route as AdminAdminLocationRouteImport } from './routes/_admin/admin/location'
@@ -26,11 +31,16 @@ import { Route as AdminAdminSettingRouteImport } from './routes/_admin/admin/set
 import { Route as AdminAdminSponsorRouteImport } from './routes/_admin/admin/sponsor'
 import { Route as AuthorizationAuthCallbackRouteImport } from './routes/_authorization/auth/callback'
 import { Route as AuthorizationAuthLoginRouteImport } from './routes/_authorization/auth/login'
+import { Route as AuthorizationAuthRegisterRouteImport } from './routes/_authorization/auth/register'
+import { Route as UserUserAccountRouteImport } from './routes/_user/user/account'
+import { Route as UserUserDashboardRouteImport } from './routes/_user/user/dashboard'
 import { Route as AdminAdminLinkIndexRouteImport } from './routes/_admin/admin/link/index'
-import { Route as AdminAdminLinkIdRouteImport } from './routes/_admin/admin/link/$id'
 import { Route as AdminAdminLinkAddRouteImport } from './routes/_admin/admin/link/add'
 import { Route as AdminAdminLinkVerifyRouteImport } from './routes/_admin/admin/link/verify'
-import { Route as AdminAdminLinkIdEditRouteImport } from './routes/_admin/admin/link/$id.edit'
+import { Route as UserUserLinksIndexRouteImport } from './routes/_user/user/links/index'
+import { Route as AdminAdminLinkIdIndexRouteImport } from './routes/_admin/admin/link/$id/index'
+import { Route as AdminAdminLinkIdEditRouteImport } from './routes/_admin/admin/link/$id/edit'
+import { Route as UserUserLinksIdEditRouteImport } from './routes/_user/user/links/$id/edit'
 
 const AdminRouteRoute = AdminRouteRouteImport.update({
   id: '/_admin',
@@ -44,9 +54,18 @@ const PublicRouteRoute = PublicRouteRouteImport.update({
   id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UserRouteRoute = UserRouteRouteImport.update({
+  id: '/_user',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRouteRoute = AboutRouteRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OperateRouteRoute = OperateRouteRouteImport.update({
+  id: '/operate',
+  path: '/operate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAdminRouteRoute = AdminAdminRouteRouteImport.update({
@@ -58,6 +77,11 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PublicRouteRoute,
+} as any)
+const UserUserRouteRoute = UserUserRouteRouteImport.update({
+  id: '/user',
+  path: '/user',
+  getParentRoute: () => UserRouteRoute,
 } as any)
 const AboutIndexRoute = AboutIndexRouteImport.update({
   id: '/',
@@ -78,6 +102,16 @@ const AboutSponsorRoute = AboutSponsorRouteImport.update({
   id: '/sponsor',
   path: '/sponsor',
   getParentRoute: () => AboutRouteRoute,
+} as any)
+const OperateIndexRoute = OperateIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OperateRouteRoute,
+} as any)
+const OperateApplyRoute = OperateApplyRouteImport.update({
+  id: '/apply',
+  path: '/apply',
+  getParentRoute: () => OperateRouteRoute,
 } as any)
 const AdminAdminColorRoute = AdminAdminColorRouteImport.update({
   id: '/color',
@@ -115,14 +149,25 @@ const AuthorizationAuthLoginRoute = AuthorizationAuthLoginRouteImport.update({
   path: '/auth/login',
   getParentRoute: () => AuthorizationRouteRoute,
 } as any)
+const AuthorizationAuthRegisterRoute =
+  AuthorizationAuthRegisterRouteImport.update({
+    id: '/auth/register',
+    path: '/auth/register',
+    getParentRoute: () => AuthorizationRouteRoute,
+  } as any)
+const UserUserAccountRoute = UserUserAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => UserUserRouteRoute,
+} as any)
+const UserUserDashboardRoute = UserUserDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => UserUserRouteRoute,
+} as any)
 const AdminAdminLinkIndexRoute = AdminAdminLinkIndexRouteImport.update({
   id: '/link/',
   path: '/link/',
-  getParentRoute: () => AdminAdminRouteRoute,
-} as any)
-const AdminAdminLinkIdRoute = AdminAdminLinkIdRouteImport.update({
-  id: '/link/$id',
-  path: '/link/$id',
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
 const AdminAdminLinkAddRoute = AdminAdminLinkAddRouteImport.update({
@@ -135,20 +180,39 @@ const AdminAdminLinkVerifyRoute = AdminAdminLinkVerifyRouteImport.update({
   path: '/link/verify',
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
+const UserUserLinksIndexRoute = UserUserLinksIndexRouteImport.update({
+  id: '/links/',
+  path: '/links/',
+  getParentRoute: () => UserUserRouteRoute,
+} as any)
+const AdminAdminLinkIdIndexRoute = AdminAdminLinkIdIndexRouteImport.update({
+  id: '/link/$id/',
+  path: '/link/$id/',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
 const AdminAdminLinkIdEditRoute = AdminAdminLinkIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => AdminAdminLinkIdRoute,
+  id: '/link/$id/edit',
+  path: '/link/$id/edit',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
+const UserUserLinksIdEditRoute = UserUserLinksIdEditRouteImport.update({
+  id: '/links/$id/edit',
+  path: '/links/$id/edit',
+  getParentRoute: () => UserUserRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/about': typeof AboutRouteRouteWithChildren
+  '/operate': typeof OperateRouteRouteWithChildren
   '/admin': typeof AdminAdminRouteRouteWithChildren
+  '/user': typeof UserUserRouteRouteWithChildren
   '/about/friends': typeof AboutFriendsRoute
   '/about/me': typeof AboutMeRoute
   '/about/sponsor': typeof AboutSponsorRoute
+  '/operate/apply': typeof OperateApplyRoute
   '/about/': typeof AboutIndexRoute
+  '/operate/': typeof OperateIndexRoute
   '/admin/color': typeof AdminAdminColorRoute
   '/admin/dashboard': typeof AdminAdminDashboardRoute
   '/admin/location': typeof AdminAdminLocationRoute
@@ -156,19 +220,27 @@ export interface FileRoutesByFullPath {
   '/admin/sponsor': typeof AdminAdminSponsorRoute
   '/auth/callback': typeof AuthorizationAuthCallbackRoute
   '/auth/login': typeof AuthorizationAuthLoginRoute
-  '/admin/link/$id': typeof AdminAdminLinkIdRouteWithChildren
+  '/auth/register': typeof AuthorizationAuthRegisterRoute
+  '/user/account': typeof UserUserAccountRoute
+  '/user/dashboard': typeof UserUserDashboardRoute
   '/admin/link/add': typeof AdminAdminLinkAddRoute
   '/admin/link/verify': typeof AdminAdminLinkVerifyRoute
   '/admin/link/': typeof AdminAdminLinkIndexRoute
+  '/user/links/': typeof UserUserLinksIndexRoute
   '/admin/link/$id/edit': typeof AdminAdminLinkIdEditRoute
+  '/user/links/$id/edit': typeof UserUserLinksIdEditRoute
+  '/admin/link/$id/': typeof AdminAdminLinkIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/admin': typeof AdminAdminRouteRouteWithChildren
+  '/user': typeof UserUserRouteRouteWithChildren
   '/about/friends': typeof AboutFriendsRoute
   '/about/me': typeof AboutMeRoute
   '/about/sponsor': typeof AboutSponsorRoute
+  '/operate/apply': typeof OperateApplyRoute
   '/about': typeof AboutIndexRoute
+  '/operate': typeof OperateIndexRoute
   '/admin/color': typeof AdminAdminColorRoute
   '/admin/dashboard': typeof AdminAdminDashboardRoute
   '/admin/location': typeof AdminAdminLocationRoute
@@ -176,24 +248,34 @@ export interface FileRoutesByTo {
   '/admin/sponsor': typeof AdminAdminSponsorRoute
   '/auth/callback': typeof AuthorizationAuthCallbackRoute
   '/auth/login': typeof AuthorizationAuthLoginRoute
-  '/admin/link/$id': typeof AdminAdminLinkIdRouteWithChildren
+  '/auth/register': typeof AuthorizationAuthRegisterRoute
+  '/user/account': typeof UserUserAccountRoute
+  '/user/dashboard': typeof UserUserDashboardRoute
   '/admin/link/add': typeof AdminAdminLinkAddRoute
   '/admin/link/verify': typeof AdminAdminLinkVerifyRoute
   '/admin/link': typeof AdminAdminLinkIndexRoute
+  '/user/links': typeof UserUserLinksIndexRoute
   '/admin/link/$id/edit': typeof AdminAdminLinkIdEditRoute
+  '/user/links/$id/edit': typeof UserUserLinksIdEditRoute
+  '/admin/link/$id': typeof AdminAdminLinkIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_admin': typeof AdminRouteRouteWithChildren
   '/_authorization': typeof AuthorizationRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
+  '/_user': typeof UserRouteRouteWithChildren
   '/about': typeof AboutRouteRouteWithChildren
+  '/operate': typeof OperateRouteRouteWithChildren
   '/_admin/admin': typeof AdminAdminRouteRouteWithChildren
+  '/_user/user': typeof UserUserRouteRouteWithChildren
   '/about/friends': typeof AboutFriendsRoute
   '/about/me': typeof AboutMeRoute
   '/about/sponsor': typeof AboutSponsorRoute
+  '/operate/apply': typeof OperateApplyRoute
   '/_public/': typeof PublicIndexRoute
   '/about/': typeof AboutIndexRoute
+  '/operate/': typeof OperateIndexRoute
   '/_admin/admin/color': typeof AdminAdminColorRoute
   '/_admin/admin/dashboard': typeof AdminAdminDashboardRoute
   '/_admin/admin/location': typeof AdminAdminLocationRoute
@@ -201,22 +283,31 @@ export interface FileRoutesById {
   '/_admin/admin/sponsor': typeof AdminAdminSponsorRoute
   '/_authorization/auth/callback': typeof AuthorizationAuthCallbackRoute
   '/_authorization/auth/login': typeof AuthorizationAuthLoginRoute
-  '/_admin/admin/link/$id': typeof AdminAdminLinkIdRouteWithChildren
+  '/_authorization/auth/register': typeof AuthorizationAuthRegisterRoute
+  '/_user/user/account': typeof UserUserAccountRoute
+  '/_user/user/dashboard': typeof UserUserDashboardRoute
   '/_admin/admin/link/add': typeof AdminAdminLinkAddRoute
   '/_admin/admin/link/verify': typeof AdminAdminLinkVerifyRoute
   '/_admin/admin/link/': typeof AdminAdminLinkIndexRoute
+  '/_user/user/links/': typeof UserUserLinksIndexRoute
   '/_admin/admin/link/$id/edit': typeof AdminAdminLinkIdEditRoute
+  '/_user/user/links/$id/edit': typeof UserUserLinksIdEditRoute
+  '/_admin/admin/link/$id/': typeof AdminAdminLinkIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/operate'
     | '/admin'
+    | '/user'
     | '/about/friends'
     | '/about/me'
     | '/about/sponsor'
+    | '/operate/apply'
     | '/about/'
+    | '/operate/'
     | '/admin/color'
     | '/admin/dashboard'
     | '/admin/location'
@@ -224,19 +315,27 @@ export interface FileRouteTypes {
     | '/admin/sponsor'
     | '/auth/callback'
     | '/auth/login'
-    | '/admin/link/$id'
+    | '/auth/register'
+    | '/user/account'
+    | '/user/dashboard'
     | '/admin/link/add'
     | '/admin/link/verify'
     | '/admin/link/'
+    | '/user/links/'
     | '/admin/link/$id/edit'
+    | '/user/links/$id/edit'
+    | '/admin/link/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
+    | '/user'
     | '/about/friends'
     | '/about/me'
     | '/about/sponsor'
+    | '/operate/apply'
     | '/about'
+    | '/operate'
     | '/admin/color'
     | '/admin/dashboard'
     | '/admin/location'
@@ -244,23 +343,33 @@ export interface FileRouteTypes {
     | '/admin/sponsor'
     | '/auth/callback'
     | '/auth/login'
-    | '/admin/link/$id'
+    | '/auth/register'
+    | '/user/account'
+    | '/user/dashboard'
     | '/admin/link/add'
     | '/admin/link/verify'
     | '/admin/link'
+    | '/user/links'
     | '/admin/link/$id/edit'
+    | '/user/links/$id/edit'
+    | '/admin/link/$id'
   id:
     | '__root__'
     | '/_admin'
     | '/_authorization'
     | '/_public'
+    | '/_user'
     | '/about'
+    | '/operate'
     | '/_admin/admin'
+    | '/_user/user'
     | '/about/friends'
     | '/about/me'
     | '/about/sponsor'
+    | '/operate/apply'
     | '/_public/'
     | '/about/'
+    | '/operate/'
     | '/_admin/admin/color'
     | '/_admin/admin/dashboard'
     | '/_admin/admin/location'
@@ -268,18 +377,25 @@ export interface FileRouteTypes {
     | '/_admin/admin/sponsor'
     | '/_authorization/auth/callback'
     | '/_authorization/auth/login'
-    | '/_admin/admin/link/$id'
+    | '/_authorization/auth/register'
+    | '/_user/user/account'
+    | '/_user/user/dashboard'
     | '/_admin/admin/link/add'
     | '/_admin/admin/link/verify'
     | '/_admin/admin/link/'
+    | '/_user/user/links/'
     | '/_admin/admin/link/$id/edit'
+    | '/_user/user/links/$id/edit'
+    | '/_admin/admin/link/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AuthorizationRouteRoute: typeof AuthorizationRouteRouteWithChildren
   PublicRouteRoute: typeof PublicRouteRouteWithChildren
+  UserRouteRoute: typeof UserRouteRouteWithChildren
   AboutRouteRoute: typeof AboutRouteRouteWithChildren
+  OperateRouteRoute: typeof OperateRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -305,11 +421,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_user': {
+      id: '/_user'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof UserRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/operate': {
+      id: '/operate'
+      path: '/operate'
+      fullPath: '/operate'
+      preLoaderRoute: typeof OperateRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_admin/admin': {
@@ -325,6 +455,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRouteRoute
+    }
+    '/_user/user': {
+      id: '/_user/user'
+      path: '/user'
+      fullPath: '/user'
+      preLoaderRoute: typeof UserUserRouteRouteImport
+      parentRoute: typeof UserRouteRoute
     }
     '/about/': {
       id: '/about/'
@@ -353,6 +490,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/about/sponsor'
       preLoaderRoute: typeof AboutSponsorRouteImport
       parentRoute: typeof AboutRouteRoute
+    }
+    '/operate/': {
+      id: '/operate/'
+      path: '/'
+      fullPath: '/operate/'
+      preLoaderRoute: typeof OperateIndexRouteImport
+      parentRoute: typeof OperateRouteRoute
+    }
+    '/operate/apply': {
+      id: '/operate/apply'
+      path: '/apply'
+      fullPath: '/operate/apply'
+      preLoaderRoute: typeof OperateApplyRouteImport
+      parentRoute: typeof OperateRouteRoute
     }
     '/_admin/admin/color': {
       id: '/_admin/admin/color'
@@ -403,18 +554,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthorizationAuthLoginRouteImport
       parentRoute: typeof AuthorizationRouteRoute
     }
+    '/_authorization/auth/register': {
+      id: '/_authorization/auth/register'
+      path: '/auth/register'
+      fullPath: '/auth/register'
+      preLoaderRoute: typeof AuthorizationAuthRegisterRouteImport
+      parentRoute: typeof AuthorizationRouteRoute
+    }
+    '/_user/user/account': {
+      id: '/_user/user/account'
+      path: '/account'
+      fullPath: '/user/account'
+      preLoaderRoute: typeof UserUserAccountRouteImport
+      parentRoute: typeof UserUserRouteRoute
+    }
+    '/_user/user/dashboard': {
+      id: '/_user/user/dashboard'
+      path: '/dashboard'
+      fullPath: '/user/dashboard'
+      preLoaderRoute: typeof UserUserDashboardRouteImport
+      parentRoute: typeof UserUserRouteRoute
+    }
     '/_admin/admin/link/': {
       id: '/_admin/admin/link/'
       path: '/link'
       fullPath: '/admin/link/'
       preLoaderRoute: typeof AdminAdminLinkIndexRouteImport
-      parentRoute: typeof AdminAdminRouteRoute
-    }
-    '/_admin/admin/link/$id': {
-      id: '/_admin/admin/link/$id'
-      path: '/link/$id'
-      fullPath: '/admin/link/$id'
-      preLoaderRoute: typeof AdminAdminLinkIdRouteImport
       parentRoute: typeof AdminAdminRouteRoute
     }
     '/_admin/admin/link/add': {
@@ -431,26 +596,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminLinkVerifyRouteImport
       parentRoute: typeof AdminAdminRouteRoute
     }
+    '/_user/user/links/': {
+      id: '/_user/user/links/'
+      path: '/links'
+      fullPath: '/user/links/'
+      preLoaderRoute: typeof UserUserLinksIndexRouteImport
+      parentRoute: typeof UserUserRouteRoute
+    }
+    '/_admin/admin/link/$id/': {
+      id: '/_admin/admin/link/$id/'
+      path: '/link/$id'
+      fullPath: '/admin/link/$id/'
+      preLoaderRoute: typeof AdminAdminLinkIdIndexRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
     '/_admin/admin/link/$id/edit': {
       id: '/_admin/admin/link/$id/edit'
-      path: '/edit'
+      path: '/link/$id/edit'
       fullPath: '/admin/link/$id/edit'
       preLoaderRoute: typeof AdminAdminLinkIdEditRouteImport
-      parentRoute: typeof AdminAdminLinkIdRoute
+      parentRoute: typeof AdminAdminRouteRoute
+    }
+    '/_user/user/links/$id/edit': {
+      id: '/_user/user/links/$id/edit'
+      path: '/links/$id/edit'
+      fullPath: '/user/links/$id/edit'
+      preLoaderRoute: typeof UserUserLinksIdEditRouteImport
+      parentRoute: typeof UserUserRouteRoute
     }
   }
 }
-
-interface AdminAdminLinkIdRouteChildren {
-  AdminAdminLinkIdEditRoute: typeof AdminAdminLinkIdEditRoute
-}
-
-const AdminAdminLinkIdRouteChildren: AdminAdminLinkIdRouteChildren = {
-  AdminAdminLinkIdEditRoute: AdminAdminLinkIdEditRoute,
-}
-
-const AdminAdminLinkIdRouteWithChildren =
-  AdminAdminLinkIdRoute._addFileChildren(AdminAdminLinkIdRouteChildren)
 
 interface AdminAdminRouteRouteChildren {
   AdminAdminColorRoute: typeof AdminAdminColorRoute
@@ -458,10 +633,11 @@ interface AdminAdminRouteRouteChildren {
   AdminAdminLocationRoute: typeof AdminAdminLocationRoute
   AdminAdminSettingRoute: typeof AdminAdminSettingRoute
   AdminAdminSponsorRoute: typeof AdminAdminSponsorRoute
-  AdminAdminLinkIdRoute: typeof AdminAdminLinkIdRouteWithChildren
   AdminAdminLinkAddRoute: typeof AdminAdminLinkAddRoute
   AdminAdminLinkVerifyRoute: typeof AdminAdminLinkVerifyRoute
   AdminAdminLinkIndexRoute: typeof AdminAdminLinkIndexRoute
+  AdminAdminLinkIdEditRoute: typeof AdminAdminLinkIdEditRoute
+  AdminAdminLinkIdIndexRoute: typeof AdminAdminLinkIdIndexRoute
 }
 
 const AdminAdminRouteRouteChildren: AdminAdminRouteRouteChildren = {
@@ -470,10 +646,11 @@ const AdminAdminRouteRouteChildren: AdminAdminRouteRouteChildren = {
   AdminAdminLocationRoute: AdminAdminLocationRoute,
   AdminAdminSettingRoute: AdminAdminSettingRoute,
   AdminAdminSponsorRoute: AdminAdminSponsorRoute,
-  AdminAdminLinkIdRoute: AdminAdminLinkIdRouteWithChildren,
   AdminAdminLinkAddRoute: AdminAdminLinkAddRoute,
   AdminAdminLinkVerifyRoute: AdminAdminLinkVerifyRoute,
   AdminAdminLinkIndexRoute: AdminAdminLinkIndexRoute,
+  AdminAdminLinkIdEditRoute: AdminAdminLinkIdEditRoute,
+  AdminAdminLinkIdIndexRoute: AdminAdminLinkIdIndexRoute,
 }
 
 const AdminAdminRouteRouteWithChildren = AdminAdminRouteRoute._addFileChildren(
@@ -495,11 +672,13 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 interface AuthorizationRouteRouteChildren {
   AuthorizationAuthCallbackRoute: typeof AuthorizationAuthCallbackRoute
   AuthorizationAuthLoginRoute: typeof AuthorizationAuthLoginRoute
+  AuthorizationAuthRegisterRoute: typeof AuthorizationAuthRegisterRoute
 }
 
 const AuthorizationRouteRouteChildren: AuthorizationRouteRouteChildren = {
   AuthorizationAuthCallbackRoute: AuthorizationAuthCallbackRoute,
   AuthorizationAuthLoginRoute: AuthorizationAuthLoginRoute,
+  AuthorizationAuthRegisterRoute: AuthorizationAuthRegisterRoute,
 }
 
 const AuthorizationRouteRouteWithChildren =
@@ -515,6 +694,36 @@ const PublicRouteRouteChildren: PublicRouteRouteChildren = {
 
 const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(
   PublicRouteRouteChildren,
+)
+
+interface UserUserRouteRouteChildren {
+  UserUserAccountRoute: typeof UserUserAccountRoute
+  UserUserDashboardRoute: typeof UserUserDashboardRoute
+  UserUserLinksIndexRoute: typeof UserUserLinksIndexRoute
+  UserUserLinksIdEditRoute: typeof UserUserLinksIdEditRoute
+}
+
+const UserUserRouteRouteChildren: UserUserRouteRouteChildren = {
+  UserUserAccountRoute: UserUserAccountRoute,
+  UserUserDashboardRoute: UserUserDashboardRoute,
+  UserUserLinksIndexRoute: UserUserLinksIndexRoute,
+  UserUserLinksIdEditRoute: UserUserLinksIdEditRoute,
+}
+
+const UserUserRouteRouteWithChildren = UserUserRouteRoute._addFileChildren(
+  UserUserRouteRouteChildren,
+)
+
+interface UserRouteRouteChildren {
+  UserUserRouteRoute: typeof UserUserRouteRouteWithChildren
+}
+
+const UserRouteRouteChildren: UserRouteRouteChildren = {
+  UserUserRouteRoute: UserUserRouteRouteWithChildren,
+}
+
+const UserRouteRouteWithChildren = UserRouteRoute._addFileChildren(
+  UserRouteRouteChildren,
 )
 
 interface AboutRouteRouteChildren {
@@ -535,11 +744,27 @@ const AboutRouteRouteWithChildren = AboutRouteRoute._addFileChildren(
   AboutRouteRouteChildren,
 )
 
+interface OperateRouteRouteChildren {
+  OperateApplyRoute: typeof OperateApplyRoute
+  OperateIndexRoute: typeof OperateIndexRoute
+}
+
+const OperateRouteRouteChildren: OperateRouteRouteChildren = {
+  OperateApplyRoute: OperateApplyRoute,
+  OperateIndexRoute: OperateIndexRoute,
+}
+
+const OperateRouteRouteWithChildren = OperateRouteRoute._addFileChildren(
+  OperateRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AuthorizationRouteRoute: AuthorizationRouteRouteWithChildren,
   PublicRouteRoute: PublicRouteRouteWithChildren,
+  UserRouteRoute: UserRouteRouteWithChildren,
   AboutRouteRoute: AboutRouteRouteWithChildren,
+  OperateRouteRoute: OperateRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

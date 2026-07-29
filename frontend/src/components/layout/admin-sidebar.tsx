@@ -45,13 +45,7 @@ import { siteConfig } from '@/lib/site'
 import { useAuth } from '@/hooks/use-auth'
 import { useSiteInfo } from '@/hooks/use-site-info'
 import { cn } from '@/lib/utils'
-
-/** 角色中文映射（与后端 pkg/constants 的 Role* 常量对应） */
-const roleLabels: Record<string, string> = {
-  admin: '管理员',
-  moderator: '协作者',
-  user: '用户',
-}
+import { roleLabel as resolveRoleLabel } from '@/lib/role'
 
 /** 日期时间格式化为 2026-07-28 19:30；无效/缺省返回 — */
 function formatDateTime(iso?: string | null): string {
@@ -100,7 +94,7 @@ export function AdminSidebar() {
 
   const displayName = user?.nickname || user?.username || '管理员'
   const userInitial = (user?.username ?? '?').charAt(0).toUpperCase()
-  const roleLabel = roleLabels[user?.role ?? ''] ?? user?.role ?? '—'
+  const roleLabel = resolveRoleLabel(user?.role)
 
   const handleLogout = async () => {
     await signOut()
@@ -161,7 +155,7 @@ export function AdminSidebar() {
                           className="absolute top-2 left-1 z-10 h-4 w-[3px] group-data-[collapsible=icon]:hidden"
                           aria-hidden
                         >
-                          <span className="block h-full w-full -skew-x-12 rounded-sm bg-leaf-deep" />
+                          <span className="block h-full w-full rounded-sm bg-leaf-deep" />
                         </motion.span>
                       )}
                       <SidebarMenuButton

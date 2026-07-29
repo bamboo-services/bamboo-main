@@ -9,6 +9,7 @@
 
 import { request } from './client'
 import type {
+  ApplyLinkRequest,
   CreateLinkRequest,
   FriendPublicResponse,
   LinkFriend,
@@ -18,6 +19,11 @@ import type {
   UpdateLinkFailRequest,
   UpdateLinkRequest,
   UpdateLinkStatusRequest,
+  UpdateProfileRequest,
+  UpdateUserLinkRequest,
+  UserInfo,
+  UserInfoResponse,
+  UserLinkParams,
 } from './types'
 
 /**
@@ -118,4 +124,69 @@ export function updateLinkFail(
     url: `/admin/links/${id.toString()}/fail`,
     data: req,
   })
+}
+
+// ---------------------------------------------------------------------------
+// 用户自助接口（需登录；归属校验由后端完成）
+// ---------------------------------------------------------------------------
+
+/** 访客自助申请友链（公开，POST /api/v1/links/apply） */
+export function applyLink(req: ApplyLinkRequest): Promise<LinkFriend> {
+  return request<LinkFriend>({
+    method: 'POST',
+    url: '/links/apply',
+    data: req,
+  })
+}
+
+/** 我的友链分页列表（GET /api/v1/user/links） */
+export function listMyLinks(
+  params: UserLinkParams = {},
+): Promise<PaginationResponse<LinkFriend>> {
+  return request<PaginationResponse<LinkFriend>>({
+    method: 'GET',
+    url: '/user/links',
+    params: {
+      page: params.page ?? 1,
+      page_size: params.page_size ?? 10,
+      link_status: params.link_status,
+    },
+  })
+}
+
+/** 我的友链详情（GET /api/v1/user/links/:id） */
+export function getMyLink(id: SnowflakeID): Promise<LinkFriend> {
+  return request<LinkFriend>({
+    method: 'GET',
+    url: `/user/links/${id.toString()}`,
+  })
+}
+
+/** 更新我的友链（PUT /api/v1/user/links/:id） */
+export function updateMyLink(
+  id: SnowflakeID,
+  req: UpdateUserLinkRequest,
+): Promise<LinkFriend> {
+  return request<LinkFriend>({
+    method: 'PUT',
+    url: `/user/links/${id.toString()}`,
+    data: req,
+  })
+}
+
+/** 申请下架我的友链（PUT /api/v1/user/links/:id/takedown） */
+export function requestTakedown(id: SnowflakeID): Promise<void> {
+  return request<void>({
+    method: 'PUT',
+    url: `/user/links/${id.toString()}/takedown`,
+  })
+}
+
+/** 更新用户资料（PUT /api/v1/user/profile） */
+export function updateProfile(req: UpdateProfileRequest): Promise<UserInfo> {
+  return request<UserInfoResponse>({
+    method: 'PUT',
+    url: '/user/profile',
+    data: req,
+  }).then((res) => res.user)
 }
