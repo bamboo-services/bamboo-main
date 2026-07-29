@@ -22,7 +22,7 @@ import (
 // 同时记录该用户的创建时间和更新时间，便于数据管理和审计。
 type SystemUser struct {
 	xModels.BaseEntity            // 嵌入基础实体（SnowflakeID 主键 + timestamptz 时间戳）
-	OAuthUserID        *string    `json:"-" gorm:"type:varchar(255);uniqueIndex;comment:OAuth 用户唯一标识"`               // OAuth 用户唯一标识
+	OAuthUserID        *string    `json:"-" gorm:"column:oauth_user_id;type:varchar(255);uniqueIndex;comment:OAuth 用户唯一标识"` // OAuth 用户唯一标识
 	Username           string     `json:"username" gorm:"type:varchar(50);not null;uniqueIndex;comment:用户名"`         // 用户名
 	Password           string     `json:"-" gorm:"type:varchar(255);not null;comment:密码哈希"`                          // 密码哈希
 	Email              string     `json:"email" gorm:"type:varchar(100);not null;uniqueIndex;comment:邮箱"`            // 邮箱
