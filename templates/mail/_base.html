@@ -1,0 +1,121 @@
+<!--
+--------------------------------------------------------------------------------
+Copyright (c) 2016-NOW(至今) 筱锋
+Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
+--------------------------------------------------------------------------------
+许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
+有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+https://opensource.org/licenses/MIT
+--------------------------------------------------------------------------------
+-->
+
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{{.Subject}}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #eef1ea; font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; -webkit-font-smoothing: antialiased;">
+
+    <!-- 外层宣纸底（淡绿页面背景） -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #eef1ea;">
+        <tr>
+            <td align="center" style="padding: 36px 16px;">
+
+                <!-- 主信笺卡（宣纸卡片块：白底 + 墨边软阴影 + 圆角） -->
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #fcfdfa; border-radius: 10px; box-shadow: 0 3px 14px rgba(60, 80, 60, 0.10); overflow: hidden; border: 1px solid #e2e8d8;">
+
+                    <!-- 品牌署名头：左竖墨条 + 衬线站名 + 右 mono 日期戳 -->
+                    <tr>
+                        <td style="padding: 28px 40px 22px; background-color: #fcfdfa; border-bottom: 1px solid #e2e8d8;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <!-- 左竖墨条（leaf-deep 实色竖线，替代斜墨条——邮件场景适配） -->
+                                    <td style="width: 4px; background-color: #4a7a55; border-radius: 2px; padding: 0;" valign="top">
+                                        <div style="font-size: 0; line-height: 0; height: 44px;">&nbsp;</div>
+                                    </td>
+                                    <td style="padding-left: 16px;">
+                                        <h1 style="margin: 0; font-family: Georgia, 'Songti SC', 'STSong', serif; font-size: 24px; font-weight: 600; color: #2f4a33; letter-spacing: 0.5px; line-height: 1.2;">
+                                            竹林友链
+                                        </h1>
+                                        <p style="margin: 4px 0 0; font-size: 11px; color: #7a8a72; letter-spacing: 2px; text-transform: uppercase;">
+                                            BAMBOO LINK SERVICE
+                                        </p>
+                                    </td>
+                                    <td align="right" valign="top" style="padding-top: 4px;">
+                                        <p style="margin: 0; font-size: 11px; color: #9aa89a; letter-spacing: 1px;">
+                                            竹林清晨 · 晨报
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- 内容槽位（业务片段注入） -->
+                    <tr>
+                        <td style="padding: 36px 40px 28px; color: #2f4a33; font-size: 15px; line-height: 1.7;">
+                            {{template "content" .}}
+                        </td>
+                    </tr>
+
+                    <!-- 竹节分隔线：横线 + 圆/宽节点交替（纯 CSS table 实现） -->
+                    <tr>
+                        <td style="padding: 0 40px;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="font-size: 0; line-height: 0; height: 1px; background-color: #d6ddcc; border-top: 0; border-bottom: 0;">&nbsp;</td>
+                                    <td style="width: 6px; padding: 0 5px;">
+                                        <div style="width: 6px; height: 6px; background-color: #a8b89e; border-radius: 50%; font-size: 0; line-height: 0;">&nbsp;</div>
+                                    </td>
+                                    <td style="font-size: 0; line-height: 0; height: 1px; background-color: #d6ddcc;">&nbsp;</td>
+                                    <td style="width: 10px; padding: 0 5px;">
+                                        <div style="width: 10px; height: 4px; background-color: #8aa388; border-radius: 2px; font-size: 0; line-height: 0;">&nbsp;</div>
+                                    </td>
+                                    <td style="font-size: 0; line-height: 0; height: 1px; background-color: #d6ddcc;">&nbsp;</td>
+                                    <td style="width: 6px; padding: 0 5px;">
+                                        <div style="width: 6px; height: 6px; background-color: #a8b89e; border-radius: 50%; font-size: 0; line-height: 0;">&nbsp;</div>
+                                    </td>
+                                    <td style="font-size: 0; line-height: 0; height: 1px; background-color: #d6ddcc;">&nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- 题跋尾注：竖排意境收束（横向单行衬线小字） -->
+                    <tr>
+                        <td style="padding: 18px 40px 12px;">
+                            <p style="margin: 0; font-family: Georgia, 'Songti SC', 'STSong', serif; font-size: 13px; font-style: italic; color: #8a9a82; text-align: center; letter-spacing: 1.5px;">
+                                                致 · 每一位远道而来的友人
+                                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- 版权页脚 -->
+                    <tr>
+                        <td style="padding: 12px 40px 28px; background-color: #f6f8f1; border-top: 1px solid #e2e8d8;">
+                            <p style="margin: 0; font-size: 12px; color: #9aa89a; text-align: center; line-height: 1.6;">
+                                此邮件由竹林友链自动发送，请勿直接回复。
+                            </p>
+                            <p style="margin: 6px 0 0; font-size: 11px; color: #aab6a4; text-align: center; line-height: 1.5;">
+                                &copy; 2016-NOW 筱锋 · Bamboo Link Service · MIT License
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+
+                <!-- 卡下落款：极淡衬线水印字（晨光墨晕的克制替代） -->
+                <p style="margin: 18px 0 0; font-family: Georgia, 'Songti SC', 'STSong', serif; font-size: 12px; color: #b8c2ae; text-align: center; letter-spacing: 3px;">
+                    竹 · 林 · 清 · 晨
+                </p>
+
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+{{end}}

@@ -12,30 +12,33 @@ https://opensource.org/licenses/MIT
 {{define "register_code"}}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
     <tr>
-        <td style="padding-bottom: 16px;">
-            <h2 style="margin: 0 0 16px; font-size: 20px; font-weight: 600; color: #1a1a1a; border-bottom: 2px solid #9C27B0; padding-bottom: 10px;">
-                🔑 注册验证码
+        <td style="padding-bottom: 18px;">
+            <h2 style="margin: 0 0 18px; padding: 6px 0 6px 14px; border-left: 3px solid #4a7a55; font-family: Georgia, 'Songti SC', 'STSong', serif; font-size: 20px; font-weight: 600; color: #2f4a33; line-height: 1.4;">
+                注册验证码
             </h2>
-            <p style="margin: 0 0 12px; font-size: 15px; color: #555555; line-height: 1.8;">
-                亲爱的 <strong style="color: #1a1a1a;">{{.Username}}</strong>，您好！
+            <p style="margin: 0 0 12px; font-size: 15px; color: #5a6a52; line-height: 1.8;">
+                亲爱的 <strong style="color: #2f4a33; font-weight: 600;">{{.Username}}</strong>，您好：
             </p>
-            <p style="margin: 0; font-size: 15px; color: #555555; line-height: 1.8;">
-                您正在注册账号，请使用下方验证码完成注册：
+            <p style="margin: 0; font-size: 15px; color: #5a6a52; line-height: 1.8;">
+                您正在竹林门庭登册注册，请誊录下方验证码以完成身份核验：
             </p>
         </td>
     </tr>
+
+    <!-- 验证码：衬线大字于字段纸底，墨色落款 -->
     <tr>
-        <td align="center" style="padding: 12px 0 24px;">
-            <div style="display: inline-block; padding: 14px 40px; background: #f3e5f5; color: #7b1fa2; border-radius: 4px; font-size: 28px; font-weight: 700; letter-spacing: 8px; font-family: monospace;">
+        <td align="center" style="padding: 8px 0 24px;">
+            <div style="display: inline-block; padding: 16px 44px; background-color: #f1f4e8; color: #2f4a33; border: 1px dashed #a8b89e; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 32px; font-weight: 700; letter-spacing: 14px; line-height: 1;">
                 {{.Code}}
             </div>
         </td>
     </tr>
+
     <tr>
         <td>
-            <div style="background: #f3e5f5; border-left: 4px solid #9C27B0; padding: 15px; margin: 8px 0 0;">
-                <p style="color: #7b1fa2; margin: 0; font-size: 14px;">
-                    ⏰ 此验证码将在 <strong>{{.ExpireTime}}</strong> 后失效，请勿向他人泄露。
+            <div style="margin: 8px 0 0; padding: 13px 16px; background-color: #f1f4e8; border-left: 3px solid #4a7a55; border-radius: 0 4px 4px 0;">
+                <p style="margin: 0; font-size: 13px; color: #5a6a52; line-height: 1.7;">
+                    此验证码将于 <strong style="color: #2f4a33;">{{.ExpireTime}}</strong> 后失效，请勿示于他人，以防名帖被盗用。
                 </p>
             </div>
         </td>

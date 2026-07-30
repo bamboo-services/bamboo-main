@@ -12,50 +12,53 @@ https://opensource.org/licenses/MIT
 {{define "apply"}}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
     <tr>
-        <td style="padding-bottom: 16px;">
-            <h2 style="margin: 0 0 16px; font-size: 20px; font-weight: 600; color: #1a1a1a; border-bottom: 2px solid #2196F3; padding-bottom: 10px;">
-                📬 收到新的友链申请
+        <td style="padding-bottom: 18px;">
+            <h2 style="margin: 0 0 18px; padding: 6px 0 6px 14px; border-left: 3px solid #4a7a55; font-family: Georgia, 'Songti SC', 'STSong', serif; font-size: 20px; font-weight: 600; color: #2f4a33; line-height: 1.4;">
+                收到新的友链申请
             </h2>
-            <p style="margin: 0 0 12px; font-size: 15px; color: #555555; line-height: 1.8;">
-                管理员您好！
+            <p style="margin: 0 0 12px; font-size: 15px; color: #5a6a52; line-height: 1.8;">
+                管理员您好，晨报送达：
             </p>
-            <p style="margin: 0; font-size: 15px; color: #555555; line-height: 1.8;">
-                有用户提交了新的友情链接申请，请及时审核：
+            <p style="margin: 0; font-size: 15px; color: #5a6a52; line-height: 1.8;">
+                有访客于竹林门庭投递了新的友情链接申请，待您过目裁度。以下为申请名帖：
             </p>
         </td>
     </tr>
+
+    <!-- 申请名帖（宣纸卡片块 + 行间分隔） -->
     <tr>
         <td style="padding-bottom: 24px;">
-            <table style="width: 100%; border-collapse: collapse;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f6f8f1; border: 1px solid #e2e8d8;">
                 <tr>
-                    <td style="padding: 12px; border: 1px solid #dddddd; background: #f9f9f9; width: 30%; font-size: 14px; color: #555555;">申请人</td>
-                    <td style="padding: 12px; border: 1px solid #dddddd; font-size: 14px; color: #333333;">{{.Username}}</td>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; width: 32%; font-size: 13px; color: #7a8a72; letter-spacing: 0.5px;">申请人</td>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 14px; color: #2f4a33;">{{.Username}}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 12px; border: 1px solid #dddddd; background: #f9f9f9; font-size: 14px; color: #555555;">网站名称</td>
-                    <td style="padding: 12px; border: 1px solid #dddddd; font-size: 14px; color: #333333;">{{.LinkName}}</td>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 13px; color: #7a8a72;">网站名称</td>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 14px; color: #2f4a33;">{{.LinkName}}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 12px; border: 1px solid #dddddd; background: #f9f9f9; font-size: 14px; color: #555555;">网站地址</td>
-                    <td style="padding: 12px; border: 1px solid #dddddd; font-size: 14px;">
-                        <a href="{{.LinkURL}}" style="color: #1a73e8;">{{.LinkURL}}</a>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 13px; color: #7a8a72;">网站地址</td>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 14px;">
+                        <a href="{{.LinkURL}}" style="color: #4a7a55; text-decoration: underline;">{{.LinkURL}}</a>
                     </td>
                 </tr>
                 <tr>
-                    <td style="padding: 12px; border: 1px solid #dddddd; background: #f9f9f9; font-size: 14px; color: #555555;">网站描述</td>
-                    <td style="padding: 12px; border: 1px solid #dddddd; font-size: 14px; color: #333333;">{{.LinkDesc}}</td>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 13px; color: #7a8a72; vertical-align: top;">网站描述</td>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 14px; color: #2f4a33; line-height: 1.7;">{{.LinkDesc}}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 12px; border: 1px solid #dddddd; background: #f9f9f9; font-size: 14px; color: #555555;">联系邮箱</td>
-                    <td style="padding: 12px; border: 1px solid #dddddd; font-size: 14px; color: #333333;">{{.Email}}</td>
+                    <td style="padding: 11px 16px; font-size: 13px; color: #7a8a72;">联系邮箱</td>
+                    <td style="padding: 11px 16px; font-size: 14px; color: #2f4a33;">{{.Email}}</td>
                 </tr>
             </table>
         </td>
     </tr>
+
     <tr>
-        <td align="center">
-            <a href="{{.AdminURL}}" style="display: inline-block; padding: 12px 30px; background: #2196F3; color: #ffffff; text-decoration: none; border-radius: 4px;">
-                前往管理后台审核
+        <td align="center" style="padding-top: 4px;">
+            <a href="{{.AdminURL}}" style="display: inline-block; padding: 14px 40px; background-color: #4a7a55; color: #ffffff; text-decoration: none; border-radius: 5px; font-family: Georgia, 'Songti SC', 'STSong', serif; font-size: 15px; letter-spacing: 2px; line-height: 1;">
+                前往后台裁度
             </a>
         </td>
     </tr>
