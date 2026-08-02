@@ -32,10 +32,26 @@ type LinkColor struct {
 	Status             bool    `json:"status" gorm:"type:boolean;default:true;comment:颜色状态（false: 禁用, true: 启用）"`      // 颜色状态
 
 	// 关联关系
-	LinksFKey []*LinkFriend `json:"links_f_key,omitempty" gorm:"foreignKey:ColorID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;comment:友链外键"` // 友链外键，关联 LinkFriend 类型
+	// 注意：constraint:"-" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），
+	// 友链 color_id 会引用保留 ID，数据库层面需放行该引用值；关联清理由业务层保证。
+	LinksFKey []*LinkFriend `json:"links_f_key,omitempty" gorm:"foreignKey:ColorID;references:ID;constraint:-;comment:友链外键"` // 友链外键，关联 LinkFriend 类型
 }
 
 // GetGene 返回 xSnowflake.Gene，用于标识该实体在 ID 生成时使用的基因类型。
 func (_ *LinkColor) GetGene() xSnowflake.Gene {
 	return bConst.GeneLinkColor
+}
+
+// NewFancyColor 构造内置炫彩颜色对象。
+//
+// 炫彩（type=1）为系统内置的特殊颜色，不落库：颜色列表接口与友链查询返回时以此虚拟对象
+// 表达炫彩选项，ID 固定为 constants.BuiltinFancyColorID（雪花 ID 空间之外的保留值）。
+func NewFancyColor() *LinkColor {
+	return &LinkColor{
+		BaseEntity: xModels.BaseEntity{ID: bConst.BuiltinFancyColorID},
+		Name:       "炫彩",
+		Type:       1,
+		SortOrder:  0,
+		Status:     true,
+	}
 }

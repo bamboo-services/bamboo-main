@@ -48,6 +48,8 @@ import {
   linkStatus,
 } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
+import { accentOf, isFancyColor } from '@/lib/colors'
+import { cn } from '@/lib/utils'
 import { useAdminLink, useDeleteLink } from '@/hooks/use-links'
 
 export const Route = createFileRoute('/_admin/admin/link/$id/')({
@@ -114,7 +116,7 @@ function FriendPreview({ link, accent }: { link: LinkFriend; accent: string }) {
     >
       <span
         className="absolute inset-y-0 left-0 w-1"
-        style={{ backgroundColor: accent }}
+        style={{ background: accent }}
         aria-hidden="true"
       />
       <Avatar className="size-12 shrink-0 rounded-full">
@@ -194,7 +196,8 @@ function LinkDetailPage() {
     )
   }
 
-  const accent = link.color_f_key?.primary_color ?? 'var(--leaf-deep)'
+  const accent = accentOf(link.color_f_key)
+  const fancy = isFancyColor(link.color_f_key)
   const s = linkStatus(link)
 
   return (
@@ -218,8 +221,11 @@ function LinkDetailPage() {
         className={`${inkCard} relative overflow-hidden p-0`}
       >
         <span
-          className="absolute inset-y-0 left-0 z-10 w-1.5"
-          style={{ backgroundColor: accent }}
+          className={cn(
+            'absolute inset-y-0 left-0 z-10 w-1.5',
+            fancy && 'ink-fancy',
+          )}
+          style={{ background: accent }}
           aria-hidden="true"
         />
         {/* 晨光墨晕 + 墨韵竹叶 */}
@@ -268,7 +274,7 @@ function LinkDetailPage() {
               <span className="flex items-center gap-1.5">
                 <span
                   className="size-2.5 rounded-full"
-                  style={{ backgroundColor: accent }}
+                  style={{ background: accent }}
                   aria-hidden="true"
                 />
                 {link.color_f_key?.name ?? '默认'}

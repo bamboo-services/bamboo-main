@@ -12,6 +12,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { domainOf, useFriendOpen } from './friend-card-shared'
 import { LazyImage } from './lazy-image'
 import type { FriendCardProps } from './friend-card-shared'
+import { accentOf, fancyGradient, isFancyColor } from '@/lib/colors'
+import { cn } from '@/lib/utils'
+import { BambooArt } from '@/components/ink-wash'
 
 /**
  * 高级友链卡（2×2）—— Bento 栅格中的特写位。
@@ -21,24 +24,50 @@ import type { FriendCardProps } from './friend-card-shared'
  */
 export function PremiumFriendCard({ link, onOpen }: FriendCardProps) {
   const { ref, handleClick } = useFriendOpen(link, onOpen)
+  const accent = accentOf(link.color_f_key)
+  const fancy = isFancyColor(link.color_f_key)
 
   return (
     <a
       ref={ref}
       href={link.url}
       onClick={handleClick}
-      className="group relative col-span-2 row-span-2 flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-all duration-500 hover:-translate-y-1 hover:border-leaf-muted hover:shadow-[0_24px_50px_-30px_oklch(0.32_0.06_155/0.45)]"
+      className="group isolate relative col-span-2 row-span-2 flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-all duration-500 hover:-translate-y-1 hover:border-leaf-muted hover:shadow-[0_24px_50px_-30px_oklch(0.32_0.06_155/0.45)]"
+      style={
+        fancy
+          ? {
+              background:
+                'radial-gradient(130% 100% at 88% 0%, oklch(0.88 0.1 105 / 0.18), transparent 58%), var(--card)',
+            }
+          : undefined
+      }
     >
-      {/* 左侧墨条：hover 加宽并延伸全高（深化既有 accent） */}
-      <span className="absolute inset-y-5 left-0 z-20 w-[3px] rounded-r-full bg-leaf-deep transition-all duration-500 group-hover:inset-y-0 group-hover:w-[6px]" />
+      {/* 炫彩卡背衬竹：右下角墨竹（大卡，竹幅稍宽），hover 略深 */}
+      {fancy && (
+        <BambooArt className="pointer-events-none absolute -z-10 bottom-0 right-[-22px] top-0 h-full w-[210px] text-text-primary opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
+      )}
+      {/* 左侧墨条：友链主色（炫彩为竹影流光），hover 加宽并延伸全高 */}
+      <span
+        className={cn(
+          'absolute inset-y-5 left-0 z-20 rounded-r-full transition-all duration-500 group-hover:inset-y-0 group-hover:w-[6px]',
+          fancy ? 'w-[4px] ink-fancy' : 'w-[3px]',
+        )}
+        style={fancy ? undefined : { background: accent }}
+      />
 
       {/* 默认内容：水平垂直居中，hover 淡出 */}
       <div className="relative z-10 flex h-full flex-col items-center justify-center p-6 text-center transition-opacity duration-300 group-hover:opacity-0">
         <Avatar className="size-16 rounded-full ring-2 ring-ring-glow">
           <AvatarImage src={link.avatar ?? undefined} alt={link.name} loading="lazy" />
-          <AvatarFallback className="bg-leaf-light/50 font-serif text-2xl font-bold text-leaf-deep">
-            {link.name.slice(0, 1)}
-          </AvatarFallback>
+        <AvatarFallback
+          className={cn(
+            'font-serif text-2xl font-bold',
+            fancy ? 'text-card' : 'bg-leaf-light/50 text-leaf-deep',
+          )}
+          style={fancy ? { background: fancyGradient() } : undefined}
+        >
+          {link.name.slice(0, 1)}
+        </AvatarFallback>
         </Avatar>
         <h3 className="mt-4 font-serif text-xl font-bold text-text-primary">
           {link.name}

@@ -13,6 +13,7 @@ package logic
 
 import (
 	"context"
+	"strings"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
@@ -55,6 +56,9 @@ func NewLinkColorLogic(ctx context.Context) *LinkColorLogic {
 
 // Add 添加友链颜色，校验普通颜色类型必填字段并按当前最大排序值自增生成新颜色。
 func (l *LinkColorLogic) Add(ctx context.Context, req *apiLinkColor.ColorAddRequest) (*entity.LinkColor, *xError.Error) {
+	if req.ColorType == 1 {
+		return nil, xError.NewError(ctx, xError.BadRequest, "炫彩为系统内置颜色，无需创建", false)
+	}
 	if req.ColorType == 0 {
 		if req.PrimaryColor == nil || req.SubColor == nil || req.HoverColor == nil {
 			return nil, xError.NewError(ctx, xError.BadRequest, "普通颜色类型需要设置主颜色、副颜色和悬停颜色", false)
@@ -99,6 +103,9 @@ func (l *LinkColorLogic) Add(ctx context.Context, req *apiLinkColor.ColorAddRequ
 
 // Update 更新友链颜色，按请求字段覆盖颜色属性并校验普通颜色类型的必填项。
 func (l *LinkColorLogic) Update(ctx context.Context, colorID xSnowflake.SnowflakeID, req *apiLinkColor.ColorUpdateRequest) (*entity.LinkColor, *xError.Error) {
+	if req.ColorType != nil && *req.ColorType == 1 {
+		return nil, xError.NewError(ctx, xError.BadRequest, "炫彩为系统内置颜色，不支持保存为炫彩类型", false)
+	}
 	color, found, xErr := l.repo.color.GetByID(ctx, colorID, false, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -269,7 +276,7 @@ func (l *LinkColorLogic) Get(ctx context.Context, colorID xSnowflake.SnowflakeID
 
 // GetList 获取友链颜色列表。
 func (l *LinkColorLogic) GetList(ctx context.Context, req *apiLinkColor.ColorListRequest) ([]entity.LinkColor, *xError.Error) {
-	return l.repo.color.List(ctx, &repository.ColorListQuery{
+	colors, xErr := l.repo.color.List(ctx, &repository.ColorListQuery{
 		Status:      req.Status,
 		Type:        req.Type,
 		Name:        req.Name,
@@ -277,6 +284,35 @@ func (l *LinkColorLogic) GetList(ctx context.Context, req *apiLinkColor.ColorLis
 		OrderBy:     req.OrderBy,
 		Order:       req.Order,
 	}, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+
+	// 内置炫彩（不落库）：满足过滤条件时置顶注入虚拟记录，供前端选择器使用
+	if builtinFancyVisible(req) {
+		colors = append([]entity.LinkColor{*entity.NewFancyColor()}, colors...)
+	}
+
+	return colors, nil
+}
+
+// builtinFancyVisible 判断内置炫彩是否满足当前列表过滤条件。
+//
+// 炫彩恒为启用状态，仅当类型/名称/状态过滤未排除它时才注入。
+func builtinFancyVisible(req *apiLinkColor.ColorListRequest) bool {
+	if req.Status != nil && *req.Status != 1 {
+		return false
+	}
+	if req.OnlyEnabled != nil && !*req.OnlyEnabled {
+		return false
+	}
+	if req.Type != nil && *req.Type != 1 {
+		return false
+	}
+	if req.Name != nil && *req.Name != "" && !strings.Contains("炫彩", *req.Name) {
+		return false
+	}
+	return true
 }
 
 // GetPage 分页获取友链颜色。

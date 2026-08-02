@@ -248,6 +248,15 @@ code {
     transform: translateX(100%);
   }
 }
+/* 炫彩流动：竹绿流光在墨条内缓缓上下游走（纯渐变，不分节不画竹） */
+@keyframes ink-fancy-flow {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 100%;
+  }
+}
 
 @layer utilities {
   .ink-sway {
@@ -275,6 +284,12 @@ code {
   .ink-shimmer {
     animation: ink-shimmer 1.6s ease-in-out infinite;
   }
+  /* 炫彩墨条：竹绿流光缓缓流动（纯渐变，竹作为卡背衬竹呈现，见 BambooArt） */
+  .ink-fancy {
+    background: linear-gradient(180deg, var(--leaf-muted), var(--leaf-deep), var(--leaf-light), var(--leaf-deep), var(--leaf-muted));
+    background-size: 100% 300%;
+    animation: ink-fancy-flow 9s ease-in-out infinite alternate;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -282,7 +297,8 @@ code {
   .ink-pulse,
   .ink-stamp,
   .ink-pop,
-  .ink-shimmer {
+  .ink-shimmer,
+  .ink-fancy {
     animation: none;
   }
 }

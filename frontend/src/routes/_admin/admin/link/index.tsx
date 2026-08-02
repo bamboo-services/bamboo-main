@@ -69,6 +69,7 @@ import {
   linkStatus,
 } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
+import { accentOf, isFancyColor } from '@/lib/colors'
 import { cn } from '@/lib/utils'
 import { useAdminLinks, useDeleteLink, useReScreenshotLink } from '@/hooks/use-links'
 import { useAllGroups } from '@/hooks/use-groups'
@@ -253,9 +254,7 @@ function LinkTable({
             <span className="flex items-center gap-1.5 text-text-secondary">
               <span
                 className="size-2.5 rounded-full"
-                style={{
-                  backgroundColor: color?.primary_color ?? 'var(--leaf-deep)',
-                }}
+                style={{ background: accentOf(color) }}
                 aria-hidden="true"
               />
               {color?.name ?? '默认'}
@@ -624,7 +623,8 @@ function LinkListPage() {
           className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
         >
           {links.map((link, i) => {
-            const accent = link.color_f_key?.primary_color ?? 'var(--leaf-deep)'
+            const accent = accentOf(link.color_f_key)
+            const fancy = isFancyColor(link.color_f_key)
             const s = linkStatus(link)
             return (
               <motion.div
@@ -644,8 +644,11 @@ function LinkListPage() {
               >
                 {/* 左侧墨色竖条：取站点配色作为数据签名 */}
                 <span
-                  className="absolute inset-y-0 left-0 w-1"
-                  style={{ backgroundColor: accent }}
+                  className={cn(
+                    'absolute inset-y-0 left-0 w-1',
+                    fancy && 'ink-fancy',
+                  )}
+                  style={{ background: accent }}
                   aria-hidden="true"
                 />
                 <div className="flex flex-1 flex-col">
@@ -686,7 +689,7 @@ function LinkListPage() {
                     <InkBadge tone="neutral" className="gap-1.5">
                       <span
                         className="size-2 rounded-full"
-                        style={{ backgroundColor: accent }}
+                        style={{ background: accent }}
                         aria-hidden="true"
                       />
                       {link.color_f_key?.name ?? '默认'}

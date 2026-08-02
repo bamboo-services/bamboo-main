@@ -27,6 +27,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { CardHead, InkGlow, InkPill, inkCard } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
+import { accentOf, isFancyColor } from '@/lib/colors'
 import { cn } from '@/lib/utils'
 import { useAllGroups } from '@/hooks/use-groups'
 import { useAllColors } from '@/hooks/use-colors'
@@ -53,12 +54,9 @@ const LEVEL_OPTIONS = [
   { value: 3, label: '广告' },
 ] as const
 
-/** 色块背景：type=1（炫彩）且有副色时渲染渐变，否则取主色 */
+/** 色块背景：炫彩渲染竹绿渐变，普通颜色取主色，未设置回退默认竹绿 */
 function colorBackground(color: LinkColor): string {
-  if (color.type === 1 && color.sub_color) {
-    return `linear-gradient(135deg, ${color.primary_color ?? 'var(--leaf-deep)'}, ${color.sub_color})`
-  }
-  return color.primary_color ?? 'var(--leaf-deep)'
+  return accentOf(color)
 }
 
 /**
@@ -321,6 +319,7 @@ export function LinkForm({
               </button>
               {colors.map((color) => {
                 const selected = form.colorId === color.id
+                const fancy = isFancyColor(color)
                 return (
                   <button
                     key={color.id.toString()}
@@ -333,12 +332,13 @@ export function LinkForm({
                       })
                     }
                     className={cn(
-                      'flex size-9 cursor-pointer items-center justify-center rounded-full ring-offset-2 ring-offset-background transition-all duration-200',
+                      'relative flex size-9 cursor-pointer items-center justify-center rounded-full ring-offset-2 ring-offset-background transition-all duration-200',
+                      fancy && 'ink-fancy',
                       selected
                         ? 'scale-110 ring-2 ring-leaf-deep'
                         : 'hover:scale-105',
                     )}
-                    style={{ background: colorBackground(color) }}
+                    style={fancy ? undefined : { background: colorBackground(color) }}
                   >
                     {selected && (
                       <Check className="size-4 text-card" strokeWidth={3} />

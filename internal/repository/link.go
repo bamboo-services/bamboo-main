@@ -67,6 +67,16 @@ func (r *LinkRepo) pickDB(tx *gorm.DB) *gorm.DB {
 	return r.db
 }
 
+// ensureFancyColor 若友链引用内置炫彩（color_id 为保留 ID），注入虚拟炫彩颜色对象。
+//
+// 炫彩为系统内置特殊颜色（不落库），数据库 Preload 无法命中该关联，
+// 由查询层在返回前补齐 ColorFKey，保证下游渲染无需感知 ID 约定。
+func ensureFancyColor(link *entity.LinkFriend) {
+	if link.ColorID != nil && *link.ColorID == constants.BuiltinFancyColorID && link.ColorFKey == nil {
+		link.ColorFKey = entity.NewFancyColor()
+	}
+}
+
 // Create 创建友情链接
 func (r *LinkRepo) Create(ctx context.Context, link *entity.LinkFriend, tx *gorm.DB) (*entity.LinkFriend, *xError.Error) {
 	r.log.Info(ctx, "Create - 创建友情链接")
@@ -143,6 +153,11 @@ func (r *LinkRepo) GetByID(ctx context.Context, id xSnowflake.SnowflakeID, withA
 			return nil, false, nil
 		}
 		return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
+	}
+
+	// 内置炫彩：color_id 引用保留 ID 时补齐虚拟颜色对象，随缓存一并持久化
+	if withAssociations {
+		ensureFancyColor(&link)
 	}
 
 	if cacheErr := r.kc.Set(ctx, constants.RedisLinkFriend.Get(link.ID).String(), &link, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
@@ -225,6 +240,11 @@ func (r *LinkRepo) List(ctx context.Context, req *FriendQuery, tx *gorm.DB) ([]e
 		return nil, 0, xError.NewError(ctx, xError.DatabaseError, "查询友情链接列表失败", false, err)
 	}
 
+	// 内置炫彩：color_id 引用保留 ID 时补齐虚拟颜色对象
+	for i := range links {
+		ensureFancyColor(&links[i])
+	}
+
 	return links, total, nil
 }
 
@@ -291,6 +311,11 @@ func (r *LinkRepo) ListPublic(ctx context.Context, groupID *xSnowflake.Snowflake
 	err := query.Preload("GroupFKey").Preload("ColorFKey").Order("sort_order ASC, created_at DESC").Find(&links).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询公开友情链接失败", false, err)
+	}
+
+	// 内置炫彩：color_id 引用保留 ID 时补齐虚拟颜色对象
+	for i := range links {
+		ensureFancyColor(&links[i])
 	}
 
 	return links, nil

@@ -270,7 +270,7 @@ definitions:
         minimum: 0
         type: integer
       color_type:
-        description: '颜色类型（0: 普通, 1: 炫彩）'
+        description: '颜色类型（0: 普通；1: 炫彩为系统内置颜色，无需创建）'
         enum:
         - 0
         - 1
@@ -301,7 +301,10 @@ definitions:
       id:
         type: integer
       links_f_key:
-        description: 关联关系
+        description: |-
+          关联关系
+          注意：constraint:"-" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），
+          友链 color_id 会引用保留 ID，数据库层面需放行该引用值；关联清理由业务层保证。
         items:
           $ref: '#/definitions/entity.LinkFriend'
         type: array
@@ -366,7 +369,10 @@ definitions:
       id:
         type: integer
       links_f_key:
-        description: 关联关系
+        description: |-
+          关联关系
+          注意：constraint:"-" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），
+          友链 color_id 会引用保留 ID，数据库层面需放行该引用值；关联清理由业务层保证。
         items:
           $ref: '#/definitions/entity.LinkFriend'
         type: array
@@ -452,7 +458,7 @@ definitions:
         minimum: 0
         type: integer
       color_type:
-        description: '颜色类型（0: 普通, 1: 炫彩）'
+        description: '颜色类型（0: 普通；1: 炫彩为系统内置颜色，不支持保存为炫彩）'
         enum:
         - 0
         - 1
@@ -481,7 +487,10 @@ definitions:
       id:
         type: integer
       links_f_key:
-        description: 关联关系
+        description: |-
+          关联关系
+          注意：constraint:"-" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），
+          友链 color_id 会引用保留 ID，数据库层面需放行该引用值；关联清理由业务层保证。
         items:
           $ref: '#/definitions/entity.LinkFriend'
         type: array
@@ -570,7 +579,9 @@ definitions:
       color_f_key:
         allOf:
         - $ref: '#/definitions/entity.LinkColor'
-        description: 友链颜色外键
+        description: |-
+          注意：constraint:"-" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），
+          color_id 可能引用保留 ID，数据库层面需放行该引用值；颜色关联的清理由业务层保证。
       color_id:
         description: 友链颜色ID
         type: integer
@@ -687,7 +698,9 @@ definitions:
       color_f_key:
         allOf:
         - $ref: '#/definitions/entity.LinkColor'
-        description: 友链颜色外键
+        description: |-
+          注意：constraint:"-" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），
+          color_id 可能引用保留 ID，数据库层面需放行该引用值；颜色关联的清理由业务层保证。
       color_id:
         description: 友链颜色ID
         type: integer
@@ -864,7 +877,9 @@ definitions:
       color_f_key:
         allOf:
         - $ref: '#/definitions/entity.LinkColor'
-        description: 友链颜色外键
+        description: |-
+          注意：constraint:"-" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），
+          color_id 可能引用保留 ID，数据库层面需放行该引用值；颜色关联的清理由业务层保证。
       color_id:
         description: 友链颜色ID
         type: integer
@@ -1674,7 +1689,10 @@ definitions:
       id:
         type: integer
       links_f_key:
-        description: 关联关系
+        description: |-
+          关联关系
+          注意：constraint:"-" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），
+          友链 color_id 会引用保留 ID，数据库层面需放行该引用值；关联清理由业务层保证。
         items:
           $ref: '#/definitions/entity.LinkFriend'
         type: array
@@ -1710,7 +1728,9 @@ definitions:
       color_f_key:
         allOf:
         - $ref: '#/definitions/entity.LinkColor'
-        description: 友链颜色外键
+        description: |-
+          注意：constraint:"-" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），
+          color_id 可能引用保留 ID，数据库层面需放行该引用值；颜色关联的清理由业务层保证。
       color_id:
         description: 友链颜色ID
         type: integer
@@ -1918,7 +1938,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 创建新的友链颜色，支持普通颜色和炫彩颜色两种类型
+      description: 创建新的友链颜色（普通配色）；炫彩为系统内置颜色，无需创建
       parameters:
       - description: 添加友链颜色请求
         in: body

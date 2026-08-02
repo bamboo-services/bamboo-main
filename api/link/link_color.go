@@ -20,7 +20,7 @@ import (
 // ColorAddRequest 添加友链颜色请求
 type ColorAddRequest struct {
 	ColorName    string  `json:"color_name" binding:"required,min=1,max=50" example:"炫彩红"`     // 颜色名称
-	ColorType    int     `json:"color_type" binding:"oneof=0 1" example:"0"`                   // 颜色类型（0: 普通, 1: 炫彩）
+	ColorType    int     `json:"color_type" binding:"oneof=0 1" example:"0"`                   // 颜色类型（0: 普通；1: 炫彩为系统内置颜色，无需创建）
 	PrimaryColor *string `json:"primary_color" binding:"omitempty,hexcolor" example:"#FF0000"` // 主颜色
 	SubColor     *string `json:"sub_color" binding:"omitempty,hexcolor" example:"#FF6600"`     // 副颜色
 	HoverColor   *string `json:"hover_color" binding:"omitempty,hexcolor" example:"#FF3300"`   // 悬停颜色
@@ -30,7 +30,7 @@ type ColorAddRequest struct {
 // ColorUpdateRequest 更新友链颜色请求
 type ColorUpdateRequest struct {
 	ColorName    *string `json:"color_name" binding:"omitempty,min=1,max=50" example:"炫彩红"` // 颜色名称
-	ColorType    *int    `json:"color_type" binding:"omitempty,oneof=0 1" example:"0"`      // 颜色类型（0: 普通, 1: 炫彩）
+	ColorType    *int    `json:"color_type" binding:"omitempty,oneof=0 1" example:"0"`      // 颜色类型（0: 普通；1: 炫彩为系统内置颜色，不支持保存为炫彩）
 	PrimaryColor *string `json:"primary_color" binding:"omitempty" example:"#FF0000"`       // 主颜色（可传空字符串清空）
 	SubColor     *string `json:"sub_color" binding:"omitempty" example:"#FF6600"`           // 副颜色（可传空字符串清空）
 	HoverColor   *string `json:"hover_color" binding:"omitempty" example:"#FF3300"`         // 悬停颜色（可传空字符串清空）

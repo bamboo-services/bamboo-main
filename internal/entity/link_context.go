@@ -43,12 +43,14 @@ type LinkFriend struct {
 	ApplyRemark        *string                 `json:"apply_remark,omitempty" gorm:"type:text;comment:申请者备注"`                                   // 申请者备注
 	ReviewRemark       *string                 `json:"review_remark,omitempty" gorm:"type:text;comment:审核备注"`                                   // 审核备注
 	ScreenshotURL      *string                 `json:"screenshot_url,omitempty" gorm:"type:varchar(500);comment:友链站点截图URL(相对路径)"`               // 友链站点截图URL（相对路径）
-	ScreenshotAt       *time.Time              `json:"screenshot_at,omitempty" gorm:"comment:友链站点截图最近更新时间"`                                    // 友链站点截图最近更新时间
+	ScreenshotAt       *time.Time              `json:"screenshot_at,omitempty" gorm:"comment:友链站点截图最近更新时间"`                                     // 友链站点截图最近更新时间
 
 	// 关联关系
-	GroupFKey *LinkGroup  `json:"group_f_key,omitempty" gorm:"foreignKey:GroupID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;comment:友链分组外键"` // 友链分组外键
-	ColorFKey *LinkColor  `json:"color_f_key,omitempty" gorm:"foreignKey:ColorID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;comment:友链颜色外键"` // 友链颜色外键
-	UserFKey  *SystemUser `json:"user_f_key,omitempty" gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;comment:归属用户外键"`   // 归属用户外键
+	GroupFKey *LinkGroup `json:"group_f_key,omitempty" gorm:"foreignKey:GroupID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;comment:友链分组外键"` // 友链分组外键
+	// 注意：constraint:"-" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），
+	// color_id 可能引用保留 ID，数据库层面需放行该引用值；颜色关联的清理由业务层保证。
+	ColorFKey *LinkColor  `json:"color_f_key,omitempty" gorm:"foreignKey:ColorID;references:ID;constraint:-;comment:友链颜色外键"`                                // 友链颜色外键
+	UserFKey  *SystemUser `json:"user_f_key,omitempty" gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;comment:归属用户外键"` // 归属用户外键
 }
 
 // GetGene 返回 xSnowflake.Gene，用于标识该实体在 ID 生成时使用的基因类型。

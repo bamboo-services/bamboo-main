@@ -64,6 +64,7 @@ import {
   useUpdateColor,
   useUpdateColorStatus,
 } from '@/hooks/use-colors'
+import { fancyGradient } from '@/lib/colors'
 
 export const Route = createFileRoute('/_admin/admin/color')({
   component: ColorPage,
@@ -81,13 +82,6 @@ function normalizeHex(value: string | null, fallback: string): string {
   return value && /^#[0-9a-fA-F]{6}$/.test(value)
     ? value.toLowerCase()
     : fallback
-}
-
-/** 炫彩类型的预览渐变（优先使用已存色值） */
-function fancyGradient(color: LinkColor): string {
-  return `linear-gradient(135deg, ${color.primary_color ?? '#f43f5e'}, ${
-    color.sub_color ?? '#f59e0b'
-  }, ${color.hover_color ?? '#38bdf8'})`
 }
 
 /** 颜色选择器：原生取色器 + hex 展示 */
@@ -160,7 +154,7 @@ function ColorPage() {
   useEffect(() => {
     if (formOpen) {
       setName(editing?.name ?? '')
-      setColorType(editing?.type ?? 0)
+      setColorType(0)
       setPrimary(normalizeHex(editing?.primary_color ?? null, DEFAULT_PRIMARY))
       setSub(normalizeHex(editing?.sub_color ?? null, DEFAULT_SUB))
       setHover(normalizeHex(editing?.hover_color ?? null, DEFAULT_HOVER))
@@ -182,15 +176,12 @@ function ColorPage() {
     const parsedOrder = Number.parseInt(order, 10)
     const colorOrder = Number.isNaN(parsedOrder) ? 0 : parsedOrder
     const close = () => setFormOpen(false)
-    // 炫彩类型无需色值，仅普通类型提交三原色
-    const colorFields =
-      colorType === 1
-        ? {}
-        : {
-            primary_color: primary,
-            sub_color: sub,
-            hover_color: hover,
-          }
+  // 仅支持普通配色（炫彩为内置颜色，无需创建），始终提交三原色
+  const colorFields = {
+    primary_color: primary,
+    sub_color: sub,
+    hover_color: hover,
+  }
 
     if (editing) {
       updateColor.mutate(
@@ -236,7 +227,7 @@ function ColorPage() {
       <PageHead
         kicker="COLORS · 颜色"
         title="颜色管理"
-        sub="管理友链的展示颜色，支持普通配色与炫彩效果。"
+        sub="管理友链的展示颜色，配置普通配色；炫彩为系统内置颜色。"
         actions={
           <Button className="cursor-pointer" onClick={openCreate}>
             <Plus className="mr-2 size-4" />
@@ -321,7 +312,7 @@ function ColorPage() {
                     {color.type === 1 ? (
                       <span
                         className="block size-7 rounded-md ring-1 ring-inset ring-border/60"
-                        style={{ background: fancyGradient(color) }}
+                        style={{ background: fancyGradient() }}
                         title="炫彩"
                         aria-hidden="true"
                       />
@@ -464,7 +455,7 @@ function ColorPage() {
             <DialogDescription>
               {editing
                 ? '修改颜色配置后点击保存生效。'
-                : '创建一种友链颜色，可选择普通配色或炫彩效果。'}
+                : '创建一种友链颜色，配置普通配色。'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -479,38 +470,17 @@ function ColorPage() {
             </div>
             <div className="space-y-2">
               <Label>颜色类型</Label>
-              <div className="flex rounded-md border border-input bg-background p-0.5">
-                <button
-                  type="button"
-                  onClick={() => setColorType(0)}
-                  className={cn(
-                    'flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium transition-colors duration-200',
-                    colorType === 0
-                      ? 'bg-leaf-deep/12 text-leaf-deep'
-                      : 'text-text-secondary hover:text-text-primary',
-                  )}
-                >
-                  <CircleDot className="size-4" />
-                  普通
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setColorType(1)}
-                  className={cn(
-                    'flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium transition-colors duration-200',
-                    colorType === 1
-                      ? 'bg-leaf-deep/12 text-leaf-deep'
-                      : 'text-text-secondary hover:text-text-primary',
-                  )}
-                >
-                  <Sparkles className="size-4" />
-                  炫彩
-                </button>
+              <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2">
+                <CircleDot className="size-4 text-leaf-deep" />
+                <span className="text-sm font-medium text-text-primary">
+                  普通配色
+                </span>
+                <span className="ml-auto text-xs text-text-secondary">
+                  炫彩为内置颜色，无需创建
+                </span>
               </div>
               <p className="text-xs text-text-secondary">
-                {colorType === 1
-                  ? '炫彩类型由前端主题渲染动态效果，无需配置颜色。'
-                  : '普通类型需配置主色、副色与悬停色。'}
+                需配置主色、副色与悬停色。
               </p>
             </div>
             {colorType === 0 && (

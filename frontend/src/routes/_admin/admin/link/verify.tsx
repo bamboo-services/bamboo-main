@@ -40,6 +40,7 @@ import {
   linkStatus,
 } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
+import { accentOf, isFancyColor } from '@/lib/colors'
 import { cn } from '@/lib/utils'
 import {
   useAdminLinks,
@@ -262,6 +263,8 @@ function VerifyDetail({
 }) {
   const isTakedown = link.status === 3
   const status = linkStatus(link)
+  const accent = accentOf(link.color_f_key)
+  const fancy = isFancyColor(link.color_f_key)
   const groups = useAllGroups().data ?? []
   const colors = useAllColors().data ?? []
 
@@ -270,7 +273,11 @@ function VerifyDetail({
       {/* 申请横幅：左侧墨条 + 晨光墨晕呼应待审核状态 */}
       <div className={`${inkCard} relative overflow-hidden p-0`}>
         <span
-          className="absolute inset-y-0 left-0 z-10 w-1.5 bg-leaf-deep"
+          className={cn(
+            'absolute inset-y-0 left-0 z-10 w-1.5',
+            fancy && 'ink-fancy',
+          )}
+          style={{ background: accent }}
           aria-hidden="true"
         />
         <div

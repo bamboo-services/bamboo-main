@@ -122,7 +122,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "创建新的友链颜色，支持普通颜色和炫彩颜色两种类型",
+                "description": "创建新的友链颜色（普通配色）；炫彩为系统内置颜色，无需创建",
                 "consumes": [
                     "application/json"
                 ],
@@ -4893,7 +4893,7 @@ const docTemplate = `{
                     "example": 0
                 },
                 "color_type": {
-                    "description": "颜色类型（0: 普通, 1: 炫彩）",
+                    "description": "颜色类型（0: 普通；1: 炫彩为系统内置颜色，无需创建）",
                     "type": "integer",
                     "enum": [
                         0,
@@ -4932,7 +4932,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "links_f_key": {
-                    "description": "关联关系",
+                    "description": "关联关系\n注意：constraint:\"-\" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），\n友链 color_id 会引用保留 ID，数据库层面需放行该引用值；关联清理由业务层保证。",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/entity.LinkFriend"
@@ -5026,7 +5026,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "links_f_key": {
-                    "description": "关联关系",
+                    "description": "关联关系\n注意：constraint:\"-\" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），\n友链 color_id 会引用保留 ID，数据库层面需放行该引用值；关联清理由业务层保证。",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/entity.LinkFriend"
@@ -5148,7 +5148,7 @@ const docTemplate = `{
                     "example": 0
                 },
                 "color_type": {
-                    "description": "颜色类型（0: 普通, 1: 炫彩）",
+                    "description": "颜色类型（0: 普通；1: 炫彩为系统内置颜色，不支持保存为炫彩）",
                     "type": "integer",
                     "enum": [
                         0,
@@ -5187,7 +5187,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "links_f_key": {
-                    "description": "关联关系",
+                    "description": "关联关系\n注意：constraint:\"-\" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），\n友链 color_id 会引用保留 ID，数据库层面需放行该引用值；关联清理由业务层保证。",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/entity.LinkFriend"
@@ -5302,7 +5302,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "color_f_key": {
-                    "description": "友链颜色外键",
+                    "description": "注意：constraint:\"-\" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），\ncolor_id 可能引用保留 ID，数据库层面需放行该引用值；颜色关联的清理由业务层保证。",
                     "allOf": [
                         {
                             "$ref": "#/definitions/entity.LinkColor"
@@ -5466,7 +5466,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "color_f_key": {
-                    "description": "友链颜色外键",
+                    "description": "注意：constraint:\"-\" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），\ncolor_id 可能引用保留 ID，数据库层面需放行该引用值；颜色关联的清理由业务层保证。",
                     "allOf": [
                         {
                             "$ref": "#/definitions/entity.LinkColor"
@@ -5716,7 +5716,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "color_f_key": {
-                    "description": "友链颜色外键",
+                    "description": "注意：constraint:\"-\" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），\ncolor_id 可能引用保留 ID，数据库层面需放行该引用值；颜色关联的清理由业务层保证。",
                     "allOf": [
                         {
                             "$ref": "#/definitions/entity.LinkColor"
@@ -6885,7 +6885,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "links_f_key": {
-                    "description": "关联关系",
+                    "description": "关联关系\n注意：constraint:\"-\" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），\n友链 color_id 会引用保留 ID，数据库层面需放行该引用值；关联清理由业务层保证。",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/entity.LinkFriend"
@@ -6932,7 +6932,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "color_f_key": {
-                    "description": "友链颜色外键",
+                    "description": "注意：constraint:\"-\" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），\ncolor_id 可能引用保留 ID，数据库层面需放行该引用值；颜色关联的清理由业务层保证。",
                     "allOf": [
                         {
                             "$ref": "#/definitions/entity.LinkColor"

@@ -22,7 +22,7 @@ import (
 // Add 添加友链颜色
 //
 // @Summary [管理] 添加友链颜色
-// @Description 创建新的友链颜色，支持普通颜色和炫彩颜色两种类型
+// @Description 创建新的友链颜色（普通配色）；炫彩为系统内置颜色，无需创建
 // @Tags 友链颜色接口
 // @Accept json
 // @Produce json
