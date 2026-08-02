@@ -92,9 +92,11 @@ type FriendDetailResponse struct {
 	entity.LinkFriend
 }
 
-// FriendListResponse 友情链接列表响应
+// FriendListResponse 友情链接列表响应（附带待审核/异常计数，供管理端入口徽章展示）
 type FriendListResponse struct {
 	base.PaginationResponse[entity.LinkFriend]
+	PendingCount int64 `json:"pending_count"` // 待审核友链数量
+	AnomalyCount int64 `json:"anomaly_count"` // 异常友链数量（status 非 0/1 或已失效）
 }
 
 // FriendPublicResponse 公开友情链接响应

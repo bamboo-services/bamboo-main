@@ -16,7 +16,7 @@ import {
   useLocation,
 } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
-import { ChevronsUpDown, LogOut } from 'lucide-react'
+import { ChevronsUpDown, LayoutDashboard, LogOut } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/hooks/use-auth'
 import { getToken } from '@/lib/auth'
-import { roleLabel as resolveRoleLabel } from '@/lib/role'
+import { isAdmin, roleLabel as resolveRoleLabel } from '@/lib/role'
 import { cn } from '@/lib/utils'
 import { enter } from '@/lib/motion'
 
@@ -93,6 +93,7 @@ function StatusRow({ label, value }: { label: string; value: string }) {
  */
 function UserAvatarMenu() {
   const { user, signOut } = useAuth()
+  const [menuOpen, setMenuOpen] = useState(false)
   const displayName = user?.nickname || user?.username || '用户'
   const userInitial = (user?.username ?? '?').charAt(0).toUpperCase()
   const roleLabel = resolveRoleLabel(user?.role)
@@ -103,7 +104,7 @@ function UserAvatarMenu() {
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -162,6 +163,21 @@ function UserAvatarMenu() {
             />
           </dl>
         </div>
+        {isAdmin(user) && (
+          <>
+            <DropdownMenuSeparator className="bg-border" />
+            <div className="p-1.5">
+              <Link
+                to="/admin/dashboard"
+                onClick={() => setMenuOpen(false)}
+                className="relative flex items-center gap-2.5 rounded-sm px-3 py-2 font-serif text-[13px] font-medium text-text-primary transition-colors duration-200 before:absolute before:top-1/2 before:left-0 before:h-3.5 before:w-[3px] before:-translate-y-1/2 before:rounded-sm before:bg-leaf-deep before:opacity-0 before:transition-opacity hover:bg-leaf-light/40 hover:text-leaf-deep hover:before:opacity-100"
+              >
+                <LayoutDashboard className="size-4 text-text-secondary transition-colors duration-200" />
+                切换到管理员端
+              </Link>
+            </div>
+          </>
+        )}
         <DropdownMenuSeparator className="bg-border" />
         <div className="p-1.5">
           <DropdownMenuItem variant="destructive" onClick={handleLogout}>

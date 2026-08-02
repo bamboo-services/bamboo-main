@@ -781,6 +781,9 @@ definitions:
     type: object
   apiLink.FriendListResponse:
     properties:
+      anomaly_count:
+        description: 异常友链数量（status 非 0/1 或已失效）
+        type: integer
       data:
         description: 数据列表
         items:
@@ -790,6 +793,9 @@ definitions:
         allOf:
         - $ref: '#/definitions/base.PaginationInfo'
         description: 分页信息
+      pending_count:
+        description: 待审核友链数量
+        type: integer
     type: object
   apiLink.FriendPublicResponse:
     properties:

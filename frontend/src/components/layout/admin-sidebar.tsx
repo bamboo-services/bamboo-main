@@ -11,8 +11,10 @@
 
 import { Link, useLocation } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
+import { useState } from 'react'
 import {
   ChevronsUpDown,
+  CircleUserRound,
   Heart,
   LayoutDashboard,
   Link as LinkIcon,
@@ -75,6 +77,7 @@ export function AdminSidebar() {
   const { user, signOut } = useAuth()
   const { data: site } = useSiteInfo()
   const reduced = useReducedMotion() ?? false
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const siteName = site?.site_name || siteConfig.defaultName
 
   const isActive = (url: string) => {
@@ -182,7 +185,7 @@ export function AdminSidebar() {
         <SidebarMenu>
           {/* 点击用户卡片展开状态信息栏 + 退出登录 */}
           <SidebarMenuItem>
-            <DropdownMenu>
+            <DropdownMenu open={userMenuOpen} onOpenChange={setUserMenuOpen}>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton size="lg" className="transition-colors">
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-leaf-deep/12 font-serif text-sm font-semibold text-leaf-deep ring-1 ring-leaf-deep/15">
@@ -247,6 +250,17 @@ export function AdminSidebar() {
                       value={formatDateTime(user?.created_at)}
                     />
                   </dl>
+                </div>
+                <DropdownMenuSeparator className="bg-border" />
+                <div className="p-1.5">
+                  <Link
+                    to="/user/dashboard"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="relative flex items-center gap-2.5 rounded-sm px-3 py-2 font-serif text-[13px] font-medium text-text-primary transition-colors duration-200 before:absolute before:top-1/2 before:left-0 before:h-3.5 before:w-[3px] before:-translate-y-1/2 before:rounded-sm before:bg-leaf-deep before:opacity-0 before:transition-opacity hover:bg-leaf-light/40 hover:text-leaf-deep hover:before:opacity-100"
+                  >
+                    <CircleUserRound className="size-4 text-text-secondary transition-colors duration-200" />
+                    切换到用户端
+                  </Link>
                 </div>
                 <DropdownMenuSeparator className="bg-border" />
                 <div className="p-1.5">

@@ -45,6 +45,12 @@ export interface PaginationResponse<T> {
   pagination: PaginationInfo
 }
 
+/** 管理端友链分页列表响应（附带待审核/异常计数，供入口徽章展示） */
+export interface AdminLinkListResponse extends PaginationResponse<LinkFriend> {
+  pending_count: number
+  anomaly_count: number
+}
+
 // ---------------------------------------------------------------------------
 // 站点信息
 // ---------------------------------------------------------------------------

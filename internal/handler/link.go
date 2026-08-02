@@ -198,14 +198,13 @@ func (h *LinkHandler) List(c *gin.Context) {
 	}
 
 	// 调用服务层
-	result, err := h.service.linkLogic.List(c.Request.Context(), &req)
+	resp, err := h.service.linkLogic.List(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	resp := apiLink.FriendListResponse{PaginationResponse: *result}
 	xResult.SuccessHasData(c, "获取成功", resp)
 }
 

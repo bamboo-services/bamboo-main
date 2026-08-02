@@ -379,6 +379,18 @@ func (r *LinkRepo) CountByStatus(ctx context.Context, status int, tx *gorm.DB) (
 	return count, nil
 }
 
+// CountAnomaly 统计异常友链数量（status 非 0/1 或已失效）
+func (r *LinkRepo) CountAnomaly(ctx context.Context, tx *gorm.DB) (int64, *xError.Error) {
+	var count int64
+	err := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).
+		Where("(status NOT IN (0, 1) OR is_failure = 1)").
+		Count(&count).Error
+	if err != nil {
+		return 0, xError.NewError(ctx, xError.DatabaseError, "统计异常友链数量失败", true, err)
+	}
+	return count, nil
+}
+
 // CountByGroupID 统计指定分组下友情链接数量
 func (r *LinkRepo) CountByGroupID(ctx context.Context, groupID xSnowflake.SnowflakeID, tx *gorm.DB) (int64, *xError.Error) {
 	var count int64

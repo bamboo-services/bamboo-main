@@ -54,7 +54,11 @@ import { RegularFriendCard } from '@/components/about/regular-friend-card'
 import { enter } from '@/lib/motion'
 import { accentOf, isFancyColor } from '@/lib/colors'
 import { cn } from '@/lib/utils'
-import { useAdminLink, useDeleteLink } from '@/hooks/use-links'
+import {
+  useAdminLink,
+  useDeleteLink,
+  useReScreenshotLink,
+} from '@/hooks/use-links'
 
 export const Route = createFileRoute('/_admin/admin/link/$id/')({
   component: LinkDetailPage,
@@ -138,6 +142,7 @@ function LinkDetailPage() {
 
   const linkQuery = useAdminLink(BigInt(id))
   const deleteLink = useDeleteLink()
+  const reScreenshot = useReScreenshotLink()
   const link = linkQuery.data
 
   const handleDelete = () => {
@@ -294,6 +299,17 @@ function LinkDetailPage() {
               <Pencil className="mr-2 size-4" />
               编辑
             </Button>
+            {link.status === 1 && (
+              <Button
+                variant="outline"
+                className="cursor-pointer"
+                disabled={reScreenshot.isPending}
+                onClick={() => reScreenshot.mutate(link.id)}
+              >
+                <Camera className="mr-2 size-4" />
+                重新截图
+              </Button>
+            )}
             <Button
               variant="outline"
               className="cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive"

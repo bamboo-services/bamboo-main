@@ -74,7 +74,6 @@ import { accentOf, isFancyColor } from '@/lib/colors'
 import { cn } from '@/lib/utils'
 import { useAdminLinks, useDeleteLink, useReScreenshotLink } from '@/hooks/use-links'
 import { useAllGroups } from '@/hooks/use-groups'
-import { useDashboardStats } from '@/hooks/use-dashboard'
 
 export const Route = createFileRoute('/_admin/admin/link/')({
   component: LinkListPage,
@@ -149,7 +148,11 @@ function RowMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild className="cursor-pointer">
-          <Link to="/admin/link/$id/edit" params={{ id: link.id.toString() }}>
+          <Link
+            to="/admin/link/$id/edit"
+            params={{ id: link.id.toString() }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <Pencil className="mr-2 size-4" />
             编辑
           </Link>
@@ -375,7 +378,6 @@ function LinkListPage() {
 
   const deleteLink = useDeleteLink()
   const groupsQuery = useAllGroups()
-  const statsQuery = useDashboardStats()
 
   const linksQuery = useAdminLinks({
     page: pagination.pageIndex + 1,
@@ -391,7 +393,6 @@ function LinkListPage() {
   const links = linksQuery.data?.data ?? []
   const total = linksQuery.data?.pagination.total ?? 0
   const totalPages = linksQuery.data?.pagination.total_pages ?? 1
-  const stats = statsQuery.data
   const groups = groupsQuery.data ?? []
 
   const openDetail = (id: SnowflakeID) =>
@@ -416,15 +417,20 @@ function LinkListPage() {
               <Button variant="outline" className="cursor-pointer">
                 <AlertTriangle className="mr-2 size-4" />
                 异常管理
+                {(linksQuery.data?.anomaly_count ?? 0) > 0 && (
+                  <InkBadge tone="danger" className="ml-2">
+                    {linksQuery.data?.anomaly_count}
+                  </InkBadge>
+                )}
               </Button>
             </Link>
             <Link to="/admin/link/verify">
               <Button variant="outline" className="cursor-pointer">
                 <CheckCircle2 className="mr-2 size-4" />
                 友链审核
-                {(stats?.pending_links ?? 0) > 0 && (
+                {(linksQuery.data?.pending_count ?? 0) > 0 && (
                   <InkBadge tone="pending" className="ml-2">
-                    {stats?.pending_links}
+                    {linksQuery.data?.pending_count}
                   </InkBadge>
                 )}
               </Button>

@@ -9,6 +9,7 @@
 
 import { request } from './client'
 import type {
+  AdminLinkListResponse,
   ApplyLinkRequest,
   CreateLinkRequest,
   FriendPublicResponse,
@@ -50,8 +51,8 @@ export function getPublicLinks(
 /** 管理端友链分页列表（支持搜索/状态/分组筛选与排序） */
 export function listAdminLinks(
   params: LinkListParams = {},
-): Promise<PaginationResponse<LinkFriend>> {
-  return request<PaginationResponse<LinkFriend>>({
+): Promise<AdminLinkListResponse> {
+  return request<AdminLinkListResponse>({
     method: 'GET',
     url: '/admin/links',
     params: {

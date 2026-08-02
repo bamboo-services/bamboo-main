@@ -201,7 +201,7 @@ func (l *LinkLogic) Get(ctx context.Context, linkID xSnowflake.SnowflakeID) (*en
 }
 
 // List 获取友情链接列表
-func (l *LinkLogic) List(ctx context.Context, req *apiLink.FriendQueryRequest) (*base.PaginationResponse[entity.LinkFriend], *xError.Error) {
+func (l *LinkLogic) List(ctx context.Context, req *apiLink.FriendQueryRequest) (*apiLink.FriendListResponse, *xError.Error) {
 	// 设置默认值
 	if req.Page <= 0 {
 		req.Page = 1
@@ -225,7 +225,22 @@ func (l *LinkLogic) List(ctx context.Context, req *apiLink.FriendQueryRequest) (
 		return nil, xErr
 	}
 
-	return base.NewPaginationResponse(links, req.Page, req.PageSize, total), nil
+	// 附加计数：待审核 / 异常，供管理端入口徽章展示
+	pendingCount, xErr := l.repo.link.CountByStatus(ctx, constants.LinkStatusPending, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+	anomalyCount, xErr := l.repo.link.CountAnomaly(ctx, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+
+	result := base.NewPaginationResponse(links, req.Page, req.PageSize, total)
+	return &apiLink.FriendListResponse{
+		PaginationResponse: *result,
+		PendingCount:       pendingCount,
+		AnomalyCount:       anomalyCount,
+	}, nil
 }
 
 // UpdateStatus 更新友情链接状态

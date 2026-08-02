@@ -5594,6 +5594,10 @@ const docTemplate = `{
         "apiLink.FriendListResponse": {
             "type": "object",
             "properties": {
+                "anomaly_count": {
+                    "description": "异常友链数量（status 非 0/1 或已失效）",
+                    "type": "integer"
+                },
                 "data": {
                     "description": "数据列表",
                     "type": "array",
@@ -5608,6 +5612,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/base.PaginationInfo"
                         }
                     ]
+                },
+                "pending_count": {
+                    "description": "待审核友链数量",
+                    "type": "integer"
                 }
             }
         },
