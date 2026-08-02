@@ -55,6 +55,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
+  BambooArt,
   BambooRule,
   EnsoEmpty,
   InkBadge,
@@ -559,7 +560,14 @@ function LinkListPage() {
       </motion.div>
 
       {groups.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
+        <motion.div
+          {...enter(reduced, 0.28, {
+            initial: { opacity: 0, y: 10 },
+            animate: { opacity: 1, y: 0 },
+            transition: { duration: 0.4, ease: 'easeOut' },
+          })}
+          className="flex flex-wrap gap-1.5"
+        >
           <InkPill
             active={groupFilter === null}
             onClick={() => {
@@ -581,7 +589,7 @@ function LinkListPage() {
               {group.name}
             </InkPill>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {/* 内容区 */}
@@ -592,7 +600,14 @@ function LinkListPage() {
           ))}
         </div>
       ) : links.length === 0 ? (
-        <div className={inkTableWrap}>
+        <motion.div
+          {...enter(reduced, 0.3, {
+            initial: { opacity: 0 },
+            animate: { opacity: 1 },
+            transition: { duration: 0.4, ease: 'easeOut' },
+          })}
+          className={inkTableWrap}
+        >
           <div className="py-6">
             <EnsoEmpty
               title="没有找到匹配的友链"
@@ -612,7 +627,7 @@ function LinkListPage() {
               </Button>
             </EnsoEmpty>
           </div>
-        </div>
+        </motion.div>
       ) : viewMode === 'list' ? (
         <motion.div
           {...enter(reduced, 0.3, {
@@ -625,7 +640,6 @@ function LinkListPage() {
           {links.map((link, i) => {
             const accent = accentOf(link.color_f_key)
             const fancy = isFancyColor(link.color_f_key)
-            const s = linkStatus(link)
             return (
               <motion.div
                 key={link.id.toString()}
@@ -640,8 +654,12 @@ function LinkListPage() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') openDetail(link.id)
                 }}
-                className={cn(inkCard, 'cursor-pointer text-left')}
+                className={cn(inkCard, 'isolate cursor-pointer text-left')}
               >
+                {/* 炫彩卡背衬竹：右下角墨竹，hover 略深 */}
+                {fancy && (
+                  <BambooArt className="pointer-events-none absolute -z-10 bottom-0 right-[-18px] top-0 h-full w-[180px] text-text-primary opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
+                )}
                 {/* 左侧墨色竖条：取站点配色作为数据签名 */}
                 <span
                   className={cn(
@@ -660,9 +678,14 @@ function LinkListPage() {
                         className="size-11 text-sm"
                       />
                       <div className="min-w-0">
-                        <h3 className="truncate font-serif text-base font-semibold text-text-primary">
-                          {link.name}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="truncate font-serif text-base font-semibold text-text-primary">
+                            {link.name}
+                          </h3>
+                          <InkBadge tone="neutral" className="shrink-0">
+                            {link.group_f_key?.name ?? '未分组'}
+                          </InkBadge>
+                        </div>
                         <a
                           href={link.url}
                           target="_blank"
@@ -677,39 +700,31 @@ function LinkListPage() {
                     </div>
                     <RowMenu link={link} onConfirmDelete={setDeleteTarget} />
                   </div>
-
                   <p className="mt-3 line-clamp-2 flex-1 text-sm leading-relaxed text-text-secondary">
                     {link.description ?? '这个站点没有留下描述。'}
                   </p>
-
-                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                    <InkBadge tone="neutral">
-                      {link.group_f_key?.name ?? '未分组'}
-                    </InkBadge>
-                    <InkBadge tone="neutral" className="gap-1.5">
-                      <span
-                        className="size-2 rounded-full"
-                        style={{ background: accent }}
-                        aria-hidden="true"
-                      />
-                      {link.color_f_key?.name ?? '默认'}
-                    </InkBadge>
-                    <InkBadge tone={s.tone}>{s.label}</InkBadge>
-                  </div>
                 </div>
               </motion.div>
             )
           })}
         </motion.div>
       ) : (
-        <LinkTable
-          links={links}
-          pagination={pagination}
-          pageCount={totalPages}
-          onPaginationChange={setPagination}
-          onOpenDetail={openDetail}
-          onConfirmDelete={setDeleteTarget}
-        />
+        <motion.div
+          {...enter(reduced, 0.3, {
+            initial: { opacity: 0 },
+            animate: { opacity: 1 },
+            transition: { duration: 0.4, ease: 'easeOut' },
+          })}
+        >
+          <LinkTable
+            links={links}
+            pagination={pagination}
+            pageCount={totalPages}
+            onPaginationChange={setPagination}
+            onOpenDetail={openDetail}
+            onConfirmDelete={setDeleteTarget}
+          />
+        </motion.div>
       )}
 
       {/* 列表视图分页 */}

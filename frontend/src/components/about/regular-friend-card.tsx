@@ -29,7 +29,7 @@ export function RegularFriendCard({ link, onOpen }: FriendCardProps) {
       ref={ref}
       href={link.url}
       onClick={handleClick}
-      className="group isolate relative flex items-center gap-3 overflow-hidden rounded-lg border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]"
+      className="group isolate relative flex flex-col items-center justify-center overflow-hidden rounded-lg border border-border bg-card p-4 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]"
       style={
         fancy
           ? {
@@ -52,7 +52,7 @@ export function RegularFriendCard({ link, onOpen }: FriendCardProps) {
         style={fancy ? undefined : { background: accent }}
       />
 
-      <Avatar className="size-10 shrink-0 rounded-full">
+      <Avatar className="size-11 shrink-0 rounded-full">
         <AvatarImage src={link.avatar ?? undefined} alt={link.name} loading="lazy" />
         <AvatarFallback
           className={cn(
@@ -65,14 +65,12 @@ export function RegularFriendCard({ link, onOpen }: FriendCardProps) {
         </AvatarFallback>
       </Avatar>
 
-      <div className="min-w-0 flex-1">
-        <h3 className="truncate font-serif text-sm font-semibold text-text-primary transition-colors group-hover:text-leaf-deep">
-          {link.name}
-        </h3>
-        <p className="mt-0.5 truncate text-xs leading-snug text-text-secondary">
-          {link.description ?? '这个站点很神秘，没有留下描述。'}
-        </p>
-      </div>
+      <h3 className="mt-2.5 truncate font-serif text-sm font-semibold text-text-primary transition-colors group-hover:text-leaf-deep">
+        {link.name}
+      </h3>
+      <p className="mt-1 truncate text-[11px] leading-snug text-text-secondary">
+        {link.description ?? '这个站点很神秘，没有留下描述。'}
+      </p>
     </a>
   )
 }

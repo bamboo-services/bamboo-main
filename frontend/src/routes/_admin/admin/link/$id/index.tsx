@@ -47,6 +47,10 @@ import {
   inkCard,
   linkStatus,
 } from '@/components/ink-wash'
+import { AdFriendCard } from '@/components/about/ad-friend-card'
+import { CloseFriendCard } from '@/components/about/close-friend-card'
+import { PremiumFriendCard } from '@/components/about/premium-friend-card'
+import { RegularFriendCard } from '@/components/about/regular-friend-card'
 import { enter } from '@/lib/motion'
 import { accentOf, isFancyColor } from '@/lib/colors'
 import { cn } from '@/lib/utils'
@@ -105,39 +109,24 @@ function InfoRow({
   )
 }
 
-/** 友链预览：1:1 还原公开页的展示卡片 */
-function FriendPreview({ link, accent }: { link: LinkFriend; accent: string }) {
-  return (
-    <a
-      href={link.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group relative flex gap-3 overflow-hidden rounded-lg border border-border bg-card p-4 shadow-sm transition-[translate,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]"
-    >
-      <span
-        className="absolute inset-y-0 left-0 w-1"
-        style={{ background: accent }}
-        aria-hidden="true"
-      />
-      <Avatar className="size-12 shrink-0 rounded-full">
-        <AvatarImage src={link.avatar ?? undefined} alt={link.name} />
-        <AvatarFallback className="font-serif">
-          {link.name.slice(0, 1)}
-        </AvatarFallback>
-      </Avatar>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <h4 className="truncate font-serif font-semibold text-text-primary group-hover:text-leaf-deep">
-            {link.name}
-          </h4>
-          <ExternalLink className="size-4 shrink-0 text-text-secondary opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-        </div>
-        <p className="mt-1 line-clamp-2 text-sm text-text-secondary">
-          {link.description || '这个站点很神秘，没有留下描述。'}
-        </p>
-      </div>
-    </a>
-  )
+/**
+ * 友链预览：直接复刻 about/friends 的公开页卡片（按友链级别选卡），
+ * 点击预览在新窗口打开站点。
+ */
+function FriendPreview({ link }: { link: LinkFriend }) {
+  const onOpen = (target: LinkFriend) => {
+    window.open(target.url, '_blank', 'noopener')
+  }
+  switch (link.level) {
+    case 2: // 高级
+      return <PremiumFriendCard link={link} onOpen={onOpen} />
+    case 1: // 好友
+      return <CloseFriendCard link={link} onOpen={onOpen} />
+    case 3: // 推广
+      return <AdFriendCard link={link} onOpen={onOpen} />
+    default: // 一般
+      return <RegularFriendCard link={link} onOpen={onOpen} />
+  }
 }
 
 function LinkDetailPage() {
@@ -335,18 +324,6 @@ function LinkDetailPage() {
           </motion.section>
 
           <motion.section
-            {...enter(reduced, 0.22, {
-              initial: { opacity: 0, y: 10 },
-              animate: { opacity: 1, y: 0 },
-              transition: { duration: 0.4, ease: 'easeOut' },
-            })}
-            className={inkCard}
-          >
-            <CardHead title="友链预览" meta="访客在公开页看到的卡片样式" />
-            <FriendPreview link={link} accent={accent} />
-          </motion.section>
-
-          <motion.section
             {...enter(reduced, 0.25, {
               initial: { opacity: 0, y: 10 },
               animate: { opacity: 1, y: 0 },
@@ -425,37 +402,49 @@ function LinkDetailPage() {
           )}
         </div>
 
-        <motion.section
-          {...enter(reduced, 0.2, {
-            initial: { opacity: 0, y: 10 },
-            animate: { opacity: 1, y: 0 },
-            transition: { duration: 0.4, ease: 'easeOut' },
-          })}
-          className={`${inkCard} h-fit`}
-        >
-          <CardHead title="基本信息" meta="INFO" />
-          <InfoRow icon={<Mail className="size-4" />} label="站长邮箱">
-            {link.email ? (
-              <span className="flex items-center gap-1">
-                {link.email}
-                <CopyButton text={link.email} label="复制站长邮箱" />
+        <div className="space-y-4">
+          {/* 友链预览：裸渲染公开页卡，置于基本信息上方 */}
+          <motion.div
+            {...enter(reduced, 0.14, {
+              initial: { opacity: 0, y: 10 },
+              animate: { opacity: 1, y: 0 },
+              transition: { duration: 0.4, ease: 'easeOut' },
+            })}
+          >
+            <FriendPreview link={link} />
+          </motion.div>
+          <motion.section
+            {...enter(reduced, 0.2, {
+              initial: { opacity: 0, y: 10 },
+              animate: { opacity: 1, y: 0 },
+              transition: { duration: 0.4, ease: 'easeOut' },
+            })}
+            className={`${inkCard} h-fit`}
+          >
+            <CardHead title="基本信息" meta="INFO" />
+            <InfoRow icon={<Mail className="size-4" />} label="站长邮箱">
+              {link.email ? (
+                <span className="flex items-center gap-1">
+                  {link.email}
+                  <CopyButton text={link.email} label="复制站长邮箱" />
+                </span>
+              ) : (
+                <span className="text-text-secondary">—</span>
+              )}
+            </InfoRow>
+            <InfoRow icon={<MapPin className="size-4" />} label="所在位置">
+              {link.group_f_key?.name ?? '未分组'}
+            </InfoRow>
+            <InfoRow icon={<Globe className="size-4" />} label="审核状态">
+              <InkBadge tone={s.tone}>{s.label}</InkBadge>
+            </InfoRow>
+            <InfoRow icon={<RefreshCcw className="size-4" />} label="更新时间">
+              <span className="font-mono tabular-nums">
+                {new Date(link.updated_at).toLocaleString('zh-CN')}
               </span>
-            ) : (
-              <span className="text-text-secondary">—</span>
-            )}
-          </InfoRow>
-          <InfoRow icon={<MapPin className="size-4" />} label="所在位置">
-            {link.group_f_key?.name ?? '未分组'}
-          </InfoRow>
-          <InfoRow icon={<Globe className="size-4" />} label="审核状态">
-            <InkBadge tone={s.tone}>{s.label}</InkBadge>
-          </InfoRow>
-          <InfoRow icon={<RefreshCcw className="size-4" />} label="更新时间">
-            <span className="font-mono tabular-nums">
-              {new Date(link.updated_at).toLocaleString('zh-CN')}
-            </span>
-          </InfoRow>
-        </motion.section>
+            </InfoRow>
+          </motion.section>
+        </div>
       </div>
 
       {/* 删除确认弹窗 */}
