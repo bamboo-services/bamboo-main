@@ -35,7 +35,7 @@ export function AdFriendCard({ link, onOpen }: FriendCardProps) {
       <span className="absolute inset-y-3 left-0 w-[2px] rounded-r-full bg-leaf-muted transition-all duration-500 group-hover:inset-y-0 group-hover:w-[4px]" />
 
       <Avatar className="size-11 rounded-full ring-1 ring-ring-glow">
-        <AvatarImage src={link.avatar ?? undefined} alt={link.name} />
+        <AvatarImage src={link.avatar ?? undefined} alt={link.name} loading="lazy" />
         <AvatarFallback className="bg-leaf-light/50 font-serif text-base font-bold text-leaf-deep">
           {link.name.slice(0, 1)}
         </AvatarFallback>

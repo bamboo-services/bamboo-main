@@ -39,7 +39,7 @@ export function RegularFriendCard({ link, onOpen }: FriendCardProps) {
       />
 
       <Avatar className="size-10 shrink-0 rounded-full">
-        <AvatarImage src={link.avatar ?? undefined} alt={link.name} />
+        <AvatarImage src={link.avatar ?? undefined} alt={link.name} loading="lazy" />
         <AvatarFallback className="bg-leaf-light/30 font-serif text-sm font-semibold text-leaf-deep">
           {link.name.slice(0, 1)}
         </AvatarFallback>

@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react'
  * 点击友链卡不直接跳转：先从卡片中心以 clip-path circle() 扩散至全屏，
  * 内容（头像/站名/域名/进度线）错峰渐显，动画完毕才 window.open 真实跳转，
  * 随后引导层收拢。高级友链（premium）以站点截图为全屏背景并附浏览器地址栏，
- * 营造「进入对方小站」的沉浸感（截图字段待后端支持，当前以墨晕渐变示意）。
+ * 营造「进入对方小站」的沉浸感（截图未生成时回退墨晕渐变示意）。
  */
 
 /** Interlude 展示所需的数据（由友链卡在点击时传入） */
@@ -29,6 +29,8 @@ export interface InterludeData {
   avatarChar: string
   /** 是否高级友链（截图背景 + 浏览器地址栏） */
   premium: boolean
+  /** 高级友链站点截图 URL（可为空，空时回退墨晕渐变背景） */
+  screenshotUrl?: string | null
   /** 扩散起点（卡片中心视口坐标） */
   origin: { x: number; y: number }
 }
@@ -88,14 +90,20 @@ export function Interlude({
         ease: [0.22, 0.9, 0.3, 1],
       }}
     >
-      {/* 背景层：常规 = 宣纸墨晕；高级 = 站点截图（暗化叠层保证可读） */}
+      {/* 背景层：常规 = 宣纸墨晕；高级 = 站点截图（暗化叠层保证可读，缺图回退墨晕） */}
       {data.premium ? (
         <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(180deg, oklch(0.32 0.06 155 / 0.28), oklch(0.32 0.06 155 / 0.5)), linear-gradient(135deg, oklch(0.88 0.1 105 / 0.55), oklch(0.99 0.005 110) 42%, oklch(0.8 0.08 130 / 0.5))',
-          }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={
+            data.screenshotUrl
+              ? {
+                  backgroundImage: `linear-gradient(180deg, oklch(0.32 0.06 155 / 0.28), oklch(0.32 0.06 155 / 0.5)), url(${data.screenshotUrl})`,
+                }
+              : {
+                  background:
+                    'linear-gradient(180deg, oklch(0.32 0.06 155 / 0.28), oklch(0.32 0.06 155 / 0.5)), linear-gradient(135deg, oklch(0.88 0.1 105 / 0.55), oklch(0.99 0.005 110) 42%, oklch(0.8 0.08 130 / 0.5))',
+                }
+          }
         />
       ) : (
         <div

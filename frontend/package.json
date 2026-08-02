@@ -37,6 +37,7 @@
     "radix-ui": "^1.6.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-intersection-observer": "^11.0.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.7",

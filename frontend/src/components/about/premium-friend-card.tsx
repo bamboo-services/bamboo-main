@@ -10,13 +10,14 @@
 import { ArrowRight, Eye } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { domainOf, useFriendOpen } from './friend-card-shared'
+import { LazyImage } from './lazy-image'
 import type { FriendCardProps } from './friend-card-shared'
 
 /**
  * 高级友链卡（2×2）—— Bento 栅格中的特写位。
  * 默认：头像 + 名/址 + 描述，水平垂直居中（名帖式）。
  * hover：左侧墨条加宽延伸全高，站点截图面板自底部滑入覆盖（浏览器框）。
- * 点击：触发 Interlude 沉浸引导（截图背景）。
+ * 点击：触发 Interlude 沉浸引导（截图背景）；截图未生成或加载失败时回退占位。
  */
 export function PremiumFriendCard({ link, onOpen }: FriendCardProps) {
   const { ref, handleClick } = useFriendOpen(link, onOpen)
@@ -34,7 +35,7 @@ export function PremiumFriendCard({ link, onOpen }: FriendCardProps) {
       {/* 默认内容：水平垂直居中，hover 淡出 */}
       <div className="relative z-10 flex h-full flex-col items-center justify-center p-6 text-center transition-opacity duration-300 group-hover:opacity-0">
         <Avatar className="size-16 rounded-full ring-2 ring-ring-glow">
-          <AvatarImage src={link.avatar ?? undefined} alt={link.name} />
+          <AvatarImage src={link.avatar ?? undefined} alt={link.name} loading="lazy" />
           <AvatarFallback className="bg-leaf-light/50 font-serif text-2xl font-bold text-leaf-deep">
             {link.name.slice(0, 1)}
           </AvatarFallback>
@@ -65,13 +66,21 @@ export function PremiumFriendCard({ link, onOpen }: FriendCardProps) {
             {link.url}
           </span>
         </div>
-        {/* 预览区（截图字段待后端支持，当前以墨晕渐变示意） */}
-        <div className="relative flex-1 overflow-hidden">
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-leaf-light/30 via-card to-leaf-muted/25">
-            <span className="font-mono text-xs text-text-secondary">
-              站点截图 · 占位
-            </span>
-          </div>
+        {/* 预览区：真实站点截图（滚动接近时懒加载，未生成时墨晕占位） */}
+        <div className="relative flex-1 overflow-hidden bg-card">
+          {link.screenshot_url ? (
+            <LazyImage
+              src={link.screenshot_url}
+              alt={`${link.name} 站点截图`}
+              className="h-full w-full"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center bg-gradient-to-br from-leaf-light/30 via-card to-leaf-muted/25">
+              <span className="font-mono text-xs text-text-secondary">
+                站点截图 · 占位
+              </span>
+            </div>
+          )}
           {/* 底部名号叠层（渐变保可读） */}
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-card via-card/85 to-transparent px-5 pb-4 pt-10">
             <div className="flex items-end justify-between gap-3">
