@@ -609,6 +609,12 @@ definitions:
       rss:
         description: 友链RSS地址
         type: string
+      screenshot_at:
+        description: 友链站点截图最近更新时间
+        type: string
+      screenshot_url:
+        description: 友链站点截图URL（相对路径）
+        type: string
       sort_order:
         description: 友链排序
         type: integer
@@ -719,6 +725,12 @@ definitions:
         type: string
       rss:
         description: 友链RSS地址
+        type: string
+      screenshot_at:
+        description: 友链站点截图最近更新时间
+        type: string
+      screenshot_url:
+        description: 友链站点截图URL（相对路径）
         type: string
       sort_order:
         description: 友链排序
@@ -890,6 +902,12 @@ definitions:
         type: string
       rss:
         description: 友链RSS地址
+        type: string
+      screenshot_at:
+        description: 友链站点截图最近更新时间
+        type: string
+      screenshot_url:
+        description: 友链站点截图URL（相对路径）
         type: string
       sort_order:
         description: 友链排序
@@ -1730,6 +1748,12 @@ definitions:
         type: string
       rss:
         description: 友链RSS地址
+        type: string
+      screenshot_at:
+        description: 友链站点截图最近更新时间
+        type: string
+      screenshot_url:
+        description: 友链站点截图URL（相对路径）
         type: string
       sort_order:
         description: 友链排序
@@ -3065,6 +3089,45 @@ paths:
       security:
       - Bearer: []
       summary: '[管理] 更新友情链接失效状态'
+      tags:
+      - 友情链接接口
+  /api/v1/admin/links/{id}/screenshot:
+    post:
+      consumes:
+      - application/json
+      description: 手动触发友链站点截图重新生成，任务进入截图队列串行处理
+      parameters:
+      - description: 友情链接ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 已加入截图队列
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "404":
+          description: 友情链接不存在
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[管理] 重新生成友链站点截图'
       tags:
       - 友情链接接口
   /api/v1/admin/links/{id}/status:

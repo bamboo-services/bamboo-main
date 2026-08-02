@@ -2036,6 +2036,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/admin/links/{id}/screenshot": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "手动触发友链站点截图重新生成，任务进入截图队列串行处理",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "友情链接接口"
+                ],
+                "summary": "[管理] 重新生成友链站点截图",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "友情链接ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "已加入截图队列",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "友情链接不存在",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/links/{id}/status": {
             "put": {
                 "security": [
@@ -5302,6 +5363,14 @@ const docTemplate = `{
                     "description": "友链RSS地址",
                     "type": "string"
                 },
+                "screenshot_at": {
+                    "description": "友链站点截图最近更新时间",
+                    "type": "string"
+                },
+                "screenshot_url": {
+                    "description": "友链站点截图URL（相对路径）",
+                    "type": "string"
+                },
                 "sort_order": {
                     "description": "友链排序",
                     "type": "integer"
@@ -5456,6 +5525,14 @@ const docTemplate = `{
                 },
                 "rss": {
                     "description": "友链RSS地址",
+                    "type": "string"
+                },
+                "screenshot_at": {
+                    "description": "友链站点截图最近更新时间",
+                    "type": "string"
+                },
+                "screenshot_url": {
+                    "description": "友链站点截图URL（相对路径）",
                     "type": "string"
                 },
                 "sort_order": {
@@ -5698,6 +5775,14 @@ const docTemplate = `{
                 },
                 "rss": {
                     "description": "友链RSS地址",
+                    "type": "string"
+                },
+                "screenshot_at": {
+                    "description": "友链站点截图最近更新时间",
+                    "type": "string"
+                },
+                "screenshot_url": {
+                    "description": "友链站点截图URL（相对路径）",
                     "type": "string"
                 },
                 "sort_order": {
@@ -6906,6 +6991,14 @@ const docTemplate = `{
                 },
                 "rss": {
                     "description": "友链RSS地址",
+                    "type": "string"
+                },
+                "screenshot_at": {
+                    "description": "友链站点截图最近更新时间",
+                    "type": "string"
+                },
+                "screenshot_url": {
+                    "description": "友链站点截图URL（相对路径）",
                     "type": "string"
                 },
                 "sort_order": {

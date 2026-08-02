@@ -50,6 +50,10 @@ export default defineConfig({
         target: 'http://localhost:5555',
         changeOrigin: true,
       },
+      '/screenshots': {
+        target: 'http://localhost:5555',
+        changeOrigin: true,
+      },
     },
   },
 })

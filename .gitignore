@@ -51,6 +51,9 @@ diff.txt
 demo/
 old/
 
+### Runtime Data ###
+data/
+
 ### Frontend Build Output ###
 # 内嵌前端产物默认不入库，仅保留占位 index.html 以保证 go:embed 永远可编译
 resources/frontend/dist/*

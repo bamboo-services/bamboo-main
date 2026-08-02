@@ -53,6 +53,7 @@ func (r *route) linkAdminRouter(route gin.IRouter) {
 		linkGroup.DELETE("/:id", linkHandler.Delete)
 		linkGroup.PUT("/:id/status", linkHandler.UpdateStatus)
 		linkGroup.PUT("/:id/fail", linkHandler.UpdateFailStatus)
+		linkGroup.POST("/:id/screenshot", linkHandler.ReScreenshot)
 	}
 }
 

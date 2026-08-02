@@ -296,6 +296,45 @@ func (r *LinkRepo) ListPublic(ctx context.Context, groupID *xSnowflake.Snowflake
 	return links, nil
 }
 
+// ListApprovedForScreenshot 查询全部已通过且未失效的友链（按排序与创建时间，供截图全量入队）
+func (r *LinkRepo) ListApprovedForScreenshot(ctx context.Context, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
+	r.log.Info(ctx, "ListApprovedForScreenshot - 查询待截图友链")
+
+	var links []entity.LinkFriend
+	err := r.pickDB(tx).WithContext(ctx).
+		Where("status = ? AND is_failure = ?", constants.LinkStatusApproved, constants.LinkFailNormal).
+		Order("sort_order ASC, created_at DESC").
+		Find(&links).Error
+	if err != nil {
+		return nil, xError.NewError(ctx, xError.DatabaseError, "查询待截图友链失败", false, err)
+	}
+
+	return links, nil
+}
+
+// UpdateScreenshot 更新友链站点截图信息（URL 与最近截图时间）
+func (r *LinkRepo) UpdateScreenshot(ctx context.Context, id xSnowflake.SnowflakeID, url string, at time.Time, tx *gorm.DB) *xError.Error {
+	r.log.Info(ctx, "UpdateScreenshot - 更新友链截图信息")
+
+	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).
+		Where("id = ?", id).
+		Updates(map[string]any{
+			"screenshot_url": url,
+			"screenshot_at":  at,
+		})
+	if result.Error != nil {
+		return xError.NewError(ctx, xError.DatabaseError, "更新友链截图信息失败", false, result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+	}
+
+	if cacheErr := r.kc.Delete(ctx, constants.RedisLinkFriend.Get(id).String()); cacheErr != nil {
+		r.log.Warn(ctx, cacheErr.Error())
+	}
+	return nil
+}
+
 // CountByStatus 按审核状态统计友情链接数量；status 为负数时统计全部
 func (r *LinkRepo) CountByStatus(ctx context.Context, status int, tx *gorm.DB) (int64, *xError.Error) {
 	query := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{})

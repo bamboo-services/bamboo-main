@@ -20,6 +20,7 @@ import (
 	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
+	"github.com/bamboo-services/bamboo-main/internal/service/screenshot"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
@@ -131,6 +132,7 @@ func (l *LinkLogic) Update(ctx context.Context, linkID xSnowflake.SnowflakeID, r
 	if req.LinkDesc != "" {
 		link.Description = xUtil.Ptr(req.LinkDesc)
 	}
+	urlChanged := req.LinkURL != "" && req.LinkURL != link.URL
 	if req.LinkEmail != "" {
 		link.Email = xUtil.Ptr(req.LinkEmail)
 	}
@@ -161,6 +163,13 @@ func (l *LinkLogic) Update(ctx context.Context, linkID xSnowflake.SnowflakeID, r
 	}
 	if !found {
 		return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+	}
+
+	// URL 变更：旧截图与站点不匹配，触发重新截图
+	if urlChanged {
+		if manager := screenshot.GetManager(ctx); manager != nil {
+			manager.Enqueue(linkID)
+		}
 	}
 
 	return reloaded, nil
@@ -242,6 +251,13 @@ func (l *LinkLogic) UpdateStatus(ctx context.Context, linkID xSnowflake.Snowflak
 		l.sendStatusNotification(asyncCtx, link, req.LinkStatus, req.LinkReviewRemark)
 	}, xAsync.WithName("MAIL"))
 
+	// 审核通过：触发友链首次站点截图（入队后由截图 worker 串行处理）
+	if req.LinkStatus == constants.LinkStatusApproved {
+		if manager := screenshot.GetManager(ctx); manager != nil {
+			manager.Enqueue(linkID)
+		}
+	}
+
 	return nil
 }
 
@@ -255,6 +271,29 @@ func (l *LinkLogic) UpdateFailStatus(ctx context.Context, linkID xSnowflake.Snow
 		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
 	}
 
+	return nil
+}
+
+// ReScreenshot 手动触发友链重新截图（仅已通过且未失效的友链）
+//
+// 仅将任务加入截图队列，由截图 worker 串行处理，接口本身不等待截图完成。
+func (l *LinkLogic) ReScreenshot(ctx context.Context, linkID xSnowflake.SnowflakeID) *xError.Error {
+	link, found, xErr := l.repo.link.GetByID(ctx, linkID, false, nil)
+	if xErr != nil {
+		return xErr
+	}
+	if !found {
+		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+	}
+	if link.Status != constants.LinkStatusApproved {
+		return xError.NewError(ctx, xError.BadRequest, "仅已通过的友链支持重新截图", false)
+	}
+
+	manager := screenshot.GetManager(ctx)
+	if manager == nil {
+		return xError.NewError(ctx, xError.ServerInternalError, "截图服务不可用", false)
+	}
+	manager.Enqueue(linkID)
 	return nil
 }
 

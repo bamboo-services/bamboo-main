@@ -15,9 +15,12 @@ import (
 	"context"
 	"os"
 
+	"github.com/bamboo-services/bamboo-main/internal/repository"
+	"github.com/bamboo-services/bamboo-main/internal/service/screenshot"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 )
 
 // emailConfigInit 构造业务邮件配置并注入到上下文。
@@ -44,4 +47,19 @@ func getEnvStringByKey(key string, defaultValue string) string {
 		return defaultValue
 	}
 	return value
+}
+
+// screenshotManagerInit 构造友链截图任务管理器并注入到上下文。
+//
+// 截图服务配置经 SCREENSHOT_* 环境变量装配（env-first 约定），
+// worker 常驻协程由 main.go 的 Runner 附加协程启动。
+func (r *reg) screenshotManagerInit(ctx context.Context) (any, error) {
+	log := xLog.WithName(xLog.NamedINIT)
+	log.Info(ctx, "加载友链截图服务配置")
+
+	cfg := screenshot.LoadConfig()
+	db := xCtxUtil.MustGetDB(ctx)
+	m := xCtxUtil.MustGetCacheManager(ctx)
+
+	return screenshot.NewManager(cfg, repository.NewLinkRepo(db, m), nil, nil), nil
 }

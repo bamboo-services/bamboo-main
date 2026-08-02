@@ -79,4 +79,6 @@ const (
 const (
 	// ContextCustomConfig 自定义配置上下文键
 	ContextCustomConfig xCtx.ContextKey = "context_custom_config"
+	// ContextScreenshotManager 友链截图任务管理器上下文键
+	ContextScreenshotManager xCtx.ContextKey = "context_screenshot_manager"
 )

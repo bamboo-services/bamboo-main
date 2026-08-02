@@ -12,11 +12,15 @@
 package main
 
 import (
+	"context"
+	"time"
+
 	_ "github.com/bamboo-services/bamboo-main/docs"
 	"github.com/bamboo-services/bamboo-main/internal/app/route"
 	"github.com/bamboo-services/bamboo-main/internal/app/startup"
 	"github.com/bamboo-services/bamboo-main/internal/app/startup/prepare"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
+	"github.com/bamboo-services/bamboo-main/internal/service/screenshot"
 
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xMain "github.com/bamboo-services/bamboo-base-go/major/main"
@@ -24,6 +28,8 @@ import (
 	xOptionCache "github.com/bamboo-services/bamboo-base-go/major/option/cache"
 	xOptionDB "github.com/bamboo-services/bamboo-base-go/major/option/database"
 	xReg "github.com/bamboo-services/bamboo-base-go/major/register"
+	xCron "github.com/bamboo-services/bamboo-base-go/plugins/cron"
+	xCronRunner "github.com/bamboo-services/bamboo-base-go/plugins/cron/runner"
 )
 
 func main() {
@@ -52,9 +58,31 @@ func main() {
 		xOption.WithRoute(route.NewRoute),
 	}
 
+	// 定时任务时区：固定 Asia/Shanghai（每日 0 点全量更新站点截图）
+	location, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		location = time.FixedZone("Asia/Shanghai", 8*3600)
+	}
+
 	xMain.Runner(
 		xReg.Register(ctx, nodeList, opts...),
 		xLog.WithName(xLog.NamedMAIN),
-		nil,
+		// 每日 0 点全量刷新友链站点截图（cron 插件挂载到 Runner 附加协程）
+		xCronRunner.New(
+			xCronRunner.WithRegister(
+				xCron.NewJob("0 0 * * *", func(ctx context.Context) {
+					if manager := screenshot.GetManager(ctx); manager != nil {
+						manager.EnqueueAll(ctx)
+					}
+				}),
+			),
+			xCronRunner.WithLocation(location),
+		),
+		// 截图任务队列 worker 常驻协程，随 Runner 生命周期启停
+		func(ctx context.Context, _ ...any) {
+			if manager := screenshot.GetManager(ctx); manager != nil {
+				manager.Run(ctx)
+			}
+		},
 	)
 }

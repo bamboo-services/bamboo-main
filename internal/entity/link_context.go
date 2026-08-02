@@ -10,6 +10,8 @@
 package entity
 
 import (
+	"time"
+
 	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xModels "github.com/bamboo-services/bamboo-base-go/major/models"
 
@@ -40,6 +42,8 @@ type LinkFriend struct {
 	FailReason         *string                 `json:"fail_reason,omitempty" gorm:"type:text;comment:友链失效原因"`                                   // 友链失效原因
 	ApplyRemark        *string                 `json:"apply_remark,omitempty" gorm:"type:text;comment:申请者备注"`                                   // 申请者备注
 	ReviewRemark       *string                 `json:"review_remark,omitempty" gorm:"type:text;comment:审核备注"`                                   // 审核备注
+	ScreenshotURL      *string                 `json:"screenshot_url,omitempty" gorm:"type:varchar(500);comment:友链站点截图URL(相对路径)"`               // 友链站点截图URL（相对路径）
+	ScreenshotAt       *time.Time              `json:"screenshot_at,omitempty" gorm:"comment:友链站点截图最近更新时间"`                                    // 友链站点截图最近更新时间
 
 	// 关联关系
 	GroupFKey *LinkGroup  `json:"group_f_key,omitempty" gorm:"foreignKey:GroupID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;comment:友链分组外键"` // 友链分组外键

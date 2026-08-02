@@ -290,6 +290,36 @@ func (h *LinkHandler) UpdateFailStatus(c *gin.Context) {
 	xResult.Success(c, "失效状态更新成功")
 }
 
+// ReScreenshot 重新生成友链站点截图
+//
+// @Summary [管理] 重新生成友链站点截图
+// @Description 手动触发友链站点截图重新生成，任务进入截图队列串行处理
+// @Tags 友情链接接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param id path int true "友情链接ID"
+// @Success 200 {object} xBase.BaseResponse "已加入截图队列"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/links/{id}/screenshot [POST]
+func (h *LinkHandler) ReScreenshot(c *gin.Context) {
+	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	if uri == nil {
+		return
+	}
+
+	err := h.service.linkLogic.ReScreenshot(c.Request.Context(), uri.ID)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	xResult.Success(c, "已加入截图队列")
+}
+
 // GetPublicLinks 获取公开的友情链接
 //
 // @Summary [用户] 获取公开友情链接

@@ -15,6 +15,7 @@ import (
 	"context"
 
 	"github.com/bamboo-services/bamboo-main/internal/metrics"
+	"github.com/bamboo-services/bamboo-main/internal/service/screenshot"
 
 	xEnv "github.com/bamboo-services/bamboo-base-go/defined/env"
 	xMiddle "github.com/bamboo-services/bamboo-base-go/major/middleware"
@@ -49,6 +50,9 @@ func NewRoute(ctx context.Context, serve *gin.Engine) {
 
 	// Prometheus 指标端点（根路径，公开无鉴权；promhttp 直写，不经 BaseResponse）
 	r.engine.GET("/metrics", metrics.Handler())
+
+	// 友链站点截图静态资源：运行时生成于 SCREENSHOT_DIR，独立于内嵌前端资源
+	r.engine.Static("/screenshots", xEnv.GetEnvString(screenshot.EnvScreenshotDir, "data/screenshots"))
 
 	oauthRoute := bSdkRoute.NewRoute(r.context)
 
