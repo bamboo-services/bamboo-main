@@ -10,12 +10,15 @@
  */
 
 import { useEffect, useState } from 'react'
-import { Save } from 'lucide-react'
+import { MapPin, Palette, Save } from 'lucide-react'
 import type { FormEvent } from 'react'
 import type { ApplyLinkRequest, LinkFriend } from '@/api/types'
+import { useAuth } from '@/hooks/use-auth'
+import { usePublicColors, usePublicGroups } from '@/hooks/use-links'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 
 /** 用户友链表单状态 */
@@ -23,7 +26,10 @@ interface UserLinkFormState {
   siteName: string
   siteUrl: string
   siteLogo: string
+  siteRss: string
   webmasterEmail: string
+  groupId: string
+  colorId: string
   siteDescription: string
   applyRemark: string
 }
@@ -46,11 +52,19 @@ export function UserLinkForm({
   submitLabel?: string
   onSubmit: (req: ApplyLinkRequest) => void
 }) {
+  const { user, isAuthenticated } = useAuth()
+  const lockedEmail = isAuthenticated ? (user?.email ?? '') : ''
+  const { data: groups } = usePublicGroups()
+  const { data: colors } = usePublicColors()
+
   const [form, setForm] = useState<UserLinkFormState>({
     siteName: '',
     siteUrl: '',
     siteLogo: '',
+    siteRss: '',
     webmasterEmail: '',
+    groupId: '',
+    colorId: '',
     siteDescription: '',
     applyRemark: '',
   })
@@ -62,12 +76,15 @@ export function UserLinkForm({
         siteName: initial.name,
         siteUrl: initial.url,
         siteLogo: initial.avatar ?? '',
-        webmasterEmail: initial.email ?? '',
+        siteRss: initial.rss ?? '',
+        webmasterEmail: lockedEmail || (initial.email ?? ''),
+        groupId: initial.group_id?.toString() ?? '',
+        colorId: initial.color_id?.toString() ?? '',
         siteDescription: initial.description ?? '',
         applyRemark: initial.apply_remark ?? '',
       })
     }
-  }, [initial])
+  }, [initial, lockedEmail])
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -75,15 +92,18 @@ export function UserLinkForm({
       link_name: form.siteName.trim(),
       link_url: form.siteUrl.trim(),
       link_avatar: form.siteLogo.trim() || undefined,
-      link_email: form.webmasterEmail.trim(),
+      link_rss: form.siteRss.trim() || undefined,
+      link_email: (lockedEmail || form.webmasterEmail).trim(),
+      link_group_id: form.groupId ? BigInt(form.groupId) : undefined,
+      link_color_id: form.colorId ? BigInt(form.colorId) : undefined,
       link_desc: form.siteDescription.trim() || undefined,
       link_apply_remark: form.applyRemark.trim() || undefined,
     })
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* 基本信息 */}
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* 行格字段：名称|地址 · Logo|RSS · 位置|颜色 · 邮箱全宽收尾（连续行格，不设分区标题） */}
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="siteName">
@@ -120,6 +140,52 @@ export function UserLinkForm({
           />
         </div>
         <div className="space-y-2">
+          <Label htmlFor="siteRss">订阅地址</Label>
+          <Input
+            id="siteRss"
+            type="url"
+            placeholder="https://example.com/atom.xml"
+            value={form.siteRss}
+            onChange={(e) => setForm({ ...form, siteRss: e.target.value })}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="groupId" className="flex items-center gap-1.5">
+            <MapPin className="size-3.5 text-text-secondary" />
+            展示位置
+          </Label>
+          <Select
+            id="groupId"
+            value={form.groupId}
+            onChange={(e) => setForm({ ...form, groupId: e.target.value })}
+          >
+            <option value="">请选择位置</option>
+            {groups?.map((g) => (
+              <option key={g.id.toString()} value={g.id.toString()}>
+                {g.name}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="colorId" className="flex items-center gap-1.5">
+            <Palette className="size-3.5 text-text-secondary" />
+            展示颜色
+          </Label>
+          <Select
+            id="colorId"
+            value={form.colorId}
+            onChange={(e) => setForm({ ...form, colorId: e.target.value })}
+          >
+            <option value="">请选择颜色</option>
+            {colors?.map((c) => (
+              <option key={c.id.toString()} value={c.id.toString()}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="space-y-2 md:col-span-2">
           <Label htmlFor="webmasterEmail">
             站长邮箱 <span className="text-destructive">*</span>
           </Label>
@@ -128,11 +194,20 @@ export function UserLinkForm({
             type="email"
             placeholder="admin@example.com"
             required
-            value={form.webmasterEmail}
+            readOnly={isAuthenticated}
+            value={isAuthenticated ? lockedEmail : form.webmasterEmail}
             onChange={(e) =>
               setForm({ ...form, webmasterEmail: e.target.value })
             }
+            className={
+              isAuthenticated ? 'cursor-not-allowed bg-muted/30 opacity-70' : ''
+            }
           />
+          {isAuthenticated && (
+            <p className="text-[11px] text-text-secondary">
+              已登录，邮箱自动填入且不可修改
+            </p>
+          )}
         </div>
       </div>
 
@@ -162,7 +237,7 @@ export function UserLinkForm({
       </div>
 
       {/* 提交按钮 */}
-      <div className="flex justify-end border-t border-border/60 pt-6">
+      <div className="flex justify-end border-t border-border/60 pt-5">
         <Button type="submit" className="cursor-pointer" disabled={submitting}>
           <Save className="mr-2 size-4" />
           {submitting ? '提交中…' : submitLabel}

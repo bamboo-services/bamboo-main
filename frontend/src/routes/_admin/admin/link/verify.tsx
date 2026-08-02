@@ -9,7 +9,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import {
@@ -19,11 +19,14 @@ import {
   Globe,
   Mail,
   MapPin,
-  RefreshCcw,
+  Palette,
   X,
 } from 'lucide-react'
-import type { LinkFriend, SnowflakeID } from '@/api/types'
+import type { LinkFriend, SnowflakeID, UpdateLinkRequest } from '@/api/types'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -38,7 +41,13 @@ import {
 } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
 import { cn } from '@/lib/utils'
-import { useAdminLinks, useUpdateLinkStatus } from '@/hooks/use-links'
+import {
+  useAdminLinks,
+  useUpdateLink,
+  useUpdateLinkStatus,
+} from '@/hooks/use-links'
+import { useAllGroups } from '@/hooks/use-groups'
+import { useAllColors } from '@/hooks/use-colors'
 
 export const Route = createFileRoute('/_admin/admin/link/verify')({
   component: LinkVerifyPage,
@@ -188,9 +197,54 @@ function VerifyItem({
   )
 }
 
-/** 选中后右侧的审核详情面板 */
+/** 审核详情面板的可编辑表单状态 */
+interface VerifyFormState {
+  siteName: string
+  siteUrl: string
+  siteLogo: string
+  siteRss: string
+  webmasterEmail: string
+  siteDescription: string
+  groupId: SnowflakeID | null
+  colorId: SnowflakeID | null
+  applyRemark: string
+}
+
+/** 从 LinkFriend 初始化编辑表单 */
+function initVerifyForm(link: LinkFriend): VerifyFormState {
+  return {
+    siteName: link.name,
+    siteUrl: link.url,
+    siteLogo: link.avatar ?? '',
+    siteRss: link.rss ?? '',
+    webmasterEmail: link.email ?? '',
+    siteDescription: link.description ?? '',
+    groupId: link.group_id,
+    colorId: link.color_id,
+    applyRemark: link.apply_remark ?? '',
+  }
+}
+
+/** 将编辑表单转为 UpdateLinkRequest */
+function verifyFormToUpdateReq(form: VerifyFormState): UpdateLinkRequest {
+  return {
+    link_name: form.siteName.trim(),
+    link_url: form.siteUrl.trim(),
+    link_avatar: form.siteLogo.trim() || undefined,
+    link_rss: form.siteRss.trim() || undefined,
+    link_email: form.webmasterEmail.trim() || undefined,
+    link_desc: form.siteDescription.trim() || undefined,
+    link_group_id: form.groupId ?? undefined,
+    link_color_id: form.colorId ?? undefined,
+    link_apply_remark: form.applyRemark.trim() || undefined,
+  }
+}
+
+/** 选中后右侧的审核详情面板（可编辑站点信息 + 审核操作） */
 function VerifyDetail({
   link,
+  form,
+  onFormChange,
   remark,
   onRemarkChange,
   onApprove,
@@ -198,6 +252,8 @@ function VerifyDetail({
   isPending,
 }: {
   link: LinkFriend
+  form: VerifyFormState
+  onFormChange: (patch: Partial<VerifyFormState>) => void
   remark: string
   onRemarkChange: (value: string) => void
   onApprove: () => void
@@ -206,6 +262,9 @@ function VerifyDetail({
 }) {
   const isTakedown = link.status === 3
   const status = linkStatus(link)
+  const groups = useAllGroups().data ?? []
+  const colors = useAllColors().data ?? []
+
   return (
     <div className="space-y-4">
       {/* 申请横幅：左侧墨条 + 晨光墨晕呼应待审核状态 */}
@@ -224,68 +283,153 @@ function VerifyDetail({
         />
         <div className="relative flex flex-wrap items-center gap-5 p-6 pl-9">
           <SiteAvatar
-            name={link.name}
-            url={link.avatar}
+            name={form.siteName || link.name}
+            url={form.siteLogo || link.avatar}
             className="size-20 rounded-2xl text-3xl"
           />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2.5">
               <h2 className="font-serif text-2xl font-bold tracking-tight text-text-primary">
-                {link.name}
+                {form.siteName || link.name}
               </h2>
               <InkBadge tone={status.tone}>{status.label}</InkBadge>
             </div>
             <a
-              href={link.url}
+              href={form.siteUrl || link.url}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-2 inline-flex items-center gap-1.5 font-mono text-sm text-text-secondary transition-colors hover:text-leaf-deep"
             >
               <Globe className="size-4" />
-              {link.url}
+              {form.siteUrl || link.url}
               <ExternalLink className="size-3.5" />
             </a>
           </div>
         </div>
       </div>
 
-      {/* 描述 + 申请信息 */}
-      <div className="grid gap-4 xl:grid-cols-3">
-        <div className={`${inkCard} xl:col-span-2`}>
-          <CardHead title="站点描述" />
-          <p className="leading-relaxed text-text-secondary">
-            {link.description || '暂无描述'}
-          </p>
-          {link.apply_remark && (
-            <div className="mt-4 border-t border-border/60 pt-3">
-              <p className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">
-                申请备注
-              </p>
-              <p className="mt-1 leading-relaxed text-text-primary">
-                {link.apply_remark}
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className={inkCard}>
-          <CardHead title="申请信息" />
-          <div className="space-y-3">
-            <div className="flex items-center gap-2.5 text-sm text-text-primary">
-              <Mail className="size-4 shrink-0 text-text-secondary" />
-              <span className="truncate">{link.email ?? '未提供'}</span>
-            </div>
-            <div className="flex items-center gap-2.5 text-sm text-text-primary">
-              <MapPin className="size-4 shrink-0 text-text-secondary" />
-              <span>{link.group_f_key?.name ?? '未分组'}</span>
-            </div>
-            <div className="flex items-center gap-2.5 text-sm text-text-primary">
-              <RefreshCcw className="size-4 shrink-0 text-text-secondary" />
-              <span className="font-mono tabular-nums">
-                {new Date(link.updated_at).toLocaleString('zh-CN')}
-              </span>
-            </div>
+      {/* 可编辑站点信息 */}
+      <div className={inkCard}>
+        <CardHead title="站点信息" meta="EDITABLE" />
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="v-siteName">
+              站点名称 <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="v-siteName"
+              value={form.siteName}
+              onChange={(e) => onFormChange({ siteName: e.target.value })}
+              disabled={isPending}
+            />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="v-siteUrl">
+              站点地址 <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="v-siteUrl"
+              type="url"
+              value={form.siteUrl}
+              onChange={(e) => onFormChange({ siteUrl: e.target.value })}
+              disabled={isPending}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="v-siteLogo">站点 Logo</Label>
+            <Input
+              id="v-siteLogo"
+              value={form.siteLogo}
+              onChange={(e) => onFormChange({ siteLogo: e.target.value })}
+              disabled={isPending}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="v-siteRss">订阅地址</Label>
+            <Input
+              id="v-siteRss"
+              type="url"
+              value={form.siteRss}
+              onChange={(e) => onFormChange({ siteRss: e.target.value })}
+              disabled={isPending}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="v-email">站长邮箱</Label>
+            <Input
+              id="v-email"
+              type="email"
+              value={form.webmasterEmail}
+              onChange={(e) => onFormChange({ webmasterEmail: e.target.value })}
+              disabled={isPending}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="v-groupId" className="flex items-center gap-1.5">
+              <MapPin className="size-3.5 text-text-secondary" />
+              展示位置
+            </Label>
+            <Select
+              id="v-groupId"
+              value={form.groupId?.toString() ?? ''}
+              onChange={(e) =>
+                onFormChange({
+                  groupId: e.target.value ? BigInt(e.target.value) : null,
+                })
+              }
+              disabled={isPending}
+            >
+              <option value="">未分组</option>
+              {groups.map((g) => (
+                <option key={g.id.toString()} value={g.id.toString()}>
+                  {g.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="v-colorId" className="flex items-center gap-1.5">
+              <Palette className="size-3.5 text-text-secondary" />
+              展示颜色
+            </Label>
+            <Select
+              id="v-colorId"
+              value={form.colorId?.toString() ?? ''}
+              onChange={(e) =>
+                onFormChange({
+                  colorId: e.target.value ? BigInt(e.target.value) : null,
+                })
+              }
+              disabled={isPending}
+            >
+              <option value="">默认颜色</option>
+              {colors.map((c) => (
+                <option key={c.id.toString()} value={c.id.toString()}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </div>
+        <div className="mt-4 space-y-2">
+          <Label htmlFor="v-desc">站点描述</Label>
+          <Textarea
+            id="v-desc"
+            className="min-h-[80px]"
+            value={form.siteDescription}
+            onChange={(e) => onFormChange({ siteDescription: e.target.value })}
+            disabled={isPending}
+          />
+        </div>
+        <div className="mt-4 space-y-2">
+          <Label htmlFor="v-remark">申请备注</Label>
+          <Textarea
+            id="v-remark"
+            className="min-h-[60px]"
+            value={form.applyRemark}
+            onChange={(e) => onFormChange({ applyRemark: e.target.value })}
+            disabled={isPending}
+          />
         </div>
       </div>
 
@@ -312,7 +456,7 @@ function VerifyDetail({
           <p className="text-sm text-text-secondary">
             {isTakedown
               ? '批准下架后该站点将从友链页面移除'
-              : '审核通过后该站点将展示在友链页面'}
+              : '审核通过后该站点将展示在友链页面，上方修改会同步保存'}
           </p>
           <div className="flex gap-2">
             <Button
@@ -343,61 +487,102 @@ function LinkVerifyPage() {
   const reduced = useReducedMotion() ?? false
   // 同时拉取「待审核(0)」与「下架待审核(3)」两类待处理友链
   const pendingQuery = useAdminLinks({ link_status: 0, page: 1, page_size: 50 })
-  const takedownQuery = useAdminLinks({ link_status: 3, page: 1, page_size: 50 })
+  const takedownQuery = useAdminLinks({
+    link_status: 3,
+    page: 1,
+    page_size: 50,
+  })
   const isLoading = pendingQuery.isLoading || takedownQuery.isLoading
   const pendingLinks = [
     ...(pendingQuery.data?.data ?? []),
     ...(takedownQuery.data?.data ?? []),
   ]
   const updateStatus = useUpdateLinkStatus()
+  const updateLink = useUpdateLink()
 
   const [selectedId, setSelectedId] = useState<SnowflakeID | null>(null)
   const [remark, setRemark] = useState('')
+  const [editForm, setEditForm] = useState<VerifyFormState | null>(null)
 
   const selected = pendingLinks.find((l) => l.id === selectedId) ?? null
   const hasSelection = selected !== null
 
-  /** 点击已选中项则取消选中 */
-  const toggle = (id: SnowflakeID) =>
-    setSelectedId((prev) => (prev === id ? null : id))
+  /** 选中项变化时初始化/重置编辑表单 */
+  useEffect(() => {
+    if (selected) {
+      setEditForm(initVerifyForm(selected))
+    } else {
+      setEditForm(null)
+    }
+  }, [selectedId])
 
-  // 主操作：新申请 → 通过(1)；下架申请 → 批准下架(4)
+  const patchForm = useCallback((patch: Partial<VerifyFormState>) => {
+    setEditForm((prev) => (prev ? { ...prev, ...patch } : prev))
+  }, [])
+
+  /** 点击已选中项则取消选中 */
+  const toggle = (id: SnowflakeID) => {
+    setSelectedId((prev) => (prev === id ? null : id))
+    setRemark('')
+  }
+
+  // 主操作：先保存编辑 → 再改状态
   const handleApprove = () => {
-    if (!selected) return
+    if (!selected || !editForm) return
     const targetStatus = selected.status === 3 ? 4 : 1
-    updateStatus.mutate(
-      {
-        id: selected.id,
-        req: {
-          link_status: targetStatus,
-          link_review_remark: remark.trim() || undefined,
-        },
-      },
+    const updateReq = verifyFormToUpdateReq(editForm)
+
+    // 先保存站点信息修改
+    updateLink.mutate(
+      { id: selected.id, req: updateReq },
       {
         onSuccess: () => {
-          setSelectedId(null)
-          setRemark('')
+          // 保存成功后再改审核状态
+          updateStatus.mutate(
+            {
+              id: selected.id,
+              req: {
+                link_status: targetStatus,
+                link_review_remark: remark.trim() || undefined,
+              },
+            },
+            {
+              onSuccess: () => {
+                setSelectedId(null)
+                setRemark('')
+              },
+            },
+          )
         },
       },
     )
   }
 
-  // 次操作：新申请 → 拒绝(2)；下架申请 → 驳回下架（恢复已通过 1）
+  // 次操作：先保存编辑 → 再改状态
   const handleReject = () => {
-    if (!selected) return
+    if (!selected || !editForm) return
     const targetStatus = selected.status === 3 ? 1 : 2
-    updateStatus.mutate(
-      {
-        id: selected.id,
-        req: {
-          link_status: targetStatus,
-          link_review_remark: remark.trim() || undefined,
-        },
-      },
+    const updateReq = verifyFormToUpdateReq(editForm)
+
+    updateLink.mutate(
+      { id: selected.id, req: updateReq },
       {
         onSuccess: () => {
-          setSelectedId(null)
-          setRemark('')
+          updateStatus.mutate(
+            {
+              id: selected.id,
+              req: {
+                link_status: targetStatus,
+                link_review_remark: remark.trim() || undefined,
+              },
+            },
+            {
+              onSuccess: () => {
+                setSelectedId(null)
+                setRemark('')
+              },
+            },
+          )
         },
       },
     )
@@ -499,11 +684,13 @@ function LinkVerifyPage() {
             >
               <VerifyDetail
                 link={selected}
+                form={editForm ?? initVerifyForm(selected)}
+                onFormChange={patchForm}
                 remark={remark}
                 onRemarkChange={setRemark}
                 onApprove={handleApprove}
                 onReject={handleReject}
-                isPending={updateStatus.isPending}
+                isPending={updateStatus.isPending || updateLink.isPending}
               />
             </motion.div>
           )}

@@ -12,7 +12,9 @@ import type {
   ApplyLinkRequest,
   CreateLinkRequest,
   FriendPublicResponse,
+  LinkColor,
   LinkFriend,
+  LinkGroup,
   LinkListParams,
   PaginationResponse,
   SnowflakeID,
@@ -189,4 +191,20 @@ export function updateProfile(req: UpdateProfileRequest): Promise<UserInfo> {
     url: '/user/profile',
     data: req,
   }).then((res) => res.user)
+}
+
+/** 公开接口：获取启用的友链分组列表（供申请表单选择器） */
+export function getPublicGroups(): Promise<Array<LinkGroup>> {
+  return request<Array<LinkGroup>>({
+    method: 'GET',
+    url: '/links/groups',
+  })
+}
+
+/** 公开接口：获取启用的友链颜色列表（供申请表单选择器） */
+export function getPublicColors(): Promise<Array<LinkColor>> {
+  return request<Array<LinkColor>>({
+    method: 'GET',
+    url: '/links/colors',
+  })
 }

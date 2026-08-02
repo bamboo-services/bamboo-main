@@ -39,19 +39,20 @@ func DefaultUser(ctx context.Context, db *gorm.DB) error {
 		return err
 	}
 
-	passwordString, err := xUtil.Password().EncryptString("xiao_lfeng")
+	passwordString, err := xUtil.Password().EncryptString("123456")
 	if err != nil {
 		return err
 	}
 
 	user := &entity.SystemUser{
-		Username: "xiao_lfeng",
-		Password: passwordString,
-		Email:    "gm@x-lf.cn",
-		Nickname: xUtil.Ptr("筱锋"),
-		Avatar:   xUtil.Ptr("https://i-cdn.akass.cn/2024/05/664870a814c0d.png!wp60"),
-		Role:     constants.RoleAdmin,
-		Status:   constants.StatusActive,
+		Username:    "super_admin",
+		Password:    passwordString,
+		Email:       "gm@x-lf.cn",
+		Nickname:    xUtil.Ptr("筱锋"),
+		Avatar:      xUtil.Ptr("https://i-cdn.akass.cn/2024/05/664870a814c0d.png!wp60"),
+		Role:        constants.RoleAdmin,
+		Status:      constants.StatusActive,
+		EmailVerify: true,
 	}
 	if err = db.WithContext(ctx).Create(user).Error; err != nil {
 		return err

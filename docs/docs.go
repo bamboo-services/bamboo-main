@@ -3778,6 +3778,76 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/links/colors": {
+            "get": {
+                "description": "返回所有启用的友链颜色，供访客申请时预选展示颜色",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "友情链接接口"
+                ],
+                "summary": "[公开] 获取友链颜色列表",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.LinkColor"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/links/groups": {
+            "get": {
+                "description": "返回所有启用的友链分组，供访客申请时预选展示位置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "友情链接接口"
+                ],
+                "summary": "[公开] 获取友链分组列表",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.LinkGroup"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/public/health": {
             "get": {
                 "description": "检查系统、数据库、Redis连接状态",
@@ -5279,6 +5349,10 @@ const docTemplate = `{
                     "maxLength": 500,
                     "example": "https://example.com/avatar.jpg"
                 },
+                "link_color_id": {
+                    "type": "integer",
+                    "example": 1
+                },
                 "link_desc": {
                     "type": "string",
                     "maxLength": 500,
@@ -5288,6 +5362,10 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 100,
                     "example": "admin@example.com"
+                },
+                "link_group_id": {
+                    "type": "integer",
+                    "example": 1
                 },
                 "link_name": {
                     "type": "string",

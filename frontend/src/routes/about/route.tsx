@@ -7,11 +7,17 @@
 // https://opensource.org/licenses/MIT
 // --------------------------------------------------------------------------------
 
-import { Link, Outlet, createFileRoute, useLocation } from '@tanstack/react-router'
+import {
+  Link,
+  Outlet,
+  createFileRoute,
+  useLocation,
+} from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { enter } from '@/lib/motion'
+import { AccountHoverCard } from '@/components/layout/account-hover-card'
 import { FallingLeaves } from '@/components/decorative/falling-leaves'
 import defaultBackground from '@/assets/images/default-background.webp'
 
@@ -28,7 +34,13 @@ const NAV_ITEMS = [
 /** 竹叶小标（导航品牌用） */
 function BambooLeafMark() {
   return (
-    <svg width="20" height="20" viewBox="0 0 48 32" fill="var(--leaf-deep)" aria-hidden>
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 48 32"
+      fill="var(--leaf-deep)"
+      aria-hidden
+    >
       <path d="M2 30C10 18 26 6 46 2c-3 12-16 24-44 28z" />
     </svg>
   )
@@ -76,7 +88,10 @@ function AboutLayout() {
         )}
       >
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5 md:px-10">
-          <Link to="/" className="flex items-center gap-2.5 transition-opacity hover:opacity-70">
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 transition-opacity hover:opacity-70"
+          >
             <BambooLeafMark />
             <span className="font-serif text-base font-semibold tracking-wide text-text-primary">
               关于小站
@@ -101,6 +116,7 @@ function AboutLayout() {
                 </Link>
               )
             })}
+            <AccountHoverCard />
           </div>
         </div>
       </nav>

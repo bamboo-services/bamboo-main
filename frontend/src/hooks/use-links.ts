@@ -27,6 +27,8 @@ import {
   deleteLink,
   getAdminLink,
   getMyLink,
+  getPublicColors,
+  getPublicGroups,
   listAdminLinks,
   listMyLinks,
   requestTakedown,
@@ -153,9 +155,11 @@ export function useUpdateLinkFail() {
 export const myLinkKeys = {
   all: ['user', 'links'] as const,
   lists: () => [...myLinkKeys.all, 'list'] as const,
-  list: (params: UserLinkParams) => [...myLinkKeys.lists(), { ...params }] as const,
+  list: (params: UserLinkParams) =>
+    [...myLinkKeys.lists(), { ...params }] as const,
   details: () => [...myLinkKeys.all, 'detail'] as const,
-  detail: (id: SnowflakeID) => [...myLinkKeys.details(), id.toString()] as const,
+  detail: (id: SnowflakeID) =>
+    [...myLinkKeys.details(), id.toString()] as const,
 }
 
 /** 我的友链分页列表 */
@@ -228,5 +232,23 @@ export function useUpdateProfile() {
       void qc.invalidateQueries({ queryKey: AUTH_USER_QUERY_KEY })
     },
     onError: (err: Error) => toast.error(err.message || '资料更新失败'),
+  })
+}
+
+/** 公开接口：获取启用的友链分组列表（供申请表单选择器） */
+export function usePublicGroups() {
+  return useQuery({
+    queryKey: ['public', 'groups'] as const,
+    queryFn: getPublicGroups,
+    staleTime: 10 * 60 * 1000,
+  })
+}
+
+/** 公开接口：获取启用的友链颜色列表（供申请表单选择器） */
+export function usePublicColors() {
+  return useQuery({
+    queryKey: ['public', 'colors'] as const,
+    queryFn: getPublicColors,
+    staleTime: 10 * 60 * 1000,
   })
 }

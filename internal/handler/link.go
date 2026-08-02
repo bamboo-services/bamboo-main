@@ -515,3 +515,45 @@ func (h *LinkHandler) RequestTakedown(c *gin.Context) {
 	// 返回成功响应
 	xResult.Success(c, "下架申请已提交，请等待管理员审核")
 }
+
+// GetPublicGroups 获取启用的友链分组列表（公开接口，供申请表单选择器使用）
+//
+// @Summary [公开] 获取友链分组列表
+// @Description 返回所有启用的友链分组，供访客申请时预选展示位置
+// @Tags 友情链接接口
+// @Produce json
+// @Success 200 {object} xBase.BaseResponse{data=[]entity.LinkGroup} "获取成功"
+// @Router /api/v1/links/groups [GET]
+func (h *LinkHandler) GetPublicGroups(c *gin.Context) {
+	onlyEnabled := true
+	req := apiLink.GroupListRequest{
+		OnlyEnabled: &onlyEnabled,
+	}
+	groups, err := h.service.linkGroupLogic.GetList(c.Request.Context(), &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	xResult.SuccessHasData(c, "获取友链分组列表成功", groups)
+}
+
+// GetPublicColors 获取启用的友链颜色列表（公开接口，供申请表单选择器使用）
+//
+// @Summary [公开] 获取友链颜色列表
+// @Description 返回所有启用的友链颜色，供访客申请时预选展示颜色
+// @Tags 友情链接接口
+// @Produce json
+// @Success 200 {object} xBase.BaseResponse{data=[]entity.LinkColor} "获取成功"
+// @Router /api/v1/links/colors [GET]
+func (h *LinkHandler) GetPublicColors(c *gin.Context) {
+	onlyEnabled := true
+	req := apiLink.ColorListRequest{
+		OnlyEnabled: &onlyEnabled,
+	}
+	colors, err := h.service.linkColorLogic.GetList(c.Request.Context(), &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	xResult.SuccessHasData(c, "获取友链颜色列表成功", colors)
+}

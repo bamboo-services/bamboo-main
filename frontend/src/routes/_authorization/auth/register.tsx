@@ -13,7 +13,6 @@ import { Link, createFileRoute, redirect } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import {
-  ArrowLeft,
   AtSign,
   Eye,
   EyeOff,
@@ -25,9 +24,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { BackLink, BambooArt, BrushUnderline } from '@/components/ink-wash'
 import { BambooLogo } from '@/assets/svg/bamboo-logo'
 import { siteConfig } from '@/lib/site'
-import defaultBackground from '@/assets/images/default-background.webp'
 import { getStoredUser, getToken, setSession } from '@/lib/auth'
 import { ROLE_ADMIN } from '@/lib/role'
 import { useRegister, useSendRegisterCode } from '@/hooks/use-auth'
@@ -65,6 +64,21 @@ export const Route = createFileRoute('/_authorization/auth/register')({
   },
   component: RegisterPage,
 })
+
+/** 站点 Logo：认证页两栏镜像时，桌面/移动的视口左上承载者不同，故抽成片段复用 */
+function SiteLogo() {
+  return (
+    <Link
+      to="/"
+      className="flex items-center gap-2.5 transition-opacity hover:opacity-80"
+    >
+      <BambooLogo size={30} />
+      <span className="font-serif text-lg font-semibold text-text-primary">
+        {siteConfig.defaultName}
+      </span>
+    </Link>
+  )
+}
 
 function RegisterPage() {
   const reduced = useReducedMotion() ?? false
@@ -123,47 +137,121 @@ function RegisterPage() {
 
   return (
     <div className="grid min-h-dvh bg-background lg:grid-cols-2">
-      {/* 左侧：表单栏 */}
-      <div className="flex flex-col gap-6 p-6 md:p-10">
-        {/* 顶部 Logo */}
-        <div className="flex justify-center md:justify-start">
-          <Link
-            to="/"
-            className="flex items-center gap-2.5 font-medium transition-opacity hover:opacity-80"
-          >
-            <BambooLogo size={30} />
-            <span className="text-lg font-semibold text-text-primary">
-              {siteConfig.defaultName}
-            </span>
-          </Link>
+      {/* ───────── 左栏：水墨叙事面板（镜像，与登录页互为镜面） ───────── */}
+      <motion.div
+        initial={reduced ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+        className="relative hidden overflow-hidden lg:block"
+        style={{
+          background:
+            'radial-gradient(700px 400px at 25% 12%, oklch(0.88 0.1 105 / 0.26), transparent 68%), radial-gradient(500px 380px at 80% 90%, oklch(0.88 0.1 105 / 0.12), transparent 70%), oklch(0.955 0.02 112)',
+        }}
+      >
+        {/* 桌面 Logo：承载视口左上（表单在右栏，故 Logo 落在水墨栏） */}
+        <div className="absolute left-12 top-10 z-10">
+          <SiteLogo />
+        </div>
+        {/* 衬线水印大字：贴左外边缘 */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-[100px] top-10 select-none font-serif text-[180px] font-black leading-none text-text-primary opacity-[0.04]"
+        >
+          林
+        </span>
+        {/* 墨韵竹叶：左栏朝左外（镜像） */}
+        <BambooArt
+          mirror
+          className="pointer-events-none absolute -left-10 top-0 h-full w-[560px] text-text-primary"
+        />
+        {/* 竹节竖线收边：贴右分界线 */}
+        <span
+          aria-hidden
+          className="absolute bottom-[8%] right-0 top-[8%] w-px"
+          style={{
+            background:
+              'linear-gradient(to bottom, transparent, var(--leaf-muted), transparent)',
+            opacity: 0.5,
+          }}
+        />
+
+        {/* 竖排题跋：贴右分界线内侧 */}
+        <div className="absolute right-[72px] top-1/2 -translate-y-1/2 [writing-mode:vertical-rl] [text-orientation:upright]">
+          <div className="flex">
+            <p className="font-serif text-[52px] font-bold leading-[1.15] tracking-[0.28em] text-text-primary">
+              竹林新友
+            </p>
+            <p className="mr-[18px] font-serif text-[34px] font-semibold tracking-[0.3em] text-leaf-deep">
+              遇
+            </p>
+          </div>
+          <p className="mr-4 font-serif text-[15px] leading-[2.4] tracking-[0.4em] text-text-secondary">
+            以文会友，以链相连
+          </p>
+        </div>
+
+        {/* 底部引言 */}
+        <div className="absolute inset-x-0 bottom-14 pl-[60px] pr-[72px]">
+          <p className="font-serif text-[17px] italic leading-relaxed tracking-[0.02em] text-text-primary/85">
+            「{siteConfig.blogger.description}」
+          </p>
+          <p className="mt-2.5 font-mono text-[11px] uppercase tracking-[0.12em] text-text-secondary">
+            {siteConfig.defaultName} · 友情链接管理
+          </p>
+        </div>
+      </motion.div>
+
+      {/* ───────── 右栏：表单（视口右，装饰朝右外边缘） ───────── */}
+      <div className="relative flex flex-col gap-6 overflow-hidden p-6 md:p-10">
+        {/* 晨光墨晕：镜像，重心偏右上 */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(560px 220px at 82% 0%, oklch(0.88 0.1 105 / 0.20), transparent 72%), radial-gradient(420px 260px at 10% 100%, oklch(0.88 0.1 105 / 0.08), transparent 70%)',
+          }}
+        />
+        {/* 墨韵竹叶水印：右栏朝右外，极淡 */}
+        <BambooArt className="pointer-events-none absolute -bottom-10 -right-[60px] h-full w-[420px] text-text-primary opacity-50" />
+        {/* 角标：承载视口右上（仅桌面） */}
+        <span className="absolute right-12 top-10 hidden font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary/70 lg:block">
+          Register · 竹林
+        </span>
+
+        {/* 顶部 Logo：仅移动（桌面 Logo 在左栏水墨面板） */}
+        <div className="relative z-10 flex justify-center md:justify-start lg:hidden">
+          <SiteLogo />
         </div>
 
         {/* 居中窄表单 */}
-        <div className="flex flex-1 items-center justify-center">
+        <div className="relative z-10 flex flex-1 items-center justify-center">
           <motion.div
-            initial={reduced ? false : { opacity: 0, y: 10 }}
+            initial={reduced ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, ease: 'easeOut' }}
-            className="w-full max-w-xs"
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className="w-full max-w-[360px]"
           >
-            <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-              {/* 标题组 */}
-              <div className="flex flex-col gap-2 text-center">
-                <h1 className="text-2xl font-bold text-text-primary">
-                  注册账号
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  注册后即可申请并管理你的友情链接
-                </p>
-              </div>
+            <form className="flex flex-col" onSubmit={handleSubmit}>
+              {/* 返回链接：标题上方的逃生口 */}
+              <BackLink to="/" label="返回首页" className="mb-5" />
 
-              <div className="grid gap-4">
+              {/* 标题组：衬线 + 笔刷下划线 */}
+              <h1 className="font-serif text-[32px] font-bold leading-tight tracking-[0.01em] text-text-primary">
+                注册账号
+              </h1>
+              <BrushUnderline className="mb-2.5 mt-2.5" />
+              <p className="text-sm leading-relaxed text-text-secondary">
+                注册后即可申请并管理你的友情链接
+              </p>
+
+              <div className="mt-6 grid gap-4">
                 {/* 邮箱 + 发送验证码 */}
                 <div className="grid gap-2">
                   <Label htmlFor="email">邮箱</Label>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
-                      <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary/70" />
                       <Input
                         id="email"
                         type="email"
@@ -197,7 +285,7 @@ function RegisterPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="code">验证码</Label>
                   <div className="relative">
-                    <ShieldCheck className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <ShieldCheck className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary/70" />
                     <Input
                       id="code"
                       type="text"
@@ -218,7 +306,7 @@ function RegisterPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="username">用户名</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary/70" />
                     <Input
                       id="username"
                       type="text"
@@ -237,10 +325,10 @@ function RegisterPage() {
                 {/* 昵称（可选） */}
                 <div className="grid gap-2">
                   <Label htmlFor="nickname">
-                    昵称 <span className="text-muted-foreground">（可选）</span>
+                    昵称 <span className="text-text-secondary">（可选）</span>
                   </Label>
                   <div className="relative">
-                    <AtSign className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <AtSign className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary/70" />
                     <Input
                       id="nickname"
                       type="text"
@@ -258,7 +346,7 @@ function RegisterPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="password">密码</Label>
                   <div className="relative">
-                    <LockKeyhole className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <LockKeyhole className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary/70" />
                     <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
@@ -274,7 +362,7 @@ function RegisterPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary transition-colors hover:text-text-primary"
                       aria-label={showPassword ? '隐藏密码' : '显示密码'}
                     >
                       {showPassword ? (
@@ -299,61 +387,28 @@ function RegisterPage() {
                   className="w-full"
                   disabled={registerMutation.isPending}
                 >
-                  {registerMutation.isPending ? '注册中…' : '注册'}
+                  {registerMutation.isPending ? '注册中…' : '注 册'}
                 </Button>
               </div>
 
-              {/* 已有账号 / 返回首页 */}
-              <div className="flex items-center justify-center gap-4 text-sm">
+              {/* 底部：仅认证流程内切换 */}
+              <div className="mt-6 flex justify-center text-sm">
                 <Link
                   to="/auth/login"
-                  className="text-primary transition-colors hover:opacity-80"
+                  className="font-medium text-leaf-deep transition-opacity hover:opacity-75"
                 >
                   已有账号？去登录
-                </Link>
-                <Link
-                  to="/"
-                  className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-primary"
-                >
-                  <ArrowLeft className="size-3.5" />
-                  返回首页
                 </Link>
               </div>
             </form>
           </motion.div>
         </div>
-      </div>
 
-      {/* 右侧：图片栏（移动端隐藏，沿用首页竹林清晨图保持色调统一） */}
-      <motion.div
-        initial={reduced ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
-        className="relative hidden lg:block"
-      >
-        <img
-          alt="Background"
-          src={defaultBackground}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        {/* 主题绿调遮罩：底部压深以便承载引言文字 */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(to top, oklch(0.35 0.08 155 / 0.82) 0%, oklch(0.5 0.08 155 / 0.25) 45%, oklch(0.96 0.03 110 / 0.2) 100%)',
-          }}
-        />
-        {/* 底部引言 */}
-        <div className="absolute inset-x-0 bottom-0 p-10">
-          <p className="text-lg font-medium leading-relaxed text-white">
-            {siteConfig.blogger.description}
-          </p>
-          <p className="mt-2 text-sm text-white/70">
-            {siteConfig.defaultName} · 友情链接管理
-          </p>
-        </div>
-      </motion.div>
+        {/* 底部版权 */}
+        <p className="relative z-10 text-center font-mono text-[11px] tracking-[0.1em] text-text-secondary/70">
+          BAMBOO · FRIENDSHIP LINKS
+        </p>
+      </div>
     </div>
   )
 }

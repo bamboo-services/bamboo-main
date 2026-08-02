@@ -129,11 +129,20 @@ export function EnsoEmpty({
   )
 }
 
-/** 墨韵竹叶：三竿竹 SVG，墨色 opacity 0.045–0.1，ink-sway 极慢摇曳 */
-export function BambooArt({ className }: { className?: string }) {
+/** 墨韵竹叶：三竿竹 SVG，墨色 opacity 0.045–0.1，ink-sway 极慢摇曳。
+ *  `mirror` 水平翻转整幅（竹竿贴左外边缘、竹叶朝左伸展），供位于视口左栏的
+ *  容器使用——装饰一律朝「外边缘」，与右栏默认朝向互为镜像。翻转只作用于根
+ *  svg 的 CSS transform，与内部 ink-sway 的 fill-box 摇曳互不干扰。 */
+export function BambooArt({
+  className,
+  mirror,
+}: {
+  className?: string
+  mirror?: boolean
+}) {
   return (
     <svg
-      className={className}
+      className={cn(className, mirror && '[transform:scaleX(-1)]')}
       viewBox="0 0 580 432"
       preserveAspectRatio="xMaxYMax meet"
       aria-hidden="true"
@@ -211,6 +220,34 @@ export function BambooArt({ className }: { className?: string }) {
 /* ───────── 页面级原语：供 dashboard 之外的后台各页收编进同一套语言 ───────── */
 
 /**
+ * 返回链接：mono 小字 + 箭头 hover 微移。认证页的「返回首页」逃生口与后台
+ * `PageHead` 的 backTo 共用同一交互签名——「返回」是跨页面的统一手势，沉淀为
+ * 单一原语避免各处内联出细微漂移。`className` 仅承载外距等定位语义。
+ */
+export function BackLink({
+  to,
+  label = '返回',
+  className = '',
+}: {
+  to: string
+  label?: string
+  className?: string
+}) {
+  return (
+    <Link
+      to={to}
+      className={cn(
+        'group inline-flex items-center gap-1.5 font-mono text-xs text-text-secondary transition-colors duration-150 hover:text-leaf-deep',
+        className,
+      )}
+    >
+      <ArrowLeft className="size-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
+      {label}
+    </Link>
+  )
+}
+
+/**
  * 页头：mono kicker + 衬线大标题 + 笔刷下划线 + 描述 + 右侧动作区。
  * 取代旧版 `text-3xl font-bold tracking-tight` 通用页头，是全后台页面的统一开场。
  * `backTo` 提供时渲染返回链接（箭头悬停微移）。
@@ -233,15 +270,7 @@ export function PageHead({
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
-        {backTo && (
-          <Link
-            to={backTo}
-            className="group mb-2.5 inline-flex items-center gap-1.5 font-mono text-xs text-text-secondary transition-colors duration-150 hover:text-leaf-deep"
-          >
-            <ArrowLeft className="size-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
-            {backLabel ?? '返回'}
-          </Link>
-        )}
+        {backTo && <BackLink to={backTo} label={backLabel} className="mb-2.5" />}
         {kicker && (
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-leaf-deep">
             {kicker}

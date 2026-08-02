@@ -21,6 +21,8 @@ func (r *route) linkRouter(route gin.IRouter) {
 	linkGroup := route.Group("/links")
 	{
 		linkGroup.GET("", linkHandler.GetPublicLinks)
+		linkGroup.GET("/groups", linkHandler.GetPublicGroups)
+		linkGroup.GET("/colors", linkHandler.GetPublicColors)
 		linkGroup.POST("/apply", linkHandler.ApplyLink)
 	}
 }

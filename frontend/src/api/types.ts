@@ -296,6 +296,8 @@ export interface ApplyLinkRequest {
   link_rss?: string
   link_desc?: string
   link_email: string
+  link_group_id?: SnowflakeID
+  link_color_id?: SnowflakeID
   link_apply_remark?: string
 }
 
@@ -307,6 +309,8 @@ export interface UpdateUserLinkRequest {
   link_rss?: string
   link_desc?: string
   link_email?: string
+  link_group_id?: SnowflakeID
+  link_color_id?: SnowflakeID
   link_apply_remark?: string
 }
 

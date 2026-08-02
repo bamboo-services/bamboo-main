@@ -106,13 +106,15 @@ type FriendPublicResponse struct {
 // 面向游客与登录用户的公开申请入口：仅需站点基础信息，联系邮箱必填（用于确认友链归属），
 // 分组/颜色/级别/排序等管理员专属字段不在此开放，由管理员审核时分配。
 type FriendApplyRequest struct {
-	LinkName        string `json:"link_name" binding:"required,min=1,max=100" example:"示例网站"`
-	LinkURL         string `json:"link_url" binding:"required,url,max=500" example:"https://example.com"`
-	LinkAvatar      string `json:"link_avatar" binding:"omitempty,url,max=500" example:"https://example.com/avatar.jpg"`
-	LinkRSS         string `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
-	LinkDesc        string `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
-	LinkEmail       string `json:"link_email" binding:"required,email,max=100" example:"admin@example.com"`
-	LinkApplyRemark string `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
+	LinkName        string                 `json:"link_name" binding:"required,min=1,max=100" example:"示例网站"`
+	LinkURL         string                 `json:"link_url" binding:"required,url,max=500" example:"https://example.com"`
+	LinkAvatar      string                 `json:"link_avatar" binding:"omitempty,url,max=500" example:"https://example.com/avatar.jpg"`
+	LinkRSS         string                 `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
+	LinkDesc        string                 `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
+	LinkEmail       string                 `json:"link_email" binding:"required,email,max=100" example:"admin@example.com"`
+	LinkGroupID     xSnowflake.SnowflakeID `json:"link_group_id" binding:"omitempty,number" example:"1"`
+	LinkColorID     xSnowflake.SnowflakeID `json:"link_color_id" binding:"omitempty,number" example:"1"`
+	LinkApplyRemark string                 `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
 }
 
 // FriendUserUpdateRequest 用户更新自己友情链接请求

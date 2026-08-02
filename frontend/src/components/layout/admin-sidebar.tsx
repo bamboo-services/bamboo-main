@@ -45,16 +45,8 @@ import { siteConfig } from '@/lib/site'
 import { useAuth } from '@/hooks/use-auth'
 import { useSiteInfo } from '@/hooks/use-site-info'
 import { cn } from '@/lib/utils'
+import { formatDateTime } from '@/lib/datetime'
 import { roleLabel as resolveRoleLabel } from '@/lib/role'
-
-/** 日期时间格式化为 2026-07-28 19:30；无效/缺省返回 — */
-function formatDateTime(iso?: string | null): string {
-  if (!iso) return '—'
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return '—'
-  const pad = (n: number) => n.toString().padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
 
 const menuGroups = [
   {
@@ -258,7 +250,10 @@ export function AdminSidebar() {
                 </div>
                 <DropdownMenuSeparator className="bg-border" />
                 <div className="p-1.5">
-                  <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={handleLogout}
+                  >
                     <LogOut className="size-4" />
                     退出登录
                   </DropdownMenuItem>
@@ -326,11 +321,33 @@ function SidebarBambooArt({ className }: { className?: string }) {
           strokeWidth="3"
           strokeLinecap="round"
         />
-        <ellipse cx="81" cy="150" rx="4" ry="1.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
-        <ellipse cx="81" cy="96" rx="4" ry="1.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
+        <ellipse
+          cx="81"
+          cy="150"
+          rx="4"
+          ry="1.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        />
+        <ellipse
+          cx="81"
+          cy="96"
+          rx="4"
+          ry="1.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        />
         <use href="#sbleaf" transform="translate(82 158) rotate(-22)" />
-        <use href="#sbleaf" transform="translate(81 104) scale(-1 1) rotate(-26)" />
-        <use href="#sbleaf" transform="translate(81 52) rotate(-32) scale(1.05)" />
+        <use
+          href="#sbleaf"
+          transform="translate(81 104) scale(-1 1) rotate(-26)"
+        />
+        <use
+          href="#sbleaf"
+          transform="translate(81 52) rotate(-32) scale(1.05)"
+        />
       </g>
     </svg>
   )

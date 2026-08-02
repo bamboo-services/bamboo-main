@@ -12,13 +12,7 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
-import {
-  MoreHorizontal,
-  Pencil,
-  Plus,
-  Search,
-  Trash2,
-} from 'lucide-react'
+import { MoreHorizontal, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import type {
   SnowflakeID,
   SponsorChannelAdmin,
@@ -44,6 +38,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Pagination } from '@/components/ui/pagination'
+import { Select } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -88,10 +83,6 @@ export const Route = createFileRoute('/_admin/admin/sponsor')({
 })
 
 const PAGE_SIZE = 10
-
-/** 原生 select 样式（与 Input 视觉对齐） */
-const selectClass =
-  'h-9 w-full cursor-pointer rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-leaf-deep focus-visible:ring-leaf-deep/30 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50'
 
 /** 金额（分）转元展示 */
 function formatYuan(cents: number) {
@@ -272,9 +263,9 @@ function RecordsPanel({ reduced }: { reduced: boolean }) {
             }}
           />
         </div>
-        <select
+        <Select
           aria-label="按渠道筛选"
-          className={cn(selectClass, 'w-40')}
+          className="w-40"
           value={channelFilter?.toString() ?? ''}
           onChange={(e) => {
             const value = e.target.value
@@ -288,7 +279,7 @@ function RecordsPanel({ reduced }: { reduced: boolean }) {
               {channel.name}
             </option>
           ))}
-        </select>
+        </Select>
         <div className="flex-1" />
         <Button className="cursor-pointer" onClick={() => setFormTarget('new')}>
           <Plus className="mr-2 size-4" />
@@ -364,10 +355,7 @@ function RecordsPanel({ reduced }: { reduced: boolean }) {
                     </InkBadge>
                   </TableCell>
                   <TableCell
-                    className={cn(
-                      inkTd,
-                      'hidden max-w-[220px] md:table-cell',
-                    )}
+                    className={cn(inkTd, 'hidden max-w-[220px] md:table-cell')}
                   >
                     <span
                       className="block truncate text-text-secondary"
@@ -388,9 +376,7 @@ function RecordsPanel({ reduced }: { reduced: boolean }) {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell
-                    className={cn(inkTd, 'hidden lg:table-cell')}
-                  >
+                  <TableCell className={cn(inkTd, 'hidden lg:table-cell')}>
                     <span className="font-mono tabular-nums text-text-secondary">
                       {formatDate(record.sponsor_at ?? record.created_at)}
                     </span>
@@ -612,9 +598,8 @@ function RecordFormDialog({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="recordChannel">赞助渠道</Label>
-              <select
+              <Select
                 id="recordChannel"
-                className={selectClass}
                 value={channelId}
                 onChange={(e) => setChannelId(e.target.value)}
               >
@@ -627,7 +612,7 @@ function RecordFormDialog({
                     {channel.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="recordSponsorAt">赞助时间</Label>

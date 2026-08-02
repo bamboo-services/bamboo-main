@@ -638,6 +638,9 @@ definitions:
         example: https://example.com/avatar.jpg
         maxLength: 500
         type: string
+      link_color_id:
+        example: 1
+        type: integer
       link_desc:
         example: 这是一个示例网站
         maxLength: 500
@@ -646,6 +649,9 @@ definitions:
         example: admin@example.com
         maxLength: 100
         type: string
+      link_group_id:
+        example: 1
+        type: integer
       link_name:
         example: 示例网站
         maxLength: 100
@@ -4135,6 +4141,46 @@ paths:
       summary: '[公开] 申请友情链接'
       tags:
       - 公开接口
+  /api/v1/links/colors:
+    get:
+      description: 返回所有启用的友链颜色，供访客申请时预选展示颜色
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.LinkColor'
+                  type: array
+              type: object
+      summary: '[公开] 获取友链颜色列表'
+      tags:
+      - 友情链接接口
+  /api/v1/links/groups:
+    get:
+      description: 返回所有启用的友链分组，供访客申请时预选展示位置
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.LinkGroup'
+                  type: array
+              type: object
+      summary: '[公开] 获取友链分组列表'
+      tags:
+      - 友情链接接口
   /api/v1/public/health:
     get:
       consumes:

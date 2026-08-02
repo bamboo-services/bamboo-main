@@ -12,7 +12,7 @@ import { motion, useReducedMotion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { enter } from '@/lib/motion'
-import { getToken } from '@/lib/auth'
+import { AccountHoverCard } from '@/components/layout/account-hover-card'
 import { FallingLeaves } from '@/components/decorative/falling-leaves'
 import defaultBackground from '@/assets/images/default-background.webp'
 
@@ -23,7 +23,13 @@ export const Route = createFileRoute('/operate')({
 /** 竹叶小标（导航品牌用） */
 function BambooLeafMark() {
   return (
-    <svg width="20" height="20" viewBox="0 0 48 32" fill="var(--leaf-deep)" aria-hidden>
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 48 32"
+      fill="var(--leaf-deep)"
+      aria-hidden
+    >
       <path d="M2 30C10 18 26 6 46 2c-3 12-16 24-44 28z" />
     </svg>
   )
@@ -34,13 +40,12 @@ function BambooLeafMark() {
  *
  * 结构身份区别于 about（全屏模糊背景 + 落叶 + 大字叙事）：
  * operate 是访客的「递交一封信」，纯宣纸底、更窄聚焦、功能导向，
- * 顶导右侧按登录态呈现「登录/注册」或「用户中心」入口。
+ * 顶导右侧复用公开页账户入口 AccountHoverCard（未登录墨韵胶囊 / 已登录状态卡）。
  */
 function OperateLayout() {
   const reduced = useReducedMotion() ?? false
   const thisYear = new Date().getFullYear()
   const [scrolled, setScrolled] = useState(false)
-  const isAuthed = getToken() != null
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -88,29 +93,7 @@ function OperateLayout() {
             </span>
           </Link>
           <div className="flex items-center gap-6">
-            {isAuthed ? (
-              <Link
-                to="/user/dashboard"
-                className="font-mono text-[11px] uppercase tracking-[0.28em] text-text-secondary transition-colors hover:text-leaf-deep"
-              >
-                用户中心
-              </Link>
-            ) : (
-              <>
-                <Link
-                  to="/auth/login"
-                  className="font-mono text-[11px] uppercase tracking-[0.28em] text-text-secondary transition-colors hover:text-leaf-deep"
-                >
-                  登录
-                </Link>
-                <Link
-                  to="/auth/register"
-                  className="font-mono text-[11px] uppercase tracking-[0.28em] text-text-secondary transition-colors hover:text-leaf-deep"
-                >
-                  注册
-                </Link>
-              </>
-            )}
+            <AccountHoverCard />
           </div>
         </div>
       </nav>
