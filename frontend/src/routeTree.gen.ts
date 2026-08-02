@@ -36,6 +36,7 @@ import { Route as UserUserAccountRouteImport } from './routes/_user/user/account
 import { Route as UserUserDashboardRouteImport } from './routes/_user/user/dashboard'
 import { Route as AdminAdminLinkIndexRouteImport } from './routes/_admin/admin/link/index'
 import { Route as AdminAdminLinkAddRouteImport } from './routes/_admin/admin/link/add'
+import { Route as AdminAdminLinkAnomalyRouteImport } from './routes/_admin/admin/link/anomaly'
 import { Route as AdminAdminLinkVerifyRouteImport } from './routes/_admin/admin/link/verify'
 import { Route as UserUserLinksIndexRouteImport } from './routes/_user/user/links/index'
 import { Route as AdminAdminLinkIdIndexRouteImport } from './routes/_admin/admin/link/$id/index'
@@ -175,6 +176,11 @@ const AdminAdminLinkAddRoute = AdminAdminLinkAddRouteImport.update({
   path: '/link/add',
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
+const AdminAdminLinkAnomalyRoute = AdminAdminLinkAnomalyRouteImport.update({
+  id: '/link/anomaly',
+  path: '/link/anomaly',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
 const AdminAdminLinkVerifyRoute = AdminAdminLinkVerifyRouteImport.update({
   id: '/link/verify',
   path: '/link/verify',
@@ -224,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/user/account': typeof UserUserAccountRoute
   '/user/dashboard': typeof UserUserDashboardRoute
   '/admin/link/add': typeof AdminAdminLinkAddRoute
+  '/admin/link/anomaly': typeof AdminAdminLinkAnomalyRoute
   '/admin/link/verify': typeof AdminAdminLinkVerifyRoute
   '/admin/link/': typeof AdminAdminLinkIndexRoute
   '/user/links/': typeof UserUserLinksIndexRoute
@@ -252,6 +259,7 @@ export interface FileRoutesByTo {
   '/user/account': typeof UserUserAccountRoute
   '/user/dashboard': typeof UserUserDashboardRoute
   '/admin/link/add': typeof AdminAdminLinkAddRoute
+  '/admin/link/anomaly': typeof AdminAdminLinkAnomalyRoute
   '/admin/link/verify': typeof AdminAdminLinkVerifyRoute
   '/admin/link': typeof AdminAdminLinkIndexRoute
   '/user/links': typeof UserUserLinksIndexRoute
@@ -287,6 +295,7 @@ export interface FileRoutesById {
   '/_user/user/account': typeof UserUserAccountRoute
   '/_user/user/dashboard': typeof UserUserDashboardRoute
   '/_admin/admin/link/add': typeof AdminAdminLinkAddRoute
+  '/_admin/admin/link/anomaly': typeof AdminAdminLinkAnomalyRoute
   '/_admin/admin/link/verify': typeof AdminAdminLinkVerifyRoute
   '/_admin/admin/link/': typeof AdminAdminLinkIndexRoute
   '/_user/user/links/': typeof UserUserLinksIndexRoute
@@ -319,6 +328,7 @@ export interface FileRouteTypes {
     | '/user/account'
     | '/user/dashboard'
     | '/admin/link/add'
+    | '/admin/link/anomaly'
     | '/admin/link/verify'
     | '/admin/link/'
     | '/user/links/'
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | '/user/account'
     | '/user/dashboard'
     | '/admin/link/add'
+    | '/admin/link/anomaly'
     | '/admin/link/verify'
     | '/admin/link'
     | '/user/links'
@@ -381,6 +392,7 @@ export interface FileRouteTypes {
     | '/_user/user/account'
     | '/_user/user/dashboard'
     | '/_admin/admin/link/add'
+    | '/_admin/admin/link/anomaly'
     | '/_admin/admin/link/verify'
     | '/_admin/admin/link/'
     | '/_user/user/links/'
@@ -589,6 +601,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminLinkAddRouteImport
       parentRoute: typeof AdminAdminRouteRoute
     }
+    '/_admin/admin/link/anomaly': {
+      id: '/_admin/admin/link/anomaly'
+      path: '/link/anomaly'
+      fullPath: '/admin/link/anomaly'
+      preLoaderRoute: typeof AdminAdminLinkAnomalyRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
     '/_admin/admin/link/verify': {
       id: '/_admin/admin/link/verify'
       path: '/link/verify'
@@ -634,6 +653,7 @@ interface AdminAdminRouteRouteChildren {
   AdminAdminSettingRoute: typeof AdminAdminSettingRoute
   AdminAdminSponsorRoute: typeof AdminAdminSponsorRoute
   AdminAdminLinkAddRoute: typeof AdminAdminLinkAddRoute
+  AdminAdminLinkAnomalyRoute: typeof AdminAdminLinkAnomalyRoute
   AdminAdminLinkVerifyRoute: typeof AdminAdminLinkVerifyRoute
   AdminAdminLinkIndexRoute: typeof AdminAdminLinkIndexRoute
   AdminAdminLinkIdEditRoute: typeof AdminAdminLinkIdEditRoute
@@ -647,6 +667,7 @@ const AdminAdminRouteRouteChildren: AdminAdminRouteRouteChildren = {
   AdminAdminSettingRoute: AdminAdminSettingRoute,
   AdminAdminSponsorRoute: AdminAdminSponsorRoute,
   AdminAdminLinkAddRoute: AdminAdminLinkAddRoute,
+  AdminAdminLinkAnomalyRoute: AdminAdminLinkAnomalyRoute,
   AdminAdminLinkVerifyRoute: AdminAdminLinkVerifyRoute,
   AdminAdminLinkIndexRoute: AdminAdminLinkIndexRoute,
   AdminAdminLinkIdEditRoute: AdminAdminLinkIdEditRoute,

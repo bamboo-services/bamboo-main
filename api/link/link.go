@@ -57,8 +57,9 @@ type FriendQueryRequest struct {
 	Page        int                    `form:"page" binding:"omitempty,min=1" example:"1"`
 	PageSize    int                    `form:"page_size" binding:"omitempty,min=1,max=100" example:"10"`
 	LinkName    string                 `form:"link_name" binding:"omitempty,max=100" example:"示例"`
-	LinkStatus  *int                   `form:"link_status" binding:"omitempty,oneof=0 1 2" example:"1"`
+	LinkStatus  *int                   `form:"link_status" binding:"omitempty,oneof=0 1 2 3 4" example:"1"`
 	LinkFail    *int                   `form:"link_fail" binding:"omitempty,oneof=0 1" example:"0"`
+	LinkAnomaly *bool                  `form:"link_anomaly" binding:"omitempty" example:"true"` // 异常过滤：status 非 0/1 或已失效（true）
 	LinkGroupID xSnowflake.SnowflakeID `form:"link_group_id" binding:"omitempty,number" example:"1"`
 	SortBy      string                 `form:"sort_by" binding:"omitempty,oneof=created_at updated_at link_order link_name" example:"created_at"`
 	SortOrder   string                 `form:"sort_order" binding:"omitempty,oneof=asc desc" example:"desc"`

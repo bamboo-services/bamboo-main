@@ -45,6 +45,7 @@ type FriendQuery struct {
 	LinkName    string
 	LinkStatus  *int
 	LinkFail    *int
+	LinkAnomaly *bool
 	LinkGroupID xSnowflake.SnowflakeID
 	UserID      xSnowflake.SnowflakeID
 	SortBy      string
@@ -200,6 +201,10 @@ func (r *LinkRepo) List(ctx context.Context, req *FriendQuery, tx *gorm.DB) ([]e
 	}
 	if req.LinkFail != nil {
 		query = query.Where("is_failure = ?", *req.LinkFail)
+	}
+	if req.LinkAnomaly != nil && *req.LinkAnomaly {
+		// 异常：非待审核/已通过（拒绝/下架待审核/已下架）或已失效
+		query = query.Where("(status NOT IN (0, 1) OR is_failure = 1)")
 	}
 	if req.LinkGroupID != 0 {
 		query = query.Where("group_id = ?", req.LinkGroupID)

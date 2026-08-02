@@ -1607,7 +1607,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "友情链接状态 0:待审核 1:已通过 2:已拒绝",
+                        "description": "友情链接状态 0:待审核 1:已通过 2:已拒绝 3:下架待审核 4:已下架",
                         "name": "link_status",
                         "in": "query"
                     },
@@ -1615,6 +1615,12 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "失效状态 0:正常 1:失效",
                         "name": "link_fail",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "异常过滤：status 非 0/1 或已失效（true）",
+                        "name": "link_anomaly",
                         "in": "query"
                     },
                     {

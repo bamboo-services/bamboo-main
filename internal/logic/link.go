@@ -216,6 +216,7 @@ func (l *LinkLogic) List(ctx context.Context, req *apiLink.FriendQueryRequest) (
 		LinkName:    req.LinkName,
 		LinkStatus:  req.LinkStatus,
 		LinkFail:    req.LinkFail,
+		LinkAnomaly: req.LinkAnomaly,
 		LinkGroupID: req.LinkGroupID,
 		SortBy:      req.SortBy,
 		SortOrder:   req.SortOrder,

@@ -243,6 +243,7 @@ export interface LinkListParams {
   link_name?: string
   link_status?: number
   link_fail?: number
+  link_anomaly?: boolean
   link_group_id?: SnowflakeID
   sort_by?: 'created_at' | 'updated_at' | 'link_order' | 'link_name'
   sort_order?: 'asc' | 'desc'

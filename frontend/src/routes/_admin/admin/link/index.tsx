@@ -18,6 +18,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import {
+  AlertTriangle,
   Camera,
   CheckCircle2,
   ExternalLink,
@@ -59,7 +60,6 @@ import {
   BambooRule,
   EnsoEmpty,
   InkBadge,
-  InkPill,
   PageHead,
   inkCard,
   inkTableHeadRow,
@@ -365,7 +365,6 @@ function LinkListPage() {
   const reduced = useReducedMotion() ?? false
   const navigate = useNavigate()
   const [keyword, setKeyword] = useState('')
-  const [statusFilter, setStatusFilter] = useState<number | null>(null)
   const [groupFilter, setGroupFilter] = useState<SnowflakeID | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('list')
   const [pagination, setPagination] = useState<PaginationState>({
@@ -382,7 +381,8 @@ function LinkListPage() {
     page: pagination.pageIndex + 1,
     page_size: pagination.pageSize,
     link_name: keyword.trim() || undefined,
-    link_status: statusFilter ?? undefined,
+    // 友链管理仅展示已通过友链，其余状态分流至审核/异常管理
+    link_status: 1,
     link_group_id: groupFilter ?? undefined,
     sort_by: 'created_at',
     sort_order: 'desc',
@@ -404,33 +404,6 @@ function LinkListPage() {
     })
   }
 
-  const statusPills = [
-    { label: '全部', value: null },
-    { label: '待审核', value: 0 },
-    { label: '已通过', value: 1 },
-    { label: '已拒绝', value: 2 },
-    { label: '下架待审核', value: 3 },
-    { label: '已下架', value: 4 },
-  ]
-
-  const statItems = [
-    {
-      label: '总收录',
-      value: stats?.total_links ?? 0,
-      dot: 'var(--chart-1)',
-    },
-    {
-      label: '已通过',
-      value: stats?.approved_links ?? 0,
-      dot: 'var(--leaf-deep)',
-    },
-    {
-      label: '待审核',
-      value: stats?.pending_links ?? 0,
-      dot: 'var(--chart-4)',
-    },
-  ]
-
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <PageHead
@@ -439,6 +412,12 @@ function LinkListPage() {
         sub="管理所有友情链接，审核申请、维护站点信息。"
         actions={
           <>
+            <Link to="/admin/link/anomaly">
+              <Button variant="outline" className="cursor-pointer">
+                <AlertTriangle className="mr-2 size-4" />
+                异常管理
+              </Button>
+            </Link>
             <Link to="/admin/link/verify">
               <Button variant="outline" className="cursor-pointer">
                 <CheckCircle2 className="mr-2 size-4" />
@@ -462,7 +441,7 @@ function LinkListPage() {
 
       <BambooRule reduced={reduced} delay={0.12} />
 
-      {/* 统计条 + 视图切换 */}
+      {/* 搜索 + 位置分组 + 视图切换（一行） */}
       <motion.div
         {...enter(reduced, 0.18, {
           initial: { opacity: 0, y: 10 },
@@ -471,27 +450,57 @@ function LinkListPage() {
         })}
         className="flex flex-wrap items-center justify-between gap-3"
       >
-        <div className={`${inkCard} flex items-center gap-7 px-5 py-3`}>
-          {statItems.map((item) => (
-            <span
-              key={item.label}
-              className="flex items-center gap-2"
-            >
-              <span
-                className="size-2 rounded-full"
-                style={{ backgroundColor: item.dot }}
-                aria-hidden="true"
-              />
-              <span className="font-serif text-xl font-semibold tabular-nums text-text-primary">
-                {item.value}
-              </span>
-              <span className="font-mono text-xs text-text-secondary">
-                {item.label}
-              </span>
-            </span>
-          ))}
+        <div className="relative w-full max-w-xs sm:w-72">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
+          <Input
+            placeholder="搜索站点…"
+            className="pl-9"
+            value={keyword}
+            onChange={(e) => {
+              setKeyword(e.target.value)
+              setPagination((old) => ({ ...old, pageIndex: 0 }))
+            }}
+          />
         </div>
-
+        {groups.length > 0 && (
+          <div className="flex min-w-0 flex-1 items-center justify-start">
+            <div className="flex max-w-full items-center gap-1 overflow-x-auto rounded-lg border border-border bg-background p-0.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setGroupFilter(null)
+                  setPagination((old) => ({ ...old, pageIndex: 0 }))
+                }}
+                className={cn(
+                  'cursor-pointer whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-200',
+                  groupFilter === null
+                    ? 'bg-leaf-deep/12 text-leaf-deep'
+                    : 'text-text-secondary hover:text-text-primary',
+                )}
+              >
+                全部位置
+              </button>
+              {groups.map((group) => (
+                <button
+                  key={group.id.toString()}
+                  type="button"
+                  onClick={() => {
+                    setGroupFilter(group.id)
+                    setPagination((old) => ({ ...old, pageIndex: 0 }))
+                  }}
+                  className={cn(
+                    'cursor-pointer whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-200',
+                    groupFilter === group.id
+                      ? 'bg-leaf-deep/12 text-leaf-deep'
+                      : 'text-text-secondary hover:text-text-primary',
+                  )}
+                >
+                  {group.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="flex rounded-lg border border-border bg-background p-0.5">
           <button
             type="button"
@@ -522,76 +531,6 @@ function LinkListPage() {
         </div>
       </motion.div>
 
-      {/* 筛选区：搜索 + 状态 */}
-      <motion.div
-        {...enter(reduced, 0.24, {
-          initial: { opacity: 0, y: 10 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.4, ease: 'easeOut' },
-        })}
-        className="flex flex-wrap items-center gap-3"
-      >
-        <div className="relative w-full max-w-xs">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
-          <Input
-            placeholder="搜索站点…"
-            className="pl-9"
-            value={keyword}
-            onChange={(e) => {
-              setKeyword(e.target.value)
-              setPagination((old) => ({ ...old, pageIndex: 0 }))
-            }}
-          />
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {statusPills.map((pill) => (
-            <InkPill
-              key={pill.label}
-              active={statusFilter === pill.value}
-              onClick={() => {
-                setStatusFilter(pill.value)
-                setPagination((old) => ({ ...old, pageIndex: 0 }))
-              }}
-            >
-              {pill.label}
-            </InkPill>
-          ))}
-        </div>
-      </motion.div>
-
-      {groups.length > 0 && (
-        <motion.div
-          {...enter(reduced, 0.28, {
-            initial: { opacity: 0, y: 10 },
-            animate: { opacity: 1, y: 0 },
-            transition: { duration: 0.4, ease: 'easeOut' },
-          })}
-          className="flex flex-wrap gap-1.5"
-        >
-          <InkPill
-            active={groupFilter === null}
-            onClick={() => {
-              setGroupFilter(null)
-              setPagination((old) => ({ ...old, pageIndex: 0 }))
-            }}
-          >
-            全部位置
-          </InkPill>
-          {groups.map((group) => (
-            <InkPill
-              key={group.id.toString()}
-              active={groupFilter === group.id}
-              onClick={() => {
-                setGroupFilter(group.id)
-                setPagination((old) => ({ ...old, pageIndex: 0 }))
-              }}
-            >
-              {group.name}
-            </InkPill>
-          ))}
-        </motion.div>
-      )}
-
       {/* 内容区 */}
       {linksQuery.isLoading ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -619,7 +558,6 @@ function LinkListPage() {
                 className="ml-auto cursor-pointer"
                 onClick={() => {
                   setKeyword('')
-                  setStatusFilter(null)
                   setGroupFilter(null)
                 }}
               >

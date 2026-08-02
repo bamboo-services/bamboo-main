@@ -176,8 +176,9 @@ func (h *LinkHandler) Get(c *gin.Context) {
 // @Param page query int false "页码" default(1)
 // @Param page_size query int false "每页数量" default(10)
 // @Param link_name query string false "友情链接名称"
-// @Param link_status query int false "友情链接状态 0:待审核 1:已通过 2:已拒绝"
+// @Param link_status query int false "友情链接状态 0:待审核 1:已通过 2:已拒绝 3:下架待审核 4:已下架"
 // @Param link_fail query int false "失效状态 0:正常 1:失效"
+// @Param link_anomaly query bool false "异常过滤：status 非 0/1 或已失效（true）"
 // @Param link_group_id query int64 false "分组ID"
 // @Param sort_by query string false "排序字段" Enums(created_at, updated_at, link_order, link_name)
 // @Param sort_order query string false "排序方式" Enums(asc, desc)

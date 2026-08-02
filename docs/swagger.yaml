@@ -2837,7 +2837,7 @@ paths:
         in: query
         name: link_name
         type: string
-      - description: 友情链接状态 0:待审核 1:已通过 2:已拒绝
+      - description: 友情链接状态 0:待审核 1:已通过 2:已拒绝 3:下架待审核 4:已下架
         in: query
         name: link_status
         type: integer
@@ -2845,6 +2845,10 @@ paths:
         in: query
         name: link_fail
         type: integer
+      - description: 异常过滤：status 非 0/1 或已失效（true）
+        in: query
+        name: link_anomaly
+        type: boolean
       - description: 分组ID
         format: int64
         in: query

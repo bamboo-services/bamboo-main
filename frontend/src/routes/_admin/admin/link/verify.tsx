@@ -261,7 +261,6 @@ function VerifyDetail({
   onReject: () => void
   isPending: boolean
 }) {
-  const isTakedown = link.status === 3
   const status = linkStatus(link)
   const accent = accentOf(link.color_f_key)
   const fancy = isFancyColor(link.color_f_key)
@@ -461,9 +460,7 @@ function VerifyDetail({
         </div>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-text-secondary">
-            {isTakedown
-              ? '批准下架后该站点将从友链页面移除'
-              : '审核通过后该站点将展示在友链页面，上方修改会同步保存'}
+            审核通过后该站点将展示在友链页面，上方修改会同步保存
           </p>
           <div className="flex gap-2">
             <Button
@@ -473,7 +470,7 @@ function VerifyDetail({
               disabled={isPending}
             >
               <X className="mr-2 size-4" />
-              {isPending ? '处理中…' : isTakedown ? '驳回下架' : '拒绝'}
+              {isPending ? '处理中…' : '拒绝'}
             </Button>
             <Button
               className="cursor-pointer"
@@ -481,7 +478,7 @@ function VerifyDetail({
               disabled={isPending}
             >
               <Check className="mr-2 size-4" />
-              {isPending ? '处理中…' : isTakedown ? '批准下架' : '通过'}
+              {isPending ? '处理中…' : '通过'}
             </Button>
           </div>
         </div>
@@ -492,18 +489,10 @@ function VerifyDetail({
 
 function LinkVerifyPage() {
   const reduced = useReducedMotion() ?? false
-  // 同时拉取「待审核(0)」与「下架待审核(3)」两类待处理友链
+  // 友链审核仅展示待审核(0)，其余状态分流至异常管理
   const pendingQuery = useAdminLinks({ link_status: 0, page: 1, page_size: 50 })
-  const takedownQuery = useAdminLinks({
-    link_status: 3,
-    page: 1,
-    page_size: 50,
-  })
-  const isLoading = pendingQuery.isLoading || takedownQuery.isLoading
-  const pendingLinks = [
-    ...(pendingQuery.data?.data ?? []),
-    ...(takedownQuery.data?.data ?? []),
-  ]
+  const isLoading = pendingQuery.isLoading
+  const pendingLinks = pendingQuery.data?.data ?? []
   const updateStatus = useUpdateLinkStatus()
   const updateLink = useUpdateLink()
 
@@ -536,7 +525,6 @@ function LinkVerifyPage() {
   // 主操作：先保存编辑 → 再改状态
   const handleApprove = () => {
     if (!selected || !editForm) return
-    const targetStatus = selected.status === 3 ? 4 : 1
     const updateReq = verifyFormToUpdateReq(editForm)
 
     // 先保存站点信息修改
@@ -549,7 +537,7 @@ function LinkVerifyPage() {
             {
               id: selected.id,
               req: {
-                link_status: targetStatus,
+                link_status: 1,
                 link_review_remark: remark.trim() || undefined,
               },
             },
@@ -568,7 +556,6 @@ function LinkVerifyPage() {
   // 次操作：先保存编辑 → 再改状态
   const handleReject = () => {
     if (!selected || !editForm) return
-    const targetStatus = selected.status === 3 ? 1 : 2
     const updateReq = verifyFormToUpdateReq(editForm)
 
     updateLink.mutate(
@@ -579,7 +566,7 @@ function LinkVerifyPage() {
             {
               id: selected.id,
               req: {
-                link_status: targetStatus,
+                link_status: 2,
                 link_review_remark: remark.trim() || undefined,
               },
             },

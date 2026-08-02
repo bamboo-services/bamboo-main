@@ -60,6 +60,7 @@ export function listAdminLinks(
       link_name: params.link_name || undefined,
       link_status: params.link_status,
       link_fail: params.link_fail,
+      link_anomaly: params.link_anomaly,
       link_group_id: params.link_group_id?.toString(),
       sort_by: params.sort_by,
       sort_order: params.sort_order,
