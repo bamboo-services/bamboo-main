@@ -128,6 +128,14 @@ export function updateLinkFail(
   })
 }
 
+/** 手动触发友链重新截图（仅已通过友链有效，任务进入截图队列） */
+export function reScreenshotLink(id: SnowflakeID): Promise<void> {
+  return request<void>({
+    method: 'POST',
+    url: `/admin/links/${id.toString()}/screenshot`,
+  })
+}
+
 // ---------------------------------------------------------------------------
 // 用户自助接口（需登录；归属校验由后端完成）
 // ---------------------------------------------------------------------------

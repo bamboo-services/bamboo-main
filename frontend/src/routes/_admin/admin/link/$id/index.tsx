@@ -14,6 +14,7 @@ import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import {
   ArrowLeft,
+  Camera,
   Check,
   Copy,
   ExternalLink,
@@ -142,6 +143,7 @@ function LinkDetailPage() {
   const { id } = Route.useParams()
   const navigate = useNavigate()
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [shotFailed, setShotFailed] = useState(false)
 
   const linkQuery = useAdminLink(BigInt(id))
   const deleteLink = useDeleteLink()
@@ -336,6 +338,43 @@ function LinkDetailPage() {
           >
             <CardHead title="友链预览" meta="访客在公开页看到的卡片样式" />
             <FriendPreview link={link} accent={accent} />
+          </motion.section>
+
+          <motion.section
+            {...enter(reduced, 0.25, {
+              initial: { opacity: 0, y: 10 },
+              animate: { opacity: 1, y: 0 },
+              transition: { duration: 0.4, ease: 'easeOut' },
+            })}
+            className={inkCard}
+          >
+            <CardHead
+              title="站点截图"
+              meta={
+                link.screenshot_at
+                  ? `更新于 ${new Date(link.screenshot_at).toLocaleString('zh-CN')}`
+                  : '每日 0 点自动更新'
+              }
+            />
+            {link.screenshot_url && !shotFailed ? (
+              <img
+                src={link.screenshot_url}
+                alt={`${link.name} 站点截图`}
+                loading="lazy"
+                onError={() => setShotFailed(true)}
+                className="block w-full rounded-lg border border-border/70 bg-card shadow-sm"
+              />
+            ) : (
+              <div className="flex h-44 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border/70 bg-gradient-to-br from-leaf-light/15 via-card to-leaf-muted/10 text-center">
+                <Camera className="size-7 text-text-secondary opacity-40" />
+                <p className="font-mono text-xs text-text-secondary">
+                  截图尚未生成
+                </p>
+                <p className="text-xs text-text-secondary/80">
+                  审核通过后自动生成，此后每日 0 点更新
+                </p>
+              </div>
+            )}
           </motion.section>
 
           {(link.apply_remark || link.review_remark) && (

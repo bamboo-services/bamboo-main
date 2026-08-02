@@ -223,6 +223,8 @@ export interface LinkFriend {
   fail_reason: string | null
   apply_remark: string | null
   review_remark: string | null
+  screenshot_url: string | null
+  screenshot_at: string | null
   updated_at: string
   group_f_key?: LinkGroup | null
   color_f_key?: LinkColor | null

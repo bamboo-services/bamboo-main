@@ -31,6 +31,7 @@ import {
   getPublicGroups,
   listAdminLinks,
   listMyLinks,
+  reScreenshotLink,
   requestTakedown,
   updateLink,
   updateLinkFail,
@@ -66,6 +67,9 @@ export function useAdminLink(id: SnowflakeID) {
   return useQuery({
     queryKey: linkKeys.detail(id),
     queryFn: () => getAdminLink(id),
+    // 截图由后台队列异步生成，前端无法感知完成时机：
+    // 禁用 stale 缓存，每次进入详情页都重新拉取最新数据（含最新截图）
+    staleTime: 0,
   })
 }
 
@@ -144,6 +148,19 @@ export function useUpdateLinkFail() {
       void qc.invalidateQueries({ queryKey: linkKeys.all })
     },
     onError: (err: Error) => toast.error(err.message || '失效状态更新失败'),
+  })
+}
+
+/** 手动重新生成友链站点截图（仅已通过友链有效） */
+export function useReScreenshotLink() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: SnowflakeID) => reScreenshotLink(id),
+    onSuccess: () => {
+      toast.success('已加入截图队列，稍后自动完成')
+      void qc.invalidateQueries({ queryKey: linkKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '重新截图失败'),
   })
 }
 

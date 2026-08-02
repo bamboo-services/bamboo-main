@@ -18,6 +18,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import {
+  Camera,
   CheckCircle2,
   ExternalLink,
   List,
@@ -69,7 +70,7 @@ import {
 } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
 import { cn } from '@/lib/utils'
-import { useAdminLinks, useDeleteLink } from '@/hooks/use-links'
+import { useAdminLinks, useDeleteLink, useReScreenshotLink } from '@/hooks/use-links'
 import { useAllGroups } from '@/hooks/use-groups'
 import { useDashboardStats } from '@/hooks/use-dashboard'
 
@@ -122,7 +123,7 @@ function SiteAvatar({
   )
 }
 
-/** 行内操作菜单：编辑 + 删除（删除触发确认弹窗） */
+/** 行内操作菜单：编辑 + 重新截图（仅已通过）+ 删除（删除触发确认弹窗） */
 function RowMenu({
   link,
   onConfirmDelete,
@@ -130,6 +131,8 @@ function RowMenu({
   link: LinkFriend
   onConfirmDelete: (link: LinkFriend) => void
 }) {
+  const reScreenshot = useReScreenshotLink()
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -149,6 +152,21 @@ function RowMenu({
             编辑
           </Link>
         </DropdownMenuItem>
+        {link.status === 1 && (
+          <>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              disabled={reScreenshot.isPending}
+              onClick={(e) => {
+                e.stopPropagation()
+                reScreenshot.mutate(link.id)
+              }}
+            >
+              <Camera className="mr-2 size-4" />
+              重新截图
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="cursor-pointer text-destructive focus:text-destructive"

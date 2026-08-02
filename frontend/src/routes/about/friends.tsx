@@ -155,6 +155,7 @@ function FriendsPage() {
         url: link.url,
         avatarChar: link.name.slice(0, 1),
         premium: link.level === LINK_LEVEL.premium,
+        screenshotUrl: link.screenshot_url,
         origin,
       })
     },
