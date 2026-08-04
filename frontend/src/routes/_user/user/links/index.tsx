@@ -93,10 +93,7 @@ function MyLinksPage() {
           </div>
         ) : error || links.length === 0 ? (
           <div className={`${inkCard} p-8`}>
-            <EnsoEmpty
-              title="还没有友链"
-              hint="提交申请，让竹林认识你的小站"
-            >
+            <EnsoEmpty title="还没有友链" hint="提交申请，让竹林认识你的小站">
               <Link to="/operate/apply" className="ml-auto">
                 <Button className="cursor-pointer">去申请友链</Button>
               </Link>
@@ -157,7 +154,11 @@ function MyLinksPage() {
                       to="/user/links/$id/edit"
                       params={{ id: link.id.toString() }}
                     >
-                      <Button variant="outline" size="sm" className="cursor-pointer">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="cursor-pointer"
+                      >
                         <Pencil className="size-4" />
                         编辑
                       </Button>
@@ -193,8 +194,8 @@ function MyLinksPage() {
           <DialogHeader>
             <DialogTitle>申请下架友链</DialogTitle>
             <DialogDescription>
-              确定要申请下架「{takedownTarget?.name}」吗？提交后需等待管理员审核，
-              审核通过后该友链将不再公开展示。
+              确定要申请下架「{takedownTarget?.name}
+              」吗？提交后需等待管理员审核， 审核通过后该友链将不再公开展示。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

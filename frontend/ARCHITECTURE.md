@@ -21,17 +21,17 @@
 
 ### 1.2 色彩 token（`src/styles.css`，禁止自创颜色）
 
-| token | oklch | 用途 |
-| --- | --- | --- |
-| `--background` | `oklch(0.975 0.016 110)` | 宣纸页面底 |
-| `--card` | `oklch(0.99 0.005 110)` | 卡片块底 |
-| `--text-primary` / 墨色 | `oklch(0.32 0.06 155)` | 主文字、浓墨 |
-| `--text-secondary` / 淡墨 | `oklch(0.5 0.05 130)` | 次级文字 |
-| `--leaf-light` | `oklch(0.88 0.1 105)` | 浅叶绿（晨光墨晕） |
-| `--leaf-muted` | `oklch(0.8 0.08 130)` | 柔叶绿（竹节线） |
-| `--leaf-deep` | `oklch(0.55 0.12 155)` | **深叶绿，唯一 accent** |
-| `--seal` | `oklch(0.55 0.18 25)` | 朱砂红（备用，当前未启用） |
-| `--chart-1/4/5` | 见 styles.css | donut 分段（已通过/待审核/其他） |
+| token                     | oklch                    | 用途                             |
+| ------------------------- | ------------------------ | -------------------------------- |
+| `--background`            | `oklch(0.975 0.016 110)` | 宣纸页面底                       |
+| `--card`                  | `oklch(0.99 0.005 110)`  | 卡片块底                         |
+| `--text-primary` / 墨色   | `oklch(0.32 0.06 155)`   | 主文字、浓墨                     |
+| `--text-secondary` / 淡墨 | `oklch(0.5 0.05 130)`    | 次级文字                         |
+| `--leaf-light`            | `oklch(0.88 0.1 105)`    | 浅叶绿（晨光墨晕）               |
+| `--leaf-muted`            | `oklch(0.8 0.08 130)`    | 柔叶绿（竹节线）                 |
+| `--leaf-deep`             | `oklch(0.55 0.12 155)`   | **深叶绿，唯一 accent**          |
+| `--seal`                  | `oklch(0.55 0.18 25)`    | 朱砂红（备用，当前未启用）       |
+| `--chart-1/4/5`           | 见 styles.css            | donut 分段（已通过/待审核/其他） |
 
 ### 1.3 字体
 
@@ -78,12 +78,12 @@
 
 ### 2.1 分层模型
 
-| 层级 | 载体 | 职责 | 允许的属性 | 关键约束 |
-| --- | --- | --- | --- | --- |
-| **路由级** | `src/routes/_admin/route.tsx` 的 `<motion.div key={pathname}>` | 页面切换整体淡入 | **仅 `opacity`** | 禁 `y` 位移，否则与各页区块级上滑嵌套叠加 |
-| **区块级** | 各页 `motion.section` + `enter()` 助手 | 卡片错峰入场 | `opacity` + `y` | 入场动画只允许出现在本层 |
-| **组件级** | `src/components/dashboard/*` | 数据可视化呈现 | `strokeDasharray`（静态）/ raf 计数 | **禁自生长动画**，遵守单一入场原则 |
-| **环境级** | `src/styles.css` CSS keyframes | 持续氛围 | `transform: rotate` / `box-shadow` | reduced-motion 全静止，不参与入场 |
+| 层级       | 载体                                                           | 职责             | 允许的属性                          | 关键约束                                  |
+| ---------- | -------------------------------------------------------------- | ---------------- | ----------------------------------- | ----------------------------------------- |
+| **路由级** | `src/routes/_admin/route.tsx` 的 `<motion.div key={pathname}>` | 页面切换整体淡入 | **仅 `opacity`**                    | 禁 `y` 位移，否则与各页区块级上滑嵌套叠加 |
+| **区块级** | 各页 `motion.section` + `enter()` 助手                         | 卡片错峰入场     | `opacity` + `y`                     | 入场动画只允许出现在本层                  |
+| **组件级** | `src/components/dashboard/*`                                   | 数据可视化呈现   | `strokeDasharray`（静态）/ raf 计数 | **禁自生长动画**，遵守单一入场原则        |
+| **环境级** | `src/styles.css` CSS keyframes                                 | 持续氛围         | `transform: rotate` / `box-shadow`  | reduced-motion 全静止，不参与入场         |
 
 ### 2.2 入场编排（区块级）
 
@@ -92,7 +92,11 @@
 ```ts
 // 正常：原样返回 full 动画 + 叠加 delay
 // reduced-motion：退化为纯 opacity 快速淡入（delay × 0.08）
-export function enter(reduced: boolean, delay: number, full: MotionDivProps): MotionDivProps
+export function enter(
+  reduced: boolean,
+  delay: number,
+  full: MotionDivProps,
+): MotionDivProps
 ```
 
 - 错峰 delay 递增（如 dashboard 的 KPI/友链构成/系统状态/最近申请 = 0.22 / 0.3 / 0.36 / 0.44）。
@@ -127,11 +131,11 @@ export function enter(reduced: boolean, delay: number, full: MotionDivProps): Mo
 
 ### 2.5 数据可视化组件（`src/components/dashboard/`）
 
-| 组件 | 机制 | 动画 | 约束 |
-| --- | --- | --- | --- |
-| `count-up.tsx` | raf + easeOutCubic 数字滚动 | 非 motion，1s 计数 | reduced-motion 跳终值；属「数值更新」非入场 |
-| `donut-chart.tsx` | 纯 SVG，`pathLength=1` + `strokeDasharray` | **无** | 数据到达即直接画到位，禁自生长 |
-| `radial-gauge.tsx` | 纯 SVG，270° 弧 + `strokeDasharray` | **无** | 同上，禁自生长 |
+| 组件               | 机制                                       | 动画               | 约束                                        |
+| ------------------ | ------------------------------------------ | ------------------ | ------------------------------------------- |
+| `count-up.tsx`     | raf + easeOutCubic 数字滚动                | 非 motion，1s 计数 | reduced-motion 跳终值；属「数值更新」非入场 |
+| `donut-chart.tsx`  | 纯 SVG，`pathLength=1` + `strokeDasharray` | **无**             | 数据到达即直接画到位，禁自生长              |
+| `radial-gauge.tsx` | 纯 SVG，270° 弧 + `strokeDasharray`        | **无**             | 同上，禁自生长                              |
 
 > 历史教训：donut/gauge 曾用 `useMotionValue` + `animate()` 做弧线生长动画（0.9~1s），在数据到达后
 > 才触发，与区块级入场动画叠加成「二次加载」。现统一移除——**入场只走区块级 `enter()` 一层**。

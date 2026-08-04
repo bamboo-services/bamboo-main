@@ -7,9 +7,9 @@
 // https://opensource.org/licenses/MIT
 // --------------------------------------------------------------------------------
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useFriendOpen } from './friend-card-shared'
 import type { FriendCardProps } from './friend-card-shared'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { accentOf, fancyGradient, isFancyColor } from '@/lib/colors'
 import { cn } from '@/lib/utils'
 import { BambooArt } from '@/components/ink-wash'
@@ -58,7 +58,11 @@ export function AdFriendCard({ link, onOpen }: FriendCardProps) {
       />
 
       <Avatar className="size-11 rounded-full ring-1 ring-ring-glow">
-        <AvatarImage src={link.avatar ?? undefined} alt={link.name} loading="lazy" />
+        <AvatarImage
+          src={link.avatar ?? undefined}
+          alt={link.name}
+          loading="lazy"
+        />
         <AvatarFallback
           className={cn(
             'font-serif text-base font-bold',

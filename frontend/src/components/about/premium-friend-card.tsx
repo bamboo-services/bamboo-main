@@ -8,10 +8,10 @@
 // --------------------------------------------------------------------------------
 
 import { ArrowRight, Eye } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { domainOf, useFriendOpen } from './friend-card-shared'
 import { LazyImage } from './lazy-image'
 import type { FriendCardProps } from './friend-card-shared'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { accentOf, fancyGradient, isFancyColor } from '@/lib/colors'
 import { cn } from '@/lib/utils'
 import { BambooArt } from '@/components/ink-wash'
@@ -32,7 +32,7 @@ export function PremiumFriendCard({ link, onOpen }: FriendCardProps) {
       ref={ref}
       href={link.url}
       onClick={handleClick}
-      className="group isolate relative col-span-2 row-span-2 flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-all duration-500 hover:-translate-y-1 hover:border-leaf-muted hover:shadow-[0_24px_50px_-30px_oklch(0.32_0.06_155/0.45)]"
+      className="group isolate relative col-span-2 row-span-4 flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-all duration-500 hover:-translate-y-1 hover:border-leaf-muted hover:shadow-[0_24px_50px_-30px_oklch(0.32_0.06_155/0.45)]"
       style={
         fancy
           ? {
@@ -58,16 +58,20 @@ export function PremiumFriendCard({ link, onOpen }: FriendCardProps) {
       {/* 默认内容：水平垂直居中，hover 淡出 */}
       <div className="relative z-10 flex h-full flex-col items-center justify-center p-6 text-center transition-opacity duration-300 group-hover:opacity-0">
         <Avatar className="size-16 rounded-full ring-2 ring-ring-glow">
-          <AvatarImage src={link.avatar ?? undefined} alt={link.name} loading="lazy" />
-        <AvatarFallback
-          className={cn(
-            'font-serif text-2xl font-bold',
-            fancy ? 'text-card' : 'bg-leaf-light/50 text-leaf-deep',
-          )}
-          style={fancy ? { background: fancyGradient() } : undefined}
-        >
-          {link.name.slice(0, 1)}
-        </AvatarFallback>
+          <AvatarImage
+            src={link.avatar ?? undefined}
+            alt={link.name}
+            loading="lazy"
+          />
+          <AvatarFallback
+            className={cn(
+              'font-serif text-2xl font-bold',
+              fancy ? 'text-card' : 'bg-leaf-light/50 text-leaf-deep',
+            )}
+            style={fancy ? { background: fancyGradient() } : undefined}
+          >
+            {link.name.slice(0, 1)}
+          </AvatarFallback>
         </Avatar>
         <h3 className="mt-4 font-serif text-xl font-bold text-text-primary">
           {link.name}

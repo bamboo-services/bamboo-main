@@ -11,13 +11,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { motion, useReducedMotion } from 'motion/react'
 import { ExternalLink, Mail } from 'lucide-react'
+import type { MotionDivProps } from '@/lib/motion'
 import { getAbout, getSiteInfo } from '@/api/info'
 import { MarkdownView } from '@/components/markdown'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BambooArt, BrushUnderline } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
-import type { MotionDivProps } from '@/lib/motion'
 import { siteConfig } from '@/lib/site'
 import myAvatar from '@/assets/images/my_avatar.png'
 
@@ -95,7 +95,10 @@ function AboutMePage() {
                 {...enter(reduced, 0.2, {
                   initial: { opacity: 0, y: 24 },
                   animate: { opacity: 1, y: 0 },
-                  transition: { duration: 0.7, ease: [0.22, 0.9, 0.3, 1] as const },
+                  transition: {
+                    duration: 0.7,
+                    ease: [0.22, 0.9, 0.3, 1] as const,
+                  },
                 })}
                 className="mt-8 font-serif text-[clamp(4.5rem,13vw,8.5rem)] font-bold leading-[1.02] tracking-[0.02em] text-text-primary"
               >
@@ -108,11 +111,18 @@ function AboutMePage() {
                 {...enter(reduced, 0.32, {
                   initial: { opacity: 0, scaleX: 0 },
                   animate: { opacity: 1, scaleX: 1 },
-                  transition: { duration: 0.7, ease: [0.22, 0.9, 0.3, 1] as const },
+                  transition: {
+                    duration: 0.7,
+                    ease: [0.22, 0.9, 0.3, 1] as const,
+                  },
                 })}
                 className="mt-6 origin-left"
               >
-                <svg className="block h-3 w-44 md:w-56" viewBox="0 0 224 12" aria-hidden>
+                <svg
+                  className="block h-3 w-44 md:w-56"
+                  viewBox="0 0 224 12"
+                  aria-hidden
+                >
                   <path
                     d="M2 7 C 48 1 118 0 222 3 C 150 11 60 12 2 7 Z"
                     fill="var(--leaf-deep)"
@@ -154,7 +164,10 @@ function AboutMePage() {
                     <ExternalLink className="size-3.5" />
                   </span>
                 </a>
-                <a href={`mailto:${email}`} className="group inline-flex items-baseline gap-2">
+                <a
+                  href={`mailto:${email}`}
+                  className="group inline-flex items-baseline gap-2"
+                >
                   <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-text-secondary transition-colors group-hover:text-leaf-deep">
                     邮箱
                   </span>
@@ -172,7 +185,10 @@ function AboutMePage() {
                 {...enter(reduced, 0.4, {
                   initial: { opacity: 0, scale: 0.92 },
                   animate: { opacity: 1, scale: 1 },
-                  transition: { duration: 0.8, ease: [0.22, 0.9, 0.3, 1] as const },
+                  transition: {
+                    duration: 0.8,
+                    ease: [0.22, 0.9, 0.3, 1] as const,
+                  },
                 })}
                 className="flex items-center gap-7"
               >
@@ -216,7 +232,10 @@ function AboutMePage() {
         <div className="mx-auto w-full max-w-6xl px-6 md:px-10">
           <div className="grid grid-cols-12 gap-10">
             <aside className="col-span-12 md:col-span-3">
-              <motion.div {...scrollReveal(reduced)} className="md:sticky md:top-28">
+              <motion.div
+                {...scrollReveal(reduced)}
+                className="md:sticky md:top-28"
+              >
                 <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-leaf-deep">
                   壹 · 自序
                 </p>

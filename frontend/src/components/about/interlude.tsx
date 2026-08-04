@@ -194,7 +194,10 @@ export function Interlude({
           }
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: reduced ? 0.01 : 0.4, delay: reduced ? 0 : 0.55 }}
+          transition={{
+            duration: reduced ? 0.01 : 0.4,
+            delay: reduced ? 0 : 0.55,
+          }}
         >
           <motion.span
             className={
@@ -220,7 +223,10 @@ export function Interlude({
           }
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: reduced ? 0.01 : 0.4, delay: reduced ? 0 : 0.65 }}
+          transition={{
+            duration: reduced ? 0.01 : 0.4,
+            delay: reduced ? 0 : 0.65,
+          }}
         >
           正在前往
         </motion.p>

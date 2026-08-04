@@ -28,9 +28,11 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useBlocker } from '@tanstack/react-router'
 import { GripVertical } from 'lucide-react'
 import { useReducedMotion } from 'motion/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
 import type { LinkFriend } from '@/api/types'
 import type { FriendGroupSection } from '@/lib/friend-groups'
@@ -39,6 +41,15 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { domainOf } from '@/components/about/friend-card-shared'
 import { CHAPTERS, LINK_LEVEL, groupLinksByGroup } from '@/lib/friend-groups'
 import { accentOf, isFancyColor } from '@/lib/colors'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import { SiteAvatar } from '@/components/link/site-avatar'
 import { usePublicLinks, useSortLinks } from '@/hooks/use-links'
@@ -85,13 +96,14 @@ function AccentBar({
 }
 
 /**
- * 友链排位卡（纯视觉，h-full 填满栅格单元）：级别感知——高级 2×2 名帖式大卡，
- * 其余 1×1 紧凑小卡。复刻公开页 Bento 栅格层级，保证排位预览不失真。
+ * 友链排位卡（纯视觉，h-full 填满栅格单元）：级别感知，与公开页逐格对应——
+ * 高级 2×2 名帖式大卡；好友/广告 1×1 紧凑竖排；一般 1×1 横排富式（高度为好友一半）。
+ * 复刻公开页 Bento 栅格层级，保证排位预览不失真。
  */
 function FriendRankCard({ link }: { link: LinkFriend }) {
   if (link.level === LINK_LEVEL.premium) {
     return (
-      <div className="group relative flex h-full flex-col items-center justify-center overflow-hidden rounded-lg border border-border bg-card p-4 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_18px_40px_-28px_oklch(0.32_0.06_155/0.45)]">
+      <div className="group relative flex h-full flex-col items-center justify-center overflow-hidden rounded-lg border border-border bg-card p-4 text-center transition-[translate,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_18px_40px_-28px_oklch(0.32_0.06_155/0.45)]">
         <AccentBar
           link={link}
           className="inset-y-4 w-[2px] transition-all duration-300 group-hover:inset-y-0 group-hover:w-[4px]"
@@ -119,30 +131,66 @@ function FriendRankCard({ link }: { link: LinkFriend }) {
     )
   }
 
+  // 好友：1×2 紧凑竖排（对齐公开页好友竖排卡，高度为一般的两倍）
+  if (link.level === LINK_LEVEL.close) {
+    return (
+      <div className="group relative flex h-full flex-col items-center justify-center gap-1 overflow-hidden rounded-lg border border-border bg-card px-3 text-center transition-[translate,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_12px_26px_-22px_oklch(0.32_0.06_155/0.4)]">
+        <AccentBar
+          link={link}
+          className="inset-y-2.5 w-[2px] transition-all duration-300 group-hover:inset-y-0 group-hover:w-[3px]"
+        />
+        <SiteAvatar
+          name={link.name}
+          url={link.avatar}
+          className="size-9 rounded-full ring-1 ring-ring-glow"
+        />
+        <p className="w-full truncate font-serif text-sm font-bold leading-tight text-text-primary">
+          {link.name}
+        </p>
+        <LevelBadge level={link.level} />
+      </div>
+    )
+  }
+
+  // 广告：1×1 极简竖排（与一般同高，56px；公开页广告同为竖排带标识）
+  if (link.level === LINK_LEVEL.ad) {
+    return (
+      <div className="group relative flex h-full flex-col items-center justify-center gap-0.5 overflow-hidden rounded-lg border border-border bg-card px-2 text-center transition-[translate,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_12px_26px_-22px_oklch(0.32_0.06_155/0.4)]">
+        <AccentBar
+          link={link}
+          className="inset-y-2 w-[2px] transition-all duration-300 group-hover:inset-y-0 group-hover:w-[3px]"
+        />
+        <SiteAvatar
+          name={link.name}
+          url={link.avatar}
+          className="size-6 rounded-full ring-1 ring-ring-glow"
+        />
+        <p className="w-full truncate font-serif text-[10px] font-bold leading-tight text-text-primary">
+          {link.name}
+        </p>
+      </div>
+    )
+  }
+
+  // 一般：1×1 横排富式（对齐公开页横排卡），row-span-1 高度为好友一半
   return (
-    <div className="group relative flex h-full items-center gap-2.5 overflow-hidden rounded-lg border border-border bg-card px-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_12px_26px_-22px_oklch(0.32_0.06_155/0.4)]">
+    <div className="group relative flex h-full items-center gap-2 overflow-hidden rounded-lg border border-border bg-card px-2.5 transition-[translate,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_12px_26px_-22px_oklch(0.32_0.06_155/0.4)]">
       <AccentBar
         link={link}
-        className="inset-y-2.5 w-[2px] transition-all duration-300 group-hover:inset-y-0 group-hover:w-[3px]"
+        className="inset-y-2 w-[2px] transition-all duration-300 group-hover:inset-y-0 group-hover:w-[3px]"
       />
       <SiteAvatar
         name={link.name}
         url={link.avatar}
-        className="size-9 rounded-md"
+        className="size-7 rounded-full ring-1 ring-ring-glow"
       />
       <div className="min-w-0 flex-1">
-        <p className="truncate font-serif text-sm font-semibold leading-tight text-text-primary">
+        <p className="truncate font-serif text-xs font-bold leading-tight text-text-primary">
           {link.name}
         </p>
-        <div className="mt-1 flex items-center gap-1.5">
-          {link.level !== LINK_LEVEL.regular ? (
-            <LevelBadge level={link.level} />
-          ) : (
-            <p className="truncate font-mono text-[10px] uppercase tracking-[0.12em] text-text-secondary">
-              {domainOf(link.url)}
-            </p>
-          )}
-        </div>
+        <p className="mt-0.5 truncate font-mono text-[9px] uppercase tracking-[0.12em] text-text-secondary">
+          {domainOf(link.url)}
+        </p>
       </div>
     </div>
   )
@@ -168,6 +216,7 @@ function SortableRankCard({
     data: { type: 'link' },
   })
   const premium = link.level === LINK_LEVEL.premium
+  const close = link.level === LINK_LEVEL.close
 
   return (
     <div
@@ -180,7 +229,8 @@ function SortableRankCard({
       {...listeners}
       className={cn(
         'cursor-grab focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf-deep/50 active:cursor-grabbing',
-        premium && 'col-span-2 row-span-2',
+        premium && 'col-span-2 row-span-4',
+        close && 'row-span-2',
         isDragging && 'opacity-40',
       )}
     >
@@ -262,7 +312,7 @@ function SectionBlock({
       >
         <div
           ref={setDropRef}
-          className="grid grid-flow-dense grid-cols-2 gap-3 [grid-auto-rows:112px] sm:grid-cols-3 lg:grid-cols-4"
+          className="grid grid-flow-dense grid-cols-2 gap-3 [grid-auto-rows:56px] sm:grid-cols-3 lg:grid-cols-4"
         >
           {children}
         </div>
@@ -288,14 +338,17 @@ export function RankingBoard() {
   const [sections, setSections] = useState<Array<FriendGroupSection>>([])
   const [activeId, setActiveId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
+  const [dirty, setDirty] = useState(false)
 
   const sectionsRef = useRef<Array<FriendGroupSection>>([])
   const snapshotRef = useRef<Array<FriendGroupSection>>([])
-  const timerRef = useRef<number | undefined>(undefined)
   const activeIdRef = useRef<string | null>(null)
   const savingRef = useRef(false)
   /** 拖拽开始时的序列化快照，用于无意义拖拽抑制 */
   const dragStartRef = useRef<string>('')
+  /** 拖拽开始时的 sections 引用快照，用于 onDragCancel 回滚 onDragOver 的跨容器乐观移动 */
+  const dragStartSectionsRef = useRef<Array<FriendGroupSection>>([])
 
   useEffect(() => {
     sectionsRef.current = sections
@@ -310,6 +363,7 @@ export function RankingBoard() {
     const next = groupLinksByGroup(links ?? [])
     setSections(next)
     snapshotRef.current = next
+    setDirty(false)
   }, [links])
 
   const sensors = useSensors(
@@ -353,10 +407,14 @@ export function RankingBoard() {
     const done = () => {
       snapshotRef.current = sectionsRef.current
       setSaving(false)
+      setDirty(false)
+      toast.success('排位保存成功')
     }
-    const rollback = () => {
+    const rollback = (err?: Error) => {
       setSections(snapshotRef.current)
       setSaving(false)
+      setDirty(false)
+      toast.error(err?.message || '排位保存失败，已还原')
     }
     sortLinks.mutate(items, {
       onSuccess: () => {
@@ -370,20 +428,11 @@ export function RankingBoard() {
     })
   }, [sortLinks, sortGroups])
 
-  const schedulePersist = useCallback(() => {
-    if (timerRef.current) window.clearTimeout(timerRef.current)
-    timerRef.current = window.setTimeout(flush, 600)
-  }, [flush])
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) window.clearTimeout(timerRef.current)
-    }
-  }, [])
-
   const onDragStart = useCallback(({ active }: DragStartEvent) => {
     setActiveId(String(active.id))
+    setDragActive(true)
     dragStartRef.current = serializeSections(sectionsRef.current)
+    dragStartSectionsRef.current = sectionsRef.current
   }, [])
 
   /** 跨容器拖动链接：实时把被拖卡片从源章节移到目标章节（乐观）；章节拖拽不在此处理 */
@@ -420,10 +469,11 @@ export function RankingBoard() {
     [findSection],
   )
 
-  /** 拖拽结束：链接定序 / 章节重排，随后调度持久化（无意义拖拽抑制） */
+  /** 拖拽结束：链接定序 / 章节重排，标记未保存（无意义拖拽抑制） */
   const onDragEnd = useCallback(
     ({ active, over }: DragEndEvent) => {
       setActiveId(null)
+      setDragActive(false)
       if (!over) return
       const type = active.data.current?.type
       // 先基于当前态计算拖拽后的 next（跨容器移动已在 onDragOver 落态），
@@ -467,11 +517,25 @@ export function RankingBoard() {
       const after = serializeSections(next)
       if (after !== dragStartRef.current) {
         setSections(next)
-        schedulePersist()
+        setDirty(true)
       }
     },
-    [findSection, schedulePersist],
+    [findSection],
   )
+
+  /** 拖拽取消（Esc / pointercancel / touchcancel）：复位状态并回滚跨容器乐观移动 */
+  const onDragCancel = useCallback(() => {
+    setActiveId(null)
+    setDragActive(false)
+    setSections(dragStartSectionsRef.current)
+  }, [])
+
+  /** 未保存更改时拦截 SPA 内路由导航与页面关闭（useBlocker 含 beforeunload 兜底） */
+  const blocker = useBlocker({
+    shouldBlockFn: () => dirty,
+    enableBeforeUnload: dirty,
+    withResolver: true,
+  })
 
   const activeLink = useMemo(() => {
     if (!activeId) return null
@@ -489,25 +553,31 @@ export function RankingBoard() {
 
   return (
     <div className="space-y-8">
-      {/* 状态条：操作提示 + 总数 + 保存指示 */}
+      {/* 状态条：操作提示 + 总数 + 未保存指示 + 保存按钮 */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-text-secondary">
-          拖拽卡片调整排位 · 跨章拖动即改分组 · 松手自动保存
+          拖拽卡片调整排位 · 跨章拖动即改分组 · 点击保存持久化
         </p>
         <div className="flex items-center gap-2.5">
+          {dirty && <InkBadge tone="leaf">有未保存的更改</InkBadge>}
           <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-text-secondary">
             共 {total} 位
           </span>
-          {saving && <InkBadge tone="neutral">保存中…</InkBadge>}
+          <Button size="sm" onClick={flush} disabled={!dirty || saving}>
+            {saving ? '保存中…' : '保存'}
+          </Button>
         </div>
       </div>
 
       {/* 看板主体 */}
       {isLoading ? (
-        <div className="grid grid-flow-dense grid-cols-2 gap-3 [grid-auto-rows:112px] sm:grid-cols-3 lg:grid-cols-4">
-          <Skeleton className="col-span-2 row-span-2 rounded-lg" />
+        <div className="grid grid-flow-dense grid-cols-2 gap-3 [grid-auto-rows:56px] sm:grid-cols-3 lg:grid-cols-4">
+          <Skeleton className="col-span-2 row-span-4 rounded-lg" />
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="rounded-lg" />
+            <Skeleton
+              key={i}
+              className={cn('rounded-lg', i % 2 === 0 && 'row-span-2')}
+            />
           ))}
         </div>
       ) : sections.length === 0 ? (
@@ -519,12 +589,15 @@ export function RankingBoard() {
           onDragStart={onDragStart}
           onDragOver={onDragOver}
           onDragEnd={onDragEnd}
+          onDragCancel={onDragCancel}
         >
           <SortableContext
             items={sections.map(containerId)}
             strategy={verticalListSortingStrategy}
           >
-            <div className="space-y-10">
+            <div
+              className={cn('space-y-10', dragActive && 'pointer-events-none')}
+            >
               {sections.map((section, gi) => (
                 <SectionBlock
                   key={section.groupId}
@@ -543,21 +616,40 @@ export function RankingBoard() {
               ))}
             </div>
           </SortableContext>
-          <DragOverlay dropAnimation={reduced ? null : undefined}>
-            {activeLink ? (
-              <div className="flex rotate-1 items-center gap-2.5 rounded-lg border border-leaf-muted bg-card px-3 py-2 shadow-[0_18px_40px_-20px_oklch(0.32_0.06_155/0.5)]">
-                <SiteAvatar
-                  name={activeLink.name}
-                  url={activeLink.avatar}
-                  className="size-9 rounded-md"
-                />
-                <span className="font-serif text-sm font-semibold text-text-primary">
-                  {activeLink.name}
-                </span>
-              </div>
-            ) : null}
+          <DragOverlay
+            dropAnimation={
+              reduced ? null : { duration: 200, easing: 'ease-out' }
+            }
+            className="pointer-events-none"
+          >
+            {activeLink ? <FriendRankCard link={activeLink} /> : null}
           </DragOverlay>
         </DndContext>
+      )}
+
+      {/* 未保存更改的离开确认：放弃则 proceed 放行导航，继续编辑则 reset 留在当前页 */}
+      {blocker.status === 'blocked' && (
+        <Dialog
+          open
+          onOpenChange={(open) => {
+            if (!open) blocker.reset()
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>放弃未保存的更改？</DialogTitle>
+              <DialogDescription>
+                当前排位有未保存的调整，离开此页将丢失这些更改。
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => blocker.reset()}>
+                继续编辑
+              </Button>
+              <Button onClick={() => blocker.proceed()}>放弃更改并离开</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   )

@@ -11,12 +11,12 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { motion, useReducedMotion } from 'motion/react'
 import type { SponsorChannel, SponsorRecord } from '@/api/types'
+import type { MotionDivProps } from '@/lib/motion'
 import { getPublicChannels, getPublicRecords } from '@/api/sponsor'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BambooArt, EnsoEmpty } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
-import type { MotionDivProps } from '@/lib/motion'
 
 export const Route = createFileRoute('/about/sponsor')({
   component: SponsorPage,
@@ -111,7 +111,11 @@ function SponsorPage() {
             })}
             className="mt-5 origin-left"
           >
-            <svg className="block h-3 w-40 md:w-52" viewBox="0 0 224 12" aria-hidden>
+            <svg
+              className="block h-3 w-40 md:w-52"
+              viewBox="0 0 224 12"
+              aria-hidden
+            >
               <path
                 d="M2 7 C 48 1 118 0 222 3 C 150 11 60 12 2 7 Z"
                 fill="var(--leaf-deep)"
@@ -168,7 +172,9 @@ function SponsorPage() {
               ))}
             </motion.div>
           ) : (
-            <p className="text-[15px] text-text-secondary">暂未开放赞助渠道。</p>
+            <p className="text-[15px] text-text-secondary">
+              暂未开放赞助渠道。
+            </p>
           )}
         </div>
       </section>
@@ -263,7 +269,13 @@ function ChannelCard({ channel }: { channel: SponsorChannel }) {
 }
 
 /** 账册行：mono 序号 + 头像 + 衬线昵称 + 渠道·日期 + 斜体留言 + 衬线大字金额 */
-function RecordRow({ record, index }: { record: SponsorRecord; index: number }) {
+function RecordRow({
+  record,
+  index,
+}: {
+  record: SponsorRecord
+  index: number
+}) {
   const { int, dec } = splitAmount(record.amount)
   return (
     <div className="group relative flex items-center gap-5 px-4 py-6 transition-colors duration-300 hover:bg-muted/45 md:gap-7 md:px-6">

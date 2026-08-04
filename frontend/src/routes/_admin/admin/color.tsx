@@ -176,12 +176,12 @@ function ColorPage() {
     const parsedOrder = Number.parseInt(order, 10)
     const colorOrder = Number.isNaN(parsedOrder) ? 0 : parsedOrder
     const close = () => setFormOpen(false)
-  // 仅支持普通配色（炫彩为内置颜色，无需创建），始终提交三原色
-  const colorFields = {
-    primary_color: primary,
-    sub_color: sub,
-    hover_color: hover,
-  }
+    // 仅支持普通配色（炫彩为内置颜色，无需创建），始终提交三原色
+    const colorFields = {
+      primary_color: primary,
+      sub_color: sub,
+      hover_color: hover,
+    }
 
     if (editing) {
       updateColor.mutate(
@@ -430,8 +430,7 @@ function ColorPage() {
         {!colorsQuery.isLoading && colors.length > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
             <span className="font-mono text-xs text-text-secondary">
-              第 {pageIndex + 1} / {Math.max(totalPages, 1)} 页 · 共 {total}{' '}
-              条
+              第 {pageIndex + 1} / {Math.max(totalPages, 1)} 页 · 共 {total} 条
             </span>
             <Pagination
               pageIndex={pageIndex}

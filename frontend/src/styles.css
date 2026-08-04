@@ -286,7 +286,14 @@ code {
   }
   /* 炫彩墨条：竹绿流光缓缓流动（纯渐变，竹作为卡背衬竹呈现，见 BambooArt） */
   .ink-fancy {
-    background: linear-gradient(180deg, var(--leaf-muted), var(--leaf-deep), var(--leaf-light), var(--leaf-deep), var(--leaf-muted));
+    background: linear-gradient(
+      180deg,
+      var(--leaf-muted),
+      var(--leaf-deep),
+      var(--leaf-light),
+      var(--leaf-deep),
+      var(--leaf-muted)
+    );
     background-size: 100% 300%;
     animation: ink-fancy-flow 9s ease-in-out infinite alternate;
   }

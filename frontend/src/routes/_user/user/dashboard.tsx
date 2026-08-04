@@ -10,6 +10,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import { ArrowRight, Plus, Settings } from 'lucide-react'
+import type { InkBadgeTone } from '@/components/ink-wash'
 import { useAuth } from '@/hooks/use-auth'
 import { useMyLinks } from '@/hooks/use-links'
 import {
@@ -17,7 +18,6 @@ import {
   CardHead,
   InkBadge,
   inkCard,
-  type InkBadgeTone,
 } from '@/components/ink-wash'
 import { Skeleton } from '@/components/ui/skeleton'
 import { enter } from '@/lib/motion'
@@ -60,10 +60,34 @@ function UserDashboardPage() {
   const displayName = user?.nickname || user?.username
 
   const statusRows: Array<StatusRow> = [
-    { label: '待审核', badge: '审核中', tone: 'pending', dot: 'var(--leaf-light)', count: pending },
-    { label: '已展示', badge: '公开展示', tone: 'leaf', dot: 'var(--chart-1)', count: live },
-    { label: '被拒', badge: '未通过', tone: 'danger', dot: 'oklch(0.577 0.245 27.325 / 0.5)', count: rejected },
-    { label: '已下架', badge: '不可见', tone: 'neutral', dot: 'var(--leaf-muted)', count: offline },
+    {
+      label: '待审核',
+      badge: '审核中',
+      tone: 'pending',
+      dot: 'var(--leaf-light)',
+      count: pending,
+    },
+    {
+      label: '已展示',
+      badge: '公开展示',
+      tone: 'leaf',
+      dot: 'var(--chart-1)',
+      count: live,
+    },
+    {
+      label: '被拒',
+      badge: '未通过',
+      tone: 'danger',
+      dot: 'oklch(0.577 0.245 27.325 / 0.5)',
+      count: rejected,
+    },
+    {
+      label: '已下架',
+      badge: '不可见',
+      tone: 'neutral',
+      dot: 'var(--leaf-muted)',
+      count: offline,
+    },
   ]
 
   return (
@@ -82,7 +106,8 @@ function UserDashboardPage() {
           我的友链 · 各美其美
         </p>
         <h1 className="mt-6 font-serif text-[clamp(2rem,5vw,3rem)] font-bold leading-[1.08] tracking-[0.02em] text-text-primary">
-          {greeting()}，<span className="text-leaf-deep">{displayName ?? '朋友'}</span>
+          {greeting()}，
+          <span className="text-leaf-deep">{displayName ?? '朋友'}</span>
         </h1>
         <div className="mt-4">
           <BrushUnderline />
@@ -101,7 +126,10 @@ function UserDashboardPage() {
         })}
         className={`${inkCard} mb-6`}
       >
-        <CardHead title="友链状态" meta={isLoading ? '—' : `TOTAL ${links.length}`} />
+        <CardHead
+          title="友链状态"
+          meta={isLoading ? '—' : `TOTAL ${links.length}`}
+        />
         {isLoading ? (
           <div className="space-y-3">
             <Skeleton className="h-12 w-full" />
@@ -143,7 +171,10 @@ function UserDashboardPage() {
         })}
         className="grid gap-4 sm:grid-cols-2"
       >
-        <Link to="/operate/apply" className={`${inkCard} group flex items-center gap-4 p-5`}>
+        <Link
+          to="/operate/apply"
+          className={`${inkCard} group flex items-center gap-4 p-5`}
+        >
           <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-leaf-deep/12 text-leaf-deep ring-1 ring-leaf-deep/15 transition-transform duration-300 group-hover:scale-105">
             <Plus className="size-5" />
           </span>
@@ -157,7 +188,10 @@ function UserDashboardPage() {
           </span>
           <ArrowRight className="size-4 shrink-0 text-text-secondary transition-transform duration-300 group-hover:translate-x-0.5" />
         </Link>
-        <Link to="/user/account" className={`${inkCard} group flex items-center gap-4 p-5`}>
+        <Link
+          to="/user/account"
+          className={`${inkCard} group flex items-center gap-4 p-5`}
+        >
           <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-leaf-deep/12 text-leaf-deep ring-1 ring-leaf-deep/15 transition-transform duration-300 group-hover:scale-105">
             <Settings className="size-5" />
           </span>

@@ -10,12 +10,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { RegisterRequest } from '@/api/types'
-import {
-  getCurrentUser,
-  logout,
-  register,
-  sendRegisterCode,
-} from '@/api/auth'
+import { getCurrentUser, logout, register, sendRegisterCode } from '@/api/auth'
 import { clearSession, getStoredUser, getToken } from '@/lib/auth'
 
 /** 当前用户查询 key */

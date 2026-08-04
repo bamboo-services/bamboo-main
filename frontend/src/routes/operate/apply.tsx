@@ -94,7 +94,10 @@ function ApplyPage() {
               {/* 信笺抬头 */}
               <div className="relative mb-6 flex items-center justify-between gap-2 border-b border-border pb-4">
                 <h2 className="flex items-center gap-2.5 font-serif text-lg font-semibold text-text-primary">
-                  <span className="h-[3px] w-5 -skew-x-12 rounded-sm bg-leaf-deep" aria-hidden />
+                  <span
+                    className="h-[3px] w-5 -skew-x-12 rounded-sm bg-leaf-deep"
+                    aria-hidden
+                  />
                   友链申请
                 </h2>
                 <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-text-secondary">
@@ -162,7 +165,10 @@ function ExchangeInfoCard({
       {/* 抬头 */}
       <div className="relative mb-4 flex items-center justify-between gap-2 border-b border-border pb-3">
         <h2 className="flex items-center gap-2.5 font-serif text-base font-semibold text-text-primary">
-          <span className="h-[3px] w-4 -skew-x-12 rounded-sm bg-leaf-deep" aria-hidden />
+          <span
+            className="h-[3px] w-4 -skew-x-12 rounded-sm bg-leaf-deep"
+            aria-hidden
+          />
           添加博主友链
         </h2>
         <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-text-secondary">

@@ -56,7 +56,13 @@ export function CardHead({ title, meta }: { title: string; meta?: string }) {
 }
 
 /** 竹节分隔线：横线 + 圆/宽节点交替，用于分大章节 */
-export function BambooRule({ reduced, delay }: { reduced: boolean; delay: number }) {
+export function BambooRule({
+  reduced,
+  delay,
+}: {
+  reduced: boolean
+  delay: number
+}) {
   return (
     <motion.div
       {...enter(reduced, delay, {
@@ -81,8 +87,15 @@ export function BambooRule({ reduced, delay }: { reduced: boolean; delay: number
 /** 笔刷下划线：手绘 SVG path（leaf-deep），用于标题 / 名帖收尾 */
 export function BrushUnderline({ className = '' }: { className?: string }) {
   return (
-    <svg className={`block h-1.5 w-21 ${className}`} viewBox="0 0 84 6" aria-hidden>
-      <path d="M0 3 C 20 -0.5 44 -1.2 84 0.5 C 50 5 20 6 0 3 Z" fill="var(--leaf-deep)" />
+    <svg
+      className={`block h-1.5 w-21 ${className}`}
+      viewBox="0 0 84 6"
+      aria-hidden
+    >
+      <path
+        d="M0 3 C 20 -0.5 44 -1.2 84 0.5 C 50 5 20 6 0 3 Z"
+        fill="var(--leaf-deep)"
+      />
     </svg>
   )
 }
@@ -90,7 +103,13 @@ export function BrushUnderline({ className = '' }: { className?: string }) {
 /** enso 缺口圆 + 竹叶：空状态签名图标 */
 export function EnsoIcon({ className = '' }: { className?: string }) {
   return (
-    <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden className={`shrink-0 ${className}`}>
+    <svg
+      width="48"
+      height="48"
+      viewBox="0 0 48 48"
+      aria-hidden
+      className={`shrink-0 ${className}`}
+    >
       <path
         d="M27 7 A 17 17 0 1 0 41 31"
         fill="none"
@@ -122,7 +141,9 @@ export function EnsoEmpty({
       <EnsoIcon />
       <div>
         <p className="font-serif text-[15px] text-text-primary">{title}</p>
-        {hint && <p className="font-mono text-xs text-text-secondary">{hint}</p>}
+        {hint && (
+          <p className="font-mono text-xs text-text-secondary">{hint}</p>
+        )}
       </div>
       {children}
     </div>
@@ -157,10 +178,19 @@ export function BambooArt({
             strokeWidth="2"
             strokeLinecap="round"
           />
-          <use href="#bzleaf" transform="translate(12 -3) rotate(-44) scale(1.08)" />
+          <use
+            href="#bzleaf"
+            transform="translate(12 -3) rotate(-44) scale(1.08)"
+          />
           <use href="#bzleaf" transform="translate(28 -6) rotate(-14)" />
-          <use href="#bzleaf" transform="translate(44 -7) rotate(14) scale(.95)" />
-          <use href="#bzleaf" transform="translate(56 -7) rotate(42) scale(.72)" />
+          <use
+            href="#bzleaf"
+            transform="translate(44 -7) rotate(14) scale(.95)"
+          />
+          <use
+            href="#bzleaf"
+            transform="translate(56 -7) rotate(42) scale(.72)"
+          />
         </g>
       </defs>
 
@@ -173,15 +203,59 @@ export function BambooArt({
           strokeWidth="6.5"
           strokeLinecap="round"
         />
-        <ellipse cx="390" cy="350" rx="7.5" ry="2.8" fill="none" stroke="currentColor" strokeWidth="2" />
-        <ellipse cx="389.5" cy="258" rx="7.5" ry="2.8" fill="none" stroke="currentColor" strokeWidth="2" />
-        <ellipse cx="390" cy="166" rx="7.5" ry="2.8" fill="none" stroke="currentColor" strokeWidth="2" />
-        <ellipse cx="390" cy="82" rx="6.5" ry="2.4" fill="none" stroke="currentColor" strokeWidth="2" />
+        <ellipse
+          cx="390"
+          cy="350"
+          rx="7.5"
+          ry="2.8"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
+        <ellipse
+          cx="389.5"
+          cy="258"
+          rx="7.5"
+          ry="2.8"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
+        <ellipse
+          cx="390"
+          cy="166"
+          rx="7.5"
+          ry="2.8"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
+        <ellipse
+          cx="390"
+          cy="82"
+          rx="6.5"
+          ry="2.4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
         <use href="#spray" transform="translate(391 318) rotate(-16)" />
-        <use href="#spray" transform="translate(389 226) scale(-1 1) rotate(-22)" />
-        <use href="#spray" transform="translate(390 134) rotate(-28) scale(1.12)" />
-        <use href="#spray" transform="translate(388 50) rotate(-54) scale(1.2)" />
-        <use href="#bzleaf" transform="translate(304 404) rotate(26) scale(.78)" />
+        <use
+          href="#spray"
+          transform="translate(389 226) scale(-1 1) rotate(-22)"
+        />
+        <use
+          href="#spray"
+          transform="translate(390 134) rotate(-28) scale(1.12)"
+        />
+        <use
+          href="#spray"
+          transform="translate(388 50) rotate(-54) scale(1.2)"
+        />
+        <use
+          href="#bzleaf"
+          transform="translate(304 404) rotate(26) scale(.78)"
+        />
       </g>
 
       {/* 竹二 */}
@@ -193,12 +267,45 @@ export function BambooArt({
           strokeWidth="4.6"
           strokeLinecap="round"
         />
-        <ellipse cx="497" cy="356" rx="5.5" ry="2" fill="none" stroke="currentColor" strokeWidth="1.6" />
-        <ellipse cx="497" cy="266" rx="5.5" ry="2" fill="none" stroke="currentColor" strokeWidth="1.6" />
-        <ellipse cx="497" cy="176" rx="5.5" ry="2" fill="none" stroke="currentColor" strokeWidth="1.6" />
-        <use href="#spray" transform="translate(497 326) rotate(-12) scale(.88)" />
-        <use href="#spray" transform="translate(496 236) scale(-1 1) rotate(-24) scale(.95)" />
-        <use href="#spray" transform="translate(496 138) rotate(-42) scale(1.05)" />
+        <ellipse
+          cx="497"
+          cy="356"
+          rx="5.5"
+          ry="2"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+        />
+        <ellipse
+          cx="497"
+          cy="266"
+          rx="5.5"
+          ry="2"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+        />
+        <ellipse
+          cx="497"
+          cy="176"
+          rx="5.5"
+          ry="2"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+        />
+        <use
+          href="#spray"
+          transform="translate(497 326) rotate(-12) scale(.88)"
+        />
+        <use
+          href="#spray"
+          transform="translate(496 236) scale(-1 1) rotate(-24) scale(.95)"
+        />
+        <use
+          href="#spray"
+          transform="translate(496 138) rotate(-42) scale(1.05)"
+        />
       </g>
 
       {/* 竹三（更淡更远） */}
@@ -210,8 +317,14 @@ export function BambooArt({
           strokeWidth="3.4"
           strokeLinecap="round"
         />
-        <use href="#spray" transform="translate(299 372) rotate(-10) scale(.8)" />
-        <use href="#spray" transform="translate(299 300) scale(-1 1) rotate(-18) scale(.82)" />
+        <use
+          href="#spray"
+          transform="translate(299 372) rotate(-10) scale(.8)"
+        />
+        <use
+          href="#spray"
+          transform="translate(299 300) scale(-1 1) rotate(-18) scale(.82)"
+        />
       </g>
     </svg>
   )
@@ -270,7 +383,9 @@ export function PageHead({
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
-        {backTo && <BackLink to={backTo} label={backLabel} className="mb-2.5" />}
+        {backTo && (
+          <BackLink to={backTo} label={backLabel} className="mb-2.5" />
+        )}
         {kicker && (
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-leaf-deep">
             {kicker}
@@ -287,7 +402,9 @@ export function PageHead({
         )}
       </div>
       {actions && (
-        <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {actions}
+        </div>
       )}
     </div>
   )
@@ -518,7 +635,9 @@ export function InkNavRow({
       <span
         className={cn(
           'grid size-9 shrink-0 place-items-center rounded-lg transition-colors duration-150',
-          active ? 'bg-leaf-deep/15 text-leaf-deep' : 'bg-muted text-text-secondary',
+          active
+            ? 'bg-leaf-deep/15 text-leaf-deep'
+            : 'bg-muted text-text-secondary',
         )}
       >
         {icon}
@@ -528,7 +647,9 @@ export function InkNavRow({
           {title}
         </span>
         {desc && (
-          <span className="mt-0.5 block text-xs text-text-secondary">{desc}</span>
+          <span className="mt-0.5 block text-xs text-text-secondary">
+            {desc}
+          </span>
         )}
       </span>
       <ChevronRight

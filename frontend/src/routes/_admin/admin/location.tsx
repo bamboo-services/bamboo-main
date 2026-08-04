@@ -313,8 +313,7 @@ function LocationPage() {
         {!groupsQuery.isLoading && groups.length > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
             <span className="font-mono text-xs text-text-secondary">
-              第 {pageIndex + 1} / {Math.max(totalPages, 1)} 页 · 共 {total}{' '}
-              条
+              第 {pageIndex + 1} / {Math.max(totalPages, 1)} 页 · 共 {total} 条
             </span>
             <Pagination
               pageIndex={pageIndex}

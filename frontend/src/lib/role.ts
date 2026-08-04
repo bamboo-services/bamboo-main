@@ -39,7 +39,10 @@ export function isAdmin(user?: UserInfo | null): boolean {
 /**
  * 判断用户是否持有指定角色之一。缺省 user 时回退读取本地缓存用户。
  */
-export function hasRole(user: UserInfo | null | undefined, ...roles: string[]): boolean {
+export function hasRole(
+  user: UserInfo | null | undefined,
+  ...roles: Array<string>
+): boolean {
   const target = user ?? getStoredUser()
   if (!target) return false
   return roles.includes(target.role)

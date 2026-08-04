@@ -24,6 +24,7 @@ import { RegularFriendCard } from '@/components/about/regular-friend-card'
 import { Interlude } from '@/components/about/interlude'
 import { enter } from '@/lib/motion'
 import { CHAPTERS, LINK_LEVEL, groupLinksByGroup } from '@/lib/friend-groups'
+import { cn } from '@/lib/utils'
 import { usePublicLinks } from '@/hooks/use-links'
 
 export const Route = createFileRoute('/about/friends')({
@@ -227,10 +228,13 @@ function FriendsPage() {
       {/* ═══════════ 分组章节 · Bento 混排栅格 ═══════════ */}
       {isLoading ? (
         <div className="mx-auto w-full max-w-6xl px-6 md:px-10">
-          <div className="grid grid-flow-dense grid-cols-2 gap-4 pb-20 [grid-auto-rows:168px] sm:grid-cols-3 sm:[grid-auto-rows:158px] md:grid-cols-4 md:[grid-auto-rows:150px]">
-            <Skeleton className="col-span-2 row-span-2 rounded-lg" />
+          <div className="grid grid-flow-dense grid-cols-2 gap-4 pb-20 [grid-auto-rows:84px] sm:grid-cols-3 sm:[grid-auto-rows:79px] md:grid-cols-4 md:[grid-auto-rows:75px]">
+            <Skeleton className="col-span-2 row-span-4 rounded-lg" />
             {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="rounded-lg" />
+              <Skeleton
+                key={i}
+                className={cn('rounded-lg', i % 2 === 0 && 'row-span-2')}
+              />
             ))}
           </div>
         </div>
@@ -268,7 +272,7 @@ function FriendsPage() {
               {/* Bento 栅格：1×1 基础，高级 2×2，dense 流自动填补空隙 */}
               <motion.div
                 {...scrollReveal(reduced)}
-                className="grid grid-flow-dense grid-cols-2 gap-4 [grid-auto-rows:168px] sm:grid-cols-3 sm:[grid-auto-rows:158px] md:grid-cols-4 md:[grid-auto-rows:150px]"
+                className="grid grid-flow-dense grid-cols-2 gap-4 [grid-auto-rows:84px] sm:grid-cols-3 sm:[grid-auto-rows:79px] md:grid-cols-4 md:[grid-auto-rows:75px]"
               >
                 {group.links.map((link) => (
                   <FriendCardSwitch

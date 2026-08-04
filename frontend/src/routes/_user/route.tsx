@@ -51,7 +51,7 @@ interface NavItem {
   matchPrefix?: string
 }
 
-const NAV_ITEMS: NavItem[] = [
+const NAV_ITEMS: Array<NavItem> = [
   { to: '/user/dashboard', label: '看板' },
   { to: '/user/links', label: '我的友链', matchPrefix: '/user/links' },
   { to: '/user/account', label: '账号设置' },
@@ -60,7 +60,13 @@ const NAV_ITEMS: NavItem[] = [
 /** 竹叶小标（导航品牌用） */
 function BambooLeafMark() {
   return (
-    <svg width="20" height="20" viewBox="0 0 48 32" fill="var(--leaf-deep)" aria-hidden>
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 48 32"
+      fill="var(--leaf-deep)"
+      aria-hidden
+    >
       <path d="M2 30C10 18 26 6 46 2c-3 12-16 24-44 28z" />
     </svg>
   )

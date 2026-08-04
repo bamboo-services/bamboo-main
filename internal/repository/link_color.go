@@ -14,6 +14,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -165,17 +166,46 @@ func (r *LinkColorRepo) UpdateStatusByID(ctx context.Context, id xSnowflake.Snow
 	return true, nil
 }
 
+// colorSortRowTemplate 友链颜色重排 VALUES 行模板（id, sort_order）
+//
+// 占位符逐项显式 cast：id 为 bigint，sort_order 为 int；避免 PostgreSQL 将纯参数列
+// 默认推断为 text 触发 SQLSTATE 42883。占位符数量由 TestSortRowTemplate 兜底。
+const colorSortRowTemplate = "(?::bigint, ?::int)"
+
 // UpdateSortByIDs 批量更新友链颜色的排序值
+//
+// 单条 UPDATE ... FROM (VALUES ...) 一次落库全部条目，消除逐行 N+1 往返；
+// 排序视为内容更新，刷新 updated_at；RowsAffected==len(ids) 依赖 PostgreSQL
+// 「匹配行」语义作原子存在性兜底；VALUES 语法与 ::cast 为 PostgreSQL 专属。
+// 写后逐条失效单条缓存。
 func (r *LinkColorRepo) UpdateSortByIDs(ctx context.Context, ids []xSnowflake.SnowflakeID, startSort int, tx *gorm.DB) *xError.Error {
+	if len(ids) == 0 {
+		return nil
+	}
+
 	db := r.pickDB(tx).WithContext(ctx)
+	values := make([]string, 0, len(ids))
+	args := make([]any, 0, len(ids)*2)
 	for i, id := range ids {
-		result := db.Model(&entity.LinkColor{}).Where("id = ?", id).Update("sort_order", startSort+i)
-		if result.Error != nil {
-			return xError.NewError(ctx, xError.DatabaseError, "更新颜色排序失败", false, result.Error)
-		}
-		if result.RowsAffected == 0 {
-			return xError.NewError(ctx, xError.NotFound, "颜色不存在", false)
-		}
+		values = append(values, colorSortRowTemplate)
+		args = append(args, id, startSort+i)
+	}
+
+	result := db.Exec(
+		fmt.Sprintf(`UPDATE bm_link_color
+			SET sort_order = v.sort_order, updated_at = now()
+			FROM (VALUES %s) AS v(id, sort_order)
+			WHERE bm_link_color.id = v.id`, strings.Join(values, ",")),
+		args...,
+	)
+	if result.Error != nil {
+		return xError.NewError(ctx, xError.DatabaseError, "更新颜色排序失败", false, result.Error)
+	}
+	if result.RowsAffected != int64(len(ids)) {
+		return xError.NewError(ctx, xError.NotFound, "颜色不存在", false)
+	}
+
+	for _, id := range ids {
 		if cacheErr := r.kc.Delete(ctx, constants.RedisLinkColor.Get(id).String()); cacheErr != nil {
 			r.log.Warn(ctx, cacheErr.Error())
 		}

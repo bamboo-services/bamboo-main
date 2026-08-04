@@ -26,7 +26,12 @@ interface CountUpProps {
  * 数字渐进动画。基于 requestAnimationFrame + easeOutCubic。
  * 无障碍：用户偏好减少动态时，直接跳到终值。
  */
-export function CountUp({ value, duration = 1, className, style }: CountUpProps) {
+export function CountUp({
+  value,
+  duration = 1,
+  className,
+  style,
+}: CountUpProps) {
   const reduced = useReducedMotion() ?? false
   const [display, setDisplay] = useState(reduced ? value : 0)
 

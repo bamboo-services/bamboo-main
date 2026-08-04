@@ -362,10 +362,21 @@ func (r *LinkRepo) GetByIDs(ctx context.Context, ids []xSnowflake.SnowflakeID, t
 	return links, nil
 }
 
+// linkSortRowTemplate 友链批量排序 VALUES 行模板（id, sort_order, group_id）
+//
+// 占位符逐项显式 cast 目标类型：id/group_id 为 bigint（xSnowflake.SnowflakeID=int64），
+// sort_order 为 int；避免 PostgreSQL 将纯参数列默认推断为 text 触发 SQLSTATE 42883。
+// 占位符数量必须与 SortAssignment 字段一一对应，由 TestLinkSortRowTemplate 兜底。
+const linkSortRowTemplate = "(?::bigint, ?::int, ?::bigint)"
+
 // UpdateSortAndPosition 批量更新友链的全局排序值与分组归属
 //
 // 单条 UPDATE ... FROM (VALUES ...) 一次落库全部条目，消除逐行 N+1 往返；
-// 写后逐条失效单条缓存。受影响行数与载荷不符视为存在性校验失败（逻辑层已先校验，此处兜底）。
+// 排序视为内容更新，统一刷新 updated_at（与分组/颜色重排行为对齐）；
+// RowsAffected==len(items) 依赖 PostgreSQL「匹配行」语义（值未变化也计数），
+// 作为原子存在性兜底，可同时捕获 GetByIDs 预检与写入之间的并发删除（TOCTOU）；
+// VALUES 语法与 ::cast 为 PostgreSQL 专属，勿在其他驱动下使用。
+// 写后逐条失效单条缓存。
 func (r *LinkRepo) UpdateSortAndPosition(ctx context.Context, items []SortAssignment, tx *gorm.DB) *xError.Error {
 	r.log.Info(ctx, "UpdateSortAndPosition - 批量更新友链排序与位置")
 
@@ -377,13 +388,13 @@ func (r *LinkRepo) UpdateSortAndPosition(ctx context.Context, items []SortAssign
 	values := make([]string, 0, len(items))
 	args := make([]any, 0, len(items)*3)
 	for _, it := range items {
-		values = append(values, "(?, ?, ?)")
+		values = append(values, linkSortRowTemplate)
 		args = append(args, it.ID, it.Order, it.GroupID)
 	}
 
 	result := db.Exec(
 		fmt.Sprintf(`UPDATE bm_link_friend
-			SET sort_order = v.sort_order, group_id = v.group_id
+			SET sort_order = v.sort_order, group_id = v.group_id, updated_at = now()
 			FROM (VALUES %s) AS v(id, sort_order, group_id)
 			WHERE bm_link_friend.id = v.id`, strings.Join(values, ",")),
 		args...,

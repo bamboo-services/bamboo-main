@@ -7,11 +7,7 @@
 // https://opensource.org/licenses/MIT
 // --------------------------------------------------------------------------------
 
-import {
-  Link,
-  createFileRoute,
-  useNavigate,
-} from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import type { ApplyLinkRequest } from '@/api/types'
 import { useMyLink, useUpdateMyLink } from '@/hooks/use-links'

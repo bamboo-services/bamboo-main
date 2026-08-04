@@ -130,10 +130,7 @@ export function LinkForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="grid gap-4 lg:grid-cols-2"
-    >
+    <form onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-2">
       {/* 站点信息卡 */}
       <motion.section
         {...enter(reduced, 0.12, {
@@ -338,7 +335,9 @@ export function LinkForm({
                         ? 'scale-110 ring-2 ring-leaf-deep'
                         : 'hover:scale-105',
                     )}
-                    style={fancy ? undefined : { background: colorBackground(color) }}
+                    style={
+                      fancy ? undefined : { background: colorBackground(color) }
+                    }
                   >
                     {selected && (
                       <Check className="size-4 text-card" strokeWidth={3} />
@@ -400,7 +399,11 @@ export function LinkForm({
                 取消
               </Button>
             </Link>
-            <Button type="submit" className="cursor-pointer" disabled={submitting}>
+            <Button
+              type="submit"
+              className="cursor-pointer"
+              disabled={submitting}
+            >
               <Save className="mr-2 size-4" />
               {submitting ? '保存中…' : '保存'}
             </Button>

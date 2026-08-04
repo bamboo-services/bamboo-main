@@ -60,7 +60,9 @@ function greeting(): string {
 function dateLine(): string {
   const d = new Date()
   const pad = (n: number) => n.toString().padStart(2, '0')
-  const week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][d.getDay()]
+  const week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][
+    d.getDay()
+  ]
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${week}`
 }
 
@@ -89,9 +91,24 @@ function DashboardPage() {
   const other = Math.max(0, total - approved - pending)
 
   const kpiItems = [
-    { label: '友链总数', value: total, hint: '已收录 · Total', watermark: '林' },
-    { label: '待审核', value: pending, hint: '待处理 · Awaiting', watermark: '候' },
-    { label: '已通过', value: approved, hint: '已上线 · Live', watermark: '通' },
+    {
+      label: '友链总数',
+      value: total,
+      hint: '已收录 · Total',
+      watermark: '林',
+    },
+    {
+      label: '待审核',
+      value: pending,
+      hint: '待处理 · Awaiting',
+      watermark: '候',
+    },
+    {
+      label: '已通过',
+      value: approved,
+      hint: '已上线 · Live',
+      watermark: '通',
+    },
   ]
 
   const donutSegments: Array<DonutSegment> = [
@@ -214,12 +231,16 @@ function DashboardPage() {
                         className="size-2.5 shrink-0 rounded-[2px]"
                         style={{ backgroundColor: seg.color }}
                       />
-                      <span className="text-sm text-text-primary">{seg.label}</span>
+                      <span className="text-sm text-text-primary">
+                        {seg.label}
+                      </span>
                       <span className="ml-auto font-mono text-sm font-medium tabular-nums text-text-primary">
                         {statsQuery.isLoading ? '—' : seg.value}
                       </span>
                       <span className="w-10 text-right font-mono text-[11px] tabular-nums text-text-secondary">
-                        {total > 0 ? `${Math.round((seg.value / total) * 100)}%` : '0%'}
+                        {total > 0
+                          ? `${Math.round((seg.value / total) * 100)}%`
+                          : '0%'}
                       </span>
                     </li>
                   ))}
@@ -283,7 +304,10 @@ function DashboardPage() {
                   <dl className="flex flex-col">
                     <RuntimeRow label="运行时长" value={runtime.uptime} />
                     <RuntimeRow label="内存占用" value={runtime.memory_usage} />
-                    <RuntimeRow label="协程数" value={String(runtime.goroutines)} />
+                    <RuntimeRow
+                      label="协程数"
+                      value={String(runtime.goroutines)}
+                    />
                   </dl>
                 </div>
 
@@ -327,7 +351,10 @@ function DashboardPage() {
           })}
           className={`${inkCard} mt-4`}
         >
-          <CardHead title="最近申请" meta={pending > 0 ? `${pending} 项待处理` : '0 项待处理'} />
+          <CardHead
+            title="最近申请"
+            meta={pending > 0 ? `${pending} 项待处理` : '0 项待处理'}
+          />
           {statsQuery.isLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -346,7 +373,10 @@ function DashboardPage() {
                       {(i + 1).toString().padStart(2, '0')}
                     </span>
                     <Avatar className="size-8 rounded">
-                      <AvatarImage src={item.avatar || undefined} alt={item.name} />
+                      <AvatarImage
+                        src={item.avatar || undefined}
+                        alt={item.name}
+                      />
                       <AvatarFallback className="rounded text-xs">
                         {item.name.slice(0, 1)}
                       </AvatarFallback>
@@ -363,7 +393,9 @@ function DashboardPage() {
                       <span className="font-mono text-xs text-text-secondary">
                         {relativeTime(item.created_at)}
                       </span>
-                      <span className="text-xs font-medium text-leaf-deep">待审核</span>
+                      <span className="text-xs font-medium text-leaf-deep">
+                        待审核
+                      </span>
                     </div>
                   </Link>
                 </li>
@@ -374,7 +406,9 @@ function DashboardPage() {
               {/* enso 缺口圆 + 竹叶空状态 */}
               <EnsoIcon />
               <div>
-                <p className="font-serif text-[15px] text-text-primary">暂无待审核申请</p>
+                <p className="font-serif text-[15px] text-text-primary">
+                  暂无待审核申请
+                </p>
                 <p className="font-mono text-xs text-text-secondary">
                   新的友链申请提交后将在此处进入审核队列
                 </p>
@@ -415,7 +449,7 @@ function HorizontalHero(props: HeroProps) {
     props.version ? `版本 · ${props.version}` : null,
     props.goVersion ? `${props.goVersion}` : null,
     props.platform ? `${props.platform}` : null,
-  ].filter(Boolean) as string[]
+  ].filter(Boolean) as Array<string>
 
   return (
     <motion.section
@@ -442,9 +476,13 @@ function HorizontalHero(props: HeroProps) {
       <div className="relative z-10 w-full px-6 py-12 md:px-10">
         <div className="mb-5 flex items-center gap-3.5">
           <StatusDot healthy={props.healthy} loading={props.loading} />
-          <span className="font-mono text-xs text-text-secondary">系统运行中</span>
+          <span className="font-mono text-xs text-text-secondary">
+            系统运行中
+          </span>
           <span className="text-leaf-muted">·</span>
-          <span className="font-mono text-xs text-text-secondary">{props.dateStr}</span>
+          <span className="font-mono text-xs text-text-secondary">
+            {props.dateStr}
+          </span>
         </div>
 
         <h1 className="font-serif text-[64px] font-bold leading-[1.12] tracking-[0.005em] text-text-primary">
@@ -468,7 +506,9 @@ function HorizontalHero(props: HeroProps) {
           {metaItems.map((m, i) => (
             <span key={m} className="flex items-center gap-4">
               <span className="font-mono text-xs text-text-secondary">{m}</span>
-              {i < metaItems.length - 1 && <span className="text-leaf-muted">·</span>}
+              {i < metaItems.length - 1 && (
+                <span className="text-leaf-muted">·</span>
+              )}
             </span>
           ))}
         </div>
@@ -504,9 +544,13 @@ function VerticalColophon(props: HeroProps) {
       {/* 顶部状态 */}
       <div className="relative z-10 flex items-center gap-2.5 px-6 pt-6">
         <StatusDot healthy={props.healthy} loading={props.loading} />
-        <span className="font-mono text-xs text-text-secondary">系统运行中</span>
+        <span className="font-mono text-xs text-text-secondary">
+          系统运行中
+        </span>
         <span className="text-leaf-muted">·</span>
-        <span className="font-mono text-xs text-text-secondary">{props.dateStr}</span>
+        <span className="font-mono text-xs text-text-secondary">
+          {props.dateStr}
+        </span>
       </div>
 
       {/* 竖排题跋 */}
@@ -515,7 +559,9 @@ function VerticalColophon(props: HeroProps) {
           <p className="flex flex-col items-start gap-4 font-serif font-bold leading-[1.05] tracking-[0.3em] text-text-primary">
             <span className="text-[56px]">{greeting()}</span>
             {props.displayName && (
-              <span className="text-[40px] text-leaf-deep">{props.displayName}</span>
+              <span className="text-[40px] text-leaf-deep">
+                {props.displayName}
+              </span>
             )}
           </p>
           <p className="mt-8 max-h-[260px] font-serif text-base leading-[2.2] tracking-[0.4em] text-text-secondary">
@@ -549,7 +595,13 @@ function VerticalColophon(props: HeroProps) {
 }
 
 /** 状态点：绿点呼吸（reduced 时静止） */
-function StatusDot({ healthy, loading }: { healthy: boolean; loading: boolean }) {
+function StatusDot({
+  healthy,
+  loading,
+}: {
+  healthy: boolean
+  loading: boolean
+}) {
   const color = loading
     ? 'bg-text-secondary/60'
     : healthy
