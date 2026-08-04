@@ -263,8 +263,8 @@ export interface CreateLinkRequest {
   link_rss?: string
   link_desc?: string
   link_email?: string
-  link_group_id?: SnowflakeID
-  link_color_id?: SnowflakeID
+  link_group_id?: SnowflakeID | null
+  link_color_id?: SnowflakeID | null
   link_order?: number
   link_level?: number
   link_apply_remark?: string
@@ -278,8 +278,8 @@ export interface UpdateLinkRequest {
   link_rss?: string
   link_desc?: string
   link_email?: string
-  link_group_id?: SnowflakeID
-  link_color_id?: SnowflakeID
+  link_group_id?: SnowflakeID | null
+  link_color_id?: SnowflakeID | null
   link_order?: number
   link_level?: number
   link_apply_remark?: string
@@ -297,6 +297,25 @@ export interface UpdateLinkFailRequest {
   link_fail_reason?: string
 }
 
+/**
+ * 友链排序条目（PATCH /api/v1/admin/links/sort）。
+ * items 数组顺序 = 目标全局展示顺序；group_id 三态：省略=保持原组 / null=未分组 / 值=移入该组。
+ */
+export interface FriendSortItem {
+  id: SnowflakeID
+  group_id?: SnowflakeID | null
+}
+
+/** 友链批量排序/位置请求（PATCH /api/v1/admin/links/sort） */
+export interface FriendSortRequest {
+  items: Array<FriendSortItem>
+}
+
+/** 友链批量排序/位置响应 */
+export interface FriendSortResponse {
+  count: number
+}
+
 /** 访客自助申请友链请求（POST /api/v1/links/apply） */
 export interface ApplyLinkRequest {
   link_name: string
@@ -305,8 +324,8 @@ export interface ApplyLinkRequest {
   link_rss?: string
   link_desc?: string
   link_email: string
-  link_group_id?: SnowflakeID
-  link_color_id?: SnowflakeID
+  link_group_id?: SnowflakeID | null
+  link_color_id?: SnowflakeID | null
   link_apply_remark?: string
 }
 
@@ -318,8 +337,8 @@ export interface UpdateUserLinkRequest {
   link_rss?: string
   link_desc?: string
   link_email?: string
-  link_group_id?: SnowflakeID
-  link_color_id?: SnowflakeID
+  link_group_id?: SnowflakeID | null
+  link_color_id?: SnowflakeID | null
   link_apply_remark?: string
 }
 

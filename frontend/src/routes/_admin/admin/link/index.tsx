@@ -72,8 +72,13 @@ import {
 import { enter } from '@/lib/motion'
 import { accentOf, isFancyColor } from '@/lib/colors'
 import { cn } from '@/lib/utils'
-import { useAdminLinks, useDeleteLink, useReScreenshotLink } from '@/hooks/use-links'
+import {
+  useAdminLinks,
+  useDeleteLink,
+  useReScreenshotLink,
+} from '@/hooks/use-links'
 import { useAllGroups } from '@/hooks/use-groups'
+import { SiteAvatar } from '@/components/link/site-avatar'
 
 export const Route = createFileRoute('/_admin/admin/link/')({
   component: LinkListPage,
@@ -82,47 +87,6 @@ export const Route = createFileRoute('/_admin/admin/link/')({
 type ViewMode = 'list' | 'table'
 
 const PAGE_SIZE = 9
-
-/** 头像加载失败时回退为首字色块（宣纸底 + 墨色衬线字） */
-function SiteAvatar({
-  name,
-  url,
-  className,
-}: {
-  name: string
-  url: string | null
-  className?: string
-}) {
-  const [failed, setFailed] = useState(false)
-  if (failed || !url) {
-    return (
-      <div
-        className={cn(
-          'flex shrink-0 items-center justify-center rounded-lg bg-muted font-serif font-semibold text-text-secondary',
-          className,
-        )}
-      >
-        {name.charAt(0)}
-      </div>
-    )
-  }
-  return (
-    <div
-      className={cn(
-        'flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted ring-1 ring-border/60',
-        className,
-      )}
-    >
-      <img
-        src={url}
-        alt={name}
-        className="size-full object-cover"
-        loading="lazy"
-        onError={() => setFailed(true)}
-      />
-    </div>
-  )
-}
 
 /** 行内操作菜单：编辑 + 重新截图（仅已通过）+ 删除（删除触发确认弹窗） */
 function RowMenu({
@@ -330,10 +294,7 @@ function LinkTable({
             <tr
               key={row.id}
               onClick={() => onOpenDetail(row.original.id)}
-              className={cn(
-                'group cursor-pointer',
-                inkTableRow,
-              )}
+              className={cn('group cursor-pointer', inkTableRow)}
             >
               {row.getVisibleCells().map((cell) => (
                 <td
@@ -644,7 +605,10 @@ function LinkListPage() {
                     </div>
                     <RowMenu link={link} onConfirmDelete={setDeleteTarget} />
                   </div>
-                  <p className="mt-3 line-clamp-2 flex-1 text-sm leading-relaxed text-text-secondary">
+                  <p
+                    className="mt-3 flex-1 truncate text-sm text-text-secondary"
+                    title={link.description ?? undefined}
+                  >
                     {link.description ?? '这个站点没有留下描述。'}
                   </p>
                 </div>

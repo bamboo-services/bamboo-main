@@ -13,6 +13,8 @@ import type {
   ApplyLinkRequest,
   CreateLinkRequest,
   FriendPublicResponse,
+  FriendSortItem,
+  FriendSortResponse,
   LinkColor,
   LinkFriend,
   LinkGroup,
@@ -135,6 +137,19 @@ export function reScreenshotLink(id: SnowflakeID): Promise<void> {
   return request<void>({
     method: 'POST',
     url: `/admin/links/${id.toString()}/screenshot`,
+  })
+}
+
+/**
+ * 批量更新友链排序与位置（PATCH /api/v1/admin/links/sort）。
+ * items 顺序 = 目标全局展示顺序；group_id 三态（省略=保持原组 / null=未分组 / 值=移入该组）。
+ * bigint 由 client transformRequest 自动序列化，无需手工 toString。
+ */
+export function sortLinks(items: Array<FriendSortItem>): Promise<FriendSortResponse> {
+  return request<FriendSortResponse>({
+    method: 'PATCH',
+    url: '/admin/links/sort',
+    data: { items },
   })
 }
 

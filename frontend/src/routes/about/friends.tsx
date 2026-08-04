@@ -25,16 +25,11 @@ import type { InterludeData } from '@/components/about/interlude'
 import type { FriendCardProps } from '@/components/about/friend-card-shared'
 import { enter } from '@/lib/motion'
 import type { MotionDivProps } from '@/lib/motion'
+import { CHAPTERS, LINK_LEVEL, groupLinksByGroup } from '@/lib/friend-groups'
 
 export const Route = createFileRoute('/about/friends')({
   component: FriendsPage,
 })
-
-/** 友链级别枚举（与后端 pkg/constants LinkLevel 对齐：0 一般 / 1 好友 / 2 高级 / 3 广告） */
-const LINK_LEVEL = { regular: 0, close: 1, premium: 2, ad: 3 } as const
-
-/** 章节序号（壹 贰 叁 …） */
-const CHAPTERS = ['壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖', '拾'] as const
 
 /** 展卷 reveal：滚动至视口内淡入上移（reduced-motion 时直接呈现） */
 function scrollReveal(reduced: boolean): MotionDivProps {
@@ -45,35 +40,6 @@ function scrollReveal(reduced: boolean): MotionDivProps {
     viewport: { once: true, amount: 0.08 },
     transition: { duration: 0.9, ease: [0.22, 0.9, 0.3, 1] as const },
   }
-}
-
-/** 友链按分组聚合（分组名取自后端嵌套的 group_f_key） */
-function groupLinksByGroup(links: Array<LinkFriend>): Array<{
-  groupId: string
-  name: string
-  links: Array<LinkFriend>
-}> {
-  const map = new Map<string, { name: string; links: Array<LinkFriend> }>()
-  for (const link of links) {
-    const key = link.group_id != null ? link.group_id.toString() : 'none'
-    const entry = map.get(key) ?? {
-      name: link.group_f_key?.name ?? '未分组',
-      links: [],
-    }
-    entry.links.push(link)
-    map.set(key, entry)
-  }
-  return Array.from(map.entries())
-    .map(([groupId, entry]) => ({
-      groupId,
-      name: entry.name,
-      links: entry.links.sort((a, b) => a.sort_order - b.sort_order),
-    }))
-    .sort((a, b) => {
-      if (a.groupId === 'none') return 1
-      if (b.groupId === 'none') return -1
-      return 0
-    })
 }
 
 /** 按级别选用对应的卡片组件（级别来自后端 level 字段） */

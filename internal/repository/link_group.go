@@ -179,6 +179,19 @@ func (r *LinkGroupRepo) UpdateSortByIDs(ctx context.Context, ids []xSnowflake.Sn
 	return nil
 }
 
+// GetByIDs 按 ID 列表批量查询友链分组（无预加载、不走缓存，供排序前存在性与启用状态校验）
+func (r *LinkGroupRepo) GetByIDs(ctx context.Context, ids []xSnowflake.SnowflakeID, tx *gorm.DB) ([]entity.LinkGroup, *xError.Error) {
+	r.log.Info(ctx, "GetByIDs - 批量查询友链分组")
+
+	var groups []entity.LinkGroup
+	err := r.pickDB(tx).WithContext(ctx).Where("id IN ?", ids).Find(&groups).Error
+	if err != nil {
+		return nil, xError.NewError(ctx, xError.DatabaseError, "批量查询友链分组失败", false, err)
+	}
+
+	return groups, nil
+}
+
 // DeleteByID 物理删除友链分组
 func (r *LinkGroupRepo) DeleteByID(ctx context.Context, id xSnowflake.SnowflakeID, tx *gorm.DB) (bool, *xError.Error) {
 	result := r.pickDB(tx).WithContext(ctx).Unscoped().Where("id = ?", id).Delete(&entity.LinkGroup{})

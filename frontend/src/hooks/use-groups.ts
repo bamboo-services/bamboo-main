@@ -21,6 +21,7 @@ import {
   deleteGroup,
   getAllGroups,
   listGroups,
+  sortGroups,
   updateGroup,
   updateGroupStatus,
 } from '@/api/group'
@@ -101,5 +102,17 @@ export function useDeleteGroup() {
       void qc.invalidateQueries({ queryKey: groupKeys.all })
     },
     onError: (err: Error) => toast.error(err.message || '分组删除失败'),
+  })
+}
+
+/** 批量更新分组排序（排位看板章节拖拽联动；成功提示由友链排序 mutation 统一承担） */
+export function useSortGroups() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (groupIds: Array<SnowflakeID>) => sortGroups(groupIds),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: groupKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '分组排序保存失败'),
   })
 }

@@ -179,7 +179,10 @@ function VerifyItem({
         )}
       >
         <div className="overflow-hidden">
-          <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-text-secondary">
+          <p
+            className="mt-3 truncate text-sm text-text-secondary"
+            title={link.description || undefined}
+          >
             {link.description || '暂无描述'}
           </p>
           <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/60 pt-3 text-xs">
@@ -235,8 +238,8 @@ function verifyFormToUpdateReq(form: VerifyFormState): UpdateLinkRequest {
     link_rss: form.siteRss.trim() || undefined,
     link_email: form.webmasterEmail.trim() || undefined,
     link_desc: form.siteDescription.trim() || undefined,
-    link_group_id: form.groupId ?? undefined,
-    link_color_id: form.colorId ?? undefined,
+    link_group_id: form.groupId ?? null,
+    link_color_id: form.colorId ?? null,
     link_apply_remark: form.applyRemark.trim() || undefined,
   }
 }

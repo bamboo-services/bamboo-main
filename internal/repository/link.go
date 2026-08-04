@@ -52,6 +52,16 @@ type FriendQuery struct {
 	SortOrder   string
 }
 
+// SortAssignment 友链排序赋值条目
+//
+// repository 层自有模型：承载「目标全局序号 + 目标分组」两项写入值，
+// 由 logic 层纯函数 BuildSortAssignments 计算后交由 UpdateSortAndPosition 落库。
+type SortAssignment struct {
+	ID      xSnowflake.SnowflakeID  // 友链ID
+	GroupID *xSnowflake.SnowflakeID // 目标分组ID（nil=未分组）
+	Order   int                     // 目标全局排序值
+}
+
 // NewLinkRepo 创建 LinkRepo 实例
 func NewLinkRepo(db *gorm.DB, m *xCache.Manager) *LinkRepo {
 	return &LinkRepo{
@@ -302,18 +312,26 @@ func (r *LinkRepo) UpdateFailureByID(ctx context.Context, id xSnowflake.Snowflak
 }
 
 // ListPublic 查询公开的友情链接列表
+//
+// 排序语义「数字越小权重越大」：章节序遵循分组排序值（bm_link_group.sort_order ASC，
+// 未分组 NULL 经 NULLS LAST 置底），章内遵循友链排序值（bm_link_friend.sort_order ASC），
+// 同序回退创建时间倒序。LEFT JOIN 后 status 于两表同名，条件列一律带表限定；
+// 表名含 bm_ 前缀且为单数（xOptionDB.WithTablePrefix + SingularTable，见 main.go）。
 func (r *LinkRepo) ListPublic(ctx context.Context, groupID *xSnowflake.SnowflakeID, approvedStatus int, normalFail int, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
 	r.log.Info(ctx, "ListPublic - 查询公开友情链接")
 
 	query := r.pickDB(tx).WithContext(ctx).
-		Where("status = ? AND is_failure = ?", approvedStatus, normalFail)
+		Joins("LEFT JOIN bm_link_group ON bm_link_group.id = bm_link_friend.group_id").
+		Where("bm_link_friend.status = ? AND bm_link_friend.is_failure = ?", approvedStatus, normalFail)
 
 	if groupID != nil {
-		query = query.Where("group_id = ?", *groupID)
+		query = query.Where("bm_link_friend.group_id = ?", *groupID)
 	}
 
 	var links []entity.LinkFriend
-	err := query.Preload("GroupFKey").Preload("ColorFKey").Order("sort_order ASC, created_at DESC").Find(&links).Error
+	err := query.Preload("GroupFKey").Preload("ColorFKey").
+		Order("bm_link_group.sort_order ASC NULLS LAST, bm_link_friend.sort_order ASC, bm_link_friend.created_at DESC").
+		Find(&links).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "查询公开友情链接失败", false, err)
 	}
@@ -324,6 +342,45 @@ func (r *LinkRepo) ListPublic(ctx context.Context, groupID *xSnowflake.Snowflake
 	}
 
 	return links, nil
+}
+
+// GetByIDs 按 ID 列表批量查询友链（无预加载、不走单条缓存，供排序前存在性校验）
+func (r *LinkRepo) GetByIDs(ctx context.Context, ids []xSnowflake.SnowflakeID, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
+	r.log.Info(ctx, "GetByIDs - 批量查询友情链接")
+
+	var links []entity.LinkFriend
+	err := r.pickDB(tx).WithContext(ctx).Where("id IN ?", ids).Find(&links).Error
+	if err != nil {
+		return nil, xError.NewError(ctx, xError.DatabaseError, "批量查询友情链接失败", false, err)
+	}
+
+	return links, nil
+}
+
+// UpdateSortAndPosition 批量更新友链的全局排序值与分组归属
+//
+// 按传入条目逐条写入 sort_order 与 group_id（nil 即置未分组），写后逐条失效单条缓存。
+func (r *LinkRepo) UpdateSortAndPosition(ctx context.Context, items []SortAssignment, tx *gorm.DB) *xError.Error {
+	r.log.Info(ctx, "UpdateSortAndPosition - 批量更新友链排序与位置")
+
+	db := r.pickDB(tx).WithContext(ctx)
+	for _, it := range items {
+		result := db.Model(&entity.LinkFriend{}).Where("id = ?", it.ID).Updates(map[string]any{
+			"sort_order": it.Order,
+			"group_id":   it.GroupID,
+		})
+		if result.Error != nil {
+			return xError.NewError(ctx, xError.DatabaseError, "更新友链排序失败", false, result.Error)
+		}
+		if result.RowsAffected == 0 {
+			return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		}
+		if cacheErr := r.kc.Delete(ctx, constants.RedisLinkFriend.Get(it.ID).String()); cacheErr != nil {
+			r.log.Warn(ctx, cacheErr.Error())
+		}
+	}
+
+	return nil
 }
 
 // ListApprovedForScreenshot 查询全部已通过且未失效的友链（按排序与创建时间，供截图全量入队）

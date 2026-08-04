@@ -12,6 +12,8 @@
 package apiLink
 
 import (
+	"encoding/json"
+
 	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
@@ -22,34 +24,66 @@ type LinkIDRequest struct {
 	ID xSnowflake.SnowflakeID `uri:"id" binding:"required"`
 }
 
+// NullableSnowflakeID 可空雪花 ID 请求字段（三态）：
+//   - JSON 省略：未提供，业务按「保持原值」处理
+//   - JSON null：显式清空（如取消颜色/分组选择）
+//   - JSON 值：设置新值
+//
+// 用于区分「不传」与「传 null」，避免取消选择被零值哨兵吞掉。
+type NullableSnowflakeID struct {
+	present bool
+	value   *xSnowflake.SnowflakeID
+}
+
+// UnmarshalJSON 解析 JSON 值；null 与省略通过 Provided 区分
+func (n *NullableSnowflakeID) UnmarshalJSON(data []byte) error {
+	n.present = true
+	if string(data) == "null" {
+		n.value = nil
+		return nil
+	}
+	var id xSnowflake.SnowflakeID
+	if err := json.Unmarshal(data, &id); err != nil {
+		return err
+	}
+	n.value = &id
+	return nil
+}
+
+// Provided 字段是否在请求中显式出现（null 与值均为 true，省略为 false）
+func (n NullableSnowflakeID) Provided() bool { return n.present }
+
+// Value 返回解析值；显式 null 时为 nil
+func (n NullableSnowflakeID) Value() *xSnowflake.SnowflakeID { return n.value }
+
 // FriendAddRequest 添加友情链接请求
 type FriendAddRequest struct {
-	LinkName        string                 `json:"link_name" binding:"required,min=1,max=100" example:"示例网站"`
-	LinkURL         string                 `json:"link_url" binding:"required,url,max=500" example:"https://example.com"`
-	LinkAvatar      string                 `json:"link_avatar" binding:"omitempty,url,max=500" example:"https://example.com/avatar.jpg"`
-	LinkRSS         string                 `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
-	LinkDesc        string                 `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
-	LinkEmail       string                 `json:"link_email" binding:"omitempty,email,max=100" example:"admin@example.com"`
-	LinkGroupID     xSnowflake.SnowflakeID `json:"link_group_id" binding:"omitempty,number" example:"1"`
-	LinkColorID     xSnowflake.SnowflakeID `json:"link_color_id" binding:"omitempty,number" example:"1"`
-	LinkOrder       int                    `json:"link_order" binding:"omitempty,min=0" example:"0"`
-	LinkLevel       int                    `json:"link_level" binding:"omitempty,oneof=0 1 2 3" example:"0"`
-	LinkApplyRemark string                 `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
+	LinkName        string              `json:"link_name" binding:"required,min=1,max=100" example:"示例网站"`
+	LinkURL         string              `json:"link_url" binding:"required,url,max=500" example:"https://example.com"`
+	LinkAvatar      string              `json:"link_avatar" binding:"omitempty,url,max=500" example:"https://example.com/avatar.jpg"`
+	LinkRSS         string              `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
+	LinkDesc        string              `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
+	LinkEmail       string              `json:"link_email" binding:"omitempty,email,max=100" example:"admin@example.com"`
+	LinkGroupID     NullableSnowflakeID `json:"link_group_id" binding:"omitempty" example:"1"`
+	LinkColorID     NullableSnowflakeID `json:"link_color_id" binding:"omitempty" example:"1"`
+	LinkOrder       int                 `json:"link_order" binding:"omitempty,min=0" example:"0"`
+	LinkLevel       int                 `json:"link_level" binding:"omitempty,oneof=0 1 2 3" example:"0"`
+	LinkApplyRemark string              `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
 }
 
 // FriendUpdateRequest 更新友情链接请求
 type FriendUpdateRequest struct {
-	LinkName        string                 `json:"link_name" binding:"omitempty,min=1,max=100" example:"示例网站"`
-	LinkURL         string                 `json:"link_url" binding:"omitempty,url,max=500" example:"https://example.com"`
-	LinkAvatar      string                 `json:"link_avatar" binding:"omitempty,url,max=500" example:"https://example.com/avatar.jpg"`
-	LinkRSS         string                 `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
-	LinkDesc        string                 `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
-	LinkEmail       string                 `json:"link_email" binding:"omitempty,email,max=100" example:"admin@example.com"`
-	LinkGroupID     xSnowflake.SnowflakeID `json:"link_group_id" binding:"omitempty,number" example:"1"`
-	LinkColorID     xSnowflake.SnowflakeID `json:"link_color_id" binding:"omitempty,number" example:"1"`
-	LinkOrder       *int                   `json:"link_order" binding:"omitempty,min=0" example:"0"`
-	LinkLevel       *int                   `json:"link_level" binding:"omitempty,oneof=0 1 2 3" example:"0"`
-	LinkApplyRemark string                 `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
+	LinkName        string              `json:"link_name" binding:"omitempty,min=1,max=100" example:"示例网站"`
+	LinkURL         string              `json:"link_url" binding:"omitempty,url,max=500" example:"https://example.com"`
+	LinkAvatar      string              `json:"link_avatar" binding:"omitempty,url,max=500" example:"https://example.com/avatar.jpg"`
+	LinkRSS         string              `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
+	LinkDesc        string              `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
+	LinkEmail       string              `json:"link_email" binding:"omitempty,email,max=100" example:"admin@example.com"`
+	LinkGroupID     NullableSnowflakeID `json:"link_group_id" binding:"omitempty" example:"1"`
+	LinkColorID     NullableSnowflakeID `json:"link_color_id" binding:"omitempty" example:"1"`
+	LinkOrder       *int                `json:"link_order" binding:"omitempty,min=0" example:"0"`
+	LinkLevel       *int                `json:"link_level" binding:"omitempty,oneof=0 1 2 3" example:"0"`
+	LinkApplyRemark string              `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
 }
 
 // FriendQueryRequest 查询友情链接请求
@@ -104,20 +138,39 @@ type FriendPublicResponse struct {
 	Links []entity.LinkFriend `json:"links"`
 }
 
+// FriendSortItem 友链排序条目
+//
+// items 数组顺序 = 目标全局展示顺序（后端按此序重写全局 sort_order 为 0..N-1）。
+// GroupID 三态（复用 NullableSnowflakeID）：省略=保持原分组，null=移入未分组，值=移入该分组。
+type FriendSortItem struct {
+	ID      xSnowflake.SnowflakeID `json:"id" binding:"required"`        // 友链ID
+	GroupID NullableSnowflakeID    `json:"group_id" binding:"omitempty"` // 目标分组ID（三态）
+}
+
+// FriendSortRequest 友链批量排序/位置请求
+type FriendSortRequest struct {
+	Items []FriendSortItem `json:"items" binding:"required,min=1,max=500,dive"` // 排序条目列表，顺序即目标全局展示顺序
+}
+
+// FriendSortResponse 友链批量排序/位置响应
+type FriendSortResponse struct {
+	Count int `json:"count"` // 更新的友链数量
+}
+
 // FriendApplyRequest 访客自助申请友情链接请求
 //
 // 面向游客与登录用户的公开申请入口：仅需站点基础信息，联系邮箱必填（用于确认友链归属），
 // 分组/颜色/级别/排序等管理员专属字段不在此开放，由管理员审核时分配。
 type FriendApplyRequest struct {
-	LinkName        string                 `json:"link_name" binding:"required,min=1,max=100" example:"示例网站"`
-	LinkURL         string                 `json:"link_url" binding:"required,url,max=500" example:"https://example.com"`
-	LinkAvatar      string                 `json:"link_avatar" binding:"omitempty,url,max=500" example:"https://example.com/avatar.jpg"`
-	LinkRSS         string                 `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
-	LinkDesc        string                 `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
-	LinkEmail       string                 `json:"link_email" binding:"required,email,max=100" example:"admin@example.com"`
-	LinkGroupID     xSnowflake.SnowflakeID `json:"link_group_id" binding:"omitempty,number" example:"1"`
-	LinkColorID     xSnowflake.SnowflakeID `json:"link_color_id" binding:"omitempty,number" example:"1"`
-	LinkApplyRemark string                 `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
+	LinkName        string              `json:"link_name" binding:"required,min=1,max=100" example:"示例网站"`
+	LinkURL         string              `json:"link_url" binding:"required,url,max=500" example:"https://example.com"`
+	LinkAvatar      string              `json:"link_avatar" binding:"omitempty,url,max=500" example:"https://example.com/avatar.jpg"`
+	LinkRSS         string              `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
+	LinkDesc        string              `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
+	LinkEmail       string              `json:"link_email" binding:"required,email,max=100" example:"admin@example.com"`
+	LinkGroupID     NullableSnowflakeID `json:"link_group_id" binding:"omitempty" example:"1"`
+	LinkColorID     NullableSnowflakeID `json:"link_color_id" binding:"omitempty" example:"1"`
+	LinkApplyRemark string              `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
 }
 
 // FriendUserUpdateRequest 用户更新自己友情链接请求

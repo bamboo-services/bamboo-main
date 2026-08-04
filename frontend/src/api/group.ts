@@ -95,3 +95,12 @@ export function deleteGroup(id: SnowflakeID, force = false): Promise<void> {
     params: { force },
   })
 }
+
+/** 批量更新友链分组排序（载荷顺序 = 目标章节序；PATCH /api/v1/admin/groups/sort） */
+export function sortGroups(groupIds: Array<SnowflakeID>): Promise<void> {
+  return request<void>({
+    method: 'PATCH',
+    url: '/admin/groups/sort',
+    data: { group_ids: groupIds },
+  })
+}

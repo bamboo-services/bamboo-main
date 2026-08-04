@@ -17,6 +17,7 @@ import {
   CircleUserRound,
   Heart,
   LayoutDashboard,
+  LayoutGrid,
   Link as LinkIcon,
   LogOut,
   MapPin,
@@ -59,6 +60,7 @@ const menuGroups = [
     label: '友链',
     items: [
       { title: '友链管理', url: '/admin/link', icon: LinkIcon },
+      { title: '排位管理', url: '/admin/ranking', icon: LayoutGrid },
       { title: '位置管理', url: '/admin/location', icon: MapPin },
       { title: '颜色管理', url: '/admin/color', icon: Palette },
     ],

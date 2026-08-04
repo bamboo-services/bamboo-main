@@ -516,57 +516,6 @@ definitions:
         type: string
     type: object
   apiLink.FriendAddRequest:
-    properties:
-      link_apply_remark:
-        example: 申请友链
-        maxLength: 500
-        type: string
-      link_avatar:
-        example: https://example.com/avatar.jpg
-        maxLength: 500
-        type: string
-      link_color_id:
-        example: 1
-        type: integer
-      link_desc:
-        example: 这是一个示例网站
-        maxLength: 500
-        type: string
-      link_email:
-        example: admin@example.com
-        maxLength: 100
-        type: string
-      link_group_id:
-        example: 1
-        type: integer
-      link_level:
-        enum:
-        - 0
-        - 1
-        - 2
-        - 3
-        example: 0
-        type: integer
-      link_name:
-        example: 示例网站
-        maxLength: 100
-        minLength: 1
-        type: string
-      link_order:
-        example: 0
-        minimum: 0
-        type: integer
-      link_rss:
-        example: https://example.com/rss.xml
-        maxLength: 500
-        type: string
-      link_url:
-        example: https://example.com
-        maxLength: 500
-        type: string
-    required:
-    - link_name
-    - link_url
     type: object
   apiLink.FriendAddResponse:
     properties:
@@ -646,46 +595,6 @@ definitions:
         type: integer
     type: object
   apiLink.FriendApplyRequest:
-    properties:
-      link_apply_remark:
-        example: 申请友链
-        maxLength: 500
-        type: string
-      link_avatar:
-        example: https://example.com/avatar.jpg
-        maxLength: 500
-        type: string
-      link_color_id:
-        example: 1
-        type: integer
-      link_desc:
-        example: 这是一个示例网站
-        maxLength: 500
-        type: string
-      link_email:
-        example: admin@example.com
-        maxLength: 100
-        type: string
-      link_group_id:
-        example: 1
-        type: integer
-      link_name:
-        example: 示例网站
-        maxLength: 100
-        minLength: 1
-        type: string
-      link_rss:
-        example: https://example.com/rss.xml
-        maxLength: 500
-        type: string
-      link_url:
-        example: https://example.com
-        maxLength: 500
-        type: string
-    required:
-    - link_email
-    - link_name
-    - link_url
     type: object
   apiLink.FriendDetailResponse:
     properties:
@@ -804,6 +713,36 @@ definitions:
           $ref: '#/definitions/entity.LinkFriend'
         type: array
     type: object
+  apiLink.FriendSortItem:
+    properties:
+      group_id:
+        allOf:
+        - $ref: '#/definitions/apiLink.NullableSnowflakeID'
+        description: 目标分组ID（三态）
+      id:
+        description: 友链ID
+        type: integer
+    required:
+    - id
+    type: object
+  apiLink.FriendSortRequest:
+    properties:
+      items:
+        description: 排序条目列表，顺序即目标全局展示顺序
+        items:
+          $ref: '#/definitions/apiLink.FriendSortItem'
+        maxItems: 500
+        minItems: 1
+        type: array
+    required:
+    - items
+    type: object
+  apiLink.FriendSortResponse:
+    properties:
+      count:
+        description: 更新的友链数量
+        type: integer
+    type: object
   apiLink.FriendStatusRequest:
     properties:
       link_review_remark:
@@ -823,54 +762,6 @@ definitions:
     - link_status
     type: object
   apiLink.FriendUpdateRequest:
-    properties:
-      link_apply_remark:
-        example: 申请友链
-        maxLength: 500
-        type: string
-      link_avatar:
-        example: https://example.com/avatar.jpg
-        maxLength: 500
-        type: string
-      link_color_id:
-        example: 1
-        type: integer
-      link_desc:
-        example: 这是一个示例网站
-        maxLength: 500
-        type: string
-      link_email:
-        example: admin@example.com
-        maxLength: 100
-        type: string
-      link_group_id:
-        example: 1
-        type: integer
-      link_level:
-        enum:
-        - 0
-        - 1
-        - 2
-        - 3
-        example: 0
-        type: integer
-      link_name:
-        example: 示例网站
-        maxLength: 100
-        minLength: 1
-        type: string
-      link_order:
-        example: 0
-        minimum: 0
-        type: integer
-      link_rss:
-        example: https://example.com/rss.xml
-        maxLength: 500
-        type: string
-      link_url:
-        example: https://example.com
-        maxLength: 500
-        type: string
     type: object
   apiLink.FriendUpdateResponse:
     properties:
@@ -1174,6 +1065,8 @@ definitions:
         type: boolean
       updated_at:
         type: string
+    type: object
+  apiLink.NullableSnowflakeID:
     type: object
   apiPublic.HealthResponse:
     properties:
@@ -3203,6 +3096,51 @@ paths:
       security:
       - Bearer: []
       summary: '[管理] 更新友情链接状态'
+      tags:
+      - 友情链接接口
+  /api/v1/admin/links/sort:
+    patch:
+      consumes:
+      - application/json
+      description: 按照传入的条目数组顺序重写全局排序值（0..N-1），并随条目携带三态分组归属（省略=保持原组 / null=置未分组 / 值=移入该组）
+      parameters:
+      - description: 友链排序请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiLink.FriendSortRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 排序更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiLink.FriendSortResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "404":
+          description: 友情链接或分组不存在
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[管理] 批量更新友情链接排序与位置'
       tags:
       - 友情链接接口
   /api/v1/admin/sponsors/channels:

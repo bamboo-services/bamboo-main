@@ -48,6 +48,7 @@ func (r *route) linkAdminRouter(route gin.IRouter) {
 	{
 		linkGroup.POST("", linkHandler.Add)
 		linkGroup.GET("", linkHandler.List)
+		linkGroup.PATCH("/sort", linkHandler.UpdateSort)
 		linkGroup.GET("/:id", linkHandler.Get)
 		linkGroup.PUT("/:id", linkHandler.Update)
 		linkGroup.DELETE("/:id", linkHandler.Delete)

@@ -13,6 +13,7 @@ package logic
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	apiLink "github.com/bamboo-services/bamboo-main/api/link"
@@ -32,8 +33,9 @@ import (
 )
 
 type linkRepo struct {
-	link *repository.LinkRepo
-	user *repository.SystemUserRepo
+	link  *repository.LinkRepo
+	user  *repository.SystemUserRepo
+	group *repository.LinkGroupRepo
 }
 
 // LinkLogic 友情链接业务逻辑
@@ -54,8 +56,9 @@ func NewLinkLogic(ctx context.Context) *LinkLogic {
 			log:   xLog.WithName(xLog.NamedLOGC, "LinkLogic"),
 		},
 		repo: linkRepo{
-			link: repository.NewLinkRepo(db, m),
-			user: repository.NewSystemUserRepo(db, m),
+			link:  repository.NewLinkRepo(db, m),
+			user:  repository.NewSystemUserRepo(db, m),
+			group: repository.NewLinkGroupRepo(db, m),
 		},
 	}
 }
@@ -78,11 +81,11 @@ func (l *LinkLogic) Add(ctx context.Context, req *apiLink.FriendAddRequest) (*en
 	}
 
 	// 设置ID外键
-	if req.LinkGroupID != 0 {
-		link.GroupID = &req.LinkGroupID
+	if req.LinkGroupID.Provided() {
+		link.GroupID = req.LinkGroupID.Value()
 	}
-	if req.LinkColorID != 0 {
-		link.ColorID = &req.LinkColorID
+	if req.LinkColorID.Provided() {
+		link.ColorID = req.LinkColorID.Value()
 	}
 
 	_, xErr := l.repo.link.Create(ctx, link, nil)
@@ -136,11 +139,11 @@ func (l *LinkLogic) Update(ctx context.Context, linkID xSnowflake.SnowflakeID, r
 	if req.LinkEmail != "" {
 		link.Email = xUtil.Ptr(req.LinkEmail)
 	}
-	if req.LinkGroupID != 0 {
-		link.GroupID = &req.LinkGroupID
+	if req.LinkGroupID.Provided() {
+		link.GroupID = req.LinkGroupID.Value()
 	}
-	if req.LinkColorID != 0 {
-		link.ColorID = &req.LinkColorID
+	if req.LinkColorID.Provided() {
+		link.ColorID = req.LinkColorID.Value()
 	}
 	if req.LinkOrder != nil {
 		link.SortOrder = *req.LinkOrder
@@ -151,6 +154,11 @@ func (l *LinkLogic) Update(ctx context.Context, linkID xSnowflake.SnowflakeID, r
 	if req.LinkApplyRemark != "" {
 		link.ApplyRemark = xUtil.Ptr(req.LinkApplyRemark)
 	}
+
+	// 清空关联引用：对象可能来自缓存快照（含 ColorFKey/GroupFKey），保留关联会让 GORM Save 用快照覆盖关联表并把外键改回旧值
+	link.GroupFKey = nil
+	link.ColorFKey = nil
+	link.UserFKey = nil
 
 	_, xErr = l.repo.link.Save(ctx, link, nil)
 	if xErr != nil {
@@ -285,6 +293,114 @@ func (l *LinkLogic) UpdateFailStatus(ctx context.Context, linkID xSnowflake.Snow
 	}
 	if !ok {
 		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+	}
+
+	return nil
+}
+
+// BuildSortAssignments 根据载荷顺序计算全局排序赋值（纯函数，无 ctx/DB，便于表驱动单测）
+//
+// 以 links 建立 id→现有 GroupID 映射；按 items 载荷顺序分配全局序号 0..N-1；
+// GroupID 三态：item 显式提供则取提供值（null 即置未分组），否则保持原分组。
+// 载荷含重复 ID 时返回 error，由调用方包装为参数错误。
+func BuildSortAssignments(links []entity.LinkFriend, items []apiLink.FriendSortItem) ([]repository.SortAssignment, error) {
+	existing := make(map[xSnowflake.SnowflakeID]*xSnowflake.SnowflakeID, len(links))
+	for i := range links {
+		existing[links[i].ID] = links[i].GroupID
+	}
+
+	assignments := make([]repository.SortAssignment, 0, len(items))
+	seen := make(map[xSnowflake.SnowflakeID]struct{}, len(items))
+	for order, item := range items {
+		if _, dup := seen[item.ID]; dup {
+			return nil, errors.New("items 含重复友链ID")
+		}
+		seen[item.ID] = struct{}{}
+
+		groupID := existing[item.ID]
+		if item.GroupID.Provided() {
+			groupID = item.GroupID.Value()
+		}
+
+		assignments = append(assignments, repository.SortAssignment{
+			ID:      item.ID,
+			GroupID: groupID,
+			Order:   order,
+		})
+	}
+
+	return assignments, nil
+}
+
+// UpdateSort 批量更新友链全局排序与分组归属
+//
+// 事务内按载荷顺序重写全局 sort_order 为 0..N-1，并随载荷携带三态 group_id
+// （省略=保持原组 / null=置未分组 / 值=移入该组），写后由 repo 逐条失效缓存。
+func (l *LinkLogic) UpdateSort(ctx context.Context, req *apiLink.FriendSortRequest) *xError.Error {
+	// 收集友链 ID 并校验全部存在
+	idSet := make(map[xSnowflake.SnowflakeID]struct{}, len(req.Items))
+	ids := make([]xSnowflake.SnowflakeID, 0, len(req.Items))
+	for _, item := range req.Items {
+		if _, ok := idSet[item.ID]; !ok {
+			idSet[item.ID] = struct{}{}
+			ids = append(ids, item.ID)
+		}
+	}
+	links, xErr := l.repo.link.GetByIDs(ctx, ids, nil)
+	if xErr != nil {
+		return xErr
+	}
+	if len(links) != len(ids) {
+		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+	}
+
+	// 收集显式提供的目标分组 ID，校验全部存在且启用
+	groupIDSet := make(map[xSnowflake.SnowflakeID]struct{})
+	for _, item := range req.Items {
+		if item.GroupID.Provided() && item.GroupID.Value() != nil {
+			groupIDSet[*item.GroupID.Value()] = struct{}{}
+		}
+	}
+	if len(groupIDSet) > 0 {
+		groupIDs := make([]xSnowflake.SnowflakeID, 0, len(groupIDSet))
+		for gid := range groupIDSet {
+			groupIDs = append(groupIDs, gid)
+		}
+		groups, xErr := l.repo.group.GetByIDs(ctx, groupIDs, nil)
+		if xErr != nil {
+			return xErr
+		}
+		if len(groups) != len(groupIDs) {
+			return xError.NewError(ctx, xError.NotFound, "友链分组不存在或已禁用", false)
+		}
+		for i := range groups {
+			if !groups[i].Status {
+				return xError.NewError(ctx, xError.NotFound, "友链分组不存在或已禁用", false)
+			}
+		}
+	}
+
+	// 计算排序赋值（纯函数），重复 ID 等非法载荷包装为参数错误
+	assignments, err := BuildSortAssignments(links, req.Items)
+	if err != nil {
+		return xError.NewError(ctx, xError.ParameterError, xError.ErrMessage(err.Error()), false, err)
+	}
+
+	// 事务内批量写入（镜像 LinkGroupLogic.UpdateSort 的 tx + defer recover 模式）
+	tx := l.db.WithContext(ctx).Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if xErr := l.repo.link.UpdateSortAndPosition(ctx, assignments, tx); xErr != nil {
+		tx.Rollback()
+		return xErr
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return xError.NewError(ctx, xError.DatabaseError, "提交排序更新失败", false, err)
 	}
 
 	return nil
@@ -435,6 +551,11 @@ func (l *LinkLogic) UpdateMine(ctx context.Context, userID xSnowflake.SnowflakeI
 	if req.LinkApplyRemark != "" {
 		link.ApplyRemark = xUtil.Ptr(req.LinkApplyRemark)
 	}
+
+	// 清空关联引用：对象可能来自缓存快照（含 ColorFKey/GroupFKey），保留关联会让 GORM Save 用快照覆盖关联表并把外键改回旧值
+	link.GroupFKey = nil
+	link.ColorFKey = nil
+	link.UserFKey = nil
 
 	_, xErr = l.repo.link.Save(ctx, link, nil)
 	if xErr != nil {

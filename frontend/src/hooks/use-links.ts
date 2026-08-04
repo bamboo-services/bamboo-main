@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import type {
   ApplyLinkRequest,
   CreateLinkRequest,
+  FriendSortItem,
   LinkListParams,
   SnowflakeID,
   UpdateLinkFailRequest,
@@ -33,6 +34,7 @@ import {
   listMyLinks,
   reScreenshotLink,
   requestTakedown,
+  sortLinks,
   updateLink,
   updateLinkFail,
   updateLinkStatus,
@@ -267,5 +269,23 @@ export function usePublicColors() {
     queryKey: ['public', 'colors'] as const,
     queryFn: getPublicColors,
     staleTime: 10 * 60 * 1000,
+  })
+}
+
+/**
+ * 批量更新友链排序与位置（排位管理 Sidebar 拖拽持久化）。
+ * 成功后同时失效管理端与公开端缓存——Sidebar 与 about/friends 共享 ['public','links']，
+ * 一处失效双端刷新，保证预览即所见。
+ */
+export function useSortLinks() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (items: Array<FriendSortItem>) => sortLinks(items),
+    onSuccess: () => {
+      toast.success('排序已保存')
+      void qc.invalidateQueries({ queryKey: linkKeys.all })
+      void qc.invalidateQueries({ queryKey: ['public', 'links'] })
+    },
+    onError: (err: Error) => toast.error(err.message || '排序保存失败'),
   })
 }

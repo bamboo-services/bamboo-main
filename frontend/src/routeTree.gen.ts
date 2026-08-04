@@ -27,6 +27,7 @@ import { Route as OperateApplyRouteImport } from './routes/operate/apply'
 import { Route as AdminAdminColorRouteImport } from './routes/_admin/admin/color'
 import { Route as AdminAdminDashboardRouteImport } from './routes/_admin/admin/dashboard'
 import { Route as AdminAdminLocationRouteImport } from './routes/_admin/admin/location'
+import { Route as AdminAdminRankingRouteImport } from './routes/_admin/admin/ranking'
 import { Route as AdminAdminSettingRouteImport } from './routes/_admin/admin/setting'
 import { Route as AdminAdminSponsorRouteImport } from './routes/_admin/admin/sponsor'
 import { Route as AuthorizationAuthCallbackRouteImport } from './routes/_authorization/auth/callback'
@@ -129,6 +130,11 @@ const AdminAdminLocationRoute = AdminAdminLocationRouteImport.update({
   path: '/location',
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
+const AdminAdminRankingRoute = AdminAdminRankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
 const AdminAdminSettingRoute = AdminAdminSettingRouteImport.update({
   id: '/setting',
   path: '/setting',
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/admin/color': typeof AdminAdminColorRoute
   '/admin/dashboard': typeof AdminAdminDashboardRoute
   '/admin/location': typeof AdminAdminLocationRoute
+  '/admin/ranking': typeof AdminAdminRankingRoute
   '/admin/setting': typeof AdminAdminSettingRoute
   '/admin/sponsor': typeof AdminAdminSponsorRoute
   '/auth/callback': typeof AuthorizationAuthCallbackRoute
@@ -251,6 +258,7 @@ export interface FileRoutesByTo {
   '/admin/color': typeof AdminAdminColorRoute
   '/admin/dashboard': typeof AdminAdminDashboardRoute
   '/admin/location': typeof AdminAdminLocationRoute
+  '/admin/ranking': typeof AdminAdminRankingRoute
   '/admin/setting': typeof AdminAdminSettingRoute
   '/admin/sponsor': typeof AdminAdminSponsorRoute
   '/auth/callback': typeof AuthorizationAuthCallbackRoute
@@ -287,6 +295,7 @@ export interface FileRoutesById {
   '/_admin/admin/color': typeof AdminAdminColorRoute
   '/_admin/admin/dashboard': typeof AdminAdminDashboardRoute
   '/_admin/admin/location': typeof AdminAdminLocationRoute
+  '/_admin/admin/ranking': typeof AdminAdminRankingRoute
   '/_admin/admin/setting': typeof AdminAdminSettingRoute
   '/_admin/admin/sponsor': typeof AdminAdminSponsorRoute
   '/_authorization/auth/callback': typeof AuthorizationAuthCallbackRoute
@@ -320,6 +329,7 @@ export interface FileRouteTypes {
     | '/admin/color'
     | '/admin/dashboard'
     | '/admin/location'
+    | '/admin/ranking'
     | '/admin/setting'
     | '/admin/sponsor'
     | '/auth/callback'
@@ -349,6 +359,7 @@ export interface FileRouteTypes {
     | '/admin/color'
     | '/admin/dashboard'
     | '/admin/location'
+    | '/admin/ranking'
     | '/admin/setting'
     | '/admin/sponsor'
     | '/auth/callback'
@@ -384,6 +395,7 @@ export interface FileRouteTypes {
     | '/_admin/admin/color'
     | '/_admin/admin/dashboard'
     | '/_admin/admin/location'
+    | '/_admin/admin/ranking'
     | '/_admin/admin/setting'
     | '/_admin/admin/sponsor'
     | '/_authorization/auth/callback'
@@ -538,6 +550,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminLocationRouteImport
       parentRoute: typeof AdminAdminRouteRoute
     }
+    '/_admin/admin/ranking': {
+      id: '/_admin/admin/ranking'
+      path: '/ranking'
+      fullPath: '/admin/ranking'
+      preLoaderRoute: typeof AdminAdminRankingRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
     '/_admin/admin/setting': {
       id: '/_admin/admin/setting'
       path: '/setting'
@@ -650,6 +669,7 @@ interface AdminAdminRouteRouteChildren {
   AdminAdminColorRoute: typeof AdminAdminColorRoute
   AdminAdminDashboardRoute: typeof AdminAdminDashboardRoute
   AdminAdminLocationRoute: typeof AdminAdminLocationRoute
+  AdminAdminRankingRoute: typeof AdminAdminRankingRoute
   AdminAdminSettingRoute: typeof AdminAdminSettingRoute
   AdminAdminSponsorRoute: typeof AdminAdminSponsorRoute
   AdminAdminLinkAddRoute: typeof AdminAdminLinkAddRoute
@@ -664,6 +684,7 @@ const AdminAdminRouteRouteChildren: AdminAdminRouteRouteChildren = {
   AdminAdminColorRoute: AdminAdminColorRoute,
   AdminAdminDashboardRoute: AdminAdminDashboardRoute,
   AdminAdminLocationRoute: AdminAdminLocationRoute,
+  AdminAdminRankingRoute: AdminAdminRankingRoute,
   AdminAdminSettingRoute: AdminAdminSettingRoute,
   AdminAdminSponsorRoute: AdminAdminSponsorRoute,
   AdminAdminLinkAddRoute: AdminAdminLinkAddRoute,

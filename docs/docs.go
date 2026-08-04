@@ -1760,6 +1760,81 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/admin/links/sort": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "按照传入的条目数组顺序重写全局排序值（0..N-1），并随条目携带三态分组归属（省略=保持原组 / null=置未分组 / 值=移入该组）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "友情链接接口"
+                ],
+                "summary": "[管理] 批量更新友情链接排序与位置",
+                "parameters": [
+                    {
+                        "description": "友链排序请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiLink.FriendSortRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "排序更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.FriendSortResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "友情链接或分组不存在",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/links/{id}": {
             "get": {
                 "security": [
@@ -5229,72 +5304,7 @@ const docTemplate = `{
             }
         },
         "apiLink.FriendAddRequest": {
-            "type": "object",
-            "required": [
-                "link_name",
-                "link_url"
-            ],
-            "properties": {
-                "link_apply_remark": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "申请友链"
-                },
-                "link_avatar": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "https://example.com/avatar.jpg"
-                },
-                "link_color_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "link_desc": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "这是一个示例网站"
-                },
-                "link_email": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "example": "admin@example.com"
-                },
-                "link_group_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "link_level": {
-                    "type": "integer",
-                    "enum": [
-                        0,
-                        1,
-                        2,
-                        3
-                    ],
-                    "example": 0
-                },
-                "link_name": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "minLength": 1,
-                    "example": "示例网站"
-                },
-                "link_order": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "example": 0
-                },
-                "link_rss": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "https://example.com/rss.xml"
-                },
-                "link_url": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "https://example.com"
-                }
-            }
+            "type": "object"
         },
         "apiLink.FriendAddResponse": {
             "type": "object",
@@ -5407,58 +5417,7 @@ const docTemplate = `{
             }
         },
         "apiLink.FriendApplyRequest": {
-            "type": "object",
-            "required": [
-                "link_email",
-                "link_name",
-                "link_url"
-            ],
-            "properties": {
-                "link_apply_remark": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "申请友链"
-                },
-                "link_avatar": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "https://example.com/avatar.jpg"
-                },
-                "link_color_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "link_desc": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "这是一个示例网站"
-                },
-                "link_email": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "example": "admin@example.com"
-                },
-                "link_group_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "link_name": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "minLength": 1,
-                    "example": "示例网站"
-                },
-                "link_rss": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "https://example.com/rss.xml"
-                },
-                "link_url": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "https://example.com"
-                }
-            }
+            "type": "object"
         },
         "apiLink.FriendDetailResponse": {
             "type": "object",
@@ -5630,6 +5589,52 @@ const docTemplate = `{
                 }
             }
         },
+        "apiLink.FriendSortItem": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "group_id": {
+                    "description": "目标分组ID（三态）",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/apiLink.NullableSnowflakeID"
+                        }
+                    ]
+                },
+                "id": {
+                    "description": "友链ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "apiLink.FriendSortRequest": {
+            "type": "object",
+            "required": [
+                "items"
+            ],
+            "properties": {
+                "items": {
+                    "description": "排序条目列表，顺序即目标全局展示顺序",
+                    "type": "array",
+                    "maxItems": 500,
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/apiLink.FriendSortItem"
+                    }
+                }
+            }
+        },
+        "apiLink.FriendSortResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "更新的友链数量",
+                    "type": "integer"
+                }
+            }
+        },
         "apiLink.FriendStatusRequest": {
             "type": "object",
             "required": [
@@ -5655,68 +5660,7 @@ const docTemplate = `{
             }
         },
         "apiLink.FriendUpdateRequest": {
-            "type": "object",
-            "properties": {
-                "link_apply_remark": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "申请友链"
-                },
-                "link_avatar": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "https://example.com/avatar.jpg"
-                },
-                "link_color_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "link_desc": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "这是一个示例网站"
-                },
-                "link_email": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "example": "admin@example.com"
-                },
-                "link_group_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "link_level": {
-                    "type": "integer",
-                    "enum": [
-                        0,
-                        1,
-                        2,
-                        3
-                    ],
-                    "example": 0
-                },
-                "link_name": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "minLength": 1,
-                    "example": "示例网站"
-                },
-                "link_order": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "example": 0
-                },
-                "link_rss": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "https://example.com/rss.xml"
-                },
-                "link_url": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "https://example.com"
-                }
-            }
+            "type": "object"
         },
         "apiLink.FriendUpdateResponse": {
             "type": "object",
@@ -6146,6 +6090,9 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "apiLink.NullableSnowflakeID": {
+            "type": "object"
         },
         "apiPublic.HealthResponse": {
             "type": "object",

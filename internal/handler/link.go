@@ -249,6 +249,45 @@ func (h *LinkHandler) UpdateStatus(c *gin.Context) {
 	xResult.Success(c, "状态更新成功")
 }
 
+// UpdateSort 批量更新友情链接排序与位置
+//
+// @Summary [管理] 批量更新友情链接排序与位置
+// @Description 按照传入的条目数组顺序重写全局排序值（0..N-1），并随条目携带三态分组归属（省略=保持原组 / null=置未分组 / 值=移入该组）
+// @Tags 友情链接接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param request body apiLink.FriendSortRequest true "友链排序请求"
+// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendSortResponse} "排序更新成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 404 {object} xBase.BaseResponse "友情链接或分组不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/links/sort [PATCH]
+func (h *LinkHandler) UpdateSort(c *gin.Context) {
+	var req apiLink.FriendSortRequest
+
+	// 绑定请求数据
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	err := h.service.linkLogic.UpdateSort(c.Request.Context(), &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	resp := apiLink.FriendSortResponse{
+		Count: len(req.Items),
+	}
+	xResult.SuccessHasData(c, "友链排序更新成功", resp)
+}
+
 // UpdateFailStatus 更新友情链接失效状态
 //
 // @Summary [管理] 更新友情链接失效状态

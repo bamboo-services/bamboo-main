@@ -152,6 +152,9 @@ func (l *LinkColorLogic) Update(ctx context.Context, colorID xSnowflake.Snowflak
 		}
 	}
 
+	// 清空关联引用：缓存快照可能含 LinksFKey，保留会让 GORM Save 用友链旧快照覆盖友链记录
+	color.LinksFKey = nil
+
 	_, xErr = l.repo.color.Save(ctx, color, nil)
 	if xErr != nil {
 		return nil, xErr
