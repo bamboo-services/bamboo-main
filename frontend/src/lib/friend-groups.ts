@@ -15,7 +15,18 @@ import type { LinkFriend } from '@/api/types'
 export const LINK_LEVEL = { regular: 0, close: 1, premium: 2, ad: 3 } as const
 
 /** 章节序号（壹 贰 叁 …） */
-export const CHAPTERS = ['壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖', '拾'] as const
+export const CHAPTERS = [
+  '壹',
+  '贰',
+  '叁',
+  '肆',
+  '伍',
+  '陆',
+  '柒',
+  '捌',
+  '玖',
+  '拾',
+] as const
 
 /** 友链分组章节（groupLinksByGroup 的聚合单元；groupId 'none' 表示未分组） */
 export interface FriendGroupSection {
@@ -30,8 +41,13 @@ export interface FriendGroupSection {
  * 章节序遵循分组排序值「数字越小权重越大」（group_f_key.sort_order ASC，与位置管理一致）；
  * 未分组以最大值置底；章内按友链排序值升序。
  */
-export function groupLinksByGroup(links: Array<LinkFriend>): Array<FriendGroupSection> {
-  const map = new Map<string, { name: string; order: number; links: Array<LinkFriend> }>()
+export function groupLinksByGroup(
+  links: Array<LinkFriend>,
+): Array<FriendGroupSection> {
+  const map = new Map<
+    string,
+    { name: string; order: number; links: Array<LinkFriend> }
+  >()
   for (const link of links) {
     const key = link.group_id != null ? link.group_id.toString() : 'none'
     const entry = map.get(key) ?? {
@@ -43,12 +59,10 @@ export function groupLinksByGroup(links: Array<LinkFriend>): Array<FriendGroupSe
     map.set(key, entry)
   }
   return Array.from(map.entries())
+    .sort((a, b) => a[1].order - b[1].order)
     .map(([groupId, entry]) => ({
       groupId,
       name: entry.name,
-      order: entry.order,
       links: entry.links.sort((a, b) => a.sort_order - b.sort_order),
     }))
-    .sort((a, b) => a.order - b.order)
-    .map(({ groupId, name, links: sorted }) => ({ groupId, name, links: sorted }))
 }

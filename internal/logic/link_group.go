@@ -22,6 +22,7 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
+	"gorm.io/gorm"
 )
 
 type linkGroupRepo struct {
@@ -124,28 +125,14 @@ func (l *LinkGroupLogic) Update(ctx context.Context, groupID xSnowflake.Snowflak
 
 // UpdateSort 更新友链分组排序，在事务内按 ID 列表批量重置排序值。
 func (l *LinkGroupLogic) UpdateSort(ctx context.Context, req *apiLinkGroup.GroupSortRequest) *xError.Error {
-	tx := l.db.WithContext(ctx).Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
 	startSort := 0
 	if req.SortOrder != nil && *req.SortOrder > 0 {
 		startSort = *req.SortOrder
 	}
 
-	if xErr := l.repo.group.UpdateSortByIDs(ctx, req.GroupIDs, startSort, tx); xErr != nil {
-		tx.Rollback()
-		return xErr
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "提交排序更新失败", false, err)
-	}
-
-	return nil
+	return l.withTx(ctx, func(tx *gorm.DB) *xError.Error {
+		return l.repo.group.UpdateSortByIDs(ctx, req.GroupIDs, startSort, tx)
+	})
 }
 
 // UpdateStatus 更新友链分组启用状态。

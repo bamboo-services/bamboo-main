@@ -9,7 +9,6 @@
  * --------------------------------------------------------------------------------
  */
 
-import { useQuery } from '@tanstack/react-query'
 import {
   DndContext,
   DragOverlay,
@@ -38,18 +37,22 @@ import type { FriendGroupSection } from '@/lib/friend-groups'
 import { EnsoEmpty, InkBadge } from '@/components/ink-wash'
 import { Skeleton } from '@/components/ui/skeleton'
 import { domainOf } from '@/components/about/friend-card-shared'
-import { getPublicLinks } from '@/api/link'
 import { CHAPTERS, LINK_LEVEL, groupLinksByGroup } from '@/lib/friend-groups'
 import { accentOf, isFancyColor } from '@/lib/colors'
 import { cn } from '@/lib/utils'
 import { SiteAvatar } from '@/components/link/site-avatar'
-import { useSortLinks } from '@/hooks/use-links'
+import { usePublicLinks, useSortLinks } from '@/hooks/use-links'
 import { useSortGroups } from '@/hooks/use-groups'
 
 /** 章节 id（章节拖拽 sortable + 顶层 SortableContext）：'group:<id>' / 'group:none' */
 const containerId = (section: FriendGroupSection) => `group:${section.groupId}`
 /** 章节内栅格 droppable id（接收链接跨组拖入）：'container:<id>' */
 const dropId = (section: FriendGroupSection) => `container:${section.groupId}`
+/** 章节序序列化（groupIds × 链序），用于无意义拖拽抑制比对 */
+const serializeSections = (sections: Array<FriendGroupSection>) =>
+  JSON.stringify(
+    sections.map((s) => [s.groupId, s.links.map((l) => l.id.toString())]),
+  )
 
 /** 级别徽章：好友/高级/广告（一般级别不显示），tone 走 ink-wash 既有 badgeTones */
 function LevelBadge({ level }: { level: number }) {
@@ -60,12 +63,22 @@ function LevelBadge({ level }: { level: number }) {
 }
 
 /** 左侧主色墨条：炫彩走 ink-fancy 流光，普通颜色取 accentOf 主色 */
-function AccentBar({ link, className }: { link: LinkFriend; className?: string }) {
+function AccentBar({
+  link,
+  className,
+}: {
+  link: LinkFriend
+  className?: string
+}) {
   const fancy = isFancyColor(link.color_f_key)
   return (
     <span
       aria-hidden
-      className={cn('absolute left-0 rounded-r-full', fancy ? 'ink-fancy' : '', className)}
+      className={cn(
+        'absolute left-0 rounded-r-full',
+        fancy ? 'ink-fancy' : '',
+        className,
+      )}
       style={fancy ? undefined : { background: accentOf(link.color_f_key) }}
     />
   )
@@ -79,8 +92,15 @@ function FriendRankCard({ link }: { link: LinkFriend }) {
   if (link.level === LINK_LEVEL.premium) {
     return (
       <div className="group relative flex h-full flex-col items-center justify-center overflow-hidden rounded-lg border border-border bg-card p-4 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_18px_40px_-28px_oklch(0.32_0.06_155/0.45)]">
-        <AccentBar link={link} className="inset-y-4 w-[2px] transition-all duration-300 group-hover:inset-y-0 group-hover:w-[4px]" />
-        <SiteAvatar name={link.name} url={link.avatar} className="size-14 rounded-full ring-2 ring-ring-glow" />
+        <AccentBar
+          link={link}
+          className="inset-y-4 w-[2px] transition-all duration-300 group-hover:inset-y-0 group-hover:w-[4px]"
+        />
+        <SiteAvatar
+          name={link.name}
+          url={link.avatar}
+          className="size-14 rounded-full ring-2 ring-ring-glow"
+        />
         <p className="mt-2.5 w-full truncate font-serif text-[15px] font-bold leading-tight text-text-primary">
           {link.name}
         </p>
@@ -101,8 +121,15 @@ function FriendRankCard({ link }: { link: LinkFriend }) {
 
   return (
     <div className="group relative flex h-full items-center gap-2.5 overflow-hidden rounded-lg border border-border bg-card px-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_12px_26px_-22px_oklch(0.32_0.06_155/0.4)]">
-      <AccentBar link={link} className="inset-y-2.5 w-[2px] transition-all duration-300 group-hover:inset-y-0 group-hover:w-[3px]" />
-      <SiteAvatar name={link.name} url={link.avatar} className="size-9 rounded-md" />
+      <AccentBar
+        link={link}
+        className="inset-y-2.5 w-[2px] transition-all duration-300 group-hover:inset-y-0 group-hover:w-[3px]"
+      />
+      <SiteAvatar
+        name={link.name}
+        url={link.avatar}
+        className="size-9 rounded-md"
+      />
       <div className="min-w-0 flex-1">
         <p className="truncate font-serif text-sm font-semibold leading-tight text-text-primary">
           {link.name}
@@ -122,8 +149,21 @@ function FriendRankCard({ link }: { link: LinkFriend }) {
 }
 
 /** 可拖拽友链卡：栅格单元（高级占 2×2）+ useSortable 变换 */
-function SortableRankCard({ link, reduced }: { link: LinkFriend; reduced: boolean }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+function SortableRankCard({
+  link,
+  reduced,
+}: {
+  link: LinkFriend
+  reduced: boolean
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: link.id.toString(),
     data: { type: 'link' },
   })
@@ -132,7 +172,10 @@ function SortableRankCard({ link, reduced }: { link: LinkFriend; reduced: boolea
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition: reduced ? undefined : transition }}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition: reduced ? undefined : transition,
+      }}
       {...attributes}
       {...listeners}
       className={cn(
@@ -162,7 +205,14 @@ function SectionBlock({
   children: React.ReactNode
 }) {
   const ungrouped = section.groupId === 'none'
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: containerId(section),
     data: { type: 'group' },
     disabled: ungrouped,
@@ -175,7 +225,10 @@ function SectionBlock({
   return (
     <section
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition: reduced ? undefined : transition }}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition: reduced ? undefined : transition,
+      }}
       {...attributes}
       className={cn(isDragging && 'opacity-40')}
     >
@@ -228,10 +281,7 @@ function SectionBlock({
  */
 export function RankingBoard() {
   const reduced = useReducedMotion() ?? false
-  const { data: links, isLoading } = useQuery({
-    queryKey: ['public', 'links'],
-    queryFn: () => getPublicLinks(),
-  })
+  const { data: links, isLoading } = usePublicLinks()
   const sortLinks = useSortLinks()
   const sortGroups = useSortGroups()
 
@@ -249,13 +299,9 @@ export function RankingBoard() {
 
   useEffect(() => {
     sectionsRef.current = sections
-  }, [sections])
-  useEffect(() => {
     activeIdRef.current = activeId
-  }, [activeId])
-  useEffect(() => {
     savingRef.current = saving
-  }, [saving])
+  }, [sections, activeId, saving])
 
   // 仅在公开接口数据刷新时同步本地镜像（同源同缓存）；
   // 拖拽中/保存中跳过，避免用过期数据覆盖乐观状态（守卫走 ref，不进入依赖触发重同步）
@@ -268,19 +314,26 @@ export function RankingBoard() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   )
 
   /** 由 id 定位所在章节（章节 id / droppable id → 自身；友链 id → 所属章节） */
-  const findSection = useCallback((id: string): FriendGroupSection | undefined => {
-    if (id.startsWith('group:')) {
-      return sectionsRef.current.find((s) => containerId(s) === id)
-    }
-    if (id.startsWith('container:')) {
-      return sectionsRef.current.find((s) => dropId(s) === id)
-    }
-    return sectionsRef.current.find((s) => s.links.some((l) => l.id.toString() === id))
-  }, [])
+  const findSection = useCallback(
+    (id: string): FriendGroupSection | undefined => {
+      if (id.startsWith('group:')) {
+        return sectionsRef.current.find((s) => containerId(s) === id)
+      }
+      if (id.startsWith('container:')) {
+        return sectionsRef.current.find((s) => dropId(s) === id)
+      }
+      return sectionsRef.current.find((s) =>
+        s.links.some((l) => l.id.toString() === id),
+      )
+    },
+    [],
+  )
 
   /** 拍平 sections → 全局有序载荷（章节序 × 组内序，未分组置底） */
   const flush = useCallback(() => {
@@ -330,9 +383,7 @@ export function RankingBoard() {
 
   const onDragStart = useCallback(({ active }: DragStartEvent) => {
     setActiveId(String(active.id))
-    dragStartRef.current = JSON.stringify(
-      sectionsRef.current.map((s) => [s.groupId, s.links.map((l) => l.id.toString())]),
-    )
+    dragStartRef.current = serializeSections(sectionsRef.current)
   }, [])
 
   /** 跨容器拖动链接：实时把被拖卡片从源章节移到目标章节（乐观）；章节拖拽不在此处理 */
@@ -349,10 +400,14 @@ export function RankingBoard() {
         if (!src || !dst) return prev
         const srcLinks = [...src.links]
         const dstLinks = [...dst.links]
-        const activeIndex = srcLinks.findIndex((l) => l.id.toString() === String(active.id))
+        const activeIndex = srcLinks.findIndex(
+          (l) => l.id.toString() === String(active.id),
+        )
         if (activeIndex < 0) return prev
         const [moved] = srcLinks.splice(activeIndex, 1)
-        const overIndex = dstLinks.findIndex((l) => l.id.toString() === String(over.id))
+        const overIndex = dstLinks.findIndex(
+          (l) => l.id.toString() === String(over.id),
+        )
         if (overIndex >= 0) dstLinks.splice(overIndex, 0, moved)
         else dstLinks.push(moved)
         return prev.map((s) => {
@@ -379,7 +434,9 @@ export function RankingBoard() {
         // 章节拖拽：整章移动（未分组置底，不作落点）
         const target = findSection(String(over.id))
         if (target && target.groupId !== 'none') {
-          const fromIndex = next.findIndex((s) => containerId(s) === String(active.id))
+          const fromIndex = next.findIndex(
+            (s) => containerId(s) === String(active.id),
+          )
           const toIndex = next.findIndex((s) => s.groupId === target.groupId)
           if (fromIndex >= 0 && toIndex >= 0 && fromIndex !== toIndex) {
             next = arrayMove(next, fromIndex, toIndex)
@@ -390,8 +447,12 @@ export function RankingBoard() {
         const section = findSection(String(active.id))
         const overSection = findSection(String(over.id))
         if (section && overSection && section.groupId === overSection.groupId) {
-          const oldIndex = section.links.findIndex((l) => l.id.toString() === String(active.id))
-          const newIndex = section.links.findIndex((l) => l.id.toString() === String(over.id))
+          const oldIndex = section.links.findIndex(
+            (l) => l.id.toString() === String(active.id),
+          )
+          const newIndex = section.links.findIndex(
+            (l) => l.id.toString() === String(over.id),
+          )
           if (oldIndex >= 0 && newIndex >= 0 && oldIndex !== newIndex) {
             next = next.map((s) =>
               s.groupId === section.groupId
@@ -403,7 +464,7 @@ export function RankingBoard() {
       }
 
       // 无意义拖拽抑制：序列化未变则零请求
-      const after = JSON.stringify(next.map((s) => [s.groupId, s.links.map((l) => l.id.toString())]))
+      const after = serializeSections(next)
       if (after !== dragStartRef.current) {
         setSections(next)
         schedulePersist()
@@ -421,7 +482,10 @@ export function RankingBoard() {
     return null
   }, [activeId, sections])
 
-  const total = useMemo(() => sections.reduce((sum, s) => sum + s.links.length, 0), [sections])
+  const total = useMemo(
+    () => sections.reduce((sum, s) => sum + s.links.length, 0),
+    [sections],
+  )
 
   return (
     <div className="space-y-8">
@@ -456,12 +520,24 @@ export function RankingBoard() {
           onDragOver={onDragOver}
           onDragEnd={onDragEnd}
         >
-          <SortableContext items={sections.map(containerId)} strategy={verticalListSortingStrategy}>
+          <SortableContext
+            items={sections.map(containerId)}
+            strategy={verticalListSortingStrategy}
+          >
             <div className="space-y-10">
               {sections.map((section, gi) => (
-                <SectionBlock key={section.groupId} section={section} index={gi} reduced={reduced}>
+                <SectionBlock
+                  key={section.groupId}
+                  section={section}
+                  index={gi}
+                  reduced={reduced}
+                >
                   {section.links.map((link) => (
-                    <SortableRankCard key={link.id.toString()} link={link} reduced={reduced} />
+                    <SortableRankCard
+                      key={link.id.toString()}
+                      link={link}
+                      reduced={reduced}
+                    />
                   ))}
                 </SectionBlock>
               ))}
@@ -470,7 +546,11 @@ export function RankingBoard() {
           <DragOverlay dropAnimation={reduced ? null : undefined}>
             {activeLink ? (
               <div className="flex rotate-1 items-center gap-2.5 rounded-lg border border-leaf-muted bg-card px-3 py-2 shadow-[0_18px_40px_-20px_oklch(0.32_0.06_155/0.5)]">
-                <SiteAvatar name={activeLink.name} url={activeLink.avatar} className="size-9 rounded-md" />
+                <SiteAvatar
+                  name={activeLink.name}
+                  url={activeLink.avatar}
+                  className="size-9 rounded-md"
+                />
                 <span className="font-serif text-sm font-semibold text-text-primary">
                   {activeLink.name}
                 </span>

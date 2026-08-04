@@ -23,6 +23,7 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
+	"gorm.io/gorm"
 )
 
 type linkColorRepo struct {
@@ -152,9 +153,6 @@ func (l *LinkColorLogic) Update(ctx context.Context, colorID xSnowflake.Snowflak
 		}
 	}
 
-	// 清空关联引用：缓存快照可能含 LinksFKey，保留会让 GORM Save 用友链旧快照覆盖友链记录
-	color.LinksFKey = nil
-
 	_, xErr = l.repo.color.Save(ctx, color, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -173,28 +171,14 @@ func (l *LinkColorLogic) Update(ctx context.Context, colorID xSnowflake.Snowflak
 
 // UpdateSort 更新友链颜色排序，在事务内按 ID 列表批量重置排序值。
 func (l *LinkColorLogic) UpdateSort(ctx context.Context, req *apiLinkColor.ColorSortRequest) *xError.Error {
-	tx := l.db.WithContext(ctx).Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
 	startSort := 0
 	if req.SortOrder != nil && *req.SortOrder > 0 {
 		startSort = *req.SortOrder
 	}
 
-	if xErr := l.repo.color.UpdateSortByIDs(ctx, req.ColorIDs, startSort, tx); xErr != nil {
-		tx.Rollback()
-		return xErr
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "提交排序更新失败", false, err)
-	}
-
-	return nil
+	return l.withTx(ctx, func(tx *gorm.DB) *xError.Error {
+		return l.repo.color.UpdateSortByIDs(ctx, req.ColorIDs, startSort, tx)
+	})
 }
 
 // UpdateStatus 更新友链颜色启用状态。

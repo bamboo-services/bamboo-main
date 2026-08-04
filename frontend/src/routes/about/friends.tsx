@@ -8,11 +8,12 @@
 // --------------------------------------------------------------------------------
 
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
 import { motion, useReducedMotion } from 'motion/react'
 import { useCallback, useState } from 'react'
 import type { LinkFriend } from '@/api/types'
-import { getPublicLinks } from '@/api/link'
+import type { InterludeData } from '@/components/about/interlude'
+import type { FriendCardProps } from '@/components/about/friend-card-shared'
+import type { MotionDivProps } from '@/lib/motion'
 import { BambooArt, EnsoEmpty } from '@/components/ink-wash'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
@@ -21,11 +22,9 @@ import { CloseFriendCard } from '@/components/about/close-friend-card'
 import { PremiumFriendCard } from '@/components/about/premium-friend-card'
 import { RegularFriendCard } from '@/components/about/regular-friend-card'
 import { Interlude } from '@/components/about/interlude'
-import type { InterludeData } from '@/components/about/interlude'
-import type { FriendCardProps } from '@/components/about/friend-card-shared'
 import { enter } from '@/lib/motion'
-import type { MotionDivProps } from '@/lib/motion'
 import { CHAPTERS, LINK_LEVEL, groupLinksByGroup } from '@/lib/friend-groups'
+import { usePublicLinks } from '@/hooks/use-links'
 
 export const Route = createFileRoute('/about/friends')({
   component: FriendsPage,
@@ -103,14 +102,7 @@ function NameCardButton() {
 
 function FriendsPage() {
   const reduced = useReducedMotion() ?? false
-  const {
-    data: links,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['public', 'links'],
-    queryFn: () => getPublicLinks(),
-  })
+  const { data: links, isLoading, error } = usePublicLinks()
   const [interlude, setInterlude] = useState<InterludeData | null>(null)
 
   /** 点击友链卡 → 组装 Interlude 数据（高级友链用截图背景） */
@@ -157,7 +149,10 @@ function FriendsPage() {
                 {...enter(reduced, 0.2, {
                   initial: { opacity: 0, y: 24 },
                   animate: { opacity: 1, y: 0 },
-                  transition: { duration: 0.7, ease: [0.22, 0.9, 0.3, 1] as const },
+                  transition: {
+                    duration: 0.7,
+                    ease: [0.22, 0.9, 0.3, 1] as const,
+                  },
                 })}
                 className="mt-7 font-serif text-[clamp(3.4rem,9.5vw,6.5rem)] font-bold leading-[1.05] tracking-[0.03em] text-text-primary"
               >
@@ -168,11 +163,18 @@ function FriendsPage() {
                 {...enter(reduced, 0.32, {
                   initial: { opacity: 0, scaleX: 0 },
                   animate: { opacity: 1, scaleX: 1 },
-                  transition: { duration: 0.7, ease: [0.22, 0.9, 0.3, 1] as const },
+                  transition: {
+                    duration: 0.7,
+                    ease: [0.22, 0.9, 0.3, 1] as const,
+                  },
                 })}
                 className="mt-5 origin-left"
               >
-                <svg className="block h-3 w-40 md:w-52" viewBox="0 0 224 12" aria-hidden>
+                <svg
+                  className="block h-3 w-40 md:w-52"
+                  viewBox="0 0 224 12"
+                  aria-hidden
+                >
                   <path
                     d="M2 7 C 48 1 118 0 222 3 C 150 11 60 12 2 7 Z"
                     fill="var(--leaf-deep)"
@@ -235,10 +237,7 @@ function FriendsPage() {
       ) : error || !links || links.length === 0 ? (
         <div className="mx-auto w-full max-w-6xl px-6 md:px-10">
           <div className="pb-24 pt-8">
-            <EnsoEmpty
-              title="还没有友链"
-              hint="快来申请第一个，让竹林热闹起来"
-            >
+            <EnsoEmpty title="还没有友链" hint="快来申请第一个，让竹林热闹起来">
               <Link to="/operate/apply" className="ml-auto">
                 <Button className="cursor-pointer">申请友链</Button>
               </Link>

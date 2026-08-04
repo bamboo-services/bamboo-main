@@ -24,6 +24,7 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // LinkColorRepo 友链颜色数据访问层
@@ -100,8 +101,11 @@ func (r *LinkColorRepo) Create(ctx context.Context, color *entity.LinkColor, tx 
 }
 
 // Save 保存友链颜色（存在则更新）
+//
+// 经 Omit(clause.Associations) 收敛关联写入：实体可能来自缓存快照（含 LinksFKey），
+// 保留关联会让 GORM Save 用友链旧快照覆盖友链记录。关联引用不参与保存，交由外键字段落库。
 func (r *LinkColorRepo) Save(ctx context.Context, color *entity.LinkColor, tx *gorm.DB) (*entity.LinkColor, *xError.Error) {
-	err := r.pickDB(tx).WithContext(ctx).Save(color).Error
+	err := r.pickDB(tx).WithContext(ctx).Omit(clause.Associations).Save(color).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "保存友链颜色失败", false, err)
 	}

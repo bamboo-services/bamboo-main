@@ -9,10 +9,13 @@
  * --------------------------------------------------------------------------------
  */
 
-import { useState } from 'react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 
-/** 头像加载失败时回退为首字色块（宣纸底 + 墨色衬线字） */
+/**
+ * 站点头像：加载失败或缺失时回退为首字色块（宣纸底 + 墨色衬线字）。
+ * 复用 shadcn Avatar 原语（与 about 友链卡同套机制），onError 回退由 Radix 承担。
+ */
 export function SiteAvatar({
   name,
   url,
@@ -22,33 +25,18 @@ export function SiteAvatar({
   url: string | null
   className?: string
 }) {
-  const [failed, setFailed] = useState(false)
-  if (failed || !url) {
-    return (
-      <div
-        className={cn(
-          'flex shrink-0 items-center justify-center rounded-lg bg-muted font-serif font-semibold text-text-secondary',
-          className,
-        )}
-      >
-        {name.charAt(0)}
-      </div>
-    )
-  }
   return (
-    <div
+    <Avatar
       className={cn(
-        'flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted ring-1 ring-border/60',
+        'shrink-0 rounded-lg bg-muted',
+        url && 'ring-1 ring-border/60',
         className,
       )}
     >
-      <img
-        src={url}
-        alt={name}
-        className="size-full object-cover"
-        loading="lazy"
-        onError={() => setFailed(true)}
-      />
-    </div>
+      <AvatarImage src={url ?? undefined} alt={name} loading="lazy" />
+      <AvatarFallback className="rounded-lg bg-muted font-serif font-semibold text-text-secondary">
+        {name.charAt(0)}
+      </AvatarFallback>
+    </Avatar>
   )
 }

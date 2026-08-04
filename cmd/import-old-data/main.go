@@ -228,6 +228,41 @@ func nullableStr(f string) *string {
 	return &f
 }
 
+// seqGen 同毫秒内递增雪花序列号（跨毫秒自动归零）。
+type seqGen struct {
+	lastMs int64
+	seq    int64
+}
+
+// next 返回指定毫秒对应的序列号；进入新毫秒时归零重计。
+func (g *seqGen) next(ms int64) int64 {
+	if ms != g.lastMs {
+		g.lastMs, g.seq = ms, 0
+	} else {
+		g.seq++
+	}
+	return g.seq
+}
+
+// orUpdated 更新时间缺省回退为创建时间（旧库 updated_at 可能为空）。
+func orUpdated(created time.Time, updated *time.Time) time.Time {
+	if updated != nil {
+		return *updated
+	}
+	return created
+}
+
+// parseNullableTime 解析可为空的时间字段：NULL 哨兵/空串返回 nil，解析失败静默返回 nil。
+func parseNullableTime(f string) *time.Time {
+	if f == "\x00NULL\x00" || f == "" {
+		return nil
+	}
+	if t, err := parseTime(f); err == nil {
+		return &t
+	}
+	return nil
+}
+
 // ----------------------------------------------------------------------------
 // 主流程
 // ----------------------------------------------------------------------------
@@ -305,23 +340,13 @@ func run() error {
 
 		// 5.1 颜色：旧 id -> 新雪花 ID
 		colorMap := make(map[int64]xSnowflake.SnowflakeID, len(colors))
-		seq := int64(0)
-		lastMs := int64(-1)
+		gen := &seqGen{}
 		for _, c := range colors {
-			ms := c.createdAt.UnixMilli()
-			if ms != lastMs {
-				lastMs, seq = ms, 0
-			} else {
-				seq++
-			}
-			nid := snowflakeID(c.createdAt, constants.GeneLinkColor, seq)
+			nid := snowflakeID(c.createdAt, constants.GeneLinkColor, gen.next(c.createdAt.UnixMilli()))
 			colorMap[c.id] = nid
 			primary := "#" + strings.TrimSpace(c.color)
 			created := c.createdAt
-			updated := created
-			if c.updatedAt != nil {
-				updated = *c.updatedAt
-			}
+			updated := orUpdated(created, c.updatedAt)
 			if err := tx.Exec(
 				`INSERT INTO bm_link_color (id, created_at, updated_at, name, type, primary_color, sub_color, hover_color, sort_order, status)
 				 VALUES (?, ?, ?, ?, 0, ?, NULL, NULL, ?, ?)`,
@@ -333,22 +358,12 @@ func run() error {
 
 		// 5.2 分组：旧 id -> 新雪花 ID
 		groupMap := make(map[int64]xSnowflake.SnowflakeID, len(groups))
-		seq = 0
-		lastMs = -1
+		gen = &seqGen{}
 		for _, g := range groups {
-			ms := g.createdAt.UnixMilli()
-			if ms != lastMs {
-				lastMs, seq = ms, 0
-			} else {
-				seq++
-			}
-			nid := snowflakeID(g.createdAt, constants.GeneLinkGroup, seq)
+			nid := snowflakeID(g.createdAt, constants.GeneLinkGroup, gen.next(g.createdAt.UnixMilli()))
 			groupMap[g.id] = nid
 			created := g.createdAt
-			updated := created
-			if g.updatedAt != nil {
-				updated = *g.updatedAt
-			}
+			updated := orUpdated(created, g.updatedAt)
 			var desc any
 			if g.description != nil {
 				desc = *g.description
@@ -373,28 +388,12 @@ func run() error {
 		adminID = adminUser.ID
 
 		// 5.4 友链（组内按旧 id 顺序赋 sort_order）
-		groupSort := map[int64]int{}
-		for _, l := range links {
-			if l.location != nil {
-				groupSort[*l.location]++
-			}
-		}
 		curGroupSort := map[int64]int{}
-		seq = 0
-		lastMs = -1
+		gen = &seqGen{}
 		for _, l := range links {
-			ms := l.createdAt.UnixMilli()
-			if ms != lastMs {
-				lastMs, seq = ms, 0
-			} else {
-				seq++
-			}
-			nid := snowflakeID(l.createdAt, constants.GeneLink, seq)
+			nid := snowflakeID(l.createdAt, constants.GeneLink, gen.next(l.createdAt.UnixMilli()))
 			created := l.createdAt
-			updated := created
-			if l.updatedAt != nil {
-				updated = *l.updatedAt
-			}
+			updated := orUpdated(created, l.updatedAt)
 			var groupID, colorID, userID any
 			if l.location != nil {
 				if v, ok := groupMap[*l.location]; ok {
@@ -454,16 +453,9 @@ func parseColors(b copyBlock) ([]oldColor, error) {
 		if err != nil {
 			return nil, fmt.Errorf("解析 xf_color 时间失败: %w", err)
 		}
-		var updated *time.Time
-		if row[6] != "\x00NULL\x00" && row[6] != "" {
-			t, err := parseTime(row[6])
-			if err == nil {
-				updated = &t
-			}
-		}
 		out = append(out, oldColor{
 			id: id, name: row[1], displayName: row[2], color: row[3],
-			hasSelect: row[4] == "t", createdAt: created, updatedAt: updated,
+			hasSelect: row[4] == "t", createdAt: created, updatedAt: parseNullableTime(row[6]),
 		})
 	}
 	return out, nil
@@ -487,17 +479,10 @@ func parseLocations(b copyBlock) ([]oldLocation, error) {
 		if err != nil {
 			return nil, fmt.Errorf("解析 xf_location 时间失败: %w", err)
 		}
-		var updated *time.Time
-		if row[7] != "\x00NULL\x00" && row[7] != "" {
-			t, err := parseTime(row[7])
-			if err == nil {
-				updated = &t
-			}
-		}
 		out = append(out, oldLocation{
 			id: id, sort: sort, name: row[2], displayName: row[3],
 			description: nullableStr(row[4]), reveal: row[5] == "t",
-			createdAt: created, updatedAt: updated,
+			createdAt: created, updatedAt: parseNullableTime(row[7]),
 		})
 	}
 	return out, nil
@@ -516,13 +501,6 @@ func parseLinks(b copyBlock) ([]oldLink, error) {
 		created, err := parseTime(row[18])
 		if err != nil {
 			return nil, fmt.Errorf("解析 xf_link_list 时间失败: %w", err)
-		}
-		var updated *time.Time
-		if row[19] != "\x00NULL\x00" && row[19] != "" {
-			t, err := parseTime(row[19])
-			if err == nil {
-				updated = &t
-			}
 		}
 		status, err := strconv.Atoi(row[16])
 		if err != nil {
@@ -544,7 +522,7 @@ func parseLinks(b copyBlock) ([]oldLink, error) {
 			siteLogo: nullableStr(row[5]), cdnLogoURL: nullableStr(row[6]), siteDesc: nullableStr(row[7]),
 			siteRSSURL: nullableStr(row[8]), location: location, color: color,
 			webmasterRemark: nullableStr(row[14]), remark: nullableStr(row[15]),
-			status: status, createdAt: created, updatedAt: updated,
+			status: status, createdAt: created, updatedAt: parseNullableTime(row[19]),
 		})
 	}
 	return out, nil

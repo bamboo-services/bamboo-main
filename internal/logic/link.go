@@ -30,6 +30,7 @@ import (
 	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	xAsync "github.com/bamboo-services/bamboo-base-go/plugins/async"
+	"gorm.io/gorm"
 )
 
 type linkRepo struct {
@@ -154,11 +155,6 @@ func (l *LinkLogic) Update(ctx context.Context, linkID xSnowflake.SnowflakeID, r
 	if req.LinkApplyRemark != "" {
 		link.ApplyRemark = xUtil.Ptr(req.LinkApplyRemark)
 	}
-
-	// 清空关联引用：对象可能来自缓存快照（含 ColorFKey/GroupFKey），保留关联会让 GORM Save 用快照覆盖关联表并把外键改回旧值
-	link.GroupFKey = nil
-	link.ColorFKey = nil
-	link.UserFKey = nil
 
 	_, xErr = l.repo.link.Save(ctx, link, nil)
 	if xErr != nil {
@@ -386,24 +382,10 @@ func (l *LinkLogic) UpdateSort(ctx context.Context, req *apiLink.FriendSortReque
 		return xError.NewError(ctx, xError.ParameterError, xError.ErrMessage(err.Error()), false, err)
 	}
 
-	// 事务内批量写入（镜像 LinkGroupLogic.UpdateSort 的 tx + defer recover 模式）
-	tx := l.db.WithContext(ctx).Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
-	if xErr := l.repo.link.UpdateSortAndPosition(ctx, assignments, tx); xErr != nil {
-		tx.Rollback()
-		return xErr
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "提交排序更新失败", false, err)
-	}
-
-	return nil
+	// 事务内批量写入（关联引用由 repo.Save 经 Omit(clause.Associations) 收敛，见 LinkRepo.Save）
+	return l.withTx(ctx, func(tx *gorm.DB) *xError.Error {
+		return l.repo.link.UpdateSortAndPosition(ctx, assignments, tx)
+	})
 }
 
 // ReScreenshot 手动触发友链重新截图（仅已通过且未失效的友链）
@@ -551,11 +533,6 @@ func (l *LinkLogic) UpdateMine(ctx context.Context, userID xSnowflake.SnowflakeI
 	if req.LinkApplyRemark != "" {
 		link.ApplyRemark = xUtil.Ptr(req.LinkApplyRemark)
 	}
-
-	// 清空关联引用：对象可能来自缓存快照（含 ColorFKey/GroupFKey），保留关联会让 GORM Save 用快照覆盖关联表并把外键改回旧值
-	link.GroupFKey = nil
-	link.ColorFKey = nil
-	link.UserFKey = nil
 
 	_, xErr = l.repo.link.Save(ctx, link, nil)
 	if xErr != nil {

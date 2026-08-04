@@ -14,6 +14,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -24,6 +25,7 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // LinkRepo 友情链接数据访问层
@@ -125,10 +127,13 @@ func (r *LinkRepo) BindUserByEmail(ctx context.Context, userID xSnowflake.Snowfl
 }
 
 // Save 保存友情链接（存在则更新）
+//
+// 经 Omit(clause.Associations) 收敛关联写入：实体可能来自缓存快照（含 GroupFKey/ColorFKey/UserFKey），
+// 保留关联会让 GORM Save 用旧快照覆盖关联表并把外键改回旧值。关联引用不参与保存，交由外键字段落库。
 func (r *LinkRepo) Save(ctx context.Context, link *entity.LinkFriend, tx *gorm.DB) (*entity.LinkFriend, *xError.Error) {
 	r.log.Info(ctx, "Save - 保存友情链接")
 
-	err := r.pickDB(tx).WithContext(ctx).Save(link).Error
+	err := r.pickDB(tx).WithContext(ctx).Omit(clause.Associations).Save(link).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "保存友情链接失败", false, err)
 	}
@@ -359,22 +364,38 @@ func (r *LinkRepo) GetByIDs(ctx context.Context, ids []xSnowflake.SnowflakeID, t
 
 // UpdateSortAndPosition 批量更新友链的全局排序值与分组归属
 //
-// 按传入条目逐条写入 sort_order 与 group_id（nil 即置未分组），写后逐条失效单条缓存。
+// 单条 UPDATE ... FROM (VALUES ...) 一次落库全部条目，消除逐行 N+1 往返；
+// 写后逐条失效单条缓存。受影响行数与载荷不符视为存在性校验失败（逻辑层已先校验，此处兜底）。
 func (r *LinkRepo) UpdateSortAndPosition(ctx context.Context, items []SortAssignment, tx *gorm.DB) *xError.Error {
 	r.log.Info(ctx, "UpdateSortAndPosition - 批量更新友链排序与位置")
 
+	if len(items) == 0 {
+		return nil
+	}
+
 	db := r.pickDB(tx).WithContext(ctx)
+	values := make([]string, 0, len(items))
+	args := make([]any, 0, len(items)*3)
 	for _, it := range items {
-		result := db.Model(&entity.LinkFriend{}).Where("id = ?", it.ID).Updates(map[string]any{
-			"sort_order": it.Order,
-			"group_id":   it.GroupID,
-		})
-		if result.Error != nil {
-			return xError.NewError(ctx, xError.DatabaseError, "更新友链排序失败", false, result.Error)
-		}
-		if result.RowsAffected == 0 {
-			return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
-		}
+		values = append(values, "(?, ?, ?)")
+		args = append(args, it.ID, it.Order, it.GroupID)
+	}
+
+	result := db.Exec(
+		fmt.Sprintf(`UPDATE bm_link_friend
+			SET sort_order = v.sort_order, group_id = v.group_id
+			FROM (VALUES %s) AS v(id, sort_order, group_id)
+			WHERE bm_link_friend.id = v.id`, strings.Join(values, ",")),
+		args...,
+	)
+	if result.Error != nil {
+		return xError.NewError(ctx, xError.DatabaseError, "更新友链排序失败", false, result.Error)
+	}
+	if result.RowsAffected != int64(len(items)) {
+		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+	}
+
+	for _, it := range items {
 		if cacheErr := r.kc.Delete(ctx, constants.RedisLinkFriend.Get(it.ID).String()); cacheErr != nil {
 			r.log.Warn(ctx, cacheErr.Error())
 		}

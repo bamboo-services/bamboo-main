@@ -24,6 +24,7 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // LinkGroupRepo 友链分组数据访问层
@@ -99,8 +100,11 @@ func (r *LinkGroupRepo) Create(ctx context.Context, group *entity.LinkGroup, tx 
 }
 
 // Save 保存友链分组（存在则更新）
+//
+// 经 Omit(clause.Associations) 收敛关联写入：实体可能来自缓存快照（含 LinksFKey），
+// 保留关联会让 GORM Save 用友链旧快照覆盖友链记录。关联引用不参与保存，交由外键字段落库。
 func (r *LinkGroupRepo) Save(ctx context.Context, group *entity.LinkGroup, tx *gorm.DB) (*entity.LinkGroup, *xError.Error) {
-	err := r.pickDB(tx).WithContext(ctx).Save(group).Error
+	err := r.pickDB(tx).WithContext(ctx).Omit(clause.Associations).Save(group).Error
 	if err != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "保存友链分组失败", false, err)
 	}

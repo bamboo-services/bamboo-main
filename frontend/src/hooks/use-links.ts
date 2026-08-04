@@ -30,6 +30,7 @@ import {
   getMyLink,
   getPublicColors,
   getPublicGroups,
+  getPublicLinks,
   listAdminLinks,
   listMyLinks,
   reScreenshotLink,
@@ -272,9 +273,22 @@ export function usePublicColors() {
   })
 }
 
+/** 公开友链 queryKey（排位看板与访客页共享，一处失效双端刷新） */
+export const publicLinkKeys = {
+  all: ['public', 'links'] as const,
+}
+
+/** 公开接口：访客页友链列表（排位看板复用同源同缓存，保证预览即所见） */
+export function usePublicLinks() {
+  return useQuery({
+    queryKey: publicLinkKeys.all,
+    queryFn: () => getPublicLinks(),
+  })
+}
+
 /**
  * 批量更新友链排序与位置（排位管理 Sidebar 拖拽持久化）。
- * 成功后同时失效管理端与公开端缓存——Sidebar 与 about/friends 共享 ['public','links']，
+ * 成功后同时失效管理端与公开端缓存——Sidebar 与 about/friends 共享 publicLinkKeys.all，
  * 一处失效双端刷新，保证预览即所见。
  */
 export function useSortLinks() {
@@ -284,7 +298,7 @@ export function useSortLinks() {
     onSuccess: () => {
       toast.success('排序已保存')
       void qc.invalidateQueries({ queryKey: linkKeys.all })
-      void qc.invalidateQueries({ queryKey: ['public', 'links'] })
+      void qc.invalidateQueries({ queryKey: publicLinkKeys.all })
     },
     onError: (err: Error) => toast.error(err.message || '排序保存失败'),
   })
