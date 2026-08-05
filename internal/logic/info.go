@@ -281,6 +281,41 @@ func (l *InfoLogic) GetArchiveInfo(ctx context.Context) (*apiInfo.ArchiveRespons
 	return result, nil
 }
 
+// GetColorMode 获取高级配色模式状态。
+//
+// 读取 bm_system 的 color.mode 配置，值为 premium 视为高级模式，其余（含缺失）回落普通模式。
+func (l *InfoLogic) GetColorMode(ctx context.Context) (*apiInfo.ColorModeResponse, *xError.Error) {
+	mode := bConst.ColorModeNormal
+	config, found, xErr := l.repo.system.GetByKey(ctx, bConst.KeyColorMode)
+	if xErr != nil {
+		return nil, xError.NewError(ctx, xError.DatabaseError, "获取高级配色模式失败", false, xErr)
+	}
+	if found && config.Value != nil && *config.Value == bConst.ColorModePremium {
+		mode = bConst.ColorModePremium
+	}
+
+	updatedAt := time.Now()
+	if found {
+		updatedAt = config.UpdatedAt
+	}
+
+	return &apiInfo.ColorModeResponse{
+		Mode:      mode,
+		UpdatedAt: updatedAt,
+	}, nil
+}
+
+// UpdateColorMode 更新高级配色模式状态。
+func (l *InfoLogic) UpdateColorMode(ctx context.Context, req *apiInfo.ColorModeUpdateRequest) (*apiInfo.ColorModeResponse, *xError.Error) {
+	mode := req.Mode
+	xErr := l.repo.system.SetByKey(ctx, bConst.KeyColorMode, &mode)
+	if xErr != nil {
+		return nil, xError.NewError(ctx, xError.DatabaseError, "更新高级配色模式失败", false, xErr)
+	}
+
+	return l.GetColorMode(ctx)
+}
+
 // UpdateArchiveInfo 更新站点档案
 func (l *InfoLogic) UpdateArchiveInfo(ctx context.Context, req *apiInfo.ArchiveUpdateRequest) (*apiInfo.ArchiveResponse, *xError.Error) {
 	updates := make(map[string]*string)

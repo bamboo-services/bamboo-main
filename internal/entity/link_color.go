@@ -18,10 +18,12 @@ import (
 
 // LinkColor 表示一个友链颜色实体，用于友情链接的颜色主题管理。
 //
-// 颜色均需设置 PrimaryColor、SubColor、HoverColor 三个颜色值；
+// 颜色按类型分级：普通配色（Type=0）仅需主色、单色渲染；
+// 高级配色（Type=1）需主/副/悬停三色、渐变渲染；
 // 炫彩为系统内置颜色（不落库），通过保留 ID（constants.BuiltinFancyColorID）表达。
 type LinkColor struct {
 	xModels.BaseEntity         // 嵌入基础实体（SnowflakeID 主键 + timestamptz 时间戳）
+	Type               int     `json:"type" gorm:"type:bigint;default:0;comment:颜色类型（0: 普通, 1: 高级）"`                    // 颜色类型
 	Name               string  `json:"name" gorm:"type:varchar(50);not null;comment:颜色名称"`                             // 颜色名称
 	PrimaryColor       *string `json:"primary_color,omitempty" gorm:"type:varchar(9);comment:主颜色（如#FF0000或#FF0000FF）"` // 主颜色
 	SubColor           *string `json:"sub_color,omitempty" gorm:"type:varchar(9);comment:副颜色"`                         // 副颜色

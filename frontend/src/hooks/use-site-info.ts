@@ -13,16 +13,19 @@ import type {
   UpdateApplySiteRequest,
   UpdateArchiveRequest,
   UpdateBloggerRequest,
+  UpdateColorModeRequest,
   UpdateSiteRequest,
 } from '@/api/types'
 import {
   getApplySiteInfo,
   getArchive,
   getBloggerInfo,
+  getColorMode,
   getSiteInfo,
   updateApplySiteInfo,
   updateArchive,
   updateBloggerInfo,
+  updateColorMode,
   updateSiteInfo,
 } from '@/api/info'
 
@@ -33,6 +36,7 @@ export const siteInfoKeys = {
   archive: () => [...siteInfoKeys.all, 'archive'] as const,
   applySite: () => [...siteInfoKeys.all, 'apply-site'] as const,
   blogger: () => [...siteInfoKeys.all, 'blogger'] as const,
+  colorMode: () => [...siteInfoKeys.all, 'color-mode'] as const,
 }
 
 /** 站点信息（站名、主页介绍） */
@@ -116,5 +120,29 @@ export function useUpdateBloggerInfo() {
       void qc.invalidateQueries({ queryKey: siteInfoKeys.blogger() })
     },
     onError: (err: Error) => toast.error(err.message || '博主信息保存失败'),
+  })
+}
+
+/** 高级配色模式（normal=普通, premium=高级） */
+export function useColorMode() {
+  return useQuery({
+    queryKey: siteInfoKeys.colorMode(),
+    queryFn: getColorMode,
+  })
+}
+
+/** 更新高级配色模式 */
+export function useUpdateColorMode() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (req: UpdateColorModeRequest) => updateColorMode(req),
+    onSuccess: () => {
+      toast.success('高级配色模式已更新')
+      void qc.invalidateQueries({ queryKey: siteInfoKeys.colorMode() })
+      // 开关影响颜色选择器可见范围，联动刷新公开与管理端颜色列表
+      void qc.invalidateQueries({ queryKey: ['public', 'colors'] })
+      void qc.invalidateQueries({ queryKey: ['admin', 'colors'] })
+    },
+    onError: (err: Error) => toast.error(err.message || '高级配色模式更新失败'),
   })
 }

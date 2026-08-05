@@ -19,3 +19,9 @@ import (
 // 友链引用炫彩时 color_id 保存该保留值，查询返回时再由后端注入对应的虚拟颜色对象。
 // 该值在雪花 ID 空间之外，数据库真实颜色记录不可能占用。
 const BuiltinFancyColorID xSnowflake.SnowflakeID = 1
+
+// ColorTypeNormal 普通配色（type=0）：仅主色，单色渲染。
+const ColorTypeNormal int = 0
+
+// ColorTypePremium 高级配色（type=1）：主/副/悬停三色，渐变渲染。
+const ColorTypePremium int = 1

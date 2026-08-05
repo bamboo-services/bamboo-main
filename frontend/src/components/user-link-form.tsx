@@ -9,7 +9,7 @@
  * --------------------------------------------------------------------------------
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { MapPin, Palette, Save } from 'lucide-react'
 import type { FormEvent } from 'react'
 import type { ApplyLinkRequest, LinkFriend } from '@/api/types'
@@ -63,7 +63,18 @@ export function UserLinkForm({
   const { user, isAuthenticated } = useAuth()
   const lockedEmail = isAuthenticated ? (user?.email ?? '') : ''
   const { data: groups } = usePublicGroups()
-  const { data: colors } = usePublicColors()
+  const { data: publicColors } = usePublicColors()
+
+  // 颜色下拉兜底：服务端已按高级配色开关过滤；编辑场景下若当前选中颜色不在
+  // 可见列表（如普通模式下既有高级色），追加进下拉选项，避免选中态丢失被误清。
+  const colors = useMemo(() => {
+    const list = publicColors ?? []
+    const selected = initial?.color_f_key
+    if (selected && !list.some((c) => c.id === selected.id)) {
+      return [...list, selected]
+    }
+    return list
+  }, [publicColors, initial?.color_f_key])
 
   const [form, setForm] = useState<UserLinkFormState>({
     siteName: '',

@@ -12,14 +12,7 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
-import {
-  Pencil,
-  Plus,
-  Power,
-  PowerOff,
-  Sparkles,
-  Trash2,
-} from 'lucide-react'
+import { Pencil, Plus, Power, PowerOff, Sparkles, Trash2 } from 'lucide-react'
 import type { LinkColor } from '@/api/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -63,7 +56,12 @@ import {
   useUpdateColor,
   useUpdateColorStatus,
 } from '@/hooks/use-colors'
-import { fancyGradient, isFancyColor } from '@/lib/colors'
+import {
+  fancyGradient,
+  isFancyColor,
+  isPremiumColor,
+  premiumGradient,
+} from '@/lib/colors'
 
 export const Route = createFileRoute('/_admin/admin/color')({
   component: ColorPage,
@@ -121,6 +119,7 @@ function ColorPage() {
   // 新建 / 编辑弹窗（共用一个受控表单）
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<LinkColor | null>(null)
+  const [type, setType] = useState(0)
   const [name, setName] = useState('')
   const [primary, setPrimary] = useState(DEFAULT_PRIMARY)
   const [sub, setSub] = useState(DEFAULT_SUB)
@@ -151,6 +150,7 @@ function ColorPage() {
   // 弹窗打开时按编辑对象预填 / 重置表单
   useEffect(() => {
     if (formOpen) {
+      setType(editing?.type ?? 0)
       setName(editing?.name ?? '')
       setPrimary(normalizeHex(editing?.primary_color ?? null, DEFAULT_PRIMARY))
       setSub(normalizeHex(editing?.sub_color ?? null, DEFAULT_SUB))
@@ -173,18 +173,18 @@ function ColorPage() {
     const parsedOrder = Number.parseInt(order, 10)
     const colorOrder = Number.isNaN(parsedOrder) ? 0 : parsedOrder
     const close = () => setFormOpen(false)
-    // 颜色均需配置主色、副色与悬停色；炫彩为内置颜色，无需创建
-    const colorFields = {
-      primary_color: primary,
-      sub_color: sub,
-      hover_color: hover,
-    }
+    // 普通配色仅主色；高级配色需主/副/悬停三色；炫彩为内置颜色，无需创建
+    const colorFields =
+      type === 1
+        ? { primary_color: primary, sub_color: sub, hover_color: hover }
+        : { primary_color: primary }
 
     if (editing) {
       updateColor.mutate(
         {
           id: editing.id,
           req: {
+            type,
             color_name: name.trim(),
             ...colorFields,
             color_order: colorOrder,
@@ -195,6 +195,7 @@ function ColorPage() {
     } else {
       createColor.mutate(
         {
+          type,
           color_name: name.trim(),
           ...colorFields,
           color_order: colorOrder,
@@ -315,10 +316,14 @@ function ColorPage() {
                       <div className="flex items-center gap-1.5">
                         <span
                           className="block size-7 rounded-md ring-1 ring-inset ring-border/60"
-                          style={{
-                            backgroundColor:
-                              color.primary_color ?? 'var(--leaf-deep)',
-                          }}
+                          style={
+                            isPremiumColor(color)
+                              ? { background: premiumGradient(color) }
+                              : {
+                                  backgroundColor:
+                                    color.primary_color ?? 'var(--leaf-deep)',
+                                }
+                          }
                           title={`主色 ${color.primary_color ?? '未设置'}`}
                           aria-hidden="true"
                         />
@@ -359,6 +364,8 @@ function ColorPage() {
                         <Sparkles className="size-3" />
                         炫彩
                       </InkBadge>
+                    ) : isPremiumColor(color) ? (
+                      <InkBadge tone="pending">高级</InkBadge>
                     ) : (
                       <InkBadge tone="neutral">普通</InkBadge>
                     )}
@@ -463,16 +470,37 @@ function ColorPage() {
               />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2">
-                <span className="text-sm font-medium text-text-primary">
+              <Label>颜色类型</Label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setType(0)}
+                  className={cn(
+                    'flex-1 cursor-pointer rounded-md border px-3 py-2 text-sm font-medium transition-colors duration-150',
+                    type === 0
+                      ? 'border-leaf-deep bg-leaf-deep text-card'
+                      : 'border-input bg-background text-text-secondary hover:bg-muted/50',
+                  )}
+                >
                   普通配色
-                </span>
-                <span className="ml-auto text-xs text-text-secondary">
-                  炫彩为内置颜色，无需创建
-                </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setType(1)}
+                  className={cn(
+                    'flex-1 cursor-pointer rounded-md border px-3 py-2 text-sm font-medium transition-colors duration-150',
+                    type === 1
+                      ? 'border-leaf-deep bg-leaf-deep text-card'
+                      : 'border-input bg-background text-text-secondary hover:bg-muted/50',
+                  )}
+                >
+                  高级配色
+                </button>
               </div>
               <p className="text-xs text-text-secondary">
-                需配置主色、副色与悬停色。
+                {type === 1
+                  ? '高级配色需配置主色、副色与悬停色，渲染为三色渐变。'
+                  : '普通配色仅需主色，渲染为单色。炫彩为内置颜色，无需创建。'}
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
@@ -482,18 +510,22 @@ function ColorPage() {
                 value={primary}
                 onChange={setPrimary}
               />
-              <ColorField
-                id="subColor"
-                label="副色"
-                value={sub}
-                onChange={setSub}
-              />
-              <ColorField
-                id="hoverColor"
-                label="悬停色"
-                value={hover}
-                onChange={setHover}
-              />
+              {type === 1 && (
+                <>
+                  <ColorField
+                    id="subColor"
+                    label="副色"
+                    value={sub}
+                    onChange={setSub}
+                  />
+                  <ColorField
+                    id="hoverColor"
+                    label="悬停色"
+                    value={hover}
+                    onChange={setHover}
+                  />
+                </>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="colorOrder">排序</Label>

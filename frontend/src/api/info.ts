@@ -12,10 +12,12 @@ import type {
   ApplySiteInfoResponse,
   ArchiveResponse,
   BloggerInfoResponse,
+  ColorModeResponse,
   SiteInfoResponse,
   UpdateApplySiteRequest,
   UpdateArchiveRequest,
   UpdateBloggerRequest,
+  UpdateColorModeRequest,
   UpdateSiteRequest,
 } from './types'
 
@@ -31,7 +33,10 @@ export function getArchive(): Promise<ArchiveResponse> {
 
 /** 获取申请站点展示（站名、描述、地址、图片、订阅、邮箱）— 供 operate/apply 交换友链场景 */
 export function getApplySiteInfo(): Promise<ApplySiteInfoResponse> {
-  return request<ApplySiteInfoResponse>({ method: 'GET', url: '/info/apply-site' })
+  return request<ApplySiteInfoResponse>({
+    method: 'GET',
+    url: '/info/apply-site',
+  })
 }
 
 /** 获取博主信息（昵称、简介、博客链接、头像）— 供「关于我」名士帖展示 */
@@ -79,6 +84,22 @@ export function updateBloggerInfo(
   return request<BloggerInfoResponse>({
     method: 'PUT',
     url: '/info/admin/blogger',
+    data: req,
+  })
+}
+
+/** 获取高级配色模式（normal=普通, premium=高级） */
+export function getColorMode(): Promise<ColorModeResponse> {
+  return request<ColorModeResponse>({ method: 'GET', url: '/info/color-mode' })
+}
+
+/** 更新高级配色模式（管理端） */
+export function updateColorMode(
+  req: UpdateColorModeRequest,
+): Promise<ColorModeResponse> {
+  return request<ColorModeResponse>({
+    method: 'PUT',
+    url: '/info/admin/color-mode',
     data: req,
   })
 }

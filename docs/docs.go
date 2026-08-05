@@ -4006,6 +4006,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/info/admin/color-mode": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "管理员切换站点高级配色模式（normal=普通, premium=高级），开启后高级配色可选并渐变渲染",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点信息接口"
+                ],
+                "summary": "[管理] 更新高级配色模式",
+                "parameters": [
+                    {
+                        "description": "高级配色模式更新请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiInfo.ColorModeUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.ColorModeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/info/admin/site": {
             "put": {
                 "security": [
@@ -4224,6 +4293,47 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/apiInfo.BuiltinInvalidGroupResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/info/color-mode": {
+            "get": {
+                "description": "获取站点当前高级配色模式（normal=普通, premium=高级），决定颜色选择器可见范围",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点信息接口"
+                ],
+                "summary": "[用户] 获取高级配色模式",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.ColorModeResponse"
                                         }
                                     }
                                 }
@@ -5834,6 +5944,36 @@ const docTemplate = `{
                 }
             }
         },
+        "apiInfo.ColorModeResponse": {
+            "type": "object",
+            "properties": {
+                "mode": {
+                    "description": "配色模式：normal=普通, premium=高级",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "apiInfo.ColorModeUpdateRequest": {
+            "type": "object",
+            "required": [
+                "mode"
+            ],
+            "properties": {
+                "mode": {
+                    "description": "配色模式：normal=普通, premium=高级",
+                    "type": "string",
+                    "enum": [
+                        "normal",
+                        "premium"
+                    ],
+                    "example": "premium"
+                }
+            }
+        },
         "apiInfo.SiteResponse": {
             "type": "object",
             "properties": {
@@ -5884,7 +6024,7 @@ const docTemplate = `{
                     "example": 0
                 },
                 "hover_color": {
-                    "description": "悬停颜色",
+                    "description": "悬停颜色（高级配色必填）",
                     "type": "string",
                     "example": "#FF3300"
                 },
@@ -5894,9 +6034,18 @@ const docTemplate = `{
                     "example": "#FF0000"
                 },
                 "sub_color": {
-                    "description": "副颜色",
+                    "description": "副颜色（高级配色必填）",
                     "type": "string",
                     "example": "#FF6600"
+                },
+                "type": {
+                    "description": "颜色类型：0=普通, 1=高级",
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ],
+                    "example": 0
                 }
             }
         },
@@ -5939,6 +6088,10 @@ const docTemplate = `{
                 "sub_color": {
                     "description": "副颜色",
                     "type": "string"
+                },
+                "type": {
+                    "description": "颜色类型",
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -6029,6 +6182,10 @@ const docTemplate = `{
                 "sub_color": {
                     "description": "副颜色",
                     "type": "string"
+                },
+                "type": {
+                    "description": "颜色类型",
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -6135,6 +6292,15 @@ const docTemplate = `{
                     "description": "副颜色（可传空字符串清空）",
                     "type": "string",
                     "example": "#FF6600"
+                },
+                "type": {
+                    "description": "颜色类型：0=普通, 1=高级",
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ],
+                    "example": 0
                 }
             }
         },
@@ -6177,6 +6343,10 @@ const docTemplate = `{
                 "sub_color": {
                     "description": "副颜色",
                     "type": "string"
+                },
+                "type": {
+                    "description": "颜色类型",
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -8021,6 +8191,10 @@ const docTemplate = `{
                 "sub_color": {
                     "description": "副颜色",
                     "type": "string"
+                },
+                "type": {
+                    "description": "颜色类型",
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"

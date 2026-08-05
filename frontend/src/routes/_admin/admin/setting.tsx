@@ -12,23 +12,33 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import { Contact, Globe, Lock, Save, Send, UserRound } from 'lucide-react'
+import {
+  Contact,
+  Globe,
+  Lock,
+  Palette,
+  Save,
+  Send,
+  UserRound,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
-import { InkNavRow, PageHead } from '@/components/ink-wash'
+import { InkNavRow, InkSwitch, PageHead } from '@/components/ink-wash'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { enter } from '@/lib/motion'
 import {
   useApplySiteInfo,
   useArchive,
   useBloggerInfo,
+  useColorMode,
   useSiteInfo,
   useUpdateApplySiteInfo,
   useUpdateArchive,
   useUpdateBloggerInfo,
+  useUpdateColorMode,
   useUpdateSiteInfo,
 } from '@/hooks/use-site-info'
 import {
@@ -40,7 +50,8 @@ export const Route = createFileRoute('/_admin/admin/setting')({
   component: SettingPage,
 })
 
-type SettingSection = 'site' | 'archive' | 'applySite' | 'blogger' | 'invalid'
+type SettingSection =
+  'site' | 'archive' | 'applySite' | 'blogger' | 'colorMode' | 'invalid'
 
 /**
  * 系统设置：主从面板 · 扁平化。
@@ -103,6 +114,13 @@ function SettingPage() {
               onClick={() => setSection('blogger')}
             />
             <InkNavRow
+              icon={<Palette className="size-4" />}
+              title="高级配色"
+              desc="开关站点级高级配色"
+              active={section === 'colorMode'}
+              onClick={() => setSection('colorMode')}
+            />
+            <InkNavRow
               icon={<Lock className="size-4" />}
               title="已失效分组"
               desc="失效友链自动归集"
@@ -124,6 +142,8 @@ function SettingPage() {
           <ApplySitePanel reduced={reduced} />
         ) : section === 'blogger' ? (
           <BloggerInfoPanel reduced={reduced} />
+        ) : section === 'colorMode' ? (
+          <ColorModePanel reduced={reduced} />
         ) : (
           <InvalidGroupPanel reduced={reduced} />
         )}
@@ -429,7 +449,8 @@ function ApplySitePanel({ reduced }: { reduced: boolean }) {
 
           <div className="relative mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-5">
             <p className="font-serif text-sm italic text-text-secondary">
-              访客申请友链前需先在自站添加博主友链，此处即供其复制的站点资料，展示于 operate/apply 申请页。
+              访客申请友链前需先在自站添加博主友链，此处即供其复制的站点资料，展示于
+              operate/apply 申请页。
             </p>
             <Button onClick={handleSave} disabled={updateApplySite.isPending}>
               <Save className="mr-2 h-4 w-4" />
@@ -539,6 +560,60 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
   )
 }
 
+/** 高级配色面板：站点级开关，控制颜色选择器可见范围与渲染级别 */
+function ColorModePanel({ reduced }: { reduced: boolean }) {
+  const { data, isLoading } = useColorMode()
+  const updateMode = useUpdateColorMode()
+
+  const premium = data?.mode === 'premium'
+  const pending = updateMode.isPending
+
+  return (
+    <motion.section
+      {...enter(reduced, 0.18, {
+        initial: { opacity: 0, y: 10 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.4, ease: 'easeOut' },
+      })}
+      className="relative"
+    >
+      <PanelHeader kicker="COLOR MODE · 高级配色" title="高级配色开关" />
+
+      {isLoading ? (
+        <div className="relative mt-8 space-y-3">
+          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+      ) : (
+        <div className="relative mt-8 space-y-4">
+          <div className="flex items-center justify-between gap-4 rounded-md border border-border bg-background px-4 py-3.5">
+            <div className="space-y-1">
+              <p className="font-serif text-base font-semibold text-text-primary">
+                {premium ? '高级配色已开启' : '高级配色已关闭'}
+              </p>
+              <p className="text-xs leading-relaxed text-text-secondary">
+                关闭后颜色选择器仅展示普通配色与炫彩；
+                开启后额外展示金、玫瑰金、红宝石、蓝宝石等高级配色，并以三色渐变渲染。
+              </p>
+            </div>
+            <InkSwitch
+              checked={premium}
+              disabled={pending}
+              onToggle={() =>
+                updateMode.mutate({ mode: premium ? 'normal' : 'premium' })
+              }
+              aria-label="高级配色开关"
+            />
+          </div>
+          <p className="font-serif text-xs italic text-text-secondary/80">
+            炫彩为系统内置配色，不受开关影响，始终可选。
+          </p>
+        </div>
+      )}
+    </motion.section>
+  )
+}
+
 /** 内置「已失效」分组面板：失效友链自动归集分组，名称/描述经 bm_system 热修改 */
 function InvalidGroupPanel({ reduced }: { reduced: boolean }) {
   const { data, isLoading } = useBuiltinInvalidGroup()
@@ -600,7 +675,8 @@ function InvalidGroupPanel({ reduced }: { reduced: boolean }) {
 
           <div className="relative mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-5">
             <p className="font-serif text-sm italic text-text-secondary">
-              失效友链自动归入该分组，名称与描述经 bm_system 热修改，公开「已失效」章节同步生效。
+              失效友链自动归入该分组，名称与描述经 bm_system
+              热修改，公开「已失效」章节同步生效。
             </p>
             <Button
               onClick={handleSave}

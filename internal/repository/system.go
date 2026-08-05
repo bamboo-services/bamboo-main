@@ -22,6 +22,7 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	bConst "github.com/bamboo-services/bamboo-main/pkg/constants"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // SystemRepo 系统配置数据访问层
@@ -90,6 +91,30 @@ func (r *SystemRepo) UpdateValueByKey(ctx context.Context, key string, value *st
 	err := r.db.WithContext(ctx).Model(&entity.System{}).Where("key = ?", key).Update("value", value).Error
 	if err != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "更新系统配置失败", true, err)
+	}
+
+	return nil
+}
+
+// SetByKey 按键 upsert 系统配置值（键存在则更新，缺失则插入）。
+//
+// 区别于 UpdateValueByKey（键缺失时静默无操作），适用于管理员写入可能尚未初始化的配置键；
+// 幂等：同一键重复调用只更新值与更新时间。
+func (r *SystemRepo) SetByKey(ctx context.Context, key string, value *string) *xError.Error {
+	r.log.Info(ctx, "SetByKey - 写入系统配置")
+
+	key = strings.TrimSpace(key)
+	if key == "" {
+		return nil
+	}
+
+	config := entity.System{Key: key, Value: value}
+	err := r.db.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "key"}},
+		DoUpdates: clause.AssignmentColumns([]string{"value", "updated_at"}),
+	}).Create(&config).Error
+	if err != nil {
+		return xError.NewError(ctx, xError.DatabaseError, "写入系统配置失败", true, err)
 	}
 
 	return nil

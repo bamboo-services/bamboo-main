@@ -275,3 +275,54 @@ func (h *InfoHandler) UpdateBuiltinInvalidGroup(c *gin.Context) {
 	resp := apiInfo.BuiltinInvalidGroupResponse{LinkGroup: *group}
 	xResult.SuccessHasData(c, "内置已失效分组配置更新成功", resp)
 }
+
+// GetColorMode 获取高级配色模式
+//
+// @Summary [用户] 获取高级配色模式
+// @Description 获取站点当前高级配色模式（normal=普通, premium=高级），决定颜色选择器可见范围
+// @Tags 站点信息接口
+// @Accept json
+// @Produce json
+// @Success 200 {object} xBase.BaseResponse{data=apiInfo.ColorModeResponse} "获取成功"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/info/color-mode [GET]
+func (h *InfoHandler) GetColorMode(c *gin.Context) {
+	result, err := h.service.infoLogic.GetColorMode(c.Request.Context())
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	xResult.SuccessHasData(c, "获取高级配色模式成功", result)
+}
+
+// UpdateColorMode 更新高级配色模式
+//
+// @Summary [管理] 更新高级配色模式
+// @Description 管理员切换站点高级配色模式（normal=普通, premium=高级），开启后高级配色可选并渐变渲染
+// @Tags 站点信息接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param request body apiInfo.ColorModeUpdateRequest true "高级配色模式更新请求"
+// @Success 200 {object} xBase.BaseResponse{data=apiInfo.ColorModeResponse} "更新成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/info/admin/color-mode [PUT]
+func (h *InfoHandler) UpdateColorMode(c *gin.Context) {
+	var req apiInfo.ColorModeUpdateRequest
+
+	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	result, err := h.service.infoLogic.UpdateColorMode(c.Request.Context(), &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	xResult.SuccessHasData(c, "高级配色模式更新成功", result)
+}

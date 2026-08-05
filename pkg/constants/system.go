@@ -19,3 +19,17 @@ const (
 	// KeyBuiltinInvalidGroupDesc 内置「已失效」分组描述配置键。
 	KeyBuiltinInvalidGroupDesc = "group.builtin.invalid.description"
 )
+
+// 站点级高级配色开关（color.mode）在 bm_system 表中的配置键。
+//
+// 决定颜色选择器可见范围与渲染级别：
+//   - ColorModeNormal：仅展示普通配色与炫彩（高级色隐藏，不可选）
+//   - ColorModePremium：额外展示高级配色（主/副/悬停三色渐变渲染）
+const (
+	// KeyColorMode 高级配色模式配置键。
+	KeyColorMode = "color.mode"
+	// ColorModeNormal 普通模式：仅普通色 + 炫彩。
+	ColorModeNormal = "normal"
+	// ColorModePremium 高级模式：普通色 + 高级色 + 炫彩。
+	ColorModePremium = "premium"
+)

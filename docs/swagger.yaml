@@ -310,6 +310,27 @@ definitions:
         minLength: 1
         type: string
     type: object
+  apiInfo.ColorModeResponse:
+    properties:
+      mode:
+        description: 配色模式：normal=普通, premium=高级
+        type: string
+      updated_at:
+        description: 更新时间
+        type: string
+    type: object
+  apiInfo.ColorModeUpdateRequest:
+    properties:
+      mode:
+        description: 配色模式：normal=普通, premium=高级
+        enum:
+        - normal
+        - premium
+        example: premium
+        type: string
+    required:
+    - mode
+    type: object
   apiInfo.SiteResponse:
     properties:
       introduction:
@@ -345,7 +366,7 @@ definitions:
         minimum: 0
         type: integer
       hover_color:
-        description: 悬停颜色
+        description: 悬停颜色（高级配色必填）
         example: '#FF3300'
         type: string
       primary_color:
@@ -353,9 +374,16 @@ definitions:
         example: '#FF0000'
         type: string
       sub_color:
-        description: 副颜色
+        description: 副颜色（高级配色必填）
         example: '#FF6600'
         type: string
+      type:
+        description: 颜色类型：0=普通, 1=高级
+        enum:
+        - 0
+        - 1
+        example: 0
+        type: integer
     required:
     - color_name
     type: object
@@ -391,6 +419,9 @@ definitions:
       sub_color:
         description: 副颜色
         type: string
+      type:
+        description: 颜色类型
+        type: integer
       updated_at:
         type: string
     type: object
@@ -456,6 +487,9 @@ definitions:
       sub_color:
         description: 副颜色
         type: string
+      type:
+        description: 颜色类型
+        type: integer
       updated_at:
         type: string
     type: object
@@ -531,6 +565,13 @@ definitions:
         description: 副颜色（可传空字符串清空）
         example: '#FF6600'
         type: string
+      type:
+        description: 颜色类型：0=普通, 1=高级
+        enum:
+        - 0
+        - 1
+        example: 0
+        type: integer
     type: object
   apiLink.ColorUpdateResponse:
     properties:
@@ -564,6 +605,9 @@ definitions:
       sub_color:
         description: 副颜色
         type: string
+      type:
+        description: 颜色类型
+        type: integer
       updated_at:
         type: string
     type: object
@@ -1877,6 +1921,9 @@ definitions:
       sub_color:
         description: 副颜色
         type: string
+      type:
+        description: 颜色类型
+        type: integer
       updated_at:
         type: string
     type: object
@@ -4509,6 +4556,47 @@ paths:
       summary: '[管理] 更新内置已失效分组配置'
       tags:
       - 站点信息接口
+  /api/v1/info/admin/color-mode:
+    put:
+      consumes:
+      - application/json
+      description: 管理员切换站点高级配色模式（normal=普通, premium=高级），开启后高级配色可选并渐变渲染
+      parameters:
+      - description: 高级配色模式更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiInfo.ColorModeUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiInfo.ColorModeResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[管理] 更新高级配色模式'
+      tags:
+      - 站点信息接口
   /api/v1/info/admin/site:
     put:
       consumes:
@@ -4644,6 +4732,30 @@ paths:
           schema:
             $ref: '#/definitions/xBase.BaseResponse'
       summary: '[用户] 获取内置已失效分组配置'
+      tags:
+      - 站点信息接口
+  /api/v1/info/color-mode:
+    get:
+      consumes:
+      - application/json
+      description: 获取站点当前高级配色模式（normal=普通, premium=高级），决定颜色选择器可见范围
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiInfo.ColorModeResponse'
+              type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      summary: '[用户] 获取高级配色模式'
       tags:
       - 站点信息接口
   /api/v1/info/site:

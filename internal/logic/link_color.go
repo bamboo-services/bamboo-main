@@ -23,12 +23,14 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
+	bConst "github.com/bamboo-services/bamboo-main/pkg/constants"
 	"gorm.io/gorm"
 )
 
 type linkColorRepo struct {
-	color *repository.LinkColorRepo
-	link  *repository.LinkRepo
+	color  *repository.LinkColorRepo
+	link   *repository.LinkRepo
+	system *repository.SystemRepo
 }
 
 // LinkColorLogic 友链颜色业务逻辑
@@ -37,7 +39,7 @@ type LinkColorLogic struct {
 	repo linkColorRepo
 }
 
-// NewLinkColorLogic 创建 LinkColorLogic 实例，从上下文获取数据库与缓存并初始化颜色与友链仓储依赖。
+// NewLinkColorLogic 创建 LinkColorLogic 实例，从上下文获取数据库与缓存并初始化颜色、友链与系统配置仓储依赖。
 func NewLinkColorLogic(ctx context.Context) *LinkColorLogic {
 	db := xCtxUtil.MustGetDB(ctx)
 	m := xCtxUtil.MustGetCacheManager(ctx)
@@ -49,19 +51,23 @@ func NewLinkColorLogic(ctx context.Context) *LinkColorLogic {
 			log:   xLog.WithName(xLog.NamedLOGC, "LinkColorLogic"),
 		},
 		repo: linkColorRepo{
-			color: repository.NewLinkColorRepo(db, m),
-			link:  repository.NewLinkRepo(db, m),
+			color:  repository.NewLinkColorRepo(db, m),
+			link:   repository.NewLinkRepo(db, m),
+			system: repository.NewSystemRepo(db, m),
 		},
 	}
 }
 
-// Add 添加友链颜色，校验三色必填字段并按当前最大排序值自增生成新颜色。
+// Add 添加友链颜色，按类型校验配色并自增生成新颜色。
+//
+// 普通配色（Type=0）仅需主色必填，副色/悬停色可空（渲染取单色）；
+// 高级配色（Type=1）需主色、副色、悬停色三者齐备（渲染取三色渐变）。
 func (l *LinkColorLogic) Add(ctx context.Context, req *apiLinkColor.ColorAddRequest) (*entity.LinkColor, *xError.Error) {
-	if req.PrimaryColor == nil || req.SubColor == nil || req.HoverColor == nil {
-		return nil, xError.NewError(ctx, xError.BadRequest, "需要设置主颜色、副颜色和悬停颜色", false)
+	if req.PrimaryColor == nil || *req.PrimaryColor == "" {
+		return nil, xError.NewError(ctx, xError.BadRequest, "需要设置主颜色", false)
 	}
-	if *req.PrimaryColor == "" || *req.SubColor == "" || *req.HoverColor == "" {
-		return nil, xError.NewError(ctx, xError.BadRequest, "颜色值不能为空", false)
+	if req.Type == bConst.ColorTypePremium && (req.SubColor == nil || *req.SubColor == "" || req.HoverColor == nil || *req.HoverColor == "") {
+		return nil, xError.NewError(ctx, xError.BadRequest, "高级配色需设置主颜色、副颜色和悬停颜色", false)
 	}
 
 	maxSort, xErr := l.repo.color.GetMaxSortOrder(ctx, nil)
@@ -70,6 +76,7 @@ func (l *LinkColorLogic) Add(ctx context.Context, req *apiLinkColor.ColorAddRequ
 	}
 
 	color := &entity.LinkColor{
+		Type:         req.Type,
 		Name:         req.ColorName,
 		PrimaryColor: req.PrimaryColor,
 		SubColor:     req.SubColor,
@@ -94,7 +101,7 @@ func (l *LinkColorLogic) Add(ctx context.Context, req *apiLinkColor.ColorAddRequ
 	return reloaded, nil
 }
 
-// Update 更新友链颜色，按请求字段覆盖颜色属性并校验三色必填项。
+// Update 更新友链颜色，按请求字段覆盖颜色属性并按结果类型校验配色。
 func (l *LinkColorLogic) Update(ctx context.Context, colorID xSnowflake.SnowflakeID, req *apiLinkColor.ColorUpdateRequest) (*entity.LinkColor, *xError.Error) {
 	color, found, xErr := l.repo.color.GetByID(ctx, colorID, false, nil)
 	if xErr != nil {
@@ -104,6 +111,9 @@ func (l *LinkColorLogic) Update(ctx context.Context, colorID xSnowflake.Snowflak
 		return nil, xError.NewError(ctx, xError.NotFound, "友链颜色不存在", false)
 	}
 
+	if req.Type != nil {
+		color.Type = *req.Type
+	}
 	if req.ColorName != nil {
 		color.Name = *req.ColorName
 	}
@@ -133,8 +143,12 @@ func (l *LinkColorLogic) Update(ctx context.Context, colorID xSnowflake.Snowflak
 		}
 	}
 
-	if color.PrimaryColor == nil || color.SubColor == nil || color.HoverColor == nil {
-		return nil, xError.NewError(ctx, xError.BadRequest, "需要设置主颜色、副颜色和悬停颜色", false)
+	// 按结果类型校验：普通配色仅主色必填；高级配色需三色齐备
+	if color.PrimaryColor == nil || *color.PrimaryColor == "" {
+		return nil, xError.NewError(ctx, xError.BadRequest, "需要设置主颜色", false)
+	}
+	if color.Type == bConst.ColorTypePremium && (color.SubColor == nil || *color.SubColor == "" || color.HoverColor == nil || *color.HoverColor == "") {
+		return nil, xError.NewError(ctx, xError.BadRequest, "高级配色需设置主颜色、副颜色和悬停颜色", false)
 	}
 
 	_, xErr = l.repo.color.Save(ctx, color, nil)
@@ -246,11 +260,28 @@ func (l *LinkColorLogic) Get(ctx context.Context, colorID xSnowflake.SnowflakeID
 }
 
 // GetList 获取友链颜色列表。
+//
+// 类型过滤规则：显式传 type 参数优先于站点开关；未传时普通模式仅返回普通配色（type=0），
+// 高级模式返回全部配色。内置炫彩按过滤条件置顶注入虚拟记录（不落库）。
 func (l *LinkColorLogic) GetList(ctx context.Context, req *apiLinkColor.ColorListRequest) ([]entity.LinkColor, *xError.Error) {
+	// 类型过滤：显式传 type 优先于站点开关；未传时普通模式仅返回普通配色
+	typeFilter := req.Type
+	if typeFilter == nil {
+		premium, xErr := l.isPremiumMode(ctx)
+		if xErr != nil {
+			return nil, xErr
+		}
+		if !premium {
+			t := bConst.ColorTypeNormal
+			typeFilter = &t
+		}
+	}
+
 	colors, xErr := l.repo.color.List(ctx, &repository.ColorListQuery{
 		Status:      req.Status,
 		Name:        req.Name,
 		OnlyEnabled: req.OnlyEnabled,
+		Type:        typeFilter,
 		OrderBy:     req.OrderBy,
 		Order:       req.Order,
 	}, nil)
@@ -259,17 +290,31 @@ func (l *LinkColorLogic) GetList(ctx context.Context, req *apiLinkColor.ColorLis
 	}
 
 	// 内置炫彩（不落库）：满足过滤条件时置顶注入虚拟记录，供前端选择器使用
-	if builtinFancyVisible(req) {
+	if builtinFancyVisible(req, typeFilter) {
 		colors = append([]entity.LinkColor{*entity.NewFancyColor()}, colors...)
 	}
 
 	return colors, nil
 }
 
+// isPremiumMode 判断站点当前是否处于高级配色模式。
+//
+// 读取 bm_system 的 color.mode 配置，值为 premium 视为高级模式，其余（含缺失）回落普通模式。
+func (l *LinkColorLogic) isPremiumMode(ctx context.Context) (bool, *xError.Error) {
+	config, found, xErr := l.repo.system.GetByKey(ctx, bConst.KeyColorMode)
+	if xErr != nil {
+		return false, xErr
+	}
+	if !found || config.Value == nil {
+		return false, nil
+	}
+	return *config.Value == bConst.ColorModePremium, nil
+}
+
 // builtinFancyVisible 判断内置炫彩是否满足当前列表过滤条件。
 //
-// 炫彩恒为启用状态，仅当名称/状态过滤未排除它时才注入。
-func builtinFancyVisible(req *apiLinkColor.ColorListRequest) bool {
+// 炫彩恒为启用状态，仅当名称/状态过滤未排除它、且未被按类型过滤（type=1 高级色）剔除时才注入。
+func builtinFancyVisible(req *apiLinkColor.ColorListRequest, typeFilter *int) bool {
 	if req.Status != nil && *req.Status != 1 {
 		return false
 	}
@@ -277,6 +322,9 @@ func builtinFancyVisible(req *apiLinkColor.ColorListRequest) bool {
 		return false
 	}
 	if req.Name != nil && *req.Name != "" && !strings.Contains("炫彩", *req.Name) {
+		return false
+	}
+	if typeFilter != nil && *typeFilter != bConst.ColorTypeNormal {
 		return false
 	}
 	return true
@@ -296,6 +344,7 @@ func (l *LinkColorLogic) GetPage(ctx context.Context, req *apiLinkColor.ColorPag
 		PageSize: req.PageSize,
 		Status:   req.Status,
 		Name:     req.Name,
+		Type:     req.Type,
 		OrderBy:  req.OrderBy,
 		Order:    req.Order,
 	}, nil)

@@ -28,6 +28,7 @@ func (r *route) infoRouter(route gin.IRouter) {
 		infoGroup.GET("/apply-site", infoHandler.GetApplySiteInfo)
 		infoGroup.GET("/blogger", infoHandler.GetBloggerInfo)
 		infoGroup.GET("/builtin-invalid-group", infoHandler.GetBuiltinInvalidGroup)
+		infoGroup.GET("/color-mode", infoHandler.GetColorMode)
 
 		// 管理端写操作：统一 /info/admin 前置路径，鉴权管理员
 		adminGroup := infoGroup.Group("/admin")
@@ -39,6 +40,7 @@ func (r *route) infoRouter(route gin.IRouter) {
 			adminGroup.PUT("/apply-site", infoHandler.UpdateApplySiteInfo)
 			adminGroup.PUT("/blogger", infoHandler.UpdateBloggerInfo)
 			adminGroup.PUT("/builtin-invalid-group", infoHandler.UpdateBuiltinInvalidGroup)
+			adminGroup.PUT("/color-mode", infoHandler.UpdateColorMode)
 		}
 	}
 }

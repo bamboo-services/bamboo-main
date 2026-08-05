@@ -82,6 +82,20 @@ export interface UpdateArchiveRequest {
   about?: string
 }
 
+/** 站点级高级配色模式：normal=普通（仅普通色+炫彩）, premium=高级（额外展示高级色） */
+export type ColorMode = 'normal' | 'premium'
+
+/** 高级配色模式响应（GET /api/v1/info/color-mode） */
+export interface ColorModeResponse {
+  mode: ColorMode
+  updated_at: string
+}
+
+/** 更新高级配色模式请求（PUT /api/v1/admin/info/color-mode） */
+export interface UpdateColorModeRequest {
+  mode: ColorMode
+}
+
 /** 申请站点展示（GET /api/v1/info/apply-site）— 供 operate/apply 交换友链场景读取博主站点资料 */
 export interface ApplySiteInfoResponse {
   site_name: string
@@ -178,6 +192,7 @@ export interface GroupPageParams extends GroupListParams {
 /** 友链颜色实体（后端 entity.LinkColor；炫彩为内置保留颜色 ID=1，不在此实体体现） */
 export interface LinkColor {
   id: SnowflakeID
+  type: number // 颜色类型：0=普通（单色渲染）, 1=高级（三色渐变渲染）
   name: string
   primary_color: string | null
   sub_color: string | null
@@ -189,6 +204,7 @@ export interface LinkColor {
 
 /** 添加友链颜色请求（POST /api/v1/admin/colors；炫彩为内置颜色，无需创建） */
 export interface CreateColorRequest {
+  type?: number // 颜色类型：0=普通（仅主色）, 1=高级（三色必填）
   color_name: string
   primary_color?: string
   sub_color?: string
@@ -198,6 +214,7 @@ export interface CreateColorRequest {
 
 /** 更新友链颜色请求（PUT /api/v1/admin/colors/:id） */
 export interface UpdateColorRequest {
+  type?: number // 颜色类型：0=普通, 1=高级
   color_name?: string
   primary_color?: string
   sub_color?: string
@@ -208,6 +225,7 @@ export interface UpdateColorRequest {
 /** 友链颜色列表查询参数（GET /api/v1/admin/colors/all） */
 export interface ColorListParams {
   status?: number
+  type?: number // 类型过滤：0=普通, 1=高级；不传时普通模式仅返回普通色
   name?: string
   only_enabled?: boolean
   order_by?: 'name' | 'sort_order' | 'created_at'

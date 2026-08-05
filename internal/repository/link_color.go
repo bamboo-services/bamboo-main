@@ -44,6 +44,7 @@ type ColorListQuery struct {
 	Status      *int
 	Name        *string
 	OnlyEnabled *bool
+	Type        *int
 	OrderBy     *string
 	Order       *string
 }
@@ -54,6 +55,7 @@ type ColorPageQuery struct {
 	PageSize int
 	Status   *int
 	Name     *string
+	Type     *int
 	OrderBy  *string
 	Order    *string
 }
@@ -239,6 +241,9 @@ func (r *LinkColorRepo) List(ctx context.Context, req *ColorListQuery, tx *gorm.
 	if req.OnlyEnabled != nil && *req.OnlyEnabled {
 		query = query.Where("status = ?", true)
 	}
+	if req.Type != nil {
+		query = query.Where("type = ?", *req.Type)
+	}
 	if req.Name != nil && *req.Name != "" {
 		query = query.Where("name ILIKE ?", "%"+*req.Name+"%")
 	}
@@ -271,6 +276,9 @@ func (r *LinkColorRepo) Page(ctx context.Context, req *ColorPageQuery, tx *gorm.
 
 	if req.Status != nil {
 		query = query.Where("status = ?", *req.Status == 1)
+	}
+	if req.Type != nil {
+		query = query.Where("type = ?", *req.Type)
 	}
 	if req.Name != nil && *req.Name != "" {
 		query = query.Where("name ILIKE ?", "%"+*req.Name+"%")
