@@ -10,7 +10,13 @@
 import { useFriendOpen } from './friend-card-shared'
 import type { FriendCardProps } from './friend-card-shared'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { accentOf, fancyGradient, isFancyColor } from '@/lib/colors'
+import {
+  accentHoverOf,
+  accentOf,
+  fancyGradient,
+  isFancyColor,
+  isPremiumColor,
+} from '@/lib/colors'
 import { cn } from '@/lib/utils'
 import { BambooArt } from '@/components/ink-wash'
 
@@ -23,6 +29,8 @@ export function AdFriendCard({ link, onOpen }: FriendCardProps) {
   const { ref, handleClick } = useFriendOpen(link, onOpen)
   const accent = accentOf(link.color_f_key)
   const fancy = isFancyColor(link.color_f_key)
+  const premium = isPremiumColor(link.color_f_key)
+  const hoverAccent = accentHoverOf(link.color_f_key)
 
   return (
     <a
@@ -48,13 +56,25 @@ export function AdFriendCard({ link, onOpen }: FriendCardProps) {
         推广
       </span>
 
-      {/* 左侧墨条：友链主色（炫彩为竹影流光），hover 加宽并延伸全高 */}
+      {/* 左侧墨条：炫彩竹影流光 / 高级色三色渐变 / 普通色主色，hover 加宽延伸并切悬停色 */}
       <span
         className={cn(
           'absolute inset-y-3 left-0 rounded-r-full transition-all duration-500 group-hover:inset-y-0 group-hover:w-[4px]',
           fancy ? 'w-[3px] ink-fancy' : 'w-[2px]',
+          !fancy &&
+            !premium &&
+            'bg-[var(--ink-accent)] group-hover:bg-[var(--ink-accent-hover)]',
         )}
-        style={fancy ? undefined : { background: accent }}
+        style={
+          fancy
+            ? undefined
+            : premium
+              ? { background: accent }
+              : {
+                  ['--ink-accent' as string]: accent,
+                  ['--ink-accent-hover' as string]: hoverAccent ?? accent,
+                }
+        }
       />
 
       <Avatar className="size-11 rounded-full ring-1 ring-ring-glow">

@@ -58,14 +58,11 @@ func NewLinkColorLogic(ctx context.Context) *LinkColorLogic {
 
 // Add 添加友链颜色，按类型校验配色并自增生成新颜色。
 //
-// 普通配色（Type=0）仅需主色必填，副色/悬停色可空（渲染取单色）；
-// 高级配色（Type=1）需主色、副色、悬停色三者齐备（渲染取三色渐变）。
+// 普通配色（Type=0）与高级配色（Type=1）均需配置主色、副色、悬停色三色：
+// 普通色默认主色渲染、悬停时切悬停色；高级色三色渐变渲染。
 func (l *LinkColorLogic) Add(ctx context.Context, req *apiLinkColor.ColorAddRequest) (*entity.LinkColor, *xError.Error) {
-	if req.PrimaryColor == nil || *req.PrimaryColor == "" {
-		return nil, xError.NewError(ctx, xError.BadRequest, "需要设置主颜色", false)
-	}
-	if req.Type == bConst.ColorTypePremium && (req.SubColor == nil || *req.SubColor == "" || req.HoverColor == nil || *req.HoverColor == "") {
-		return nil, xError.NewError(ctx, xError.BadRequest, "高级配色需设置主颜色、副颜色和悬停颜色", false)
+	if req.PrimaryColor == nil || *req.PrimaryColor == "" || req.SubColor == nil || *req.SubColor == "" || req.HoverColor == nil || *req.HoverColor == "" {
+		return nil, xError.NewError(ctx, xError.BadRequest, "需要设置主颜色、副颜色和悬停颜色", false)
 	}
 
 	maxSort, xErr := l.repo.color.GetMaxSortOrder(ctx, nil)
@@ -141,12 +138,9 @@ func (l *LinkColorLogic) Update(ctx context.Context, colorID xSnowflake.Snowflak
 		}
 	}
 
-	// 按结果类型校验：普通配色仅主色必填；高级配色需三色齐备
-	if color.PrimaryColor == nil || *color.PrimaryColor == "" {
-		return nil, xError.NewError(ctx, xError.BadRequest, "需要设置主颜色", false)
-	}
-	if color.Type == bConst.ColorTypePremium && (color.SubColor == nil || *color.SubColor == "" || color.HoverColor == nil || *color.HoverColor == "") {
-		return nil, xError.NewError(ctx, xError.BadRequest, "高级配色需设置主颜色、副颜色和悬停颜色", false)
+	// 普通配色与高级配色均需三色齐备
+	if color.PrimaryColor == nil || *color.PrimaryColor == "" || color.SubColor == nil || *color.SubColor == "" || color.HoverColor == nil || *color.HoverColor == "" {
+		return nil, xError.NewError(ctx, xError.BadRequest, "需要设置主颜色、副颜色和悬停颜色", false)
 	}
 
 	_, xErr = l.repo.color.Save(ctx, color, nil)

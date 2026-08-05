@@ -74,3 +74,14 @@ export function accentOf(color: LinkColor | null | undefined): string {
   if (isPremiumColor(color)) return premiumGradient(color)
   return color?.primary_color ?? 'var(--leaf-deep)'
 }
+
+/**
+ * 取普通配色的悬停强调色（hover_color）。
+ * 炫彩/高级配色返回 undefined——炫彩走竹绿流光、高级色走三色渐变，均不参与 hover 变色。
+ */
+export function accentHoverOf(
+  color: LinkColor | null | undefined,
+): string | undefined {
+  if (isFancyColor(color) || isPremiumColor(color)) return undefined
+  return color?.hover_color ?? undefined
+}

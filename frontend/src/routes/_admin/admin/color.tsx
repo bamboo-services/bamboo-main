@@ -173,11 +173,12 @@ function ColorPage() {
     const parsedOrder = Number.parseInt(order, 10)
     const colorOrder = Number.isNaN(parsedOrder) ? 0 : parsedOrder
     const close = () => setFormOpen(false)
-    // 普通配色仅主色；高级配色需主/副/悬停三色；炫彩为内置颜色，无需创建
-    const colorFields =
-      type === 1
-        ? { primary_color: primary, sub_color: sub, hover_color: hover }
-        : { primary_color: primary }
+    // 普通配色与高级配色均需主/副/悬停三色；炫彩为内置颜色，无需创建
+    const colorFields = {
+      primary_color: primary,
+      sub_color: sub,
+      hover_color: hover,
+    }
 
     if (editing) {
       updateColor.mutate(
@@ -500,7 +501,7 @@ function ColorPage() {
               <p className="text-xs text-text-secondary">
                 {type === 1
                   ? '高级配色需配置主色、副色与悬停色，渲染为三色渐变。'
-                  : '普通配色仅需主色，渲染为单色。炫彩为内置颜色，无需创建。'}
+                  : '普通配色需配置主色、副色与悬停色，默认主色渲染、悬停时切换悬停色。炫彩为内置颜色，无需创建。'}
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
@@ -510,22 +511,18 @@ function ColorPage() {
                 value={primary}
                 onChange={setPrimary}
               />
-              {type === 1 && (
-                <>
-                  <ColorField
-                    id="subColor"
-                    label="副色"
-                    value={sub}
-                    onChange={setSub}
-                  />
-                  <ColorField
-                    id="hoverColor"
-                    label="悬停色"
-                    value={hover}
-                    onChange={setHover}
-                  />
-                </>
-              )}
+              <ColorField
+                id="subColor"
+                label="副色"
+                value={sub}
+                onChange={setSub}
+              />
+              <ColorField
+                id="hoverColor"
+                label="悬停色"
+                value={hover}
+                onChange={setHover}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="colorOrder">排序</Label>
