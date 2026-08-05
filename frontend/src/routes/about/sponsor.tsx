@@ -241,26 +241,9 @@ function SponsorPage() {
         </div>
       </section>
 
-      {/* ═══════════ 壹 · 渠道（雅致供奉） ═══════════ */}
+      {/* ═══════════ 渠道（列表直接展示，无需分组标题） ═══════════ */}
       <section className="py-16 md:py-20">
         <div className="mx-auto w-full max-w-6xl px-6 md:px-10">
-          <motion.div
-            {...scrollReveal(reduced)}
-            className="mb-8 flex items-end justify-between gap-4"
-          >
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-leaf-deep">
-                壹 · 渠道
-              </p>
-              <h2 className="mt-2.5 font-serif text-2xl font-bold text-text-primary md:text-3xl">
-                随喜之门
-              </h2>
-            </div>
-            <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-text-secondary">
-              Channels · {channels.length}
-            </span>
-          </motion.div>
-
           {channelsQuery.isLoading ? (
             <div className="grid gap-6 sm:grid-cols-2">
               {Array.from({ length: 2 }).map((_, i) => (
@@ -300,7 +283,7 @@ function SponsorPage() {
           >
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-leaf-deep">
-                贰 · 记录
+                记录
               </p>
               <h2 className="mt-2.5 font-serif text-2xl font-bold text-text-primary md:text-3xl">
                 感恩账册
