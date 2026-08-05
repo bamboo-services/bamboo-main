@@ -10,8 +10,8 @@
 // Package frontend 将 Vite 构建产物（resources/frontend/dist）以 go:embed 形式内嵌进二进制，
 // 供 route 包在 NoRoute 阶段提供静态资源托管与 SPA fallback 能力。
 //
-// 注意：dist 目录下至少保留 index.html，否则 go:embed 将在编译期失败。
-// 开发阶段若未执行 `make build-frontend`，占位 index.html 会返回「前端尚未构建」提示页。
+// 注意：dist 目录下至少保留一个文件（当前为 .gitkeep 空占位），否则 go:embed 将在编译期失败。
+// 构建产物不入库，开发阶段若未执行 `make build-frontend`，静态资源不可用（FileServer 返回 404）。
 package frontend
 
 import (
