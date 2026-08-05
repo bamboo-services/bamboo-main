@@ -34,26 +34,60 @@ export function PremiumFriendCard({ link, onOpen }: FriendCardProps) {
   const fancy = isFancyColor(link.color_f_key)
   const premium = isPremiumColor(link.color_f_key)
   const hoverAccent = accentHoverOf(link.color_f_key)
+  const textHover = fancy
+    ? 'var(--leaf-deep)'
+    : (link.color_f_key?.hover_color ?? accent)
+  const glowColor = fancy
+    ? 'oklch(0.88 0.1 105 / 0.5)'
+    : link.color_f_key?.primary_color
+      ? `color-mix(in srgb, ${link.color_f_key.primary_color} 20%, transparent)`
+      : 'var(--leaf-muted)'
+  const inkPrimary = link.color_f_key?.primary_color ?? 'var(--leaf-deep)'
 
   return (
     <a
       ref={ref}
       href={link.url}
       onClick={handleClick}
-      className="group isolate relative col-span-2 row-span-4 flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-all duration-500 hover:-translate-y-1 hover:border-leaf-muted hover:shadow-[0_24px_50px_-30px_oklch(0.32_0.06_155/0.45)]"
+      className="group isolate relative col-span-2 row-span-4 flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-all duration-500 hover:-translate-y-1 hover:border-[var(--ink-border-hover)] hover:shadow-[0_24px_50px_-30px_oklch(0.32_0.06_155/0.45)]"
       style={
         fancy
           ? {
               background:
                 'radial-gradient(130% 100% at 88% 0%, oklch(0.88 0.1 105 / 0.18), transparent 58%), var(--card)',
+              ['--ink-text-hover' as string]: 'var(--leaf-deep)',
+              ['--ink-border-hover' as string]: 'var(--leaf-deep)',
+              ['--ink-primary' as string]: 'var(--leaf-deep)',
             }
-          : undefined
+          : premium
+            ? {
+                ['--ink-accent' as string]: accent,
+                ['--ink-text-hover' as string]: textHover,
+                ['--ink-border-hover' as string]: inkPrimary,
+                ['--ink-primary' as string]: inkPrimary,
+              }
+            : {
+                ['--ink-accent' as string]: accent,
+                ['--ink-accent-hover' as string]: hoverAccent ?? accent,
+                ['--ink-text-hover' as string]: textHover,
+                ['--ink-border-hover' as string]: inkPrimary,
+                ['--ink-primary' as string]: inkPrimary,
+              }
       }
     >
       {/* 炫彩卡背衬竹：右下角墨竹（大卡，竹幅稍宽），hover 略深 */}
       {fancy && (
         <BambooArt className="pointer-events-none absolute -z-10 bottom-0 right-[-22px] top-0 h-full w-[210px] text-text-primary opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
       )}
+      {/* hover 站点色光晕：自右上浮现的辉光，呼应晨光 */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 rounded-lg opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        style={{
+          background: `radial-gradient(120% 100% at 85% 0%, ${glowColor} 0%, transparent 58%)`,
+        }}
+      />
+
       {/* 左侧墨条：炫彩竹影流光 / 高级色三色渐变 / 普通色主色，hover 加宽延伸并切悬停色 */}
       <span
         className={cn(
@@ -62,17 +96,8 @@ export function PremiumFriendCard({ link, onOpen }: FriendCardProps) {
           !fancy &&
             !premium &&
             'bg-[var(--ink-accent)] group-hover:bg-[var(--ink-accent-hover)]',
+          !fancy && premium && '[background:var(--ink-accent)]',
         )}
-        style={
-          fancy
-            ? undefined
-            : premium
-              ? { background: accent }
-              : {
-                  ['--ink-accent' as string]: accent,
-                  ['--ink-accent-hover' as string]: hoverAccent ?? accent,
-                }
-        }
       />
 
       {/* 默认内容：水平垂直居中，hover 淡出 */}
@@ -102,7 +127,7 @@ export function PremiumFriendCard({ link, onOpen }: FriendCardProps) {
         <p className="mt-4 max-w-xs text-[14px] leading-[1.8] text-text-secondary">
           {link.description ?? '这个站点很神秘，没有留下描述。'}
         </p>
-        <p className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-leaf-deep/70">
+        <p className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--ink-text-hover)]/70">
           <Eye className="size-3.5" />
           悬停查看站点截图
         </p>
@@ -112,9 +137,27 @@ export function PremiumFriendCard({ link, onOpen }: FriendCardProps) {
       <div className="absolute inset-0 z-10 flex translate-y-[101%] flex-col transition-transform duration-500 ease-[cubic-bezier(0.22,0.9,0.3,1)] group-hover:translate-y-0">
         {/* 浏览器框 */}
         <div className="flex items-center gap-1.5 border-b border-border bg-card px-3.5 py-2">
-          <span className="size-2.5 rounded-full bg-leaf-muted/60" />
-          <span className="size-2.5 rounded-full bg-leaf-muted/40" />
-          <span className="size-2.5 rounded-full bg-leaf-muted/25" />
+          <span
+            className="size-2.5 rounded-full"
+            style={{
+              background: fancy ? fancyGradient() : 'var(--ink-primary)',
+              opacity: 0.6,
+            }}
+          />
+          <span
+            className="size-2.5 rounded-full"
+            style={{
+              background: fancy ? fancyGradient() : 'var(--ink-primary)',
+              opacity: 0.4,
+            }}
+          />
+          <span
+            className="size-2.5 rounded-full"
+            style={{
+              background: fancy ? fancyGradient() : 'var(--ink-primary)',
+              opacity: 0.25,
+            }}
+          />
           <span className="ml-2.5 truncate font-mono text-[10px] text-text-secondary">
             {link.url}
           </span>
@@ -128,7 +171,12 @@ export function PremiumFriendCard({ link, onOpen }: FriendCardProps) {
               className="h-full w-full"
             />
           ) : (
-            <div className="flex h-full items-center justify-center bg-gradient-to-br from-leaf-light/30 via-card to-leaf-muted/25">
+            <div
+              className="flex h-full items-center justify-center"
+              style={{
+                background: `radial-gradient(120% 100% at 85% 0%, ${glowColor} 0%, transparent 55%), radial-gradient(120% 100% at 8% 0%, ${glowColor} 0%, transparent 55%), linear-gradient(160deg, oklch(0.88 0.1 105 / 0.28), var(--card) 55%, oklch(0.8 0.08 130 / 0.2))`,
+              }}
+            >
               <span className="font-mono text-xs text-text-secondary">
                 站点截图 · 占位
               </span>
@@ -138,14 +186,14 @@ export function PremiumFriendCard({ link, onOpen }: FriendCardProps) {
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-card via-card/85 to-transparent px-5 pb-4 pt-10">
             <div className="flex items-end justify-between gap-3">
               <div>
-                <h3 className="font-serif text-lg font-bold text-text-primary">
+                <h3 className="font-serif text-lg font-bold text-[var(--ink-text-hover)]">
                   {link.name}
                 </h3>
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary">
                   {domainOf(link.url)}
                 </p>
               </div>
-              <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.3em] text-leaf-deep">
+              <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--ink-text-hover)]">
                 访问
                 <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
               </span>

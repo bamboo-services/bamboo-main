@@ -70,7 +70,8 @@ import {
   linkStatus,
 } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
-import { accentOf, isFancyColor } from '@/lib/colors'
+import { accentOf, isFancyColor, isPremiumColor } from '@/lib/colors'
+import { AccentBar } from '@/components/link/accent-bar'
 import { cn } from '@/lib/utils'
 import {
   useAdminLinks,
@@ -226,6 +227,13 @@ function LinkTable({
                 aria-hidden="true"
               />
               {color?.name ?? '默认'}
+              {isFancyColor(color) ? (
+                <InkBadge tone="leaf">炫彩</InkBadge>
+              ) : isPremiumColor(color) ? (
+                <InkBadge tone="pending">高级</InkBadge>
+              ) : color ? (
+                <InkBadge tone="neutral">普通</InkBadge>
+              ) : null}
             </span>
           )
         },
@@ -389,8 +397,9 @@ function LinkListPage() {
               <Button variant="outline" className="cursor-pointer">
                 <CheckCircle2 className="mr-2 size-4" />
                 友链审核
-                {((linksQuery.data?.pending_count ?? 0) +
-                  (linksQuery.data?.edit_pending_count ?? 0)) > 0 && (
+                {(linksQuery.data?.pending_count ?? 0) +
+                  (linksQuery.data?.edit_pending_count ?? 0) >
+                  0 && (
                   <InkBadge tone="pending" className="ml-2">
                     {(linksQuery.data?.pending_count ?? 0) +
                       (linksQuery.data?.edit_pending_count ?? 0)}
@@ -545,7 +554,6 @@ function LinkListPage() {
           className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
         >
           {links.map((link, i) => {
-            const accent = accentOf(link.color_f_key)
             const fancy = isFancyColor(link.color_f_key)
             return (
               <motion.div
@@ -561,21 +569,17 @@ function LinkListPage() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') openDetail(link.id)
                 }}
-                className={cn(inkCard, 'isolate cursor-pointer text-left')}
+                className={cn(
+                  inkCard,
+                  'group isolate cursor-pointer text-left',
+                )}
               >
                 {/* 炫彩卡背衬竹：右下角墨竹，hover 略深 */}
                 {fancy && (
                   <BambooArt className="pointer-events-none absolute -z-10 bottom-0 right-[-18px] top-0 h-full w-[180px] text-text-primary opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
                 )}
-                {/* 左侧墨色竖条：取站点配色作为数据签名 */}
-                <span
-                  className={cn(
-                    'absolute inset-y-0 left-0 w-1',
-                    fancy && 'ink-fancy',
-                  )}
-                  style={{ background: accent }}
-                  aria-hidden="true"
-                />
+                {/* 左侧站点色墨条：普通主色 hover 悬停色 / 高级渐变 / 炫彩竹影 */}
+                <AccentBar color={link.color_f_key} className="inset-y-0 w-1" />
                 <div className="flex flex-1 flex-col">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex min-w-0 items-center gap-3">

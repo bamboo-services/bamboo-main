@@ -40,7 +40,7 @@ import { EnsoEmpty, InkBadge } from '@/components/ink-wash'
 import { Skeleton } from '@/components/ui/skeleton'
 import { domainOf } from '@/components/about/friend-card-shared'
 import { CHAPTERS, LINK_LEVEL, groupLinksByGroup } from '@/lib/friend-groups'
-import { accentOf, isFancyColor } from '@/lib/colors'
+import { AccentBar } from '@/components/link/accent-bar'
 import { isBuiltinGroupId } from '@/lib/locations'
 import { Button } from '@/components/ui/button'
 import {
@@ -74,28 +74,6 @@ function LevelBadge({ level }: { level: number }) {
   return null
 }
 
-/** 左侧主色墨条：炫彩走 ink-fancy 流光，普通颜色取 accentOf 主色 */
-function AccentBar({
-  link,
-  className,
-}: {
-  link: LinkFriend
-  className?: string
-}) {
-  const fancy = isFancyColor(link.color_f_key)
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        'absolute left-0 rounded-r-full',
-        fancy ? 'ink-fancy' : '',
-        className,
-      )}
-      style={fancy ? undefined : { background: accentOf(link.color_f_key) }}
-    />
-  )
-}
-
 /**
  * 友链排位卡（纯视觉，h-full 填满栅格单元）：级别感知，与公开页逐格对应——
  * 高级 2×2 名帖式大卡；好友/广告 1×1 紧凑竖排；一般 1×1 横排富式（高度为好友一半）。
@@ -106,7 +84,7 @@ function FriendRankCard({ link }: { link: LinkFriend }) {
     return (
       <div className="group relative flex h-full flex-col items-center justify-center overflow-hidden rounded-lg border border-border bg-card p-4 text-center transition-[translate,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_18px_40px_-28px_oklch(0.32_0.06_155/0.45)]">
         <AccentBar
-          link={link}
+          color={link.color_f_key}
           className="inset-y-4 w-[2px] transition-all duration-300 group-hover:inset-y-0 group-hover:w-[4px]"
         />
         <SiteAvatar
@@ -137,7 +115,7 @@ function FriendRankCard({ link }: { link: LinkFriend }) {
     return (
       <div className="group relative flex h-full flex-col items-center justify-center gap-1 overflow-hidden rounded-lg border border-border bg-card px-3 text-center transition-[translate,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_12px_26px_-22px_oklch(0.32_0.06_155/0.4)]">
         <AccentBar
-          link={link}
+          color={link.color_f_key}
           className="inset-y-2.5 w-[2px] transition-all duration-300 group-hover:inset-y-0 group-hover:w-[3px]"
         />
         <SiteAvatar
@@ -158,7 +136,7 @@ function FriendRankCard({ link }: { link: LinkFriend }) {
     return (
       <div className="group relative flex h-full flex-col items-center justify-center gap-0.5 overflow-hidden rounded-lg border border-border bg-card px-2 text-center transition-[translate,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_12px_26px_-22px_oklch(0.32_0.06_155/0.4)]">
         <AccentBar
-          link={link}
+          color={link.color_f_key}
           className="inset-y-2 w-[2px] transition-all duration-300 group-hover:inset-y-0 group-hover:w-[3px]"
         />
         <SiteAvatar
@@ -177,7 +155,7 @@ function FriendRankCard({ link }: { link: LinkFriend }) {
   return (
     <div className="group relative flex h-full items-center gap-2 overflow-hidden rounded-lg border border-border bg-card px-2.5 transition-[translate,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_12px_26px_-22px_oklch(0.32_0.06_155/0.4)]">
       <AccentBar
-        link={link}
+        color={link.color_f_key}
         className="inset-y-2 w-[2px] transition-all duration-300 group-hover:inset-y-0 group-hover:w-[3px]"
       />
       <SiteAvatar

@@ -40,7 +40,7 @@ import {
   linkStatus,
 } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
-import { accentOf, isFancyColor } from '@/lib/colors'
+import { AccentBar } from '@/components/link/accent-bar'
 import { cn } from '@/lib/utils'
 import {
   useAdminLinks,
@@ -267,23 +267,14 @@ function VerifyDetail({
   isPending: boolean
 }) {
   const status = linkStatus(link)
-  const accent = accentOf(link.color_f_key)
-  const fancy = isFancyColor(link.color_f_key)
   const groups = useAllGroups().data ?? []
   const colors = useAllColors().data ?? []
 
   return (
     <div className="space-y-4">
       {/* 申请横幅：左侧墨条 + 晨光墨晕呼应待审核状态 */}
-      <div className={`${inkCard} relative overflow-hidden p-0`}>
-        <span
-          className={cn(
-            'absolute inset-y-0 left-0 z-10 w-1.5',
-            fancy && 'ink-fancy',
-          )}
-          style={{ background: accent }}
-          aria-hidden="true"
-        />
+      <div className={`${inkCard} group relative overflow-hidden p-0`}>
+        <AccentBar color={link.color_f_key} className="inset-y-0 z-10 w-1.5" />
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -559,11 +550,11 @@ function EditVerifyDetail({
   const groupName = (id: SnowflakeID | null) =>
     id == null
       ? '未分组'
-      : groups.find((g) => g.id === id)?.name ?? `位置 #${id}`
+      : (groups.find((g) => g.id === id)?.name ?? `位置 #${id}`)
   const colorName = (id: SnowflakeID | null) =>
     id == null
       ? '默认颜色'
-      : colors.find((c) => c.id === id)?.name ?? `颜色 #${id}`
+      : (colors.find((c) => c.id === id)?.name ?? `颜色 #${id}`)
 
   return (
     <div className="space-y-4">
@@ -922,9 +913,7 @@ function LinkVerifyPage() {
           <div className="py-8">
             <EnsoEmpty
               title={
-                tab === 'new'
-                  ? '暂无待审核的友链申请'
-                  : '暂无待审核的修改申请'
+                tab === 'new' ? '暂无待审核的友链申请' : '暂无待审核的修改申请'
               }
               hint={
                 tab === 'new'

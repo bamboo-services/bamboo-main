@@ -52,8 +52,8 @@ import { CloseFriendCard } from '@/components/about/close-friend-card'
 import { PremiumFriendCard } from '@/components/about/premium-friend-card'
 import { RegularFriendCard } from '@/components/about/regular-friend-card'
 import { enter } from '@/lib/motion'
-import { accentOf, isFancyColor } from '@/lib/colors'
-import { cn } from '@/lib/utils'
+import { accentOf } from '@/lib/colors'
+import { AccentBar } from '@/components/link/accent-bar'
 import {
   useAdminLink,
   useDeleteLink,
@@ -191,7 +191,6 @@ function LinkDetailPage() {
   }
 
   const accent = accentOf(link.color_f_key)
-  const fancy = isFancyColor(link.color_f_key)
   const s = linkStatus(link)
 
   return (
@@ -212,16 +211,10 @@ function LinkDetailPage() {
           animate: { opacity: 1, y: 0 },
           transition: { duration: 0.5, ease: 'easeOut' },
         })}
-        className={`${inkCard} relative overflow-hidden p-0`}
+        className={`${inkCard} group relative overflow-hidden p-0`}
       >
-        <span
-          className={cn(
-            'absolute inset-y-0 left-0 z-10 w-1.5',
-            fancy && 'ink-fancy',
-          )}
-          style={{ background: accent }}
-          aria-hidden="true"
-        />
+        {/* 左侧站点色墨条：普通主色 hover 悬停色 / 高级渐变 / 炫彩竹影 */}
+        <AccentBar color={link.color_f_key} className="inset-y-0 z-10 w-1.5" />
         {/* 晨光墨晕 + 墨韵竹叶 */}
         <div
           className="pointer-events-none absolute inset-0"

@@ -31,20 +31,42 @@ export function AdFriendCard({ link, onOpen }: FriendCardProps) {
   const fancy = isFancyColor(link.color_f_key)
   const premium = isPremiumColor(link.color_f_key)
   const hoverAccent = accentHoverOf(link.color_f_key)
+  const textHover = fancy
+    ? 'var(--leaf-deep)'
+    : (link.color_f_key?.hover_color ?? accent)
+  const glowColor = fancy
+    ? 'oklch(0.88 0.1 105 / 0.5)'
+    : link.color_f_key?.primary_color
+      ? `color-mix(in srgb, ${link.color_f_key.primary_color} 20%, transparent)`
+      : 'var(--leaf-muted)'
+  const inkPrimary = link.color_f_key?.primary_color ?? 'var(--leaf-deep)'
 
   return (
     <a
       ref={ref}
       href={link.url}
       onClick={handleClick}
-      className="group isolate relative flex flex-col items-center justify-center overflow-hidden rounded-lg border border-border bg-card p-4 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-leaf-muted hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]"
+      className="group isolate relative flex flex-col items-center justify-center overflow-hidden rounded-lg border border-border bg-card p-4 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--ink-border-hover)] hover:shadow-[0_14px_30px_-22px_oklch(0.32_0.06_155/0.4)]"
       style={
         fancy
           ? {
               background:
                 'radial-gradient(130% 100% at 88% 0%, oklch(0.88 0.1 105 / 0.16), transparent 58%), var(--card)',
+              ['--ink-text-hover' as string]: 'var(--leaf-deep)',
+              ['--ink-border-hover' as string]: 'var(--leaf-deep)',
             }
-          : undefined
+          : premium
+            ? {
+                ['--ink-accent' as string]: accent,
+                ['--ink-text-hover' as string]: textHover,
+                ['--ink-border-hover' as string]: inkPrimary,
+              }
+            : {
+                ['--ink-accent' as string]: accent,
+                ['--ink-accent-hover' as string]: hoverAccent ?? accent,
+                ['--ink-text-hover' as string]: textHover,
+                ['--ink-border-hover' as string]: inkPrimary,
+              }
       }
     >
       {/* 炫彩卡背衬竹：右下角墨竹，hover 略深 */}
@@ -56,6 +78,15 @@ export function AdFriendCard({ link, onOpen }: FriendCardProps) {
         推广
       </span>
 
+      {/* hover 站点色光晕：自右上浮现的辉光，呼应晨光 */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 rounded-lg opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        style={{
+          background: `radial-gradient(120% 100% at 85% 0%, ${glowColor} 0%, transparent 58%)`,
+        }}
+      />
+
       {/* 左侧墨条：炫彩竹影流光 / 高级色三色渐变 / 普通色主色，hover 加宽延伸并切悬停色 */}
       <span
         className={cn(
@@ -64,17 +95,8 @@ export function AdFriendCard({ link, onOpen }: FriendCardProps) {
           !fancy &&
             !premium &&
             'bg-[var(--ink-accent)] group-hover:bg-[var(--ink-accent-hover)]',
+          !fancy && premium && '[background:var(--ink-accent)]',
         )}
-        style={
-          fancy
-            ? undefined
-            : premium
-              ? { background: accent }
-              : {
-                  ['--ink-accent' as string]: accent,
-                  ['--ink-accent-hover' as string]: hoverAccent ?? accent,
-                }
-        }
       />
 
       <Avatar className="size-11 rounded-full ring-1 ring-ring-glow">
@@ -94,7 +116,7 @@ export function AdFriendCard({ link, onOpen }: FriendCardProps) {
         </AvatarFallback>
       </Avatar>
 
-      <h3 className="mt-2.5 truncate font-serif text-sm font-bold text-text-primary transition-colors group-hover:text-leaf-deep">
+      <h3 className="mt-2.5 truncate font-serif text-sm font-bold text-text-primary transition-colors group-hover:text-[var(--ink-text-hover)]">
         {link.name}
       </h3>
       <p className="mt-0.5 truncate text-[11px] leading-snug text-text-secondary">
