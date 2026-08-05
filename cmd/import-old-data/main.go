@@ -60,6 +60,8 @@ const (
 	maxSequence           = 1023
 	datacenterID          = 7
 	nodeID                = 3
+	// builtinGroupCount 内置分组数量（首页/友链页），迁移时旧分组排序值顺延预留 0、1。
+	builtinGroupCount = 2
 )
 
 // snowflakeID 按 xSnowflake 位布局构造指定时间的雪花 ID。
@@ -371,7 +373,7 @@ func run() error {
 			if err := tx.Exec(
 				`INSERT INTO bm_link_group (id, created_at, updated_at, name, description, sort_order, status)
 				 VALUES (?, ?, ?, ?, ?, ?, ?)`,
-				nid, created, updated, g.displayName, desc, g.sort, g.reveal,
+				nid, created, updated, g.displayName, desc, g.sort+builtinGroupCount, g.reveal,
 			).Error; err != nil {
 				return fmt.Errorf("插入分组 %s 失败: %w", g.displayName, err)
 			}
