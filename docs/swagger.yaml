@@ -269,13 +269,6 @@ definitions:
         example: 0
         minimum: 0
         type: integer
-      color_type:
-        description: '颜色类型（0: 普通；1: 炫彩为系统内置颜色，无需创建）'
-        enum:
-        - 0
-        - 1
-        example: 0
-        type: integer
       hover_color:
         description: 悬停颜色
         example: '#FF3300'
@@ -323,9 +316,6 @@ definitions:
       sub_color:
         description: 副颜色
         type: string
-      type:
-        description: 颜色类型
-        type: integer
       updated_at:
         type: string
     type: object
@@ -391,9 +381,6 @@ definitions:
       sub_color:
         description: 副颜色
         type: string
-      type:
-        description: 颜色类型
-        type: integer
       updated_at:
         type: string
     type: object
@@ -457,13 +444,6 @@ definitions:
         example: 0
         minimum: 0
         type: integer
-      color_type:
-        description: '颜色类型（0: 普通；1: 炫彩为系统内置颜色，不支持保存为炫彩）'
-        enum:
-        - 0
-        - 1
-        example: 0
-        type: integer
       hover_color:
         description: 悬停颜色（可传空字符串清空）
         example: '#FF3300'
@@ -509,9 +489,6 @@ definitions:
       sub_color:
         description: 副颜色
         type: string
-      type:
-        description: 颜色类型
-        type: integer
       updated_at:
         type: string
     type: object
@@ -1610,9 +1587,6 @@ definitions:
       sub_color:
         description: 副颜色
         type: string
-      type:
-        description: 颜色类型
-        type: integer
       updated_at:
         type: string
     type: object
@@ -1788,10 +1762,6 @@ paths:
       - description: 状态过滤（0=禁用，1=启用）
         in: query
         name: status
-        type: integer
-      - description: 类型过滤（0=普通，1=炫彩）
-        in: query
-        name: type
         type: integer
       - description: 名称模糊搜索
         in: query
@@ -2072,10 +2042,6 @@ paths:
       - description: 状态过滤（0=禁用，1=启用）
         in: query
         name: status
-        type: integer
-      - description: 类型过滤（0=普通，1=炫彩）
-        in: query
-        name: type
         type: integer
       - description: 名称模糊搜索
         in: query

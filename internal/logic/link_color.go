@@ -54,18 +54,13 @@ func NewLinkColorLogic(ctx context.Context) *LinkColorLogic {
 	}
 }
 
-// Add 添加友链颜色，校验普通颜色类型必填字段并按当前最大排序值自增生成新颜色。
+// Add 添加友链颜色，校验三色必填字段并按当前最大排序值自增生成新颜色。
 func (l *LinkColorLogic) Add(ctx context.Context, req *apiLinkColor.ColorAddRequest) (*entity.LinkColor, *xError.Error) {
-	if req.ColorType == 1 {
-		return nil, xError.NewError(ctx, xError.BadRequest, "炫彩为系统内置颜色，无需创建", false)
+	if req.PrimaryColor == nil || req.SubColor == nil || req.HoverColor == nil {
+		return nil, xError.NewError(ctx, xError.BadRequest, "需要设置主颜色、副颜色和悬停颜色", false)
 	}
-	if req.ColorType == 0 {
-		if req.PrimaryColor == nil || req.SubColor == nil || req.HoverColor == nil {
-			return nil, xError.NewError(ctx, xError.BadRequest, "普通颜色类型需要设置主颜色、副颜色和悬停颜色", false)
-		}
-		if *req.PrimaryColor == "" || *req.SubColor == "" || *req.HoverColor == "" {
-			return nil, xError.NewError(ctx, xError.BadRequest, "普通颜色类型的颜色值不能为空", false)
-		}
+	if *req.PrimaryColor == "" || *req.SubColor == "" || *req.HoverColor == "" {
+		return nil, xError.NewError(ctx, xError.BadRequest, "颜色值不能为空", false)
 	}
 
 	maxSort, xErr := l.repo.color.GetMaxSortOrder(ctx, nil)
@@ -74,15 +69,12 @@ func (l *LinkColorLogic) Add(ctx context.Context, req *apiLinkColor.ColorAddRequ
 	}
 
 	color := &entity.LinkColor{
-		Name:      req.ColorName,
-		Type:      req.ColorType,
-		SortOrder: maxSort + 1,
-		Status:    true,
-	}
-	if req.ColorType == 0 {
-		color.PrimaryColor = req.PrimaryColor
-		color.SubColor = req.SubColor
-		color.HoverColor = req.HoverColor
+		Name:         req.ColorName,
+		PrimaryColor: req.PrimaryColor,
+		SubColor:     req.SubColor,
+		HoverColor:   req.HoverColor,
+		SortOrder:    maxSort + 1,
+		Status:       true,
 	}
 
 	_, xErr = l.repo.color.Create(ctx, color, nil)
@@ -101,11 +93,8 @@ func (l *LinkColorLogic) Add(ctx context.Context, req *apiLinkColor.ColorAddRequ
 	return reloaded, nil
 }
 
-// Update 更新友链颜色，按请求字段覆盖颜色属性并校验普通颜色类型的必填项。
+// Update 更新友链颜色，按请求字段覆盖颜色属性并校验三色必填项。
 func (l *LinkColorLogic) Update(ctx context.Context, colorID xSnowflake.SnowflakeID, req *apiLinkColor.ColorUpdateRequest) (*entity.LinkColor, *xError.Error) {
-	if req.ColorType != nil && *req.ColorType == 1 {
-		return nil, xError.NewError(ctx, xError.BadRequest, "炫彩为系统内置颜色，不支持保存为炫彩类型", false)
-	}
 	color, found, xErr := l.repo.color.GetByID(ctx, colorID, false, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -116,9 +105,6 @@ func (l *LinkColorLogic) Update(ctx context.Context, colorID xSnowflake.Snowflak
 
 	if req.ColorName != nil {
 		color.Name = *req.ColorName
-	}
-	if req.ColorType != nil {
-		color.Type = *req.ColorType
 	}
 	if req.ColorOrder != nil {
 		color.SortOrder = *req.ColorOrder
@@ -146,10 +132,8 @@ func (l *LinkColorLogic) Update(ctx context.Context, colorID xSnowflake.Snowflak
 		}
 	}
 
-	if color.Type == 0 {
-		if color.PrimaryColor == nil || color.SubColor == nil || color.HoverColor == nil {
-			return nil, xError.NewError(ctx, xError.BadRequest, "普通颜色类型需要设置主颜色、副颜色和悬停颜色", false)
-		}
+	if color.PrimaryColor == nil || color.SubColor == nil || color.HoverColor == nil {
+		return nil, xError.NewError(ctx, xError.BadRequest, "需要设置主颜色、副颜色和悬停颜色", false)
 	}
 
 	// 清空关联引用：缓存快照可能含 LinksFKey，保留会让 GORM Save 用友链旧快照覆盖友链记录
@@ -281,7 +265,6 @@ func (l *LinkColorLogic) Get(ctx context.Context, colorID xSnowflake.SnowflakeID
 func (l *LinkColorLogic) GetList(ctx context.Context, req *apiLinkColor.ColorListRequest) ([]entity.LinkColor, *xError.Error) {
 	colors, xErr := l.repo.color.List(ctx, &repository.ColorListQuery{
 		Status:      req.Status,
-		Type:        req.Type,
 		Name:        req.Name,
 		OnlyEnabled: req.OnlyEnabled,
 		OrderBy:     req.OrderBy,
@@ -301,15 +284,12 @@ func (l *LinkColorLogic) GetList(ctx context.Context, req *apiLinkColor.ColorLis
 
 // builtinFancyVisible 判断内置炫彩是否满足当前列表过滤条件。
 //
-// 炫彩恒为启用状态，仅当类型/名称/状态过滤未排除它时才注入。
+// 炫彩恒为启用状态，仅当名称/状态过滤未排除它时才注入。
 func builtinFancyVisible(req *apiLinkColor.ColorListRequest) bool {
 	if req.Status != nil && *req.Status != 1 {
 		return false
 	}
 	if req.OnlyEnabled != nil && !*req.OnlyEnabled {
-		return false
-	}
-	if req.Type != nil && *req.Type != 1 {
 		return false
 	}
 	if req.Name != nil && *req.Name != "" && !strings.Contains("炫彩", *req.Name) {
@@ -331,7 +311,6 @@ func (l *LinkColorLogic) GetPage(ctx context.Context, req *apiLinkColor.ColorPag
 		Page:     req.Page,
 		PageSize: req.PageSize,
 		Status:   req.Status,
-		Type:     req.Type,
 		Name:     req.Name,
 		OrderBy:  req.OrderBy,
 		Order:    req.Order,

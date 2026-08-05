@@ -15,7 +15,7 @@ import (
 
 // BuiltinFancyColorID 内置炫彩颜色的保留 ID。
 //
-// 炫彩（type=1）为系统内置的特殊颜色，不落库：颜色列表接口会以该 ID 注入一条虚拟炫彩记录，
+// 炫彩为系统内置的特殊颜色，不落库：颜色列表接口会以该 ID 注入一条虚拟炫彩记录，
 // 友链引用炫彩时 color_id 保存该保留值，查询返回时再由后端注入对应的虚拟颜色对象。
 // 该值在雪花 ID 空间之外，数据库真实颜色记录不可能占用。
 const BuiltinFancyColorID xSnowflake.SnowflakeID = 1

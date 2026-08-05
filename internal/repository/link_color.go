@@ -40,7 +40,6 @@ type LinkColorRepo struct {
 // repository 层自有查询模型，由 logic 层从 transport DTO（api/link）转换而来。
 type ColorListQuery struct {
 	Status      *int
-	Type        *int
 	Name        *string
 	OnlyEnabled *bool
 	OrderBy     *string
@@ -52,7 +51,6 @@ type ColorPageQuery struct {
 	Page     int
 	PageSize int
 	Status   *int
-	Type     *int
 	Name     *string
 	OrderBy  *string
 	Order    *string
@@ -207,9 +205,6 @@ func (r *LinkColorRepo) List(ctx context.Context, req *ColorListQuery, tx *gorm.
 	if req.OnlyEnabled != nil && *req.OnlyEnabled {
 		query = query.Where("status = ?", true)
 	}
-	if req.Type != nil {
-		query = query.Where("type = ?", *req.Type)
-	}
 	if req.Name != nil && *req.Name != "" {
 		query = query.Where("name ILIKE ?", "%"+*req.Name+"%")
 	}
@@ -242,9 +237,6 @@ func (r *LinkColorRepo) Page(ctx context.Context, req *ColorPageQuery, tx *gorm.
 
 	if req.Status != nil {
 		query = query.Where("status = ?", *req.Status == 1)
-	}
-	if req.Type != nil {
-		query = query.Where("type = ?", *req.Type)
 	}
 	if req.Name != nil && *req.Name != "" {
 		query = query.Where("name ILIKE ?", "%"+*req.Name+"%")

@@ -29,7 +29,6 @@ export function listColors(
       page: params.page ?? 1,
       page_size: params.page_size ?? 10,
       status: params.status,
-      type: params.type,
       name: params.name,
       order_by: params.order_by,
       order: params.order,
@@ -46,7 +45,6 @@ export function getAllColors(
     url: '/admin/colors/all',
     params: {
       status: params.status,
-      type: params.type,
       name: params.name,
       only_enabled: params.only_enabled,
       order_by: params.order_by ?? 'sort_order',
