@@ -23,7 +23,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ComponentProps } from 'react'
 import { BambooLogo } from '@/assets/svg/bamboo-logo'
 import { FallingLeaves } from '@/components/decorative/falling-leaves'
-import { BambooArt } from '@/components/ink-wash'
+import { BambooArt, BambooRule } from '@/components/ink-wash'
 import { getSiteInfo } from '@/api/info'
 import { getToken } from '@/lib/auth'
 import { cn } from '@/lib/utils'
@@ -242,35 +242,301 @@ function useGroveDepth(reduced: boolean) {
 /* ------------------------------------------------------------------ */
 
 function LoadingScreen() {
+  const reduced = useReducedMotion() ?? false
+
   return (
     <motion.div
       key="loading"
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-background"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-background"
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.02 }}
-      transition={{ duration: 0.5, ease: 'easeInOut' }}
+      exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 1.02 }}
+      transition={
+        reduced
+          ? { duration: 0.2, ease: 'easeInOut' }
+          : { duration: 0.5, ease: 'easeInOut' }
+      }
     >
+      {/* 晨光墨晕：左上主光 + 右下辅光（与登录页左栏同源） */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(560px 220px at 18% 0%, oklch(0.88 0.1 105 / 0.20), transparent 72%), radial-gradient(420px 260px at 90% 100%, oklch(0.88 0.1 105 / 0.08), transparent 70%)',
+        }}
+      />
+      {/* 衬线水印大字：贴右下外缘，极淡 */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -bottom-8 right-[4%] select-none font-serif text-[200px] font-black leading-none text-text-primary opacity-[0.04]"
+      >
+        竹
+      </span>
+      {/* 竹节竖线收边：左右分界线 */}
+      <span
+        aria-hidden
+        className="absolute bottom-[12%] left-[5%] top-[12%] w-px"
+        style={{
+          background:
+            'linear-gradient(to bottom, transparent, var(--leaf-muted), transparent)',
+          opacity: 0.5,
+        }}
+      />
+      <span
+        aria-hidden
+        className="absolute bottom-[12%] right-[5%] top-[12%] w-px"
+        style={{
+          background:
+            'linear-gradient(to bottom, transparent, var(--leaf-muted), transparent)',
+          opacity: 0.5,
+        }}
+      />
+
+      {/* 立轴画心：一幅正在完成的字画 */}
       <motion.div
-        animate={{ scale: [1, 1.08, 1], opacity: [0.85, 1, 0.85] }}
-        transition={{
-          duration: 2,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: 'easeInOut',
-        }}
+        initial={reduced ? false : { opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={
+          reduced
+            ? { duration: 0.3 }
+            : { duration: 0.9, ease: [0.22, 0.9, 0.3, 1] as const }
+        }
+        className="relative z-10 flex h-[min(560px,74vh)] w-[min(520px,92vw)] flex-col rounded-[2px] bg-[oklch(0.955_0.02_112)] px-[28px] pb-[24px] pt-[40px] shadow-[0_0_0_1px_oklch(0.8_0.08_130/0.32),0_34px_70px_-32px_oklch(0.32_0.06_155/0.4)] md:px-[40px] md:pt-[48px] lg:h-[min(600px,80vh)] lg:px-[46px] lg:pb-[28px] lg:pt-[52px]"
       >
-        <BambooLogo size={72} />
+        <div className="relative flex-1">
+          {/* 三竿墨竹：完整复用 BambooArt 数据（项目认可的竹子样式），墨色淡雅浓度、近浓远淡，竹叶极慢摇曳 */}
+          <svg
+            className="text-text-primary absolute inset-0 h-full w-full"
+            viewBox="0 0 580 432"
+            preserveAspectRatio="xMaxYMax meet"
+            aria-hidden="true"
+          >
+            <defs>
+              <path
+                id="bzleaf-load"
+                d="M0 0 C12 -7 34 -11 58 -3 C36 4 12 5 0 0 Z"
+              />
+              <g id="spray-load">
+                <path
+                  d="M0 0 Q26 -9 56 -7"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <use
+                  href="#bzleaf-load"
+                  transform="translate(12 -3) rotate(-44) scale(1.08)"
+                />
+                <use
+                  href="#bzleaf-load"
+                  transform="translate(28 -6) rotate(-14)"
+                />
+                <use
+                  href="#bzleaf-load"
+                  transform="translate(44 -7) rotate(14) scale(.95)"
+                />
+                <use
+                  href="#bzleaf-load"
+                  transform="translate(56 -7) rotate(42) scale(.72)"
+                />
+              </g>
+            </defs>
+            {/* 竹一：主竿 */}
+            <g className="ink-sway" opacity="0.55">
+              <path
+                d="M392 432 C388 366 393 314 390 258 C387 202 392 142 389 86 C388 56 390 30 388 8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="6.5"
+                strokeLinecap="round"
+              />
+              <ellipse
+                cx="390"
+                cy="350"
+                rx="7.5"
+                ry="2.8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <ellipse
+                cx="389.5"
+                cy="258"
+                rx="7.5"
+                ry="2.8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <ellipse
+                cx="390"
+                cy="166"
+                rx="7.5"
+                ry="2.8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <ellipse
+                cx="390"
+                cy="82"
+                rx="6.5"
+                ry="2.4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <use
+                href="#spray-load"
+                transform="translate(391 318) rotate(-16)"
+              />
+              <use
+                href="#spray-load"
+                transform="translate(389 226) scale(-1 1) rotate(-22)"
+              />
+              <use
+                href="#spray-load"
+                transform="translate(390 134) rotate(-28) scale(1.12)"
+              />
+              <use
+                href="#spray-load"
+                transform="translate(388 50) rotate(-54) scale(1.2)"
+              />
+              <use
+                href="#bzleaf-load"
+                transform="translate(304 404) rotate(26) scale(.78)"
+              />
+            </g>
+            {/* 竹二：中竿 */}
+            <g className="ink-sway ink-sway-slow" opacity="0.38">
+              <path
+                d="M498 432 C495 380 499 338 497 294 C495 248 498 202 496 156 C495 132 497 106 496 84"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="4.6"
+                strokeLinecap="round"
+              />
+              <ellipse
+                cx="497"
+                cy="356"
+                rx="5.5"
+                ry="2"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+              />
+              <ellipse
+                cx="497"
+                cy="266"
+                rx="5.5"
+                ry="2"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+              />
+              <ellipse
+                cx="497"
+                cy="176"
+                rx="5.5"
+                ry="2"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+              />
+              <use
+                href="#spray-load"
+                transform="translate(497 326) rotate(-12) scale(.88)"
+              />
+              <use
+                href="#spray-load"
+                transform="translate(496 236) scale(-1 1) rotate(-24) scale(.95)"
+              />
+              <use
+                href="#spray-load"
+                transform="translate(496 138) rotate(-42) scale(1.05)"
+              />
+            </g>
+            {/* 竹三：细竿 */}
+            <g className="ink-sway ink-sway-fast" opacity="0.26">
+              <path
+                d="M300 432 C298 400 300 372 299 340 C298 308 300 280 299 250"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3.4"
+                strokeLinecap="round"
+              />
+              <use
+                href="#spray-load"
+                transform="translate(299 372) rotate(-10) scale(.8)"
+              />
+              <use
+                href="#spray-load"
+                transform="translate(299 300) scale(-1 1) rotate(-18) scale(.82)"
+              />
+            </g>
+          </svg>
+
+          {/* 竖排题跋：左缘留边距，落墨（flex-col 逐字竖排，规避 writing-mode 大字折行） */}
+          <div className="absolute left-[6%] top-1/2 flex -translate-y-1/2">
+            <motion.div
+              initial={reduced ? false : { opacity: 0, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, filter: 'blur(0px)' }}
+              transition={{ duration: 1.4, ease: 'easeOut', delay: 0.35 }}
+              className="flex flex-col items-center gap-[9px]"
+            >
+              {['正', '在', '入', '林'].map((ch) => (
+                <span
+                  key={ch}
+                  className="font-serif text-[30px] font-bold leading-none text-text-primary md:text-[40px] lg:text-[46px]"
+                >
+                  {ch}
+                </span>
+              ))}
+            </motion.div>
+            <motion.div
+              initial={reduced ? false : { opacity: 0, filter: 'blur(6px)' }}
+              animate={{ opacity: 1, filter: 'blur(0px)' }}
+              transition={{ duration: 1.4, ease: 'easeOut', delay: 0.75 }}
+              className="ml-[18px] flex flex-col items-center gap-[5px] pt-[10px]"
+            >
+              {['节', '节', '而', '生'].map((ch) => (
+                <span
+                  key={ch}
+                  className="font-serif text-[13px] leading-none text-text-secondary md:text-[15px]"
+                >
+                  {ch}
+                </span>
+              ))}
+            </motion.div>
+          </div>
+        </div>
+
+        {/* 题款区：画心内底部（竹节分隔 + mono 状态），使画心自足居中 */}
+        <div className="mt-4 flex flex-col items-center gap-3 pb-1">
+          <BambooRule reduced={reduced} delay={0} />
+          <div className="flex items-center gap-2.5">
+            <span
+              className="ink-pulse size-2 shrink-0 rounded-full bg-leaf-deep"
+              aria-hidden
+            />
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-text-secondary">
+              正在加载 · LOADING
+            </p>
+          </div>
+        </div>
       </motion.div>
-      <motion.p
-        className="text-sm tracking-widest text-text-secondary"
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{
-          duration: 2,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: 'easeInOut',
-        }}
-      >
-        正在加载…
-      </motion.p>
+
+      {/* 轴头 */}
+      <span
+        aria-hidden
+        className="relative z-10 h-[7px] w-[min(546px,97vw)] rounded-[2px] bg-[linear-gradient(90deg,transparent,var(--leaf-muted),transparent)] opacity-65"
+      />
+
+      {/* 落款 */}
+      <p className="absolute inset-x-0 bottom-6 text-center font-mono text-[11px] tracking-[0.1em] text-text-secondary/70">
+        BAMBOO · FRIENDSHIP LINKS
+      </p>
     </motion.div>
   )
 }

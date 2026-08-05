@@ -176,7 +176,12 @@ func (m *Manager) process(ctx context.Context, id xSnowflake.SnowflakeID) {
 		m.log.SugarWarn(ctx, "截图信息更新失败", "link_id", linkID, "error", xErr.Error())
 		return
 	}
-	m.log.SugarInfo(ctx, "站点截图完成", "link_id", linkID, "url", link.URL, "path", path)
+	m.log.SugarInfo(ctx, "截图成功",
+		"link_id", linkID,
+		"url", link.URL,
+		"path", path,
+		"size", len(data),
+	)
 }
 
 // saveFile 原子写入截图文件：先写临时文件再 rename 替换，避免半写文件被读取
