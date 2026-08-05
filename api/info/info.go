@@ -16,7 +16,7 @@ import "time"
 // SiteUpdateRequest 站点信息更新请求
 type SiteUpdateRequest struct {
 	SiteName        *string `json:"site_name" binding:"omitempty,min=1,max=100" example:"筱锋的小站"`
-	SiteDescription *string `json:"site_description" binding:"omitempty,max=500" example:"一个有趣的个人博客"`
+	SiteDescription *string `json:"site_description" binding:"omitempty,max=5000" example:"# 一个有趣的个人博客\n\n用 Markdown 书写本站介绍。"`
 	Introduction    *string `json:"introduction" binding:"omitempty,max=2000" example:"欢迎来到我的主页！"`
 }
 

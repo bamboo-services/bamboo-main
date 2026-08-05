@@ -5601,8 +5601,8 @@ const docTemplate = `{
                 },
                 "site_description": {
                     "type": "string",
-                    "maxLength": 500,
-                    "example": "一个有趣的个人博客"
+                    "maxLength": 5000,
+                    "example": "# 一个有趣的个人博客\n\n用 Markdown 书写本站介绍。"
                 },
                 "site_name": {
                     "type": "string",

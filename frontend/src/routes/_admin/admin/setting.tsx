@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { InkNavRow, PageHead } from '@/components/ink-wash'
+import { MarkdownEditor } from '@/components/markdown-editor'
 import { enter } from '@/lib/motion'
 import {
   useAbout,
@@ -39,7 +40,7 @@ export const Route = createFileRoute('/_admin/admin/setting')({
   component: SettingPage,
 })
 
-type SettingSection = 'site' | 'about' | 'applySite' | 'blogger' | 'invalid'
+type SettingSection = 'site' | 'archive' | 'applySite' | 'blogger' | 'invalid'
 
 /**
  * 系统设置：主从面板 · 扁平化。
@@ -80,10 +81,10 @@ function SettingPage() {
             />
             <InkNavRow
               icon={<UserRound className="size-4" />}
-              title="自我介绍"
-              desc="Markdown 个人档案"
-              active={section === 'about'}
-              onClick={() => setSection('about')}
+              title="站点档案"
+              desc="站点描述 · 自我介绍"
+              active={section === 'archive'}
+              onClick={() => setSection('archive')}
             />
             <InkNavRow
               icon={<Send className="size-4" />}
@@ -115,8 +116,8 @@ function SettingPage() {
         {/* 右侧编辑区：扁平，无卡 */}
         {section === 'site' ? (
           <SiteInfoPanel reduced={reduced} />
-        ) : section === 'about' ? (
-          <AboutPanel reduced={reduced} />
+        ) : section === 'archive' ? (
+          <SiteArchivePanel reduced={reduced} />
         ) : section === 'applySite' ? (
           <ApplySitePanel reduced={reduced} />
         ) : section === 'blogger' ? (
@@ -160,13 +161,11 @@ function SiteInfoPanel({ reduced }: { reduced: boolean }) {
   const updateSite = useUpdateSiteInfo()
 
   const [siteName, setSiteName] = useState('')
-  const [siteDescription, setSiteDescription] = useState('')
   const [introduction, setIntroduction] = useState('')
 
   useEffect(() => {
     if (data) {
       setSiteName(data.site_name)
-      setSiteDescription(data.site_description)
       setIntroduction(data.introduction)
     }
   }, [data])
@@ -174,7 +173,6 @@ function SiteInfoPanel({ reduced }: { reduced: boolean }) {
   const handleSave = () => {
     updateSite.mutate({
       site_name: siteName,
-      site_description: siteDescription,
       introduction,
     })
   }
@@ -207,14 +205,6 @@ function SiteInfoPanel({ reduced }: { reduced: boolean }) {
                 onChange={(e) => setSiteName(e.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="siteDescription">站点描述</Label>
-              <Input
-                id="siteDescription"
-                value={siteDescription}
-                onChange={(e) => setSiteDescription(e.target.value)}
-              />
-            </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="introduction">主页介绍</Label>
               <Textarea
@@ -229,7 +219,7 @@ function SiteInfoPanel({ reduced }: { reduced: boolean }) {
           {/* 落款：墨线收束 + 衬线导语 + 保存 */}
           <div className="relative mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-5">
             <p className="font-serif text-sm italic text-text-secondary">
-              站点信息将展示于公开页头部。
+              站名与主页介绍展示于公开页；站点描述已移入「站点档案」。
             </p>
             <Button onClick={handleSave} disabled={updateSite.isPending}>
               <Save className="mr-2 h-4 w-4" />
@@ -242,19 +232,30 @@ function SiteInfoPanel({ reduced }: { reduced: boolean }) {
   )
 }
 
-/** 自我介绍面板 */
-function AboutPanel({ reduced }: { reduced: boolean }) {
-  const { data, isLoading } = useAbout()
+/** 站点档案面板：站点描述 + 自我介绍（均 Markdown，各自独立保存） */
+function SiteArchivePanel({ reduced }: { reduced: boolean }) {
+  const { data: site, isLoading: siteLoading } = useSiteInfo()
+  const { data: about, isLoading: aboutLoading } = useAbout()
+  const updateSite = useUpdateSiteInfo()
   const updateAbout = useUpdateAbout()
 
-  const [content, setContent] = useState('')
+  const [siteDesc, setSiteDesc] = useState('')
+  const [aboutContent, setAboutContent] = useState('')
 
   useEffect(() => {
-    if (data) setContent(data.content)
-  }, [data])
+    if (site) setSiteDesc(site.site_description)
+  }, [site])
 
-  const handleSave = () => {
-    updateAbout.mutate({ content })
+  useEffect(() => {
+    if (about) setAboutContent(about.content)
+  }, [about])
+
+  const handleSaveSiteDesc = () => {
+    updateSite.mutate({ site_description: siteDesc })
+  }
+
+  const handleSaveAbout = () => {
+    updateAbout.mutate({ content: aboutContent })
   }
 
   return (
@@ -266,30 +267,70 @@ function AboutPanel({ reduced }: { reduced: boolean }) {
       })}
       className="relative"
     >
-      <PanelHeader kicker="ABOUT · MARKDOWN" title="自我介绍" />
+      <PanelHeader kicker="ARCHIVE · MARKDOWN" title="站点档案" />
 
-      {isLoading ? (
-        <Skeleton className="relative mt-8 h-64 w-full" />
+      {siteLoading || aboutLoading ? (
+        <div className="relative mt-8 space-y-8">
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
       ) : (
         <>
-          <div className="relative mt-8 space-y-2">
-            <Label htmlFor="aboutContent">介绍内容</Label>
-            <Textarea
-              id="aboutContent"
-              className="min-h-[280px] font-mono text-sm"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
+          {/* 站点描述：Markdown 编辑器，展示于「贰 · 本站」 */}
+          <div className="relative mt-8">
+            <div className="mb-2 flex items-center justify-between">
+              <Label htmlFor="archiveSiteDesc">站点描述</Label>
+              <span className="font-mono text-[11px] tracking-wide text-text-secondary">
+                · 展示于「贰 · 本站」
+              </span>
+            </div>
+            <MarkdownEditor
+              id="archiveSiteDesc"
+              value={siteDesc}
+              onChange={setSiteDesc}
+              minHeight={200}
+              placeholder="用 Markdown 书写本站介绍，支持加粗、横线等…"
+              maxLength={5000}
             />
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-4">
+              <p className="font-serif text-sm italic text-text-secondary">
+                展示于关于我的「贰 · 本站」章节。
+              </p>
+              <Button
+                onClick={handleSaveSiteDesc}
+                disabled={updateSite.isPending}
+              >
+                <Save className="mr-2 h-4 w-4" />
+                {updateSite.isPending ? '保存中…' : '保存站点描述'}
+              </Button>
+            </div>
           </div>
 
-          <div className="relative mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-5">
-            <p className="font-serif text-sm italic text-text-secondary">
-              支持 Markdown，保存后即时生效。
-            </p>
-            <Button onClick={handleSave} disabled={updateAbout.isPending}>
-              <Save className="mr-2 h-4 w-4" />
-              {updateAbout.isPending ? '保存中…' : '保存自我介绍'}
-            </Button>
+          {/* 自我介绍：Markdown 编辑器，展示于「壹 · 自序」 */}
+          <div className="relative mt-10 border-t border-border/60 pt-8">
+            <div className="mb-2 flex items-center justify-between">
+              <Label htmlFor="archiveAbout">自我介绍</Label>
+              <span className="font-mono text-[11px] tracking-wide text-text-secondary">
+                · 展示于「壹 · 自序」
+              </span>
+            </div>
+            <MarkdownEditor
+              id="archiveAbout"
+              value={aboutContent}
+              onChange={setAboutContent}
+              minHeight={280}
+              placeholder="用 Markdown 书写个人档案…"
+              maxLength={10000}
+            />
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-4">
+              <p className="font-serif text-sm italic text-text-secondary">
+                展示于关于我的「壹 · 自序」章节。
+              </p>
+              <Button onClick={handleSaveAbout} disabled={updateAbout.isPending}>
+                <Save className="mr-2 h-4 w-4" />
+                {updateAbout.isPending ? '保存中…' : '保存自我介绍'}
+              </Button>
+            </div>
           </div>
         </>
       )}
