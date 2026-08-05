@@ -131,6 +131,12 @@ export interface UpdateGroupRequest {
   group_status?: number // 0=禁用 1=启用
 }
 
+/** 更新内置「已失效」分组配置请求（PUT /api/v1/admin/groups/builtin/invalid） */
+export interface UpdateBuiltinInvalidGroupRequest {
+  name?: string
+  description?: string // 传空串即清空描述
+}
+
 /** 友链分组列表查询参数（GET /api/v1/admin/groups/all） */
 export interface GroupListParams {
   status?: number
@@ -235,6 +241,12 @@ export interface LinkFriend {
 
 /** 公开友链列表响应（GET /api/v1/links） */
 export interface FriendPublicResponse {
+  links: Array<LinkFriend>
+}
+
+/** 公开「已失效」分组响应（GET /api/v1/links/failed） */
+export interface FriendFailedResponse {
+  group: LinkGroup | null
   links: Array<LinkFriend>
 }
 

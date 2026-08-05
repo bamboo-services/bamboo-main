@@ -12,6 +12,7 @@ import type {
   AdminLinkListResponse,
   ApplyLinkRequest,
   CreateLinkRequest,
+  FriendFailedResponse,
   FriendPublicResponse,
   FriendSortItem,
   FriendSortResponse,
@@ -44,6 +45,18 @@ export function getPublicLinks(
     url: '/links',
     params: groupId != null ? { group_id: groupId.toString() } : undefined,
   }).then((res) => res.links)
+}
+
+/**
+ * 获取公开「已失效」分组及其下的失效友链。
+ * - 独立于 getPublicLinks（正常友链），供 about/friends 渲染「已失效」章节
+ * - 返回内置「已失效」分组信息（名称/描述经 bm_system 热修改）+ 失效友链列表
+ */
+export function getFailedLinks(): Promise<FriendFailedResponse> {
+  return request<FriendFailedResponse>({
+    method: 'GET',
+    url: '/links/failed',
+  })
 }
 
 // ---------------------------------------------------------------------------

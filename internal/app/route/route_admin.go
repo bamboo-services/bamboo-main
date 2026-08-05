@@ -66,6 +66,8 @@ func (r *route) linkGroupAdminRouter(route gin.IRouter) {
 		groupRouter.GET("", groupHandler.GetPage)
 		groupRouter.GET("/all", groupHandler.GetList)
 		groupRouter.PATCH("/sort", groupHandler.UpdateSort)
+		groupRouter.GET("/builtin/invalid", groupHandler.GetBuiltinInvalidGroup)
+		groupRouter.PUT("/builtin/invalid", groupHandler.UpdateBuiltinInvalidGroup)
 		groupRouter.GET("/:id", groupHandler.Get)
 		groupRouter.PUT("/:id", groupHandler.Update)
 		groupRouter.PATCH("/:id/status", groupHandler.UpdateStatus)

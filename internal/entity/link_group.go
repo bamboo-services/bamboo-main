@@ -28,7 +28,7 @@ type LinkGroup struct {
 	Status             bool    `json:"status" gorm:"type:boolean;default:true;comment:分组状态（false: 禁用, true: 启用）"` // 分组状态
 
 	// 关联关系
-	// 注意：constraint:"-" 跳过数据库外键约束——首页/友链页为内置分组（不落库），
+	// 注意：constraint:"-" 跳过数据库外键约束——「已失效」为内置分组（不落库），
 	// 友链 group_id 会引用保留 ID，数据库层面需放行该引用值；分组关联的清理由业务层保证。
 	LinksFKey []*LinkFriend `json:"links_f_key,omitempty" gorm:"foreignKey:GroupID;references:ID;constraint:-;comment:友链外键"` // 友链外键，关联 LinkFriend 类型
 }
@@ -38,38 +38,36 @@ func (_ *LinkGroup) GetGene() xSnowflake.Gene {
 	return bConst.GeneLinkGroup
 }
 
-// NewBuiltinGroups 构造内置分组对象列表（固定顺序：首页 → 友链页）。
+// NewBuiltinGroup 构造内置「已失效」分组虚拟对象（不落库）。
 //
-// 内置分组为系统预设位置（不落库）：分组列表接口与友链查询返回时以此虚拟对象表达选项，
-// ID 固定为 constants.BuiltinGroupHomepageID / BuiltinGroupFriendsID（雪花 ID 空间之外的保留值）。
-func NewBuiltinGroups() []*LinkGroup {
-	return []*LinkGroup{
-		{
-			BaseEntity: xModels.BaseEntity{ID: bConst.BuiltinGroupHomepageID},
-			Name:       "首页",
-			SortOrder:  0,
-			Status:     true,
-		},
-		{
-			BaseEntity: xModels.BaseEntity{ID: bConst.BuiltinGroupFriendsID},
-			Name:       "友链页",
-			SortOrder:  1,
-			Status:     true,
-		},
+// 名称与描述由上层（repository/logic）读取 bm_system 配置后注入，ID 固定为
+// constants.BuiltinGroupInvalidID（雪花 ID 空间之外的保留值），排序恒为 0、状态恒为启用。
+func NewBuiltinGroup(name string, description *string) *LinkGroup {
+	return &LinkGroup{
+		BaseEntity:  xModels.BaseEntity{ID: bConst.BuiltinGroupInvalidID},
+		Name:        name,
+		Description: description,
+		SortOrder:   0,
+		Status:      true,
 	}
+}
+
+// NewDefaultBuiltinGroup 返回内置「已失效」分组的默认虚拟对象。
+//
+// 当 bm_system 配置缺失或读取失败时作为兜底，保证系统内置语义始终可用。
+func NewDefaultBuiltinGroup() *LinkGroup {
+	return NewBuiltinGroup("已失效", nil)
 }
 
 // BuiltinGroupByID 按保留 ID 返回内置分组对象；非内置 ID 返回 nil。
 func BuiltinGroupByID(id xSnowflake.SnowflakeID) *LinkGroup {
-	for _, group := range NewBuiltinGroups() {
-		if group.ID == id {
-			return group
-		}
+	if id == bConst.BuiltinGroupInvalidID {
+		return NewDefaultBuiltinGroup()
 	}
 	return nil
 }
 
-// IsBuiltinGroupID 判断是否为内置分组的保留 ID。
+// IsBuiltinGroupID 判断是否为内置「已失效」分组的保留 ID。
 func IsBuiltinGroupID(id xSnowflake.SnowflakeID) bool {
-	return id == bConst.BuiltinGroupHomepageID || id == bConst.BuiltinGroupFriendsID
+	return id == bConst.BuiltinGroupInvalidID
 }

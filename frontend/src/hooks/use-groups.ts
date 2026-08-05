@@ -14,17 +14,21 @@ import type {
   GroupListParams,
   GroupPageParams,
   SnowflakeID,
+  UpdateBuiltinInvalidGroupRequest,
   UpdateGroupRequest,
 } from '@/api/types'
 import {
   createGroup,
   deleteGroup,
   getAllGroups,
+  getBuiltinInvalidGroup,
   listGroups,
   sortGroups,
+  updateBuiltinInvalidGroup,
   updateGroup,
   updateGroupStatus,
 } from '@/api/group'
+import { failedLinkKeys } from '@/hooks/use-links'
 
 /** 友链分组 queryKey 工厂 */
 export const groupKeys = {
@@ -114,5 +118,34 @@ export function useSortGroups() {
       void qc.invalidateQueries({ queryKey: groupKeys.all })
     },
     onError: (err: Error) => toast.error(err.message || '分组排序保存失败'),
+  })
+}
+
+/** 内置「已失效」分组配置 queryKey */
+const builtinInvalidKeys = {
+  detail: ['admin', 'groups', 'builtin', 'invalid'] as const,
+}
+
+/** 获取内置「已失效」分组配置（GET /api/v1/admin/groups/builtin/invalid） */
+export function useBuiltinInvalidGroup() {
+  return useQuery({
+    queryKey: builtinInvalidKeys.detail,
+    queryFn: getBuiltinInvalidGroup,
+  })
+}
+
+/** 更新内置「已失效」分组配置（经 bm_system 热修改，同步刷新公开「已失效」章节） */
+export function useUpdateBuiltinInvalidGroup() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (req: UpdateBuiltinInvalidGroupRequest) =>
+      updateBuiltinInvalidGroup(req),
+    onSuccess: () => {
+      toast.success('已失效分组配置已更新')
+      void qc.invalidateQueries({ queryKey: builtinInvalidKeys.detail })
+      // 分组名称变更需同步公开「已失效」章节标题
+      void qc.invalidateQueries({ queryKey: failedLinkKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '已失效分组配置更新失败'),
   })
 }

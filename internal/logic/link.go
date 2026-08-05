@@ -34,9 +34,10 @@ import (
 )
 
 type linkRepo struct {
-	link  *repository.LinkRepo
-	user  *repository.SystemUserRepo
-	group *repository.LinkGroupRepo
+	link   *repository.LinkRepo
+	user   *repository.SystemUserRepo
+	group  *repository.LinkGroupRepo
+	system *repository.SystemRepo
 }
 
 // LinkLogic 友情链接业务逻辑
@@ -57,9 +58,10 @@ func NewLinkLogic(ctx context.Context) *LinkLogic {
 			log:   xLog.WithName(xLog.NamedLOGC, "LinkLogic"),
 		},
 		repo: linkRepo{
-			link:  repository.NewLinkRepo(db, m),
-			user:  repository.NewSystemUserRepo(db, m),
-			group: repository.NewLinkGroupRepo(db, m),
+			link:   repository.NewLinkRepo(db, m),
+			user:   repository.NewSystemUserRepo(db, m),
+			group:  repository.NewLinkGroupRepo(db, m),
+			system: repository.NewSystemRepo(db, m),
 		},
 	}
 }
@@ -281,9 +283,12 @@ func (l *LinkLogic) UpdateStatus(ctx context.Context, linkID xSnowflake.Snowflak
 	return nil
 }
 
-// UpdateFailStatus 更新友情链接失效状态
+// UpdateFailStatus 更新友情链接失效状态。
+//
+// 标记失效时自动归入内置「已失效」分组（保留 ID）；恢复时若当前分组为已失效分组则清空为未分组。
 func (l *LinkLogic) UpdateFailStatus(ctx context.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendFailRequest) *xError.Error {
-	ok, xErr := l.repo.link.UpdateFailureByID(ctx, linkID, req.LinkFail, req.LinkFailReason, nil)
+	invalidGroupID := xSnowflake.SnowflakeID(constants.BuiltinGroupInvalidID)
+	ok, xErr := l.repo.link.UpdateFailureByID(ctx, linkID, req.LinkFail, req.LinkFailReason, &invalidGroupID, nil)
 	if xErr != nil {
 		return xErr
 	}
@@ -426,6 +431,27 @@ func (l *LinkLogic) GetPublicLinks(ctx context.Context, groupIDStr string) ([]en
 	}
 
 	return l.repo.link.ListPublic(ctx, groupID, constants.LinkStatusApproved, constants.LinkFailNormal, nil)
+}
+
+// GetFailedLinks 获取公开「已失效」分组及其下的失效友链。
+//
+// 与 ListPublic（仅正常友链）独立成档：内置「已失效」分组信息来自 bm_system 配置，
+// 读取失败时降级默认分组不阻断；友链限定已通过且失效，避免暴露非公开审核状态。
+func (l *LinkLogic) GetFailedLinks(ctx context.Context) (*apiLink.FriendFailedResponse, *xError.Error) {
+	invalidGroup, xErr := l.repo.system.BuildBuiltinInvalidGroup(ctx)
+	if xErr != nil {
+		invalidGroup = entity.NewDefaultBuiltinGroup()
+	}
+
+	links, xErr := l.repo.link.ListFailed(ctx, constants.LinkStatusApproved, constants.LinkFailBroken, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+
+	return &apiLink.FriendFailedResponse{
+		Group: invalidGroup,
+		Links: links,
+	}, nil
 }
 
 // Apply 访客自助申请友情链接

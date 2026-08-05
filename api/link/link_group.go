@@ -122,3 +122,16 @@ type GroupDeleteConflictInfo struct {
 	TotalLinks   int                    `json:"total_links"`   // 总友链数量
 	DisplayCount int                    `json:"display_count"` // 显示的友链数量（最多10个）
 }
+
+// BuiltinInvalidGroupUpdateRequest 更新内置「已失效」分组配置请求
+//
+// PATCH 语义：仅更新非 nil 字段；名称必填（去除空白后不能为空），描述传空串即清空。
+type BuiltinInvalidGroupUpdateRequest struct {
+	Name        *string `json:"name" binding:"omitempty,min=1,max=100" example:"已失效"`           // 分组名称
+	Description *string `json:"description" binding:"omitempty,max=500" example:"已失效友链，站点不可访问"` // 分组描述（空串清空）
+}
+
+// BuiltinInvalidGroupResponse 内置「已失效」分组配置响应
+type BuiltinInvalidGroupResponse struct {
+	entity.LinkGroup
+}

@@ -32,9 +32,10 @@ import (
 //
 // 收口友情链接实体的 CRUD、分页查询与缓存读写，缓存经 xCache.Manager 统一失效。
 type LinkRepo struct {
-	db  *gorm.DB
-	kc  xCache.KeyCache[string, entity.LinkFriend]
-	log *xLog.LogNamedLogger
+	db     *gorm.DB
+	kc     xCache.KeyCache[string, entity.LinkFriend]
+	system *SystemRepo
+	log    *xLog.LogNamedLogger
 }
 
 // FriendQuery 友情链接分页查询条件
@@ -67,9 +68,10 @@ type SortAssignment struct {
 // NewLinkRepo 创建 LinkRepo 实例
 func NewLinkRepo(db *gorm.DB, m *xCache.Manager) *LinkRepo {
 	return &LinkRepo{
-		db:  db,
-		kc:  xCache.KeyCacheOf[string, entity.LinkFriend](m),
-		log: xLog.WithName(xLog.NamedREPO, "LinkRepo"),
+		db:     db,
+		kc:     xCache.KeyCacheOf[string, entity.LinkFriend](m),
+		system: NewSystemRepo(db, m),
+		log:    xLog.WithName(xLog.NamedREPO, "LinkRepo"),
 	}
 }
 
@@ -90,16 +92,32 @@ func ensureFancyColor(link *entity.LinkFriend) {
 	}
 }
 
-// ensureBuiltinGroup 若友链引用内置分组（group_id 为保留 ID），注入虚拟分组对象。
+// ensureBuiltinGroup 若友链引用内置「已失效」分组（group_id 为保留 ID），注入虚拟分组对象。
 //
-// 首页/友链页为系统预设位置（不落库），数据库 Preload 无法命中该关联，
-// 由查询层在返回前补齐 GroupFKey，保证下游渲染无需感知 ID 约定。
-func ensureBuiltinGroup(link *entity.LinkFriend) {
+// 已失效为系统内置语义分组（不落库），数据库 Preload 无法命中该关联，
+// 由查询层在返回前补齐 GroupFKey。名字/描述来自调用方读取 bm_system 配置后构造的
+// builtinInvalid（nil 时回退默认「已失效」），保证下游渲染无需感知 ID 约定。
+func ensureBuiltinGroup(link *entity.LinkFriend, builtinInvalid *entity.LinkGroup) {
 	if link.GroupID != nil && link.GroupFKey == nil {
-		if builtin := entity.BuiltinGroupByID(*link.GroupID); builtin != nil {
-			link.GroupFKey = builtin
+		if entity.IsBuiltinGroupID(*link.GroupID) {
+			if builtinInvalid != nil {
+				link.GroupFKey = builtinInvalid
+			} else {
+				link.GroupFKey = entity.NewDefaultBuiltinGroup()
+			}
 		}
 	}
+}
+
+// buildBuiltinInvalid 读取内置「已失效」分组配置，读取失败或为空时回退默认值。
+//
+// 供各查询方法在循环注入前调用一次，避免对每条友链重复读取 system 配置（防 N+1）。
+func (r *LinkRepo) buildBuiltinInvalid(ctx context.Context) *entity.LinkGroup {
+	builtin, xErr := r.system.BuildBuiltinInvalidGroup(ctx)
+	if xErr != nil || builtin == nil {
+		return entity.NewDefaultBuiltinGroup()
+	}
+	return builtin
 }
 
 // Create 创建友情链接
@@ -186,7 +204,7 @@ func (r *LinkRepo) GetByID(ctx context.Context, id xSnowflake.SnowflakeID, withA
 	// 内置虚拟项（不落库）：color_id/group_id 引用保留 ID 时补齐虚拟对象，随缓存一并持久化
 	if withAssociations {
 		ensureFancyColor(&link)
-		ensureBuiltinGroup(&link)
+		ensureBuiltinGroup(&link, r.buildBuiltinInvalid(ctx))
 	}
 
 	if cacheErr := r.kc.Set(ctx, constants.RedisLinkFriend.Get(link.ID).String(), &link, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
@@ -274,9 +292,10 @@ func (r *LinkRepo) List(ctx context.Context, req *FriendQuery, tx *gorm.DB) ([]e
 	}
 
 	// 内置虚拟项（不落库）：color_id/group_id 引用保留 ID 时补齐虚拟对象
+	builtinInvalid := r.buildBuiltinInvalid(ctx)
 	for i := range links {
 		ensureFancyColor(&links[i])
-		ensureBuiltinGroup(&links[i])
+		ensureBuiltinGroup(&links[i], builtinInvalid)
 	}
 
 	return links, total, nil
@@ -307,13 +326,13 @@ func (r *LinkRepo) UpdateStatusByID(ctx context.Context, id xSnowflake.Snowflake
 }
 
 // UpdateFailureByID 更新友情链接的失效状态
-func (r *LinkRepo) UpdateFailureByID(ctx context.Context, id xSnowflake.SnowflakeID, isFailure int, failReason string, tx *gorm.DB) (bool, *xError.Error) {
+//
+// invalidGroupID 为内置「已失效」分组的保留 ID：标记失效时自动归入该分组，
+// 恢复时若当前分组即已失效分组则清空（未分组），否则保持原分组不变。
+func (r *LinkRepo) UpdateFailureByID(ctx context.Context, id xSnowflake.SnowflakeID, isFailure int, failReason string, invalidGroupID *xSnowflake.SnowflakeID, tx *gorm.DB) (bool, *xError.Error) {
 	r.log.Info(ctx, "UpdateFailureByID - 更新友情链接失效状态")
 
-	updates := map[string]any{
-		"is_failure":  isFailure,
-		"fail_reason": failReason,
-	}
+	updates := buildFailureUpdates(isFailure, failReason, invalidGroupID)
 
 	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).Where("id = ?", id).Updates(updates)
 	if result.Error != nil {
@@ -328,6 +347,30 @@ func (r *LinkRepo) UpdateFailureByID(ctx context.Context, id xSnowflake.Snowflak
 	}
 
 	return true, nil
+}
+
+// buildFailureUpdates 组装失效状态更新字段（纯函数，便于表驱动单测）。
+//
+// invalidGroupID 为空时不操作分组；标记失效（isFailure 为失效标志）时归入内置
+// 「已失效」分组，恢复时以单条 CASE 原子判断「当前分组为已失效分组则清空」，
+// 避免读-改-写竞态。
+func buildFailureUpdates(isFailure int, failReason string, invalidGroupID *xSnowflake.SnowflakeID) map[string]any {
+	updates := map[string]any{
+		"is_failure":  isFailure,
+		"fail_reason": failReason,
+	}
+
+	if invalidGroupID != nil {
+		if isFailure == constants.LinkFailBroken {
+			updates["group_id"] = *invalidGroupID
+		} else {
+			updates["group_id"] = gorm.Expr(
+				"CASE WHEN group_id = ? THEN NULL ELSE group_id END", *invalidGroupID,
+			)
+		}
+	}
+
+	return updates
 }
 
 // ListPublic 查询公开的友情链接列表
@@ -356,9 +399,37 @@ func (r *LinkRepo) ListPublic(ctx context.Context, groupID *xSnowflake.Snowflake
 	}
 
 	// 内置虚拟项（不落库）：color_id/group_id 引用保留 ID 时补齐虚拟对象
+	builtinInvalid := r.buildBuiltinInvalid(ctx)
 	for i := range links {
 		ensureFancyColor(&links[i])
-		ensureBuiltinGroup(&links[i])
+		ensureBuiltinGroup(&links[i], builtinInvalid)
+	}
+
+	return links, nil
+}
+
+// ListFailed 查询已失效的公开友链（is_failure 为失效标志且状态为已通过）。
+//
+// 供公开「已失效」章节独立展示，按友链排序值升序、创建时间倒序，
+// 返回前补齐内置虚拟关联，与 ListPublic 共用同一套注入逻辑。
+func (r *LinkRepo) ListFailed(ctx context.Context, approvedStatus int, brokenFail int, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
+	r.log.Info(ctx, "ListFailed - 查询已失效公开友链")
+
+	var links []entity.LinkFriend
+	err := r.pickDB(tx).WithContext(ctx).
+		Where("is_failure = ? AND status = ?", brokenFail, approvedStatus).
+		Preload("GroupFKey").Preload("ColorFKey").
+		Order("sort_order ASC, created_at DESC").
+		Find(&links).Error
+	if err != nil {
+		return nil, xError.NewError(ctx, xError.DatabaseError, "查询已失效友链失败", false, err)
+	}
+
+	// 内置虚拟项（不落库）：color_id/group_id 引用保留 ID 时补齐虚拟对象
+	builtinInvalid := r.buildBuiltinInvalid(ctx)
+	for i := range links {
+		ensureFancyColor(&links[i])
+		ensureBuiltinGroup(&links[i], builtinInvalid)
 	}
 
 	return links, nil

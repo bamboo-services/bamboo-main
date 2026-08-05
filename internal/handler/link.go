@@ -385,6 +385,26 @@ func (h *LinkHandler) GetPublicLinks(c *gin.Context) {
 	xResult.SuccessHasData(c, "获取成功", resp)
 }
 
+// GetFailedLinks 获取公开「已失效」分组及失效友链
+//
+// @Summary [用户] 获取公开已失效分组
+// @Description 获取内置「已失效」分组信息及其下的失效友链（已通过且失效），供公开页独立章节展示
+// @Tags 公开接口
+// @Accept json
+// @Produce json
+// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendFailedResponse} "获取成功"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/links/failed [GET]
+func (h *LinkHandler) GetFailedLinks(c *gin.Context) {
+	resp, err := h.service.linkLogic.GetFailedLinks(c.Request.Context())
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	xResult.SuccessHasData(c, "获取已失效分组成功", resp)
+}
+
 // ApplyLink 访客自助申请友情链接
 //
 // @Summary [公开] 申请友情链接

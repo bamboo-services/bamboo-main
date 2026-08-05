@@ -10,7 +10,6 @@
  */
 
 import type { LinkFriend } from '@/api/types'
-import { builtinPriority } from '@/lib/locations'
 
 /** 友链级别枚举（与后端 pkg/constants LinkLevel 对齐：0 一般 / 1 好友 / 2 高级 / 3 广告） */
 export const LINK_LEVEL = { regular: 0, close: 1, premium: 2, ad: 3 } as const
@@ -40,7 +39,7 @@ export interface FriendGroupSection {
  * 友链按分组聚合（分组名取自后端嵌套的 group_f_key）
  *
  * 章节序遵循分组排序值「数字越小权重越大」（group_f_key.sort_order ASC，与位置管理一致）；
- * 内置分组（首页/友链页）固定负优先级恒置顶；未分组以最大值置底；章内按友链排序值升序。
+ * 未分组以最大值置底；章内按友链排序值升序。
  */
 export function groupLinksByGroup(
   links: Array<LinkFriend>,
@@ -53,18 +52,12 @@ export function groupLinksByGroup(
     const key = link.group_id != null ? link.group_id.toString() : 'none'
     const entry =
       map.get(key) ??
-      (() => {
-        const prio = key === 'none' ? null : builtinPriority(key)
-        return {
-          name: link.group_f_key?.name ?? '未分组',
-          // 内置分组恒置顶：优先级取极小负值；真实分组沿用分组排序值
-          order:
-            prio != null
-              ? Number.MIN_SAFE_INTEGER + prio
-              : (link.group_f_key?.sort_order ?? Number.MAX_SAFE_INTEGER),
-          links: [],
-        }
-      })()
+      (() => ({
+        name: link.group_f_key?.name ?? '未分组',
+        // 真实分组沿用分组排序值；未分组以最大值置底
+        order: link.group_f_key?.sort_order ?? Number.MAX_SAFE_INTEGER,
+        links: [],
+      }))()
     entry.links.push(link)
     map.set(key, entry)
   }

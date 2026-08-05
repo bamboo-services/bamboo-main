@@ -15,6 +15,7 @@ import type {
   LinkGroup,
   PaginationResponse,
   SnowflakeID,
+  UpdateBuiltinInvalidGroupRequest,
   UpdateGroupRequest,
 } from './types'
 
@@ -102,5 +103,24 @@ export function sortGroups(groupIds: Array<SnowflakeID>): Promise<void> {
     method: 'PATCH',
     url: '/admin/groups/sort',
     data: { group_ids: groupIds },
+  })
+}
+
+/** 获取内置「已失效」分组配置（GET /api/v1/admin/groups/builtin/invalid） */
+export function getBuiltinInvalidGroup(): Promise<LinkGroup> {
+  return request<LinkGroup>({
+    method: 'GET',
+    url: '/admin/groups/builtin/invalid',
+  })
+}
+
+/** 更新内置「已失效」分组配置（PUT /api/v1/admin/groups/builtin/invalid，走 bm_system 热修改） */
+export function updateBuiltinInvalidGroup(
+  req: UpdateBuiltinInvalidGroupRequest,
+): Promise<LinkGroup> {
+  return request<LinkGroup>({
+    method: 'PUT',
+    url: '/admin/groups/builtin/invalid',
+    data: req,
   })
 }

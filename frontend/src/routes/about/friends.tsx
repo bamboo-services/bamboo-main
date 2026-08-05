@@ -25,7 +25,7 @@ import { Interlude } from '@/components/about/interlude'
 import { enter } from '@/lib/motion'
 import { CHAPTERS, LINK_LEVEL, groupLinksByGroup } from '@/lib/friend-groups'
 import { cn } from '@/lib/utils'
-import { usePublicLinks } from '@/hooks/use-links'
+import { useFailedLinks, usePublicLinks } from '@/hooks/use-links'
 
 export const Route = createFileRoute('/about/friends')({
   component: FriendsPage,
@@ -104,6 +104,7 @@ function NameCardButton() {
 function FriendsPage() {
   const reduced = useReducedMotion() ?? false
   const { data: links, isLoading, error } = usePublicLinks()
+  const { data: failed } = useFailedLinks()
   const [interlude, setInterlude] = useState<InterludeData | null>(null)
 
   /** 点击友链卡 → 组装 Interlude 数据（高级友链用截图背景） */
@@ -249,42 +250,87 @@ function FriendsPage() {
           </div>
         </div>
       ) : (
-        groupLinksByGroup(links).map((group, gi) => (
-          <section key={`g-${group.groupId}`} className="py-16 md:py-20">
-            <div className="mx-auto w-full max-w-6xl px-6 md:px-10">
-              <motion.div
-                {...scrollReveal(reduced)}
-                className="mb-8 flex items-end justify-between gap-4"
-              >
-                <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-leaf-deep">
-                    {CHAPTERS[gi] ?? '其'}
-                  </p>
-                  <h2 className="mt-2.5 font-serif text-2xl font-bold text-text-primary md:text-3xl">
-                    {group.name}
-                  </h2>
-                </div>
-                <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-text-secondary">
-                  {group.links.length} 位
-                </span>
-              </motion.div>
+        <>
+          {groupLinksByGroup(links).map((group, gi) => (
+            <section key={`g-${group.groupId}`} className="py-16 md:py-20">
+              <div className="mx-auto w-full max-w-6xl px-6 md:px-10">
+                <motion.div
+                  {...scrollReveal(reduced)}
+                  className="mb-8 flex items-end justify-between gap-4"
+                >
+                  <div>
+                    <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-leaf-deep">
+                      {CHAPTERS[gi] ?? '其'}
+                    </p>
+                    <h2 className="mt-2.5 font-serif text-2xl font-bold text-text-primary md:text-3xl">
+                      {group.name}
+                    </h2>
+                  </div>
+                  <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-text-secondary">
+                    {group.links.length} 位
+                  </span>
+                </motion.div>
 
-              {/* Bento 栅格：1×1 基础，高级 2×2，dense 流自动填补空隙 */}
-              <motion.div
-                {...scrollReveal(reduced)}
-                className="grid grid-flow-dense grid-cols-2 gap-4 [grid-auto-rows:84px] sm:grid-cols-3 sm:[grid-auto-rows:79px] md:grid-cols-4 md:[grid-auto-rows:75px]"
-              >
-                {group.links.map((link) => (
-                  <FriendCardSwitch
-                    key={link.id.toString()}
-                    link={link}
-                    onOpen={handleOpen}
-                  />
-                ))}
-              </motion.div>
-            </div>
-          </section>
-        ))
+                {/* Bento 栅格：1×1 基础，高级 2×2，dense 流自动填补空隙 */}
+                <motion.div
+                  {...scrollReveal(reduced)}
+                  className="grid grid-flow-dense grid-cols-2 gap-4 [grid-auto-rows:84px] sm:grid-cols-3 sm:[grid-auto-rows:79px] md:grid-cols-4 md:[grid-auto-rows:75px]"
+                >
+                  {group.links.map((link) => (
+                    <FriendCardSwitch
+                      key={link.id.toString()}
+                      link={link}
+                      onOpen={handleOpen}
+                    />
+                  ))}
+                </motion.div>
+              </div>
+            </section>
+          ))}
+
+          {/* ═══════════ 已失效章节 · 独立接口获取 ═══════════ */}
+          {failed && failed.links.length > 0 && (
+            <section key="g-failed" className="py-16 opacity-70 md:py-20">
+              <div className="mx-auto w-full max-w-6xl px-6 md:px-10">
+                <motion.div
+                  {...scrollReveal(reduced)}
+                  className="mb-8 flex items-end justify-between gap-4"
+                >
+                  <div>
+                    <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-leaf-deep">
+                      烬 · RETIRED
+                    </p>
+                    <h2 className="mt-2.5 font-serif text-2xl font-bold text-text-primary md:text-3xl">
+                      {failed.group?.name ?? '已失效'}
+                    </h2>
+                    {failed.group?.description && (
+                      <p className="mt-1.5 font-serif text-sm text-text-secondary">
+                        {failed.group.description}
+                      </p>
+                    )}
+                  </div>
+                  <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-text-secondary">
+                    {failed.links.length} 位
+                  </span>
+                </motion.div>
+
+                {/* 失效友链 Bento 栅格：淡墨渲染，传达「已失效」语义 */}
+                <motion.div
+                  {...scrollReveal(reduced)}
+                  className="grid grid-flow-dense grid-cols-2 gap-4 [grid-auto-rows:84px] sm:grid-cols-3 sm:[grid-auto-rows:79px] md:grid-cols-4 md:[grid-auto-rows:75px]"
+                >
+                  {failed.links.map((link) => (
+                    <FriendCardSwitch
+                      key={link.id.toString()}
+                      link={link}
+                      onOpen={handleOpen}
+                    />
+                  ))}
+                </motion.div>
+              </div>
+            </section>
+          )}
+        </>
       )}
 
       {/* 沉浸式跳转引导层 */}

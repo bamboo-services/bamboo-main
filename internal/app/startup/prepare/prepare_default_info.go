@@ -36,6 +36,9 @@ var defaultInfoConfigs = []struct {
 	{Key: "blogger.site_image", Value: "https://i-cdn.akass.cn/2024/05/664870a814c0d.png!wp60"},
 	{Key: "blogger.rss", Value: "https://blog.x-lf.com/atom.xml"},
 	{Key: "blogger.email", Value: "gm@x-lf.cn"},
+	// 内置「已失效」分组配置（供友链失效自动归集与公开「已失效」章节展示）
+	{Key: "group.builtin.invalid.name", Value: "已失效"},
+	{Key: "group.builtin.invalid.description", Value: ""},
 }
 
 // DefaultInfo 初始化默认站点信息配置的 xOptionDB.PrepareFunc。

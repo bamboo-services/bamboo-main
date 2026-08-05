@@ -955,6 +955,125 @@
                 }
             }
         },
+        "/api/v1/admin/groups/builtin/invalid": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "返回内置「已失效」分组的名称与描述（经 bm_system 热修改）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "友链分组接口"
+                ],
+                "summary": "[管理] 获取内置已失效分组配置",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.BuiltinInvalidGroupResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "更新内置「已失效」分组的名称与描述（写入 bm_system，即时生效）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "友链分组接口"
+                ],
+                "summary": "[管理] 更新内置已失效分组配置",
+                "parameters": [
+                    {
+                        "description": "更新内置已失效分组配置请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiLink.BuiltinInvalidGroupUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.BuiltinInvalidGroupResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/groups/sort": {
             "patch": {
                 "security": [
@@ -2856,7 +2975,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/apiSponsor.RecordPageResponse"
+                                            "$ref": "#/definitions/apiSponsor.RecordAdminPageResponse"
                                         }
                                     }
                                 }
@@ -3132,6 +3251,76 @@
                 "responses": {
                     "200": {
                         "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "赞助记录不存在",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/sponsors/records/{id}/status": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "审核赞助展示申请，可置为通过（1）或拒绝（2），并填写审核备注反馈给申请者",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "赞助记录接口"
+                ],
+                "summary": "[管理] 审核赞助记录",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "赞助记录ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "审核赞助记录请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiSponsor.SponsorStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "状态更新成功",
                         "schema": {
                             "$ref": "#/definitions/xBase.BaseResponse"
                         }
@@ -3932,6 +4121,47 @@
                 }
             }
         },
+        "/api/v1/links/failed": {
+            "get": {
+                "description": "获取内置「已失效」分组信息及其下的失效友链（已通过且失效），供公开页独立章节展示",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "公开接口"
+                ],
+                "summary": "[用户] 获取公开已失效分组",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiLink.FriendFailedResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/links/groups": {
             "get": {
                 "description": "返回所有启用的友链分组，供访客申请时预选展示位置",
@@ -4088,6 +4318,70 @@
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sponsors/apply": {
+            "post": {
+                "description": "游客或登录用户提交赞助展示申请，需提供联系邮箱用于归属确认，提交后进入待审核状态",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "赞助记录接口"
+                ],
+                "summary": "[公开] 申请赞助展示",
+                "parameters": [
+                    {
+                        "description": "赞助展示申请请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiSponsor.SponsorApplyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "申请提交成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiSponsor.RecordAddResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "赞助渠道不存在",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
@@ -4573,6 +4867,227 @@
                     }
                 }
             }
+        },
+        "/api/v1/user/sponsors": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "分页查询当前登录用户名下的赞助记录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户赞助接口"
+                ],
+                "summary": "[用户] 获取我的赞助记录列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "赞助状态 0:待审核 1:已通过 2:已拒绝",
+                        "name": "sponsor_status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiSponsor.RecordPageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/sponsors/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取当前登录用户名下指定赞助记录的详细信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户赞助接口"
+                ],
+                "summary": "[用户] 获取我的赞助记录详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "赞助记录ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiSponsor.RecordDetailResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "赞助记录不存在",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "更新当前登录用户名下指定赞助记录的展示信息（金额与渠道不可修改）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户赞助接口"
+                ],
+                "summary": "[用户] 更新我的赞助记录",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "赞助记录ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新赞助记录请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiSponsor.SponsorUserUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiSponsor.RecordUpdateResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "赞助记录不存在",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -4928,6 +5443,61 @@
                     "maxLength": 100,
                     "minLength": 1,
                     "example": "筱锋的小站"
+                }
+            }
+        },
+        "apiLink.BuiltinInvalidGroupResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "description": "分组描述",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "links_f_key": {
+                    "description": "关联关系\n注意：constraint:\"-\" 跳过数据库外键约束——「已失效」为内置分组（不落库），\n友链 group_id 会引用保留 ID，数据库层面需放行该引用值；分组关联的清理由业务层保证。",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.LinkFriend"
+                    }
+                },
+                "name": {
+                    "description": "分组名称",
+                    "type": "string"
+                },
+                "sort_order": {
+                    "description": "分组排序",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "分组状态",
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiLink.BuiltinInvalidGroupUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "分组描述（空串清空）",
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "已失效友链，站点不可访问"
+                },
+                "name": {
+                    "description": "分组名称",
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "example": "已失效"
                 }
             }
         },
@@ -5292,7 +5862,7 @@
                     "type": "string"
                 },
                 "group_f_key": {
-                    "description": "关联关系",
+                    "description": "关联关系\n注意：constraint:\"-\" 跳过数据库外键约束——首页/友链页为内置分组（不落库），\ngroup_id 可能引用保留 ID，数据库层面需放行该引用值；分组关联的清理由业务层保证。",
                     "allOf": [
                         {
                             "$ref": "#/definitions/entity.LinkGroup"
@@ -5405,7 +5975,7 @@
                     "type": "string"
                 },
                 "group_f_key": {
-                    "description": "关联关系",
+                    "description": "关联关系\n注意：constraint:\"-\" 跳过数据库外键约束——首页/友链页为内置分组（不落库），\ngroup_id 可能引用保留 ID，数据库层面需放行该引用值；分组关联的清理由业务层保证。",
                     "allOf": [
                         {
                             "$ref": "#/definitions/entity.LinkGroup"
@@ -5494,6 +6064,26 @@
                     "type": "string",
                     "maxLength": 500,
                     "example": "网站无法访问"
+                }
+            }
+        },
+        "apiLink.FriendFailedResponse": {
+            "type": "object",
+            "properties": {
+                "group": {
+                    "description": "内置「已失效」分组信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.LinkGroup"
+                        }
+                    ]
+                },
+                "links": {
+                    "description": "已失效友链列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.LinkFriend"
+                    }
                 }
             }
         },
@@ -5648,7 +6238,7 @@
                     "type": "string"
                 },
                 "group_f_key": {
-                    "description": "关联关系",
+                    "description": "关联关系\n注意：constraint:\"-\" 跳过数据库外键约束——首页/友链页为内置分组（不落库），\ngroup_id 可能引用保留 ID，数据库层面需放行该引用值；分组关联的清理由业务层保证。",
                     "allOf": [
                         {
                             "$ref": "#/definitions/entity.LinkGroup"
@@ -5798,7 +6388,7 @@
                     "type": "integer"
                 },
                 "links_f_key": {
-                    "description": "关联关系",
+                    "description": "关联关系\n注意：constraint:\"-\" 跳过数据库外键约束——「已失效」为内置分组（不落库），\n友链 group_id 会引用保留 ID，数据库层面需放行该引用值；分组关联的清理由业务层保证。",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/entity.LinkFriend"
@@ -5879,7 +6469,7 @@
                     "type": "integer"
                 },
                 "links_f_key": {
-                    "description": "关联关系",
+                    "description": "关联关系\n注意：constraint:\"-\" 跳过数据库外键约束——「已失效」为内置分组（不落库），\n友链 group_id 会引用保留 ID，数据库层面需放行该引用值；分组关联的清理由业务层保证。",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/entity.LinkFriend"
@@ -6015,7 +6605,7 @@
                     "type": "integer"
                 },
                 "links_f_key": {
-                    "description": "关联关系",
+                    "description": "关联关系\n注意：constraint:\"-\" 跳过数据库外键约束——「已失效」为内置分组（不落库），\n友链 group_id 会引用保留 ID，数据库层面需放行该引用值；分组关联的清理由业务层保证。",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/entity.LinkFriend"
@@ -6444,6 +7034,9 @@
                 "amount": {
                     "type": "integer"
                 },
+                "apply_remark": {
+                    "type": "string"
+                },
                 "channel": {
                     "$ref": "#/definitions/apiSponsor.SponsorChannelSimpleResponse"
                 },
@@ -6451,6 +7044,9 @@
                     "type": "integer"
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "email": {
                     "type": "string"
                 },
                 "id": {
@@ -6471,14 +7067,48 @@
                 "redirect_url": {
                     "type": "string"
                 },
+                "review_remark": {
+                    "type": "string"
+                },
                 "sort_order": {
                     "type": "integer"
                 },
                 "sponsor_at": {
                     "type": "string"
                 },
+                "status": {
+                    "description": "审核状态（0:待审核 1:已通过 2:已拒绝）",
+                    "type": "integer"
+                },
                 "updated_at": {
                     "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "apiSponsor.RecordAdminPageResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "数据列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/apiSponsor.RecordEntityResponse"
+                    }
+                },
+                "pagination": {
+                    "description": "分页信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/base.PaginationInfo"
+                        }
+                    ]
+                },
+                "pending_count": {
+                    "description": "待审核赞助数量",
+                    "type": "integer"
                 }
             }
         },
@@ -6488,6 +7118,9 @@
                 "amount": {
                     "type": "integer"
                 },
+                "apply_remark": {
+                    "type": "string"
+                },
                 "channel": {
                     "$ref": "#/definitions/apiSponsor.SponsorChannelSimpleResponse"
                 },
@@ -6495,6 +7128,9 @@
                     "type": "integer"
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "email": {
                     "type": "string"
                 },
                 "id": {
@@ -6515,14 +7151,24 @@
                 "redirect_url": {
                     "type": "string"
                 },
+                "review_remark": {
+                    "type": "string"
+                },
                 "sort_order": {
                     "type": "integer"
                 },
                 "sponsor_at": {
                     "type": "string"
                 },
+                "status": {
+                    "description": "审核状态（0:待审核 1:已通过 2:已拒绝）",
+                    "type": "integer"
+                },
                 "updated_at": {
                     "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -6532,6 +7178,9 @@
                 "amount": {
                     "type": "integer"
                 },
+                "apply_remark": {
+                    "type": "string"
+                },
                 "channel": {
                     "$ref": "#/definitions/apiSponsor.SponsorChannelSimpleResponse"
                 },
@@ -6539,6 +7188,9 @@
                     "type": "integer"
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "email": {
                     "type": "string"
                 },
                 "id": {
@@ -6559,14 +7211,24 @@
                 "redirect_url": {
                     "type": "string"
                 },
+                "review_remark": {
+                    "type": "string"
+                },
                 "sort_order": {
                     "type": "integer"
                 },
                 "sponsor_at": {
                     "type": "string"
                 },
+                "status": {
+                    "description": "审核状态（0:待审核 1:已通过 2:已拒绝）",
+                    "type": "integer"
+                },
                 "updated_at": {
                     "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -6698,6 +7360,9 @@
                 "amount": {
                     "type": "integer"
                 },
+                "apply_remark": {
+                    "type": "string"
+                },
                 "channel": {
                     "$ref": "#/definitions/apiSponsor.SponsorChannelSimpleResponse"
                 },
@@ -6705,6 +7370,9 @@
                     "type": "integer"
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "email": {
                     "type": "string"
                 },
                 "id": {
@@ -6725,14 +7393,86 @@
                 "redirect_url": {
                     "type": "string"
                 },
+                "review_remark": {
+                    "type": "string"
+                },
                 "sort_order": {
                     "type": "integer"
                 },
                 "sponsor_at": {
                     "type": "string"
                 },
+                "status": {
+                    "description": "审核状态（0:待审核 1:已通过 2:已拒绝）",
+                    "type": "integer"
+                },
                 "updated_at": {
                     "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "apiSponsor.SponsorApplyRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "email",
+                "nickname"
+            ],
+            "properties": {
+                "amount": {
+                    "description": "赞助金额(分)",
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 1000
+                },
+                "apply_remark": {
+                    "description": "申请者备注",
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "感谢支持"
+                },
+                "channel_id": {
+                    "description": "赞助渠道 ID",
+                    "type": "integer",
+                    "example": 123456789
+                },
+                "email": {
+                    "description": "联系邮箱（用于归属确认）",
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "admin@example.com"
+                },
+                "is_anonymous": {
+                    "description": "是否匿名展示",
+                    "type": "boolean",
+                    "example": false
+                },
+                "message": {
+                    "description": "留言信息",
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "感谢开发者"
+                },
+                "nickname": {
+                    "description": "赞助者昵称",
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "example": "张三"
+                },
+                "redirect_url": {
+                    "description": "点击昵称的跳转地址",
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "https://example.com"
+                },
+                "sponsor_at": {
+                    "description": "赞助发生时间",
+                    "type": "string",
+                    "example": "2025-01-01T12:00:00Z"
                 }
             }
         },
@@ -6747,6 +7487,70 @@
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "apiSponsor.SponsorStatusRequest": {
+            "type": "object",
+            "required": [
+                "sponsor_status"
+            ],
+            "properties": {
+                "sponsor_review_remark": {
+                    "description": "审核备注（拒绝原因）",
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "审核通过"
+                },
+                "sponsor_status": {
+                    "description": "审核状态（0:待审核 1:已通过 2:已拒绝）",
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1,
+                        2
+                    ],
+                    "example": 1
+                }
+            }
+        },
+        "apiSponsor.SponsorUserUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "apply_remark": {
+                    "description": "申请者备注",
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "感谢支持"
+                },
+                "is_anonymous": {
+                    "description": "是否匿名展示",
+                    "type": "boolean",
+                    "example": false
+                },
+                "message": {
+                    "description": "留言信息",
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "感谢开发者"
+                },
+                "nickname": {
+                    "description": "赞助者昵称",
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "example": "张三"
+                },
+                "redirect_url": {
+                    "description": "点击昵称的跳转地址",
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "https://example.com"
+                },
+                "sponsor_at": {
+                    "description": "赞助发生时间",
+                    "type": "string",
+                    "example": "2025-01-01T12:00:00Z"
                 }
             }
         },
@@ -6863,7 +7667,7 @@
                     "type": "string"
                 },
                 "group_f_key": {
-                    "description": "关联关系",
+                    "description": "关联关系\n注意：constraint:\"-\" 跳过数据库外键约束——首页/友链页为内置分组（不落库），\ngroup_id 可能引用保留 ID，数据库层面需放行该引用值；分组关联的清理由业务层保证。",
                     "allOf": [
                         {
                             "$ref": "#/definitions/entity.LinkGroup"
@@ -6948,7 +7752,7 @@
                     "type": "integer"
                 },
                 "links_f_key": {
-                    "description": "关联关系",
+                    "description": "关联关系\n注意：constraint:\"-\" 跳过数据库外键约束——「已失效」为内置分组（不落库），\n友链 group_id 会引用保留 ID，数据库层面需放行该引用值；分组关联的清理由业务层保证。",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/entity.LinkFriend"

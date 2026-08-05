@@ -138,6 +138,15 @@ type FriendPublicResponse struct {
 	Links []entity.LinkFriend `json:"links"`
 }
 
+// FriendFailedResponse 公开「已失效」分组响应
+//
+// Group 为内置「已失效」分组虚拟对象（名称/描述经 bm_system 热修改），Links 为其下的失效友链，
+// 供公开页 about/friends 独立渲染「已失效」章节，不与其他公开友链接口共用。
+type FriendFailedResponse struct {
+	Group *entity.LinkGroup   `json:"group"` // 内置「已失效」分组信息
+	Links []entity.LinkFriend `json:"links"` // 已失效友链列表
+}
+
 // FriendSortItem 友链排序条目
 //
 // items 数组顺序 = 目标全局展示顺序（后端按此序重写全局 sort_order 为 0..N-1）。

@@ -20,6 +20,7 @@ import (
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
+	bConst "github.com/bamboo-services/bamboo-main/pkg/constants"
 	"gorm.io/gorm"
 )
 
@@ -92,4 +93,49 @@ func (r *SystemRepo) UpdateValueByKey(ctx context.Context, key string, value *st
 	}
 
 	return nil
+}
+
+// GetValuesByKeys 根据键集合批量查询系统配置，返回 key → 值映射。
+//
+// 未命中或值为空串的键不会出现在结果中，便于调用方按缺省值兜底。
+func (r *SystemRepo) GetValuesByKeys(ctx context.Context, keys []string) (map[string]string, *xError.Error) {
+	configs, xErr := r.ListByKeys(ctx, keys)
+	if xErr != nil {
+		return nil, xErr
+	}
+
+	values := make(map[string]string, len(configs))
+	for i := range configs {
+		if configs[i].Value != nil && *configs[i].Value != "" {
+			values[configs[i].Key] = *configs[i].Value
+		}
+	}
+
+	return values, nil
+}
+
+// BuildBuiltinInvalidGroup 读取内置「已失效」分组配置并构造虚拟分组对象。
+//
+// 名称缺省回退「已失效」，描述缺省为 nil；DB 读取失败返回错误，由调用方决定降级策略
+// （公开接口建议以 entity.NewDefaultBuiltinGroup 兜底，不阻断查询）。
+func (r *SystemRepo) BuildBuiltinInvalidGroup(ctx context.Context) (*entity.LinkGroup, *xError.Error) {
+	values, xErr := r.GetValuesByKeys(ctx, []string{
+		bConst.KeyBuiltinInvalidGroupName,
+		bConst.KeyBuiltinInvalidGroupDesc,
+	})
+	if xErr != nil {
+		return nil, xErr
+	}
+
+	name := entity.NewDefaultBuiltinGroup().Name
+	if v, ok := values[bConst.KeyBuiltinInvalidGroupName]; ok {
+		name = v
+	}
+
+	var desc *string
+	if v, ok := values[bConst.KeyBuiltinInvalidGroupDesc]; ok {
+		desc = &v
+	}
+
+	return entity.NewBuiltinGroup(name, desc), nil
 }

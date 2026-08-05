@@ -27,6 +27,7 @@ import {
   createLink,
   deleteLink,
   getAdminLink,
+  getFailedLinks,
   getMyLink,
   getPublicColors,
   getPublicGroups,
@@ -149,6 +150,9 @@ export function useUpdateLinkFail() {
     onSuccess: () => {
       toast.success('失效状态已更新')
       void qc.invalidateQueries({ queryKey: linkKeys.all })
+      // 失效/恢复会移动友链进出「已失效」分组，同步刷新公开正常列表与已失效章节
+      void qc.invalidateQueries({ queryKey: publicLinkKeys.all })
+      void qc.invalidateQueries({ queryKey: failedLinkKeys.all })
     },
     onError: (err: Error) => toast.error(err.message || '失效状态更新失败'),
   })
@@ -278,11 +282,24 @@ export const publicLinkKeys = {
   all: ['public', 'links'] as const,
 }
 
+/** 公开「已失效」分组 queryKey（独立于正常公开友链，失效状态变更时联动失效） */
+export const failedLinkKeys = {
+  all: ['public', 'links', 'failed'] as const,
+}
+
 /** 公开接口：访客页友链列表（排位看板复用同源同缓存，保证预览即所见） */
 export function usePublicLinks() {
   return useQuery({
     queryKey: publicLinkKeys.all,
     queryFn: () => getPublicLinks(),
+  })
+}
+
+/** 公开接口：内置「已失效」分组及其下的失效友链（供 about/friends 独立章节渲染） */
+export function useFailedLinks() {
+  return useQuery({
+    queryKey: failedLinkKeys.all,
+    queryFn: getFailedLinks,
   })
 }
 

@@ -11,31 +11,11 @@
 
 import type { LinkGroup } from '@/api/types'
 
-/** 内置「首页」分组保留 ID（与后端 constants.BuiltinGroupHomepageID 对齐） */
-export const HOMEPAGE_GROUP_ID = 1n
+/** 内置「已失效」分组保留 ID（与后端 constants.BuiltinGroupInvalidID 对齐） */
+export const INVALID_GROUP_ID = 1n
 
-/** 内置「友链页」分组保留 ID（与后端 constants.BuiltinGroupFriendsID 对齐） */
-export const FRIENDS_GROUP_ID = 2n
-
-/** 内置分组保留 ID 集合 */
-export const BUILTIN_GROUP_IDS: ReadonlySet<bigint> = new Set([
-  HOMEPAGE_GROUP_ID,
-  FRIENDS_GROUP_ID,
-])
-
-/** 内置分组名称（后端注入虚拟记录时固定） */
-export const BUILTIN_GROUP_NAMES: ReadonlyMap<bigint, string> = new Map([
-  [HOMEPAGE_GROUP_ID, '首页'],
-  [FRIENDS_GROUP_ID, '友链页'],
-])
-
-/** 内置分组优先级（数字越小越靠前；非内置返回 null），供聚合排序保证恒置顶 */
-export function builtinPriority(id: bigint | string): number | null {
-  const bid = typeof id === 'string' ? BigInt(id) : id
-  if (bid === HOMEPAGE_GROUP_ID) return 0
-  if (bid === FRIENDS_GROUP_ID) return 1
-  return null
-}
+/** 内置分组保留 ID 集合（现仅「已失效」） */
+export const BUILTIN_GROUP_IDS: ReadonlySet<bigint> = new Set([INVALID_GROUP_ID])
 
 /** 判断分组 ID 是否为内置保留 ID */
 export function isBuiltinGroupId(

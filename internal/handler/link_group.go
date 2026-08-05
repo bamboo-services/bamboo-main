@@ -337,3 +337,59 @@ func (h *LinkGroupHandler) GetPage(c *gin.Context) {
 	resp := apiLinkGroup.GroupPageResponse{PaginationResponse: *result}
 	xResult.SuccessHasData(c, "获取友链分组分页列表成功", resp)
 }
+
+// GetBuiltinInvalidGroup 获取内置「已失效」分组配置
+//
+// @Summary [管理] 获取内置已失效分组配置
+// @Description 返回内置「已失效」分组的名称与描述（经 bm_system 热修改）
+// @Tags 友链分组接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} xBase.BaseResponse{data=apiLinkGroup.BuiltinInvalidGroupResponse} "获取成功"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/groups/builtin/invalid [GET]
+func (h *LinkGroupHandler) GetBuiltinInvalidGroup(c *gin.Context) {
+	group, err := h.service.linkGroupLogic.GetBuiltinInvalidGroup(c.Request.Context())
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	resp := apiLinkGroup.BuiltinInvalidGroupResponse{LinkGroup: *group}
+	xResult.SuccessHasData(c, "获取内置已失效分组配置成功", resp)
+}
+
+// UpdateBuiltinInvalidGroup 更新内置「已失效」分组配置
+//
+// @Summary [管理] 更新内置已失效分组配置
+// @Description 更新内置「已失效」分组的名称与描述（写入 bm_system，即时生效）
+// @Tags 友链分组接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param request body apiLinkGroup.BuiltinInvalidGroupUpdateRequest true "更新内置已失效分组配置请求"
+// @Success 200 {object} xBase.BaseResponse{data=apiLinkGroup.BuiltinInvalidGroupResponse} "更新成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/groups/builtin/invalid [PUT]
+func (h *LinkGroupHandler) UpdateBuiltinInvalidGroup(c *gin.Context) {
+	var req apiLinkGroup.BuiltinInvalidGroupUpdateRequest
+
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	group, err := h.service.linkGroupLogic.UpdateBuiltinInvalidGroup(c.Request.Context(), &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	resp := apiLinkGroup.BuiltinInvalidGroupResponse{LinkGroup: *group}
+	xResult.SuccessHasData(c, "内置已失效分组配置更新成功", resp)
+}

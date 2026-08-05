@@ -23,12 +23,14 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
+	bConst "github.com/bamboo-services/bamboo-main/pkg/constants"
 	"gorm.io/gorm"
 )
 
 type linkGroupRepo struct {
-	group *repository.LinkGroupRepo
-	link  *repository.LinkRepo
+	group  *repository.LinkGroupRepo
+	link   *repository.LinkRepo
+	system *repository.SystemRepo
 }
 
 // LinkGroupLogic 友链分组业务逻辑
@@ -49,8 +51,9 @@ func NewLinkGroupLogic(ctx context.Context) *LinkGroupLogic {
 			log:   xLog.WithName(xLog.NamedLOGC, "LinkGroupLogic"),
 		},
 		repo: linkGroupRepo{
-			group: repository.NewLinkGroupRepo(db, m),
-			link:  repository.NewLinkRepo(db, m),
+			group:  repository.NewLinkGroupRepo(db, m),
+			link:   repository.NewLinkRepo(db, m),
+			system: repository.NewSystemRepo(db, m),
 		},
 	}
 }
@@ -62,11 +65,8 @@ func (l *LinkGroupLogic) Add(ctx context.Context, req *apiLinkGroup.GroupAddRequ
 		return nil, xErr
 	}
 
+	// 内置「已失效」分组不参与排序持久化，自定义分组排序值自最大排序 +1 顺延
 	sortOrder := maxSort + 1
-	// 排序位 0、1 预留给内置分组（首页/友链页），自定义分组排序值从内置数量起
-	if sortOrder < len(entity.NewBuiltinGroups()) {
-		sortOrder = len(entity.NewBuiltinGroups())
-	}
 
 	group := &entity.LinkGroup{
 		Name:        req.GroupName,
@@ -93,9 +93,9 @@ func (l *LinkGroupLogic) Add(ctx context.Context, req *apiLinkGroup.GroupAddRequ
 
 // Update 更新友链分组，按请求字段覆盖名称、描述、排序与状态。
 func (l *LinkGroupLogic) Update(ctx context.Context, groupID xSnowflake.SnowflakeID, req *apiLinkGroup.GroupUpdateRequest) (*entity.LinkGroup, *xError.Error) {
-	// 内置分组为系统预设位置（不落库），拒绝编辑
+	// 内置「已失效」分组为系统语义分组（不落库），拒绝编辑
 	if entity.IsBuiltinGroupID(groupID) {
-		return nil, xError.NewError(ctx, xError.BadRequest, "内置分组为系统预设位置，不支持编辑", false)
+		return nil, xError.NewError(ctx, xError.BadRequest, "内置已失效分组请使用「已失效配置」接口修改", false)
 	}
 
 	group, found, xErr := l.repo.group.GetByID(ctx, groupID, false, nil)
@@ -161,9 +161,9 @@ func (l *LinkGroupLogic) UpdateSort(ctx context.Context, req *apiLinkGroup.Group
 
 // UpdateStatus 更新友链分组启用状态。
 func (l *LinkGroupLogic) UpdateStatus(ctx context.Context, groupID xSnowflake.SnowflakeID, req *apiLinkGroup.GroupStatusRequest) *xError.Error {
-	// 内置分组恒为启用状态（不落库），拒绝切换
+	// 内置「已失效」分组恒为启用状态（不落库），拒绝切换
 	if entity.IsBuiltinGroupID(groupID) {
-		return xError.NewError(ctx, xError.BadRequest, "内置分组为系统预设位置，恒为启用", false)
+		return xError.NewError(ctx, xError.BadRequest, "内置已失效分组恒为启用，不支持切换", false)
 	}
 
 	ok, xErr := l.repo.group.UpdateStatusByID(ctx, groupID, req.Status, nil)
@@ -179,9 +179,9 @@ func (l *LinkGroupLogic) UpdateStatus(ctx context.Context, groupID xSnowflake.Sn
 
 // Delete 删除友链分组，存在关联友链时按 Force 决定阻断或事务清空外键后删除。
 func (l *LinkGroupLogic) Delete(ctx context.Context, groupID xSnowflake.SnowflakeID, req *apiLinkGroup.GroupDeleteRequest) ([]entity.LinkFriend, *xError.Error) {
-	// 内置分组为系统预设位置（不落库），拒绝删除
+	// 内置「已失效」分组为系统语义分组（不落库），拒绝删除
 	if entity.IsBuiltinGroupID(groupID) {
-		return nil, xError.NewError(ctx, xError.BadRequest, "内置分组为系统预设位置，不可删除", false)
+		return nil, xError.NewError(ctx, xError.BadRequest, "内置已失效分组不可删除", false)
 	}
 
 	_, found, xErr := l.repo.group.GetByID(ctx, groupID, false, nil)
@@ -237,7 +237,13 @@ func (l *LinkGroupLogic) Delete(ctx context.Context, groupID xSnowflake.Snowflak
 }
 
 // Get 获取友链分组详情。
+//
+// 内置「已失效」分组不落库，按保留 ID 请求时返回 bm_system 配置构造的虚拟分组。
 func (l *LinkGroupLogic) Get(ctx context.Context, groupID xSnowflake.SnowflakeID) (*entity.LinkGroup, *xError.Error) {
+	if entity.IsBuiltinGroupID(groupID) {
+		return l.GetBuiltinInvalidGroup(ctx)
+	}
+
 	group, found, xErr := l.repo.group.GetByID(ctx, groupID, true, nil)
 	if xErr != nil {
 		return nil, xErr
@@ -250,6 +256,8 @@ func (l *LinkGroupLogic) Get(ctx context.Context, groupID xSnowflake.SnowflakeID
 }
 
 // GetList 获取友链分组列表。
+//
+// 内置「已失效」分组为系统语义分组（非可选展示位置），不参与列表注入。
 func (l *LinkGroupLogic) GetList(ctx context.Context, req *apiLinkGroup.GroupListRequest) ([]entity.LinkGroup, *xError.Error) {
 	groups, xErr := l.repo.group.List(ctx, &repository.GroupListQuery{
 		Status:      req.Status,
@@ -263,15 +271,12 @@ func (l *LinkGroupLogic) GetList(ctx context.Context, req *apiLinkGroup.GroupLis
 		return nil, xErr
 	}
 
-	// 内置分组（不落库）：满足过滤条件时置顶注入虚拟记录，供前端选择器使用
-	if builtinGroupsVisible(req.Status, req.Name, req.OnlyEnabled) {
-		groups = append(builtinGroupValues(), groups...)
-	}
-
 	return groups, nil
 }
 
 // GetPage 分页获取友链分组。
+//
+// 内置「已失效」分组不参与分页注入。
 func (l *LinkGroupLogic) GetPage(ctx context.Context, req *apiLinkGroup.GroupPageRequest) (*base.PaginationResponse[entity.LinkGroup], *xError.Error) {
 	if req.Page <= 0 {
 		req.Page = 1
@@ -292,43 +297,39 @@ func (l *LinkGroupLogic) GetPage(ctx context.Context, req *apiLinkGroup.GroupPag
 		return nil, xErr
 	}
 
-	// 内置分组置顶注入（仅第 1 页；total 计入内置条数，保证分页一致）
-	if req.Page == 1 && builtinGroupsVisible(req.Status, req.Name, nil) {
-		values := builtinGroupValues()
-		groups = append(values, groups...)
-		total += int64(len(values))
-	}
-
 	return base.NewPaginationResponse(groups, req.Page, req.PageSize, total), nil
 }
 
-// builtinGroupValues 将内置分组对象列表转为值切片（保持固定顺序：首页 → 友链页）。
-func builtinGroupValues() []entity.LinkGroup {
-	builtins := entity.NewBuiltinGroups()
-	values := make([]entity.LinkGroup, 0, len(builtins))
-	for _, group := range builtins {
-		values = append(values, *group)
-	}
-	return values
+// GetBuiltinInvalidGroup 获取内置「已失效」分组配置（名称与描述，经 bm_system 热修改）。
+func (l *LinkGroupLogic) GetBuiltinInvalidGroup(ctx context.Context) (*entity.LinkGroup, *xError.Error) {
+	return l.repo.system.BuildBuiltinInvalidGroup(ctx)
 }
 
-// builtinGroupsVisible 判断内置分组是否满足当前过滤条件。
+// UpdateBuiltinInvalidGroup 更新内置「已失效」分组配置。
 //
-// 内置分组恒为启用状态，仅当状态/名称/启用过滤未排除它们时才注入。
-func builtinGroupsVisible(status *int, name *string, onlyEnabled *bool) bool {
-	if status != nil && *status != 1 {
-		return false
-	}
-	if onlyEnabled != nil && !*onlyEnabled {
-		return false
-	}
-	if name != nil && *name != "" {
-		for _, group := range entity.NewBuiltinGroups() {
-			if strings.Contains(group.Name, *name) {
-				return true
-			}
+// 按请求字段逐 key 写入 bm_system（PATCH 语义：仅更新非 nil 字段；描述传空串即清空），
+// 更新后回读最新配置返回。
+func (l *LinkGroupLogic) UpdateBuiltinInvalidGroup(ctx context.Context, req *apiLinkGroup.BuiltinInvalidGroupUpdateRequest) (*entity.LinkGroup, *xError.Error) {
+	updates := make(map[string]*string)
+
+	if req.Name != nil {
+		if strings.TrimSpace(*req.Name) == "" {
+			return nil, xError.NewError(ctx, xError.BadRequest, "已失效分组名称不能为空", false)
 		}
-		return false
+		updates[bConst.KeyBuiltinInvalidGroupName] = req.Name
 	}
-	return true
+	if req.Description != nil {
+		updates[bConst.KeyBuiltinInvalidGroupDesc] = req.Description
+	}
+	if len(updates) == 0 {
+		return l.GetBuiltinInvalidGroup(ctx)
+	}
+
+	for key, value := range updates {
+		if xErr := l.repo.system.UpdateValueByKey(ctx, key, value); xErr != nil {
+			return nil, xErr
+		}
+	}
+
+	return l.GetBuiltinInvalidGroup(ctx)
 }

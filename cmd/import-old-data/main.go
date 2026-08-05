@@ -60,8 +60,8 @@ const (
 	maxSequence           = 1023
 	datacenterID          = 7
 	nodeID                = 3
-	// builtinGroupCount 内置分组数量（首页/友链页），迁移时旧分组排序值顺延预留 0、1。
-	builtinGroupCount = 2
+	// builtinGroupCount 内置分组数量（已失效分组不参与排序持久化），迁移时旧分组排序值直接沿用。
+	builtinGroupCount = 0
 )
 
 // snowflakeID 按 xSnowflake 位布局构造指定时间的雪花 ID。
