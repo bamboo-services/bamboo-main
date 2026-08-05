@@ -18,13 +18,11 @@ import (
 
 // LinkColor 表示一个友链颜色实体，用于友情链接的颜色主题管理。
 //
-// 该类型支持两种颜色模式：
-// - Type=0 (普通模式): 需要设置 PrimaryColor、SubColor、HoverColor 三个颜色值
-// - Type=1 (炫彩模式): 颜色字段全部为空，由前端实现炫彩效果
+// 颜色均需设置 PrimaryColor、SubColor、HoverColor 三个颜色值；
+// 炫彩为系统内置颜色（不落库），通过保留 ID（constants.BuiltinFancyColorID）表达。
 type LinkColor struct {
 	xModels.BaseEntity         // 嵌入基础实体（SnowflakeID 主键 + timestamptz 时间戳）
 	Name               string  `json:"name" gorm:"type:varchar(50);not null;comment:颜色名称"`                             // 颜色名称
-	Type               int     `json:"type" gorm:"type:int;default:0;not null;comment:颜色类型（0: 普通, 1: 炫彩）"`             // 颜色类型
 	PrimaryColor       *string `json:"primary_color,omitempty" gorm:"type:varchar(9);comment:主颜色（如#FF0000或#FF0000FF）"` // 主颜色
 	SubColor           *string `json:"sub_color,omitempty" gorm:"type:varchar(9);comment:副颜色"`                         // 副颜色
 	HoverColor         *string `json:"hover_color,omitempty" gorm:"type:varchar(9);comment:悬停颜色"`                      // 悬停颜色
@@ -44,13 +42,12 @@ func (_ *LinkColor) GetGene() xSnowflake.Gene {
 
 // NewFancyColor 构造内置炫彩颜色对象。
 //
-// 炫彩（type=1）为系统内置的特殊颜色，不落库：颜色列表接口与友链查询返回时以此虚拟对象
+// 炫彩为系统内置的特殊颜色，不落库：颜色列表接口与友链查询返回时以此虚拟对象
 // 表达炫彩选项，ID 固定为 constants.BuiltinFancyColorID（雪花 ID 空间之外的保留值）。
 func NewFancyColor() *LinkColor {
 	return &LinkColor{
 		BaseEntity: xModels.BaseEntity{ID: bConst.BuiltinFancyColorID},
 		Name:       "炫彩",
-		Type:       1,
 		SortOrder:  0,
 		Status:     true,
 	}

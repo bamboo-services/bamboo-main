@@ -240,7 +240,6 @@ func (h *LinkColorHandler) Get(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param status query int false "状态过滤（0=禁用，1=启用）"
-// @Param type query int false "类型过滤（0=普通，1=炫彩）"
 // @Param name query string false "名称模糊搜索"
 // @Param only_enabled query bool false "仅查询启用的颜色"
 // @Param order_by query string false "排序字段（name, sort_order, created_at）"
@@ -278,7 +277,6 @@ func (h *LinkColorHandler) GetList(c *gin.Context) {
 // @Param page query int false "页码（默认1）"
 // @Param page_size query int false "每页数量（默认10，最大100）"
 // @Param status query int false "状态过滤（0=禁用，1=启用）"
-// @Param type query int false "类型过滤（0=普通，1=炫彩）"
 // @Param name query string false "名称模糊搜索"
 // @Param order_by query string false "排序字段（name, sort_order, created_at）"
 // @Param order query string false "排序方向（asc, desc）"

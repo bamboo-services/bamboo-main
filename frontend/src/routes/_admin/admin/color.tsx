@@ -13,7 +13,6 @@ import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import {
-  CircleDot,
   Pencil,
   Plus,
   Power,
@@ -64,7 +63,7 @@ import {
   useUpdateColor,
   useUpdateColorStatus,
 } from '@/hooks/use-colors'
-import { fancyGradient } from '@/lib/colors'
+import { fancyGradient, isFancyColor } from '@/lib/colors'
 
 export const Route = createFileRoute('/_admin/admin/color')({
   component: ColorPage,
@@ -123,7 +122,6 @@ function ColorPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<LinkColor | null>(null)
   const [name, setName] = useState('')
-  const [colorType, setColorType] = useState(0)
   const [primary, setPrimary] = useState(DEFAULT_PRIMARY)
   const [sub, setSub] = useState(DEFAULT_SUB)
   const [hover, setHover] = useState(DEFAULT_HOVER)
@@ -154,7 +152,6 @@ function ColorPage() {
   useEffect(() => {
     if (formOpen) {
       setName(editing?.name ?? '')
-      setColorType(0)
       setPrimary(normalizeHex(editing?.primary_color ?? null, DEFAULT_PRIMARY))
       setSub(normalizeHex(editing?.sub_color ?? null, DEFAULT_SUB))
       setHover(normalizeHex(editing?.hover_color ?? null, DEFAULT_HOVER))
@@ -176,7 +173,7 @@ function ColorPage() {
     const parsedOrder = Number.parseInt(order, 10)
     const colorOrder = Number.isNaN(parsedOrder) ? 0 : parsedOrder
     const close = () => setFormOpen(false)
-    // 仅支持普通配色（炫彩为内置颜色，无需创建），始终提交三原色
+    // 颜色均需配置主色、副色与悬停色；炫彩为内置颜色，无需创建
     const colorFields = {
       primary_color: primary,
       sub_color: sub,
@@ -189,7 +186,6 @@ function ColorPage() {
           id: editing.id,
           req: {
             color_name: name.trim(),
-            color_type: colorType,
             ...colorFields,
             color_order: colorOrder,
           },
@@ -200,7 +196,6 @@ function ColorPage() {
       createColor.mutate(
         {
           color_name: name.trim(),
-          color_type: colorType,
           ...colorFields,
           color_order: colorOrder,
         },
@@ -309,7 +304,7 @@ function ColorPage() {
               colors.map((color) => (
                 <TableRow key={color.id.toString()} className={inkTableRow}>
                   <TableCell className={inkTd}>
-                    {color.type === 1 ? (
+                    {isFancyColor(color) ? (
                       <span
                         className="block size-7 rounded-md ring-1 ring-inset ring-border/60"
                         style={{ background: fancyGradient() }}
@@ -352,14 +347,14 @@ function ColorPage() {
                     <span className="font-serif font-semibold text-text-primary">
                       {color.name}
                     </span>
-                    {color.type === 0 && color.primary_color && (
+                    {!isFancyColor(color) && color.primary_color && (
                       <div className="font-mono text-xs uppercase text-text-secondary">
                         {color.primary_color}
                       </div>
                     )}
                   </TableCell>
                   <TableCell className={inkTd}>
-                    {color.type === 1 ? (
+                    {isFancyColor(color) ? (
                       <InkBadge tone="leaf">
                         <Sparkles className="size-3" />
                         炫彩
@@ -468,9 +463,7 @@ function ColorPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>颜色类型</Label>
               <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2">
-                <CircleDot className="size-4 text-leaf-deep" />
                 <span className="text-sm font-medium text-text-primary">
                   普通配色
                 </span>
@@ -482,28 +475,26 @@ function ColorPage() {
                 需配置主色、副色与悬停色。
               </p>
             </div>
-            {colorType === 0 && (
-              <div className="grid gap-4 sm:grid-cols-3">
-                <ColorField
-                  id="primaryColor"
-                  label="主色"
-                  value={primary}
-                  onChange={setPrimary}
-                />
-                <ColorField
-                  id="subColor"
-                  label="副色"
-                  value={sub}
-                  onChange={setSub}
-                />
-                <ColorField
-                  id="hoverColor"
-                  label="悬停色"
-                  value={hover}
-                  onChange={setHover}
-                />
-              </div>
-            )}
+            <div className="grid gap-4 sm:grid-cols-3">
+              <ColorField
+                id="primaryColor"
+                label="主色"
+                value={primary}
+                onChange={setPrimary}
+              />
+              <ColorField
+                id="subColor"
+                label="副色"
+                value={sub}
+                onChange={setSub}
+              />
+              <ColorField
+                id="hoverColor"
+                label="悬停色"
+                value={hover}
+                onChange={setHover}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="colorOrder">排序</Label>
               <Input

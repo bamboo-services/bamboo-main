@@ -14,9 +14,6 @@ import type { LinkColor } from '@/api/types'
 /** 内置炫彩颜色的保留 ID（与后端 constants.BuiltinFancyColorID 对齐） */
 export const FANCY_COLOR_ID = 1n
 
-/** 内置炫彩颜色名称（后端注入虚拟记录时固定） */
-export const FANCY_COLOR_NAME = '炫彩'
-
 /**
  * 竹绿炫彩渐变「竹影流光」：中深叶绿底色 + 顶部晨光晕，
  * 全部取自 styles.css 竹绿 token。纯渐变、不画竹——竹子作为卡背衬竹
@@ -33,10 +30,10 @@ export function fancyGradient(): string {
 
 /**
  * 判断颜色是否为炫彩。
- * 命中条件：type=1（后端注入的虚拟记录 / 历史炫彩记录）或保留 ID（color_id 直连兜底）。
+ * 命中条件：保留 ID（color_id 直连兜底，炫彩为内置虚拟记录不落库）。
  */
 export function isFancyColor(color: LinkColor | null | undefined): boolean {
-  return color?.type === 1 || color?.id === FANCY_COLOR_ID
+  return color?.id === FANCY_COLOR_ID
 }
 
 /**

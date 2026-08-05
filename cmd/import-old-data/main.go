@@ -348,8 +348,8 @@ func run() error {
 			created := c.createdAt
 			updated := orUpdated(created, c.updatedAt)
 			if err := tx.Exec(
-				`INSERT INTO bm_link_color (id, created_at, updated_at, name, type, primary_color, sub_color, hover_color, sort_order, status)
-				 VALUES (?, ?, ?, ?, 0, ?, NULL, NULL, ?, ?)`,
+				`INSERT INTO bm_link_color (id, created_at, updated_at, name, primary_color, sub_color, hover_color, sort_order, status)
+				 VALUES (?, ?, ?, ?, ?, NULL, NULL, ?, ?)`,
 				nid, created, updated, c.displayName, primary, c.id, c.hasSelect,
 			).Error; err != nil {
 				return fmt.Errorf("插入颜色 %s 失败: %w", c.displayName, err)

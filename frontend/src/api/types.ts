@@ -151,11 +151,10 @@ export interface GroupPageParams extends GroupListParams {
 // 友链颜色
 // ---------------------------------------------------------------------------
 
-/** 友链颜色实体（后端 entity.LinkColor；type 0=普通 1=炫彩） */
+/** 友链颜色实体（后端 entity.LinkColor；炫彩为内置保留颜色 ID=1，不在此实体体现） */
 export interface LinkColor {
   id: SnowflakeID
   name: string
-  type: number
   primary_color: string | null
   sub_color: string | null
   hover_color: string | null
@@ -164,10 +163,9 @@ export interface LinkColor {
   updated_at: string
 }
 
-/** 添加友链颜色请求（POST /api/v1/admin/colors） */
+/** 添加友链颜色请求（POST /api/v1/admin/colors；炫彩为内置颜色，无需创建） */
 export interface CreateColorRequest {
   color_name: string
-  color_type?: number
   primary_color?: string
   sub_color?: string
   hover_color?: string
@@ -177,7 +175,6 @@ export interface CreateColorRequest {
 /** 更新友链颜色请求（PUT /api/v1/admin/colors/:id） */
 export interface UpdateColorRequest {
   color_name?: string
-  color_type?: number
   primary_color?: string
   sub_color?: string
   hover_color?: string
@@ -187,7 +184,6 @@ export interface UpdateColorRequest {
 /** 友链颜色列表查询参数（GET /api/v1/admin/colors/all） */
 export interface ColorListParams {
   status?: number
-  type?: number
   name?: string
   only_enabled?: boolean
   order_by?: 'name' | 'sort_order' | 'created_at'

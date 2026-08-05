@@ -53,12 +53,6 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "description": "类型过滤（0=普通，1=炫彩）",
-                        "name": "type",
-                        "in": "query"
-                    },
-                    {
                         "type": "string",
                         "description": "名称模糊搜索",
                         "name": "name",
@@ -207,12 +201,6 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "状态过滤（0=禁用，1=启用）",
                         "name": "status",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "类型过滤（0=普通，1=炫彩）",
-                        "name": "type",
                         "in": "query"
                     },
                     {
@@ -4973,15 +4961,6 @@ const docTemplate = `{
                     "minimum": 0,
                     "example": 0
                 },
-                "color_type": {
-                    "description": "颜色类型（0: 普通；1: 炫彩为系统内置颜色，无需创建）",
-                    "type": "integer",
-                    "enum": [
-                        0,
-                        1
-                    ],
-                    "example": 0
-                },
                 "hover_color": {
                     "description": "悬停颜色",
                     "type": "string",
@@ -5038,10 +5017,6 @@ const docTemplate = `{
                 "sub_color": {
                     "description": "副颜色",
                     "type": "string"
-                },
-                "type": {
-                    "description": "颜色类型",
-                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -5132,10 +5107,6 @@ const docTemplate = `{
                 "sub_color": {
                     "description": "副颜色",
                     "type": "string"
-                },
-                "type": {
-                    "description": "颜色类型",
-                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -5228,15 +5199,6 @@ const docTemplate = `{
                     "minimum": 0,
                     "example": 0
                 },
-                "color_type": {
-                    "description": "颜色类型（0: 普通；1: 炫彩为系统内置颜色，不支持保存为炫彩）",
-                    "type": "integer",
-                    "enum": [
-                        0,
-                        1
-                    ],
-                    "example": 0
-                },
                 "hover_color": {
                     "description": "悬停颜色（可传空字符串清空）",
                     "type": "string",
@@ -5293,10 +5255,6 @@ const docTemplate = `{
                 "sub_color": {
                     "description": "副颜色",
                     "type": "string"
-                },
-                "type": {
-                    "description": "颜色类型",
-                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -6871,10 +6829,6 @@ const docTemplate = `{
                 "sub_color": {
                     "description": "副颜色",
                     "type": "string"
-                },
-                "type": {
-                    "description": "颜色类型",
-                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
