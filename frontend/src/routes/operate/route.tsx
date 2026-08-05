@@ -7,7 +7,12 @@
 // https://opensource.org/licenses/MIT
 // --------------------------------------------------------------------------------
 
-import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
+import {
+  Link,
+  Outlet,
+  createFileRoute,
+  useLocation,
+} from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -19,6 +24,12 @@ import defaultBackground from '@/assets/images/default-background.webp'
 export const Route = createFileRoute('/operate')({
   component: OperateLayout,
 })
+
+/** 自助申请切换：友链 / 赞助（同一 operate 路由组内互切，样式对齐 about 导航） */
+const NAV_ITEMS = [
+  { to: '/operate/apply', label: '友链申请' },
+  { to: '/operate/sponsor', label: '赞助申请' },
+] as const
 
 /** 竹叶小标（导航品牌用） */
 function BambooLeafMark() {
@@ -45,6 +56,7 @@ function BambooLeafMark() {
 function OperateLayout() {
   const reduced = useReducedMotion() ?? false
   const thisYear = new Date().getFullYear()
+  const pathname = useLocation({ select: (loc) => loc.pathname })
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -92,7 +104,26 @@ function OperateLayout() {
               自助管理
             </span>
           </Link>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-5 md:gap-6">
+            {/* 申请切换：友链 / 赞助（参考 about 导航下划线样式） */}
+            {NAV_ITEMS.map((item) => {
+              const active = pathname === item.to
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={cn(
+                    'relative font-mono text-[11px] uppercase tracking-[0.28em] transition-colors',
+                    'after:absolute after:-bottom-[7px] after:left-0 after:h-0.5 after:w-full after:origin-left after:bg-leaf-deep after:transition-transform after:duration-300 after:ease-[cubic-bezier(0.22,0.9,0.3,1)]',
+                    active
+                      ? 'text-text-primary after:scale-x-100'
+                      : 'text-text-secondary after:scale-x-0 hover:text-text-primary hover:after:scale-x-100',
+                  )}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
             <AccountHoverCard />
           </div>
         </div>
