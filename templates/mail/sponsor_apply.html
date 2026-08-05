@@ -1,0 +1,64 @@
+<!--
+--------------------------------------------------------------------------------
+Copyright (c) 2016-NOW(至今) 筱锋
+Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
+--------------------------------------------------------------------------------
+许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
+有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+https://opensource.org/licenses/MIT
+--------------------------------------------------------------------------------
+-->
+
+{{define "sponsor_apply"}}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td style="padding-bottom: 18px;">
+            <h2 style="margin: 0 0 18px; padding: 6px 0 6px 14px; border-left: 3px solid #4a7a55; font-family: Georgia, 'Songti SC', 'STSong', serif; font-size: 20px; font-weight: 600; color: #2f4a33; line-height: 1.4;">
+                收到新的赞助展示申请
+            </h2>
+            <p style="margin: 0 0 12px; font-size: 15px; color: #5a6a52; line-height: 1.8;">
+                管理员您好，晨报送达：
+            </p>
+            <p style="margin: 0; font-size: 15px; color: #5a6a52; line-height: 1.8;">
+                有访客于竹林门庭投递了新的赞助展示申请，待您过目裁度。以下为申请名帖：
+            </p>
+        </td>
+    </tr>
+
+    <!-- 申请名帖（宣纸卡片块 + 行间分隔） -->
+    <tr>
+        <td style="padding-bottom: 24px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f6f8f1; border: 1px solid #e2e8d8;">
+                <tr>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; width: 32%; font-size: 13px; color: #7a8a72; letter-spacing: 0.5px;">申请人</td>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 14px; color: #2f4a33;">{{.Username}}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 13px; color: #7a8a72;">赞助金额</td>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 14px; color: #2f4a33;">¥{{.Amount}}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 13px; color: #7a8a72;">赞助渠道</td>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 14px; color: #2f4a33;">{{.Channel}}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 13px; color: #7a8a72; vertical-align: top;">留言</td>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 14px; color: #2f4a33; line-height: 1.7;">{{.Message}}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 11px 16px; font-size: 13px; color: #7a8a72;">联系邮箱</td>
+                    <td style="padding: 11px 16px; font-size: 14px; color: #2f4a33;">{{.Email}}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <tr>
+        <td align="center" style="padding-top: 4px;">
+            <a href="{{.AdminURL}}" style="display: inline-block; padding: 14px 40px; background-color: #4a7a55; color: #ffffff; text-decoration: none; border-radius: 5px; font-family: Georgia, 'Songti SC', 'STSong', serif; font-size: 15px; letter-spacing: 2px; line-height: 1;">
+                前往后台裁度
+            </a>
+        </td>
+    </tr>
+</table>
+{{end}}

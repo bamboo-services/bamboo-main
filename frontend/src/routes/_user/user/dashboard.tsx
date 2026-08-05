@@ -9,7 +9,7 @@
 
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
-import { ArrowRight, Plus, Settings } from 'lucide-react'
+import { ArrowRight, Heart, Plus, Settings } from 'lucide-react'
 import type { InkBadgeTone } from '@/components/ink-wash'
 import { useAuth } from '@/hooks/use-auth'
 import { useMyLinks } from '@/hooks/use-links'
@@ -169,7 +169,7 @@ function UserDashboardPage() {
           animate: { opacity: 1, y: 0 },
           transition: { duration: 0.5, ease: 'easeOut' },
         })}
-        className="grid gap-4 sm:grid-cols-2"
+        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
       >
         <Link
           to="/operate/apply"
@@ -201,6 +201,23 @@ function UserDashboardPage() {
             </span>
             <span className="mt-0.5 block text-xs text-text-secondary">
               管理昵称、头像与密码
+            </span>
+          </span>
+          <ArrowRight className="size-4 shrink-0 text-text-secondary transition-transform duration-300 group-hover:translate-x-0.5" />
+        </Link>
+        <Link
+          to="/operate/sponsor"
+          className={`${inkCard} group flex items-center gap-4 p-5`}
+        >
+          <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-leaf-deep/12 text-leaf-deep ring-1 ring-leaf-deep/15 transition-transform duration-300 group-hover:scale-105">
+            <Heart className="size-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-serif text-[15px] font-semibold text-text-primary">
+              申请赞助展示
+            </span>
+            <span className="mt-0.5 block text-xs text-text-secondary">
+              递交赞助心意，经核实后入册
             </span>
           </span>
           <ArrowRight className="size-4 shrink-0 text-text-secondary transition-transform duration-300 group-hover:translate-x-0.5" />

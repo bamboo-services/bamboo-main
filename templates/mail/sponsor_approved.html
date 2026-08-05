@@ -1,0 +1,51 @@
+<!--
+--------------------------------------------------------------------------------
+Copyright (c) 2016-NOW(至今) 筱锋
+Author: 筱锋「xiao_lfeng」(https://www.x-lf.com)
+--------------------------------------------------------------------------------
+许可证声明：版权所有 (c) 2016-2026 筱锋。保留所有权利。
+有关MIT许可证的更多信息，请查看项目根目录下的LICENSE文件或访问：
+https://opensource.org/licenses/MIT
+--------------------------------------------------------------------------------
+-->
+
+{{define "sponsor_approved"}}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td style="padding-bottom: 18px;">
+            <h2 style="margin: 0 0 18px; padding: 6px 0 6px 14px; border-left: 3px solid #4a7a55; font-family: Georgia, 'Songti SC', 'STSong', serif; font-size: 20px; font-weight: 600; color: #2f4a33; line-height: 1.4;">
+                赞助展示申请已通过
+            </h2>
+            <p style="margin: 0 0 12px; font-size: 15px; color: #5a6a52; line-height: 1.8;">
+                亲爱的 <strong style="color: #2f4a33; font-weight: 600;">{{.Username}}</strong>，您好：
+            </p>
+            <p style="margin: 0; font-size: 15px; color: #5a6a52; line-height: 1.8;">
+                喜讯相告 —— 您的赞助支持已过审核，正式记入竹林感恩账册。相关信息如下：
+            </p>
+        </td>
+    </tr>
+
+    <tr>
+        <td style="padding-bottom: 24px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f6f8f1; border: 1px solid #e2e8d8;">
+                <tr>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; width: 32%; font-size: 13px; color: #7a8a72; letter-spacing: 0.5px;">署名</td>
+                    <td style="padding: 11px 16px; border-bottom: 1px solid #e2e8d8; font-size: 14px; color: #2f4a33;">{{.Username}}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 11px 16px; font-size: 13px; color: #7a8a72;">赞助金额</td>
+                    <td style="padding: 11px 16px; font-size: 14px; color: #2f4a33;">¥{{.Amount}}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <p style="margin: 0; font-size: 15px; color: #6a7a62; line-height: 1.8;">
+                感谢您的慷慨支持，愿这抹墨色常伴心间。期待与您结下更多竹林之缘。
+            </p>
+        </td>
+    </tr>
+</table>
+{{end}}

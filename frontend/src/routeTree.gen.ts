@@ -24,6 +24,7 @@ import { Route as AboutMeRouteImport } from './routes/about/me'
 import { Route as AboutSponsorRouteImport } from './routes/about/sponsor'
 import { Route as OperateIndexRouteImport } from './routes/operate/index'
 import { Route as OperateApplyRouteImport } from './routes/operate/apply'
+import { Route as OperateSponsorRouteImport } from './routes/operate/sponsor'
 import { Route as AdminAdminColorRouteImport } from './routes/_admin/admin/color'
 import { Route as AdminAdminDashboardRouteImport } from './routes/_admin/admin/dashboard'
 import { Route as AdminAdminLocationRouteImport } from './routes/_admin/admin/location'
@@ -39,7 +40,9 @@ import { Route as AdminAdminLinkIndexRouteImport } from './routes/_admin/admin/l
 import { Route as AdminAdminLinkAddRouteImport } from './routes/_admin/admin/link/add'
 import { Route as AdminAdminLinkAnomalyRouteImport } from './routes/_admin/admin/link/anomaly'
 import { Route as AdminAdminLinkVerifyRouteImport } from './routes/_admin/admin/link/verify'
+import { Route as AdminAdminSponsorVerifyRouteImport } from './routes/_admin/admin/sponsor/verify'
 import { Route as UserUserLinksIndexRouteImport } from './routes/_user/user/links/index'
+import { Route as UserUserSponsorsIndexRouteImport } from './routes/_user/user/sponsors/index'
 import { Route as AdminAdminLinkIdIndexRouteImport } from './routes/_admin/admin/link/$id/index'
 import { Route as AdminAdminLinkIdEditRouteImport } from './routes/_admin/admin/link/$id/edit'
 import { Route as UserUserLinksIdEditRouteImport } from './routes/_user/user/links/$id/edit'
@@ -113,6 +116,11 @@ const OperateIndexRoute = OperateIndexRouteImport.update({
 const OperateApplyRoute = OperateApplyRouteImport.update({
   id: '/apply',
   path: '/apply',
+  getParentRoute: () => OperateRouteRoute,
+} as any)
+const OperateSponsorRoute = OperateSponsorRouteImport.update({
+  id: '/sponsor',
+  path: '/sponsor',
   getParentRoute: () => OperateRouteRoute,
 } as any)
 const AdminAdminColorRoute = AdminAdminColorRouteImport.update({
@@ -192,9 +200,19 @@ const AdminAdminLinkVerifyRoute = AdminAdminLinkVerifyRouteImport.update({
   path: '/link/verify',
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
+const AdminAdminSponsorVerifyRoute = AdminAdminSponsorVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => AdminAdminSponsorRoute,
+} as any)
 const UserUserLinksIndexRoute = UserUserLinksIndexRouteImport.update({
   id: '/links/',
   path: '/links/',
+  getParentRoute: () => UserUserRouteRoute,
+} as any)
+const UserUserSponsorsIndexRoute = UserUserSponsorsIndexRouteImport.update({
+  id: '/sponsors/',
+  path: '/sponsors/',
   getParentRoute: () => UserUserRouteRoute,
 } as any)
 const AdminAdminLinkIdIndexRoute = AdminAdminLinkIdIndexRouteImport.update({
@@ -223,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/about/me': typeof AboutMeRoute
   '/about/sponsor': typeof AboutSponsorRoute
   '/operate/apply': typeof OperateApplyRoute
+  '/operate/sponsor': typeof OperateSponsorRoute
   '/about/': typeof AboutIndexRoute
   '/operate/': typeof OperateIndexRoute
   '/admin/color': typeof AdminAdminColorRoute
@@ -230,7 +249,7 @@ export interface FileRoutesByFullPath {
   '/admin/location': typeof AdminAdminLocationRoute
   '/admin/ranking': typeof AdminAdminRankingRoute
   '/admin/setting': typeof AdminAdminSettingRoute
-  '/admin/sponsor': typeof AdminAdminSponsorRoute
+  '/admin/sponsor': typeof AdminAdminSponsorRouteWithChildren
   '/auth/callback': typeof AuthorizationAuthCallbackRoute
   '/auth/login': typeof AuthorizationAuthLoginRoute
   '/auth/register': typeof AuthorizationAuthRegisterRoute
@@ -239,8 +258,10 @@ export interface FileRoutesByFullPath {
   '/admin/link/add': typeof AdminAdminLinkAddRoute
   '/admin/link/anomaly': typeof AdminAdminLinkAnomalyRoute
   '/admin/link/verify': typeof AdminAdminLinkVerifyRoute
+  '/admin/sponsor/verify': typeof AdminAdminSponsorVerifyRoute
   '/admin/link/': typeof AdminAdminLinkIndexRoute
   '/user/links/': typeof UserUserLinksIndexRoute
+  '/user/sponsors/': typeof UserUserSponsorsIndexRoute
   '/admin/link/$id/edit': typeof AdminAdminLinkIdEditRoute
   '/user/links/$id/edit': typeof UserUserLinksIdEditRoute
   '/admin/link/$id/': typeof AdminAdminLinkIdIndexRoute
@@ -253,6 +274,7 @@ export interface FileRoutesByTo {
   '/about/me': typeof AboutMeRoute
   '/about/sponsor': typeof AboutSponsorRoute
   '/operate/apply': typeof OperateApplyRoute
+  '/operate/sponsor': typeof OperateSponsorRoute
   '/about': typeof AboutIndexRoute
   '/operate': typeof OperateIndexRoute
   '/admin/color': typeof AdminAdminColorRoute
@@ -260,7 +282,7 @@ export interface FileRoutesByTo {
   '/admin/location': typeof AdminAdminLocationRoute
   '/admin/ranking': typeof AdminAdminRankingRoute
   '/admin/setting': typeof AdminAdminSettingRoute
-  '/admin/sponsor': typeof AdminAdminSponsorRoute
+  '/admin/sponsor': typeof AdminAdminSponsorRouteWithChildren
   '/auth/callback': typeof AuthorizationAuthCallbackRoute
   '/auth/login': typeof AuthorizationAuthLoginRoute
   '/auth/register': typeof AuthorizationAuthRegisterRoute
@@ -269,8 +291,10 @@ export interface FileRoutesByTo {
   '/admin/link/add': typeof AdminAdminLinkAddRoute
   '/admin/link/anomaly': typeof AdminAdminLinkAnomalyRoute
   '/admin/link/verify': typeof AdminAdminLinkVerifyRoute
+  '/admin/sponsor/verify': typeof AdminAdminSponsorVerifyRoute
   '/admin/link': typeof AdminAdminLinkIndexRoute
   '/user/links': typeof UserUserLinksIndexRoute
+  '/user/sponsors': typeof UserUserSponsorsIndexRoute
   '/admin/link/$id/edit': typeof AdminAdminLinkIdEditRoute
   '/user/links/$id/edit': typeof UserUserLinksIdEditRoute
   '/admin/link/$id': typeof AdminAdminLinkIdIndexRoute
@@ -289,6 +313,7 @@ export interface FileRoutesById {
   '/about/me': typeof AboutMeRoute
   '/about/sponsor': typeof AboutSponsorRoute
   '/operate/apply': typeof OperateApplyRoute
+  '/operate/sponsor': typeof OperateSponsorRoute
   '/_public/': typeof PublicIndexRoute
   '/about/': typeof AboutIndexRoute
   '/operate/': typeof OperateIndexRoute
@@ -297,7 +322,7 @@ export interface FileRoutesById {
   '/_admin/admin/location': typeof AdminAdminLocationRoute
   '/_admin/admin/ranking': typeof AdminAdminRankingRoute
   '/_admin/admin/setting': typeof AdminAdminSettingRoute
-  '/_admin/admin/sponsor': typeof AdminAdminSponsorRoute
+  '/_admin/admin/sponsor': typeof AdminAdminSponsorRouteWithChildren
   '/_authorization/auth/callback': typeof AuthorizationAuthCallbackRoute
   '/_authorization/auth/login': typeof AuthorizationAuthLoginRoute
   '/_authorization/auth/register': typeof AuthorizationAuthRegisterRoute
@@ -306,8 +331,10 @@ export interface FileRoutesById {
   '/_admin/admin/link/add': typeof AdminAdminLinkAddRoute
   '/_admin/admin/link/anomaly': typeof AdminAdminLinkAnomalyRoute
   '/_admin/admin/link/verify': typeof AdminAdminLinkVerifyRoute
+  '/_admin/admin/sponsor/verify': typeof AdminAdminSponsorVerifyRoute
   '/_admin/admin/link/': typeof AdminAdminLinkIndexRoute
   '/_user/user/links/': typeof UserUserLinksIndexRoute
+  '/_user/user/sponsors/': typeof UserUserSponsorsIndexRoute
   '/_admin/admin/link/$id/edit': typeof AdminAdminLinkIdEditRoute
   '/_user/user/links/$id/edit': typeof UserUserLinksIdEditRoute
   '/_admin/admin/link/$id/': typeof AdminAdminLinkIdIndexRoute
@@ -324,6 +351,7 @@ export interface FileRouteTypes {
     | '/about/me'
     | '/about/sponsor'
     | '/operate/apply'
+    | '/operate/sponsor'
     | '/about/'
     | '/operate/'
     | '/admin/color'
@@ -340,8 +368,10 @@ export interface FileRouteTypes {
     | '/admin/link/add'
     | '/admin/link/anomaly'
     | '/admin/link/verify'
+    | '/admin/sponsor/verify'
     | '/admin/link/'
     | '/user/links/'
+    | '/user/sponsors/'
     | '/admin/link/$id/edit'
     | '/user/links/$id/edit'
     | '/admin/link/$id/'
@@ -354,6 +384,7 @@ export interface FileRouteTypes {
     | '/about/me'
     | '/about/sponsor'
     | '/operate/apply'
+    | '/operate/sponsor'
     | '/about'
     | '/operate'
     | '/admin/color'
@@ -370,8 +401,10 @@ export interface FileRouteTypes {
     | '/admin/link/add'
     | '/admin/link/anomaly'
     | '/admin/link/verify'
+    | '/admin/sponsor/verify'
     | '/admin/link'
     | '/user/links'
+    | '/user/sponsors'
     | '/admin/link/$id/edit'
     | '/user/links/$id/edit'
     | '/admin/link/$id'
@@ -389,6 +422,7 @@ export interface FileRouteTypes {
     | '/about/me'
     | '/about/sponsor'
     | '/operate/apply'
+    | '/operate/sponsor'
     | '/_public/'
     | '/about/'
     | '/operate/'
@@ -406,8 +440,10 @@ export interface FileRouteTypes {
     | '/_admin/admin/link/add'
     | '/_admin/admin/link/anomaly'
     | '/_admin/admin/link/verify'
+    | '/_admin/admin/sponsor/verify'
     | '/_admin/admin/link/'
     | '/_user/user/links/'
+    | '/_user/user/sponsors/'
     | '/_admin/admin/link/$id/edit'
     | '/_user/user/links/$id/edit'
     | '/_admin/admin/link/$id/'
@@ -529,6 +565,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OperateApplyRouteImport
       parentRoute: typeof OperateRouteRoute
     }
+    '/operate/sponsor': {
+      id: '/operate/sponsor'
+      path: '/sponsor'
+      fullPath: '/operate/sponsor'
+      preLoaderRoute: typeof OperateSponsorRouteImport
+      parentRoute: typeof OperateRouteRoute
+    }
     '/_admin/admin/color': {
       id: '/_admin/admin/color'
       path: '/color'
@@ -634,11 +677,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminLinkVerifyRouteImport
       parentRoute: typeof AdminAdminRouteRoute
     }
+    '/_admin/admin/sponsor/verify': {
+      id: '/_admin/admin/sponsor/verify'
+      path: '/verify'
+      fullPath: '/admin/sponsor/verify'
+      preLoaderRoute: typeof AdminAdminSponsorVerifyRouteImport
+      parentRoute: typeof AdminAdminSponsorRoute
+    }
     '/_user/user/links/': {
       id: '/_user/user/links/'
       path: '/links'
       fullPath: '/user/links/'
       preLoaderRoute: typeof UserUserLinksIndexRouteImport
+      parentRoute: typeof UserUserRouteRoute
+    }
+    '/_user/user/sponsors/': {
+      id: '/_user/user/sponsors/'
+      path: '/sponsors'
+      fullPath: '/user/sponsors/'
+      preLoaderRoute: typeof UserUserSponsorsIndexRouteImport
       parentRoute: typeof UserUserRouteRoute
     }
     '/_admin/admin/link/$id/': {
@@ -665,13 +722,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminAdminSponsorRouteChildren {
+  AdminAdminSponsorVerifyRoute: typeof AdminAdminSponsorVerifyRoute
+}
+
+const AdminAdminSponsorRouteChildren: AdminAdminSponsorRouteChildren = {
+  AdminAdminSponsorVerifyRoute: AdminAdminSponsorVerifyRoute,
+}
+
+const AdminAdminSponsorRouteWithChildren =
+  AdminAdminSponsorRoute._addFileChildren(AdminAdminSponsorRouteChildren)
+
 interface AdminAdminRouteRouteChildren {
   AdminAdminColorRoute: typeof AdminAdminColorRoute
   AdminAdminDashboardRoute: typeof AdminAdminDashboardRoute
   AdminAdminLocationRoute: typeof AdminAdminLocationRoute
   AdminAdminRankingRoute: typeof AdminAdminRankingRoute
   AdminAdminSettingRoute: typeof AdminAdminSettingRoute
-  AdminAdminSponsorRoute: typeof AdminAdminSponsorRoute
+  AdminAdminSponsorRoute: typeof AdminAdminSponsorRouteWithChildren
   AdminAdminLinkAddRoute: typeof AdminAdminLinkAddRoute
   AdminAdminLinkAnomalyRoute: typeof AdminAdminLinkAnomalyRoute
   AdminAdminLinkVerifyRoute: typeof AdminAdminLinkVerifyRoute
@@ -686,7 +754,7 @@ const AdminAdminRouteRouteChildren: AdminAdminRouteRouteChildren = {
   AdminAdminLocationRoute: AdminAdminLocationRoute,
   AdminAdminRankingRoute: AdminAdminRankingRoute,
   AdminAdminSettingRoute: AdminAdminSettingRoute,
-  AdminAdminSponsorRoute: AdminAdminSponsorRoute,
+  AdminAdminSponsorRoute: AdminAdminSponsorRouteWithChildren,
   AdminAdminLinkAddRoute: AdminAdminLinkAddRoute,
   AdminAdminLinkAnomalyRoute: AdminAdminLinkAnomalyRoute,
   AdminAdminLinkVerifyRoute: AdminAdminLinkVerifyRoute,
@@ -742,6 +810,7 @@ interface UserUserRouteRouteChildren {
   UserUserAccountRoute: typeof UserUserAccountRoute
   UserUserDashboardRoute: typeof UserUserDashboardRoute
   UserUserLinksIndexRoute: typeof UserUserLinksIndexRoute
+  UserUserSponsorsIndexRoute: typeof UserUserSponsorsIndexRoute
   UserUserLinksIdEditRoute: typeof UserUserLinksIdEditRoute
 }
 
@@ -749,6 +818,7 @@ const UserUserRouteRouteChildren: UserUserRouteRouteChildren = {
   UserUserAccountRoute: UserUserAccountRoute,
   UserUserDashboardRoute: UserUserDashboardRoute,
   UserUserLinksIndexRoute: UserUserLinksIndexRoute,
+  UserUserSponsorsIndexRoute: UserUserSponsorsIndexRoute,
   UserUserLinksIdEditRoute: UserUserLinksIdEditRoute,
 }
 
@@ -788,11 +858,13 @@ const AboutRouteRouteWithChildren = AboutRouteRoute._addFileChildren(
 
 interface OperateRouteRouteChildren {
   OperateApplyRoute: typeof OperateApplyRoute
+  OperateSponsorRoute: typeof OperateSponsorRoute
   OperateIndexRoute: typeof OperateIndexRoute
 }
 
 const OperateRouteRouteChildren: OperateRouteRouteChildren = {
   OperateApplyRoute: OperateApplyRoute,
+  OperateSponsorRoute: OperateSponsorRoute,
   OperateIndexRoute: OperateIndexRoute,
 }
 

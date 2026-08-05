@@ -45,6 +45,13 @@ const (
 	// LinkStatusTakenDown 链接已下架状态（管理员批准下架，不再公开展示）
 	LinkStatusTakenDown = 4
 
+	// SponsorStatusPending 赞助待审核状态（公开申请后默认，前台不可见）
+	SponsorStatusPending = 0
+	// SponsorStatusApproved 赞助已通过状态（通过审核后前台展示）
+	SponsorStatusApproved = 1
+	// SponsorStatusRejected 赞助已拒绝状态（拒绝后前台不可见）
+	SponsorStatusRejected = 2
+
 	// LinkFailNormal 链接正常状态
 	LinkFailNormal = 0
 	// LinkFailBroken 链接失效状态
@@ -74,6 +81,13 @@ const (
 	EmailTypeRejected = "rejected"
 	// EmailTypePasswordReset 密码重置邮件类型
 	EmailTypePasswordReset = "password_reset"
+
+	// SponsorEmailTypeApply 赞助申请通知邮件模板名（通知管理员）
+	SponsorEmailTypeApply = "sponsor_apply"
+	// SponsorEmailTypeApproved 赞助审核通过邮件模板名（通知申请者）
+	SponsorEmailTypeApproved = "sponsor_approved"
+	// SponsorEmailTypeRejected 赞助审核拒绝邮件模板名（通知申请者）
+	SponsorEmailTypeRejected = "sponsor_rejected"
 )
 
 const (

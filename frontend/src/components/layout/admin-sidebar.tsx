@@ -83,8 +83,9 @@ export function AdminSidebar() {
   const siteName = site?.site_name || siteConfig.defaultName
 
   const isActive = (url: string) => {
-    if (url === '/admin/link') {
-      return pathname === url || pathname.startsWith('/admin/link/')
+    // 含子路由的菜单项按前缀匹配，保证子页（如审核页）高亮不丢失
+    if (url === '/admin/link' || url === '/admin/sponsor') {
+      return pathname === url || pathname.startsWith(`${url}/`)
     }
     return pathname === url
   }

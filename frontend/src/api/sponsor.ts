@@ -9,16 +9,21 @@
 
 import { request } from './client'
 import type {
+  AdminRecordListResponse,
   ChannelPageParams,
   CreateChannelRequest,
   CreateRecordRequest,
   PaginationResponse,
   RecordPageParams,
   SnowflakeID,
+  SponsorApplyRequest,
   SponsorChannel,
   SponsorChannelAdmin,
   SponsorRecord,
   SponsorRecordAdmin,
+  SponsorStatusRequest,
+  SponsorUserParams,
+  SponsorUserUpdateRequest,
   UpdateChannelRequest,
   UpdateRecordRequest,
 } from './types'
@@ -137,8 +142,8 @@ export function deleteChannel(id: SnowflakeID): Promise<void> {
 /** 管理端赞助记录分页列表 */
 export function listAdminRecords(
   params: RecordPageParams = {},
-): Promise<PaginationResponse<SponsorRecordAdmin>> {
-  return request<PaginationResponse<SponsorRecordAdmin>>({
+): Promise<AdminRecordListResponse> {
+  return request<AdminRecordListResponse>({
     method: 'GET',
     url: '/admin/sponsors/records',
     params: {
@@ -148,6 +153,7 @@ export function listAdminRecords(
       nickname: params.nickname,
       is_anonymous: params.is_anonymous,
       is_hidden: params.is_hidden,
+      status: params.status,
       order_by: params.order_by,
       order: params.order,
     },
@@ -182,5 +188,67 @@ export function deleteRecord(id: SnowflakeID): Promise<void> {
   return request<void>({
     method: 'DELETE',
     url: `/admin/sponsors/records/${id.toString()}`,
+  })
+}
+
+/** 审核赞助记录（PUT /api/v1/admin/sponsors/records/:id/status） */
+export function updateSponsorStatus(
+  id: SnowflakeID,
+  req: SponsorStatusRequest,
+): Promise<void> {
+  return request<void>({
+    method: 'PUT',
+    url: `/admin/sponsors/records/${id.toString()}/status`,
+    data: req,
+  })
+}
+
+// ---------------------------------------------------------------------------
+// 申请 / 用户自助接口
+// ---------------------------------------------------------------------------
+
+/** 访客自助申请赞助展示（公开，POST /api/v1/sponsors/apply） */
+export function applySponsor(
+  req: SponsorApplyRequest,
+): Promise<SponsorRecordAdmin> {
+  return request<SponsorRecordAdmin>({
+    method: 'POST',
+    url: '/sponsors/apply',
+    data: req,
+  })
+}
+
+/** 我的赞助记录分页列表（GET /api/v1/user/sponsors） */
+export function listMySponsors(
+  params: SponsorUserParams = {},
+): Promise<PaginationResponse<SponsorRecordAdmin>> {
+  return request<PaginationResponse<SponsorRecordAdmin>>({
+    method: 'GET',
+    url: '/user/sponsors',
+    params: {
+      page: params.page ?? 1,
+      page_size: params.page_size ?? 10,
+      sponsor_status: params.sponsor_status,
+    },
+  })
+}
+
+/** 我的赞助记录详情（GET /api/v1/user/sponsors/:id） */
+export function getMySponsor(id: SnowflakeID): Promise<SponsorRecordAdmin> {
+  return request<SponsorRecordAdmin>({
+    method: 'GET',
+    url: `/user/sponsors/${id.toString()}`,
+  })
+}
+
+/** 更新我的赞助记录（PUT /api/v1/user/sponsors/:id） */
+export function updateMySponsor(
+  id: SnowflakeID,
+  req: SponsorUserUpdateRequest,
+): Promise<SponsorRecordAdmin> {
+  return request<SponsorRecordAdmin>({
+    method: 'PUT',
+    url: `/user/sponsors/${id.toString()}`,
+    data: req,
   })
 }

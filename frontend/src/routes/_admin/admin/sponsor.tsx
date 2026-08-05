@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import { MoreHorizontal, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import type {
@@ -153,6 +153,18 @@ function SponsorPage() {
         kicker="SPONSOR · 赞助"
         title="赞助管理"
         sub="管理所有赞助记录与赞助渠道，记录每一份支持。"
+        actions={
+          <Link to="/admin/sponsor/verify">
+            <Button variant="outline" className="cursor-pointer">
+              赞助审核
+              {(recordsTotal.data?.pending_count ?? 0) > 0 && (
+                <InkBadge tone="pending" className="ml-2 px-2">
+                  {recordsTotal.data?.pending_count}
+                </InkBadge>
+              )}
+            </Button>
+          </Link>
+        }
       />
 
       <BambooRule reduced={reduced} delay={0.12} />
@@ -212,11 +224,26 @@ function SponsorPage() {
 // 赞助记录
 // ---------------------------------------------------------------------------
 
-/** 赞助记录面板：搜索 / 渠道筛选 / 服务端分页表格 / 增删改 */
+/** 赞助记录审核状态徽章 */
+function recordStatusBadge(status: number) {
+  switch (status) {
+    case 0:
+      return <InkBadge tone="pending">待审核</InkBadge>
+    case 1:
+      return <InkBadge tone="leaf">已通过</InkBadge>
+    case 2:
+      return <InkBadge tone="danger">已拒绝</InkBadge>
+    default:
+      return <InkBadge tone="neutral">未知</InkBadge>
+  }
+}
+
+/** 赞助记录面板：搜索 / 渠道筛选 / 审核状态筛选 / 服务端分页表格 / 增删改 */
 function RecordsPanel({ reduced }: { reduced: boolean }) {
   const [page, setPage] = useState(1)
   const [keyword, setKeyword] = useState('')
   const [channelFilter, setChannelFilter] = useState<SnowflakeID | null>(null)
+  const [statusFilter, setStatusFilter] = useState<number | null>(null)
   const [formTarget, setFormTarget] = useState<
     SponsorRecordAdmin | 'new' | null
   >(null)
@@ -230,6 +257,7 @@ function RecordsPanel({ reduced }: { reduced: boolean }) {
     page_size: PAGE_SIZE,
     nickname: keyword.trim() || undefined,
     channel_id: channelFilter ?? undefined,
+    status: statusFilter ?? undefined,
     order_by: 'created_at',
     order: 'desc',
   })
@@ -279,6 +307,21 @@ function RecordsPanel({ reduced }: { reduced: boolean }) {
               {channel.name}
             </option>
           ))}
+        </Select>
+        <Select
+          aria-label="按审核状态筛选"
+          className="w-36"
+          value={statusFilter?.toString() ?? ''}
+          onChange={(e) => {
+            const value = e.target.value
+            setStatusFilter(value ? Number(value) : null)
+            setPage(1)
+          }}
+        >
+          <option value="">全部状态</option>
+          <option value="0">待审核</option>
+          <option value="1">已通过</option>
+          <option value="2">已拒绝</option>
         </Select>
         <div className="flex-1" />
         <Button className="cursor-pointer" onClick={() => setFormTarget('new')}>
@@ -366,10 +409,11 @@ function RecordsPanel({ reduced }: { reduced: boolean }) {
                   </TableCell>
                   <TableCell className={inkTd}>
                     <div className="flex flex-wrap gap-1">
+                      {recordStatusBadge(record.status)}
                       {record.is_hidden ? (
                         <InkBadge tone="danger">隐藏</InkBadge>
                       ) : (
-                        <InkBadge tone="leaf">公开</InkBadge>
+                        <InkBadge tone="neutral">公开</InkBadge>
                       )}
                       {record.is_anonymous && (
                         <InkBadge tone="neutral">匿名</InkBadge>

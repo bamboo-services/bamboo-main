@@ -12,10 +12,12 @@
 package handler
 
 import (
+	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
 	xUtil "github.com/bamboo-services/bamboo-base-go/major/utility"
 	xValid "github.com/bamboo-services/bamboo-base-go/major/validator"
 	apiSponsorRecord "github.com/bamboo-services/bamboo-main/api/sponsor"
+	"github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 	"github.com/gin-gonic/gin"
 )
 
@@ -179,7 +181,7 @@ func (h *SponsorRecordHandler) Get(c *gin.Context) {
 // @Param is_hidden query bool false "是否隐藏过滤"
 // @Param order_by query string false "排序字段（nickname, amount, sponsor_at, sort_order, created_at）"
 // @Param order query string false "排序方向（asc, desc）"
-// @Success 200 {object} xBase.BaseResponse{data=apiSponsorRecord.RecordPageResponse} "获取成功"
+// @Success 200 {object} xBase.BaseResponse{data=apiSponsorRecord.RecordAdminPageResponse} "获取成功"
 // @Failure 400 {object} xBase.BaseResponse "请求参数错误"
 // @Failure 401 {object} xBase.BaseResponse "未认证"
 // @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
@@ -202,7 +204,10 @@ func (h *SponsorRecordHandler) GetPage(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	resp := apiSponsorRecord.RecordPageResponse{PaginationResponse: *result}
+	resp := apiSponsorRecord.RecordAdminPageResponse{
+		PaginationResponse: result.PaginationResponse,
+		PendingCount:       result.PendingCount,
+	}
 	xResult.SuccessHasData(c, "获取赞助记录分页列表成功", resp)
 }
 
@@ -242,4 +247,209 @@ func (h *SponsorRecordHandler) GetPublicPage(c *gin.Context) {
 	// 返回成功响应
 	resp := apiSponsorRecord.RecordPublicPageResponse{PaginationResponse: *result}
 	xResult.SuccessHasData(c, "获取公开赞助记录列表成功", resp)
+}
+
+// ApplySponsor 访客自助申请赞助展示
+//
+// @Summary [公开] 申请赞助展示
+// @Description 游客或登录用户提交赞助展示申请，需提供联系邮箱用于归属确认，提交后进入待审核状态
+// @Tags 赞助记录接口
+// @Accept json
+// @Produce json
+// @Param request body apiSponsorRecord.SponsorApplyRequest true "赞助展示申请请求"
+// @Success 200 {object} xBase.BaseResponse{data=apiSponsorRecord.RecordAddResponse} "申请提交成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 404 {object} xBase.BaseResponse "赞助渠道不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/sponsors/apply [POST]
+func (h *SponsorRecordHandler) ApplySponsor(c *gin.Context) {
+	var req apiSponsorRecord.SponsorApplyRequest
+
+	// 绑定请求数据
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	record, err := h.service.sponsorRecordLogic.Apply(c.Request.Context(), &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	resp := apiSponsorRecord.RecordAddResponse{RecordEntityResponse: *record}
+	xResult.SuccessHasData(c, "赞助申请已提交，请等待管理员审核", resp)
+}
+
+// UpdateStatus 更新赞助记录审核状态
+//
+// @Summary [管理] 审核赞助记录
+// @Description 审核赞助展示申请，可置为通过（1）或拒绝（2），并填写审核备注反馈给申请者
+// @Tags 赞助记录接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param id path int true "赞助记录ID"
+// @Param request body apiSponsorRecord.SponsorStatusRequest true "审核赞助记录请求"
+// @Success 200 {object} xBase.BaseResponse "状态更新成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 404 {object} xBase.BaseResponse "赞助记录不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/sponsors/records/{id}/status [PUT]
+func (h *SponsorRecordHandler) UpdateStatus(c *gin.Context) {
+	uri := xUtil.Bind(c, &apiSponsorRecord.RecordIDRequest{}).URI()
+	if uri == nil {
+		return
+	}
+
+	var req apiSponsorRecord.SponsorStatusRequest
+
+	// 绑定请求数据
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	err := h.service.sponsorRecordLogic.UpdateStatus(c.Request.Context(), uri.ID, &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	xResult.Success(c, "状态更新成功")
+}
+
+// ListMyRecords 获取当前用户的赞助记录列表
+//
+// @Summary [用户] 获取我的赞助记录列表
+// @Description 分页查询当前登录用户名下的赞助记录
+// @Tags 用户赞助接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param page query int false "页码" default(1)
+// @Param page_size query int false "每页数量" default(10)
+// @Param sponsor_status query int false "赞助状态 0:待审核 1:已通过 2:已拒绝"
+// @Success 200 {object} xBase.BaseResponse{data=apiSponsorRecord.RecordPageResponse} "获取成功"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/user/sponsors [GET]
+func (h *SponsorRecordHandler) ListMyRecords(c *gin.Context) {
+	userID, exists := ctxUtil.GetUserID(c)
+	if !exists {
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		return
+	}
+
+	var req apiSponsorRecord.SponsorUserQueryRequest
+	// 绑定查询参数
+	bindErr := c.ShouldBindQuery(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	result, err := h.service.sponsorRecordLogic.ListMine(c.Request.Context(), userID, &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	resp := apiSponsorRecord.RecordPageResponse{PaginationResponse: *result}
+	xResult.SuccessHasData(c, "获取成功", resp)
+}
+
+// GetMyRecord 获取当前用户的赞助记录详情
+//
+// @Summary [用户] 获取我的赞助记录详情
+// @Description 获取当前登录用户名下指定赞助记录的详细信息
+// @Tags 用户赞助接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param id path int true "赞助记录ID"
+// @Success 200 {object} xBase.BaseResponse{data=apiSponsorRecord.RecordDetailResponse} "获取成功"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 404 {object} xBase.BaseResponse "赞助记录不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/user/sponsors/{id} [GET]
+func (h *SponsorRecordHandler) GetMyRecord(c *gin.Context) {
+	userID, exists := ctxUtil.GetUserID(c)
+	if !exists {
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		return
+	}
+
+	uri := xUtil.Bind(c, &apiSponsorRecord.RecordIDRequest{}).URI()
+	if uri == nil {
+		return
+	}
+
+	// 调用服务层
+	record, err := h.service.sponsorRecordLogic.GetMine(c.Request.Context(), userID, uri.ID)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	resp := apiSponsorRecord.RecordDetailResponse{RecordEntityResponse: *record}
+	xResult.SuccessHasData(c, "获取成功", resp)
+}
+
+// UpdateMyRecord 更新当前用户的赞助记录
+//
+// @Summary [用户] 更新我的赞助记录
+// @Description 更新当前登录用户名下指定赞助记录的展示信息（金额与渠道不可修改）
+// @Tags 用户赞助接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param id path int true "赞助记录ID"
+// @Param request body apiSponsorRecord.SponsorUserUpdateRequest true "更新赞助记录请求"
+// @Success 200 {object} xBase.BaseResponse{data=apiSponsorRecord.RecordUpdateResponse} "更新成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 404 {object} xBase.BaseResponse "赞助记录不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/user/sponsors/{id} [PUT]
+func (h *SponsorRecordHandler) UpdateMyRecord(c *gin.Context) {
+	userID, exists := ctxUtil.GetUserID(c)
+	if !exists {
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		return
+	}
+
+	uri := xUtil.Bind(c, &apiSponsorRecord.RecordIDRequest{}).URI()
+	if uri == nil {
+		return
+	}
+
+	var req apiSponsorRecord.SponsorUserUpdateRequest
+	// 绑定请求数据
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	record, err := h.service.sponsorRecordLogic.UpdateMine(c.Request.Context(), userID, uri.ID, &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	resp := apiSponsorRecord.RecordUpdateResponse{RecordEntityResponse: *record}
+	xResult.SuccessHasData(c, "赞助记录更新成功", resp)
 }

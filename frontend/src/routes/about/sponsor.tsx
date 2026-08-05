@@ -7,13 +7,14 @@
 // https://opensource.org/licenses/MIT
 // --------------------------------------------------------------------------------
 
-import { createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { motion, useReducedMotion } from 'motion/react'
 import type { SponsorChannel, SponsorRecord } from '@/api/types'
 import type { MotionDivProps } from '@/lib/motion'
 import { getPublicChannels, getPublicRecords } from '@/api/sponsor'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BambooArt, EnsoEmpty } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
@@ -133,6 +134,25 @@ function SponsorPage() {
           >
             每一份支持，都是竹林里的一缕清风。它让小站得以安静地生长，也让我知道有人在听。
           </motion.p>
+
+          {/* 申请展示入口：实际赞助后递交申请，经核实后入册感恩账册 */}
+          <motion.div
+            {...enter(reduced, 0.52, {
+              initial: { opacity: 0, y: 16 },
+              animate: { opacity: 1, y: 0 },
+              transition: { duration: 0.7, ease: 'easeOut' },
+            })}
+            className="mt-10"
+          >
+            <Link to="/operate/sponsor">
+              <Button
+                variant="outline"
+                className="cursor-pointer rounded-md px-7 py-5 font-serif text-[15px] tracking-wide"
+              >
+                已赞助 · 申请展示
+              </Button>
+            </Link>
+          </motion.div>
         </div>
       </section>
 

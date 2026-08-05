@@ -24,6 +24,7 @@ import (
 func (r *route) userRouter(route gin.IRouter) {
 	linkHandler := handler.NewHandler[handler.LinkHandler](r.context)
 	authHandler := handler.NewHandler[handler.AuthHandler](r.context)
+	sponsorRecordHandler := handler.NewHandler[handler.SponsorRecordHandler](r.context)
 
 	userGroup := route.Group("/user")
 	userGroup.Use(middleware.AuthMiddleware)
@@ -32,6 +33,9 @@ func (r *route) userRouter(route gin.IRouter) {
 		userGroup.GET("/links/:id", linkHandler.GetMyLink)
 		userGroup.PUT("/links/:id", linkHandler.UpdateMyLink)
 		userGroup.PUT("/links/:id/takedown", linkHandler.RequestTakedown)
+		userGroup.GET("/sponsors", sponsorRecordHandler.ListMyRecords)
+		userGroup.GET("/sponsors/:id", sponsorRecordHandler.GetMyRecord)
+		userGroup.PUT("/sponsors/:id", sponsorRecordHandler.UpdateMyRecord)
 		userGroup.PUT("/profile", authHandler.UpdateProfile)
 	}
 }

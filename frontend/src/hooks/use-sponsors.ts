@@ -15,20 +15,32 @@ import type {
   CreateRecordRequest,
   RecordPageParams,
   SnowflakeID,
+  SponsorApplyRequest,
+  SponsorStatusRequest,
+  SponsorUserParams,
+  SponsorUserUpdateRequest,
   UpdateChannelRequest,
   UpdateRecordRequest,
 } from '@/api/types'
+import type { GetRecordsParams } from '@/api/sponsor'
 import {
+  applySponsor,
   createChannel,
   createRecord,
   deleteChannel,
   deleteRecord,
   getAllChannels,
+  getMySponsor,
+  getPublicChannels,
+  getPublicRecords,
   listAdminChannels,
   listAdminRecords,
+  listMySponsors,
   updateChannel,
   updateChannelStatus,
+  updateMySponsor,
   updateRecord,
+  updateSponsorStatus,
 } from '@/api/sponsor'
 
 /** 赞助渠道 queryKey 工厂 */
@@ -138,6 +150,7 @@ export function useCreateRecord() {
       toast.success('赞助记录添加成功')
       void qc.invalidateQueries({ queryKey: recordKeys.all })
       void qc.invalidateQueries({ queryKey: channelKeys.all })
+      void qc.invalidateQueries({ queryKey: publicSponsorKeys.records() })
     },
     onError: (err: Error) => toast.error(err.message || '赞助记录添加失败'),
   })
@@ -152,6 +165,7 @@ export function useUpdateRecord() {
     onSuccess: () => {
       toast.success('赞助记录更新成功')
       void qc.invalidateQueries({ queryKey: recordKeys.all })
+      void qc.invalidateQueries({ queryKey: publicSponsorKeys.records() })
     },
     onError: (err: Error) => toast.error(err.message || '赞助记录更新失败'),
   })
@@ -166,7 +180,114 @@ export function useDeleteRecord() {
       toast.success('赞助记录删除成功')
       void qc.invalidateQueries({ queryKey: recordKeys.all })
       void qc.invalidateQueries({ queryKey: channelKeys.all })
+      void qc.invalidateQueries({ queryKey: publicSponsorKeys.records() })
     },
     onError: (err: Error) => toast.error(err.message || '赞助记录删除失败'),
+  })
+}
+
+// ---------------------------------------------------------------------------
+// 公开接口（前台展示 / 申请表单选择器）
+// ---------------------------------------------------------------------------
+
+/** 公开赞助 queryKey 工厂（与 admin 查询缓存隔离） */
+export const publicSponsorKeys = {
+  channels: ['public', 'sponsors', 'channels'] as const,
+  records: (page = 1) => ['public', 'sponsors', 'records', page] as const,
+}
+
+/** 公开赞助渠道列表（供申请表单选择器使用） */
+export function usePublicChannels() {
+  return useQuery({
+    queryKey: publicSponsorKeys.channels,
+    queryFn: getPublicChannels,
+    staleTime: 10 * 60 * 1000,
+  })
+}
+
+/** 公开赞助记录分页列表（前台赞助墙） */
+export function usePublicRecords(params: GetRecordsParams = {}) {
+  return useQuery({
+    queryKey: publicSponsorKeys.records(params.page ?? 1),
+    queryFn: () => getPublicRecords(params),
+  })
+}
+
+// ---------------------------------------------------------------------------
+// 用户自助赞助（与 admin 查询缓存隔离）
+// ---------------------------------------------------------------------------
+
+/** 我的赞助 queryKey 工厂（id 一律 toString，避免 bigint 进入哈希） */
+export const mySponsorKeys = {
+  all: ['user', 'sponsors'] as const,
+  lists: () => [...mySponsorKeys.all, 'list'] as const,
+  list: (params: SponsorUserParams) =>
+    [...mySponsorKeys.lists(), { ...params }] as const,
+  details: () => [...mySponsorKeys.all, 'detail'] as const,
+  detail: (id: SnowflakeID) =>
+    [...mySponsorKeys.details(), id.toString()] as const,
+}
+
+/** 我的赞助记录分页列表 */
+export function useMySponsors(params: SponsorUserParams = {}) {
+  return useQuery({
+    queryKey: mySponsorKeys.list(params),
+    queryFn: () => listMySponsors(params),
+  })
+}
+
+/** 我的赞助记录详情 */
+export function useMySponsor(id: SnowflakeID) {
+  return useQuery({
+    queryKey: mySponsorKeys.detail(id),
+    queryFn: () => getMySponsor(id),
+  })
+}
+
+/** 访客自助申请赞助展示（成功后失效我的赞助与公开账册缓存） */
+export function useApplySponsor() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (req: SponsorApplyRequest) => applySponsor(req),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: mySponsorKeys.all })
+      void qc.invalidateQueries({ queryKey: publicSponsorKeys.records() })
+    },
+    onError: (err: Error) => toast.error(err.message || '赞助申请失败'),
+  })
+}
+
+/** 更新我的赞助记录 */
+export function useUpdateMySponsor() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      id,
+      req,
+    }: {
+      id: SnowflakeID
+      req: SponsorUserUpdateRequest
+    }) => updateMySponsor(id, req),
+    onSuccess: () => {
+      toast.success('赞助记录更新成功')
+      void qc.invalidateQueries({ queryKey: mySponsorKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '赞助记录更新失败'),
+  })
+}
+
+/** 审核赞助记录（成功后失效管理端 / 公开 / 我的赞助三端缓存） */
+export function useUpdateSponsorStatus() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, req }: { id: SnowflakeID; req: SponsorStatusRequest }) =>
+      updateSponsorStatus(id, req),
+    onSuccess: () => {
+      toast.success('审核状态已更新')
+      void qc.invalidateQueries({ queryKey: recordKeys.all })
+      void qc.invalidateQueries({ queryKey: publicSponsorKeys.records() })
+      void qc.invalidateQueries({ queryKey: mySponsorKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '审核状态更新失败'),
   })
 }

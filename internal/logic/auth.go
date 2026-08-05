@@ -31,9 +31,10 @@ import (
 )
 
 type authRepo struct {
-	user  *repository.SystemUserRepo
-	token *repository.TokenRepo
-	link  *repository.LinkRepo
+	user    *repository.SystemUserRepo
+	token   *repository.TokenRepo
+	link    *repository.LinkRepo
+	sponsor *repository.SponsorRecordRepo
 }
 
 // AuthLogic 认证业务逻辑
@@ -56,9 +57,10 @@ func NewAuthLogic(ctx context.Context) *AuthLogic {
 		},
 		SessionService: logcHelper.NewSessionLogic(m),
 		repo: authRepo{
-			user:  repository.NewSystemUserRepo(db, m),
-			token: repository.NewTokenRepo(m),
-			link:  repository.NewLinkRepo(db, m),
+			user:    repository.NewSystemUserRepo(db, m),
+			token:   repository.NewTokenRepo(m),
+			link:    repository.NewLinkRepo(db, m),
+			sponsor: repository.NewSponsorRecordRepo(db, m),
 		},
 	}
 }
@@ -104,6 +106,8 @@ func (a *AuthLogic) Login(ctx context.Context, req *apiAuth.LoginRequest, meta l
 
 	// 按邮箱绑定该用户名下的孤儿友链（游客提交时尚未关联的友链）
 	a.bindLinksByEmail(ctx, user.ID, user.Email)
+	// 按邮箱绑定该用户名下的孤儿赞助记录（游客提交时尚未关联的赞助申请）
+	a.bindSponsorsByEmail(ctx, user.ID, user.Email)
 
 	return user, token, &now, &expireAt, nil
 }
@@ -165,6 +169,8 @@ func (a *AuthLogic) Register(ctx context.Context, req *apiAuth.RegisterRequest, 
 
 	// 按邮箱绑定该用户名下的孤儿友链（注册前以游客身份提交的友链）
 	a.bindLinksByEmail(ctx, newUser.ID, newUser.Email)
+	// 按邮箱绑定该用户名下的孤儿赞助记录（注册前以游客身份提交的赞助申请）
+	a.bindSponsorsByEmail(ctx, newUser.ID, newUser.Email)
 
 	return &newUser, token, &now, &expireAt, nil
 }
@@ -217,6 +223,19 @@ func (a *AuthLogic) bindLinksByEmail(ctx context.Context, userID xSnowflake.Snow
 	}
 	if xErr := a.repo.link.BindUserByEmail(ctx, userID, email); xErr != nil {
 		a.log.Warn(ctx, fmt.Sprintf("绑定用户名下友链失败（已忽略）: %v", xErr))
+	}
+}
+
+// bindSponsorsByEmail 按邮箱绑定该用户名下的孤儿赞助记录
+//
+// 将以游客身份（UserID 为空）提交、且联系邮箱与当前用户邮箱一致的赞助记录归属到该用户。
+// 失败仅记录日志，不阻断注册/登录主流程。
+func (a *AuthLogic) bindSponsorsByEmail(ctx context.Context, userID xSnowflake.SnowflakeID, email string) {
+	if email == "" {
+		return
+	}
+	if xErr := a.repo.sponsor.BindUserByEmail(ctx, userID, email, nil); xErr != nil {
+		a.log.Warn(ctx, fmt.Sprintf("绑定用户名下赞助记录失败（已忽略）: %v", xErr))
 	}
 }
 

@@ -54,6 +54,7 @@ interface NavItem {
 const NAV_ITEMS: Array<NavItem> = [
   { to: '/user/dashboard', label: '看板' },
   { to: '/user/links', label: '我的友链', matchPrefix: '/user/links' },
+  { to: '/user/sponsors', label: '我的赞助', matchPrefix: '/user/sponsors' },
   { to: '/user/account', label: '账号设置' },
 ]
 

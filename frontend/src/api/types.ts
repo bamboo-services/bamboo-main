@@ -436,9 +436,19 @@ export interface SponsorRecordAdmin {
   sort_order: number
   is_anonymous: boolean
   is_hidden: boolean
+  status: number // 审核状态 0:待审核 1:已通过 2:已拒绝
+  email: string | null
+  user_id: SnowflakeID | null
+  apply_remark: string | null
+  review_remark: string | null
   created_at: string
   updated_at: string
   channel?: SponsorChannelSimple | null
+}
+
+/** 管理端赞助记录分页响应（附待审核计数，供管理入口徽章展示） */
+export interface AdminRecordListResponse extends PaginationResponse<SponsorRecordAdmin> {
+  pending_count?: number
 }
 
 /** 添加赞助记录请求（POST /api/v1/admin/sponsors/records） */
@@ -459,7 +469,7 @@ export interface UpdateRecordRequest {
   nickname?: string
   redirect_url?: string
   amount?: number
-  channel_id?: SnowflakeID
+  channel_id?: SnowflakeID | null // null 表示清空渠道
   message?: string
   sponsor_at?: string
   sort_order?: number
@@ -475,8 +485,45 @@ export interface RecordPageParams {
   nickname?: string
   is_anonymous?: boolean
   is_hidden?: boolean
+  status?: number // 审核状态 0:待审核 1:已通过 2:已拒绝
   order_by?: 'nickname' | 'amount' | 'sponsor_at' | 'sort_order' | 'created_at'
   order?: 'asc' | 'desc'
+}
+
+/** 访客自助申请赞助展示请求（POST /api/v1/sponsors/apply） */
+export interface SponsorApplyRequest {
+  nickname: string
+  amount: number // 单位：分
+  channel_id?: SnowflakeID
+  message?: string
+  sponsor_at?: string
+  email: string
+  redirect_url?: string
+  is_anonymous?: boolean
+  apply_remark?: string
+}
+
+/** 审核赞助记录请求（PUT /api/v1/admin/sponsors/records/:id/status） */
+export interface SponsorStatusRequest {
+  sponsor_status: number // 0:待审核 1:已通过 2:已拒绝
+  sponsor_review_remark?: string
+}
+
+/** 更新我的赞助记录请求（PUT /api/v1/user/sponsors/:id，金额与渠道不可修改） */
+export interface SponsorUserUpdateRequest {
+  nickname?: string
+  redirect_url?: string
+  message?: string
+  sponsor_at?: string
+  is_anonymous?: boolean
+  apply_remark?: string
+}
+
+/** 我的赞助记录分页查询参数（GET /api/v1/user/sponsors） */
+export interface SponsorUserParams {
+  page?: number
+  page_size?: number
+  sponsor_status?: number // 0:待审核 1:已通过 2:已拒绝
 }
 
 // ---------------------------------------------------------------------------

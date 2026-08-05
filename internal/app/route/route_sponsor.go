@@ -40,6 +40,7 @@ func (r *route) sponsorAdminRouter(route gin.IRouter) {
 			recordGroup.GET("", recordHandler.GetPage)
 			recordGroup.GET("/:id", recordHandler.Get)
 			recordGroup.PUT("/:id", recordHandler.Update)
+			recordGroup.PUT("/:id/status", recordHandler.UpdateStatus)
 			recordGroup.DELETE("/:id", recordHandler.Delete)
 		}
 	}
@@ -53,5 +54,6 @@ func (r *route) sponsorRouter(route gin.IRouter) {
 	{
 		sponsorGroup.GET("/channels", channelHandler.GetPublicList)
 		sponsorGroup.GET("/records", recordHandler.GetPublicPage)
+		sponsorGroup.POST("/apply", recordHandler.ApplySponsor)
 	}
 }
