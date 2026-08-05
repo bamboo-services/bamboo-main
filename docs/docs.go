@@ -1535,6 +1535,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/admin/info/apply-site": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供 operate/apply 申请页交换友链时复制",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点信息接口"
+                ],
+                "summary": "[管理] 更新申请站点展示",
+                "parameters": [
+                    {
+                        "description": "申请站点展示更新请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiInfo.ApplySiteUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.ApplySiteResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/info/blogger": {
             "put": {
                 "security": [
@@ -1542,7 +1611,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱）",
+                "description": "管理员更新博主个人展示信息（昵称/简介/博客链接/头像），供「关于我」名士帖展示",
                 "consumes": [
                     "application/json"
                 ],
@@ -3957,9 +4026,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/info/apply-site": {
+            "get": {
+                "description": "获取博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供 operate/apply 申请页交换友链时复制添加",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点信息接口"
+                ],
+                "summary": "[用户] 获取申请站点展示",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.ApplySiteResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/info/blogger": {
             "get": {
-                "description": "获取博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供交换友链时复制添加",
+                "description": "获取博主个人展示信息（昵称/简介/博客链接/头像），供「关于我」名士帖展示",
                 "consumes": [
                     "application/json"
                 ],
@@ -5358,7 +5468,7 @@ const docTemplate = `{
                 }
             }
         },
-        "apiInfo.BloggerResponse": {
+        "apiInfo.ApplySiteResponse": {
             "type": "object",
             "properties": {
                 "email": {
@@ -5384,7 +5494,7 @@ const docTemplate = `{
                 }
             }
         },
-        "apiInfo.BloggerUpdateRequest": {
+        "apiInfo.ApplySiteUpdateRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -5416,6 +5526,51 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 500,
                     "example": "https://www.x-lf.com"
+                }
+            }
+        },
+        "apiInfo.BloggerResponse": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "blog_url": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "nick": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiInfo.BloggerUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "https://example.com/avatar.png"
+                },
+                "blog_url": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "https://blog.x-lf.com"
+                },
+                "description": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "一个热爱技术的开发者，喜欢折腾各种有趣的东西。"
+                },
+                "nick": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "筱锋"
                 }
             }
         },

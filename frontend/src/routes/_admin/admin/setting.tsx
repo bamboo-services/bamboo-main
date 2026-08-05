@@ -12,7 +12,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import { Contact, Globe, Lock, Save, UserRound } from 'lucide-react'
+import { Contact, Globe, Lock, Save, Send, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,9 +22,11 @@ import { InkNavRow, PageHead } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
 import {
   useAbout,
+  useApplySiteInfo,
   useBloggerInfo,
   useSiteInfo,
   useUpdateAbout,
+  useUpdateApplySiteInfo,
   useUpdateBloggerInfo,
   useUpdateSiteInfo,
 } from '@/hooks/use-site-info'
@@ -37,7 +39,7 @@ export const Route = createFileRoute('/_admin/admin/setting')({
   component: SettingPage,
 })
 
-type SettingSection = 'site' | 'about' | 'blogger' | 'invalid'
+type SettingSection = 'site' | 'about' | 'applySite' | 'blogger' | 'invalid'
 
 /**
  * 系统设置：主从面板 · 扁平化。
@@ -84,9 +86,16 @@ function SettingPage() {
               onClick={() => setSection('about')}
             />
             <InkNavRow
+              icon={<Send className="size-4" />}
+              title="申请展示"
+              desc="交换友链 · 站点资料"
+              active={section === 'applySite'}
+              onClick={() => setSection('applySite')}
+            />
+            <InkNavRow
               icon={<Contact className="size-4" />}
               title="博主信息"
-              desc="交换友链 · 站点资料"
+              desc="名士帖 · 个人展示"
               active={section === 'blogger'}
               onClick={() => setSection('blogger')}
             />
@@ -108,6 +117,8 @@ function SettingPage() {
           <SiteInfoPanel reduced={reduced} />
         ) : section === 'about' ? (
           <AboutPanel reduced={reduced} />
+        ) : section === 'applySite' ? (
+          <ApplySitePanel reduced={reduced} />
         ) : section === 'blogger' ? (
           <BloggerInfoPanel reduced={reduced} />
         ) : (
@@ -286,10 +297,10 @@ function AboutPanel({ reduced }: { reduced: boolean }) {
   )
 }
 
-/** 博主信息面板：交换友链场景的博主站点资料 + 「关于我」名士帖个人展示 */
-function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
-  const { data, isLoading } = useBloggerInfo()
-  const updateBlogger = useUpdateBloggerInfo()
+/** 申请站点展示面板：operate/apply 交换友链场景的博主站点资料 */
+function ApplySitePanel({ reduced }: { reduced: boolean }) {
+  const { data, isLoading } = useApplySiteInfo()
+  const updateApplySite = useUpdateApplySiteInfo()
 
   const [siteName, setSiteName] = useState('')
   const [siteDescription, setSiteDescription] = useState('')
@@ -297,10 +308,6 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
   const [siteImage, setSiteImage] = useState('')
   const [rss, setRss] = useState('')
   const [email, setEmail] = useState('')
-  const [nick, setNick] = useState('')
-  const [description, setDescription] = useState('')
-  const [blogUrl, setBlogUrl] = useState('')
-  const [avatar, setAvatar] = useState('')
 
   useEffect(() => {
     if (data) {
@@ -310,6 +317,117 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
       setSiteImage(data.site_image)
       setRss(data.rss)
       setEmail(data.email)
+    }
+  }, [data])
+
+  const handleSave = () => {
+    updateApplySite.mutate({
+      site_name: siteName,
+      site_description: siteDescription,
+      site_url: siteUrl,
+      site_image: siteImage,
+      rss,
+      email,
+    })
+  }
+
+  return (
+    <motion.section
+      {...enter(reduced, 0.18, {
+        initial: { opacity: 0, y: 10 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.4, ease: 'easeOut' },
+      })}
+      className="relative"
+    >
+      <PanelHeader kicker="APPLY SITE · 交换友链" title="申请站点展示" />
+
+      {isLoading ? (
+        <div className="relative mt-8 grid gap-x-6 gap-y-5 md:grid-cols-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-9 w-full" />
+          ))}
+        </div>
+      ) : (
+        <>
+          <div className="relative mt-8 grid gap-x-6 gap-y-5 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="applySiteName">站点名字</Label>
+              <Input
+                id="applySiteName"
+                value={siteName}
+                onChange={(e) => setSiteName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="applySiteEmail">站长邮箱</Label>
+              <Input
+                id="applySiteEmail"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="applySiteDescription">站点描述</Label>
+              <Input
+                id="applySiteDescription"
+                value={siteDescription}
+                onChange={(e) => setSiteDescription(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="applySiteUrl">站点地址</Label>
+              <Input
+                id="applySiteUrl"
+                value={siteUrl}
+                onChange={(e) => setSiteUrl(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="applySiteRss">站点订阅</Label>
+              <Input
+                id="applySiteRss"
+                value={rss}
+                onChange={(e) => setRss(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="applySiteImage">站点图片</Label>
+              <Input
+                id="applySiteImage"
+                value={siteImage}
+                onChange={(e) => setSiteImage(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="relative mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-5">
+            <p className="font-serif text-sm italic text-text-secondary">
+              访客申请友链前需先在自站添加博主友链，此处即供其复制的站点资料，展示于 operate/apply 申请页。
+            </p>
+            <Button onClick={handleSave} disabled={updateApplySite.isPending}>
+              <Save className="mr-2 h-4 w-4" />
+              {updateApplySite.isPending ? '保存中…' : '保存申请展示'}
+            </Button>
+          </div>
+        </>
+      )}
+    </motion.section>
+  )
+}
+
+/** 博主信息面板：「关于我」名士帖个人展示 */
+function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
+  const { data, isLoading } = useBloggerInfo()
+  const updateBlogger = useUpdateBloggerInfo()
+
+  const [nick, setNick] = useState('')
+  const [description, setDescription] = useState('')
+  const [blogUrl, setBlogUrl] = useState('')
+  const [avatar, setAvatar] = useState('')
+
+  useEffect(() => {
+    if (data) {
       setNick(data.nick)
       setDescription(data.description)
       setBlogUrl(data.blog_url)
@@ -319,12 +437,6 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
 
   const handleSave = () => {
     updateBlogger.mutate({
-      site_name: siteName,
-      site_description: siteDescription,
-      site_url: siteUrl,
-      site_image: siteImage,
-      rss,
-      email,
       nick,
       description,
       blog_url: blogUrl,
@@ -341,11 +453,11 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
       })}
       className="relative"
     >
-      <PanelHeader kicker="BLOGGER · EXCHANGE" title="博主信息" />
+      <PanelHeader kicker="BLOGGER · 名士帖" title="博主信息" />
 
       {isLoading ? (
         <div className="relative mt-8 grid gap-x-6 gap-y-5 md:grid-cols-2">
-          {Array.from({ length: 10 }).map((_, i) => (
+          {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-9 w-full" />
           ))}
         </div>
@@ -361,11 +473,11 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bloggerSiteName">站点名字</Label>
+              <Label htmlFor="bloggerAvatar">头像地址</Label>
               <Input
-                id="bloggerSiteName"
-                value={siteName}
-                onChange={(e) => setSiteName(e.target.value)}
+                id="bloggerAvatar"
+                value={avatar}
+                onChange={(e) => setAvatar(e.target.value)}
               />
             </div>
             <div className="space-y-2 md:col-span-2">
@@ -376,7 +488,7 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 md:col-span-2">
               <Label htmlFor="bloggerBlogUrl">博客链接</Label>
               <Input
                 id="bloggerBlogUrl"
@@ -384,59 +496,11 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
                 onChange={(e) => setBlogUrl(e.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="bloggerEmail">站长邮箱</Label>
-              <Input
-                id="bloggerEmail"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="bloggerAvatar">头像地址</Label>
-              <Input
-                id="bloggerAvatar"
-                value={avatar}
-                onChange={(e) => setAvatar(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="bloggerSiteDescription">站点描述</Label>
-              <Input
-                id="bloggerSiteDescription"
-                value={siteDescription}
-                onChange={(e) => setSiteDescription(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bloggerSiteUrl">站点地址</Label>
-              <Input
-                id="bloggerSiteUrl"
-                value={siteUrl}
-                onChange={(e) => setSiteUrl(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bloggerRss">站点订阅</Label>
-              <Input
-                id="bloggerRss"
-                value={rss}
-                onChange={(e) => setRss(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="bloggerSiteImage">站点图片</Label>
-              <Input
-                id="bloggerSiteImage"
-                value={siteImage}
-                onChange={(e) => setSiteImage(e.target.value)}
-              />
-            </div>
           </div>
 
           <div className="relative mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-5">
             <p className="font-serif text-sm italic text-text-secondary">
-              昵称、个人简介、博客链接与头像展示于「关于我」名士帖；其余站点资料供访客交换友链时复制。
+              昵称、个人简介、博客链接与头像展示于「关于我」名士帖。
             </p>
             <Button onClick={handleSave} disabled={updateBlogger.isPending}>
               <Save className="mr-2 h-4 w-4" />

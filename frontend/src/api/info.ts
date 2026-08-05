@@ -10,9 +10,11 @@
 import { request } from './client'
 import type {
   AboutResponse,
+  ApplySiteInfoResponse,
   BloggerInfoResponse,
   SiteInfoResponse,
   UpdateAboutRequest,
+  UpdateApplySiteRequest,
   UpdateBloggerRequest,
   UpdateSiteRequest,
 } from './types'
@@ -27,7 +29,12 @@ export function getAbout(): Promise<AboutResponse> {
   return request<AboutResponse>({ method: 'GET', url: '/info/about' })
 }
 
-/** 获取博主信息（站名、描述、地址、图片、订阅、邮箱）— 供交换友链场景 */
+/** 获取申请站点展示（站名、描述、地址、图片、订阅、邮箱）— 供 operate/apply 交换友链场景 */
+export function getApplySiteInfo(): Promise<ApplySiteInfoResponse> {
+  return request<ApplySiteInfoResponse>({ method: 'GET', url: '/info/apply-site' })
+}
+
+/** 获取博主信息（昵称、简介、博客链接、头像）— 供「关于我」名士帖展示 */
 export function getBloggerInfo(): Promise<BloggerInfoResponse> {
   return request<BloggerInfoResponse>({ method: 'GET', url: '/info/blogger' })
 }
@@ -48,6 +55,17 @@ export function updateAbout(req: UpdateAboutRequest): Promise<AboutResponse> {
   return request<AboutResponse>({
     method: 'PUT',
     url: '/admin/info/about',
+    data: req,
+  })
+}
+
+/** 更新申请站点展示（管理端） */
+export function updateApplySiteInfo(
+  req: UpdateApplySiteRequest,
+): Promise<ApplySiteInfoResponse> {
+  return request<ApplySiteInfoResponse>({
+    method: 'PUT',
+    url: '/admin/info/apply-site',
     data: req,
   })
 }

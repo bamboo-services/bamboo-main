@@ -81,14 +81,29 @@ export interface UpdateAboutRequest {
   content: string
 }
 
-/** 博主信息（GET /api/v1/info/blogger）— 供交换友链场景读取博主站点资料 + 「关于我」名士帖个人展示 */
-export interface BloggerInfoResponse {
+/** 申请站点展示（GET /api/v1/info/apply-site）— 供 operate/apply 交换友链场景读取博主站点资料 */
+export interface ApplySiteInfoResponse {
   site_name: string
   site_description: string
   site_url: string
   site_image: string
   rss: string
   email: string
+  updated_at: string
+}
+
+/** 更新申请站点展示请求（PUT /api/v1/admin/info/apply-site） */
+export interface UpdateApplySiteRequest {
+  site_name?: string
+  site_description?: string
+  site_url?: string
+  site_image?: string
+  rss?: string
+  email?: string
+}
+
+/** 博主信息（GET /api/v1/info/blogger）— 供「关于我」名士帖个人展示 */
+export interface BloggerInfoResponse {
   nick: string
   description: string
   blog_url: string
@@ -98,12 +113,6 @@ export interface BloggerInfoResponse {
 
 /** 更新博主信息请求（PUT /api/v1/admin/info/blogger） */
 export interface UpdateBloggerRequest {
-  site_name?: string
-  site_description?: string
-  site_url?: string
-  site_image?: string
-  rss?: string
-  email?: string
   nick?: string
   description?: string
   blog_url?: string

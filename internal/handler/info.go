@@ -90,10 +90,30 @@ func (h *InfoHandler) GetAbout(c *gin.Context) {
 	xResult.SuccessHasData(c, "获取自我介绍成功", result)
 }
 
+// GetApplySiteInfo 获取申请站点展示
+//
+// @Summary [用户] 获取申请站点展示
+// @Description 获取博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供 operate/apply 申请页交换友链时复制添加
+// @Tags 站点信息接口
+// @Accept json
+// @Produce json
+// @Success 200 {object} xBase.BaseResponse{data=apiInfo.ApplySiteResponse} "获取成功"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/info/apply-site [GET]
+func (h *InfoHandler) GetApplySiteInfo(c *gin.Context) {
+	result, err := h.service.infoLogic.GetApplySiteInfo(c.Request.Context())
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	xResult.SuccessHasData(c, "获取申请站点展示成功", result)
+}
+
 // GetBloggerInfo 获取博主信息
 //
 // @Summary [用户] 获取博主信息
-// @Description 获取博主站点资料（站点名字/描述/地址/图片/订阅/邮箱）与个人展示信息（昵称/简介/博客链接/头像），供交换友链复制及「关于我」名士帖展示
+// @Description 获取博主个人展示信息（昵称/简介/博客链接/头像），供「关于我」名士帖展示
 // @Tags 站点信息接口
 // @Accept json
 // @Produce json
@@ -110,10 +130,41 @@ func (h *InfoHandler) GetBloggerInfo(c *gin.Context) {
 	xResult.SuccessHasData(c, "获取博主信息成功", result)
 }
 
+// UpdateApplySiteInfo 更新申请站点展示
+//
+// @Summary [管理] 更新申请站点展示
+// @Description 管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供 operate/apply 申请页交换友链时复制
+// @Tags 站点信息接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param request body apiInfo.ApplySiteUpdateRequest true "申请站点展示更新请求"
+// @Success 200 {object} xBase.BaseResponse{data=apiInfo.ApplySiteResponse} "更新成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/info/apply-site [PUT]
+func (h *InfoHandler) UpdateApplySiteInfo(c *gin.Context) {
+	var req apiInfo.ApplySiteUpdateRequest
+
+	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	result, err := h.service.infoLogic.UpdateApplySiteInfo(c.Request.Context(), &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	xResult.SuccessHasData(c, "申请站点展示更新成功", result)
+}
+
 // UpdateBloggerInfo 更新博主信息
 //
 // @Summary [管理] 更新博主信息
-// @Description 管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱）与个人展示信息（昵称/简介/博客链接/头像）
+// @Description 管理员更新博主个人展示信息（昵称/简介/博客链接/头像），供「关于我」名士帖展示
 // @Tags 站点信息接口
 // @Accept json
 // @Produce json

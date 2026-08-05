@@ -29,13 +29,13 @@ var defaultInfoConfigs = []struct {
 	{Key: "site.description", Value: "一个简洁优雅的友情链接管理系统"},
 	{Key: "site.introduction", Value: "欢迎来到我的友链主页！这里收录了我的好朋友们的博客链接。"},
 	{Key: "profile.about", Value: "# 关于我\n\n这里是自我介绍，支持 **Markdown** 格式。"},
-	// 博主信息（供「交换友链」场景，访客申请前需先在自站添加博主友链）
-	{Key: "blogger.site_name", Value: "凌中的锋雨"},
-	{Key: "blogger.site_description", Value: "不为如何，只为在茫茫人海中有自己的一片天空~"},
-	{Key: "blogger.site_url", Value: "https://www.x-lf.com"},
-	{Key: "blogger.site_image", Value: "https://i-cdn.akass.cn/2024/05/664870a814c0d.png!wp60"},
-	{Key: "blogger.rss", Value: "https://blog.x-lf.com/atom.xml"},
-	{Key: "blogger.email", Value: "gm@x-lf.cn"},
+	// 申请站点展示（供「交换友链」场景，访客申请前需先在自站添加博主友链）
+	{Key: "site.apply.name", Value: "凌中的锋雨"},
+	{Key: "site.apply.description", Value: "不为如何，只为在茫茫人海中有自己的一片天空~"},
+	{Key: "site.apply.url", Value: "https://www.x-lf.com"},
+	{Key: "site.apply.image", Value: "https://i-cdn.akass.cn/2024/05/664870a814c0d.png!wp60"},
+	{Key: "site.apply.rss", Value: "https://blog.x-lf.com/atom.xml"},
+	{Key: "site.apply.email", Value: "gm@x-lf.cn"},
 	// 博主个人展示信息（供「关于我」名士帖：昵称/个人简介/博客链接/头像）
 	{Key: "blogger.nick", Value: "筱锋"},
 	{Key: "blogger.description", Value: "一个热爱技术的开发者，喜欢折腾各种有趣的东西。"},

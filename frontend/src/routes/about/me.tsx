@@ -13,7 +13,7 @@ import { motion, useReducedMotion } from 'motion/react'
 import { ExternalLink, Mail } from 'lucide-react'
 import type { MotionDivProps } from '@/lib/motion'
 import { getAbout, getSiteInfo } from '@/api/info'
-import { useBloggerInfo } from '@/hooks/use-site-info'
+import { useApplySiteInfo, useBloggerInfo } from '@/hooks/use-site-info'
 import { MarkdownView } from '@/components/markdown'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -62,10 +62,11 @@ function AboutMePage() {
     queryFn: getAbout,
   })
   const { data: blogger } = useBloggerInfo()
+  const { data: applySite } = useApplySiteInfo()
 
   const nick = blogger?.nick ?? siteConfig.blogger.nick
   const desc = blogger?.description ?? siteConfig.blogger.description
-  const email = blogger?.email ?? siteConfig.blogger.email
+  const email = applySite?.email ?? siteConfig.blogger.email
   const blogUrl = blogger?.blog_url ?? 'https://blog.x-lf.com'
   const blogHost = blogUrl.replace(/^https?:\/\//, '')
   const avatar = blogger?.avatar || myAvatar

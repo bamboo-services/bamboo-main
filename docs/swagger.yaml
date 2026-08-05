@@ -185,7 +185,7 @@ definitions:
     required:
     - content
     type: object
-  apiInfo.BloggerResponse:
+  apiInfo.ApplySiteResponse:
     properties:
       email:
         type: string
@@ -202,7 +202,7 @@ definitions:
       updated_at:
         type: string
     type: object
-  apiInfo.BloggerUpdateRequest:
+  apiInfo.ApplySiteUpdateRequest:
     properties:
       email:
         example: gm@x-lf.cn
@@ -227,6 +227,38 @@ definitions:
       site_url:
         example: https://www.x-lf.com
         maxLength: 500
+        type: string
+    type: object
+  apiInfo.BloggerResponse:
+    properties:
+      avatar:
+        type: string
+      blog_url:
+        type: string
+      description:
+        type: string
+      nick:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  apiInfo.BloggerUpdateRequest:
+    properties:
+      avatar:
+        example: https://example.com/avatar.png
+        maxLength: 500
+        type: string
+      blog_url:
+        example: https://blog.x-lf.com
+        maxLength: 500
+        type: string
+      description:
+        example: 一个热爱技术的开发者，喜欢折腾各种有趣的东西。
+        maxLength: 500
+        type: string
+      nick:
+        example: 筱锋
+        maxLength: 100
         type: string
     type: object
   apiInfo.SiteResponse:
@@ -2908,11 +2940,52 @@ paths:
       summary: '[管理] 更新自我介绍'
       tags:
       - 站点信息接口
+  /api/v1/admin/info/apply-site:
+    put:
+      consumes:
+      - application/json
+      description: 管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供 operate/apply 申请页交换友链时复制
+      parameters:
+      - description: 申请站点展示更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiInfo.ApplySiteUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiInfo.ApplySiteResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[管理] 更新申请站点展示'
+      tags:
+      - 站点信息接口
   /api/v1/admin/info/blogger:
     put:
       consumes:
       - application/json
-      description: 管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱）
+      description: 管理员更新博主个人展示信息（昵称/简介/博客链接/头像），供「关于我」名士帖展示
       parameters:
       - description: 博主信息更新请求
         in: body
@@ -4408,11 +4481,35 @@ paths:
       summary: '[用户] 获取自我介绍'
       tags:
       - 站点信息接口
+  /api/v1/info/apply-site:
+    get:
+      consumes:
+      - application/json
+      description: 获取博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供 operate/apply 申请页交换友链时复制添加
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiInfo.ApplySiteResponse'
+              type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      summary: '[用户] 获取申请站点展示'
+      tags:
+      - 站点信息接口
   /api/v1/info/blogger:
     get:
       consumes:
       - application/json
-      description: 获取博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供交换友链时复制添加
+      description: 获取博主个人展示信息（昵称/简介/博客链接/头像），供「关于我」名士帖展示
       produces:
       - application/json
       responses:

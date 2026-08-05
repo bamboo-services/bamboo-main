@@ -11,14 +11,17 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type {
   UpdateAboutRequest,
+  UpdateApplySiteRequest,
   UpdateBloggerRequest,
   UpdateSiteRequest,
 } from '@/api/types'
 import {
   getAbout,
+  getApplySiteInfo,
   getBloggerInfo,
   getSiteInfo,
   updateAbout,
+  updateApplySiteInfo,
   updateBloggerInfo,
   updateSiteInfo,
 } from '@/api/info'
@@ -28,6 +31,7 @@ export const siteInfoKeys = {
   all: ['site-info'] as const,
   site: () => [...siteInfoKeys.all, 'site'] as const,
   about: () => [...siteInfoKeys.all, 'about'] as const,
+  applySite: () => [...siteInfoKeys.all, 'apply-site'] as const,
   blogger: () => [...siteInfoKeys.all, 'blogger'] as const,
 }
 
@@ -47,7 +51,15 @@ export function useAbout() {
   })
 }
 
-/** 博主信息（站名、描述、地址、图片、订阅、邮箱）— 供交换友链场景 */
+/** 申请站点展示（站名、描述、地址、图片、订阅、邮箱）— 供 operate/apply 交换友链场景 */
+export function useApplySiteInfo() {
+  return useQuery({
+    queryKey: siteInfoKeys.applySite(),
+    queryFn: getApplySiteInfo,
+  })
+}
+
+/** 博主信息（昵称、简介、博客链接、头像）— 供「关于我」名士帖展示 */
 export function useBloggerInfo() {
   return useQuery({
     queryKey: siteInfoKeys.blogger(),
@@ -78,6 +90,19 @@ export function useUpdateAbout() {
       void qc.invalidateQueries({ queryKey: siteInfoKeys.about() })
     },
     onError: (err: Error) => toast.error(err.message || '自我介绍保存失败'),
+  })
+}
+
+/** 更新申请站点展示 */
+export function useUpdateApplySiteInfo() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (req: UpdateApplySiteRequest) => updateApplySiteInfo(req),
+    onSuccess: () => {
+      toast.success('申请站点展示已保存')
+      void qc.invalidateQueries({ queryKey: siteInfoKeys.applySite() })
+    },
+    onError: (err: Error) => toast.error(err.message || '申请站点展示保存失败'),
   })
 }
 

@@ -10,13 +10,13 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import { useState } from 'react'
-import type { ApplyLinkRequest, BloggerInfoResponse } from '@/api/types'
+import type { ApplyLinkRequest, ApplySiteInfoResponse } from '@/api/types'
 import { UserLinkForm } from '@/components/user-link-form'
 import { BrushUnderline, EnsoIcon, InkGlow } from '@/components/ink-wash'
 import { Button } from '@/components/ui/button'
 import { enter } from '@/lib/motion'
 import { useApplyLink } from '@/hooks/use-links'
-import { useBloggerInfo } from '@/hooks/use-site-info'
+import { useApplySiteInfo } from '@/hooks/use-site-info'
 import { getToken } from '@/lib/auth'
 
 export const Route = createFileRoute('/operate/apply')({
@@ -35,7 +35,7 @@ function ApplyPage() {
   const applyMutation = useApplyLink()
   const [submitted, setSubmitted] = useState(false)
   const isAuthed = getToken() != null
-  const { data: blogger } = useBloggerInfo()
+  const { data: applySite } = useApplySiteInfo()
 
   const handleSubmit = (req: ApplyLinkRequest) => {
     applyMutation.mutate(req, {
@@ -121,7 +121,7 @@ function ApplyPage() {
             </motion.section>
 
             {/* 博主站点信息 · 交换友链提示 */}
-            <ExchangeInfoCard blogger={blogger} reduced={reduced} />
+            <ExchangeInfoCard applySite={applySite} reduced={reduced} />
           </div>
         </>
       )}
@@ -133,22 +133,22 @@ function ApplyPage() {
  * 博主站点信息卡：交换友链前需先在自站添加博主友链。
  *
  * 六个字段（站点名字/描述/地址/图片/订阅/邮箱）全部取自后端
- * GET /info/blogger（admin「博主信息」设置面板维护），不再写死前端。
+ * GET /info/apply-site（admin「申请展示」设置面板维护），不再写死前端。
  */
 function ExchangeInfoCard({
-  blogger,
+  applySite,
   reduced,
 }: {
-  blogger?: BloggerInfoResponse
+  applySite?: ApplySiteInfoResponse
   reduced: boolean
 }) {
   const rows = [
-    { label: '站点名字', value: blogger?.site_name ?? '—' },
-    { label: '站点描述', value: blogger?.site_description ?? '—' },
-    { label: '站点地址', value: blogger?.site_url ?? '—' },
-    { label: '站点图片', value: blogger?.site_image ?? '—' },
-    { label: '站点订阅', value: blogger?.rss ?? '—' },
-    { label: '站长邮箱', value: blogger?.email ?? '—' },
+    { label: '站点名字', value: applySite?.site_name ?? '—' },
+    { label: '站点描述', value: applySite?.site_description ?? '—' },
+    { label: '站点地址', value: applySite?.site_url ?? '—' },
+    { label: '站点图片', value: applySite?.site_image ?? '—' },
+    { label: '站点订阅', value: applySite?.rss ?? '—' },
+    { label: '站长邮箱', value: applySite?.email ?? '—' },
   ]
 
   return (
