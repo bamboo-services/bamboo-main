@@ -10,10 +10,9 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { motion, useReducedMotion } from 'motion/react'
-import type { SponsorChannel, SponsorRecord } from '@/api/types'
+import type { SponsorRecord } from '@/api/types'
 import type { MotionDivProps } from '@/lib/motion'
-import { getPublicChannels, getPublicRecords } from '@/api/sponsor'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { getPublicRecords } from '@/api/sponsor'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BambooArt, EnsoEmpty } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
@@ -118,16 +117,11 @@ function SuixiSignButton() {
 
 function SponsorPage() {
   const reduced = useReducedMotion() ?? false
-  const channelsQuery = useQuery({
-    queryKey: ['public', 'channels'],
-    queryFn: getPublicChannels,
-  })
   const recordsQuery = useQuery({
     queryKey: ['public', 'records', 1],
     queryFn: () => getPublicRecords({ page: 1, pageSize: 20 }),
   })
 
-  const channels = channelsQuery.data ?? []
   const recordsPage = recordsQuery.data
   const records = recordsPage?.data ?? []
   const total = recordsPage?.pagination.total ?? 0
@@ -241,33 +235,7 @@ function SponsorPage() {
         </div>
       </section>
 
-      {/* ═══════════ 渠道（列表直接展示，无需分组标题） ═══════════ */}
-      <section className="py-16 md:py-20">
-        <div className="mx-auto w-full max-w-6xl px-6 md:px-10">
-          {channelsQuery.isLoading ? (
-            <div className="grid gap-6 sm:grid-cols-2">
-              {Array.from({ length: 2 }).map((_, i) => (
-                <Skeleton key={i} className="h-28 rounded-lg" />
-              ))}
-            </div>
-          ) : channels.length > 0 ? (
-            <motion.div
-              {...scrollReveal(reduced)}
-              className="grid gap-6 sm:grid-cols-2"
-            >
-              {channels.map((ch) => (
-                <ChannelCard key={ch.id.toString()} channel={ch} />
-              ))}
-            </motion.div>
-          ) : (
-            <p className="text-[15px] text-text-secondary">
-              暂未开放赞助渠道。
-            </p>
-          )}
-        </div>
-      </section>
-
-      {/* ═══════════ 贰 · 记录（感恩账册 · 水印「录」全出血） ═══════════ */}
+      {/* ═══════════ 记录（感恩账册 · 水印「录」全出血） ═══════════ */}
       <section className="relative overflow-hidden border-y border-border/70">
         <span
           className="pointer-events-none absolute -bottom-12 right-[6%] select-none font-serif text-[170px] font-black leading-none text-text-primary opacity-[0.04] md:text-[220px]"
@@ -325,34 +293,6 @@ function SponsorPage() {
         </div>
       </section>
     </>
-  )
-}
-
-/** 渠道卡（雅致供奉） */
-function ChannelCard({ channel }: { channel: SponsorChannel }) {
-  return (
-    <div className="group relative overflow-hidden rounded-lg border border-border bg-card p-8 transition-all duration-500 hover:-translate-y-1 hover:border-leaf-muted hover:shadow-[0_24px_50px_-30px_oklch(0.32_0.06_155/0.45)]">
-      <span className="absolute left-8 right-8 top-[-1px] h-0.5 origin-left scale-x-0 rounded-full bg-leaf-deep transition-transform duration-500 group-hover:scale-x-100" />
-      <div className="flex items-center gap-5">
-        <Avatar className="size-16 shrink-0 rounded-full ring-2 ring-ring-glow">
-          <AvatarImage src={channel.icon ?? undefined} alt={channel.name} />
-          <AvatarFallback className="bg-leaf-light/50 font-serif text-2xl font-bold text-leaf-deep">
-            {channel.name.slice(0, 1)}
-          </AvatarFallback>
-        </Avatar>
-        <div className="min-w-0">
-          <h3 className="font-serif text-xl font-bold text-text-primary">
-            {channel.name}
-          </h3>
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary">
-            已收到 {channel.sponsor_count} 次随喜
-          </p>
-        </div>
-        <span className="ml-auto shrink-0 rounded border border-leaf-muted/60 bg-leaf-light/20 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.25em] text-leaf-deep">
-          {channel.status ? '开放' : '关闭'}
-        </span>
-      </div>
-    </div>
   )
 }
 
