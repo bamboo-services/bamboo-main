@@ -41,6 +41,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { domainOf } from '@/components/about/friend-card-shared'
 import { CHAPTERS, LINK_LEVEL, groupLinksByGroup } from '@/lib/friend-groups'
 import { accentOf, isFancyColor } from '@/lib/colors'
+import { isBuiltinGroupId } from '@/lib/locations'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -255,6 +256,7 @@ function SectionBlock({
   children: React.ReactNode
 }) {
   const ungrouped = section.groupId === 'none'
+  const builtin = isBuiltinGroupId(section.groupId)
   const {
     attributes,
     listeners,
@@ -265,7 +267,7 @@ function SectionBlock({
   } = useSortable({
     id: containerId(section),
     data: { type: 'group' },
-    disabled: ungrouped,
+    disabled: ungrouped || builtin,
   })
   const { setNodeRef: setDropRef } = useDroppable({
     id: dropId(section),
@@ -286,13 +288,15 @@ function SectionBlock({
         {...listeners}
         className={cn(
           'group mb-3 flex items-center gap-2.5',
-          !ungrouped && 'cursor-grab active:cursor-grabbing',
+          !ungrouped && !builtin && 'cursor-grab active:cursor-grabbing',
         )}
       >
         <GripVertical
           className={cn(
             'size-4 shrink-0 text-text-secondary transition-opacity',
-            ungrouped ? 'opacity-0' : 'opacity-0 group-hover:opacity-100',
+            ungrouped || builtin
+              ? 'opacity-0'
+              : 'opacity-0 group-hover:opacity-100',
           )}
           aria-hidden
         />
@@ -399,9 +403,10 @@ export function RankingBoard() {
       })),
     )
     if (items.length === 0) return
-    // 章节序随分组排序值一并持久化（数字越小权重越大，与位置管理同源）
+    // 章节序随分组排序值一并持久化（数字越小权重越大，与位置管理同源）；
+    // 内置分组（首页/友链页）为固定预设，不参与排序持久化
     const groupIds = current
-      .filter((s) => s.groupId !== 'none')
+      .filter((s) => s.groupId !== 'none' && !isBuiltinGroupId(s.groupId))
       .map((s) => BigInt(s.groupId))
     setSaving(true)
     const done = () => {

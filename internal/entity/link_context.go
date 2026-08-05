@@ -46,7 +46,9 @@ type LinkFriend struct {
 	ScreenshotAt       *time.Time              `json:"screenshot_at,omitempty" gorm:"comment:友链站点截图最近更新时间"`                                     // 友链站点截图最近更新时间
 
 	// 关联关系
-	GroupFKey *LinkGroup `json:"group_f_key,omitempty" gorm:"foreignKey:GroupID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;comment:友链分组外键"` // 友链分组外键
+	// 注意：constraint:"-" 跳过数据库外键约束——首页/友链页为内置分组（不落库），
+	// group_id 可能引用保留 ID，数据库层面需放行该引用值；分组关联的清理由业务层保证。
+	GroupFKey *LinkGroup `json:"group_f_key,omitempty" gorm:"foreignKey:GroupID;references:ID;constraint:-;comment:友链分组外键"` // 友链分组外键
 	// 注意：constraint:"-" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），
 	// color_id 可能引用保留 ID，数据库层面需放行该引用值；颜色关联的清理由业务层保证。
 	ColorFKey *LinkColor  `json:"color_f_key,omitempty" gorm:"foreignKey:ColorID;references:ID;constraint:-;comment:友链颜色外键"`                                // 友链颜色外键

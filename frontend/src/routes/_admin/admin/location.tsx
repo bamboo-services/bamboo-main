@@ -12,7 +12,7 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
-import { Pencil, Plus, Power, PowerOff, Trash2 } from 'lucide-react'
+import { Lock, Pencil, Plus, Power, PowerOff, Trash2 } from 'lucide-react'
 import type { LinkGroup } from '@/api/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -50,6 +50,7 @@ import {
 } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
 import { cn } from '@/lib/utils'
+import { isBuiltinGroup } from '@/lib/locations'
 import {
   useCreateGroup,
   useDeleteGroup,
@@ -242,8 +243,16 @@ function LocationPage() {
               groups.map((group) => (
                 <TableRow key={group.id.toString()} className={inkTableRow}>
                   <TableCell className={inkTd}>
-                    <span className="font-serif font-semibold text-text-primary">
-                      {group.name}
+                    <span className="flex items-center gap-2">
+                      <span className="font-serif font-semibold text-text-primary">
+                        {group.name}
+                      </span>
+                      {isBuiltinGroup(group) && (
+                        <InkBadge tone="leaf">
+                          <Lock className="size-3" />
+                          内置
+                        </InkBadge>
+                      )}
                     </span>
                   </TableCell>
                   <TableCell className={cn(inkTd, 'hidden md:table-cell')}>
@@ -257,52 +266,58 @@ function LocationPage() {
                     </span>
                   </TableCell>
                   <TableCell className={inkTd}>
-                    {group.status ? (
+                    {isBuiltinGroup(group) || group.status ? (
                       <InkBadge tone="leaf">启用</InkBadge>
                     ) : (
                       <InkBadge tone="neutral">禁用</InkBadge>
                     )}
                   </TableCell>
                   <TableCell className={inkTd}>
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="编辑"
-                        className="size-8 cursor-pointer"
-                        onClick={() => openEdit(group)}
-                      >
-                        <Pencil className="size-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title={group.status ? '禁用' : '启用'}
-                        className="size-8 cursor-pointer"
-                        disabled={updateStatus.isPending}
-                        onClick={() =>
-                          updateStatus.mutate({
-                            id: group.id,
-                            status: !group.status,
-                          })
-                        }
-                      >
-                        {group.status ? (
-                          <PowerOff className="size-4" />
-                        ) : (
-                          <Power className="size-4" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="删除"
-                        className="size-8 cursor-pointer text-destructive hover:text-destructive"
-                        onClick={() => setDeleteTarget(group)}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
+                    {isBuiltinGroup(group) ? (
+                      <span className="font-mono text-xs text-text-secondary">
+                        内置位置
+                      </span>
+                    ) : (
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="编辑"
+                          className="size-8 cursor-pointer"
+                          onClick={() => openEdit(group)}
+                        >
+                          <Pencil className="size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title={group.status ? '禁用' : '启用'}
+                          className="size-8 cursor-pointer"
+                          disabled={updateStatus.isPending}
+                          onClick={() =>
+                            updateStatus.mutate({
+                              id: group.id,
+                              status: !group.status,
+                            })
+                          }
+                        >
+                          {group.status ? (
+                            <PowerOff className="size-4" />
+                          ) : (
+                            <Power className="size-4" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="删除"
+                          className="size-8 cursor-pointer text-destructive hover:text-destructive"
+                          onClick={() => setDeleteTarget(group)}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

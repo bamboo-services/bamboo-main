@@ -354,6 +354,10 @@ func (l *LinkLogic) UpdateSort(ctx context.Context, req *apiLink.FriendSortReque
 	groupIDSet := make(map[xSnowflake.SnowflakeID]struct{})
 	for _, item := range req.Items {
 		if item.GroupID.Provided() && item.GroupID.Value() != nil {
+			// 内置分组恒存在且启用（不落库），跳过数据库存在性校验
+			if entity.IsBuiltinGroupID(*item.GroupID.Value()) {
+				continue
+			}
 			groupIDSet[*item.GroupID.Value()] = struct{}{}
 		}
 	}
