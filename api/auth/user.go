@@ -18,8 +18,9 @@ type UserInfoResponse struct {
 	User entity.SystemUser `json:"user"`
 }
 
-// UpdateProfileRequest 更新用户资料请求（昵称/头像）
+// UpdateProfileRequest 更新用户资料请求（用户名/昵称/头像）
 type UpdateProfileRequest struct {
+	Username string `json:"username" binding:"omitempty,min=1,max=50" example:"xiao_lfeng"`
 	Nickname string `json:"nickname" binding:"omitempty,min=1,max=50" example:"筱锋"`
 	Avatar   string `json:"avatar" binding:"omitempty,url,max=500" example:"https://example.com/avatar.jpg"`
 }

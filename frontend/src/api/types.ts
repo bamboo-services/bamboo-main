@@ -640,6 +640,7 @@ export interface RegisterResponse {
 
 /** 更新用户资料请求（PUT /api/v1/user/profile） */
 export interface UpdateProfileRequest {
+  username?: string
   nickname?: string
   avatar?: string
 }

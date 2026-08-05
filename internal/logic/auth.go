@@ -371,11 +371,29 @@ func (a *AuthLogic) GetUserInfo(ctx context.Context, userID xSnowflake.Snowflake
 	return user, nil
 }
 
-// UpdateProfile 更新用户资料（昵称/头像）
+// UpdateProfile 更新用户资料（用户名/昵称/头像）
 //
-// 仅更新请求中非空的字段；无任何待更新字段时直接返回当前用户信息。
+// 仅更新请求中非空的字段；用户名仅在发生变更时校验唯一性（排除自身），
+// 避免无谓的数据库写入；无任何待更新字段时直接返回当前用户信息。
 func (a *AuthLogic) UpdateProfile(ctx context.Context, userID xSnowflake.SnowflakeID, req *apiAuth.UpdateProfileRequest) (*entity.SystemUser, *xError.Error) {
 	updates := map[string]any{}
+	if req.Username != "" {
+		// 仅当用户名发生变更时校验唯一性（排除自身），避免无谓的数据库写入
+		user, xErr := a.GetUserInfo(ctx, userID)
+		if xErr != nil {
+			return nil, xErr
+		}
+		if user.Username != req.Username {
+			exists, xErr := a.repo.user.ExistsByUsernameExceptID(ctx, req.Username, userID)
+			if xErr != nil {
+				return nil, xErr
+			}
+			if exists {
+				return nil, xError.NewError(ctx, xError.ParameterError, "用户名已存在", false)
+			}
+			updates["username"] = req.Username
+		}
+	}
 	if req.Nickname != "" {
 		updates["nickname"] = req.Nickname
 	}

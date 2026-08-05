@@ -32,10 +32,11 @@ function AccountPage() {
   const updateProfile = useUpdateProfile()
 
   // 资料表单（用户加载完成后预填）
-  const [profile, setProfile] = useState({ nickname: '', avatar: '' })
+  const [profile, setProfile] = useState({ username: '', nickname: '', avatar: '' })
   useEffect(() => {
     if (user) {
       setProfile({
+        username: user.username ?? '',
         nickname: user.nickname ?? '',
         avatar: user.avatar ?? '',
       })
@@ -45,6 +46,7 @@ function AccountPage() {
   const handleProfileSubmit = (e: FormEvent) => {
     e.preventDefault()
     updateProfile.mutate({
+      username: profile.username.trim() || undefined,
       nickname: profile.nickname.trim() || undefined,
       avatar: profile.avatar.trim() || undefined,
     })
@@ -122,6 +124,21 @@ function AccountPage() {
                     该邮箱尚未验证（SSO 账号可在首次验证后获得标识）。
                   </p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="username">用户名</Label>
+                <Input
+                  id="username"
+                  placeholder="登录使用的用户名"
+                  value={profile.username}
+                  onChange={(e) =>
+                    setProfile({ ...profile, username: e.target.value })
+                  }
+                />
+                <p className="text-xs text-text-secondary">
+                  用户名是登录凭证，修改后请使用新用户名登录。
+                </p>
               </div>
 
               <div className="space-y-2">

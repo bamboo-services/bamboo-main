@@ -253,7 +253,7 @@ func (h *AuthHandler) GetUserInfo(c *gin.Context) {
 // UpdateProfile 更新用户资料
 //
 // @Summary [用户] 更新用户资料
-// @Description 更新当前用户的昵称与头像
+// @Description 更新当前用户的用户名、昵称与头像
 // @Tags 认证接口
 // @Accept json
 // @Produce json

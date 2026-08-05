@@ -144,6 +144,22 @@ func (r *SystemUserRepo) ExistsByUsername(ctx context.Context, username string) 
 	return count > 0, nil
 }
 
+// ExistsByUsernameExceptID 判断用户名是否已被其他用户占用
+func (r *SystemUserRepo) ExistsByUsernameExceptID(ctx context.Context, username string, exceptID xSnowflake.SnowflakeID) (bool, *xError.Error) {
+	r.log.Info(ctx, "ExistsByUsernameExceptID - 检查用户名")
+
+	var count int64
+	query := r.db.WithContext(ctx).Model(&entity.SystemUser{}).Where("username = ?", username)
+	if exceptID > 0 {
+		query = query.Where("id <> ?", exceptID)
+	}
+	err := query.Count(&count).Error
+	if err != nil {
+		return false, xError.NewError(ctx, xError.DatabaseError, "检查用户名失败", true, err)
+	}
+	return count > 0, nil
+}
+
 // ExistsByEmailExceptID 判断邮箱是否已被其他用户占用
 func (r *SystemUserRepo) ExistsByEmailExceptID(ctx context.Context, email string, exceptID xSnowflake.SnowflakeID) (bool, *xError.Error) {
 	r.log.Info(ctx, "ExistsByEmailExceptID - 检查邮箱")
