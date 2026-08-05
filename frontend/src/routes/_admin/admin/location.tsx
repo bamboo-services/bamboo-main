@@ -52,11 +52,9 @@ import { enter } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 import { isBuiltinGroup } from '@/lib/locations'
 import {
-  useBuiltinInvalidGroup,
   useCreateGroup,
   useDeleteGroup,
   useGroups,
-  useUpdateBuiltinInvalidGroup,
   useUpdateGroup,
   useUpdateGroupStatus,
 } from '@/hooks/use-groups'
@@ -70,20 +68,6 @@ const PAGE_SIZE = 10
 function LocationPage() {
   const reduced = useReducedMotion() ?? false
   const [pageIndex, setPageIndex] = useState(0)
-
-  // 内置「已失效」分组配置（名称/描述经 bm_system 热修改）
-  const builtinInvalidQuery = useBuiltinInvalidGroup()
-  const updateBuiltinInvalid = useUpdateBuiltinInvalidGroup()
-  const [invalidName, setInvalidName] = useState('')
-  const [invalidDesc, setInvalidDesc] = useState('')
-
-  // 配置加载后预填当前值
-  useEffect(() => {
-    if (builtinInvalidQuery.data) {
-      setInvalidName(builtinInvalidQuery.data.name)
-      setInvalidDesc(builtinInvalidQuery.data.description ?? '')
-    }
-  }, [builtinInvalidQuery.data])
 
   // 新建 / 编辑弹窗（共用一个受控表单）
   const [formOpen, setFormOpen] = useState(false)
@@ -189,64 +173,6 @@ function LocationPage() {
       />
 
       <BambooRule reduced={reduced} delay={0.12} />
-
-      {/* 内置「已失效」分组配置（经 bm_system 热修改） */}
-      <motion.section
-        {...enter(reduced, 0.15, {
-          initial: { opacity: 0, y: 10 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.4, ease: 'easeOut' },
-        })}
-        className="rounded-lg border border-border bg-card/60 p-5"
-      >
-        <div>
-          <p className="flex items-center gap-2 font-serif font-semibold text-text-primary">
-            <Lock className="size-4 text-leaf-deep" />
-            内置分组 · 已失效
-          </p>
-          <p className="mt-0.5 text-xs text-text-secondary">
-            失效友链自动归入该分组；名称与描述经 bm_system 热修改，公开「已失效」章节同步生效。
-          </p>
-        </div>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="invalidName">分组名称</Label>
-            <Input
-              id="invalidName"
-              placeholder="已失效"
-              value={invalidName}
-              onChange={(e) => setInvalidName(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="invalidDesc">分组描述</Label>
-            <Input
-              id="invalidDesc"
-              placeholder="可选，说明该分组的用途"
-              value={invalidDesc}
-              onChange={(e) => setInvalidDesc(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="mt-4 flex justify-end">
-          <Button
-            className="cursor-pointer"
-            disabled={
-              !invalidName.trim() ||
-              builtinInvalidQuery.isLoading ||
-              updateBuiltinInvalid.isPending
-            }
-            onClick={() =>
-              updateBuiltinInvalid.mutate({
-                name: invalidName.trim(),
-                description: invalidDesc.trim(),
-              })
-            }
-          >
-            {updateBuiltinInvalid.isPending ? '保存中…' : '保存配置'}
-          </Button>
-        </div>
-      </motion.section>
 
       {/* 分组表格 */}
       <motion.section

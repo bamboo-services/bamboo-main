@@ -12,7 +12,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import { Contact, Globe, Save, UserRound } from 'lucide-react'
+import { Contact, Globe, Lock, Save, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -28,12 +28,16 @@ import {
   useUpdateBloggerInfo,
   useUpdateSiteInfo,
 } from '@/hooks/use-site-info'
+import {
+  useBuiltinInvalidGroup,
+  useUpdateBuiltinInvalidGroup,
+} from '@/hooks/use-groups'
 
 export const Route = createFileRoute('/_admin/admin/setting')({
   component: SettingPage,
 })
 
-type SettingSection = 'site' | 'about' | 'blogger'
+type SettingSection = 'site' | 'about' | 'blogger' | 'invalid'
 
 /**
  * 系统设置：主从面板 · 扁平化。
@@ -86,6 +90,13 @@ function SettingPage() {
               active={section === 'blogger'}
               onClick={() => setSection('blogger')}
             />
+            <InkNavRow
+              icon={<Lock className="size-4" />}
+              title="已失效分组"
+              desc="失效友链自动归集"
+              active={section === 'invalid'}
+              onClick={() => setSection('invalid')}
+            />
           </div>
           <p className="mt-6 px-3.5 font-serif text-xs italic leading-relaxed text-text-secondary/80">
             「 一处落笔，全站生辉 」
@@ -97,8 +108,10 @@ function SettingPage() {
           <SiteInfoPanel reduced={reduced} />
         ) : section === 'about' ? (
           <AboutPanel reduced={reduced} />
-        ) : (
+        ) : section === 'blogger' ? (
           <BloggerInfoPanel reduced={reduced} />
+        ) : (
+          <InvalidGroupPanel reduced={reduced} />
         )}
       </div>
     </div>
@@ -384,6 +397,83 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
             <Button onClick={handleSave} disabled={updateBlogger.isPending}>
               <Save className="mr-2 h-4 w-4" />
               {updateBlogger.isPending ? '保存中…' : '保存博主信息'}
+            </Button>
+          </div>
+        </>
+      )}
+    </motion.section>
+  )
+}
+
+/** 内置「已失效」分组面板：失效友链自动归集分组，名称/描述经 bm_system 热修改 */
+function InvalidGroupPanel({ reduced }: { reduced: boolean }) {
+  const { data, isLoading } = useBuiltinInvalidGroup()
+  const updateBuiltinInvalid = useUpdateBuiltinInvalidGroup()
+
+  const [invalidName, setInvalidName] = useState('')
+  const [invalidDesc, setInvalidDesc] = useState('')
+
+  useEffect(() => {
+    if (data) {
+      setInvalidName(data.name)
+      setInvalidDesc(data.description ?? '')
+    }
+  }, [data])
+
+  const handleSave = () => {
+    updateBuiltinInvalid.mutate({
+      name: invalidName.trim(),
+      description: invalidDesc.trim(),
+    })
+  }
+
+  return (
+    <motion.section
+      {...enter(reduced, 0.18, {
+        initial: { opacity: 0, y: 10 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.4, ease: 'easeOut' },
+      })}
+      className="relative"
+    >
+      <PanelHeader kicker="INVALID GROUP · 已失效" title="已失效分组" />
+
+      {isLoading ? (
+        <div className="relative mt-8 grid gap-x-6 gap-y-5 md:grid-cols-2">
+          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-9 w-full" />
+        </div>
+      ) : (
+        <>
+          <div className="relative mt-8 grid gap-x-6 gap-y-5 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="invalidGroupName">分组名称</Label>
+              <Input
+                id="invalidGroupName"
+                value={invalidName}
+                onChange={(e) => setInvalidName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invalidGroupDesc">分组描述</Label>
+              <Input
+                id="invalidGroupDesc"
+                value={invalidDesc}
+                onChange={(e) => setInvalidDesc(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="relative mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-5">
+            <p className="font-serif text-sm italic text-text-secondary">
+              失效友链自动归入该分组，名称与描述经 bm_system 热修改，公开「已失效」章节同步生效。
+            </p>
+            <Button
+              onClick={handleSave}
+              disabled={!invalidName.trim() || updateBuiltinInvalid.isPending}
+            >
+              <Save className="mr-2 h-4 w-4" />
+              {updateBuiltinInvalid.isPending ? '保存中…' : '保存分组配置'}
             </Button>
           </div>
         </>
