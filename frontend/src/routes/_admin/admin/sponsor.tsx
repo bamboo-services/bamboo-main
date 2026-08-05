@@ -48,13 +48,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import {
   BambooRule,
   EnsoEmpty,
   InkBadge,
-  InkStat,
   InkSwitch,
   PageHead,
   inkTableHeadRow,
@@ -142,10 +140,7 @@ function SponsorPage() {
   const reduced = useReducedMotion() ?? false
   // 统计仅取总数：轻量查询（page_size=1），与面板内的分页查询互不影响
   const recordsTotal = useAdminRecords({ page: 1, page_size: 1 })
-  const allChannels = useAllChannels()
-
   const recordCount = recordsTotal.data?.pagination.total ?? 0
-  const channelCount = allChannels.data?.length ?? 0
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -154,68 +149,30 @@ function SponsorPage() {
         title="赞助管理"
         sub="管理所有赞助记录与赞助渠道，记录每一份支持。"
         actions={
-          <Link to="/admin/sponsor/verify">
-            <Button variant="outline" className="cursor-pointer">
-              赞助审核
-              {(recordsTotal.data?.pending_count ?? 0) > 0 && (
-                <InkBadge tone="pending" className="ml-2 px-2">
-                  {recordsTotal.data?.pending_count}
-                </InkBadge>
-              )}
-            </Button>
-          </Link>
+          <div className="flex items-center gap-4">
+            <span className="font-mono text-xs text-text-secondary tabular-nums">
+              共{' '}
+              <span className="font-semibold text-leaf-deep">{recordCount}</span>{' '}
+              条记录
+            </span>
+            <Link to="/admin/sponsor/verify">
+              <Button variant="outline" className="cursor-pointer">
+                赞助审核
+                {(recordsTotal.data?.pending_count ?? 0) > 0 && (
+                  <InkBadge tone="pending" className="ml-2 px-2">
+                    {recordsTotal.data?.pending_count}
+                  </InkBadge>
+                )}
+              </Button>
+            </Link>
+          </div>
         }
       />
 
       <BambooRule reduced={reduced} delay={0.12} />
 
-      {/* 统计卡片 */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <motion.div
-          {...enter(reduced, 0.18, {
-            initial: { opacity: 0, y: 10 },
-            animate: { opacity: 1, y: 0 },
-            transition: { duration: 0.4, ease: 'easeOut' },
-          })}
-        >
-          <InkStat
-            label="赞助记录数"
-            value={recordCount}
-            watermark="赞"
-            hint="累计收到的赞助"
-            loading={recordsTotal.isLoading}
-          />
-        </motion.div>
-        <motion.div
-          {...enter(reduced, 0.24, {
-            initial: { opacity: 0, y: 10 },
-            animate: { opacity: 1, y: 0 },
-            transition: { duration: 0.4, ease: 'easeOut' },
-          })}
-        >
-          <InkStat
-            label="赞助渠道数"
-            value={channelCount}
-            watermark="渠"
-            hint="已配置的收款渠道"
-            loading={allChannels.isLoading}
-          />
-        </motion.div>
-      </div>
-
-      {/* 双标签：赞助记录 + 赞助渠道 */}
-      <Tabs defaultValue="records">
-        <TabsList>
-          <TabsTrigger value="records">赞助记录</TabsTrigger>
-          <TabsTrigger value="channels">赞助渠道</TabsTrigger>
-        </TabsList>
-        <TabsContent value="records" className="mt-4">
-          <RecordsPanel reduced={reduced} />
-        </TabsContent>
-        <TabsContent value="channels" className="mt-4">
-          <ChannelsPanel reduced={reduced} />
-        </TabsContent>
-      </Tabs>
+      {/* 记录面板：渠道卡带内联 + 记录表格，一屏同览 */}
+      <RecordsPanel reduced={reduced} />
     </div>
   )
 }
@@ -277,58 +234,73 @@ function RecordsPanel({ reduced }: { reduced: boolean }) {
 
   return (
     <div className="space-y-4">
-      {/* 工具栏：搜索 + 渠道筛选 + 添加 */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative w-full max-w-xs">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
-          <Input
-            placeholder="搜索赞助者昵称…"
-            className="pl-9"
-            value={keyword}
+      {/* 工具 + 渠道卡带：一张宣纸卡，记录操作与渠道配置同屏 */}
+      <motion.div
+        {...enter(reduced, 0.18, {
+          initial: { opacity: 0, y: 10 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.4, ease: 'easeOut' },
+        })}
+        className="rounded-lg border border-border bg-card/60 p-5"
+      >
+        {/* 工具栏：搜索 + 渠道筛选 + 状态筛选 + 添加赞助 */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative w-full max-w-xs">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
+            <Input
+              placeholder="搜索赞助者昵称…"
+              className="pl-9"
+              value={keyword}
+              onChange={(e) => {
+                setKeyword(e.target.value)
+                setPage(1)
+              }}
+            />
+          </div>
+          <Select
+            aria-label="按渠道筛选"
+            className="w-40"
+            value={channelFilter?.toString() ?? ''}
             onChange={(e) => {
-              setKeyword(e.target.value)
+              const value = e.target.value
+              setChannelFilter(value ? BigInt(value) : null)
               setPage(1)
             }}
-          />
+          >
+            <option value="">全部渠道</option>
+            {channels.map((channel) => (
+              <option key={channel.id.toString()} value={channel.id.toString()}>
+                {channel.name}
+              </option>
+            ))}
+          </Select>
+          <Select
+            aria-label="按审核状态筛选"
+            className="w-36"
+            value={statusFilter?.toString() ?? ''}
+            onChange={(e) => {
+              const value = e.target.value
+              setStatusFilter(value ? Number(value) : null)
+              setPage(1)
+            }}
+          >
+            <option value="">全部状态</option>
+            <option value="0">待审核</option>
+            <option value="1">已通过</option>
+            <option value="2">已拒绝</option>
+          </Select>
+          <div className="flex-1" />
+          <Button className="cursor-pointer" onClick={() => setFormTarget('new')}>
+            <Plus className="mr-2 size-4" />
+            添加赞助
+          </Button>
         </div>
-        <Select
-          aria-label="按渠道筛选"
-          className="w-40"
-          value={channelFilter?.toString() ?? ''}
-          onChange={(e) => {
-            const value = e.target.value
-            setChannelFilter(value ? BigInt(value) : null)
-            setPage(1)
-          }}
-        >
-          <option value="">全部渠道</option>
-          {channels.map((channel) => (
-            <option key={channel.id.toString()} value={channel.id.toString()}>
-              {channel.name}
-            </option>
-          ))}
-        </Select>
-        <Select
-          aria-label="按审核状态筛选"
-          className="w-36"
-          value={statusFilter?.toString() ?? ''}
-          onChange={(e) => {
-            const value = e.target.value
-            setStatusFilter(value ? Number(value) : null)
-            setPage(1)
-          }}
-        >
-          <option value="">全部状态</option>
-          <option value="0">待审核</option>
-          <option value="1">已通过</option>
-          <option value="2">已拒绝</option>
-        </Select>
-        <div className="flex-1" />
-        <Button className="cursor-pointer" onClick={() => setFormTarget('new')}>
-          <Plus className="mr-2 size-4" />
-          添加赞助
-        </Button>
-      </div>
+
+        {/* 渠道卡带：渠道配置内联，紧随搜索/筛选之后 */}
+        <div className="mt-5 border-t border-border/60 pt-5">
+          <ChannelStrip reduced={reduced} />
+        </div>
+      </motion.div>
 
       {/* 记录表格 */}
       <motion.div
@@ -752,10 +724,18 @@ function RecordFormDialog({
 // 赞助渠道
 // ---------------------------------------------------------------------------
 
-/** 赞助渠道面板：搜索 / 服务端分页表格 / 增删改 / 状态切换 */
-function ChannelsPanel({ reduced }: { reduced: boolean }) {
-  const [page, setPage] = useState(1)
-  const [keyword, setKeyword] = useState('')
+/** 渠道卡带：全量渠道卡片横排，内联在记录工具栏之后；开关 / 编辑 / 删除 */
+function ChannelStrip({ reduced }: { reduced: boolean }) {
+  // 渠道全量（page_size 上限 100）：取完整字段供编辑回填；赞助渠道数量远低于上限
+  const channelsQuery = useAdminChannels({
+    page: 1,
+    page_size: 100,
+    order_by: 'sort_order',
+    order: 'asc',
+  })
+  const deleteChannel = useDeleteChannel()
+  const updateStatus = useUpdateChannelStatus()
+
   const [formTarget, setFormTarget] = useState<
     SponsorChannelAdmin | 'new' | null
   >(null)
@@ -763,19 +743,7 @@ function ChannelsPanel({ reduced }: { reduced: boolean }) {
     null,
   )
 
-  const channelsQuery = useAdminChannels({
-    page,
-    page_size: PAGE_SIZE,
-    name: keyword.trim() || undefined,
-    order_by: 'sort_order',
-    order: 'asc',
-  })
-  const deleteChannel = useDeleteChannel()
-  const updateStatus = useUpdateChannelStatus()
-
   const channels = channelsQuery.data?.data ?? []
-  const total = channelsQuery.data?.pagination.total ?? 0
-  const totalPages = channelsQuery.data?.pagination.total_pages ?? 1
 
   const handleDelete = () => {
     if (!deleteTarget) return
@@ -785,195 +753,62 @@ function ChannelsPanel({ reduced }: { reduced: boolean }) {
   }
 
   return (
-    <div className="space-y-4">
-      {/* 工具栏：搜索 + 添加 */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative w-full max-w-xs">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
-          <Input
-            placeholder="搜索渠道名称…"
-            className="pl-9"
-            value={keyword}
-            onChange={(e) => {
-              setKeyword(e.target.value)
-              setPage(1)
-            }}
+    <div>
+      <div className="flex items-center justify-between gap-3">
+        <p className="flex items-center gap-2 font-serif font-semibold text-text-primary">
+          <span
+            aria-hidden
+            className="h-3.5 w-1 -skew-x-12 rounded-sm bg-leaf-deep"
           />
-        </div>
-        <div className="flex-1" />
-        <Button className="cursor-pointer" onClick={() => setFormTarget('new')}>
-          <Plus className="mr-2 size-4" />
+          赞助渠道
+          <span className="font-mono text-xs font-normal text-text-secondary tabular-nums">
+            {channels.length} 个
+          </span>
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          className="cursor-pointer"
+          onClick={() => setFormTarget('new')}
+        >
+          <Plus className="mr-1.5 size-3.5" />
           添加渠道
         </Button>
       </div>
 
-      {/* 渠道表格 */}
       <motion.div
-        {...enter(reduced, 0.2, {
-          initial: { opacity: 0 },
-          animate: { opacity: 1 },
+        {...enter(reduced, 0.22, {
+          initial: { opacity: 0, y: 8 },
+          animate: { opacity: 1, y: 0 },
           transition: { duration: 0.4, ease: 'easeOut' },
         })}
-        className={inkTableWrap}
+        className="mt-3 flex flex-wrap gap-3"
       >
-        <Table>
-          <TableHeader>
-            <TableRow className={cn(inkTableHeadRow, 'hover:bg-muted/30')}>
-              <TableHead className={inkTh}>渠道</TableHead>
-              <TableHead className={cn(inkTh, 'hidden md:table-cell')}>
-                描述
-              </TableHead>
-              <TableHead className={inkTh}>排序</TableHead>
-              <TableHead className={inkTh}>赞助次数</TableHead>
-              <TableHead className={inkTh}>状态</TableHead>
-              <TableHead className={cn(inkTh, 'text-right')}>操作</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {channelsQuery.isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell colSpan={6} className={inkTd}>
-                    <Skeleton className="h-6 w-full" />
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : channels.length === 0 ? (
-              <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={6} className="px-4 py-10">
-                  <EnsoEmpty
-                    title="没有找到赞助渠道"
-                    hint="试试调整搜索关键词，或添加一个新的赞助渠道"
-                  />
-                </TableCell>
-              </TableRow>
-            ) : (
-              channels.map((channel) => {
-                const statusPending =
-                  updateStatus.isPending &&
-                  updateStatus.variables.id === channel.id
-                return (
-                  <TableRow
-                    key={channel.id.toString()}
-                    className={cn('group', inkTableRow)}
-                  >
-                    <TableCell className={inkTd}>
-                      <div className="flex items-center gap-3">
-                        <ChannelIcon
-                          name={channel.name}
-                          icon={channel.icon}
-                          className="size-8 text-xs"
-                        />
-                        <span className="font-serif font-semibold text-text-primary">
-                          {channel.name}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        inkTd,
-                        'hidden max-w-[260px] md:table-cell',
-                      )}
-                    >
-                      <span
-                        className="block truncate text-text-secondary"
-                        title={channel.description ?? undefined}
-                      >
-                        {channel.description || '—'}
-                      </span>
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        inkTd,
-                        'font-mono tabular-nums text-text-secondary',
-                      )}
-                    >
-                      {channel.sort_order}
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        inkTd,
-                        'font-mono font-medium tabular-nums text-text-primary',
-                      )}
-                    >
-                      {channel.sponsor_count}
-                    </TableCell>
-                    <TableCell className={inkTd}>
-                      <div className="flex items-center gap-2">
-                        <InkSwitch
-                          checked={channel.status}
-                          disabled={statusPending}
-                          onToggle={() =>
-                            updateStatus.mutate({
-                              id: channel.id,
-                              status: !channel.status,
-                            })
-                          }
-                        />
-                        <span
-                          className={cn(
-                            'text-sm',
-                            channel.status
-                              ? 'text-text-primary'
-                              : 'text-text-secondary',
-                          )}
-                        >
-                          {statusPending
-                            ? '更新中…'
-                            : channel.status
-                              ? '启用'
-                              : '禁用'}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className={cn(inkTd, 'text-right')}>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8 cursor-pointer opacity-50 transition-opacity hover:opacity-100 group-hover:opacity-100"
-                          >
-                            <MoreHorizontal className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={() => setFormTarget(channel)}
-                          >
-                            <Pencil className="mr-2 size-4" />
-                            编辑
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="cursor-pointer text-destructive focus:text-destructive"
-                            onClick={() => setDeleteTarget(channel)}
-                          >
-                            <Trash2 className="mr-2 size-4" />
-                            删除
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                )
-              })
-            )}
-          </TableBody>
-        </Table>
-
-        {/* 分页 */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
-          <span className="font-mono text-xs text-text-secondary">
-            共 {total} 条 · 第 {page} / {Math.max(totalPages, 1)} 页
-          </span>
-          <Pagination
-            pageIndex={page - 1}
-            pageCount={Math.max(totalPages, 1)}
-            onPageChange={(i) => setPage(i + 1)}
-          />
-        </div>
+        {channelsQuery.isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-[76px] w-44 rounded-lg" />
+          ))
+        ) : channels.length === 0 ? (
+          <p className="w-full rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-text-secondary">
+            还没有配置赞助渠道，点击右上角「添加渠道」创建第一个收款渠道。
+          </p>
+        ) : (
+          channels.map((channel) => (
+            <ChannelCard
+              key={channel.id.toString()}
+              channel={channel}
+              statusPending={
+                updateStatus.isPending &&
+                updateStatus.variables.id === channel.id
+              }
+              onToggle={() =>
+                updateStatus.mutate({ id: channel.id, status: !channel.status })
+              }
+              onEdit={() => setFormTarget(channel)}
+              onDelete={() => setDeleteTarget(channel)}
+            />
+          ))
+        )}
       </motion.div>
 
       {/* 新增 / 编辑弹窗 */}
@@ -1014,6 +849,76 @@ function ChannelsPanel({ reduced }: { reduced: boolean }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  )
+}
+
+/** 单个渠道卡片：图标 + 名称 + 启用开关 + 赞助次数 + 悬停操作菜单 */
+function ChannelCard({
+  channel,
+  statusPending,
+  onToggle,
+  onEdit,
+  onDelete,
+}: {
+  channel: SponsorChannelAdmin
+  statusPending: boolean
+  onToggle: () => void
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  return (
+    <div className="group relative w-44 rounded-lg border border-border bg-card p-3 transition-shadow duration-200 hover:shadow-md">
+      <div className="flex items-center gap-2.5">
+        <ChannelIcon
+          name={channel.name}
+          icon={channel.icon}
+          className="size-8 text-[10px]"
+        />
+        <span className="min-w-0 flex-1 truncate font-serif font-semibold text-text-primary">
+          {channel.name}
+        </span>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 cursor-pointer opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+            >
+              <MoreHorizontal className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem className="cursor-pointer" onClick={onEdit}>
+              <Pencil className="mr-2 size-4" />
+              编辑
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="cursor-pointer text-destructive focus:text-destructive"
+              onClick={onDelete}
+            >
+              <Trash2 className="mr-2 size-4" />
+              删除
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="mt-2.5 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          <InkSwitch
+            checked={channel.status}
+            disabled={statusPending}
+            onToggle={onToggle}
+          />
+          <span className="text-xs text-text-secondary">
+            {statusPending ? '更新中' : channel.status ? '启用' : '禁用'}
+          </span>
+        </div>
+        <span className="font-mono text-xs text-text-secondary tabular-nums">
+          {channel.sponsor_count} 次
+        </span>
+      </div>
     </div>
   )
 }
