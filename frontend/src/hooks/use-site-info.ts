@@ -10,18 +10,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type {
-  UpdateAboutRequest,
   UpdateApplySiteRequest,
+  UpdateArchiveRequest,
   UpdateBloggerRequest,
   UpdateSiteRequest,
 } from '@/api/types'
 import {
-  getAbout,
   getApplySiteInfo,
+  getArchive,
   getBloggerInfo,
   getSiteInfo,
-  updateAbout,
   updateApplySiteInfo,
+  updateArchive,
   updateBloggerInfo,
   updateSiteInfo,
 } from '@/api/info'
@@ -30,12 +30,12 @@ import {
 export const siteInfoKeys = {
   all: ['site-info'] as const,
   site: () => [...siteInfoKeys.all, 'site'] as const,
-  about: () => [...siteInfoKeys.all, 'about'] as const,
+  archive: () => [...siteInfoKeys.all, 'archive'] as const,
   applySite: () => [...siteInfoKeys.all, 'apply-site'] as const,
   blogger: () => [...siteInfoKeys.all, 'blogger'] as const,
 }
 
-/** 站点信息（站名、描述、主页介绍） */
+/** 站点信息（站名、主页介绍） */
 export function useSiteInfo() {
   return useQuery({
     queryKey: siteInfoKeys.site(),
@@ -43,11 +43,11 @@ export function useSiteInfo() {
   })
 }
 
-/** 自我介绍（Markdown） */
-export function useAbout() {
+/** 站点档案（站点描述 + 自我介绍，均 Markdown） */
+export function useArchive() {
   return useQuery({
-    queryKey: siteInfoKeys.about(),
-    queryFn: getAbout,
+    queryKey: siteInfoKeys.archive(),
+    queryFn: getArchive,
   })
 }
 
@@ -80,16 +80,16 @@ export function useUpdateSiteInfo() {
   })
 }
 
-/** 更新自我介绍 */
-export function useUpdateAbout() {
+/** 更新站点档案（站点描述与自我介绍一次保存） */
+export function useUpdateArchive() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (req: UpdateAboutRequest) => updateAbout(req),
+    mutationFn: (req: UpdateArchiveRequest) => updateArchive(req),
     onSuccess: () => {
-      toast.success('自我介绍已保存')
-      void qc.invalidateQueries({ queryKey: siteInfoKeys.about() })
+      toast.success('站点档案已保存')
+      void qc.invalidateQueries({ queryKey: siteInfoKeys.archive() })
     },
-    onError: (err: Error) => toast.error(err.message || '自我介绍保存失败'),
+    onError: (err: Error) => toast.error(err.message || '站点档案保存失败'),
   })
 }
 

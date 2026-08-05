@@ -11,32 +11,52 @@
 
 package apiInfo
 
-import "time"
+import (
+	"time"
+
+	"github.com/bamboo-services/bamboo-main/internal/entity"
+)
 
 // SiteUpdateRequest 站点信息更新请求
 type SiteUpdateRequest struct {
-	SiteName        *string `json:"site_name" binding:"omitempty,min=1,max=100" example:"筱锋的小站"`
-	SiteDescription *string `json:"site_description" binding:"omitempty,max=5000" example:"# 一个有趣的个人博客\n\n用 Markdown 书写本站介绍。"`
-	Introduction    *string `json:"introduction" binding:"omitempty,max=2000" example:"欢迎来到我的主页！"`
-}
-
-// AboutUpdateRequest 自我介绍更新请求
-type AboutUpdateRequest struct {
-	Content string `json:"content" binding:"required,min=1,max=10000" example:"# 关于我\n我是筱锋..."`
+	SiteName     *string `json:"site_name" binding:"omitempty,min=1,max=100" example:"筱锋的小站"`
+	Introduction *string `json:"introduction" binding:"omitempty,max=2000" example:"欢迎来到我的主页！"`
 }
 
 // SiteResponse 站点信息响应
 type SiteResponse struct {
-	SiteName        string    `json:"site_name"`
+	SiteName     string    `json:"site_name"`
+	Introduction string    `json:"introduction"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+// ArchiveUpdateRequest 站点档案更新请求
+//
+// 站点档案聚合「站点描述」（site.description）与「自我介绍」（profile.about），
+// 均以 Markdown 书写，设置页「站点档案」板块统一一次保存。
+type ArchiveUpdateRequest struct {
+	SiteDescription *string `json:"site_description" binding:"omitempty,max=5000" example:"# 一个有趣的个人博客\n\n用 Markdown 书写本站介绍。"`
+	About           *string `json:"about" binding:"omitempty,max=10000" example:"# 关于我\n我是筱锋..."`
+}
+
+// ArchiveResponse 站点档案响应
+type ArchiveResponse struct {
 	SiteDescription string    `json:"site_description"`
-	Introduction    string    `json:"introduction"`
+	About           string    `json:"about"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
 
-// AboutResponse 自我介绍响应
-type AboutResponse struct {
-	Content   string    `json:"content"`
-	UpdatedAt time.Time `json:"updated_at"`
+// BuiltinInvalidGroupUpdateRequest 更新内置「已失效」分组配置请求
+//
+// PATCH 语义：仅更新非 nil 字段；名称必填（去除空白后不能为空），描述传空串即清空。
+type BuiltinInvalidGroupUpdateRequest struct {
+	Name        *string `json:"name" binding:"omitempty,min=1,max=100" example:"已失效"`           // 分组名称
+	Description *string `json:"description" binding:"omitempty,max=500" example:"已失效友链，站点不可访问"` // 分组描述（空串清空）
+}
+
+// BuiltinInvalidGroupResponse 内置「已失效」分组配置响应
+type BuiltinInvalidGroupResponse struct {
+	entity.LinkGroup
 }
 
 // BloggerUpdateRequest 博主信息更新请求

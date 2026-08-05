@@ -22,7 +22,7 @@ import (
 // GetSiteInfo 获取站点信息
 //
 // @Summary [用户] 获取站点信息
-// @Description 获取站点名称、描述、主页介绍等公开信息
+// @Description 获取站点名称、主页介绍等公开信息
 // @Tags 站点信息接口
 // @Accept json
 // @Produce json
@@ -42,7 +42,7 @@ func (h *InfoHandler) GetSiteInfo(c *gin.Context) {
 // UpdateSiteInfo 更新站点信息
 //
 // @Summary [管理] 更新站点信息
-// @Description 管理员更新站点名称、描述、主页介绍
+// @Description 管理员更新站点名称、主页介绍
 // @Tags 站点信息接口
 // @Accept json
 // @Produce json
@@ -52,7 +52,7 @@ func (h *InfoHandler) GetSiteInfo(c *gin.Context) {
 // @Failure 400 {object} xBase.BaseResponse "请求参数错误"
 // @Failure 401 {object} xBase.BaseResponse "未认证"
 // @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
-// @Router /api/v1/admin/info/site [PUT]
+// @Router /api/v1/info/admin/site [PUT]
 func (h *InfoHandler) UpdateSiteInfo(c *gin.Context) {
 	var req apiInfo.SiteUpdateRequest
 
@@ -70,24 +70,45 @@ func (h *InfoHandler) UpdateSiteInfo(c *gin.Context) {
 	xResult.SuccessHasData(c, "站点信息更新成功", result)
 }
 
-// GetAbout 获取自我介绍
+// GetArchiveInfo 获取站点档案
 //
-// @Summary [用户] 获取自我介绍
-// @Description 获取 Markdown 格式的自我介绍内容
+// @Summary [用户] 获取站点档案
+// @Description 获取站点描述与自我介绍（均 Markdown），供 about/me 展示
 // @Tags 站点信息接口
 // @Accept json
 // @Produce json
-// @Success 200 {object} xBase.BaseResponse{data=apiInfo.AboutResponse} "获取成功"
+// @Success 200 {object} xBase.BaseResponse{data=apiInfo.ArchiveResponse} "获取成功"
 // @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
-// @Router /api/v1/info/about [GET]
-func (h *InfoHandler) GetAbout(c *gin.Context) {
-	result, err := h.service.infoLogic.GetAbout(c.Request.Context())
+// @Router /api/v1/info/archive [GET]
+func (h *InfoHandler) GetArchiveInfo(c *gin.Context) {
+	result, err := h.service.infoLogic.GetArchiveInfo(c.Request.Context())
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	xResult.SuccessHasData(c, "获取自我介绍成功", result)
+	xResult.SuccessHasData(c, "获取站点档案成功", result)
+}
+
+// GetBuiltinInvalidGroup 获取内置「已失效」分组配置
+//
+// @Summary [用户] 获取内置已失效分组配置
+// @Description 返回内置「已失效」分组的名称与描述（经 bm_system 热修改）
+// @Tags 站点信息接口
+// @Accept json
+// @Produce json
+// @Success 200 {object} xBase.BaseResponse{data=apiInfo.BuiltinInvalidGroupResponse} "获取成功"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/info/builtin-invalid-group [GET]
+func (h *InfoHandler) GetBuiltinInvalidGroup(c *gin.Context) {
+	group, err := h.service.infoLogic.GetBuiltinInvalidGroup(c.Request.Context())
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	resp := apiInfo.BuiltinInvalidGroupResponse{LinkGroup: *group}
+	xResult.SuccessHasData(c, "获取内置已失效分组配置成功", resp)
 }
 
 // GetApplySiteInfo 获取申请站点展示
@@ -143,7 +164,7 @@ func (h *InfoHandler) GetBloggerInfo(c *gin.Context) {
 // @Failure 400 {object} xBase.BaseResponse "请求参数错误"
 // @Failure 401 {object} xBase.BaseResponse "未认证"
 // @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
-// @Router /api/v1/admin/info/apply-site [PUT]
+// @Router /api/v1/info/admin/apply-site [PUT]
 func (h *InfoHandler) UpdateApplySiteInfo(c *gin.Context) {
 	var req apiInfo.ApplySiteUpdateRequest
 
@@ -174,7 +195,7 @@ func (h *InfoHandler) UpdateApplySiteInfo(c *gin.Context) {
 // @Failure 400 {object} xBase.BaseResponse "请求参数错误"
 // @Failure 401 {object} xBase.BaseResponse "未认证"
 // @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
-// @Router /api/v1/admin/info/blogger [PUT]
+// @Router /api/v1/info/admin/blogger [PUT]
 func (h *InfoHandler) UpdateBloggerInfo(c *gin.Context) {
 	var req apiInfo.BloggerUpdateRequest
 
@@ -192,33 +213,65 @@ func (h *InfoHandler) UpdateBloggerInfo(c *gin.Context) {
 	xResult.SuccessHasData(c, "博主信息更新成功", result)
 }
 
-// UpdateAbout 更新自我介绍
+// UpdateArchiveInfo 更新站点档案
 //
-// @Summary [管理] 更新自我介绍
-// @Description 管理员更新 Markdown 格式的自我介绍
+// @Summary [管理] 更新站点档案
+// @Description 管理员更新站点描述与自我介绍（均 Markdown），一次保存
 // @Tags 站点信息接口
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body apiInfo.AboutUpdateRequest true "自我介绍更新请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiInfo.AboutResponse} "更新成功"
+// @Param request body apiInfo.ArchiveUpdateRequest true "站点档案更新请求"
+// @Success 200 {object} xBase.BaseResponse{data=apiInfo.ArchiveResponse} "更新成功"
 // @Failure 400 {object} xBase.BaseResponse "请求参数错误"
 // @Failure 401 {object} xBase.BaseResponse "未认证"
 // @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
-// @Router /api/v1/admin/info/about [PUT]
-func (h *InfoHandler) UpdateAbout(c *gin.Context) {
-	var req apiInfo.AboutUpdateRequest
+// @Router /api/v1/info/admin/archive [PUT]
+func (h *InfoHandler) UpdateArchiveInfo(c *gin.Context) {
+	var req apiInfo.ArchiveUpdateRequest
 
 	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
 		xValid.HandleValidationError(c, bindErr)
 		return
 	}
 
-	result, err := h.service.infoLogic.UpdateAbout(c.Request.Context(), &req)
+	result, err := h.service.infoLogic.UpdateArchiveInfo(c.Request.Context(), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	xResult.SuccessHasData(c, "自我介绍更新成功", result)
+	xResult.SuccessHasData(c, "站点档案更新成功", result)
+}
+
+// UpdateBuiltinInvalidGroup 更新内置「已失效」分组配置
+//
+// @Summary [管理] 更新内置已失效分组配置
+// @Description 更新内置「已失效」分组的名称与描述（写入 bm_system，即时生效）
+// @Tags 站点信息接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param request body apiInfo.BuiltinInvalidGroupUpdateRequest true "更新内置已失效分组配置请求"
+// @Success 200 {object} xBase.BaseResponse{data=apiInfo.BuiltinInvalidGroupResponse} "更新成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/info/admin/builtin-invalid-group [PUT]
+func (h *InfoHandler) UpdateBuiltinInvalidGroup(c *gin.Context) {
+	var req apiInfo.BuiltinInvalidGroupUpdateRequest
+
+	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	group, err := h.service.infoLogic.UpdateBuiltinInvalidGroup(c.Request.Context(), &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	resp := apiInfo.BuiltinInvalidGroupResponse{LinkGroup: *group}
+	xResult.SuccessHasData(c, "内置已失效分组配置更新成功", resp)
 }

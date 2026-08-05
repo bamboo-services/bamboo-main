@@ -13,11 +13,13 @@ package logic
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	apiInfo "github.com/bamboo-services/bamboo-main/api/info"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
+	bConst "github.com/bamboo-services/bamboo-main/pkg/constants"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
@@ -78,7 +80,7 @@ func NewInfoLogic(ctx context.Context) *InfoLogic {
 // GetSiteInfo 获取站点信息
 func (l *InfoLogic) GetSiteInfo(ctx context.Context) (*apiInfo.SiteResponse, *xError.Error) {
 	// 批量查询站点相关配置
-	keys := []string{KeySiteName, KeySiteDescription, KeySiteIntroduction}
+	keys := []string{KeySiteName, KeySiteIntroduction}
 	configs, xErr := l.repo.system.ListByKeys(ctx, keys)
 	if xErr != nil {
 		return nil, xError.NewError(ctx, xError.DatabaseError, "获取站点信息失败", false, xErr)
@@ -91,10 +93,9 @@ func (l *InfoLogic) GetSiteInfo(ctx context.Context) (*apiInfo.SiteResponse, *xE
 	}
 
 	result := &apiInfo.SiteResponse{
-		SiteName:        getConfigValue(configMap, KeySiteName),
-		SiteDescription: getConfigValue(configMap, KeySiteDescription),
-		Introduction:    getConfigValue(configMap, KeySiteIntroduction),
-		UpdatedAt:       getLatestUpdateTime(configMap, keys),
+		SiteName:     getConfigValue(configMap, KeySiteName),
+		Introduction: getConfigValue(configMap, KeySiteIntroduction),
+		UpdatedAt:    getLatestUpdateTime(configMap, keys),
 	}
 
 	return result, nil
@@ -106,9 +107,6 @@ func (l *InfoLogic) UpdateSiteInfo(ctx context.Context, req *apiInfo.SiteUpdateR
 	updates := make(map[string]*string)
 	if req.SiteName != nil {
 		updates[KeySiteName] = req.SiteName
-	}
-	if req.SiteDescription != nil {
-		updates[KeySiteDescription] = req.SiteDescription
 	}
 	if req.Introduction != nil {
 		updates[KeySiteIntroduction] = req.Introduction
@@ -258,36 +256,86 @@ func (l *InfoLogic) UpdateBloggerInfo(ctx context.Context, req *apiInfo.BloggerU
 	return l.GetBloggerInfo(ctx)
 }
 
-// GetAbout 获取自我介绍
-func (l *InfoLogic) GetAbout(ctx context.Context) (*apiInfo.AboutResponse, *xError.Error) {
-	config, found, xErr := l.repo.system.GetByKey(ctx, KeyProfileAbout)
+// GetArchiveInfo 获取站点档案
+//
+// 站点档案聚合「站点描述」（site.description）与「自我介绍」（profile.about），
+// 均以 Markdown 书写，供设置页「站点档案」板块统一编辑与公开页 about/me 展示。
+func (l *InfoLogic) GetArchiveInfo(ctx context.Context) (*apiInfo.ArchiveResponse, *xError.Error) {
+	keys := []string{KeySiteDescription, KeyProfileAbout}
+	configs, xErr := l.repo.system.ListByKeys(ctx, keys)
 	if xErr != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "获取自我介绍失败", false, xErr)
-	}
-	if !found {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "获取自我介绍失败", false)
+		return nil, xError.NewError(ctx, xError.DatabaseError, "获取站点档案失败", false, xErr)
 	}
 
-	content := ""
-	if config.Value != nil {
-		content = *config.Value
+	configMap := make(map[string]*entity.System)
+	for i := range configs {
+		configMap[configs[i].Key] = &configs[i]
 	}
 
-	return &apiInfo.AboutResponse{
-		Content:   content,
-		UpdatedAt: config.UpdatedAt,
-	}, nil
+	result := &apiInfo.ArchiveResponse{
+		SiteDescription: getConfigValue(configMap, KeySiteDescription),
+		About:           getConfigValue(configMap, KeyProfileAbout),
+		UpdatedAt:       getLatestUpdateTime(configMap, keys),
+	}
+
+	return result, nil
 }
 
-// UpdateAbout 更新自我介绍
-func (l *InfoLogic) UpdateAbout(ctx context.Context, req *apiInfo.AboutUpdateRequest) (*apiInfo.AboutResponse, *xError.Error) {
-	content := req.Content
-	xErr := l.repo.system.UpdateValueByKey(ctx, KeyProfileAbout, &content)
-	if xErr != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "更新自我介绍失败", false, xErr)
+// UpdateArchiveInfo 更新站点档案
+func (l *InfoLogic) UpdateArchiveInfo(ctx context.Context, req *apiInfo.ArchiveUpdateRequest) (*apiInfo.ArchiveResponse, *xError.Error) {
+	updates := make(map[string]*string)
+	if req.SiteDescription != nil {
+		updates[KeySiteDescription] = req.SiteDescription
+	}
+	if req.About != nil {
+		updates[KeyProfileAbout] = req.About
 	}
 
-	return l.GetAbout(ctx)
+	if len(updates) == 0 {
+		return l.GetArchiveInfo(ctx)
+	}
+
+	for key, value := range updates {
+		xErr := l.repo.system.UpdateValueByKey(ctx, key, value)
+		if xErr != nil {
+			return nil, xError.NewError(ctx, xError.DatabaseError, "更新站点档案失败", false, xErr)
+		}
+	}
+
+	return l.GetArchiveInfo(ctx)
+}
+
+// GetBuiltinInvalidGroup 获取内置「已失效」分组配置
+//
+// 名称/描述存于 bm_system（group.builtin.invalid.*），经 BuildBuiltinInvalidGroup 组装虚拟分组。
+func (l *InfoLogic) GetBuiltinInvalidGroup(ctx context.Context) (*entity.LinkGroup, *xError.Error) {
+	return l.repo.system.BuildBuiltinInvalidGroup(ctx)
+}
+
+// UpdateBuiltinInvalidGroup 更新内置「已失效」分组配置
+func (l *InfoLogic) UpdateBuiltinInvalidGroup(ctx context.Context, req *apiInfo.BuiltinInvalidGroupUpdateRequest) (*entity.LinkGroup, *xError.Error) {
+	updates := make(map[string]*string)
+
+	if req.Name != nil {
+		if strings.TrimSpace(*req.Name) == "" {
+			return nil, xError.NewError(ctx, xError.BadRequest, "已失效分组名称不能为空", false)
+		}
+		updates[bConst.KeyBuiltinInvalidGroupName] = req.Name
+	}
+	if req.Description != nil {
+		updates[bConst.KeyBuiltinInvalidGroupDesc] = req.Description
+	}
+	if len(updates) == 0 {
+		return l.GetBuiltinInvalidGroup(ctx)
+	}
+
+	for key, value := range updates {
+		if xErr := l.repo.system.UpdateValueByKey(ctx, key, value); xErr != nil {
+			return nil, xErr
+		}
+	}
+
+	return l.GetBuiltinInvalidGroup(ctx)
 }
 
 // ============ 辅助函数 ============

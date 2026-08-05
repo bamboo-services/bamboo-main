@@ -966,125 +966,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/admin/groups/builtin/invalid": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "返回内置「已失效」分组的名称与描述（经 bm_system 热修改）",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "友链分组接口"
-                ],
-                "summary": "[管理] 获取内置已失效分组配置",
-                "responses": {
-                    "200": {
-                        "description": "获取成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/apiLink.BuiltinInvalidGroupResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "401": {
-                        "description": "未认证",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器内部错误",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "更新内置「已失效」分组的名称与描述（写入 bm_system，即时生效）",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "友链分组接口"
-                ],
-                "summary": "[管理] 更新内置已失效分组配置",
-                "parameters": [
-                    {
-                        "description": "更新内置已失效分组配置请求",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/apiLink.BuiltinInvalidGroupUpdateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "更新成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/apiLink.BuiltinInvalidGroupResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "请求参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "未认证",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器内部错误",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/admin/groups/sort": {
             "patch": {
                 "security": [
@@ -1453,282 +1334,6 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "友链分组不存在",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器内部错误",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/admin/info/about": {
-            "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "管理员更新 Markdown 格式的自我介绍",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "站点信息接口"
-                ],
-                "summary": "[管理] 更新自我介绍",
-                "parameters": [
-                    {
-                        "description": "自我介绍更新请求",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/apiInfo.AboutUpdateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "更新成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/apiInfo.AboutResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "请求参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "未认证",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器内部错误",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/admin/info/apply-site": {
-            "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供 operate/apply 申请页交换友链时复制",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "站点信息接口"
-                ],
-                "summary": "[管理] 更新申请站点展示",
-                "parameters": [
-                    {
-                        "description": "申请站点展示更新请求",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/apiInfo.ApplySiteUpdateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "更新成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/apiInfo.ApplySiteResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "请求参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "未认证",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器内部错误",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/admin/info/blogger": {
-            "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "管理员更新博主个人展示信息（昵称/简介/博客链接/头像），供「关于我」名士帖展示",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "站点信息接口"
-                ],
-                "summary": "[管理] 更新博主信息",
-                "parameters": [
-                    {
-                        "description": "博主信息更新请求",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/apiInfo.BloggerUpdateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "更新成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/apiInfo.BloggerResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "请求参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "未认证",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器内部错误",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/admin/info/site": {
-            "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "管理员更新站点名称、描述、主页介绍",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "站点信息接口"
-                ],
-                "summary": "[管理] 更新站点信息",
-                "parameters": [
-                    {
-                        "description": "站点信息更新请求",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/apiInfo.SiteUpdateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "更新成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/apiInfo.SiteResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "请求参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "未认证",
                         "schema": {
                             "$ref": "#/definitions/xBase.BaseResponse"
                         }
@@ -4125,9 +3730,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/info/about": {
-            "get": {
-                "description": "获取 Markdown 格式的自我介绍内容",
+        "/api/v1/info/admin/apply-site": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供 operate/apply 申请页交换友链时复制",
                 "consumes": [
                     "application/json"
                 ],
@@ -4137,10 +3747,21 @@ const docTemplate = `{
                 "tags": [
                     "站点信息接口"
                 ],
-                "summary": "[用户] 获取自我介绍",
+                "summary": "[管理] 更新申请站点展示",
+                "parameters": [
+                    {
+                        "description": "申请站点展示更新请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiInfo.ApplySiteUpdateRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "获取成功",
+                        "description": "更新成功",
                         "schema": {
                             "allOf": [
                                 {
@@ -4150,11 +3771,299 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/apiInfo.AboutResponse"
+                                            "$ref": "#/definitions/apiInfo.ApplySiteResponse"
                                         }
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/info/admin/archive": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "管理员更新站点描述与自我介绍（均 Markdown），一次保存",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点信息接口"
+                ],
+                "summary": "[管理] 更新站点档案",
+                "parameters": [
+                    {
+                        "description": "站点档案更新请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiInfo.ArchiveUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.ArchiveResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/info/admin/blogger": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "管理员更新博主个人展示信息（昵称/简介/博客链接/头像），供「关于我」名士帖展示",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点信息接口"
+                ],
+                "summary": "[管理] 更新博主信息",
+                "parameters": [
+                    {
+                        "description": "博主信息更新请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiInfo.BloggerUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.BloggerResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/info/admin/builtin-invalid-group": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "更新内置「已失效」分组的名称与描述（写入 bm_system，即时生效）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点信息接口"
+                ],
+                "summary": "[管理] 更新内置已失效分组配置",
+                "parameters": [
+                    {
+                        "description": "更新内置已失效分组配置请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiInfo.BuiltinInvalidGroupUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.BuiltinInvalidGroupResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/info/admin/site": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "管理员更新站点名称、主页介绍",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点信息接口"
+                ],
+                "summary": "[管理] 更新站点信息",
+                "parameters": [
+                    {
+                        "description": "站点信息更新请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiInfo.SiteUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.SiteResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
                         }
                     },
                     "500": {
@@ -4192,6 +4101,47 @@ const docTemplate = `{
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/apiInfo.ApplySiteResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/info/archive": {
+            "get": {
+                "description": "获取站点描述与自我介绍（均 Markdown），供 about/me 展示",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点信息接口"
+                ],
+                "summary": "[用户] 获取站点档案",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.ArchiveResponse"
                                         }
                                     }
                                 }
@@ -4248,9 +4198,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/info/builtin-invalid-group": {
+            "get": {
+                "description": "返回内置「已失效」分组的名称与描述（经 bm_system 热修改）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点信息接口"
+                ],
+                "summary": "[用户] 获取内置已失效分组配置",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiInfo.BuiltinInvalidGroupResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/info/site": {
             "get": {
-                "description": "获取站点名称、描述、主页介绍等公开信息",
+                "description": "获取站点名称、主页介绍等公开信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -5653,31 +5644,6 @@ const docTemplate = `{
                 }
             }
         },
-        "apiInfo.AboutResponse": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "apiInfo.AboutUpdateRequest": {
-            "type": "object",
-            "required": [
-                "content"
-            ],
-            "properties": {
-                "content": {
-                    "type": "string",
-                    "maxLength": 10000,
-                    "minLength": 1,
-                    "example": "# 关于我\n我是筱锋..."
-                }
-            }
-        },
         "apiInfo.ApplySiteResponse": {
             "type": "object",
             "properties": {
@@ -5739,6 +5705,35 @@ const docTemplate = `{
                 }
             }
         },
+        "apiInfo.ArchiveResponse": {
+            "type": "object",
+            "properties": {
+                "about": {
+                    "type": "string"
+                },
+                "site_description": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiInfo.ArchiveUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "about": {
+                    "type": "string",
+                    "maxLength": 10000,
+                    "example": "# 关于我\n我是筱锋..."
+                },
+                "site_description": {
+                    "type": "string",
+                    "maxLength": 5000,
+                    "example": "# 一个有趣的个人博客\n\n用 Markdown 书写本站介绍。"
+                }
+            }
+        },
         "apiInfo.BloggerResponse": {
             "type": "object",
             "properties": {
@@ -5784,45 +5779,7 @@ const docTemplate = `{
                 }
             }
         },
-        "apiInfo.SiteResponse": {
-            "type": "object",
-            "properties": {
-                "introduction": {
-                    "type": "string"
-                },
-                "site_description": {
-                    "type": "string"
-                },
-                "site_name": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "apiInfo.SiteUpdateRequest": {
-            "type": "object",
-            "properties": {
-                "introduction": {
-                    "type": "string",
-                    "maxLength": 2000,
-                    "example": "欢迎来到我的主页！"
-                },
-                "site_description": {
-                    "type": "string",
-                    "maxLength": 5000,
-                    "example": "# 一个有趣的个人博客\n\n用 Markdown 书写本站介绍。"
-                },
-                "site_name": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "minLength": 1,
-                    "example": "筱锋的小站"
-                }
-            }
-        },
-        "apiLink.BuiltinInvalidGroupResponse": {
+        "apiInfo.BuiltinInvalidGroupResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -5859,7 +5816,7 @@ const docTemplate = `{
                 }
             }
         },
-        "apiLink.BuiltinInvalidGroupUpdateRequest": {
+        "apiInfo.BuiltinInvalidGroupUpdateRequest": {
             "type": "object",
             "properties": {
                 "description": {
@@ -5874,6 +5831,36 @@ const docTemplate = `{
                     "maxLength": 100,
                     "minLength": 1,
                     "example": "已失效"
+                }
+            }
+        },
+        "apiInfo.SiteResponse": {
+            "type": "object",
+            "properties": {
+                "introduction": {
+                    "type": "string"
+                },
+                "site_name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiInfo.SiteUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "introduction": {
+                    "type": "string",
+                    "maxLength": 2000,
+                    "example": "欢迎来到我的主页！"
+                },
+                "site_name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "example": "筱锋的小站"
                 }
             }
         },

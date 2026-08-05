@@ -13,28 +13,32 @@ package route
 
 import (
 	"github.com/bamboo-services/bamboo-main/internal/handler"
+	"github.com/bamboo-services/bamboo-main/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
+// infoRouter 站点信息路由：GET 公开、PUT 统一挂 /info/admin 子组并鉴权管理员。
 func (r *route) infoRouter(route gin.IRouter) {
 	infoHandler := handler.NewHandler[handler.InfoHandler](r.context)
 	infoGroup := route.Group("/info")
 	{
 		infoGroup.GET("/site", infoHandler.GetSiteInfo)
-		infoGroup.GET("/about", infoHandler.GetAbout)
+		infoGroup.GET("/archive", infoHandler.GetArchiveInfo)
 		infoGroup.GET("/apply-site", infoHandler.GetApplySiteInfo)
 		infoGroup.GET("/blogger", infoHandler.GetBloggerInfo)
-	}
-}
+		infoGroup.GET("/builtin-invalid-group", infoHandler.GetBuiltinInvalidGroup)
 
-func (r *route) infoAdminRouter(route gin.IRouter) {
-	infoHandler := handler.NewHandler[handler.InfoHandler](r.context)
-	infoGroup := route.Group("/info")
-	{
-		infoGroup.PUT("/site", infoHandler.UpdateSiteInfo)
-		infoGroup.PUT("/about", infoHandler.UpdateAbout)
-		infoGroup.PUT("/apply-site", infoHandler.UpdateApplySiteInfo)
-		infoGroup.PUT("/blogger", infoHandler.UpdateBloggerInfo)
+		// 管理端写操作：统一 /info/admin 前置路径，鉴权管理员
+		adminGroup := infoGroup.Group("/admin")
+		adminGroup.Use(middleware.AuthMiddleware)
+		adminGroup.Use(middleware.RequireRole("admin"))
+		{
+			adminGroup.PUT("/site", infoHandler.UpdateSiteInfo)
+			adminGroup.PUT("/archive", infoHandler.UpdateArchiveInfo)
+			adminGroup.PUT("/apply-site", infoHandler.UpdateApplySiteInfo)
+			adminGroup.PUT("/blogger", infoHandler.UpdateBloggerInfo)
+			adminGroup.PUT("/builtin-invalid-group", infoHandler.UpdateBuiltinInvalidGroup)
+		}
 	}
 }

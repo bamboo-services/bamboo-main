@@ -373,23 +373,3 @@ code {
   background: var(--leaf-deep);
   border-radius: 2px;
 }
-
-/* ───────── Markdown 编辑器（.markdown-editor，详见 markdown-editor.tsx） ─────────
-   编辑器内覆盖公开页排版中不适于编辑的装饰，保证光标定位稳定。 */
-
-/* 禁用首字下沉浮排：浮动首字会干扰光标定位，编辑区内还原为普通首字 */
-.markdown-editor .markdown-view > p:first-of-type::first-letter {
-  float: none;
-  font-size: inherit;
-  line-height: inherit;
-  padding: 0;
-  color: inherit;
-  font-weight: inherit;
-}
-
-/* 占位符：编辑区为空时显示 data-placeholder 文本 */
-.markdown-editor [contenteditable]:empty::before {
-  content: attr(data-placeholder);
-  color: var(--text-secondary);
-  pointer-events: none;
-}

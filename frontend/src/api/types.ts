@@ -59,27 +59,27 @@ export interface AdminLinkListResponse extends PaginationResponse<LinkFriend> {
 /** 站点信息（GET /api/v1/info/site） */
 export interface SiteInfoResponse {
   site_name: string
-  site_description: string
   introduction: string
   updated_at: string
 }
 
-/** 自我介绍（GET /api/v1/info/about） */
-export interface AboutResponse {
-  content: string
-  updated_at: string
-}
-
-/** 更新站点信息请求（PUT /api/v1/admin/info/site） */
+/** 更新站点信息请求（PUT /api/v1/info/admin/site） */
 export interface UpdateSiteRequest {
   site_name?: string
-  site_description?: string
   introduction?: string
 }
 
-/** 更新自我介绍请求（PUT /api/v1/admin/info/about） */
-export interface UpdateAboutRequest {
-  content: string
+/** 站点档案（GET /api/v1/info/archive）— 站点描述 + 自我介绍（均 Markdown） */
+export interface ArchiveResponse {
+  site_description: string
+  about: string
+  updated_at: string
+}
+
+/** 更新站点档案请求（PUT /api/v1/info/admin/archive） */
+export interface UpdateArchiveRequest {
+  site_description?: string
+  about?: string
 }
 
 /** 申请站点展示（GET /api/v1/info/apply-site）— 供 operate/apply 交换友链场景读取博主站点资料 */
@@ -93,7 +93,7 @@ export interface ApplySiteInfoResponse {
   updated_at: string
 }
 
-/** 更新申请站点展示请求（PUT /api/v1/admin/info/apply-site） */
+/** 更新申请站点展示请求（PUT /api/v1/info/admin/apply-site） */
 export interface UpdateApplySiteRequest {
   site_name?: string
   site_description?: string
@@ -112,7 +112,7 @@ export interface BloggerInfoResponse {
   updated_at: string
 }
 
-/** 更新博主信息请求（PUT /api/v1/admin/info/blogger） */
+/** 更新博主信息请求（PUT /api/v1/info/admin/blogger） */
 export interface UpdateBloggerRequest {
   nick?: string
   description?: string
@@ -149,7 +149,7 @@ export interface UpdateGroupRequest {
   group_status?: number // 0=禁用 1=启用
 }
 
-/** 更新内置「已失效」分组配置请求（PUT /api/v1/admin/groups/builtin/invalid） */
+/** 更新内置「已失效」分组配置请求（PUT /api/v1/info/admin/builtin-invalid-group） */
 export interface UpdateBuiltinInvalidGroupRequest {
   name?: string
   description?: string // 传空串即清空描述

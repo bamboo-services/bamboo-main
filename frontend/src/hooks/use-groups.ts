@@ -126,7 +126,7 @@ const builtinInvalidKeys = {
   detail: ['admin', 'groups', 'builtin', 'invalid'] as const,
 }
 
-/** 获取内置「已失效」分组配置（GET /api/v1/admin/groups/builtin/invalid） */
+/** 获取内置「已失效」分组配置（GET /api/v1/info/builtin-invalid-group） */
 export function useBuiltinInvalidGroup() {
   return useQuery({
     queryKey: builtinInvalidKeys.detail,

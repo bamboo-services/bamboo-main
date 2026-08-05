@@ -13,7 +13,6 @@ package logic
 
 import (
 	"context"
-	"strings"
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
@@ -23,7 +22,6 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
-	bConst "github.com/bamboo-services/bamboo-main/pkg/constants"
 	"gorm.io/gorm"
 )
 
@@ -241,7 +239,7 @@ func (l *LinkGroupLogic) Delete(ctx context.Context, groupID xSnowflake.Snowflak
 // 内置「已失效」分组不落库，按保留 ID 请求时返回 bm_system 配置构造的虚拟分组。
 func (l *LinkGroupLogic) Get(ctx context.Context, groupID xSnowflake.SnowflakeID) (*entity.LinkGroup, *xError.Error) {
 	if entity.IsBuiltinGroupID(groupID) {
-		return l.GetBuiltinInvalidGroup(ctx)
+		return l.repo.system.BuildBuiltinInvalidGroup(ctx)
 	}
 
 	group, found, xErr := l.repo.group.GetByID(ctx, groupID, true, nil)
@@ -298,38 +296,4 @@ func (l *LinkGroupLogic) GetPage(ctx context.Context, req *apiLinkGroup.GroupPag
 	}
 
 	return base.NewPaginationResponse(groups, req.Page, req.PageSize, total), nil
-}
-
-// GetBuiltinInvalidGroup 获取内置「已失效」分组配置（名称与描述，经 bm_system 热修改）。
-func (l *LinkGroupLogic) GetBuiltinInvalidGroup(ctx context.Context) (*entity.LinkGroup, *xError.Error) {
-	return l.repo.system.BuildBuiltinInvalidGroup(ctx)
-}
-
-// UpdateBuiltinInvalidGroup 更新内置「已失效」分组配置。
-//
-// 按请求字段逐 key 写入 bm_system（PATCH 语义：仅更新非 nil 字段；描述传空串即清空），
-// 更新后回读最新配置返回。
-func (l *LinkGroupLogic) UpdateBuiltinInvalidGroup(ctx context.Context, req *apiLinkGroup.BuiltinInvalidGroupUpdateRequest) (*entity.LinkGroup, *xError.Error) {
-	updates := make(map[string]*string)
-
-	if req.Name != nil {
-		if strings.TrimSpace(*req.Name) == "" {
-			return nil, xError.NewError(ctx, xError.BadRequest, "已失效分组名称不能为空", false)
-		}
-		updates[bConst.KeyBuiltinInvalidGroupName] = req.Name
-	}
-	if req.Description != nil {
-		updates[bConst.KeyBuiltinInvalidGroupDesc] = req.Description
-	}
-	if len(updates) == 0 {
-		return l.GetBuiltinInvalidGroup(ctx)
-	}
-
-	for key, value := range updates {
-		if xErr := l.repo.system.UpdateValueByKey(ctx, key, value); xErr != nil {
-			return nil, xErr
-		}
-	}
-
-	return l.GetBuiltinInvalidGroup(ctx)
 }

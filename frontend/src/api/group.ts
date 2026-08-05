@@ -106,21 +106,21 @@ export function sortGroups(groupIds: Array<SnowflakeID>): Promise<void> {
   })
 }
 
-/** 获取内置「已失效」分组配置（GET /api/v1/admin/groups/builtin/invalid） */
+/** 获取内置「已失效」分组配置（GET /api/v1/info/builtin-invalid-group，公开） */
 export function getBuiltinInvalidGroup(): Promise<LinkGroup> {
   return request<LinkGroup>({
     method: 'GET',
-    url: '/admin/groups/builtin/invalid',
+    url: '/info/builtin-invalid-group',
   })
 }
 
-/** 更新内置「已失效」分组配置（PUT /api/v1/admin/groups/builtin/invalid，走 bm_system 热修改） */
+/** 更新内置「已失效」分组配置（PUT /api/v1/info/admin/builtin-invalid-group，走 bm_system 热修改） */
 export function updateBuiltinInvalidGroup(
   req: UpdateBuiltinInvalidGroupRequest,
 ): Promise<LinkGroup> {
   return request<LinkGroup>({
     method: 'PUT',
-    url: '/admin/groups/builtin/invalid',
+    url: '/info/admin/builtin-invalid-group',
     data: req,
   })
 }

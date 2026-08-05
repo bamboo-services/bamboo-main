@@ -12,7 +12,7 @@ import { useQuery } from '@tanstack/react-query'
 import { motion, useReducedMotion } from 'motion/react'
 import { ExternalLink, Mail } from 'lucide-react'
 import type { MotionDivProps } from '@/lib/motion'
-import { getAbout, getSiteInfo } from '@/api/info'
+import { getArchive, getSiteInfo } from '@/api/info'
 import { useApplySiteInfo, useBloggerInfo } from '@/hooks/use-site-info'
 import { MarkdownView } from '@/components/markdown'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -57,9 +57,9 @@ function AboutMePage() {
     queryKey: ['public', 'site'],
     queryFn: getSiteInfo,
   })
-  const { data: about, isLoading } = useQuery({
-    queryKey: ['public', 'about'],
-    queryFn: getAbout,
+  const { data: archive, isLoading } = useQuery({
+    queryKey: ['public', 'archive'],
+    queryFn: getArchive,
   })
   const { data: blogger } = useBloggerInfo()
   const { data: applySite } = useApplySiteInfo()
@@ -71,7 +71,7 @@ function AboutMePage() {
   const blogHost = blogUrl.replace(/^https?:\/\//, '')
   const avatar = blogger?.avatar || myAvatar
   const displayName = site?.site_name ?? siteConfig.defaultName
-  const siteDesc = site?.site_description ?? ''
+  const siteDesc = archive?.site_description ?? ''
   const introduction = site?.introduction ?? ''
 
   return (
@@ -261,8 +261,8 @@ function AboutMePage() {
                     ))}
                     <Skeleton className="h-5 w-2/3" />
                   </div>
-                ) : about?.content ? (
-                  <MarkdownView content={about.content} />
+                ) : archive?.about ? (
+                  <MarkdownView content={archive.about} />
                 ) : (
                   <p className="text-[17px] leading-[1.95] text-text-secondary">
                     {introduction || '博主尚未填写自我介绍。'}

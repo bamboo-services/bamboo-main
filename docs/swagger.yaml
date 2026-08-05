@@ -166,25 +166,6 @@ definitions:
         description: 友链总数
         type: integer
     type: object
-  apiInfo.AboutResponse:
-    properties:
-      content:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  apiInfo.AboutUpdateRequest:
-    properties:
-      content:
-        example: |-
-          # 关于我
-          我是筱锋...
-        maxLength: 10000
-        minLength: 1
-        type: string
-    required:
-    - content
-    type: object
   apiInfo.ApplySiteResponse:
     properties:
       email:
@@ -229,6 +210,31 @@ definitions:
         maxLength: 500
         type: string
     type: object
+  apiInfo.ArchiveResponse:
+    properties:
+      about:
+        type: string
+      site_description:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  apiInfo.ArchiveUpdateRequest:
+    properties:
+      about:
+        example: |-
+          # 关于我
+          我是筱锋...
+        maxLength: 10000
+        type: string
+      site_description:
+        example: |-
+          # 一个有趣的个人博客
+
+          用 Markdown 书写本站介绍。
+        maxLength: 5000
+        type: string
+    type: object
   apiInfo.BloggerResponse:
     properties:
       avatar:
@@ -261,37 +267,7 @@ definitions:
         maxLength: 100
         type: string
     type: object
-  apiInfo.SiteResponse:
-    properties:
-      introduction:
-        type: string
-      site_description:
-        type: string
-      site_name:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  apiInfo.SiteUpdateRequest:
-    properties:
-      introduction:
-        example: 欢迎来到我的主页！
-        maxLength: 2000
-        type: string
-      site_description:
-        example: |-
-          # 一个有趣的个人博客
-
-          用 Markdown 书写本站介绍。
-        maxLength: 5000
-        type: string
-      site_name:
-        example: 筱锋的小站
-        maxLength: 100
-        minLength: 1
-        type: string
-    type: object
-  apiLink.BuiltinInvalidGroupResponse:
+  apiInfo.BuiltinInvalidGroupResponse:
     properties:
       created_at:
         type: string
@@ -320,7 +296,7 @@ definitions:
       updated_at:
         type: string
     type: object
-  apiLink.BuiltinInvalidGroupUpdateRequest:
+  apiInfo.BuiltinInvalidGroupUpdateRequest:
     properties:
       description:
         description: 分组描述（空串清空）
@@ -330,6 +306,27 @@ definitions:
       name:
         description: 分组名称
         example: 已失效
+        maxLength: 100
+        minLength: 1
+        type: string
+    type: object
+  apiInfo.SiteResponse:
+    properties:
+      introduction:
+        type: string
+      site_name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  apiInfo.SiteUpdateRequest:
+    properties:
+      introduction:
+        example: 欢迎来到我的主页！
+        maxLength: 2000
+        type: string
+      site_name:
+        example: 筱锋的小站
         maxLength: 100
         minLength: 1
         type: string
@@ -2819,76 +2816,6 @@ paths:
       summary: '[管理] 获取友链分组列表'
       tags:
       - 友链分组接口
-  /api/v1/admin/groups/builtin/invalid:
-    get:
-      consumes:
-      - application/json
-      description: 返回内置「已失效」分组的名称与描述（经 bm_system 热修改）
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 获取成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/apiLink.BuiltinInvalidGroupResponse'
-              type: object
-        "401":
-          description: 未认证
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-        "500":
-          description: 服务器内部错误
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-      security:
-      - Bearer: []
-      summary: '[管理] 获取内置已失效分组配置'
-      tags:
-      - 友链分组接口
-    put:
-      consumes:
-      - application/json
-      description: 更新内置「已失效」分组的名称与描述（写入 bm_system，即时生效）
-      parameters:
-      - description: 更新内置已失效分组配置请求
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/apiLink.BuiltinInvalidGroupUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 更新成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/apiLink.BuiltinInvalidGroupResponse'
-              type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-        "401":
-          description: 未认证
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-        "500":
-          description: 服务器内部错误
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-      security:
-      - Bearer: []
-      summary: '[管理] 更新内置已失效分组配置'
-      tags:
-      - 友链分组接口
   /api/v1/admin/groups/sort:
     patch:
       consumes:
@@ -2934,170 +2861,6 @@ paths:
       summary: '[管理] 批量更新友链分组排序'
       tags:
       - 友链分组接口
-  /api/v1/admin/info/about:
-    put:
-      consumes:
-      - application/json
-      description: 管理员更新 Markdown 格式的自我介绍
-      parameters:
-      - description: 自我介绍更新请求
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/apiInfo.AboutUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 更新成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/apiInfo.AboutResponse'
-              type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-        "401":
-          description: 未认证
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-        "500":
-          description: 服务器内部错误
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-      security:
-      - Bearer: []
-      summary: '[管理] 更新自我介绍'
-      tags:
-      - 站点信息接口
-  /api/v1/admin/info/apply-site:
-    put:
-      consumes:
-      - application/json
-      description: 管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供 operate/apply 申请页交换友链时复制
-      parameters:
-      - description: 申请站点展示更新请求
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/apiInfo.ApplySiteUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 更新成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/apiInfo.ApplySiteResponse'
-              type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-        "401":
-          description: 未认证
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-        "500":
-          description: 服务器内部错误
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-      security:
-      - Bearer: []
-      summary: '[管理] 更新申请站点展示'
-      tags:
-      - 站点信息接口
-  /api/v1/admin/info/blogger:
-    put:
-      consumes:
-      - application/json
-      description: 管理员更新博主个人展示信息（昵称/简介/博客链接/头像），供「关于我」名士帖展示
-      parameters:
-      - description: 博主信息更新请求
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/apiInfo.BloggerUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 更新成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/apiInfo.BloggerResponse'
-              type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-        "401":
-          description: 未认证
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-        "500":
-          description: 服务器内部错误
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-      security:
-      - Bearer: []
-      summary: '[管理] 更新博主信息'
-      tags:
-      - 站点信息接口
-  /api/v1/admin/info/site:
-    put:
-      consumes:
-      - application/json
-      description: 管理员更新站点名称、描述、主页介绍
-      parameters:
-      - description: 站点信息更新请求
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/apiInfo.SiteUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 更新成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/apiInfo.SiteResponse'
-              type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-        "401":
-          description: 未认证
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-        "500":
-          description: 服务器内部错误
-          schema:
-            $ref: '#/definitions/xBase.BaseResponse'
-      security:
-      - Bearer: []
-      summary: '[管理] 更新站点信息'
-      tags:
-      - 站点信息接口
   /api/v1/admin/links:
     get:
       consumes:
@@ -4582,28 +4345,209 @@ paths:
       summary: '[用户] 验证邮箱'
       tags:
       - 认证接口
-  /api/v1/info/about:
-    get:
+  /api/v1/info/admin/apply-site:
+    put:
       consumes:
       - application/json
-      description: 获取 Markdown 格式的自我介绍内容
+      description: 管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供 operate/apply 申请页交换友链时复制
+      parameters:
+      - description: 申请站点展示更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiInfo.ApplySiteUpdateRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: 获取成功
+          description: 更新成功
           schema:
             allOf:
             - $ref: '#/definitions/xBase.BaseResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/apiInfo.AboutResponse'
+                  $ref: '#/definitions/apiInfo.ApplySiteResponse'
               type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
         "500":
           description: 服务器内部错误
           schema:
             $ref: '#/definitions/xBase.BaseResponse'
-      summary: '[用户] 获取自我介绍'
+      security:
+      - Bearer: []
+      summary: '[管理] 更新申请站点展示'
+      tags:
+      - 站点信息接口
+  /api/v1/info/admin/archive:
+    put:
+      consumes:
+      - application/json
+      description: 管理员更新站点描述与自我介绍（均 Markdown），一次保存
+      parameters:
+      - description: 站点档案更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiInfo.ArchiveUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiInfo.ArchiveResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[管理] 更新站点档案'
+      tags:
+      - 站点信息接口
+  /api/v1/info/admin/blogger:
+    put:
+      consumes:
+      - application/json
+      description: 管理员更新博主个人展示信息（昵称/简介/博客链接/头像），供「关于我」名士帖展示
+      parameters:
+      - description: 博主信息更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiInfo.BloggerUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiInfo.BloggerResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[管理] 更新博主信息'
+      tags:
+      - 站点信息接口
+  /api/v1/info/admin/builtin-invalid-group:
+    put:
+      consumes:
+      - application/json
+      description: 更新内置「已失效」分组的名称与描述（写入 bm_system，即时生效）
+      parameters:
+      - description: 更新内置已失效分组配置请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiInfo.BuiltinInvalidGroupUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiInfo.BuiltinInvalidGroupResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[管理] 更新内置已失效分组配置'
+      tags:
+      - 站点信息接口
+  /api/v1/info/admin/site:
+    put:
+      consumes:
+      - application/json
+      description: 管理员更新站点名称、主页介绍
+      parameters:
+      - description: 站点信息更新请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiInfo.SiteUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiInfo.SiteResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[管理] 更新站点信息'
       tags:
       - 站点信息接口
   /api/v1/info/apply-site:
@@ -4630,6 +4574,30 @@ paths:
       summary: '[用户] 获取申请站点展示'
       tags:
       - 站点信息接口
+  /api/v1/info/archive:
+    get:
+      consumes:
+      - application/json
+      description: 获取站点描述与自我介绍（均 Markdown），供 about/me 展示
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiInfo.ArchiveResponse'
+              type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      summary: '[用户] 获取站点档案'
+      tags:
+      - 站点信息接口
   /api/v1/info/blogger:
     get:
       consumes:
@@ -4654,11 +4622,35 @@ paths:
       summary: '[用户] 获取博主信息'
       tags:
       - 站点信息接口
+  /api/v1/info/builtin-invalid-group:
+    get:
+      consumes:
+      - application/json
+      description: 返回内置「已失效」分组的名称与描述（经 bm_system 热修改）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiInfo.BuiltinInvalidGroupResponse'
+              type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      summary: '[用户] 获取内置已失效分组配置'
+      tags:
+      - 站点信息接口
   /api/v1/info/site:
     get:
       consumes:
       - application/json
-      description: 获取站点名称、描述、主页介绍等公开信息
+      description: 获取站点名称、主页介绍等公开信息
       produces:
       - application/json
       responses:

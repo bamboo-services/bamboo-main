@@ -9,24 +9,24 @@
 
 import { request } from './client'
 import type {
-  AboutResponse,
   ApplySiteInfoResponse,
+  ArchiveResponse,
   BloggerInfoResponse,
   SiteInfoResponse,
-  UpdateAboutRequest,
   UpdateApplySiteRequest,
+  UpdateArchiveRequest,
   UpdateBloggerRequest,
   UpdateSiteRequest,
 } from './types'
 
-/** 获取站点信息（站名、描述、主页介绍） */
+/** 获取站点信息（站名、主页介绍） */
 export function getSiteInfo(): Promise<SiteInfoResponse> {
   return request<SiteInfoResponse>({ method: 'GET', url: '/info/site' })
 }
 
-/** 获取 Markdown 格式的自我介绍 */
-export function getAbout(): Promise<AboutResponse> {
-  return request<AboutResponse>({ method: 'GET', url: '/info/about' })
+/** 获取站点档案（站点描述 + 自我介绍，均 Markdown） */
+export function getArchive(): Promise<ArchiveResponse> {
+  return request<ArchiveResponse>({ method: 'GET', url: '/info/archive' })
 }
 
 /** 获取申请站点展示（站名、描述、地址、图片、订阅、邮箱）— 供 operate/apply 交换友链场景 */
@@ -45,16 +45,18 @@ export function updateSiteInfo(
 ): Promise<SiteInfoResponse> {
   return request<SiteInfoResponse>({
     method: 'PUT',
-    url: '/admin/info/site',
+    url: '/info/admin/site',
     data: req,
   })
 }
 
-/** 更新自我介绍（管理端） */
-export function updateAbout(req: UpdateAboutRequest): Promise<AboutResponse> {
-  return request<AboutResponse>({
+/** 更新站点档案（管理端，站点描述与自我介绍一次保存） */
+export function updateArchive(
+  req: UpdateArchiveRequest,
+): Promise<ArchiveResponse> {
+  return request<ArchiveResponse>({
     method: 'PUT',
-    url: '/admin/info/about',
+    url: '/info/admin/archive',
     data: req,
   })
 }
@@ -65,7 +67,7 @@ export function updateApplySiteInfo(
 ): Promise<ApplySiteInfoResponse> {
   return request<ApplySiteInfoResponse>({
     method: 'PUT',
-    url: '/admin/info/apply-site',
+    url: '/info/admin/apply-site',
     data: req,
   })
 }
@@ -76,7 +78,7 @@ export function updateBloggerInfo(
 ): Promise<BloggerInfoResponse> {
   return request<BloggerInfoResponse>({
     method: 'PUT',
-    url: '/admin/info/blogger',
+    url: '/info/admin/blogger',
     data: req,
   })
 }

@@ -10,10 +10,11 @@
 import {
   forwardRef,
   useCallback,
-  useEffect,
   useImperativeHandle,
   useRef,
   useState,
+  type KeyboardEvent,
+  type ReactNode,
 } from 'react'
 import {
   Bold,
@@ -29,22 +30,17 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { MarkdownView } from '@/components/markdown'
 import { cn } from '@/lib/utils'
-import { renderMarkdownToHtml } from '@/lib/markdown-html'
-import { domToMarkdown } from '@/lib/markdown-serializer'
 
-/** 编辑器实例句柄：父组件保存前调用 flush 兜底同步最新内容 */
+/** 编辑器实例句柄：源码模式受控同步，flush 保留为空操作以兼容父组件调用 */
 export interface MarkdownEditorHandle {
   flush: () => void
 }
@@ -56,24 +52,21 @@ export interface MarkdownEditorProps {
   /** 编辑区最小高度（px），默认 320 */
   minHeight?: number
   placeholder?: string
-  /** 软限制：仅展示字符计数，不强制截断（源码模式可超限，保存由后端校验） */
+  /** 软限制：仅展示字符计数，不强制截断（保存由后端校验） */
   maxLength?: number
   disabled?: boolean
   className?: string
 }
 
-type Mode = 'wysiwyg' | 'source'
+type Mode = 'source' | 'preview'
 
 /**
- * 竹林水墨 Markdown 所见即所得编辑器。
+ * 竹林水墨 Markdown 编辑器。
  *
- * - 「预览」模式：contenteditable 渲染与公开页一致的排版，编辑即预览；
- * - 「源码」模式：纯 Markdown 源码 textarea，可手工修正；
- * - 工具栏：加粗/斜体/删除线/行内代码/链接/图片/列表/横线/块格式；
- * - 渲染单一真相源为 `MarkdownView`（经 renderMarkdownToHtml），
- *   DOM 回写经 domToMarkdown 序列化，双向保真。
- *
- * 光标铁律：聚焦（isFocused）期间绝不动 innerHTML，避免光标丢失。
+ * - 「源码」模式（默认）：Markdown 源码 textarea，受控编辑，内容永不丢失；
+ * - 「预览」模式：复用 `MarkdownView` 只读渲染，所见即公开页排版；
+ * - 工具栏：加粗/斜体/删除线/行内代码/链接/图片/列表/横线/块格式，
+ *   全部基于 textarea 选区包裹，纯文本编辑、无 DOM 双向同步风险。
  */
 export const MarkdownEditor = forwardRef<
   MarkdownEditorHandle,
@@ -91,120 +84,114 @@ export const MarkdownEditor = forwardRef<
   },
   ref,
 ) {
-  const [mode, setMode] = useState<Mode>('wysiwyg')
-  const [draft, setDraft] = useState(value)
+  const [mode, setMode] = useState<Mode>('source')
+  const taRef = useRef<HTMLTextAreaElement>(null)
 
-  const editorRef = useRef<HTMLDivElement>(null)
-  const valueRef = useRef(value)
-  const lastRenderedMd = useRef(value)
-  const isFocused = useRef(false)
-  const isComposing = useRef(false)
+  // 源码模式 value 已受控同步，flush 无需额外操作
+  useImperativeHandle(ref, () => ({ flush: () => {} }), [])
 
-  // 同步最新外部 value，供 flush 比较
-  useEffect(() => {
-    valueRef.current = value
-  }, [value])
+  /** 下一帧恢复 textarea 焦点与光标位置（等 React 更新 value） */
+  const restoreSelection = useCallback((pos: number) => {
+    requestAnimationFrame(() => {
+      const el = taRef.current
+      if (!el) return
+      el.focus()
+      el.setSelectionRange(pos, pos)
+    })
+  }, [])
 
-  /** 序列化当前 DOM 并回调 onChange（内容有变时） */
-  const flush = useCallback(() => {
-    const el = editorRef.current
-    if (!el) return
-    const md = domToMarkdown(el)
-    if (md !== valueRef.current) onChange(md)
-  }, [onChange])
-
-  // 暴露 flush 供父组件保存前兜底
-  useImperativeHandle(ref, () => ({ flush }), [flush])
-
-  /** 写入 innerHTML 的唯一入口：聚焦期间跳过 */
-  const syncFromValue = useCallback(() => {
-    const el = editorRef.current
-    if (!el || isFocused.current) return
-    if (value === lastRenderedMd.current) return
-    el.innerHTML = renderMarkdownToHtml(value)
-    lastRenderedMd.current = value
-  }, [value])
-
-  // 挂载 / 外部 value 变化 / 模式切换时同步
-  useEffect(() => {
-    syncFromValue()
-  }, [value, mode, syncFromValue])
-
-  /** 输入即时序列化（IME 组合期跳过），保证保存永远拿到最新值 */
-  const handleInput = useCallback(() => {
-    if (isComposing.current) return
-    flush()
-  }, [flush])
-
-  /** 统一执行 execCommand（已废弃但全浏览器兼容，自带 undo 栈） */
-  const exec = useCallback(
-    (command: string, execValue?: string) => {
-      editorRef.current?.focus()
-      document.execCommand(command, false, execValue)
-      handleInput()
+  /** 选区包裹：在选区前后插入标记，未选时以 hint 占位 */
+  const wrapSelection = useCallback(
+    (before: string, after: string, hint?: string) => {
+      const el = taRef.current
+      if (!el) return
+      const start = el.selectionStart
+      const end = el.selectionEnd
+      const insert = value.slice(start, end) || hint || ''
+      onChange(value.slice(0, start) + before + insert + after + value.slice(end))
+      restoreSelection(start + before.length + insert.length)
     },
-    [handleInput],
+    [value, onChange, restoreSelection],
   )
 
-  const setBlock = (tag: string) => exec('formatBlock', tag)
-
-  const insertInlineCode = () =>
-    exec('insertHTML', '<code>代码</code>')
-
-  const insertCodeBlock = () =>
-    exec('insertHTML', '<pre><code>代码</code></pre>')
-
-  const insertLink = () => {
-    const url = window.prompt('链接地址', 'https://')
-    if (url) exec('createLink', url)
-  }
-
-  const insertImage = () => {
-    const url = window.prompt('图片地址', 'https://')
-    const alt = window.prompt('图片描述', '') ?? ''
-    if (url) exec('insertHTML', `<img src="${url}" alt="${alt}" />`)
-  }
-
-  const handleModeChange = (next: string) => {
-    if (next === mode) return
-    if (next === 'source') {
-      // 切源码前把 DOM 序列化写入 draft
-      const el = editorRef.current
-      if (el) {
-        const md = domToMarkdown(el)
-        setDraft(md)
-        valueRef.current = md
-        if (md !== value) onChange(md)
+  /** 行首前缀：光标所在行加前缀，已有则移除（toggle） */
+  const toggleBlockPrefix = useCallback(
+    (prefix: string) => {
+      const el = taRef.current
+      if (!el) return
+      const start = el.selectionStart
+      const lineStart = value.lastIndexOf('\n', start - 1) + 1
+      const lineEndRel = value.indexOf('\n', start)
+      const lineEnd = lineEndRel === -1 ? value.length : lineEndRel
+      const line = value.slice(lineStart, lineEnd)
+      let next: string
+      let pos: number
+      if (line.startsWith(prefix)) {
+        next = value.slice(0, lineStart) + line.slice(prefix.length) + value.slice(lineEnd)
+        pos = lineStart
       } else {
-        setDraft(valueRef.current)
+        next = value.slice(0, lineStart) + prefix + line + value.slice(lineEnd)
+        pos = lineStart + prefix.length
       }
-    }
-    setMode(next as Mode)
-  }
+      onChange(next)
+      restoreSelection(pos)
+    },
+    [value, onChange, restoreSelection],
+  )
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  /** 正文：移除光标所在行的标题/列表/引用标记 */
+  const clearBlockPrefix = useCallback(() => {
+    const el = taRef.current
+    if (!el) return
+    const start = el.selectionStart
+    const lineStart = value.lastIndexOf('\n', start - 1) + 1
+    const lineEndRel = value.indexOf('\n', start)
+    const lineEnd = lineEndRel === -1 ? value.length : lineEndRel
+    const line = value.slice(lineStart, lineEnd)
+    const next =
+      value.slice(0, lineStart) +
+      line.replace(/^(#{1,6}\s|>\s|[-+*]\s|\d+\.\s)/, '') +
+      value.slice(lineEnd)
+    onChange(next)
+    restoreSelection(lineStart)
+  }, [value, onChange, restoreSelection])
+
+  /** 插入横线 */
+  const insertHorizontalRule = useCallback(() => {
+    const el = taRef.current
+    if (!el) return
+    const start = el.selectionStart
+    const end = el.selectionEnd
+    const insert = '\n\n---\n\n'
+    onChange(value.slice(0, start) + insert + value.slice(end))
+    restoreSelection(start + insert.length)
+  }, [value, onChange, restoreSelection])
+
+  const insertLink = useCallback(() => {
+    const url = window.prompt('链接地址', 'https://')
+    if (url) wrapSelection('[', `](${url})`, '链接文字')
+  }, [wrapSelection])
+
+  const insertImage = useCallback(() => {
+    const url = window.prompt('图片地址', 'https://')
+    if (url) wrapSelection('![', `](${url})`, '图片描述')
+  }, [wrapSelection])
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     const mod = e.metaKey || e.ctrlKey
     if (mod && e.key.toLowerCase() === 'b') {
       e.preventDefault()
-      exec('bold')
+      wrapSelection('**', '**', '加粗文字')
     } else if (mod && e.key.toLowerCase() === 'i') {
       e.preventDefault()
-      exec('italic')
+      wrapSelection('*', '*', '斜体文字')
     } else if (mod && e.key.toLowerCase() === 'k') {
       e.preventDefault()
       insertLink()
     } else if (mod && e.shiftKey && e.key.toLowerCase() === 'x') {
       e.preventDefault()
-      exec('strikeThrough')
+      wrapSelection('~~', '~~', '删除文字')
     }
-  }
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    // 只落纯文本，杜绝外站脏 HTML
-    e.preventDefault()
-    const text = e.clipboardData.getData('text/plain')
-    document.execCommand('insertText', false, text)
-    handleInput()
   }
 
   return (
@@ -233,43 +220,54 @@ export const MarkdownEditor = forwardRef<
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="min-w-32">
-              <DropdownMenuItem onSelect={() => setBlock('P')}>
+              <DropdownMenuItem onSelect={clearBlockPrefix}>
                 正文
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setBlock('H1')}>
+              <DropdownMenuItem onSelect={() => toggleBlockPrefix('# ')}>
                 标题一
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setBlock('H2')}>
+              <DropdownMenuItem onSelect={() => toggleBlockPrefix('## ')}>
                 标题二
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setBlock('H3')}>
+              <DropdownMenuItem onSelect={() => toggleBlockPrefix('### ')}>
                 标题三
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setBlock('BLOCKQUOTE')}>
+              <DropdownMenuItem onSelect={() => toggleBlockPrefix('> ')}>
                 引用
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={insertCodeBlock}>
+              <DropdownMenuItem
+                onSelect={() => wrapSelection('```\n', '\n```', '代码')}
+              >
                 代码块
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <ToolButton title="加粗 (⌘B)" onClick={() => exec('bold')}>
+          <ToolButton
+            title="加粗 (⌘B)"
+            onClick={() => wrapSelection('**', '**', '加粗文字')}
+          >
             <Bold className="size-4" />
           </ToolButton>
-          <ToolButton title="斜体 (⌘I)" onClick={() => exec('italic')}>
+          <ToolButton
+            title="斜体 (⌘I)"
+            onClick={() => wrapSelection('*', '*', '斜体文字')}
+          >
             <Italic className="size-4" />
           </ToolButton>
           <ToolButton
             title="删除线 (⌘⇧X)"
-            onClick={() => exec('strikeThrough')}
+            onClick={() => wrapSelection('~~', '~~', '删除文字')}
           >
             <Strikethrough className="size-4" />
           </ToolButton>
 
           <div className="mx-1 h-4 w-px bg-border/60" aria-hidden />
 
-          <ToolButton title="行内代码" onClick={insertInlineCode}>
+          <ToolButton
+            title="行内代码"
+            onClick={() => wrapSelection('`', '`', '代码')}
+          >
             <Code className="size-4" />
           </ToolButton>
           <ToolButton title="链接 (⌘K)" onClick={insertLink}>
@@ -281,72 +279,61 @@ export const MarkdownEditor = forwardRef<
 
           <div className="mx-1 h-4 w-px bg-border/60" aria-hidden />
 
-          <ToolButton title="无序列表" onClick={() => exec('insertUnorderedList')}>
+          <ToolButton
+            title="无序列表"
+            onClick={() => toggleBlockPrefix('- ')}
+          >
             <List className="size-4" />
           </ToolButton>
-          <ToolButton title="有序列表" onClick={() => exec('insertOrderedList')}>
+          <ToolButton
+            title="有序列表"
+            onClick={() => toggleBlockPrefix('1. ')}
+          >
             <ListOrdered className="size-4" />
           </ToolButton>
-          <ToolButton title="横线" onClick={() => exec('insertHorizontalRule')}>
+          <ToolButton title="横线" onClick={insertHorizontalRule}>
             <Minus className="size-4" />
           </ToolButton>
         </div>
 
-        {/* 模式切换：预览 / 源码 */}
-        <Tabs value={mode} onValueChange={handleModeChange} className="shrink-0">
+        {/* 模式切换：源码（默认）/ 预览（只读） */}
+        <Tabs
+          value={mode}
+          onValueChange={(v) => setMode(v as Mode)}
+          className="shrink-0"
+        >
           <TabsList variant="line" className="h-7 gap-1">
-            <TabsTrigger value="wysiwyg" className="text-xs">
-              预览
-            </TabsTrigger>
             <TabsTrigger value="source" className="text-xs">
               源码
+            </TabsTrigger>
+            <TabsTrigger value="preview" className="text-xs">
+              预览
             </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
-      {/* ───────── 编辑区：预览（contenteditable）/ 源码（textarea） ───────── */}
-      {mode === 'wysiwyg' ? (
-        <div
-          id={id}
-          ref={editorRef}
-          className="markdown-view cursor-text px-4 py-3"
-          contentEditable={!disabled}
-          suppressContentEditableWarning
-          spellCheck={false}
-          data-placeholder={placeholder}
-          style={{ minHeight }}
-          onInput={handleInput}
-          onFocus={() => {
-            isFocused.current = true
-          }}
-          onBlur={() => {
-            isFocused.current = false
-            flush()
-          }}
-          onPaste={handlePaste}
-          onKeyDown={handleKeyDown}
-          onCompositionStart={() => {
-            isComposing.current = true
-          }}
-          onCompositionEnd={() => {
-            isComposing.current = false
-            handleInput()
-          }}
-        />
-      ) : (
+      {/* ───────── 编辑区：源码（textarea）/ 预览（只读 MarkdownView） ───────── */}
+      {mode === 'source' ? (
         <Textarea
           id={id}
-          value={draft}
-          onChange={(e) => {
-            setDraft(e.target.value)
-            onChange(e.target.value)
-          }}
-          className="min-h-[320px] resize-y rounded-none border-0 bg-transparent font-mono text-sm shadow-none focus-visible:ring-0"
+          ref={taRef}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="resize-y rounded-none border-0 bg-transparent font-mono text-sm shadow-none focus-visible:ring-0"
           style={{ minHeight }}
           placeholder={placeholder}
           spellCheck={false}
+          disabled={disabled}
+          onKeyDown={handleKeyDown}
         />
+      ) : (
+        <div
+          className="max-h-[480px] overflow-y-auto px-4 py-3"
+          style={{ minHeight }}
+        >
+          <MarkdownView content={value} />
+        </div>
       )}
 
       {/* ───────── 字数统计 ───────── */}
@@ -359,7 +346,7 @@ export const MarkdownEditor = forwardRef<
   )
 })
 
-/** 工具栏按钮：mousedown 阻止抢焦点，保持 contenteditable 选区 */
+/** 工具栏按钮：mousedown 阻止抢焦点，保持 textarea 选区 */
 function ToolButton({
   title,
   onClick,
@@ -367,7 +354,7 @@ function ToolButton({
 }: {
   title: string
   onClick: () => void
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <Button

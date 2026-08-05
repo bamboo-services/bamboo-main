@@ -22,12 +22,12 @@ import { InkNavRow, PageHead } from '@/components/ink-wash'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { enter } from '@/lib/motion'
 import {
-  useAbout,
   useApplySiteInfo,
+  useArchive,
   useBloggerInfo,
   useSiteInfo,
-  useUpdateAbout,
   useUpdateApplySiteInfo,
+  useUpdateArchive,
   useUpdateBloggerInfo,
   useUpdateSiteInfo,
 } from '@/hooks/use-site-info'
@@ -61,12 +61,14 @@ function SettingPage() {
 
       <div className="grid items-start gap-8 lg:grid-cols-[240px_1fr]">
         {/* 左侧菜单：扁平，无卡 */}
+        {/* 左侧菜单：sticky 悬浮，滚动时吸附于 admin header 之下不滚走 */}
         <motion.nav
           {...enter(reduced, 0.12, {
             initial: { opacity: 0, y: 10 },
             animate: { opacity: 1, y: 0 },
             transition: { duration: 0.4, ease: 'easeOut' },
           })}
+          className="lg:sticky lg:top-20"
         >
           <p className="px-3.5 font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary">
             设置项 · PANELS
@@ -234,28 +236,21 @@ function SiteInfoPanel({ reduced }: { reduced: boolean }) {
 
 /** 站点档案面板：站点描述 + 自我介绍（均 Markdown，各自独立保存） */
 function SiteArchivePanel({ reduced }: { reduced: boolean }) {
-  const { data: site, isLoading: siteLoading } = useSiteInfo()
-  const { data: about, isLoading: aboutLoading } = useAbout()
-  const updateSite = useUpdateSiteInfo()
-  const updateAbout = useUpdateAbout()
+  const { data, isLoading } = useArchive()
+  const updateArchive = useUpdateArchive()
 
   const [siteDesc, setSiteDesc] = useState('')
   const [aboutContent, setAboutContent] = useState('')
 
   useEffect(() => {
-    if (site) setSiteDesc(site.site_description)
-  }, [site])
+    if (data) {
+      setSiteDesc(data.site_description)
+      setAboutContent(data.about)
+    }
+  }, [data])
 
-  useEffect(() => {
-    if (about) setAboutContent(about.content)
-  }, [about])
-
-  const handleSaveSiteDesc = () => {
-    updateSite.mutate({ site_description: siteDesc })
-  }
-
-  const handleSaveAbout = () => {
-    updateAbout.mutate({ content: aboutContent })
+  const handleSave = () => {
+    updateArchive.mutate({ site_description: siteDesc, about: aboutContent })
   }
 
   return (
@@ -269,7 +264,7 @@ function SiteArchivePanel({ reduced }: { reduced: boolean }) {
     >
       <PanelHeader kicker="ARCHIVE · MARKDOWN" title="站点档案" />
 
-      {siteLoading || aboutLoading ? (
+      {isLoading ? (
         <div className="relative mt-8 space-y-8">
           <Skeleton className="h-64 w-full" />
           <Skeleton className="h-64 w-full" />
@@ -292,18 +287,6 @@ function SiteArchivePanel({ reduced }: { reduced: boolean }) {
               placeholder="用 Markdown 书写本站介绍，支持加粗、横线等…"
               maxLength={5000}
             />
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-4">
-              <p className="font-serif text-sm italic text-text-secondary">
-                展示于关于我的「贰 · 本站」章节。
-              </p>
-              <Button
-                onClick={handleSaveSiteDesc}
-                disabled={updateSite.isPending}
-              >
-                <Save className="mr-2 h-4 w-4" />
-                {updateSite.isPending ? '保存中…' : '保存站点描述'}
-              </Button>
-            </div>
           </div>
 
           {/* 自我介绍：Markdown 编辑器，展示于「壹 · 自序」 */}
@@ -322,15 +305,17 @@ function SiteArchivePanel({ reduced }: { reduced: boolean }) {
               placeholder="用 Markdown 书写个人档案…"
               maxLength={10000}
             />
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-4">
-              <p className="font-serif text-sm italic text-text-secondary">
-                展示于关于我的「壹 · 自序」章节。
-              </p>
-              <Button onClick={handleSaveAbout} disabled={updateAbout.isPending}>
-                <Save className="mr-2 h-4 w-4" />
-                {updateAbout.isPending ? '保存中…' : '保存自我介绍'}
-              </Button>
-            </div>
+          </div>
+
+          {/* 统一保存：站点描述与自我介绍一次提交 */}
+          <div className="relative mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-5">
+            <p className="font-serif text-sm italic text-text-secondary">
+              站点描述与自我介绍统一保存，即时生效。
+            </p>
+            <Button onClick={handleSave} disabled={updateArchive.isPending}>
+              <Save className="mr-2 h-4 w-4" />
+              {updateArchive.isPending ? '保存中…' : '保存站点档案'}
+            </Button>
           </div>
         </>
       )}
