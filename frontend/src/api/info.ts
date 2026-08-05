@@ -12,12 +12,10 @@ import type {
   ApplySiteInfoResponse,
   ArchiveResponse,
   BloggerInfoResponse,
-  ColorModeResponse,
   SiteInfoResponse,
   UpdateApplySiteRequest,
   UpdateArchiveRequest,
   UpdateBloggerRequest,
-  UpdateColorModeRequest,
   UpdateSiteRequest,
 } from './types'
 
@@ -84,22 +82,6 @@ export function updateBloggerInfo(
   return request<BloggerInfoResponse>({
     method: 'PUT',
     url: '/info/admin/blogger',
-    data: req,
-  })
-}
-
-/** 获取高级配色模式（normal=普通, premium=高级） */
-export function getColorMode(): Promise<ColorModeResponse> {
-  return request<ColorModeResponse>({ method: 'GET', url: '/info/color-mode' })
-}
-
-/** 更新高级配色模式（管理端） */
-export function updateColorMode(
-  req: UpdateColorModeRequest,
-): Promise<ColorModeResponse> {
-  return request<ColorModeResponse>({
-    method: 'PUT',
-    url: '/info/admin/color-mode',
     data: req,
   })
 }

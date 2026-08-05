@@ -65,8 +65,8 @@ export function UserLinkForm({
   const { data: groups } = usePublicGroups()
   const { data: publicColors } = usePublicColors()
 
-  // 颜色下拉兜底：服务端已按高级配色开关过滤；编辑场景下若当前选中颜色不在
-  // 可见列表（如普通模式下既有高级色），追加进下拉选项，避免选中态丢失被误清。
+  // 颜色下拉兜底：编辑场景下若当前选中颜色不在可见列表（防御性，如颜色被禁用/删除），
+  // 追加进下拉选项，避免选中态丢失被误清。
   const colors = useMemo(() => {
     const list = publicColors ?? []
     const selected = initial?.color_f_key

@@ -104,14 +104,3 @@ type ApplySiteResponse struct {
 	Email           string    `json:"email"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
-
-// ColorModeResponse 高级配色模式响应
-type ColorModeResponse struct {
-	Mode      string    `json:"mode"`       // 配色模式：normal=普通, premium=高级
-	UpdatedAt time.Time `json:"updated_at"` // 更新时间
-}
-
-// ColorModeUpdateRequest 高级配色模式更新请求
-type ColorModeUpdateRequest struct {
-	Mode string `json:"mode" binding:"required,oneof=normal premium" example:"premium"` // 配色模式：normal=普通, premium=高级
-}

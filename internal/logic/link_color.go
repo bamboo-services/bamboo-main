@@ -28,9 +28,8 @@ import (
 )
 
 type linkColorRepo struct {
-	color  *repository.LinkColorRepo
-	link   *repository.LinkRepo
-	system *repository.SystemRepo
+	color *repository.LinkColorRepo
+	link  *repository.LinkRepo
 }
 
 // LinkColorLogic 友链颜色业务逻辑
@@ -39,7 +38,7 @@ type LinkColorLogic struct {
 	repo linkColorRepo
 }
 
-// NewLinkColorLogic 创建 LinkColorLogic 实例，从上下文获取数据库与缓存并初始化颜色、友链与系统配置仓储依赖。
+// NewLinkColorLogic 创建 LinkColorLogic 实例，从上下文获取数据库与缓存并初始化颜色与友链仓储依赖。
 func NewLinkColorLogic(ctx context.Context) *LinkColorLogic {
 	db := xCtxUtil.MustGetDB(ctx)
 	m := xCtxUtil.MustGetCacheManager(ctx)
@@ -51,9 +50,8 @@ func NewLinkColorLogic(ctx context.Context) *LinkColorLogic {
 			log:   xLog.WithName(xLog.NamedLOGC, "LinkColorLogic"),
 		},
 		repo: linkColorRepo{
-			color:  repository.NewLinkColorRepo(db, m),
-			link:   repository.NewLinkRepo(db, m),
-			system: repository.NewSystemRepo(db, m),
+			color: repository.NewLinkColorRepo(db, m),
+			link:  repository.NewLinkRepo(db, m),
 		},
 	}
 }
@@ -261,27 +259,14 @@ func (l *LinkColorLogic) Get(ctx context.Context, colorID xSnowflake.SnowflakeID
 
 // GetList 获取友链颜色列表。
 //
-// 类型过滤规则：显式传 type 参数优先于站点开关；未传时普通模式仅返回普通配色（type=0），
-// 高级模式返回全部配色。内置炫彩按过滤条件置顶注入虚拟记录（不落库）。
+// 颜色按类型分级（type=0 普通 / type=1 高级），未显式传 type 时返回全部启用配色；
+// 显式传 type 参数可按级别过滤。内置炫彩按过滤条件置顶注入虚拟记录（不落库）。
 func (l *LinkColorLogic) GetList(ctx context.Context, req *apiLinkColor.ColorListRequest) ([]entity.LinkColor, *xError.Error) {
-	// 类型过滤：显式传 type 优先于站点开关；未传时普通模式仅返回普通配色
-	typeFilter := req.Type
-	if typeFilter == nil {
-		premium, xErr := l.isPremiumMode(ctx)
-		if xErr != nil {
-			return nil, xErr
-		}
-		if !premium {
-			t := bConst.ColorTypeNormal
-			typeFilter = &t
-		}
-	}
-
 	colors, xErr := l.repo.color.List(ctx, &repository.ColorListQuery{
 		Status:      req.Status,
 		Name:        req.Name,
 		OnlyEnabled: req.OnlyEnabled,
-		Type:        typeFilter,
+		Type:        req.Type,
 		OrderBy:     req.OrderBy,
 		Order:       req.Order,
 	}, nil)
@@ -290,25 +275,11 @@ func (l *LinkColorLogic) GetList(ctx context.Context, req *apiLinkColor.ColorLis
 	}
 
 	// 内置炫彩（不落库）：满足过滤条件时置顶注入虚拟记录，供前端选择器使用
-	if builtinFancyVisible(req, typeFilter) {
+	if builtinFancyVisible(req, req.Type) {
 		colors = append([]entity.LinkColor{*entity.NewFancyColor()}, colors...)
 	}
 
 	return colors, nil
-}
-
-// isPremiumMode 判断站点当前是否处于高级配色模式。
-//
-// 读取 bm_system 的 color.mode 配置，值为 premium 视为高级模式，其余（含缺失）回落普通模式。
-func (l *LinkColorLogic) isPremiumMode(ctx context.Context) (bool, *xError.Error) {
-	config, found, xErr := l.repo.system.GetByKey(ctx, bConst.KeyColorMode)
-	if xErr != nil {
-		return false, xErr
-	}
-	if !found || config.Value == nil {
-		return false, nil
-	}
-	return *config.Value == bConst.ColorModePremium, nil
 }
 
 // builtinFancyVisible 判断内置炫彩是否满足当前列表过滤条件。

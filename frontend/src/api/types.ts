@@ -82,20 +82,6 @@ export interface UpdateArchiveRequest {
   about?: string
 }
 
-/** 站点级高级配色模式：normal=普通（仅普通色+炫彩）, premium=高级（额外展示高级色） */
-export type ColorMode = 'normal' | 'premium'
-
-/** 高级配色模式响应（GET /api/v1/info/color-mode） */
-export interface ColorModeResponse {
-  mode: ColorMode
-  updated_at: string
-}
-
-/** 更新高级配色模式请求（PUT /api/v1/admin/info/color-mode） */
-export interface UpdateColorModeRequest {
-  mode: ColorMode
-}
-
 /** 申请站点展示（GET /api/v1/info/apply-site）— 供 operate/apply 交换友链场景读取博主站点资料 */
 export interface ApplySiteInfoResponse {
   site_name: string

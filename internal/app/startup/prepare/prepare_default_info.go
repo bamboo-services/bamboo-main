@@ -44,8 +44,6 @@ var defaultInfoConfigs = []struct {
 	// 内置「已失效」分组配置（供友链失效自动归集与公开「已失效」章节展示）
 	{Key: "group.builtin.invalid.name", Value: "已失效"},
 	{Key: "group.builtin.invalid.description", Value: ""},
-	// 站点级高级配色模式（normal=普通：仅普通色+炫彩；premium=高级：额外展示高级色）
-	{Key: "color.mode", Value: "normal"},
 }
 
 // DefaultInfo 初始化默认站点信息配置的 xOptionDB.PrepareFunc。
