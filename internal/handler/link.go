@@ -507,8 +507,8 @@ func (h *LinkHandler) GetMyLink(c *gin.Context) {
 		return
 	}
 
-	// 调用服务层
-	link, err := h.service.linkLogic.GetMine(c.Request.Context(), userID, uri.ID)
+	// 调用服务层（用户端视图：剥离申请备注，保留预期值）
+	link, err := h.service.linkLogic.GetMineDetail(c.Request.Context(), userID, uri.ID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -603,6 +603,135 @@ func (h *LinkHandler) RequestTakedown(c *gin.Context) {
 
 	// 返回成功响应
 	xResult.Success(c, "下架申请已提交，请等待管理员审核")
+}
+
+// RequestEditApply 当前用户申请修改自己友链的展示位置/颜色
+//
+// @Summary [用户] 申请修改我的友链展示位置/颜色
+// @Description 对已通过且未失效的友链发起修改展示位置/颜色申请，进入修改待审核状态
+// @Tags 用户友链接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param id path int true "友情链接ID"
+// @Param request body apiLink.FriendEditApplyRequest true "修改申请请求"
+// @Success 200 {object} xBase.BaseResponse "申请成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/user/links/{id}/edit-request [PUT]
+func (h *LinkHandler) RequestEditApply(c *gin.Context) {
+	userID, exists := ctxUtil.GetUserID(c)
+	if !exists {
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		return
+	}
+
+	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	if uri == nil {
+		return
+	}
+
+	var req apiLink.FriendEditApplyRequest
+	// 绑定请求数据
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	err := h.service.linkLogic.RequestEditApply(c.Request.Context(), userID, uri.ID, &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	xResult.Success(c, "修改申请已提交，请等待管理员审核")
+}
+
+// ApproveEditRequest 博主通过友链的修改位置/颜色申请
+//
+// @Summary [管理] 通过友链修改位置/颜色申请
+// @Description 通过后应用预期展示位置/颜色，友链回到已通过状态
+// @Tags 管理友情链接接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param id path int true "友情链接ID"
+// @Param request body apiLink.FriendEditReviewRequest true "审核请求"
+// @Success 200 {object} xBase.BaseResponse "审核成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/links/{id}/edit-request/approve [POST]
+func (h *LinkHandler) ApproveEditRequest(c *gin.Context) {
+	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	if uri == nil {
+		return
+	}
+
+	var req apiLink.FriendEditReviewRequest
+	// 绑定请求数据
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	err := h.service.linkLogic.ApproveEditRequest(c.Request.Context(), uri.ID, &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	xResult.Success(c, "修改申请已通过，新位置/颜色已生效")
+}
+
+// RejectEditRequest 博主拒绝友链的修改位置/颜色申请
+//
+// @Summary [管理] 拒绝友链修改位置/颜色申请
+// @Description 拒绝后友链保持原展示位置/颜色，回到已通过状态
+// @Tags 管理友情链接接口
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param id path int true "友情链接ID"
+// @Param request body apiLink.FriendEditReviewRequest true "审核请求"
+// @Success 200 {object} xBase.BaseResponse "审核成功"
+// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
+// @Failure 401 {object} xBase.BaseResponse "未认证"
+// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
+// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Router /api/v1/admin/links/{id}/edit-request/reject [POST]
+func (h *LinkHandler) RejectEditRequest(c *gin.Context) {
+	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	if uri == nil {
+		return
+	}
+
+	var req apiLink.FriendEditReviewRequest
+	// 绑定请求数据
+	bindErr := c.ShouldBindJSON(&req)
+	if bindErr != nil {
+		xValid.HandleValidationError(c, bindErr)
+		return
+	}
+
+	// 调用服务层
+	err := h.service.linkLogic.RejectEditRequest(c.Request.Context(), uri.ID, &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	// 返回成功响应
+	xResult.Success(c, "修改申请已拒绝，友链保持原位置/颜色")
 }
 
 // GetPublicGroups 获取启用的友链分组列表（公开接口，供申请表单选择器使用）

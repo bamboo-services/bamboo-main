@@ -37,19 +37,27 @@ interface UserLinkFormState {
 /**
  * 用户友链信息表单：访客申请 / 用户编辑共用。
  *
- * 仅含站点基础信息字段（名称/地址/Logo/邮箱/描述/备注），分组/颜色/级别/排序
+ * 仅含站点基础信息字段（名称/地址/Logo/邮箱/描述），分组/颜色/级别/排序
  * 等管理员专属字段不在此开放。`initial` 提供时按友链详情预填（编辑），否则为空表单（申请）。
- * 提交时组装 ApplyLinkRequest（字段与 UpdateUserLinkRequest 同构且为其子集）交回调用方。
+ *
+ * `mode` 区分两种语义：
+ * - `apply`（默认）：开放「展示位置/展示颜色」选择与「申请备注」输入（备注仅博主审核可见）。
+ * - `edit`：展示位置/颜色改为只读展示（不可编辑），且不提供申请备注输入；
+ *   提交载荷不携带位置/颜色/备注字段，仅更新站点基础信息。
+ *
+ * 提交时组装 ApplyLinkRequest 交回调用方（edit 模式为其子集 UpdateUserLinkRequest 所需字段）。
  */
 export function UserLinkForm({
   initial,
   submitting,
   submitLabel = '保存',
+  mode = 'apply',
   onSubmit,
 }: {
   initial?: LinkFriend | null
   submitting: boolean
   submitLabel?: string
+  mode?: 'apply' | 'edit'
   onSubmit: (req: ApplyLinkRequest) => void
 }) {
   const { user, isAuthenticated } = useAuth()
@@ -94,10 +102,15 @@ export function UserLinkForm({
       link_avatar: form.siteLogo.trim() || undefined,
       link_rss: form.siteRss.trim() || undefined,
       link_email: (lockedEmail || form.webmasterEmail).trim(),
-      link_group_id: form.groupId ? BigInt(form.groupId) : undefined,
-      link_color_id: form.colorId ? BigInt(form.colorId) : undefined,
+      // edit 模式：展示位置/颜色不可编辑、无申请备注，载荷仅站点基础信息
+      ...(mode === 'edit'
+        ? {}
+        : {
+            link_group_id: form.groupId ? BigInt(form.groupId) : undefined,
+            link_color_id: form.colorId ? BigInt(form.colorId) : undefined,
+            link_apply_remark: form.applyRemark.trim() || undefined,
+          }),
       link_desc: form.siteDescription.trim() || undefined,
-      link_apply_remark: form.applyRemark.trim() || undefined,
     })
   }
 
@@ -154,36 +167,50 @@ export function UserLinkForm({
             <MapPin className="size-3.5 text-text-secondary" />
             展示位置
           </Label>
-          <Select
-            id="groupId"
-            value={form.groupId}
-            onChange={(e) => setForm({ ...form, groupId: e.target.value })}
-          >
-            <option value="">请选择位置</option>
-            {groups?.map((g) => (
-              <option key={g.id.toString()} value={g.id.toString()}>
-                {g.name}
-              </option>
-            ))}
-          </Select>
+          {mode === 'edit' ? (
+            <div className="rounded-md border border-border/70 bg-muted/40 px-3 py-2 text-sm text-text-secondary">
+              {initial?.group_f_key?.name ??
+                (initial?.group_id ? `位置 #${initial.group_id}` : '未分组')}
+            </div>
+          ) : (
+            <Select
+              id="groupId"
+              value={form.groupId}
+              onChange={(e) => setForm({ ...form, groupId: e.target.value })}
+            >
+              <option value="">请选择位置</option>
+              {groups?.map((g) => (
+                <option key={g.id.toString()} value={g.id.toString()}>
+                  {g.name}
+                </option>
+              ))}
+            </Select>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="colorId" className="flex items-center gap-1.5">
             <Palette className="size-3.5 text-text-secondary" />
             展示颜色
           </Label>
-          <Select
-            id="colorId"
-            value={form.colorId}
-            onChange={(e) => setForm({ ...form, colorId: e.target.value })}
-          >
-            <option value="">请选择颜色</option>
-            {colors?.map((c) => (
-              <option key={c.id.toString()} value={c.id.toString()}>
-                {c.name}
-              </option>
-            ))}
-          </Select>
+          {mode === 'edit' ? (
+            <div className="rounded-md border border-border/70 bg-muted/40 px-3 py-2 text-sm text-text-secondary">
+              {initial?.color_f_key?.name ??
+                (initial?.color_id ? `颜色 #${initial.color_id}` : '默认颜色')}
+            </div>
+          ) : (
+            <Select
+              id="colorId"
+              value={form.colorId}
+              onChange={(e) => setForm({ ...form, colorId: e.target.value })}
+            >
+              <option value="">请选择颜色</option>
+              {colors?.map((c) => (
+                <option key={c.id.toString()} value={c.id.toString()}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          )}
         </div>
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="webmasterEmail">
@@ -225,16 +252,21 @@ export function UserLinkForm({
         />
       </div>
 
-      {/* 申请备注 */}
-      <div className="space-y-2">
-        <Label htmlFor="applyRemark">申请备注</Label>
-        <Input
-          id="applyRemark"
-          placeholder="选填，例如申请来源说明"
-          value={form.applyRemark}
-          onChange={(e) => setForm({ ...form, applyRemark: e.target.value })}
-        />
-      </div>
+      {/* 申请备注（仅博主审核可见；编辑基础信息时不提供） */}
+      {mode === 'edit' ? null : (
+        <div className="space-y-2">
+          <Label htmlFor="applyRemark">申请备注</Label>
+          <Input
+            id="applyRemark"
+            placeholder="选填，例如申请来源说明"
+            value={form.applyRemark}
+            onChange={(e) => setForm({ ...form, applyRemark: e.target.value })}
+          />
+          <p className="text-[11px] text-text-secondary">
+            备注仅供博主审核时查看，不会公开展示
+          </p>
+        </div>
+      )}
 
       {/* 提交按钮 */}
       <div className="flex justify-end border-t border-border/60 pt-5">

@@ -389,9 +389,11 @@ function LinkListPage() {
               <Button variant="outline" className="cursor-pointer">
                 <CheckCircle2 className="mr-2 size-4" />
                 友链审核
-                {(linksQuery.data?.pending_count ?? 0) > 0 && (
+                {((linksQuery.data?.pending_count ?? 0) +
+                  (linksQuery.data?.edit_pending_count ?? 0)) > 0 && (
                   <InkBadge tone="pending" className="ml-2">
-                    {linksQuery.data?.pending_count}
+                    {(linksQuery.data?.pending_count ?? 0) +
+                      (linksQuery.data?.edit_pending_count ?? 0)}
                   </InkBadge>
                 )}
               </Button>

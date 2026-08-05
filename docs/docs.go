@@ -2223,6 +2223,146 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/admin/links/{id}/edit-request/approve": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "通过后应用预期展示位置/颜色，友链回到已通过状态",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理友情链接接口"
+                ],
+                "summary": "[管理] 通过友链修改位置/颜色申请",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "友情链接ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "审核请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiLink.FriendEditReviewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "审核成功",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "友情链接不存在",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/links/{id}/edit-request/reject": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "拒绝后友链保持原展示位置/颜色，回到已通过状态",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理友情链接接口"
+                ],
+                "summary": "[管理] 拒绝友链修改位置/颜色申请",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "友情链接ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "审核请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiLink.FriendEditReviewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "审核成功",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "友情链接不存在",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/links/{id}/fail": {
             "put": {
                 "security": [
@@ -4859,6 +4999,76 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/user/links/{id}/edit-request": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "对已通过且未失效的友链发起修改展示位置/颜色申请，进入修改待审核状态",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户友链接口"
+                ],
+                "summary": "[用户] 申请修改我的友链展示位置/颜色",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "友情链接ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "修改申请请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiLink.FriendEditApplyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "申请成功",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未认证",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "友情链接不存在",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/xBase.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user/links/{id}/takedown": {
             "put": {
                 "security": [
@@ -6023,6 +6233,14 @@ const docTemplate = `{
                     "description": "友链联系邮箱",
                     "type": "string"
                 },
+                "expected_color_id": {
+                    "description": "预期展示颜色ID（修改申请待生效）",
+                    "type": "integer"
+                },
+                "expected_group_id": {
+                    "description": "预期展示位置ID（修改申请待生效）",
+                    "type": "integer"
+                },
                 "fail_reason": {
                     "description": "友链失效原因",
                     "type": "string"
@@ -6136,6 +6354,14 @@ const docTemplate = `{
                     "description": "友链联系邮箱",
                     "type": "string"
                 },
+                "expected_color_id": {
+                    "description": "预期展示颜色ID（修改申请待生效）",
+                    "type": "integer"
+                },
+                "expected_group_id": {
+                    "description": "预期展示位置ID（修改申请待生效）",
+                    "type": "integer"
+                },
                 "fail_reason": {
                     "description": "友链失效原因",
                     "type": "string"
@@ -6212,6 +6438,19 @@ const docTemplate = `{
                 }
             }
         },
+        "apiLink.FriendEditApplyRequest": {
+            "type": "object"
+        },
+        "apiLink.FriendEditReviewRequest": {
+            "type": "object",
+            "properties": {
+                "link_review_remark": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "example": "已调整"
+                }
+            }
+        },
         "apiLink.FriendFailRequest": {
             "type": "object",
             "required": [
@@ -6257,7 +6496,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "anomaly_count": {
-                    "description": "异常友链数量（status 非 0/1 或已失效）",
+                    "description": "异常友链数量（status 非 0/1/5 或已失效）",
                     "type": "integer"
                 },
                 "data": {
@@ -6266,6 +6505,10 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entity.LinkFriend"
                     }
+                },
+                "edit_pending_count": {
+                    "description": "修改待审核友链数量（修改展示位置/颜色申请）",
+                    "type": "integer"
                 },
                 "pagination": {
                     "description": "分页信息",
@@ -6276,7 +6519,7 @@ const docTemplate = `{
                     ]
                 },
                 "pending_count": {
-                    "description": "待审核友链数量",
+                    "description": "待审核友链数量（申请阶段）",
                     "type": "integer"
                 }
             }
@@ -6399,6 +6642,14 @@ const docTemplate = `{
                     "description": "友链联系邮箱",
                     "type": "string"
                 },
+                "expected_color_id": {
+                    "description": "预期展示颜色ID（修改申请待生效）",
+                    "type": "integer"
+                },
+                "expected_group_id": {
+                    "description": "预期展示位置ID（修改申请待生效）",
+                    "type": "integer"
+                },
                 "fail_reason": {
                     "description": "友链失效原因",
                     "type": "string"
@@ -6478,11 +6729,6 @@ const docTemplate = `{
         "apiLink.FriendUserUpdateRequest": {
             "type": "object",
             "properties": {
-                "link_apply_remark": {
-                    "type": "string",
-                    "maxLength": 500,
-                    "example": "申请友链"
-                },
                 "link_avatar": {
                     "type": "string",
                     "maxLength": 500,
@@ -7827,6 +8073,14 @@ const docTemplate = `{
                 "email": {
                     "description": "友链联系邮箱",
                     "type": "string"
+                },
+                "expected_color_id": {
+                    "description": "预期展示颜色ID（修改申请待生效）",
+                    "type": "integer"
+                },
+                "expected_group_id": {
+                    "description": "预期展示位置ID（修改申请待生效）",
+                    "type": "integer"
                 },
                 "fail_reason": {
                     "description": "友链失效原因",

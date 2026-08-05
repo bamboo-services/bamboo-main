@@ -597,6 +597,12 @@ definitions:
       email:
         description: 友链联系邮箱
         type: string
+      expected_color_id:
+        description: 预期展示颜色ID（修改申请待生效）
+        type: integer
+      expected_group_id:
+        description: 预期展示位置ID（修改申请待生效）
+        type: integer
       fail_reason:
         description: 友链失效原因
         type: string
@@ -679,6 +685,12 @@ definitions:
       email:
         description: 友链联系邮箱
         type: string
+      expected_color_id:
+        description: 预期展示颜色ID（修改申请待生效）
+        type: integer
+      expected_group_id:
+        description: 预期展示位置ID（修改申请待生效）
+        type: integer
       fail_reason:
         description: 友链失效原因
         type: string
@@ -734,6 +746,15 @@ definitions:
         description: 归属用户ID（按邮箱确认归属，为空表示游客提交尚未关联）
         type: integer
     type: object
+  apiLink.FriendEditApplyRequest:
+    type: object
+  apiLink.FriendEditReviewRequest:
+    properties:
+      link_review_remark:
+        example: 已调整
+        maxLength: 500
+        type: string
+    type: object
   apiLink.FriendFailRequest:
     properties:
       link_fail:
@@ -764,19 +785,22 @@ definitions:
   apiLink.FriendListResponse:
     properties:
       anomaly_count:
-        description: 异常友链数量（status 非 0/1 或已失效）
+        description: 异常友链数量（status 非 0/1/5 或已失效）
         type: integer
       data:
         description: 数据列表
         items:
           $ref: '#/definitions/entity.LinkFriend'
         type: array
+      edit_pending_count:
+        description: 修改待审核友链数量（修改展示位置/颜色申请）
+        type: integer
       pagination:
         allOf:
         - $ref: '#/definitions/base.PaginationInfo'
         description: 分页信息
       pending_count:
-        description: 待审核友链数量
+        description: 待审核友链数量（申请阶段）
         type: integer
     type: object
   apiLink.FriendPublicResponse:
@@ -861,6 +885,12 @@ definitions:
       email:
         description: 友链联系邮箱
         type: string
+      expected_color_id:
+        description: 预期展示颜色ID（修改申请待生效）
+        type: integer
+      expected_group_id:
+        description: 预期展示位置ID（修改申请待生效）
+        type: integer
       fail_reason:
         description: 友链失效原因
         type: string
@@ -918,10 +948,6 @@ definitions:
     type: object
   apiLink.FriendUserUpdateRequest:
     properties:
-      link_apply_remark:
-        example: 申请友链
-        maxLength: 500
-        type: string
       link_avatar:
         example: https://example.com/avatar.jpg
         maxLength: 500
@@ -1882,6 +1908,12 @@ definitions:
       email:
         description: 友链联系邮箱
         type: string
+      expected_color_id:
+        description: 预期展示颜色ID（修改申请待生效）
+        type: integer
+      expected_group_id:
+        description: 预期展示位置ID（修改申请待生效）
+        type: integer
       fail_reason:
         description: 友链失效原因
         type: string
@@ -3319,6 +3351,96 @@ paths:
       summary: '[管理] 更新友情链接'
       tags:
       - 友情链接接口
+  /api/v1/admin/links/{id}/edit-request/approve:
+    post:
+      consumes:
+      - application/json
+      description: 通过后应用预期展示位置/颜色，友链回到已通过状态
+      parameters:
+      - description: 友情链接ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 审核请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiLink.FriendEditReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 审核成功
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "404":
+          description: 友情链接不存在
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[管理] 通过友链修改位置/颜色申请'
+      tags:
+      - 管理友情链接接口
+  /api/v1/admin/links/{id}/edit-request/reject:
+    post:
+      consumes:
+      - application/json
+      description: 拒绝后友链保持原展示位置/颜色，回到已通过状态
+      parameters:
+      - description: 友情链接ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 审核请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiLink.FriendEditReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 审核成功
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "404":
+          description: 友情链接不存在
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[管理] 拒绝友链修改位置/颜色申请'
+      tags:
+      - 管理友情链接接口
   /api/v1/admin/links/{id}/fail:
     put:
       consumes:
@@ -4980,6 +5102,51 @@ paths:
       security:
       - Bearer: []
       summary: '[用户] 更新我的友情链接'
+      tags:
+      - 用户友链接口
+  /api/v1/user/links/{id}/edit-request:
+    put:
+      consumes:
+      - application/json
+      description: 对已通过且未失效的友链发起修改展示位置/颜色申请，进入修改待审核状态
+      parameters:
+      - description: 友情链接ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 修改申请请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiLink.FriendEditApplyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 申请成功
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "404":
+          description: 友情链接不存在
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[用户] 申请修改我的友链展示位置/颜色'
       tags:
       - 用户友链接口
   /api/v1/user/links/{id}/takedown:

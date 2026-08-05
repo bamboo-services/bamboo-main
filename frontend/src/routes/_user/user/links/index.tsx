@@ -10,7 +10,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'motion/react'
 import { useCallback, useState } from 'react'
-import { ArchiveX, ExternalLink, Pencil } from 'lucide-react'
+import { ArchiveX, ExternalLink, MapPin, Pencil } from 'lucide-react'
 import type { LinkFriend } from '@/api/types'
 import type { InterludeData } from '@/components/about/interlude'
 import { useMyLinks, useRequestTakedown } from '@/hooks/use-links'
@@ -134,6 +134,11 @@ function MyLinksPage() {
                           审核备注：{link.review_remark}
                         </p>
                       )}
+                      {link.status === 5 && (
+                        <p className="mt-2 text-xs text-text-secondary">
+                          展示位置/颜色修改审核中，审核通过后生效
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -150,19 +155,36 @@ function MyLinksPage() {
                       <ExternalLink className="size-4" />
                       访问站点
                     </Button>
-                    <Link
-                      to="/user/links/$id/edit"
-                      params={{ id: link.id.toString() }}
-                    >
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="cursor-pointer"
+                    {link.status === 1 && (
+                      <Link
+                        to="/user/links/$id/edit"
+                        params={{ id: link.id.toString() }}
                       >
-                        <Pencil className="size-4" />
-                        编辑
-                      </Button>
-                    </Link>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="cursor-pointer"
+                        >
+                          <Pencil className="size-4" />
+                          编辑
+                        </Button>
+                      </Link>
+                    )}
+                    {link.status === 1 && link.is_failure === 0 && (
+                      <Link
+                        to="/user/links/$id/edit-location"
+                        params={{ id: link.id.toString() }}
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="cursor-pointer"
+                        >
+                          <MapPin className="size-4" />
+                          申请修改位置
+                        </Button>
+                      </Link>
+                    )}
                     {link.status === 1 && (
                       <Button
                         variant="outline"

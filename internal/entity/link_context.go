@@ -35,8 +35,10 @@ type LinkFriend struct {
 	UserID             *xSnowflake.SnowflakeID `json:"user_id,omitempty" gorm:"comment:归属用户ID;index"`                                           // 归属用户ID（按邮箱确认归属，为空表示游客提交尚未关联）
 	GroupID            *xSnowflake.SnowflakeID `json:"group_id,omitempty" gorm:"comment:所属分组ID"`                                                // 所属分组ID
 	ColorID            *xSnowflake.SnowflakeID `json:"color_id,omitempty" gorm:"comment:友链颜色ID"`                                                // 友链颜色ID
+	ExpectedGroupID    *xSnowflake.SnowflakeID `json:"expected_group_id,omitempty" gorm:"comment:预期展示位置ID(修改申请待生效)"`                           // 预期展示位置ID（修改申请待生效）
+	ExpectedColorID    *xSnowflake.SnowflakeID `json:"expected_color_id,omitempty" gorm:"comment:预期展示颜色ID(修改申请待生效)"`                           // 预期展示颜色ID（修改申请待生效）
 	SortOrder          int                     `json:"sort_order" gorm:"type:int;default:0;comment:友链排序"`                                       // 友链排序
-	Status             int                     `json:"status" gorm:"type:int;default:0;comment:友链状态（0: 待审核, 1: 已通过, 2: 已拒绝, 3: 下架待审核, 4: 已下架）"` // 友链状态
+	Status             int                     `json:"status" gorm:"type:int;default:0;comment:友链状态（0: 申请待审核, 1: 已通过, 2: 已拒绝, 3: 下架待审核, 4: 已下架, 5: 修改待审核）"` // 友链状态
 	IsFailure          int                     `json:"is_failure" gorm:"type:int;default:0;comment:友链失效标志（0: 正常, 1: 失效）"`                       // 友链失效标志
 	Level              int                     `json:"level" gorm:"type:int;default:0;comment:友链级别（0: 一般, 1: 好友, 2: 高级, 3: 广告）"`                // 友链级别
 	FailReason         *string                 `json:"fail_reason,omitempty" gorm:"type:text;comment:友链失效原因"`                                   // 友链失效原因

@@ -249,8 +249,8 @@ func (r *LinkRepo) List(ctx context.Context, req *FriendQuery, tx *gorm.DB) ([]e
 		query = query.Where("is_failure = ?", *req.LinkFail)
 	}
 	if req.LinkAnomaly != nil && *req.LinkAnomaly {
-		// 异常：非待审核/已通过（拒绝/下架待审核/已下架）或已失效
-		query = query.Where("(status NOT IN (0, 1) OR is_failure = 1)")
+		// 异常：非待审核/已通过/修改待审核（拒绝/下架待审核/已下架）或已失效
+		query = query.Where("(status NOT IN (0, 1, 5) OR is_failure = 1)")
 	}
 	if req.LinkGroupID != 0 {
 		query = query.Where("group_id = ?", req.LinkGroupID)
@@ -325,6 +325,46 @@ func (r *LinkRepo) UpdateStatusByID(ctx context.Context, id xSnowflake.Snowflake
 	return true, nil
 }
 
+// buildEditResolveUpdates 组装修改位置/颜色申请的审核落库字段（纯函数）
+//
+// apply=true 表示通过：expected_* 原子应用到正式字段（COALESCE 兜底，仅提供的一项才覆盖）；
+// 拒绝（apply=false）时保持原 group_id/color_id 不变。两种情况均清空 expected_*、
+// 状态回已通过、写入审核备注。
+func buildEditResolveUpdates(apply bool, reviewRemark string) map[string]any {
+	updates := map[string]any{
+		"expected_group_id": nil,
+		"expected_color_id": nil,
+		"status":            constants.LinkStatusApproved,
+		"review_remark":     reviewRemark,
+	}
+	if apply {
+		updates["group_id"] = gorm.Expr("COALESCE(expected_group_id, group_id)")
+		updates["color_id"] = gorm.Expr("COALESCE(expected_color_id, color_id)")
+	}
+	return updates
+}
+
+// ResolveEditRequest 结算友链的修改位置/颜色申请（通过或拒绝）
+//
+// 通过：expected_* 原子应用到正式字段；拒绝：保持原值。均清空 expected_* 并回到已通过状态。
+func (r *LinkRepo) ResolveEditRequest(ctx context.Context, id xSnowflake.SnowflakeID, apply bool, reviewRemark string, tx *gorm.DB) (bool, *xError.Error) {
+	r.log.Info(ctx, "ResolveEditRequest - 结算修改位置/颜色申请")
+
+	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).Where("id = ?", id).Updates(buildEditResolveUpdates(apply, reviewRemark))
+	if result.Error != nil {
+		return false, xError.NewError(ctx, xError.DatabaseError, "结算修改申请失败", false, result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return false, nil
+	}
+
+	if cacheErr := r.kc.Delete(ctx, constants.RedisLinkFriend.Get(id).String()); cacheErr != nil {
+		r.log.Warn(ctx, cacheErr.Error())
+	}
+
+	return true, nil
+}
+
 // UpdateFailureByID 更新友情链接的失效状态
 //
 // invalidGroupID 为内置「已失效」分组的保留 ID：标记失效时自动归入该分组，
@@ -379,12 +419,12 @@ func buildFailureUpdates(isFailure int, failReason string, invalidGroupID *xSnow
 // 未分组 NULL 经 NULLS LAST 置底），章内遵循友链排序值（bm_link_friend.sort_order ASC），
 // 同序回退创建时间倒序。LEFT JOIN 后 status 于两表同名，条件列一律带表限定；
 // 表名含 bm_ 前缀且为单数（xOptionDB.WithTablePrefix + SingularTable，见 main.go）。
-func (r *LinkRepo) ListPublic(ctx context.Context, groupID *xSnowflake.SnowflakeID, approvedStatus int, normalFail int, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
+func (r *LinkRepo) ListPublic(ctx context.Context, groupID *xSnowflake.SnowflakeID, statuses []int, normalFail int, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
 	r.log.Info(ctx, "ListPublic - 查询公开友情链接")
 
 	query := r.pickDB(tx).WithContext(ctx).
 		Joins("LEFT JOIN bm_link_group ON bm_link_group.id = bm_link_friend.group_id").
-		Where("bm_link_friend.status = ? AND bm_link_friend.is_failure = ?", approvedStatus, normalFail)
+		Where("bm_link_friend.status IN ? AND bm_link_friend.is_failure = ?", statuses, normalFail)
 
 	if groupID != nil {
 		query = query.Where("bm_link_friend.group_id = ?", *groupID)
@@ -554,11 +594,11 @@ func (r *LinkRepo) CountByStatus(ctx context.Context, status int, tx *gorm.DB) (
 	return count, nil
 }
 
-// CountAnomaly 统计异常友链数量（status 非 0/1 或已失效）
+// CountAnomaly 统计异常友链数量（status 非 0/1/5 或已失效）
 func (r *LinkRepo) CountAnomaly(ctx context.Context, tx *gorm.DB) (int64, *xError.Error) {
 	var count int64
 	err := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).
-		Where("(status NOT IN (0, 1) OR is_failure = 1)").
+		Where("(status NOT IN (0, 1, 5) OR is_failure = 1)").
 		Count(&count).Error
 	if err != nil {
 		return 0, xError.NewError(ctx, xError.DatabaseError, "统计异常友链数量失败", true, err)

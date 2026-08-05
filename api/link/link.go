@@ -91,7 +91,7 @@ type FriendQueryRequest struct {
 	Page        int                    `form:"page" binding:"omitempty,min=1" example:"1"`
 	PageSize    int                    `form:"page_size" binding:"omitempty,min=1,max=100" example:"10"`
 	LinkName    string                 `form:"link_name" binding:"omitempty,max=100" example:"示例"`
-	LinkStatus  *int                   `form:"link_status" binding:"omitempty,oneof=0 1 2 3 4" example:"1"`
+	LinkStatus  *int                   `form:"link_status" binding:"omitempty,oneof=0 1 2 3 4 5" example:"1"`
 	LinkFail    *int                   `form:"link_fail" binding:"omitempty,oneof=0 1" example:"0"`
 	LinkAnomaly *bool                  `form:"link_anomaly" binding:"omitempty" example:"true"` // 异常过滤：status 非 0/1 或已失效（true）
 	LinkGroupID xSnowflake.SnowflakeID `form:"link_group_id" binding:"omitempty,number" example:"1"`
@@ -129,8 +129,9 @@ type FriendDetailResponse struct {
 // FriendListResponse 友情链接列表响应（附带待审核/异常计数，供管理端入口徽章展示）
 type FriendListResponse struct {
 	base.PaginationResponse[entity.LinkFriend]
-	PendingCount int64 `json:"pending_count"` // 待审核友链数量
-	AnomalyCount int64 `json:"anomaly_count"` // 异常友链数量（status 非 0/1 或已失效）
+	PendingCount     int64 `json:"pending_count"`      // 待审核友链数量（申请阶段）
+	AnomalyCount     int64 `json:"anomaly_count"`      // 异常友链数量（status 非 0/1/5 或已失效）
+	EditPendingCount int64 `json:"edit_pending_count"` // 修改待审核友链数量（修改展示位置/颜色申请）
 }
 
 // FriendPublicResponse 公开友情链接响应
@@ -185,19 +186,35 @@ type FriendApplyRequest struct {
 // FriendUserUpdateRequest 用户更新自己友情链接请求
 //
 // 仅允许更新站点基础信息字段，分组/颜色/级别/排序等管理员专属字段不可改，审核状态保持不变。
+// 申请备注不在此开放（备注仅经申请/修改申请写入，且仅博主审核可见）。
 type FriendUserUpdateRequest struct {
-	LinkName        string `json:"link_name" binding:"omitempty,min=1,max=100" example:"示例网站"`
-	LinkURL         string `json:"link_url" binding:"omitempty,url,max=500" example:"https://example.com"`
-	LinkAvatar      string `json:"link_avatar" binding:"omitempty,url,max=500" example:"https://example.com/avatar.jpg"`
-	LinkRSS         string `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
-	LinkDesc        string `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
-	LinkEmail       string `json:"link_email" binding:"omitempty,email,max=100" example:"admin@example.com"`
-	LinkApplyRemark string `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
+	LinkName   string `json:"link_name" binding:"omitempty,min=1,max=100" example:"示例网站"`
+	LinkURL    string `json:"link_url" binding:"omitempty,url,max=500" example:"https://example.com"`
+	LinkAvatar string `json:"link_avatar" binding:"omitempty,url,max=500" example:"https://example.com/avatar.jpg"`
+	LinkRSS    string `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
+	LinkDesc   string `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
+	LinkEmail  string `json:"link_email" binding:"omitempty,email,max=100" example:"admin@example.com"`
 }
 
 // FriendUserQueryRequest 用户查询自己友情链接请求
 type FriendUserQueryRequest struct {
 	Page       int  `form:"page" binding:"omitempty,min=1" example:"1"`
 	PageSize   int  `form:"page_size" binding:"omitempty,min=1,max=100" example:"10"`
-	LinkStatus *int `form:"link_status" binding:"omitempty,oneof=0 1 2 3 4" example:"1"`
+	LinkStatus *int `form:"link_status" binding:"omitempty,oneof=0 1 2 3 4 5" example:"1"`
+}
+
+// FriendEditApplyRequest 用户申请修改友链展示位置/颜色请求
+//
+// 三态 ID 复用 NullableSnowflakeID：省略=保持原值，null=清空，值=设置。
+// 备注写入 ApplyRemark（仅博主审核可见），发起后友链进入修改待审核(5)，
+// 旧位置/颜色保持展示，待博主审核通过后应用预期值。
+type FriendEditApplyRequest struct {
+	LinkGroupID     NullableSnowflakeID `json:"link_group_id" binding:"omitempty" example:"1"`
+	LinkColorID     NullableSnowflakeID `json:"link_color_id" binding:"omitempty" example:"1"`
+	LinkApplyRemark string              `json:"link_apply_remark" binding:"omitempty,max=500" example:"希望调整到首页"`
+}
+
+// FriendEditReviewRequest 博主审核友链修改位置/颜色申请请求（通过/拒绝共用）
+type FriendEditReviewRequest struct {
+	LinkReviewRemark string `json:"link_review_remark" binding:"omitempty,max=500" example:"已调整"`
 }

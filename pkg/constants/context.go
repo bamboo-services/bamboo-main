@@ -34,7 +34,7 @@ const (
 	// StatusInactive 停用状态值
 	StatusInactive = 0
 
-	// LinkStatusPending 链接待审核状态
+	// LinkStatusPending 链接申请阶段待审核状态（新友链申请，等待管理员审核）
 	LinkStatusPending = 0
 	// LinkStatusApproved 链接已通过状态
 	LinkStatusApproved = 1
@@ -44,6 +44,8 @@ const (
 	LinkStatusTakedownPending = 3
 	// LinkStatusTakenDown 链接已下架状态（管理员批准下架，不再公开展示）
 	LinkStatusTakenDown = 4
+	// LinkStatusEditPending 链接修改阶段待审核状态（用户申请修改展示位置/颜色，等待管理员审核）
+	LinkStatusEditPending = 5
 
 	// SponsorStatusPending 赞助待审核状态（公开申请后默认，前台不可见）
 	SponsorStatusPending = 0

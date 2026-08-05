@@ -10,11 +10,13 @@
 package repository
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
 	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -115,6 +117,71 @@ func TestBuildFailureUpdates(t *testing.T) {
 				}
 			} else if hasGroup {
 				t.Fatalf("不应包含 group_id 键，实际 %v", got)
+			}
+		})
+	}
+}
+
+// TestBuildEditResolveUpdates 校验修改位置/颜色申请的审核落库字段组装：
+// 通过（apply=true）时以 COALESCE 将 expected_* 原子应用到正式字段；
+// 拒绝（apply=false）时保持原值；两种情形均清空预期值、状态回已通过并写入审核备注。
+func TestBuildEditResolveUpdates(t *testing.T) {
+	wantGroupExpr := gorm.Expr("COALESCE(expected_group_id, group_id)")
+	wantColorExpr := gorm.Expr("COALESCE(expected_color_id, color_id)")
+
+	cases := []struct {
+		name        string
+		apply       bool
+		remark      string
+		wantApply   bool // 是否包含 group_id/color_id 键
+		wantGroupID any
+		wantColorID any
+	}{
+		{
+			name:        "通过：应用预期值",
+			apply:       true,
+			remark:      "已调整",
+			wantApply:   true,
+			wantGroupID: wantGroupExpr,
+			wantColorID: wantColorExpr,
+		},
+		{
+			name:      "拒绝：保持原值",
+			apply:     false,
+			remark:    "维持现状",
+			wantApply: false,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := buildEditResolveUpdates(tc.apply, tc.remark)
+
+			// 恒清空预期值、状态回已通过、审核备注透传
+			if _, ok := got["expected_group_id"]; !ok || got["expected_group_id"] != nil {
+				t.Fatalf("期望 expected_group_id 键存在且为 nil，实际: %#v", got["expected_group_id"])
+			}
+			if _, ok := got["expected_color_id"]; !ok || got["expected_color_id"] != nil {
+				t.Fatalf("期望 expected_color_id 键存在且为 nil，实际: %#v", got["expected_color_id"])
+			}
+			if got["status"] != constants.LinkStatusApproved {
+				t.Fatalf("期望状态回已通过(%d)，实际: %v", constants.LinkStatusApproved, got["status"])
+			}
+			if got["review_remark"] != tc.remark {
+				t.Fatalf("期望审核备注 %q，实际: %v", tc.remark, got["review_remark"])
+			}
+
+			_, hasGroup := got["group_id"]
+			_, hasColor := got["color_id"]
+			if hasGroup != tc.wantApply || hasColor != tc.wantApply {
+				t.Fatalf("期望 group_id/color_id 键存在性为 %v/%v，实际 %v/%v", tc.wantApply, tc.wantApply, hasGroup, hasColor)
+			}
+			if tc.wantApply {
+				if !reflect.DeepEqual(got["group_id"], tc.wantGroupID) {
+					t.Fatalf("期望 group_id 为 %#v，实际: %#v", tc.wantGroupID, got["group_id"])
+				}
+				if !reflect.DeepEqual(got["color_id"], tc.wantColorID) {
+					t.Fatalf("期望 color_id 为 %#v，实际: %#v", tc.wantColorID, got["color_id"])
+				}
 			}
 		})
 	}

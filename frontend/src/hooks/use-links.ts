@@ -12,6 +12,8 @@ import { toast } from 'sonner'
 import type {
   ApplyLinkRequest,
   CreateLinkRequest,
+  EditApplyRequest,
+  EditReviewRequest,
   FriendSortItem,
   LinkListParams,
   SnowflakeID,
@@ -24,6 +26,7 @@ import type {
 } from '@/api/types'
 import {
   applyLink,
+  approveEditRequest,
   createLink,
   deleteLink,
   getAdminLink,
@@ -35,6 +38,8 @@ import {
   listAdminLinks,
   listMyLinks,
   reScreenshotLink,
+  rejectEditRequest,
+  requestEditApply,
   requestTakedown,
   sortLinks,
   updateLink,
@@ -243,6 +248,67 @@ export function useRequestTakedown() {
       void qc.invalidateQueries({ queryKey: myLinkKeys.all })
     },
     onError: (err: Error) => toast.error(err.message || '下架申请失败'),
+  })
+}
+
+/** 申请修改我的友链展示位置/颜色（成功后失效我的友链缓存，状态变修改待审核） */
+export function useEditApply() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      id,
+      req,
+    }: {
+      id: SnowflakeID
+      req: EditApplyRequest
+    }) => requestEditApply(id, req),
+    onSuccess: () => {
+      toast.success('修改申请已提交，请等待管理员审核')
+      void qc.invalidateQueries({ queryKey: myLinkKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '修改申请提交失败'),
+  })
+}
+
+/** 通过友链修改位置/颜色申请（成功后新位置/颜色上屏，需失效管理/公开/用户端缓存） */
+export function useApproveEditRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      id,
+      req,
+    }: {
+      id: SnowflakeID
+      req: EditReviewRequest
+    }) => approveEditRequest(id, req),
+    onSuccess: () => {
+      toast.success('修改申请已通过，新位置/颜色已生效')
+      void qc.invalidateQueries({ queryKey: linkKeys.all })
+      void qc.invalidateQueries({ queryKey: publicLinkKeys.all })
+      void qc.invalidateQueries({ queryKey: failedLinkKeys.all })
+      void qc.invalidateQueries({ queryKey: myLinkKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '审核失败'),
+  })
+}
+
+/** 拒绝友链修改位置/颜色申请 */
+export function useRejectEditRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      id,
+      req,
+    }: {
+      id: SnowflakeID
+      req: EditReviewRequest
+    }) => rejectEditRequest(id, req),
+    onSuccess: () => {
+      toast.success('修改申请已拒绝，友链保持原位置/颜色')
+      void qc.invalidateQueries({ queryKey: linkKeys.all })
+      void qc.invalidateQueries({ queryKey: myLinkKeys.all })
+    },
+    onError: (err: Error) => toast.error(err.message || '审核失败'),
   })
 }
 

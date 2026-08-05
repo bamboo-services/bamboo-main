@@ -55,6 +55,8 @@ func (r *route) linkAdminRouter(route gin.IRouter) {
 		linkGroup.PUT("/:id/status", linkHandler.UpdateStatus)
 		linkGroup.PUT("/:id/fail", linkHandler.UpdateFailStatus)
 		linkGroup.POST("/:id/screenshot", linkHandler.ReScreenshot)
+		linkGroup.POST("/:id/edit-request/approve", linkHandler.ApproveEditRequest)
+		linkGroup.POST("/:id/edit-request/reject", linkHandler.RejectEditRequest)
 	}
 }
 

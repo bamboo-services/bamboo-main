@@ -12,6 +12,8 @@ import type {
   AdminLinkListResponse,
   ApplyLinkRequest,
   CreateLinkRequest,
+  EditApplyRequest,
+  EditReviewRequest,
   FriendFailedResponse,
   FriendPublicResponse,
   FriendSortItem,
@@ -221,6 +223,45 @@ export function requestTakedown(id: SnowflakeID): Promise<void> {
   return request<void>({
     method: 'PUT',
     url: `/user/links/${id.toString()}/takedown`,
+  })
+}
+
+/**
+ * 申请修改我的友链展示位置/颜色（PUT /api/v1/user/links/:id/edit-request）。
+ * 三态：undefined=保持原值 / null=清空 / 值=设置。
+ */
+export function requestEditApply(
+  id: SnowflakeID,
+  req: EditApplyRequest,
+): Promise<void> {
+  return request<void>({
+    method: 'PUT',
+    url: `/user/links/${id.toString()}/edit-request`,
+    data: req,
+  })
+}
+
+/** 通过友链修改位置/颜色申请（POST /api/v1/admin/links/:id/edit-request/approve） */
+export function approveEditRequest(
+  id: SnowflakeID,
+  req: EditReviewRequest,
+): Promise<void> {
+  return request<void>({
+    method: 'POST',
+    url: `/admin/links/${id.toString()}/edit-request/approve`,
+    data: req,
+  })
+}
+
+/** 拒绝友链修改位置/颜色申请（POST /api/v1/admin/links/:id/edit-request/reject） */
+export function rejectEditRequest(
+  id: SnowflakeID,
+  req: EditReviewRequest,
+): Promise<void> {
+  return request<void>({
+    method: 'POST',
+    url: `/admin/links/${id.toString()}/edit-request/reject`,
+    data: req,
   })
 }
 

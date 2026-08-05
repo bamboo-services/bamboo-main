@@ -33,6 +33,7 @@ func (r *route) userRouter(route gin.IRouter) {
 		userGroup.GET("/links/:id", linkHandler.GetMyLink)
 		userGroup.PUT("/links/:id", linkHandler.UpdateMyLink)
 		userGroup.PUT("/links/:id/takedown", linkHandler.RequestTakedown)
+		userGroup.PUT("/links/:id/edit-request", linkHandler.RequestEditApply)
 		userGroup.GET("/sponsors", sponsorRecordHandler.ListMyRecords)
 		userGroup.GET("/sponsors/:id", sponsorRecordHandler.GetMyRecord)
 		userGroup.PUT("/sponsors/:id", sponsorRecordHandler.UpdateMyRecord)

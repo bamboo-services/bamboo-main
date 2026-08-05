@@ -43,7 +43,7 @@ function EditLinkPage() {
         title="编辑友链"
         backTo="/user/links"
         backLabel="返回我的友链"
-        sub="修改你的友链信息，保存后重新进入审核队列。"
+        sub="修改你的友链基础信息，保存后立即生效；展示位置与展示颜色需通过「申请修改位置」提交审核。"
       />
 
       {/* ═══════════ 表单 / 骨架 / 错误态 ═══════════ */}
@@ -63,6 +63,19 @@ function EditLinkPage() {
               </Link>
             </EnsoEmpty>
           </div>
+        ) : link.status === 5 ? (
+          <div className={`${inkCard} p-8`}>
+            <EnsoEmpty
+              title="修改申请审核中"
+              hint="展示位置/颜色正在等待博主审核，审核期间暂不能编辑基础信息"
+            >
+              <Link to="/user/links" className="ml-auto">
+                <Button variant="outline" className="cursor-pointer">
+                  返回我的友链
+                </Button>
+              </Link>
+            </EnsoEmpty>
+          </div>
         ) : (
           <motion.div
             {...enter(reduced, 0.15, {
@@ -74,6 +87,7 @@ function EditLinkPage() {
           >
             <UserLinkForm
               initial={link}
+              mode="edit"
               submitting={updateMutation.isPending}
               submitLabel="保存修改"
               onSubmit={handleSubmit}

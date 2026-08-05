@@ -45,9 +45,10 @@ export interface PaginationResponse<T> {
   pagination: PaginationInfo
 }
 
-/** 管理端友链分页列表响应（附带待审核/异常计数，供入口徽章展示） */
+/** 管理端友链分页列表响应（附带待审核/修改待审核/异常计数，供入口徽章展示） */
 export interface AdminLinkListResponse extends PaginationResponse<LinkFriend> {
   pending_count: number
+  edit_pending_count: number
   anomaly_count: number
 }
 
@@ -241,6 +242,8 @@ export interface LinkFriend {
   user_id: SnowflakeID | null
   group_id: SnowflakeID | null
   color_id: SnowflakeID | null
+  expected_group_id: SnowflakeID | null
+  expected_color_id: SnowflakeID | null
   sort_order: number
   status: number
   is_failure: number
@@ -362,9 +365,21 @@ export interface UpdateUserLinkRequest {
   link_rss?: string
   link_desc?: string
   link_email?: string
+}
+
+/**
+ * 用户申请修改友链展示位置/颜色请求（PUT /api/v1/user/links/:id/edit-request）。
+ * 三态：undefined=保持原值（省略）/ null=清空 / 值=设置。
+ */
+export interface EditApplyRequest {
   link_group_id?: SnowflakeID | null
   link_color_id?: SnowflakeID | null
   link_apply_remark?: string
+}
+
+/** 博主审核修改申请请求（approve/reject 共用） */
+export interface EditReviewRequest {
+  link_review_remark?: string
 }
 
 /** 用户查询自己友链参数（GET /api/v1/user/links） */

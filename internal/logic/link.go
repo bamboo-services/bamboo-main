@@ -37,6 +37,7 @@ type linkRepo struct {
 	link   *repository.LinkRepo
 	user   *repository.SystemUserRepo
 	group  *repository.LinkGroupRepo
+	color  *repository.LinkColorRepo
 	system *repository.SystemRepo
 }
 
@@ -61,6 +62,7 @@ func NewLinkLogic(ctx context.Context) *LinkLogic {
 			link:   repository.NewLinkRepo(db, m),
 			user:   repository.NewSystemUserRepo(db, m),
 			group:  repository.NewLinkGroupRepo(db, m),
+			color:  repository.NewLinkColorRepo(db, m),
 			system: repository.NewSystemRepo(db, m),
 		},
 	}
@@ -231,8 +233,12 @@ func (l *LinkLogic) List(ctx context.Context, req *apiLink.FriendQueryRequest) (
 		return nil, xErr
 	}
 
-	// 附加计数：待审核 / 异常，供管理端入口徽章展示
+	// 附加计数：待审核 / 修改待审核 / 异常，供管理端入口徽章展示
 	pendingCount, xErr := l.repo.link.CountByStatus(ctx, constants.LinkStatusPending, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+	editPendingCount, xErr := l.repo.link.CountByStatus(ctx, constants.LinkStatusEditPending, nil)
 	if xErr != nil {
 		return nil, xErr
 	}
@@ -245,6 +251,7 @@ func (l *LinkLogic) List(ctx context.Context, req *apiLink.FriendQueryRequest) (
 	return &apiLink.FriendListResponse{
 		PaginationResponse: *result,
 		PendingCount:       pendingCount,
+		EditPendingCount:   editPendingCount,
 		AnomalyCount:       anomalyCount,
 	}, nil
 }
@@ -421,6 +428,9 @@ func (l *LinkLogic) ReScreenshot(ctx context.Context, linkID xSnowflake.Snowflak
 }
 
 // GetPublicLinks 获取公开的友情链接列表
+//
+// 纳入修改待审核(5)的友链（仍按旧位置/颜色展示，等待博主审核），
+// 返回前剥离申请备注与预期值字段（申请备注仅博主审核可见，预期值属内部审核信息）。
 func (l *LinkLogic) GetPublicLinks(ctx context.Context, groupIDStr string) ([]entity.LinkFriend, *xError.Error) {
 	var groupID *xSnowflake.SnowflakeID
 	if groupIDStr != "" {
@@ -430,7 +440,17 @@ func (l *LinkLogic) GetPublicLinks(ctx context.Context, groupIDStr string) ([]en
 		}
 	}
 
-	return l.repo.link.ListPublic(ctx, groupID, constants.LinkStatusApproved, constants.LinkFailNormal, nil)
+	links, xErr := l.repo.link.ListPublic(ctx, groupID, []int{constants.LinkStatusApproved, constants.LinkStatusEditPending}, constants.LinkFailNormal, nil)
+	if xErr != nil {
+		return nil, xErr
+	}
+	// 公开展示剥离申请备注与预期值（ListPublic 返回查询新对象，原地置 nil 安全）
+	for i := range links {
+		links[i].ApplyRemark = nil
+		links[i].ExpectedGroupID = nil
+		links[i].ExpectedColorID = nil
+	}
+	return links, nil
 }
 
 // GetFailedLinks 获取公开「已失效」分组及其下的失效友链。
@@ -446,6 +466,12 @@ func (l *LinkLogic) GetFailedLinks(ctx context.Context) (*apiLink.FriendFailedRe
 	links, xErr := l.repo.link.ListFailed(ctx, constants.LinkStatusApproved, constants.LinkFailBroken, nil)
 	if xErr != nil {
 		return nil, xErr
+	}
+	// 公开展示剥离申请备注与预期值（ListFailed 返回查询新对象，原地置 nil 安全）
+	for i := range links {
+		links[i].ApplyRemark = nil
+		links[i].ExpectedGroupID = nil
+		links[i].ExpectedColorID = nil
 	}
 
 	return &apiLink.FriendFailedResponse{
@@ -518,6 +544,10 @@ func (l *LinkLogic) ListMine(ctx context.Context, userID xSnowflake.SnowflakeID,
 	if xErr != nil {
 		return nil, xErr
 	}
+	// 用户端剥离申请备注（仅博主审核可见），保留预期值供用户跟踪申请进度（List 返回查询新对象，原地置 nil 安全）
+	for i := range links {
+		links[i].ApplyRemark = nil
+	}
 
 	return base.NewPaginationResponse(links, req.Page, req.PageSize, total), nil
 }
@@ -542,6 +572,13 @@ func (l *LinkLogic) UpdateMine(ctx context.Context, userID xSnowflake.SnowflakeI
 		return nil, xErr
 	}
 
+	// 互斥：存在待处理审核（修改/下架）或已下架时禁止编辑基础信息
+	if link.Status == constants.LinkStatusEditPending ||
+		link.Status == constants.LinkStatusTakedownPending ||
+		link.Status == constants.LinkStatusTakenDown {
+		return nil, xError.NewError(ctx, xError.OperationInvalid, "友链存在待处理的申请或已下架，暂不能编辑", false)
+	}
+
 	if req.LinkName != "" {
 		link.Name = req.LinkName
 	}
@@ -559,9 +596,6 @@ func (l *LinkLogic) UpdateMine(ctx context.Context, userID xSnowflake.SnowflakeI
 	}
 	if req.LinkEmail != "" {
 		link.Email = xUtil.Ptr(req.LinkEmail)
-	}
-	if req.LinkApplyRemark != "" {
-		link.ApplyRemark = xUtil.Ptr(req.LinkApplyRemark)
 	}
 
 	_, xErr = l.repo.link.Save(ctx, link, nil)
@@ -603,6 +637,172 @@ func (l *LinkLogic) RequestTakedown(ctx context.Context, userID xSnowflake.Snowf
 	xAsync.Async(ctx, func(asyncCtx context.Context) {
 		l.sendApplyNotification(asyncCtx, link)
 	}, xAsync.WithName("MAIL"))
+
+	return nil
+}
+
+// GetMineDetail 获取当前用户名下的友链详情（用户端视图）
+//
+// 在 GetMine（内部含全量字段）基础上剥离申请备注，保留预期值供用户跟踪申请进度。
+func (l *LinkLogic) GetMineDetail(ctx context.Context, userID xSnowflake.SnowflakeID, linkID xSnowflake.SnowflakeID) (*entity.LinkFriend, *xError.Error) {
+	link, xErr := l.GetMine(ctx, userID, linkID)
+	if xErr != nil {
+		return nil, xErr
+	}
+	return sanitizeForUser(link), nil
+}
+
+// sanitizeForUser 剥离用户端不可见字段（浅拷贝，避免污染 GetByID 缓存对象）
+//
+// 仅剥离申请备注（仅博主审核可见）；预期值保留（用户需跟踪自己申请中的预期展示值）。
+func sanitizeForUser(link *entity.LinkFriend) *entity.LinkFriend {
+	cp := *link
+	cp.ApplyRemark = nil
+	return &cp
+}
+
+// RequestEditApply 当前用户申请修改自己友链的展示位置/颜色
+//
+// 仅已通过且未失效的友链可发起；预期位置/颜色三态写入 expected_* 字段，
+// 备注写入 ApplyRemark（仅博主审核可见），状态置为修改待审核(5)。
+// 旧 GroupID/ColorID 保持不变，审核通过前友链仍按旧值公开展示。
+func (l *LinkLogic) RequestEditApply(ctx context.Context, userID xSnowflake.SnowflakeID, linkID xSnowflake.SnowflakeID, req *apiLink.FriendEditApplyRequest) *xError.Error {
+	link, xErr := l.GetMine(ctx, userID, linkID)
+	if xErr != nil {
+		return xErr
+	}
+
+	// 互斥：存在待处理审核（修改/下架）或已下架时禁止再次发起修改申请
+	if link.Status == constants.LinkStatusEditPending ||
+		link.Status == constants.LinkStatusTakedownPending ||
+		link.Status == constants.LinkStatusTakenDown {
+		return xError.NewError(ctx, xError.OperationInvalid, "友链存在待处理的申请，暂不能发起新的修改申请", false)
+	}
+	if link.Status != constants.LinkStatusApproved || link.IsFailure == constants.LinkFailBroken {
+		return xError.NewError(ctx, xError.OperationInvalid, "仅已通过且未失效的友链可申请修改展示位置/颜色", false)
+	}
+
+	// 至少提供一项变更
+	if !req.LinkGroupID.Provided() && !req.LinkColorID.Provided() {
+		return xError.NewError(ctx, xError.ParameterError, "请选择预期展示位置或预期展示颜色", false)
+	}
+
+	// 校验预期位置/颜色存在且启用
+	if xErr = l.validateEditTargets(ctx, req.LinkGroupID.Value(), req.LinkColorID.Value()); xErr != nil {
+		return xErr
+	}
+
+	// 三态写入：Provided 才覆盖（null → nil），未提供保持原值
+	if req.LinkGroupID.Provided() {
+		link.ExpectedGroupID = req.LinkGroupID.Value()
+	}
+	if req.LinkColorID.Provided() {
+		link.ExpectedColorID = req.LinkColorID.Value()
+	}
+	if req.LinkApplyRemark != "" {
+		link.ApplyRemark = xUtil.Ptr(req.LinkApplyRemark)
+	}
+	link.Status = constants.LinkStatusEditPending
+
+	_, xErr = l.repo.link.Save(ctx, link, nil)
+	if xErr != nil {
+		return xErr
+	}
+
+	// 异步通知管理员处理修改申请（复用申请通知模板）
+	xAsync.Async(ctx, func(asyncCtx context.Context) {
+		l.sendApplyNotification(asyncCtx, link)
+	}, xAsync.WithName("MAIL"))
+
+	return nil
+}
+
+// ApproveEditRequest 博主通过友链的修改位置/颜色申请
+//
+// 将 expected_* 应用到正式 group_id/color_id 并清空预期值，状态回已通过。
+func (l *LinkLogic) ApproveEditRequest(ctx context.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendEditReviewRequest) *xError.Error {
+	link, found, xErr := l.repo.link.GetByID(ctx, linkID, false, nil)
+	if xErr != nil {
+		return xErr
+	}
+	if !found {
+		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+	}
+	if link.Status != constants.LinkStatusEditPending {
+		return xError.NewError(ctx, xError.OperationInvalid, "该友链当前不在修改待审核状态", false)
+	}
+
+	ok, xErr := l.repo.link.ResolveEditRequest(ctx, linkID, true, req.LinkReviewRemark, nil)
+	if xErr != nil {
+		return xErr
+	}
+	if !ok {
+		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+	}
+
+	// 发送审核结果邮件通知申请人（复用审核通过模板）
+	xAsync.Async(ctx, func(asyncCtx context.Context) {
+		l.sendStatusNotification(asyncCtx, link, constants.LinkStatusApproved, req.LinkReviewRemark)
+	}, xAsync.WithName("MAIL"))
+
+	return nil
+}
+
+// RejectEditRequest 博主拒绝友链的修改位置/颜色申请
+//
+// 保持原 group_id/color_id 不变、清空预期值，状态回已通过，审核备注记录拒绝原因。
+func (l *LinkLogic) RejectEditRequest(ctx context.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendEditReviewRequest) *xError.Error {
+	link, found, xErr := l.repo.link.GetByID(ctx, linkID, false, nil)
+	if xErr != nil {
+		return xErr
+	}
+	if !found {
+		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+	}
+	if link.Status != constants.LinkStatusEditPending {
+		return xError.NewError(ctx, xError.OperationInvalid, "该友链当前不在修改待审核状态", false)
+	}
+
+	ok, xErr := l.repo.link.ResolveEditRequest(ctx, linkID, false, req.LinkReviewRemark, nil)
+	if xErr != nil {
+		return xErr
+	}
+	if !ok {
+		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+	}
+	return nil
+}
+
+// validateEditTargets 校验修改申请的预期展示位置/颜色存在且启用
+//
+// groupID/colorID 为 nil 时跳过（未提供对应变更）；内置「已失效」分组不可选作预期位置，
+// 内置炫彩颜色为合法预期颜色直接放行。
+func (l *LinkLogic) validateEditTargets(ctx context.Context, groupID, colorID *xSnowflake.SnowflakeID) *xError.Error {
+	if groupID != nil {
+		if entity.IsBuiltinGroupID(*groupID) {
+			return xError.NewError(ctx, xError.ParameterError, "内置「已失效」分组不可选作预期展示位置", false)
+		}
+		groups, xErr := l.repo.group.GetByIDs(ctx, []xSnowflake.SnowflakeID{*groupID}, nil)
+		if xErr != nil {
+			return xErr
+		}
+		if len(groups) == 0 || !groups[0].Status {
+			return xError.NewError(ctx, xError.NotFound, "预期展示位置不存在或已停用", false)
+		}
+	}
+
+	if colorID != nil {
+		if *colorID == constants.BuiltinFancyColorID {
+			return nil // 炫彩为内置虚拟颜色，直接放行
+		}
+		color, found, xErr := l.repo.color.GetByID(ctx, *colorID, false, nil)
+		if xErr != nil {
+			return xErr
+		}
+		if !found || !color.Status {
+			return xError.NewError(ctx, xError.NotFound, "预期展示颜色不存在或已停用", false)
+		}
+	}
 
 	return nil
 }

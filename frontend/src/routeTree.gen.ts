@@ -46,6 +46,7 @@ import { Route as UserUserSponsorsIndexRouteImport } from './routes/_user/user/s
 import { Route as AdminAdminLinkIdIndexRouteImport } from './routes/_admin/admin/link/$id/index'
 import { Route as AdminAdminLinkIdEditRouteImport } from './routes/_admin/admin/link/$id/edit'
 import { Route as UserUserLinksIdEditRouteImport } from './routes/_user/user/links/$id/edit'
+import { Route as UserUserLinksIdEditLocationRouteImport } from './routes/_user/user/links/$id/edit-location'
 
 const AdminRouteRoute = AdminRouteRouteImport.update({
   id: '/_admin',
@@ -230,6 +231,12 @@ const UserUserLinksIdEditRoute = UserUserLinksIdEditRouteImport.update({
   path: '/links/$id/edit',
   getParentRoute: () => UserUserRouteRoute,
 } as any)
+const UserUserLinksIdEditLocationRoute =
+  UserUserLinksIdEditLocationRouteImport.update({
+    id: '/links/$id/edit-location',
+    path: '/links/$id/edit-location',
+    getParentRoute: () => UserUserRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
@@ -264,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/user/sponsors/': typeof UserUserSponsorsIndexRoute
   '/admin/link/$id/edit': typeof AdminAdminLinkIdEditRoute
   '/user/links/$id/edit': typeof UserUserLinksIdEditRoute
+  '/user/links/$id/edit-location': typeof UserUserLinksIdEditLocationRoute
   '/admin/link/$id/': typeof AdminAdminLinkIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -297,6 +305,7 @@ export interface FileRoutesByTo {
   '/user/sponsors': typeof UserUserSponsorsIndexRoute
   '/admin/link/$id/edit': typeof AdminAdminLinkIdEditRoute
   '/user/links/$id/edit': typeof UserUserLinksIdEditRoute
+  '/user/links/$id/edit-location': typeof UserUserLinksIdEditLocationRoute
   '/admin/link/$id': typeof AdminAdminLinkIdIndexRoute
 }
 export interface FileRoutesById {
@@ -337,6 +346,7 @@ export interface FileRoutesById {
   '/_user/user/sponsors/': typeof UserUserSponsorsIndexRoute
   '/_admin/admin/link/$id/edit': typeof AdminAdminLinkIdEditRoute
   '/_user/user/links/$id/edit': typeof UserUserLinksIdEditRoute
+  '/_user/user/links/$id/edit-location': typeof UserUserLinksIdEditLocationRoute
   '/_admin/admin/link/$id/': typeof AdminAdminLinkIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -374,6 +384,7 @@ export interface FileRouteTypes {
     | '/user/sponsors/'
     | '/admin/link/$id/edit'
     | '/user/links/$id/edit'
+    | '/user/links/$id/edit-location'
     | '/admin/link/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -407,6 +418,7 @@ export interface FileRouteTypes {
     | '/user/sponsors'
     | '/admin/link/$id/edit'
     | '/user/links/$id/edit'
+    | '/user/links/$id/edit-location'
     | '/admin/link/$id'
   id:
     | '__root__'
@@ -446,6 +458,7 @@ export interface FileRouteTypes {
     | '/_user/user/sponsors/'
     | '/_admin/admin/link/$id/edit'
     | '/_user/user/links/$id/edit'
+    | '/_user/user/links/$id/edit-location'
     | '/_admin/admin/link/$id/'
   fileRoutesById: FileRoutesById
 }
@@ -719,6 +732,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UserUserLinksIdEditRouteImport
       parentRoute: typeof UserUserRouteRoute
     }
+    '/_user/user/links/$id/edit-location': {
+      id: '/_user/user/links/$id/edit-location'
+      path: '/links/$id/edit-location'
+      fullPath: '/user/links/$id/edit-location'
+      preLoaderRoute: typeof UserUserLinksIdEditLocationRouteImport
+      parentRoute: typeof UserUserRouteRoute
+    }
   }
 }
 
@@ -812,6 +832,7 @@ interface UserUserRouteRouteChildren {
   UserUserLinksIndexRoute: typeof UserUserLinksIndexRoute
   UserUserSponsorsIndexRoute: typeof UserUserSponsorsIndexRoute
   UserUserLinksIdEditRoute: typeof UserUserLinksIdEditRoute
+  UserUserLinksIdEditLocationRoute: typeof UserUserLinksIdEditLocationRoute
 }
 
 const UserUserRouteRouteChildren: UserUserRouteRouteChildren = {
@@ -820,6 +841,7 @@ const UserUserRouteRouteChildren: UserUserRouteRouteChildren = {
   UserUserLinksIndexRoute: UserUserLinksIndexRoute,
   UserUserSponsorsIndexRoute: UserUserSponsorsIndexRoute,
   UserUserLinksIdEditRoute: UserUserLinksIdEditRoute,
+  UserUserLinksIdEditLocationRoute: UserUserLinksIdEditLocationRoute,
 }
 
 const UserUserRouteRouteWithChildren = UserUserRouteRoute._addFileChildren(

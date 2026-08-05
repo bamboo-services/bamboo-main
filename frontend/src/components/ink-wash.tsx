@@ -558,7 +558,7 @@ export function InkBadge({
   )
 }
 
-/** 友链状态 → 徽章（is_failure=1 已失效；status 1=已通过 2=已拒绝 3=下架待审核 4=已下架 0=待审核） */
+/** 友链状态 → 徽章（is_failure=1 已失效；status 1=已通过 2=已拒绝 3=下架待审核 4=已下架 5=修改审核中 0=待审核） */
 export function linkStatus(link: LinkFriend): {
   label: string
   tone: InkBadgeTone
@@ -573,6 +573,8 @@ export function linkStatus(link: LinkFriend): {
       return { label: '下架待审核', tone: 'pending' }
     case 4:
       return { label: '已下架', tone: 'neutral' }
+    case 5:
+      return { label: '修改审核中', tone: 'pending' }
     default:
       return { label: '待审核', tone: 'pending' }
   }
