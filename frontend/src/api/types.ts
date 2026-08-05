@@ -81,7 +81,7 @@ export interface UpdateAboutRequest {
   content: string
 }
 
-/** 博主信息（GET /api/v1/info/blogger）— 供交换友链场景读取博主站点资料 */
+/** 博主信息（GET /api/v1/info/blogger）— 供交换友链场景读取博主站点资料 + 「关于我」名士帖个人展示 */
 export interface BloggerInfoResponse {
   site_name: string
   site_description: string
@@ -89,6 +89,10 @@ export interface BloggerInfoResponse {
   site_image: string
   rss: string
   email: string
+  nick: string
+  description: string
+  blog_url: string
+  avatar: string
   updated_at: string
 }
 
@@ -100,6 +104,10 @@ export interface UpdateBloggerRequest {
   site_image?: string
   rss?: string
   email?: string
+  nick?: string
+  description?: string
+  blog_url?: string
+  avatar?: string
 }
 
 // ---------------------------------------------------------------------------

@@ -93,7 +93,7 @@ func (h *InfoHandler) GetAbout(c *gin.Context) {
 // GetBloggerInfo 获取博主信息
 //
 // @Summary [用户] 获取博主信息
-// @Description 获取博主站点资料（站点名字/描述/地址/图片/订阅/邮箱），供交换友链时复制添加
+// @Description 获取博主站点资料（站点名字/描述/地址/图片/订阅/邮箱）与个人展示信息（昵称/简介/博客链接/头像），供交换友链复制及「关于我」名士帖展示
 // @Tags 站点信息接口
 // @Accept json
 // @Produce json
@@ -113,7 +113,7 @@ func (h *InfoHandler) GetBloggerInfo(c *gin.Context) {
 // UpdateBloggerInfo 更新博主信息
 //
 // @Summary [管理] 更新博主信息
-// @Description 管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱）
+// @Description 管理员更新博主站点资料（站点名字/描述/地址/图片/订阅/邮箱）与个人展示信息（昵称/简介/博客链接/头像）
 // @Tags 站点信息接口
 // @Accept json
 // @Produce json

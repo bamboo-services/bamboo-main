@@ -31,13 +31,18 @@ const (
 	KeySiteIntroduction = "site.introduction"
 	KeyProfileAbout     = "profile.about"
 
-	// 博主信息键名（供「交换友链」场景读取，语义独立于站点信息）
+	// 博主信息键名（供「交换友链」场景与「关于我」名士帖读取，语义独立于站点信息）
 	KeyBloggerSiteName = "blogger.site_name"
 	KeyBloggerSiteDesc = "blogger.site_description"
 	KeyBloggerSiteUrl  = "blogger.site_url"
 	KeyBloggerSiteImg  = "blogger.site_image"
 	KeyBloggerRss      = "blogger.rss"
 	KeyBloggerEmail    = "blogger.email"
+	// 博主个人展示信息（供「关于我」名士帖：昵称/个人简介/博客链接/头像）
+	KeyBloggerNick    = "blogger.nick"
+	KeyBloggerDesc    = "blogger.description"
+	KeyBloggerBlogUrl = "blogger.blog_url"
+	KeyBloggerAvatar  = "blogger.avatar"
 )
 
 // infoRepo 站点信息仓储依赖集合
@@ -126,11 +131,14 @@ func (l *InfoLogic) UpdateSiteInfo(ctx context.Context, req *apiInfo.SiteUpdateR
 // GetBloggerInfo 获取博主信息
 //
 // 博主信息用于「交换友链」场景：站点名字/描述/地址/图片/订阅/邮箱，
-// 供访客申请友链前在自站添加博主友链时复制。与站点信息语义独立，单独取数。
+// 供访客申请友链前在自站添加博主友链时复制；
+// 同时承载「关于我」名士帖的展示信息：昵称/个人简介/博客链接/头像。
+// 与站点信息语义独立，单独取数。
 func (l *InfoLogic) GetBloggerInfo(ctx context.Context) (*apiInfo.BloggerResponse, *xError.Error) {
 	keys := []string{
 		KeyBloggerSiteName, KeyBloggerSiteDesc, KeyBloggerSiteUrl,
 		KeyBloggerSiteImg, KeyBloggerRss, KeyBloggerEmail,
+		KeyBloggerNick, KeyBloggerDesc, KeyBloggerBlogUrl, KeyBloggerAvatar,
 	}
 	configs, xErr := l.repo.system.ListByKeys(ctx, keys)
 	if xErr != nil {
@@ -149,6 +157,10 @@ func (l *InfoLogic) GetBloggerInfo(ctx context.Context) (*apiInfo.BloggerRespons
 		SiteImage:       getConfigValue(configMap, KeyBloggerSiteImg),
 		Rss:             getConfigValue(configMap, KeyBloggerRss),
 		Email:           getConfigValue(configMap, KeyBloggerEmail),
+		Nick:            getConfigValue(configMap, KeyBloggerNick),
+		Description:     getConfigValue(configMap, KeyBloggerDesc),
+		BlogUrl:         getConfigValue(configMap, KeyBloggerBlogUrl),
+		Avatar:          getConfigValue(configMap, KeyBloggerAvatar),
 		UpdatedAt:       getLatestUpdateTime(configMap, keys),
 	}
 
@@ -175,6 +187,18 @@ func (l *InfoLogic) UpdateBloggerInfo(ctx context.Context, req *apiInfo.BloggerU
 	}
 	if req.Email != nil {
 		updates[KeyBloggerEmail] = req.Email
+	}
+	if req.Nick != nil {
+		updates[KeyBloggerNick] = req.Nick
+	}
+	if req.Description != nil {
+		updates[KeyBloggerDesc] = req.Description
+	}
+	if req.BlogUrl != nil {
+		updates[KeyBloggerBlogUrl] = req.BlogUrl
+	}
+	if req.Avatar != nil {
+		updates[KeyBloggerAvatar] = req.Avatar
 	}
 
 	if len(updates) == 0 {

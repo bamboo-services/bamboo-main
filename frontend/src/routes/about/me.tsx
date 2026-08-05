@@ -13,6 +13,7 @@ import { motion, useReducedMotion } from 'motion/react'
 import { ExternalLink, Mail } from 'lucide-react'
 import type { MotionDivProps } from '@/lib/motion'
 import { getAbout, getSiteInfo } from '@/api/info'
+import { useBloggerInfo } from '@/hooks/use-site-info'
 import { MarkdownView } from '@/components/markdown'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -60,10 +61,14 @@ function AboutMePage() {
     queryKey: ['public', 'about'],
     queryFn: getAbout,
   })
+  const { data: blogger } = useBloggerInfo()
 
-  const nick = siteConfig.blogger.nick
-  const desc = siteConfig.blogger.description
-  const email = siteConfig.blogger.email
+  const nick = blogger?.nick ?? siteConfig.blogger.nick
+  const desc = blogger?.description ?? siteConfig.blogger.description
+  const email = blogger?.email ?? siteConfig.blogger.email
+  const blogUrl = blogger?.blog_url ?? 'https://blog.x-lf.com'
+  const blogHost = blogUrl.replace(/^https?:\/\//, '')
+  const avatar = blogger?.avatar || myAvatar
   const displayName = site?.site_name ?? siteConfig.defaultName
   const siteDesc = site?.site_description ?? ''
   const introduction = site?.introduction ?? ''
@@ -151,7 +156,7 @@ function AboutMePage() {
                 className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3"
               >
                 <a
-                  href="https://blog.x-lf.com"
+                  href={blogUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group inline-flex items-baseline gap-2"
@@ -160,7 +165,7 @@ function AboutMePage() {
                     博客
                   </span>
                   <span className="flex items-center gap-1 font-serif text-base text-text-primary underline decoration-leaf-muted/60 decoration-1 underline-offset-4 transition-colors group-hover:text-leaf-deep group-hover:decoration-leaf-deep">
-                    blog.x-lf.com
+                    {blogHost}
                     <ExternalLink className="size-3.5" />
                   </span>
                 </a>
@@ -197,7 +202,7 @@ function AboutMePage() {
                 </p>
                 <div className="relative">
                   <Avatar className="size-48 rounded-full ring-4 ring-ring-glow md:size-60">
-                    <AvatarImage src={myAvatar} alt={nick} />
+                    <AvatarImage src={avatar} alt={nick} />
                     <AvatarFallback className="bg-leaf-light/50 font-serif text-6xl font-bold text-leaf-deep">
                       {nick.slice(0, 1)}
                     </AvatarFallback>

@@ -286,7 +286,7 @@ function AboutPanel({ reduced }: { reduced: boolean }) {
   )
 }
 
-/** 博主信息面板：交换友链场景的博主站点资料 */
+/** 博主信息面板：交换友链场景的博主站点资料 + 「关于我」名士帖个人展示 */
 function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
   const { data, isLoading } = useBloggerInfo()
   const updateBlogger = useUpdateBloggerInfo()
@@ -297,6 +297,10 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
   const [siteImage, setSiteImage] = useState('')
   const [rss, setRss] = useState('')
   const [email, setEmail] = useState('')
+  const [nick, setNick] = useState('')
+  const [description, setDescription] = useState('')
+  const [blogUrl, setBlogUrl] = useState('')
+  const [avatar, setAvatar] = useState('')
 
   useEffect(() => {
     if (data) {
@@ -306,6 +310,10 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
       setSiteImage(data.site_image)
       setRss(data.rss)
       setEmail(data.email)
+      setNick(data.nick)
+      setDescription(data.description)
+      setBlogUrl(data.blog_url)
+      setAvatar(data.avatar)
     }
   }, [data])
 
@@ -317,6 +325,10 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
       site_image: siteImage,
       rss,
       email,
+      nick,
+      description,
+      blog_url: blogUrl,
+      avatar,
     })
   }
 
@@ -333,13 +345,21 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
 
       {isLoading ? (
         <div className="relative mt-8 grid gap-x-6 gap-y-5 md:grid-cols-2">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 10 }).map((_, i) => (
             <Skeleton key={i} className="h-9 w-full" />
           ))}
         </div>
       ) : (
         <>
           <div className="relative mt-8 grid gap-x-6 gap-y-5 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="bloggerNick">昵称</Label>
+              <Input
+                id="bloggerNick"
+                value={nick}
+                onChange={(e) => setNick(e.target.value)}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="bloggerSiteName">站点名字</Label>
               <Input
@@ -348,12 +368,36 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
                 onChange={(e) => setSiteName(e.target.value)}
               />
             </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="bloggerDescription">个人简介</Label>
+              <Input
+                id="bloggerDescription"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bloggerBlogUrl">博客链接</Label>
+              <Input
+                id="bloggerBlogUrl"
+                value={blogUrl}
+                onChange={(e) => setBlogUrl(e.target.value)}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="bloggerEmail">站长邮箱</Label>
               <Input
                 id="bloggerEmail"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="bloggerAvatar">头像地址</Label>
+              <Input
+                id="bloggerAvatar"
+                value={avatar}
+                onChange={(e) => setAvatar(e.target.value)}
               />
             </div>
             <div className="space-y-2 md:col-span-2">
@@ -392,7 +436,7 @@ function BloggerInfoPanel({ reduced }: { reduced: boolean }) {
 
           <div className="relative mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-5">
             <p className="font-serif text-sm italic text-text-secondary">
-              访客申请友链前需先在自站添加博主友链，此处即供其复制的站点资料。
+              昵称、个人简介、博客链接与头像展示于「关于我」名士帖；其余站点资料供访客交换友链时复制。
             </p>
             <Button onClick={handleSave} disabled={updateBlogger.isPending}>
               <Save className="mr-2 h-4 w-4" />

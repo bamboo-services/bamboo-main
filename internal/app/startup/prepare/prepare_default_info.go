@@ -36,6 +36,11 @@ var defaultInfoConfigs = []struct {
 	{Key: "blogger.site_image", Value: "https://i-cdn.akass.cn/2024/05/664870a814c0d.png!wp60"},
 	{Key: "blogger.rss", Value: "https://blog.x-lf.com/atom.xml"},
 	{Key: "blogger.email", Value: "gm@x-lf.cn"},
+	// 博主个人展示信息（供「关于我」名士帖：昵称/个人简介/博客链接/头像）
+	{Key: "blogger.nick", Value: "筱锋"},
+	{Key: "blogger.description", Value: "一个热爱技术的开发者，喜欢折腾各种有趣的东西。"},
+	{Key: "blogger.blog_url", Value: "https://blog.x-lf.com"},
+	{Key: "blogger.avatar", Value: "https://i-cdn.akass.cn/2024/05/664870a814c0d.png!wp60"},
 	// 内置「已失效」分组配置（供友链失效自动归集与公开「已失效」章节展示）
 	{Key: "group.builtin.invalid.name", Value: "已失效"},
 	{Key: "group.builtin.invalid.description", Value: ""},
