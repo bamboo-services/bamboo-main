@@ -324,8 +324,11 @@ func (a *AuthLogic) Logout(ctx context.Context, token string) *xError.Error {
 }
 
 // ChangePassword 修改密码
+//
+// 用户实体缓存序列化时 Password 字段（json:"-"）不参与读写，旧密码校验必须
+// 直查数据库获取密码哈希，避免命中缓存读到空哈希导致校验恒失败。
 func (a *AuthLogic) ChangePassword(ctx context.Context, userID xSnowflake.SnowflakeID, req *apiAuth.PasswordChangeRequest) *xError.Error {
-	user, found, xErr := a.repo.user.GetByID(ctx, userID)
+	hashedPassword, found, xErr := a.repo.user.GetPasswordByID(ctx, userID)
 	if xErr != nil {
 		return xErr
 	}
@@ -334,18 +337,18 @@ func (a *AuthLogic) ChangePassword(ctx context.Context, userID xSnowflake.Snowfl
 	}
 
 	// 验证旧密码
-	if !xUtil.Password().IsValid(req.OldPassword, user.Password) {
+	if !xUtil.Password().IsValid(req.OldPassword, hashedPassword) {
 		return xError.NewError(ctx, xError.ParameterError, "旧密码错误", false)
 	}
 
 	// 加密新密码
-	hashedPassword, err := xUtil.Password().EncryptString(req.NewPassword)
+	newHashedPassword, err := xUtil.Password().EncryptString(req.NewPassword)
 	if err != nil {
 		return xError.NewError(ctx, xError.ServerInternalError, "密码加密失败", false, err)
 	}
 
 	// 更新密码
-	xErr = a.repo.user.UpdatePasswordByID(ctx, userID, hashedPassword)
+	xErr = a.repo.user.UpdatePasswordByID(ctx, userID, newHashedPassword)
 	if xErr != nil {
 		return xErr
 	}

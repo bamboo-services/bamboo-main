@@ -68,6 +68,25 @@ func (r *SystemUserRepo) GetByID(ctx context.Context, id xSnowflake.SnowflakeID)
 	return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询用户失败", true, err)
 }
 
+// GetPasswordByID 直接查询用户密码哈希（绕过缓存）
+//
+// 用户实体经缓存序列化（encoding/json）时，Password 字段因 json:"-" 被丢弃，
+// 命中缓存读回的实体密码字段恒为空。修改密码等需要校验旧密码哈希的场景
+// 必须直查数据库，避免以空哈希验证导致校验恒失败。
+func (r *SystemUserRepo) GetPasswordByID(ctx context.Context, userID xSnowflake.SnowflakeID) (string, bool, *xError.Error) {
+	r.log.Info(ctx, "GetPasswordByID - 查询用户密码")
+
+	var user entity.SystemUser
+	err := r.db.WithContext(ctx).Where("id = ?", userID).Select("id", "password").First(&user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return "", false, nil
+	}
+	if err != nil {
+		return "", false, xError.NewError(ctx, xError.DatabaseError, "查询用户密码失败", true, err)
+	}
+	return user.Password, true, nil
+}
+
 // GetByUsernameOrEmail 根据用户名或邮箱获取用户
 func (r *SystemUserRepo) GetByUsernameOrEmail(ctx context.Context, keyword string) (*entity.SystemUser, bool, *xError.Error) {
 	r.log.Info(ctx, "GetByUsernameOrEmail - 查询用户")
