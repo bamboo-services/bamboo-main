@@ -35,6 +35,7 @@ type authRepo struct {
 	token   *repository.TokenRepo
 	link    *repository.LinkRepo
 	sponsor *repository.SponsorRecordRepo
+	system  *repository.SystemRepo
 }
 
 // AuthLogic 认证业务逻辑
@@ -61,6 +62,7 @@ func NewAuthLogic(ctx context.Context) *AuthLogic {
 			token:   repository.NewTokenRepo(m),
 			link:    repository.NewLinkRepo(db, m),
 			sponsor: repository.NewSponsorRecordRepo(db, m),
+			system:  repository.NewSystemRepo(db, m),
 		},
 	}
 }
@@ -109,7 +111,23 @@ func (a *AuthLogic) Login(ctx context.Context, req *apiAuth.LoginRequest, meta l
 	// 按邮箱绑定该用户名下的孤儿赞助记录（游客提交时尚未关联的赞助申请）
 	a.bindSponsorsByEmail(ctx, user.ID, user.Email)
 
+	// 填充管理员身份计算字段后返回
+	a.decorateUser(ctx, user)
+
 	return user, token, &now, &expireAt, nil
+}
+
+// decorateUser 填充用户的管理员身份计算字段（is_admin 不入库）。
+//
+// 管理员身份由 bm_system 配置表的 system.admin.id 唯一标记判定；判定失败仅记录日志，
+// 按非管理员处理，不影响主流程。
+func (a *AuthLogic) decorateUser(ctx context.Context, user *entity.SystemUser) {
+	isAdmin, xErr := a.repo.system.IsAdmin(ctx, user.ID)
+	if xErr != nil {
+		a.log.Warn(ctx, fmt.Sprintf("判断管理员身份失败: %v", xErr))
+		isAdmin = false
+	}
+	user.IsAdmin = isAdmin
 }
 
 // Register 用户注册
@@ -149,9 +167,9 @@ func (a *AuthLogic) Register(ctx context.Context, req *apiAuth.RegisterRequest, 
 		Password:    hashedPassword,
 		Email:       req.Email,
 		Nickname:    req.Nickname,
-		Role:        "user", // 新用户角色为 user
-		Status:      1,      // 默认启用
-		EmailVerify: true,   // 注册前已通过邮箱验证码校验，直接标记为已验证
+		IsAdmin:     false, // 注册用户非系统管理员
+		Status:      1,     // 默认启用
+		EmailVerify: true,  // 注册前已通过邮箱验证码校验，直接标记为已验证
 	}
 
 	if _, xErr = a.repo.user.Create(ctx, &newUser); xErr != nil {
@@ -368,6 +386,8 @@ func (a *AuthLogic) GetUserInfo(ctx context.Context, userID xSnowflake.Snowflake
 	if !found {
 		return nil, xError.NewError(ctx, xError.NotFound, "用户不存在", false)
 	}
+
+	a.decorateUser(ctx, user)
 	return user, nil
 }
 
@@ -404,7 +424,13 @@ func (a *AuthLogic) UpdateProfile(ctx context.Context, userID xSnowflake.Snowfla
 		return a.GetUserInfo(ctx, userID)
 	}
 
-	return a.repo.user.UpdateFieldsByID(ctx, userID, updates)
+	updatedUser, xErr := a.repo.user.UpdateFieldsByID(ctx, userID, updates)
+	if xErr != nil {
+		return nil, xErr
+	}
+
+	a.decorateUser(ctx, updatedUser)
+	return updatedUser, nil
 }
 
 // UpdateLastLogin 更新最后登录时间

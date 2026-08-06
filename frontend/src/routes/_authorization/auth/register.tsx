@@ -28,7 +28,6 @@ import { BackLink, BambooArt, BrushUnderline } from '@/components/ink-wash'
 import { BambooLogo } from '@/assets/svg/bamboo-logo'
 import { siteConfig } from '@/lib/site'
 import { getStoredUser, getToken, setSession } from '@/lib/auth'
-import { ROLE_ADMIN } from '@/lib/role'
 import { useRegister, useSendRegisterCode } from '@/hooks/use-auth'
 
 /** 注册页 search 参数：redirect 为注册成功后的回跳路径 */
@@ -37,12 +36,12 @@ interface RegisterSearch {
 }
 
 /** 仅信任同源内部路径（以单个 / 开头），避免开放重定向。
- *  无合法回跳目标时按角色分流：管理员去管理后台，其他去用户中心。 */
-function resolveSafeRedirect(target?: string, role?: string): string {
+ *  无合法回跳目标时按管理员身份分流：管理员去管理后台，其他去用户中心。 */
+function resolveSafeRedirect(target?: string, isAdminUser?: boolean): string {
   if (target && target.startsWith('/') && !target.startsWith('//')) {
     return target
   }
-  return role === ROLE_ADMIN ? '/admin/dashboard' : '/user/dashboard'
+  return isAdminUser ? '/admin/dashboard' : '/user/dashboard'
 }
 
 /** 简单邮箱格式校验（发送验证码前置校验，最终以后端为准） */
@@ -54,11 +53,11 @@ export const Route = createFileRoute('/_authorization/auth/register')({
   validateSearch: (search: Record<string, unknown>): RegisterSearch => ({
     redirect: typeof search.redirect === 'string' ? search.redirect : undefined,
   }),
-  // 反向守卫：已登录用户按角色跳走，避免重复看到注册界面
+  // 反向守卫：已登录用户按管理员身份跳走，避免重复看到注册界面
   beforeLoad: ({ search }) => {
     if (getToken()) {
       throw redirect({
-        to: resolveSafeRedirect(search.redirect, getStoredUser()?.role),
+        to: resolveSafeRedirect(search.redirect, getStoredUser()?.is_admin),
       })
     }
   },
@@ -128,8 +127,11 @@ function RegisterPage() {
         code: formData.code,
       })
       setSession(res.token, res.user, true)
-      // 注册后整页跳转，确保应用以干净状态重新装载；按角色分流落地页
-      window.location.href = resolveSafeRedirect(redirectTarget, res.user.role)
+      // 注册后整页跳转，确保应用以干净状态重新装载；按管理员身份分流落地页
+      window.location.href = resolveSafeRedirect(
+        redirectTarget,
+        res.user.is_admin,
+      )
     } catch (err) {
       setError(err instanceof Error ? err.message : '注册失败，请稍后重试')
     }

@@ -31,7 +31,7 @@ func DefaultUser(ctx context.Context, db *gorm.DB) error {
 	log := xLog.WithName(xLog.NamedINIT)
 
 	var adminSystem entity.System
-	err := db.WithContext(ctx).Model(&entity.System{}).Where("key = ?", "system.admin.id").First(&adminSystem).Error
+	err := db.WithContext(ctx).Model(&entity.System{}).Where("key = ?", constants.KeySystemAdminID).First(&adminSystem).Error
 	if err == nil && adminSystem.Value != nil && *adminSystem.Value != "" {
 		return nil
 	}
@@ -50,7 +50,6 @@ func DefaultUser(ctx context.Context, db *gorm.DB) error {
 		Email:       "gm@x-lf.cn",
 		Nickname:    xUtil.Ptr("筱锋"),
 		Avatar:      xUtil.Ptr("https://i-cdn.akass.cn/2024/05/664870a814c0d.png!wp60"),
-		Role:        constants.RoleAdmin,
 		Status:      constants.StatusActive,
 		EmailVerify: true,
 	}
@@ -60,7 +59,7 @@ func DefaultUser(ctx context.Context, db *gorm.DB) error {
 
 	adminID := user.ID.String()
 	if err = db.WithContext(ctx).Create(&entity.System{
-		Key:   "system.admin.id",
+		Key:   constants.KeySystemAdminID,
 		Value: &adminID,
 	}).Error; err != nil {
 		return err

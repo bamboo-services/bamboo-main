@@ -8249,16 +8249,16 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "is_admin": {
+                    "description": "是否为系统唯一管理员（计算字段，不入库）",
+                    "type": "boolean"
+                },
                 "last_login_at": {
                     "description": "最后登录时间",
                     "type": "string"
                 },
                 "nickname": {
                     "description": "昵称",
-                    "type": "string"
-                },
-                "role": {
-                    "description": "角色",
                     "type": "string"
                 },
                 "status": {

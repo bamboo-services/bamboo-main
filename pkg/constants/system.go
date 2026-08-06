@@ -9,6 +9,12 @@
 
 package constants
 
+// KeySystemAdminID 系统唯一管理员的用户 ID 配置键。
+//
+// 初始化默认管理员后写入 bm_system 表，鉴权时以「当前用户 ID == 该值」判定管理身份，
+// 取代 bm_system_user 上的角色字段。缺失或空值视为无管理员。
+const KeySystemAdminID = "system.admin.id"
+
 // 内置「已失效」分组在 bm_system 表中的配置键。
 //
 // 键值由管理员经管理端接口热修改，分组列表/友链查询在注入虚拟分组时读取，

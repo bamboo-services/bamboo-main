@@ -68,13 +68,6 @@ const (
 	// LinkLevelAd 广告友链（1×1 居中卡片，带推广标识）
 	LinkLevelAd = 3
 
-	// RoleAdmin 管理员角色标识
-	RoleAdmin = "admin"
-	// RoleModerator 审核员角色标识
-	RoleModerator = "moderator"
-	// RoleUser 普通用户角色标识
-	RoleUser = "user"
-
 	// EmailTypeApply 申请邮件类型
 	EmailTypeApply = "apply"
 	// EmailTypeApproved 审核通过邮件类型

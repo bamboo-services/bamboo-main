@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/hooks/use-auth'
 import { getToken } from '@/lib/auth'
-import { isAdmin, roleLabel as resolveRoleLabel } from '@/lib/role'
+import { adminLabel, isAdmin } from '@/lib/role'
 import { cn } from '@/lib/utils'
 import { enter } from '@/lib/motion'
 
@@ -103,7 +103,7 @@ function UserAvatarMenu() {
   const [menuOpen, setMenuOpen] = useState(false)
   const displayName = user?.nickname || user?.username || '用户'
   const userInitial = (user?.username ?? '?').charAt(0).toUpperCase()
-  const roleLabel = resolveRoleLabel(user?.role)
+  const identityLabel = adminLabel(user)
 
   const handleLogout = async () => {
     await signOut()
@@ -147,7 +147,7 @@ function UserAvatarMenu() {
                   {displayName}
                 </span>
                 <span className="shrink-0 rounded border border-leaf-muted/50 bg-leaf-light/30 px-1.5 py-px font-mono text-[10px] tracking-wide text-leaf-deep">
-                  {roleLabel}
+                  {identityLabel}
                 </span>
               </div>
               <p className="truncate font-mono text-[11px] text-text-secondary">

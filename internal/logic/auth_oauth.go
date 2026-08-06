@@ -63,6 +63,9 @@ func (a *AuthLogic) LoginByOAuth(ctx context.Context, userinfo *bSdkModels.OAuth
 		return nil, "", nil, nil, xErr
 	}
 
+	// 填充管理员身份计算字段后返回
+	a.decorateUser(ctx, user)
+
 	return user, accessToken, &now, &expiredAt, nil
 }
 
@@ -129,7 +132,7 @@ func (a *AuthLogic) SyncOAuthUser(ctx context.Context, userinfo *bSdkModels.OAut
 		Email:       a.resolveOAuthEmail(userinfo),
 		Nickname:    a.resolveOAuthNickname(userinfo),
 		Avatar:      a.resolveOAuthAvatar(userinfo),
-		Role:        constants.RoleUser,
+		IsAdmin:     false, // OAuth 同步用户非系统管理员
 		Status:      constants.StatusActive,
 		EmailVerify: strings.TrimSpace(userinfo.Email) != "",
 		LastLoginAt: &now,

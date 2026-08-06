@@ -22,7 +22,6 @@ type TokenSession struct {
 	UserID    xSnowflake.SnowflakeID `json:"user_id"`
 	Username  string                 `json:"username"`
 	Email     string                 `json:"email"`
-	Role      string                 `json:"role"`
 	LoginIP   string                 `json:"login_ip"`
 	UserAgent string                 `json:"user_agent"`
 	CreatedAt time.Time              `json:"created_at"`

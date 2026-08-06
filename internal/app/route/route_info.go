@@ -32,7 +32,7 @@ func (r *route) infoRouter(route gin.IRouter) {
 		// 管理端写操作：统一 /info/admin 前置路径，鉴权管理员
 		adminGroup := infoGroup.Group("/admin")
 		adminGroup.Use(middleware.AuthMiddleware)
-		adminGroup.Use(middleware.RequireRole("admin"))
+		adminGroup.Use(middleware.RequireAdmin)
 		{
 			adminGroup.PUT("/site", infoHandler.UpdateSiteInfo)
 			adminGroup.PUT("/archive", infoHandler.UpdateArchiveInfo)

@@ -22,7 +22,6 @@ import { BambooLogo } from '@/assets/svg/bamboo-logo'
 import { siteConfig } from '@/lib/site'
 import { SSO_OAUTH_LOGIN_URL, login } from '@/api/auth'
 import { getStoredUser, getToken, setSession } from '@/lib/auth'
-import { ROLE_ADMIN } from '@/lib/role'
 
 /** 登录页 search 参数：redirect 为登录成功后的回跳路径 */
 interface LoginSearch {
@@ -30,23 +29,30 @@ interface LoginSearch {
 }
 
 /** 仅信任同源内部路径（以单个 / 开头），避免开放重定向。
- *  无合法回跳目标时按角色分流：管理员去管理后台，其他去用户中心。 */
-function resolveSafeRedirect(redirect?: string, role?: string): string {
-  if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
-    return redirect
+ *  无合法回跳目标时按管理员身份分流：管理员去管理后台，其他去用户中心。 */
+function resolveSafeRedirect(
+  redirectTarget?: string,
+  isAdminUser?: boolean,
+): string {
+  if (
+    redirectTarget &&
+    redirectTarget.startsWith('/') &&
+    !redirectTarget.startsWith('//')
+  ) {
+    return redirectTarget
   }
-  return role === ROLE_ADMIN ? '/admin/dashboard' : '/user/dashboard'
+  return isAdminUser ? '/admin/dashboard' : '/user/dashboard'
 }
 
 export const Route = createFileRoute('/_authorization/auth/login')({
   validateSearch: (search: Record<string, unknown>): LoginSearch => ({
     redirect: typeof search.redirect === 'string' ? search.redirect : undefined,
   }),
-  // 反向守卫：已登录用户按角色跳走，避免重复看到登录界面
+  // 反向守卫：已登录用户按管理员身份跳走，避免重复看到登录界面
   beforeLoad: ({ search }) => {
     if (getToken()) {
       throw redirect({
-        to: resolveSafeRedirect(search.redirect, getStoredUser()?.role),
+        to: resolveSafeRedirect(search.redirect, getStoredUser()?.is_admin),
       })
     }
   },
@@ -75,8 +81,11 @@ function LoginPage() {
         password: formData.password,
       })
       setSession(res.token, res.user, formData.remember)
-      // 登录后整页跳转，确保应用以干净状态重新装载；按角色分流落地页
-      window.location.href = resolveSafeRedirect(redirectTarget, res.user.role)
+      // 登录后整页跳转，确保应用以干净状态重新装载；按管理员身份分流落地页
+      window.location.href = resolveSafeRedirect(
+        redirectTarget,
+        res.user.is_admin,
+      )
     } catch (err) {
       setError(err instanceof Error ? err.message : '登录失败，请稍后重试')
       setLoading(false)

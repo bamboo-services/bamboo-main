@@ -17,7 +17,6 @@ import { BackLink, BambooRule, EnsoIcon } from '@/components/ink-wash'
 import { enter } from '@/lib/motion'
 import { oauthCallback, oauthLogin } from '@/api/auth'
 import { setSession } from '@/lib/auth'
-import { ROLE_ADMIN } from '@/lib/role'
 import { siteConfig } from '@/lib/site'
 
 export const Route = createFileRoute('/_authorization/auth/callback')({
@@ -86,9 +85,10 @@ function AuthCallbackPage() {
         const token = await oauthCallback(code, state)
         const res = await oauthLogin(token.access_token)
         setSession(res.token, res.user, true)
-        // 按角色分流落地页：管理员去管理后台，其他去用户中心
-        window.location.href =
-          res.user.role === ROLE_ADMIN ? '/admin/dashboard' : '/user/dashboard'
+        // 按管理员身份分流落地页：管理员去管理后台，其他去用户中心
+        window.location.href = res.user.is_admin
+          ? '/admin/dashboard'
+          : '/user/dashboard'
       } catch (err) {
         setNotice({
           kind: 'error',

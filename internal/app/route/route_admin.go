@@ -21,7 +21,7 @@ import (
 func (r *route) adminRouter(route gin.IRouter) {
 	adminGroup := route.Group("/admin")
 	adminGroup.Use(middleware.AuthMiddleware)
-	adminGroup.Use(middleware.RequireRole("admin"))
+	adminGroup.Use(middleware.RequireAdmin)
 	{
 		r.linkAdminRouter(adminGroup)
 		r.linkGroupAdminRouter(adminGroup)

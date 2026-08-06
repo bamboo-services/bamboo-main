@@ -18,6 +18,7 @@ import (
 
 	xError "github.com/bamboo-services/bamboo-base-go/common/error"
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	bConst "github.com/bamboo-services/bamboo-main/pkg/constants"
@@ -76,6 +77,26 @@ func (r *SystemRepo) GetByKey(ctx context.Context, key string) (*entity.System, 
 	}
 
 	return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询系统配置失败", true, err)
+}
+
+// IsAdmin 判断指定用户是否为系统唯一管理员。
+//
+// 管理员身份由 bm_system 配置表的 system.admin.id 标记，比对当前用户 ID 判定；
+// 配置缺失或值为空串视为无管理员，返回 false。
+func (r *SystemRepo) IsAdmin(ctx context.Context, userID xSnowflake.SnowflakeID) (bool, *xError.Error) {
+	config, found, xErr := r.GetByKey(ctx, bConst.KeySystemAdminID)
+	if xErr != nil {
+		return false, xErr
+	}
+	if !found || config.Value == nil {
+		return false, nil
+	}
+
+	adminID := strings.TrimSpace(*config.Value)
+	if adminID == "" {
+		return false, nil
+	}
+	return adminID == userID.String(), nil
 }
 
 // UpdateValueByKey 根据键更新系统配置的值

@@ -11,47 +11,20 @@ import type { UserInfo } from '@/api/types'
 import { getStoredUser } from '@/lib/auth'
 
 /**
- * 角色常量，对齐后端 `pkg/constants/context.go` 的 Role* 常量。
- * - admin：管理员，可访问 /admin 管理后台
- * - moderator：协作者，按普通用户处理（暂无专属界面）
- * - user：普通用户，登录后进入 /user 用户中心
- */
-export const ROLE_ADMIN = 'admin'
-export const ROLE_MODERATOR = 'moderator'
-export const ROLE_USER = 'user'
-
-/** 角色中文映射（与 admin-sidebar 的 roleLabels 同源，收编于此统一复用） */
-const ROLE_LABELS: Record<string, string> = {
-  [ROLE_ADMIN]: '管理员',
-  [ROLE_MODERATOR]: '协作者',
-  [ROLE_USER]: '用户',
-}
-
-/**
- * 判断用户是否为管理员。接受显式传入的 user，缺省时读取本地缓存的当前用户，
+ * 判断用户是否为系统唯一管理员。接受显式传入的 user，缺省时读取本地缓存的当前用户，
  * 便于在 beforeLoad 等同步上下文中无 hook 时调用。
+ *
+ * 管理员身份由后端计算字段 `is_admin` 承载（对齐 bm_system.system.admin.id 判定）。
  */
 export function isAdmin(user?: UserInfo | null): boolean {
   const target = user ?? getStoredUser()
-  return target?.role === ROLE_ADMIN
+  return target?.is_admin === true
 }
 
 /**
- * 判断用户是否持有指定角色之一。缺省 user 时回退读取本地缓存用户。
+ * 取当前用户身份徽章文案：管理员 → 管理员，其余 → 用户。
+ * 缺省 user 时回退读取本地缓存用户。
  */
-export function hasRole(
-  user: UserInfo | null | undefined,
-  ...roles: Array<string>
-): boolean {
-  const target = user ?? getStoredUser()
-  if (!target) return false
-  return roles.includes(target.role)
-}
-
-/**
- * 取角色中文标签；未知角色回退为原始 role 字符串，再回退为占位横线。
- */
-export function roleLabel(role?: string | null): string {
-  if (!role) return '—'
-  return ROLE_LABELS[role] ?? role
+export function adminLabel(user?: UserInfo | null): string {
+  return isAdmin(user) ? '管理员' : '用户'
 }

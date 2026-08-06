@@ -49,7 +49,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { useSiteInfo } from '@/hooks/use-site-info'
 import { cn } from '@/lib/utils'
 import { formatDateTime } from '@/lib/datetime'
-import { roleLabel as resolveRoleLabel } from '@/lib/role'
+import { adminLabel } from '@/lib/role'
 
 const menuGroups = [
   {
@@ -92,7 +92,7 @@ export function AdminSidebar() {
 
   const displayName = user?.nickname || user?.username || '管理员'
   const userInitial = (user?.username ?? '?').charAt(0).toUpperCase()
-  const roleLabel = resolveRoleLabel(user?.role)
+  const identityLabel = adminLabel(user)
 
   const handleLogout = async () => {
     await signOut()
@@ -231,7 +231,7 @@ export function AdminSidebar() {
                           {displayName}
                         </span>
                         <span className="shrink-0 rounded border border-leaf-muted/50 bg-leaf-light/30 px-1.5 py-px font-mono text-[10px] tracking-wide text-leaf-deep">
-                          {roleLabel}
+                          {identityLabel}
                         </span>
                       </div>
                       <p className="truncate font-mono text-[11px] text-text-secondary">

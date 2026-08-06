@@ -27,7 +27,7 @@ func TestSystemUserJSON_HidesSensitiveFields(t *testing.T) {
 		Username:    "admin",
 		Password:    "hashed-password",
 		Email:       "admin@example.com",
-		Role:        "admin",
+		IsAdmin:     true,
 		Status:      1,
 		EmailVerify: true,
 	}

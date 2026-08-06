@@ -21,49 +21,55 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RequireRole 要求特定角色的中间件
-func RequireRole(roles ...string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// 获取用户UUID
-		userID, exists := ctxUtil.GetUserID(c)
-		if !exists {
-			_ = c.Error(xError.NewError(c, xError.Unauthorized, "未认证的用户", false))
-			return
-		}
-
-		// 从数据库获取用户信息
-		db := xCtxUtil.MustGetDB(c)
-		m := xCtxUtil.MustGetCacheManager(c)
-		if db == nil {
-			_ = c.Error(xError.NewError(c, xError.DatabaseError, "数据库连接异常", false))
-			return
-		}
-
-		repo := repository.NewSystemUserRepo(db, m)
-		user, found, xErr := repo.GetByID(c, userID)
-		if xErr != nil {
-			_ = c.Error(xError.NewError(c, xError.DatabaseError, "用户信息查询失败", false, xErr))
-			return
-		}
-		if !found || user.Status != constants.StatusActive {
-			_ = c.Error(xError.NewError(c, xError.NotFound, "用户不存在或已被禁用", false))
-			return
-		}
-
-		// 检查用户角色
-		hasRole := false
-		for _, role := range roles {
-			if user.Role == role {
-				hasRole = true
-				break
-			}
-		}
-
-		if !hasRole {
-			_ = c.Error(xError.NewError(c, xError.PermissionDenied, "权限不足", false))
-			return
-		}
-
-		c.Next()
+// RequireAdmin 要求当前登录用户为系统唯一管理员。
+//
+// 管理员身份由 bm_system 配置表的 system.admin.id 唯一标记：先校验用户存在且启用，
+// 再经 SystemRepo.IsAdmin 比对当前用户 ID，非管理员一律拒绝（403）。
+func RequireAdmin(c *gin.Context) {
+	// 获取当前认证用户 ID
+	userID, exists := ctxUtil.GetUserID(c)
+	if !exists {
+		_ = c.Error(xError.NewError(c, xError.Unauthorized, "未认证的用户", false))
+		c.Abort()
+		return
 	}
+
+	// 从上下文获取数据库与缓存管理器
+	db := xCtxUtil.MustGetDB(c)
+	m := xCtxUtil.MustGetCacheManager(c)
+	if db == nil {
+		_ = c.Error(xError.NewError(c, xError.DatabaseError, "数据库连接异常", false))
+		c.Abort()
+		return
+	}
+
+	// 校验用户存在且处于启用状态
+	userRepo := repository.NewSystemUserRepo(db, m)
+	user, found, xErr := userRepo.GetByID(c, userID)
+	if xErr != nil {
+		_ = c.Error(xError.NewError(c, xError.DatabaseError, "用户信息查询失败", false, xErr))
+		c.Abort()
+		return
+	}
+	if !found || user.Status != constants.StatusActive {
+		_ = c.Error(xError.NewError(c, xError.NotFound, "用户不存在或已被禁用", false))
+		c.Abort()
+		return
+	}
+
+	// 校验是否为系统唯一管理员
+	systemRepo := repository.NewSystemRepo(db, m)
+	isAdmin, xErr := systemRepo.IsAdmin(c, userID)
+	if xErr != nil {
+		_ = c.Error(xError.NewError(c, xError.DatabaseError, "管理员身份校验失败", false, xErr))
+		c.Abort()
+		return
+	}
+	if !isAdmin {
+		_ = c.Error(xError.NewError(c, xError.PermissionDenied, "权限不足", false))
+		c.Abort()
+		return
+	}
+
+	c.Next()
 }

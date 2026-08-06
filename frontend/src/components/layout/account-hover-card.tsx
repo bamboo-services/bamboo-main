@@ -23,7 +23,7 @@ import {
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { formatDateTime } from '@/lib/datetime'
-import { isAdmin, roleLabel } from '@/lib/role'
+import { adminLabel, isAdmin } from '@/lib/role'
 
 /** S 型墨韵缓动：与首页 header/footer 对焦凝定同节奏 */
 const EASE_INK: [number, number, number, number] = [0.76, 0, 0.24, 1]
@@ -160,7 +160,7 @@ export function AccountHoverCard() {
                         {displayName}
                       </span>
                       <span className="shrink-0 rounded border border-leaf-muted/50 bg-leaf-light/30 px-1.5 py-px font-mono text-[10px] tracking-wide text-leaf-deep">
-                        {roleLabel(user?.role)}
+                        {adminLabel(user)}
                       </span>
                     </div>
                     <p className="truncate font-mono text-[11px] text-text-secondary">

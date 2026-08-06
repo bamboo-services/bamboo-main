@@ -56,7 +56,6 @@ func (s *SessionLogic) CreateUserSession(ctx context.Context, user *entity.Syste
 		UserID:    user.ID,
 		Username:  user.Username,
 		Email:     user.Email,
-		Role:      user.Role,
 		LoginIP:   meta.ClientIP,
 		UserAgent: meta.UserAgent,
 		CreatedAt: now,

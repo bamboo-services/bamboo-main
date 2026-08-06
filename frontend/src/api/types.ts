@@ -587,7 +587,7 @@ export interface UserInfo {
   email: string
   nickname?: string | null
   avatar?: string | null
-  role: string
+  is_admin: boolean
   status: number
   email_verify: boolean
   last_login_at?: string | null
