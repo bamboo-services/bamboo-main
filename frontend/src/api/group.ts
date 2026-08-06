@@ -10,6 +10,7 @@
 import { request } from './client'
 import type {
   CreateGroupRequest,
+  DeleteGroupParams,
   GroupListParams,
   GroupPageParams,
   LinkGroup,
@@ -88,12 +89,15 @@ export function updateGroupStatus(
   })
 }
 
-/** 删除友链分组（force=true 时强制删除并清空关联） */
-export function deleteGroup(id: SnowflakeID, force = false): Promise<void> {
+/** 删除友链分组（force=true 移至未分组后删除；target_group_id 迁移到指定分组后删除，二者互斥） */
+export function deleteGroup(
+  id: SnowflakeID,
+  params: DeleteGroupParams = {},
+): Promise<void> {
   return request<void>({
     method: 'DELETE',
     url: `/admin/groups/${id.toString()}`,
-    params: { force },
+    params,
   })
 }
 

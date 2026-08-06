@@ -20,6 +20,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Select } from '@/components/ui/select'
 import { Pagination } from '@/components/ui/pagination'
 import {
   Table,
@@ -52,6 +53,7 @@ import { enter } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 import { isBuiltinGroup } from '@/lib/locations'
 import {
+  useAllGroups,
   useCreateGroup,
   useDeleteGroup,
   useGroups,
@@ -79,6 +81,7 @@ function LocationPage() {
   // 删除确认弹窗
   const [deleteTarget, setDeleteTarget] = useState<LinkGroup | null>(null)
   const [forceDelete, setForceDelete] = useState(false)
+  const [migrateTargetID, setMigrateTargetID] = useState('')
 
   const groupsQuery = useGroups({
     page: pageIndex + 1,
@@ -86,6 +89,7 @@ function LocationPage() {
     order_by: 'sort_order',
     order: 'asc',
   })
+  const allGroupsQuery = useAllGroups()
   const createGroup = useCreateGroup()
   const updateGroup = useUpdateGroup()
   const updateStatus = useUpdateGroupStatus()
@@ -96,6 +100,11 @@ function LocationPage() {
   const totalPages = groupsQuery.data?.pagination.total_pages ?? 1
 
   const submitting = createGroup.isPending || updateGroup.isPending
+
+  // 可迁移的目标分组：排除内置「已失效」分组与当前被删分组自身
+  const migrateCandidates = (allGroupsQuery.data ?? []).filter(
+    (g) => !isBuiltinGroup(g) && g.id.toString() !== deleteTarget?.id.toString(),
+  )
 
   // 弹窗打开时按编辑对象预填 / 重置表单
   useEffect(() => {
@@ -148,11 +157,17 @@ function LocationPage() {
   const handleDelete = () => {
     if (!deleteTarget) return
     deleteGroup.mutate(
-      { id: deleteTarget.id, force: forceDelete },
+      {
+        id: deleteTarget.id,
+        ...(migrateTargetID
+          ? { targetGroupId: BigInt(migrateTargetID) }
+          : { force: forceDelete }),
+      },
       {
         onSuccess: () => {
           setDeleteTarget(null)
           setForceDelete(false)
+          setMigrateTargetID('')
         },
       },
     )
@@ -413,6 +428,7 @@ function LocationPage() {
           if (!open) {
             setDeleteTarget(null)
             setForceDelete(false)
+            setMigrateTargetID('')
           }
         }}
       >
@@ -420,16 +436,47 @@ function LocationPage() {
           <DialogHeader>
             <DialogTitle>删除分组</DialogTitle>
             <DialogDescription>
-              确定要删除分组「{deleteTarget?.name}」吗？此操作不可撤销。
+              确定要删除分组「{deleteTarget?.name}」吗？请先决定分组下友链的去向。
             </DialogDescription>
           </DialogHeader>
-          <label className="flex cursor-pointer items-center gap-2.5 rounded-md border border-border bg-muted/30 px-3 py-2.5 text-sm transition-colors duration-150 hover:bg-muted/50">
-            <Checkbox
-              checked={forceDelete}
-              onCheckedChange={(checked) => setForceDelete(checked === true)}
-            />
-            <span>强制删除（该分组下的友链将移至未分组）</span>
-          </label>
+          <div className="space-y-4">
+            <label className="flex cursor-pointer items-center gap-2.5 rounded-md border border-border bg-muted/30 px-3 py-2.5 text-sm transition-colors duration-150 hover:bg-muted/50">
+              <Checkbox
+                checked={forceDelete}
+                onCheckedChange={(checked) => {
+                  setForceDelete(checked === true)
+                  if (checked) setMigrateTargetID('')
+                }}
+              />
+              <span>移至未分组（该分组下的友链将移出分组）</span>
+            </label>
+            <div className="space-y-2">
+              <Label htmlFor="migrateGroup">迁移到其他分组</Label>
+              <Select
+                id="migrateGroup"
+                value={migrateTargetID}
+                onChange={(e) => {
+                  setMigrateTargetID(e.target.value)
+                  if (e.target.value) setForceDelete(false)
+                }}
+              >
+                <option value="">不迁移</option>
+                {migrateCandidates.map((g) => (
+                  <option
+                    key={g.id.toString()}
+                    value={g.id.toString()}
+                    disabled={!g.status}
+                  >
+                    {g.name}
+                    {!g.status ? '（已禁用）' : ''}
+                  </option>
+                ))}
+              </Select>
+              <p className="text-xs text-text-secondary">
+                选择目标分组后，分组下友链将迁移过去再删除当前分组；禁用分组不可作为迁移目标。
+              </p>
+            </div>
+          </div>
           <DialogFooter>
             <Button
               variant="outline"

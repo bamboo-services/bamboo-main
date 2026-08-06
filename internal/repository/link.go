@@ -658,12 +658,53 @@ func (r *LinkRepo) ListByColorID(ctx context.Context, colorID xSnowflake.Snowfla
 	return links, nil
 }
 
-// ClearGroupID 清空指定分组下友情链接的分组关联
+// ClearGroupID 清空指定分组下友情链接的分组关联（移至未分组）
+//
+// 先查询受影响友链 ID 再批量 UPDATE，随后逐条失效单条缓存，
+// 避免友链缓存携带旧 group_id（写后失效约束，与 MoveGroupID 一致）。
 func (r *LinkRepo) ClearGroupID(ctx context.Context, groupID xSnowflake.SnowflakeID, tx *gorm.DB) *xError.Error {
-	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).Where("group_id = ?", groupID).Update("group_id", nil)
+	db := r.pickDB(tx).WithContext(ctx)
+	var ids []xSnowflake.SnowflakeID
+	if err := db.Model(&entity.LinkFriend{}).Where("group_id = ?", groupID).Pluck("id", &ids).Error; err != nil {
+		return xError.NewError(ctx, xError.DatabaseError, "查询待清空友链失败", false, err)
+	}
+
+	result := db.Model(&entity.LinkFriend{}).Where("group_id = ?", groupID).Update("group_id", nil)
 	if result.Error != nil {
 		return xError.NewError(ctx, xError.DatabaseError, "清空友链分组关联失败", false, result.Error)
 	}
+
+	for _, id := range ids {
+		if cacheErr := r.kc.Delete(ctx, constants.RedisLinkFriend.Get(id).String()); cacheErr != nil {
+			r.log.Warn(ctx, cacheErr.Error())
+		}
+	}
+
+	return nil
+}
+
+// MoveGroupID 将指定分组下全部友情链接迁移至目标分组
+//
+// 先查询受影响友链 ID 再批量 UPDATE，随后逐条失效单条缓存，
+// 避免友链缓存携带旧 group_id（写后失效约束，与 ClearGroupID 一致）。
+func (r *LinkRepo) MoveGroupID(ctx context.Context, fromID, toID xSnowflake.SnowflakeID, tx *gorm.DB) *xError.Error {
+	db := r.pickDB(tx).WithContext(ctx)
+	var ids []xSnowflake.SnowflakeID
+	if err := db.Model(&entity.LinkFriend{}).Where("group_id = ?", fromID).Pluck("id", &ids).Error; err != nil {
+		return xError.NewError(ctx, xError.DatabaseError, "查询待迁移友链失败", false, err)
+	}
+
+	result := db.Model(&entity.LinkFriend{}).Where("group_id = ?", fromID).Update("group_id", toID)
+	if result.Error != nil {
+		return xError.NewError(ctx, xError.DatabaseError, "迁移友链分组失败", false, result.Error)
+	}
+
+	for _, id := range ids {
+		if cacheErr := r.kc.Delete(ctx, constants.RedisLinkFriend.Get(id).String()); cacheErr != nil {
+			r.log.Warn(ctx, cacheErr.Error())
+		}
+	}
+
 	return nil
 }
 

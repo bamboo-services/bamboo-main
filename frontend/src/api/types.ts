@@ -171,6 +171,12 @@ export interface GroupPageParams extends GroupListParams {
   page_size?: number
 }
 
+/** 删除友链分组请求参数（DELETE /api/v1/admin/groups/:id；force 与 target_group_id 互斥） */
+export interface DeleteGroupParams {
+  force?: boolean
+  target_group_id?: SnowflakeID
+}
+
 // ---------------------------------------------------------------------------
 // 友链颜色
 // ---------------------------------------------------------------------------

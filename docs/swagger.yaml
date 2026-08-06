@@ -125,6 +125,11 @@ definitions:
         maxLength: 50
         minLength: 1
         type: string
+      username:
+        example: xiao_lfeng
+        maxLength: 50
+        minLength: 1
+        type: string
     type: object
   apiAuth.UserInfoResponse:
     properties:
@@ -2596,17 +2601,21 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 删除指定的友链分组，支持强制删除模式
+      description: 删除指定的友链分组。force=true 时清空关联友链后删除；传入 target_group_id 时迁移友链至目标分组后删除（二者互斥）
       parameters:
       - description: 友链分组ID
         in: path
         name: id
         required: true
         type: integer
-      - description: 是否强制删除（默认false）
+      - description: 是否强制删除（默认false，与target_group_id互斥）
         in: query
         name: force
         type: boolean
+      - description: 迁移目标分组ID（与force互斥）
+        in: query
+        name: target_group_id
+        type: integer
       produces:
       - application/json
       responses:
@@ -5210,7 +5219,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新当前用户的昵称与头像
+      description: 更新当前用户的用户名、昵称与头像
       parameters:
       - description: 更新资料请求
         in: body

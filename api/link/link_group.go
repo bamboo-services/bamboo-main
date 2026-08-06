@@ -50,7 +50,8 @@ type GroupStatusRequest struct {
 
 // GroupDeleteRequest 删除分组请求
 type GroupDeleteRequest struct {
-	Force bool `json:"force" binding:"omitempty" example:"false"` // 是否强制删除：false=检查关联，true=强制删除并清空关联
+	Force         bool                    `json:"force" binding:"omitempty" example:"false"`                  // 是否强制删除：false=检查关联，true=强制删除并清空关联
+	TargetGroupID *xSnowflake.SnowflakeID `json:"target_group_id" binding:"omitempty" example:"168297861..."` // 迁移目标分组ID：指定后将分组下友链迁移至该分组再删除，与 force 互斥
 }
 
 // GroupListRequest 分组列表查询请求

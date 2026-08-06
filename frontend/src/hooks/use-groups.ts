@@ -95,12 +95,23 @@ export function useUpdateGroupStatus() {
   })
 }
 
-/** 删除友链分组 */
+/** 删除友链分组（force=true 移至未分组；targetGroupId 迁移到指定分组，二者互斥） */
 export function useDeleteGroup() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, force }: { id: SnowflakeID; force?: boolean }) =>
-      deleteGroup(id, force),
+    mutationFn: ({
+      id,
+      force,
+      targetGroupId,
+    }: {
+      id: SnowflakeID
+      force?: boolean
+      targetGroupId?: SnowflakeID
+    }) =>
+      deleteGroup(id, {
+        ...(force ? { force: true } : {}),
+        ...(targetGroupId ? { target_group_id: targetGroupId } : {}),
+      }),
     onSuccess: () => {
       toast.success('分组删除成功')
       void qc.invalidateQueries({ queryKey: groupKeys.all })

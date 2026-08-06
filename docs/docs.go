@@ -1199,7 +1199,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "删除指定的友链分组，支持强制删除模式",
+                "description": "删除指定的友链分组。force=true 时清空关联友链后删除；传入 target_group_id 时迁移友链至目标分组后删除（二者互斥）",
                 "consumes": [
                     "application/json"
                 ],
@@ -1220,8 +1220,14 @@ const docTemplate = `{
                     },
                     {
                         "type": "boolean",
-                        "description": "是否强制删除（默认false）",
+                        "description": "是否强制删除（默认false，与target_group_id互斥）",
                         "name": "force",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "迁移目标分组ID（与force互斥）",
+                        "name": "target_group_id",
                         "in": "query"
                     }
                 ],
@@ -5128,7 +5134,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "更新当前用户的昵称与头像",
+                "description": "更新当前用户的用户名、昵称与头像",
                 "consumes": [
                     "application/json"
                 ],
@@ -5584,6 +5590,12 @@ const docTemplate = `{
                     "maxLength": 50,
                     "minLength": 1,
                     "example": "筱锋"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 1,
+                    "example": "xiao_lfeng"
                 }
             }
         },

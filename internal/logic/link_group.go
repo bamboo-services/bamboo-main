@@ -175,11 +175,19 @@ func (l *LinkGroupLogic) UpdateStatus(ctx context.Context, groupID xSnowflake.Sn
 	return nil
 }
 
-// Delete 删除友链分组，存在关联友链时按 Force 决定阻断或事务清空外键后删除。
+// Delete 删除友链分组，存在关联友链时按 target_group_id / force 决定迁移、清空或阻断。
+//
+// 处理分组下关联友链的三种结局：target_group_id 指定时迁移至目标分组、force 时清空为未分组、
+// 均未指定且存在友链则阻断。target_group_id 与 force 互斥，目标分组必须存在且为启用状态。
 func (l *LinkGroupLogic) Delete(ctx context.Context, groupID xSnowflake.SnowflakeID, req *apiLinkGroup.GroupDeleteRequest) ([]entity.LinkFriend, *xError.Error) {
 	// 内置「已失效」分组为系统语义分组（不落库），拒绝删除
 	if entity.IsBuiltinGroupID(groupID) {
 		return nil, xError.NewError(ctx, xError.BadRequest, "内置已失效分组不可删除", false)
+	}
+
+	// force 与 target_group_id 互斥，避免语义歧义
+	if req.Force && req.TargetGroupID != nil {
+		return nil, xError.NewError(ctx, xError.BadRequest, "force 与 target_group_id 不能同时指定", false)
 	}
 
 	_, found, xErr := l.repo.group.GetByID(ctx, groupID, false, nil)
@@ -190,12 +198,33 @@ func (l *LinkGroupLogic) Delete(ctx context.Context, groupID xSnowflake.Snowflak
 		return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
 	}
 
+	// 目标分组前置校验：非内置、非自身、存在且启用
+	if req.TargetGroupID != nil {
+		if entity.IsBuiltinGroupID(*req.TargetGroupID) {
+			return nil, xError.NewError(ctx, xError.BadRequest, "内置已失效分组不可作为迁移目标", false)
+		}
+		if *req.TargetGroupID == groupID {
+			return nil, xError.NewError(ctx, xError.BadRequest, "不可迁移到分组自身", false)
+		}
+		target, targetFound, xErr := l.repo.group.GetByID(ctx, *req.TargetGroupID, false, nil)
+		if xErr != nil {
+			return nil, xErr
+		}
+		if !targetFound {
+			return nil, xError.NewError(ctx, xError.NotFound, "目标友链分组不存在", false)
+		}
+		if !target.Status {
+			return nil, xError.NewError(ctx, xError.BadRequest, "目标分组已禁用，无法迁移", false)
+		}
+	}
+
 	linkCount, xErr := l.repo.link.CountByGroupID(ctx, groupID, nil)
 	if xErr != nil {
 		return nil, xErr
 	}
 
-	if linkCount > 0 && !req.Force {
+	// 无目标分组且非强制且存在友链：阻断并返回冲突友链
+	if linkCount > 0 && !req.Force && req.TargetGroupID == nil {
 		conflictLinks, xErr := l.repo.link.ListByGroupID(ctx, groupID, 10, nil)
 		if xErr != nil {
 			return nil, xErr
@@ -203,32 +232,28 @@ func (l *LinkGroupLogic) Delete(ctx context.Context, groupID xSnowflake.Snowflak
 		return conflictLinks, xError.NewError(ctx, xError.BadRequest, "分组下存在友链，无法删除", false)
 	}
 
-	tx := l.db.WithContext(ctx).Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
+	// 事务内：迁移或清空关联后物理删除分组
+	if xErr := l.withTx(ctx, func(tx *gorm.DB) *xError.Error {
+		if req.TargetGroupID != nil && linkCount > 0 {
+			if xErr := l.repo.link.MoveGroupID(ctx, groupID, *req.TargetGroupID, tx); xErr != nil {
+				return xErr
+			}
+		} else if req.Force && linkCount > 0 {
+			if xErr := l.repo.link.ClearGroupID(ctx, groupID, tx); xErr != nil {
+				return xErr
+			}
 		}
-	}()
 
-	if req.Force && linkCount > 0 {
-		if xErr = l.repo.link.ClearGroupID(ctx, groupID, tx); xErr != nil {
-			tx.Rollback()
-			return nil, xErr
+		ok, xErr := l.repo.group.DeleteByID(ctx, groupID, tx)
+		if xErr != nil {
+			return xErr
 		}
-	}
-
-	ok, xErr := l.repo.group.DeleteByID(ctx, groupID, tx)
-	if xErr != nil {
-		tx.Rollback()
+		if !ok {
+			return xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
+		}
+		return nil
+	}); xErr != nil {
 		return nil, xErr
-	}
-	if !ok {
-		tx.Rollback()
-		return nil, xError.NewError(ctx, xError.NotFound, "友链分组不存在", false)
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "提交删除操作失败", false, err)
 	}
 
 	return nil, nil

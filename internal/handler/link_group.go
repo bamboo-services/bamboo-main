@@ -12,6 +12,7 @@
 package handler
 
 import (
+	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
 	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
 	xUtil "github.com/bamboo-services/bamboo-base-go/major/utility"
 	xValid "github.com/bamboo-services/bamboo-base-go/major/validator"
@@ -189,13 +190,14 @@ func (h *LinkGroupHandler) UpdateStatus(c *gin.Context) {
 // Delete 删除友链分组
 //
 // @Summary [管理] 删除友链分组
-// @Description 删除指定的友链分组，支持强制删除模式
+// @Description 删除指定的友链分组。force=true 时清空关联友链后删除；传入 target_group_id 时迁移友链至目标分组后删除（二者互斥）
 // @Tags 友链分组接口
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param id path int true "友链分组ID"
-// @Param force query bool false "是否强制删除（默认false）"
+// @Param force query bool false "是否强制删除（默认false，与target_group_id互斥）"
+// @Param target_group_id query int false "迁移目标分组ID（与force互斥）"
 // @Success 200 {object} xBase.BaseResponse "删除成功"
 // @Failure 400 {object} xBase.BaseResponse "请求参数错误"
 // @Failure 401 {object} xBase.BaseResponse "未认证"
@@ -209,9 +211,17 @@ func (h *LinkGroupHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	// 获取force参数
+	// 获取 force 与 target_group_id 参数
 	var req apiLinkGroup.GroupDeleteRequest
 	req.Force = c.Query("force") == "true"
+	if raw := c.Query("target_group_id"); raw != "" {
+		targetID, err := xSnowflake.ParseSnowflakeID(raw)
+		if err != nil {
+			xValid.HandleValidationError(c, err)
+			return
+		}
+		req.TargetGroupID = &targetID
+	}
 
 	// 调用服务层
 	_, err := h.service.linkGroupLogic.Delete(c.Request.Context(), uri.ID, &req)
