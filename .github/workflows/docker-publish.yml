@@ -85,7 +85,9 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Create GitHub Release
-        if: inputs.publish == 'true'
+        # inputs.publish 为 boolean 类型，直接以布尔值判断（`== 'true'` 宽松比较
+        # 会转数字导致 true≠'true'，条件恒为 false 使 Release 永不创建）
+        if: inputs.publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

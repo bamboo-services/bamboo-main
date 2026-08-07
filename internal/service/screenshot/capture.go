@@ -125,9 +125,17 @@ func (c *rodCapturer) ensureBrowser(ctx context.Context) error {
 			return fmt.Errorf("未找到 Chrome/Chromium 可执行文件，请设置 SCREENSHOT_CHROME_PATH")
 		}
 		if os.Geteuid() == 0 {
-			// 容器内以 root 运行时必须禁用沙箱，否则浏览器无法启动
-			l = l.NoSandbox(true)
+			// 容器内以 root 运行：禁用沙箱与 leakless 守护。
+			//   - 沙箱在容器内无法建立，必须禁用；
+			//   - leakless guard 需与主进程 TCP 握手，容器内一旦握手失败会永久阻塞
+			//     Launch（`<-ll.Pid()` 无超时），导致截图 worker 卡死、截图无响应；
+			//     容器退出时进程本就会被清理，无需守护。
+			l = l.NoSandbox(true).Leakless(false)
 		}
+		// 浏览器启动受单次截图超时约束，避免容器内启动异常（挂起/缓慢）时 Launch 永久阻塞
+		launchCtx, cancel := context.WithTimeout(ctx, c.cfg.Timeout)
+		defer cancel()
+		l = l.Context(launchCtx)
 		if cdpURL, err = l.Launch(); err != nil {
 			return err
 		}

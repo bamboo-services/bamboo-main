@@ -45,6 +45,8 @@ services:
       # 容器内固定浏览器路径（镜像已内置 chromium；显式兜底，防止 .env 空值覆盖触发 rod 自动下载不兼容浏览器）
       SCREENSHOT_CHROME_PATH: /usr/bin/chromium
       SCREENSHOT_DIR: data/screenshots
+      # 邮件模板已 go:embed 内嵌；显式置空，防止 .env 残留 EMAIL_TEMPLATE_DIR 触发 xEmail 加载外部目录失败
+      EMAIL_TEMPLATE_DIR: ""
     ports:
       - "${XLF_PORT:-23333}:${XLF_PORT:-23333}"
     volumes:
