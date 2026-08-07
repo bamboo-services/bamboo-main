@@ -4,9 +4,15 @@ OUTPUT_BIN = bamboo-main
 SWAG_CMD = swag
 SWAG_FLAGS = --parseDependency
 
+# Docker / Release（GitHub Actions 驱动）
+REPO = bamboo-services/bamboo-main
+DOCKER_WORKFLOW = docker-publish.yml
+WATCH ?= # 置 1 时触发后阻塞观察，如 make publish VERSION=v1.2.0 WATCH=1
+
 .DEFAULT_GOAL := help
 
 .PHONY: help install swag run dev dev-backend dev-frontend build-frontend tidy fmt test vet lint build generate
+.PHONY: validate-version docker-build publish watch
 
 # 显示帮助信息
 help:
@@ -34,10 +40,18 @@ help:
 	@echo "  make vet                 - 运行 go vet 静态检查"
 	@echo "  make lint                - 运行 golangci-lint (未安装则跳过)"
 	@echo ""
+	@echo "Docker / Release（GitHub Actions 驱动，需 gh CLI 已登录）:"
+	@echo "  make docker-build VERSION=vX.X.X  - 触发 CI 构建镜像并推送 Docker Hub"
+	@echo "  make publish VERSION=vX.X.X      - 触发 CI 构建并创建 GitHub Release"
+	@echo "                                     (版本含 -beta/-alpha 等后缀 → prerelease)"
+	@echo "  make watch               - 观察最近一次 workflow run 输出"
+	@echo ""
 	@echo "示例:"
 	@echo "  make dev"
 	@echo "  make dev-backend"
 	@echo "  make build"
+	@echo "  make docker-build VERSION=v1.2.0"
+	@echo "  make publish VERSION=v1.3.0-beta.1"
 	@echo ""
 
 # 安装前端依赖
@@ -93,3 +107,25 @@ vet:
 lint:
 	@which golangci-lint >/dev/null 2>&1 || { echo "golangci-lint not installed, skipping"; exit 0; }
 	@golangci-lint run ./...
+
+# 校验版本号：vX.Y.Z 或 vX.Y.Z-预发布后缀
+validate-version:
+	@test -n "$(VERSION)" || { echo "ERROR: 请指定 VERSION=vX.X.X（如 make publish VERSION=v1.2.0）"; exit 1; }
+	@echo "$(VERSION)" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$$' \
+		|| { echo "ERROR: 非法版本号 '$(VERSION)'，示例: v1.2.0 / v1.3.0-beta.1"; exit 1; }
+
+# 触发 GitHub Actions 构建镜像并推送 Docker Hub（不创建 Release）
+docker-build: validate-version
+	@echo "触发 GitHub Actions 构建镜像 $(VERSION) ..."
+	@gh workflow run $(DOCKER_WORKFLOW) -R $(REPO) -f version=$(VERSION) -f publish=false
+	@if [ "$(WATCH)" = "1" ]; then gh run watch -R $(REPO); fi
+
+# 触发 GitHub Actions 构建镜像并发布 GitHub Release（版本含 - 后缀自动识别为 prerelease）
+publish: validate-version
+	@echo "触发 GitHub Actions 构建并发布 $(VERSION) ..."
+	@gh workflow run $(DOCKER_WORKFLOW) -R $(REPO) -f version=$(VERSION) -f publish=true
+	@if [ "$(WATCH)" = "1" ]; then gh run watch -R $(REPO); fi
+
+# 观察最近一次 workflow run 的实时输出
+watch:
+	gh run watch -R $(REPO)

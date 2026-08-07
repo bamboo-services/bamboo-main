@@ -3,16 +3,16 @@ module github.com/bamboo-services/bamboo-main
 go 1.25.11
 
 require (
-	github.com/bamboo-services/bamboo-base-go/common v1.2.0
-	github.com/bamboo-services/bamboo-base-go/defined v1.2.0
-	github.com/bamboo-services/bamboo-base-go/major v1.2.0
-	github.com/bamboo-services/bamboo-base-go/plugins/async v1.2.0
-	github.com/bamboo-services/bamboo-base-go/plugins/cron v1.2.0
-	github.com/bamboo-services/bamboo-base-go/plugins/database/postgres v1.2.0
-	github.com/bamboo-services/bamboo-base-go/plugins/email v1.2.0
+	github.com/bamboo-services/bamboo-base-go/common v1.2.2
+	github.com/bamboo-services/bamboo-base-go/defined v1.2.2
+	github.com/bamboo-services/bamboo-base-go/major v1.2.2
+	github.com/bamboo-services/bamboo-base-go/plugins/async v1.2.2
+	github.com/bamboo-services/bamboo-base-go/plugins/cron v1.2.2
+	github.com/bamboo-services/bamboo-base-go/plugins/database/postgres v1.2.2
+	github.com/bamboo-services/bamboo-base-go/plugins/email v1.2.2
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-rod/rod v0.116.2
-	github.com/phalanx-labs/beacon-sso-sdk v1.0.0-202604131739
+	github.com/phalanx-labs/beacon-sso-sdk v1.0.0-202608070000
 	github.com/prometheus/client_golang v1.24.1
 	github.com/shirou/gopsutil/v4 v4.26.6
 	github.com/swaggo/files v1.0.1
@@ -25,7 +25,7 @@ require (
 require (
 	connectrpc.com/connect v1.19.1 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
-	github.com/bamboo-services/bamboo-base-go/plugins/grpc v1.2.0 // indirect
+	github.com/bamboo-services/bamboo-base-go/plugins/grpc v1.2.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/gopkg v0.1.4 // indirect
 	github.com/bytedance/sonic v1.15.2 // indirect
@@ -105,5 +105,3 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 	gorm.io/driver/sqlite v1.6.0 // indirect
 )
-
-replace github.com/phalanx-labs/beacon-sso-sdk => /Users/xiaolfeng/ProgramProjects/Cooperate/phalanx/beacon-sso-sdk

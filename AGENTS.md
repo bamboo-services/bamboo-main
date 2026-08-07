@@ -13,9 +13,14 @@ Gin + GORM + PostgreSQL + Redis 单体后端 + React 19 + TanStack Router 前端
 ## 目录结构
 ```text
 .
+|- .github/workflows/         # GitHub Actions：Docker 构建 + Release 发布流水线
+|- Dockerfile                 # 三阶段最小化镜像（node 前端 → golang 编译 → alpine+chromium 运行）
+|- docker-compose.yaml        # 仅应用服务编排（连接外部 postgres/redis）
+|- docker-compose.full.yaml   # 全栈编排（app + postgres + redis）
+|- .dockerignore              # 构建上下文排除（dist/node_modules/data 等）
 |- main.go                    # 进程入口；xOption 声明式配置（DB/Cache/Route）+ Runner + cron/worker 协程
-|- go.mod                     # bamboo-base-go v1.2.0；beacon-sso-sdk 本地 replace
-|- Makefile                   # dev/generate（单二进制构建）/swag 等快捷命令
+|- go.mod                     # bamboo-base-go v1.2.2；beacon-sso-sdk 本地 replace
+|- Makefile                   # dev/generate（单二进制构建）/docker-build/publish 等快捷命令
 |- frontend/                  # 独立前端子项目（pnpm + Vite + React 19 + TanStack）
 |- resources/frontend/        # 前端构建产物内嵌（go:embed，产物不入库）
 |- cmd/                       # 独立命令行工具
@@ -62,6 +67,8 @@ Gin + GORM + PostgreSQL + Redis 单体后端 + React 19 + TanStack Router 前端
 | 友链截图服务 | `internal/service/screenshot/` | 队列 + rod 无头浏览器截图；cron 每日全量 + 手动重截 |
 | 单二进制部署 | `resources/frontend/embed.go`、`internal/app/route/frontend.go` | 前端产物 go:embed；NoRoute 阶段 SPA fallback |
 | 数据迁移 | `cmd/import-old-data/`、`scripts/` | 旧库导入工具与 SQL 迁移脚本 |
+| Docker 构建/发布 | `make docker-build` / `make publish`、`.github/workflows/docker-publish.yml` | GitHub Actions 驱动；VERSION 含 `-` → prerelease |
+| Docker 本地编排 | `docker-compose.yaml`、`docker-compose.full.yaml` | 仅应用（连外部服务）/ 全栈（app+postgres+redis） |
 | 前端开发 | `frontend/` | pnpm + Vite，独立子项目 |
 | 前端路由 | `frontend/src/routes/` | TanStack Router file-based，自动生成 routeTree |
 | bamboo-base-go 包路径 | 见「备注」 | v1.2.0：xCache→major/cache、xError→common/error、xLog→common/log；驱动插件化→plugins/database/* |
@@ -205,6 +212,13 @@ pnpm dev           # vite --port 3000
 pnpm build         # vite build && tsc
 pnpm test          # vitest run
 pnpm check         # prettier --write . && eslint --fix
+
+# Docker / Release（GitHub Actions 驱动，需 gh CLI 已登录）
+make docker-build VERSION=v1.2.0            # 触发 CI 构建镜像并推送 Docker Hub
+make publish VERSION=v1.3.0-beta.1          # 触发 CI 构建 + 创建 GitHub Release（- 后缀 → prerelease）
+make watch                                  # 观察最近一次 workflow run 输出
+docker compose up -d --build                # 本地仅应用（连外部 postgres/redis）
+docker compose -f docker-compose.full.yaml up -d --build   # 本地全栈
 ```
 
 ## 备注
