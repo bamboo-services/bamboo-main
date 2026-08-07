@@ -15,9 +15,10 @@ import (
 	"context"
 	"os"
 
+	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
 	"github.com/bamboo-services/bamboo-main/internal/service/screenshot"
-	"github.com/bamboo-services/bamboo-main/internal/models/base"
+	"github.com/bamboo-services/bamboo-main/templates"
 
 	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
@@ -47,6 +48,27 @@ func getEnvStringByKey(key string, defaultValue string) string {
 		return defaultValue
 	}
 	return value
+}
+
+// emailTemplateInit 将内嵌的邮件模板注入 xEmail 客户端。
+//
+// 模板目录（templates/mail）经 go:embed 打包进二进制，由 templates.Mail 提供，
+// 通过 xEmail 客户端的 AddTemplateFS 加载渲染。替代原先经 EMAIL_TEMPLATE_DIR
+// 指定运行时文件系统目录的方式，实现单二进制部署无需 COPY 模板。
+func (r *reg) emailTemplateInit(ctx context.Context) (any, error) {
+	log := xLog.WithName(xLog.NamedINIT)
+	log.Info(ctx, "加载内嵌邮件模板")
+
+	client, xerr := xCtxUtil.GetEmailClient(ctx)
+	if xerr != nil {
+		return nil, xerr
+	}
+	if err := client.AddTemplateFS(templates.Mail(), "mail/*.html"); err != nil {
+		return nil, err
+	}
+
+	log.Info(ctx, "内嵌邮件模板已注入")
+	return nil, nil
 }
 
 // screenshotManagerInit 构造友链截图任务管理器并注入到上下文。

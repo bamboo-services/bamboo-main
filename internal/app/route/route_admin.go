@@ -90,7 +90,12 @@ func (r *route) linkColorAdminRouter(route gin.IRouter) {
 }
 
 func (r *route) systemUserAdminRouter(route gin.IRouter) {
-	_ = route
+	userHandler := handler.NewHandler[handler.SystemUserHandler](r.context)
+	userRouter := route.Group("/users")
+	{
+		userRouter.GET("", userHandler.List)
+		userRouter.PATCH("/:id/status", userHandler.UpdateStatus)
+	}
 }
 
 func (r *route) systemLogRouter(route gin.IRouter) {

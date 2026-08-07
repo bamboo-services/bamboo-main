@@ -23,6 +23,7 @@ import {
   MapPin,
   Palette,
   Settings,
+  Users,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -44,6 +45,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { BambooLogo } from '@/assets/svg/bamboo-logo'
+import { UserAvatar } from '@/components/layout/user-avatar'
 import { siteConfig } from '@/lib/site'
 import { useAuth } from '@/hooks/use-auth'
 import { useSiteInfo } from '@/hooks/use-site-info'
@@ -68,6 +70,7 @@ const menuGroups = [
   {
     label: '其他',
     items: [
+      { title: '用户', url: '/admin/users', icon: Users },
       { title: '赞助', url: '/admin/sponsor', icon: Heart },
       { title: '设置', url: '/admin/setting', icon: Settings },
     ],
@@ -91,7 +94,6 @@ export function AdminSidebar() {
   }
 
   const displayName = user?.nickname || user?.username || '管理员'
-  const userInitial = (user?.username ?? '?').charAt(0).toUpperCase()
   const identityLabel = adminLabel(user)
 
   const handleLogout = async () => {
@@ -191,9 +193,11 @@ export function AdminSidebar() {
             <DropdownMenu open={userMenuOpen} onOpenChange={setUserMenuOpen}>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton size="lg" className="transition-colors">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-leaf-deep/12 font-serif text-sm font-semibold text-leaf-deep ring-1 ring-leaf-deep/15">
-                    {userInitial}
-                  </div>
+                  <UserAvatar
+                    user={user}
+                    className="size-8 rounded-lg ring-1 ring-leaf-deep/15"
+                    fallbackClassName="bg-leaf-deep/12 text-sm text-leaf-deep"
+                  />
                   <div className="grid flex-1 text-left leading-tight">
                     <span className="truncate font-serif text-sm font-semibold text-text-primary">
                       {displayName}
@@ -222,9 +226,11 @@ export function AdminSidebar() {
                     }}
                   />
                   <div className="relative flex items-center gap-3">
-                    <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-leaf-deep/12 font-serif text-lg font-semibold text-leaf-deep ring-1 ring-leaf-deep/15">
-                      {userInitial}
-                    </div>
+                    <UserAvatar
+                      user={user}
+                      className="size-11 shrink-0 rounded-lg ring-1 ring-leaf-deep/15"
+                      fallbackClassName="bg-leaf-deep/12 text-lg text-leaf-deep"
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="truncate font-serif text-[15px] font-semibold text-text-primary">

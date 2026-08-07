@@ -28,6 +28,7 @@ type service struct {
 	sponsorRecordLogic  *logic.SponsorRecordLogic
 	dashboardLogic      *logic.DashboardLogic
 	publicLogic         *logic.PublicLogic
+	systemUserLogic     *logic.SystemUserLogic
 	oauthLogic          *bSdkLogic.BusinessLogic
 }
 
@@ -55,6 +56,7 @@ func NewHandler[T IHandler](ctx context.Context) *T {
 			sponsorRecordLogic:  logic.NewSponsorRecordLogic(ctx),
 			dashboardLogic:      logic.NewDashboardLogic(ctx),
 			publicLogic:         logic.NewPublicLogic(ctx),
+			systemUserLogic:     logic.NewSystemUserLogic(ctx),
 			oauthLogic:          bSdkLogic.NewBusiness(ctx),
 		},
 	}
@@ -83,6 +85,9 @@ type SponsorRecordHandler handler
 
 // DashboardHandler 仪表盘接口处理器
 type DashboardHandler handler
+
+// SystemUserHandler 系统用户管理接口处理器
+type SystemUserHandler handler
 
 // PublicHandler 公开接口处理器
 type PublicHandler handler

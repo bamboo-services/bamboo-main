@@ -136,6 +136,30 @@ definitions:
       user:
         $ref: '#/definitions/entity.SystemUser'
     type: object
+  apiAuth.UserListResponse:
+    properties:
+      data:
+        description: 数据列表
+        items:
+          $ref: '#/definitions/entity.SystemUser'
+        type: array
+      pagination:
+        allOf:
+        - $ref: '#/definitions/base.PaginationInfo'
+        description: 分页信息
+    type: object
+  apiAuth.UserStatusRequest:
+    properties:
+      status:
+        description: '目标状态（0: 禁用, 1: 启用）'
+        enum:
+        - 0
+        - 1
+        example: 1
+        type: integer
+    required:
+    - status
+    type: object
   apiDashboard.RecentApplicationItem:
     properties:
       avatar:
@@ -4034,6 +4058,124 @@ paths:
       summary: '[管理] 审核赞助记录'
       tags:
       - 赞助记录接口
+  /api/v1/admin/users:
+    get:
+      consumes:
+      - application/json
+      description: 分页查询系统用户列表，支持关键词搜索、状态筛选与排序
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 搜索关键词（用户名/邮箱/昵称模糊匹配）
+        in: query
+        name: keyword
+        type: string
+      - description: 用户状态 0:禁用 1:启用
+        enum:
+        - 0
+        - 1
+        in: query
+        name: status
+        type: integer
+      - description: 排序字段
+        enum:
+        - created_at
+        - updated_at
+        - username
+        - email
+        - last_login_at
+        in: query
+        name: sort_by
+        type: string
+      - description: 排序方式
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/xBase.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiAuth.UserListResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[管理] 获取系统用户列表'
+      tags:
+      - 系统用户管理接口
+  /api/v1/admin/users/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: 启用或禁用指定用户账号；系统唯一管理员不可被禁用
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新用户状态请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/apiAuth.UserStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "401":
+          description: 未认证
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "404":
+          description: 用户不存在
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/xBase.BaseResponse'
+      security:
+      - Bearer: []
+      summary: '[管理] 启用/禁用用户'
+      tags:
+      - 系统用户管理接口
   /api/v1/auth/login:
     post:
       consumes:

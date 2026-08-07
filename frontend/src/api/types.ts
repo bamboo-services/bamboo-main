@@ -595,6 +595,24 @@ export interface UserInfo {
   updated_at: string
 }
 
+/** 用户分页查询参数（GET /api/v1/admin/users） */
+export interface UserListParams {
+  page?: number
+  page_size?: number
+  keyword?: string // 用户名/邮箱/昵称模糊匹配
+  status?: number // 0=禁用 1=启用
+  sort_by?: 'created_at' | 'updated_at' | 'username' | 'email' | 'last_login_at'
+  sort_order?: 'asc' | 'desc'
+}
+
+/** 更新用户状态请求（PATCH /api/v1/admin/users/:id/status） */
+export interface UserStatusRequest {
+  status: number // 0=禁用 1=启用
+}
+
+/** 管理端用户分页列表响应 */
+export type AdminUserListResponse = PaginationResponse<UserInfo>
+
 /** 登录请求（POST /api/v1/auth/login） */
 export interface LoginRequest {
   username: string

@@ -93,9 +93,27 @@ jobs:
           if [ "${{ steps.meta.outputs.prerelease }}" = "true" ]; then
             prerelease_flag="--prerelease"
           fi
+
+          # 手动生成变更日志：GitHub 自动生成器（--generate-notes）依赖 previous tag 作
+          # 对比基准，首次发布（无任何 tag）时仅产出 Full Changelog 链接、无实际内容，
+          # 故改为 git log 列出提交：有 previous tag 时取版本区间，否则取全部提交。
+          prev_tag=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          if [ -n "$prev_tag" ]; then
+            changelog=$(git log --oneline --no-merges "$prev_tag"..HEAD)
+          else
+            changelog=$(git log --oneline --no-merges)
+          fi
+
+          # 变更日志写入临时文件，经 --notes-file 传递（多行内容避免参数换行/缩进问题）
+          notes_file=$(mktemp)
+          printf '## 变更日志\n\n' > "$notes_file"
+          printf '%s\n' "$changelog" >> "$notes_file"
+
           gh release create "${{ inputs.version }}" \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
             --title "${{ inputs.version }}" \
-            --generate-notes \
+            --notes-file "$notes_file" \
             $prerelease_flag
+
+          rm -f "$notes_file"

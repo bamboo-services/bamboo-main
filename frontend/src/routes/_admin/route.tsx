@@ -81,6 +81,8 @@ function getCrumbs(pathname: string): Array<Crumb> {
     crumbs.push({ label: '赞助管理' })
   } else if (path === '/admin/setting') {
     crumbs.push({ label: '系统设置' })
+  } else if (path === '/admin/users') {
+    crumbs.push({ label: '用户管理' })
   } else if (path === '/admin/color') {
     crumbs.push({ label: '颜色管理' })
   } else if (path === '/admin/location') {

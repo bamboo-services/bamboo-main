@@ -69,14 +69,12 @@ RUN apk add --no-cache \
 
 # 截图服务显式指定 chromium 路径；邮件模板/截图目录为相对进程工作目录的路径，固定 WORKDIR=/app
 ENV SCREENSHOT_CHROME_PATH=/usr/bin/chromium \
-    EMAIL_TEMPLATE_DIR=templates/mail \
     SCREENSHOT_DIR=data/screenshots \
     TZ=Asia/Shanghai
 
 WORKDIR /app
 
 COPY --from=go-builder /out/bamboo-main /app/bamboo-main
-COPY templates/mail /app/templates/mail
 RUN mkdir -p /app/data/screenshots
 
 EXPOSE 23333

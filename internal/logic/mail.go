@@ -24,7 +24,7 @@ import (
 // MailLogic 邮件业务逻辑
 //
 // 基于 bamboo-base-go 的 xEmail 插件同步发送邮件，邮件客户端经节点化注入上下文，
-// 模板由框架模板系统渲染（外部模板目录经 EMAIL_TEMPLATE_DIR 指定）。
+// 模板由框架模板系统渲染（模板经 go:embed 内嵌，startup 节点注入 xEmail 客户端）。
 //
 // 调用方应通过 xAsync.Async 将本方法的执行置于异步 goroutine 中，以避免
 // SMTP 拨号阻塞 HTTP 请求上下文；ctx 应为 xAsync 解耦后的独立 context（携带

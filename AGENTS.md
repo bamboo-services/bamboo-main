@@ -40,7 +40,7 @@ Gin + GORM + PostgreSQL + Redis 单体后端 + React 19 + TanStack Router 前端
 |- pkg/constants/             # 状态/角色/context/redis 键常量
 |- pkg/util/                  # ctx 上下文工具与网络工具
 |- docs/                      # 生成的 swagger 产物（禁止手改）
-|- templates/mail/            # 邮件模板内容块（框架 xEmail 外部模板目录）
+|- templates/mail/            # 邮件模板内容块（go:embed 内嵌，经 templates/embed.go 打包进二进制）
 |- scripts/                   # 数据迁移 SQL 脚本
 |- deploy/                    # 部署配置（Prometheus 等）
 |- test/                      # SMTP E2E 测试（按 env 开启）
@@ -59,7 +59,7 @@ Gin + GORM + PostgreSQL + Redis 单体后端 + React 19 + TanStack Router 前端
 | Redis 会话/令牌 | `internal/repository/session.go`、`token.go` | 纯 Redis 仓储（KeyCache），认证/验证码/注册码存取 |
 | Redis 键使用 | `pkg/constants/cache.go` | 键构建器自动追加 `NOSQL_PREFIX` + `:` |
 | 邮件发送 | `internal/logic/mail.go` | 框架 xEmail 插件发送；调用点经 `xAsync.Async` 解耦请求上下文异步触发 |
-| 邮件模板 | `templates/mail/*.html` | `{{define "名称"}}` 内容块，经 `EMAIL_TEMPLATE_DIR` 加载，套用框架 `_base.html` 布局 |
+| 邮件模板 | `templates/mail/*.html`、`templates/embed.go` | `{{define "名称"}}` 内容块，经 go:embed 内嵌，startup 节点 `AddTemplateFS` 注入 xEmail 客户端，套用 `_base.html` 布局 |
 | 鉴权/会话问题 | `internal/logic/auth.go`、`internal/middleware/` | token/user context + OAuth 集成 |
 | 仪表盘统计 | `internal/logic/dashboard.go`、`internal/handler/dashboard.go` | 友链计数与最近待审核申请 |
 | 健康检查 | `internal/repository/health.go`、`internal/logic/public.go` | 数据库连通性探测 + 运行时指标 |

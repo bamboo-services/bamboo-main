@@ -24,6 +24,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { formatDateTime } from '@/lib/datetime'
 import { adminLabel, isAdmin } from '@/lib/role'
+import { UserAvatar } from '@/components/layout/user-avatar'
 
 /** S 型墨韵缓动：与首页 header/footer 对焦凝定同节奏 */
 const EASE_INK: [number, number, number, number] = [0.76, 0, 0.24, 1]
@@ -56,7 +57,6 @@ export function AccountHoverCard() {
   }
 
   const displayName = user?.nickname || user?.username || '—'
-  const userInitial = (user?.username ?? '?').charAt(0).toUpperCase()
 
   // 角色分发：admin 双入口（向下兼容用户中心），普通用户仅用户中心
   const entries: Array<{ to: string; label: string; icon: LucideIcon }> = [
@@ -84,7 +84,11 @@ export function AccountHoverCard() {
           type="button"
           className="group flex items-center gap-2 rounded-full border border-transparent py-1.5 pl-2.5 pr-3 transition-colors duration-300 hover:border-leaf-muted/50 hover:bg-leaf-light/30 data-[state=open]:border-leaf-muted/50 data-[state=open]:bg-leaf-light/35"
         >
-          <CircleUserRound className="size-[18px] text-text-secondary transition-colors duration-300 group-hover:text-leaf-deep group-data-[state=open]:text-leaf-deep" />
+          <UserAvatar
+            user={user}
+            className="size-7 rounded-full"
+            fallbackClassName="bg-leaf-deep/15 text-xs text-leaf-deep"
+          />
           <span className="max-w-28 truncate font-serif text-[13px] font-semibold tracking-wide text-text-primary">
             {displayName}
           </span>
@@ -151,9 +155,11 @@ export function AccountHoverCard() {
                   }}
                 />
                 <div className="relative flex items-center gap-3">
-                  <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-leaf-deep/12 font-serif text-lg font-semibold text-leaf-deep ring-1 ring-leaf-deep/15">
-                    {userInitial}
-                  </div>
+                  <UserAvatar
+                    user={user}
+                    className="size-11 shrink-0 rounded-lg ring-1 ring-leaf-deep/15"
+                    fallbackClassName="bg-leaf-deep/12 text-lg text-leaf-deep"
+                  />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="truncate font-serif text-[15px] font-semibold text-text-primary">

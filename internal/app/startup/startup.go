@@ -38,6 +38,7 @@ func newInit() *reg {
 // 本函数仅注册框架未覆盖的业务节点：
 //   - Email 邮件客户端（框架 xEmail 插件，SMTP 配置经 EMAIL_* 环境变量装配）
 //   - Email 业务配置（管理员邮箱等，供 logic 读取）
+//   - Email 内嵌模板注入（templates/mail 经 go:embed 内嵌，注入 xEmail 客户端）
 //   - 友链截图任务管理器（无头浏览器自动截图）
 //   - SSO SDK 依赖节点（OAuth 配置 + gRPC 客户端）
 func Init() (context.Context, []xRegNode.RegNodeList) {
@@ -46,6 +47,7 @@ func Init() (context.Context, []xRegNode.RegNodeList) {
 
 	regNode = append(regNode, xRegNode.RegNodeList{Key: xCtx.EmailClientKey, Node: xEmail.InitClient})
 	regNode = append(regNode, xRegNode.RegNodeList{Key: constants.ContextCustomConfig, Node: businessReg.emailConfigInit})
+	regNode = append(regNode, xRegNode.RegNodeList{Key: constants.ContextEmailTemplate, Node: businessReg.emailTemplateInit})
 	regNode = append(regNode, xRegNode.RegNodeList{Key: constants.ContextScreenshotManager, Node: businessReg.screenshotManagerInit})
 	regNode = append(regNode, bSdkStartup.NewStartupConfig()...)
 

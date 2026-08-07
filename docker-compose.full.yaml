@@ -86,7 +86,6 @@ services:
       XLF_HOST: "0.0.0.0"
       # 容器内固定路径（镜像已内置，此处显式兜底）
       SCREENSHOT_CHROME_PATH: /usr/bin/chromium
-      EMAIL_TEMPLATE_DIR: templates/mail
       SCREENSHOT_DIR: data/screenshots
     ports:
       - "${XLF_PORT:-23333}:${XLF_PORT:-23333}"

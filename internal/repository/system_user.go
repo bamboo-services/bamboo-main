@@ -44,6 +44,16 @@ func NewSystemUserRepo(db *gorm.DB, m *xCache.Manager) *SystemUserRepo {
 	}
 }
 
+// UserQuery 系统用户分页查询条件
+type UserQuery struct {
+	Page      int    // 页码，从 1 开始
+	PageSize  int    // 每页数量
+	Keyword   string // 搜索关键词（用户名/邮箱/昵称模糊匹配）
+	Status    *int   // 状态筛选（0: 禁用, 1: 启用）；指针类型以区分「未筛选」与「筛选禁用」
+	SortBy    string // 排序字段（created_at/updated_at/username/email/last_login_at）
+	SortOrder string // 排序方式（asc/desc）
+}
+
 // GetByID 根据ID获取用户
 func (r *SystemUserRepo) GetByID(ctx context.Context, id xSnowflake.SnowflakeID) (*entity.SystemUser, bool, *xError.Error) {
 	r.log.Info(ctx, "GetByID - 获取用户信息")
@@ -262,4 +272,55 @@ func (r *SystemUserRepo) UpdateLastLoginByID(ctx context.Context, userID xSnowfl
 	updates := map[string]any{"last_login_at": loginAt}
 	_, xErr := r.UpdateFieldsByID(ctx, userID, updates)
 	return xErr
+}
+
+// List 分页查询系统用户
+//
+// 管理端用户列表查询：支持用户名/邮箱/昵称模糊匹配、状态筛选与白名单排序。
+// 分页列表不过缓存（cache-aside 仅针对单实体），保证列表结果实时新鲜。
+func (r *SystemUserRepo) List(ctx context.Context, req *UserQuery) ([]entity.SystemUser, int64, *xError.Error) {
+	r.log.Info(ctx, "List - 查询系统用户分页列表")
+
+	query := r.db.WithContext(ctx).Model(&entity.SystemUser{})
+
+	if req.Keyword != "" {
+		kw := "%" + req.Keyword + "%"
+		query = query.Where("(username ILIKE ? OR email ILIKE ? OR nickname ILIKE ?)", kw, kw, kw)
+	}
+	if req.Status != nil {
+		query = query.Where("status = ?", *req.Status)
+	}
+
+	// 白名单排序，杜绝任意列名注入
+	orderBy := "created_at"
+	switch req.SortBy {
+	case "updated_at":
+		orderBy = "updated_at"
+	case "username":
+		orderBy = "username"
+	case "email":
+		orderBy = "email"
+	case "last_login_at":
+		orderBy = "last_login_at"
+	}
+
+	sortOrder := "DESC"
+	if strings.EqualFold(req.SortOrder, "asc") {
+		sortOrder = "ASC"
+	}
+
+	query = query.Order(orderBy + " " + sortOrder)
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, xError.NewError(ctx, xError.DatabaseError, "统计系统用户数量失败", true, err)
+	}
+
+	offset := (req.Page - 1) * req.PageSize
+	var users []entity.SystemUser
+	if err := query.Offset(offset).Limit(req.PageSize).Find(&users).Error; err != nil {
+		return nil, 0, xError.NewError(ctx, xError.DatabaseError, "查询系统用户列表失败", false, err)
+	}
+
+	return users, total, nil
 }

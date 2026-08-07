@@ -3,13 +3,13 @@ module github.com/bamboo-services/bamboo-main
 go 1.25.11
 
 require (
-	github.com/bamboo-services/bamboo-base-go/common v1.2.2
-	github.com/bamboo-services/bamboo-base-go/defined v1.2.2
+	github.com/bamboo-services/bamboo-base-go/common v1.2.3
+	github.com/bamboo-services/bamboo-base-go/defined v1.2.3
 	github.com/bamboo-services/bamboo-base-go/major v1.2.2
 	github.com/bamboo-services/bamboo-base-go/plugins/async v1.2.2
 	github.com/bamboo-services/bamboo-base-go/plugins/cron v1.2.2
 	github.com/bamboo-services/bamboo-base-go/plugins/database/postgres v1.2.2
-	github.com/bamboo-services/bamboo-base-go/plugins/email v1.2.2
+	github.com/bamboo-services/bamboo-base-go/plugins/email v1.2.3
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-rod/rod v0.116.2
 	github.com/phalanx-labs/beacon-sso-sdk v1.0.0-202608070000

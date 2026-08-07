@@ -29,6 +29,7 @@ import { getToken } from '@/lib/auth'
 import { adminLabel, isAdmin } from '@/lib/role'
 import { cn } from '@/lib/utils'
 import { enter } from '@/lib/motion'
+import { UserAvatar } from '@/components/layout/user-avatar'
 
 export const Route = createFileRoute('/_user')({
   // 路由守卫：无登录令牌时回跳登录页，并携带来源路径以便登录后返回
@@ -102,7 +103,6 @@ function UserAvatarMenu() {
   const { user, signOut } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const displayName = user?.nickname || user?.username || '用户'
-  const userInitial = (user?.username ?? '?').charAt(0).toUpperCase()
   const identityLabel = adminLabel(user)
 
   const handleLogout = async () => {
@@ -118,9 +118,11 @@ function UserAvatarMenu() {
           className="flex cursor-pointer items-center gap-1.5 rounded-full border-2 border-leaf-light/60 bg-leaf-deep/8 p-0 pl-0 transition-colors hover:border-leaf-muted hover:bg-leaf-deep/12"
           aria-label="用户菜单"
         >
-          <span className="grid size-8 place-items-center rounded-full bg-leaf-deep/15 font-serif text-sm font-semibold text-leaf-deep">
-            {userInitial}
-          </span>
+          <UserAvatar
+            user={user}
+            className="size-8 rounded-full"
+            fallbackClassName="bg-leaf-deep/15 text-sm text-leaf-deep"
+          />
           <ChevronsUpDown className="mr-1 size-3.5 text-text-secondary/60" />
         </button>
       </DropdownMenuTrigger>
@@ -138,9 +140,11 @@ function UserAvatarMenu() {
             }}
           />
           <div className="relative flex items-center gap-3">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-leaf-deep/12 font-serif text-lg font-semibold text-leaf-deep ring-1 ring-leaf-deep/15">
-              {userInitial}
-            </div>
+            <UserAvatar
+              user={user}
+              className="size-11 shrink-0 rounded-lg ring-1 ring-leaf-deep/15"
+              fallbackClassName="bg-leaf-deep/12 text-lg text-leaf-deep"
+            />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="truncate font-serif text-[15px] font-semibold text-text-primary">

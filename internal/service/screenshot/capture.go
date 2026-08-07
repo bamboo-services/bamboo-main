@@ -11,6 +11,7 @@ package screenshot
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"sync"
 	"time"
@@ -109,7 +110,19 @@ func (c *rodCapturer) ensureBrowser(ctx context.Context) error {
 		// 内置模式：spawn 本机 Chrome/Chromium 子进程，由 rod 托管生命周期
 		l := launcher.New().Headless(true)
 		if c.cfg.ChromePath != "" {
+			// 显式指定路径：先校验存在性，路径无效直接报错，避免 rod 的晦涩错误
+			if _, err := os.Stat(c.cfg.ChromePath); err != nil {
+				return fmt.Errorf("SCREENSHOT_CHROME_PATH 指向的浏览器不存在：%s", c.cfg.ChromePath)
+			}
 			l = l.Bin(c.cfg.ChromePath)
+		} else if bin, has := launcher.LookPath(); has {
+			// 未配置路径时探测系统浏览器，避免触发 rod 自动下载
+			l = l.Bin(bin)
+		} else {
+			// 未配置路径且探测不到浏览器：直接报错，绝不触发 rod 自动下载。
+			// 自动下载的浏览器为 glibc 构建，与 alpine/musl 运行时镜像不兼容，
+			// 会导致截图失败且下载进度日志刷屏。
+			return fmt.Errorf("未找到 Chrome/Chromium 可执行文件，请设置 SCREENSHOT_CHROME_PATH")
 		}
 		if os.Geteuid() == 0 {
 			// 容器内以 root 运行时必须禁用沙箱，否则浏览器无法启动

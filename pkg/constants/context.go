@@ -88,6 +88,8 @@ const (
 const (
 	// ContextCustomConfig 自定义配置上下文键
 	ContextCustomConfig xCtx.ContextKey = "context_custom_config"
+	// ContextEmailTemplate 内嵌邮件模板注入节点上下文键
+	ContextEmailTemplate xCtx.ContextKey = "context_email_template"
 	// ContextScreenshotManager 友链截图任务管理器上下文键
 	ContextScreenshotManager xCtx.ContextKey = "context_screenshot_manager"
 )
