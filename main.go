@@ -30,6 +30,9 @@ import (
 	xReg "github.com/bamboo-services/bamboo-base-go/major/register"
 	xCron "github.com/bamboo-services/bamboo-base-go/plugins/cron"
 	xCronRunner "github.com/bamboo-services/bamboo-base-go/plugins/cron/runner"
+
+	// v1.2.0 起数据库驱动插件化：DATABASE_DRIVER=postgres 需空白导入对应驱动插件
+	_ "github.com/bamboo-services/bamboo-base-go/plugins/database/postgres"
 )
 
 func main() {

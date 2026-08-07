@@ -45,7 +45,7 @@ import (
 )
 
 // ----------------------------------------------------------------------------
-// 雪花算法位布局常量（复制自 bamboo-base-go common v1.1.2 snowflake/snowflake.go）
+// 雪花算法位布局常量（复制自 bamboo-base-go common v1.2.0 snowflake/snowflake.go）
 // epoch = 2023-07-25 00:00:00 UTC；布局：1位符号 + 41位毫秒时间戳 + 6位基因
 // + 3位数据中心 + 3位节点 + 10位序列号。
 // datacenter=7 / node=3 与当前库种子数据（bm_system / bm_system_user）反推一致。

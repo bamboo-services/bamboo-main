@@ -6,9 +6,10 @@
 ## 目录结构
 ```text
 internal/logic/
-|- logic.go                    # 基础 logic 结构体（db/rdb/log）
+|- logic.go                    # 基础 logic 结构体（db/cache/log）
 |- auth.go                     # 认证/会话/密码流程
 |- auth_oauth.go               # OAuth 同步与登录逻辑
+|- dashboard.go                # 仪表盘统计逻辑
 |- link.go                     # 友链生命周期与公开列表
 |- link_group.go               # 友链分组管理
 |- link_color.go               # 友链颜色管理
@@ -26,7 +27,8 @@ internal/logic/
 | 任务 | 位置 | 说明 |
 |---|---|---|
 | 认证/会话/密码流程 | `auth.go`、`auth_oauth.go` | OAuth 同步、token/session 行为、重置/邮件流程 |
-| 友链生命周期与公开列表 | `link.go` | 增删改查/状态/失效 + 通知触发 |
+| 仪表盘统计 | `dashboard.go` | 友链计数、最近待审核申请 |
+| 友链生命周期与公开列表 | `link.go` | 增删改查/状态/失效 + 通知触发 + 用户自助子集 |
 | 友链分类管理 | `link_group.go`、`link_color.go` | 排序/状态/删除约束 |
 | 赞助领域逻辑 | `sponsor_channel.go`、`sponsor_record.go` | 渠道/记录编排与数据塑形 |
 | 公开/系统信息 | `public.go`、`info.go` | 健康/信息读写行为 |

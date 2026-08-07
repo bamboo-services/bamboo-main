@@ -13,6 +13,7 @@ internal/handler/
 |- link_color.go               # 友链颜色端点
 |- sponsor_channel.go          # 赞助渠道端点
 |- sponsor_record.go           # 赞助记录端点
+|- dashboard.go                # 仪表盘统计端点
 |- public.go                   # 公开/健康检查端点
 |- info.go                     # 站点信息端点
 ```
@@ -20,10 +21,11 @@ internal/handler/
 ## 导航指南
 | 任务 | 位置 | 说明 |
 |---|---|---|
-| 共享 handler 构造 | `handler.go` | 泛型 `NewHandler[T]` 注入全部 logic 依赖 |
-| 认证 HTTP 端点 | `auth.go` | 登录/注册/密码/重置/校验端点 |
-| 友链及分组端点 | `link.go`、`link_group.go`、`link_color.go` | bind + logic 调用 + 响应格式化 |
+| 共享 handler 构造 | `handler.go` | 泛型 `NewHandler[T]` 注入全部 logic 依赖，`IHandler` 接口约束 |
+| 认证 HTTP 端点 | `auth.go` | 登录/注册/密码/重置/校验/个人资料端点 |
+| 友链及分组端点 | `link.go`、`link_group.go`、`link_color.go` | bind + logic 调用 + 响应格式化，含用户自助子集 |
 | 赞助端点 | `sponsor_channel.go`、`sponsor_record.go` | admin/public 赞助操作 |
+| 仪表盘端点 | `dashboard.go` | 友链统计与最近待审核申请 |
 | 公开/信息端点 | `public.go`、`info.go` | 健康/信息读写端点 |
 
 ## 约定
