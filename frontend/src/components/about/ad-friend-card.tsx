@@ -14,6 +14,7 @@ import {
   accentHoverOf,
   accentOf,
   fancyGradient,
+  glowColorOf,
   isFancyColor,
   isPremiumColor,
 } from '@/lib/colors'
@@ -34,11 +35,7 @@ export function AdFriendCard({ link, onOpen }: FriendCardProps) {
   const textHover = fancy
     ? 'var(--leaf-deep)'
     : (link.color_f_key?.hover_color ?? accent)
-  const glowColor = fancy
-    ? 'oklch(0.88 0.1 105 / 0.5)'
-    : link.color_f_key?.primary_color
-      ? `color-mix(in srgb, ${link.color_f_key.primary_color} 20%, transparent)`
-      : 'var(--leaf-muted)'
+  const glowColor = glowColorOf(link.color_f_key)
   const inkPrimary = link.color_f_key?.primary_color ?? 'var(--leaf-deep)'
 
   return (

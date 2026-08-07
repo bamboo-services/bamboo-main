@@ -54,8 +54,9 @@ export function isPremiumColor(color: LinkColor | null | undefined): boolean {
 export function premiumGradient(color: LinkColor | null | undefined): string {
   const primary = color?.primary_color
   if (!primary) return fancyGradient()
-  const sub = color?.sub_color
-  const hover = color?.hover_color
+  // 走到此处 color 必非空（primary 非空 ⇔ color 非空）
+  const sub = color.sub_color
+  const hover = color.hover_color
   if (sub && hover) {
     return `linear-gradient(160deg, ${sub} 0%, ${primary} 52%, ${hover} 100%)`
   }
@@ -84,4 +85,48 @@ export function accentHoverOf(
 ): string | undefined {
   if (isFancyColor(color) || isPremiumColor(color)) return undefined
   return color?.hover_color ?? undefined
+}
+
+/**
+ * 取友链「辉光」色：卡片 hover 时自右上浮现的站点色光晕。
+ * 炫彩→竹绿晨光（炫彩主题色即竹绿）；普通色→主色 20% 透明混色；未配置→回退竹绿 muted。
+ */
+export function glowColorOf(color: LinkColor | null | undefined): string {
+  if (isFancyColor(color)) return 'oklch(0.88 0.1 105 / 0.5)'
+  if (color?.primary_color) {
+    return `color-mix(in srgb, ${color.primary_color} 20%, transparent)`
+  }
+  return 'var(--leaf-muted)'
+}
+
+/**
+ * 高级友链卡截图缺失时的「墨晕占位」背景：完全跟随友链配置色自适应。
+ * 炫彩→竹绿流光（保留竹林水墨基调）；高级色→副/主/悬停色三阶晕光；
+ * 普通色→主色系晕光；未配置→回退竹绿 token。保证粉/蓝/紫等任意主色
+ * 均得到同色系占位，不再出现「粉色站点顶着绿色晕色」的错位。
+ */
+export function placeholderGradientOf(
+  color: LinkColor | null | undefined,
+): string {
+  // 炫彩：竹绿流光占位（炫彩主题色即竹绿）
+  if (isFancyColor(color)) {
+    return [
+      'radial-gradient(120% 100% at 85% 0%, oklch(0.88 0.1 105 / 0.5) 0%, transparent 55%)',
+      'radial-gradient(120% 100% at 8% 0%, oklch(0.88 0.1 105 / 0.5) 0%, transparent 55%)',
+      'linear-gradient(160deg, oklch(0.88 0.1 105 / 0.28), var(--card) 55%, oklch(0.8 0.08 130 / 0.2))',
+    ].join(', ')
+  }
+
+  // 高级色→副/主/悬停三阶；普通色→主色（副/悬停缺失逐级退化为主色）；未配置→竹绿 muted
+  const primary = color?.primary_color ?? 'var(--leaf-muted)'
+  const light = color?.sub_color ?? primary
+  const deep = color?.hover_color ?? primary
+  const at = (c: string, pct: number) =>
+    `color-mix(in srgb, ${c} ${pct}%, transparent)`
+
+  return [
+    `radial-gradient(120% 100% at 85% 0%, ${at(primary, 30)} 0%, transparent 55%)`,
+    `radial-gradient(120% 100% at 8% 0%, ${at(light, 30)} 0%, transparent 55%)`,
+    `linear-gradient(160deg, ${at(light, 30)}, var(--card) 55%, ${at(deep, 22)})`,
+  ].join(', ')
 }

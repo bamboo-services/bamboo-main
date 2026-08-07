@@ -16,8 +16,10 @@ import {
   accentHoverOf,
   accentOf,
   fancyGradient,
+  glowColorOf,
   isFancyColor,
   isPremiumColor,
+  placeholderGradientOf,
 } from '@/lib/colors'
 import { cn } from '@/lib/utils'
 import { BambooArt } from '@/components/ink-wash'
@@ -37,11 +39,7 @@ export function PremiumFriendCard({ link, onOpen }: FriendCardProps) {
   const textHover = fancy
     ? 'var(--leaf-deep)'
     : (link.color_f_key?.hover_color ?? accent)
-  const glowColor = fancy
-    ? 'oklch(0.88 0.1 105 / 0.5)'
-    : link.color_f_key?.primary_color
-      ? `color-mix(in srgb, ${link.color_f_key.primary_color} 20%, transparent)`
-      : 'var(--leaf-muted)'
+  const glowColor = glowColorOf(link.color_f_key)
   const inkPrimary = link.color_f_key?.primary_color ?? 'var(--leaf-deep)'
 
   return (
@@ -173,9 +171,7 @@ export function PremiumFriendCard({ link, onOpen }: FriendCardProps) {
           ) : (
             <div
               className="flex h-full items-center justify-center"
-              style={{
-                background: `radial-gradient(120% 100% at 85% 0%, ${glowColor} 0%, transparent 55%), radial-gradient(120% 100% at 8% 0%, ${glowColor} 0%, transparent 55%), linear-gradient(160deg, oklch(0.88 0.1 105 / 0.28), var(--card) 55%, oklch(0.8 0.08 130 / 0.2))`,
-              }}
+              style={{ background: placeholderGradientOf(link.color_f_key) }}
             >
               <span className="font-mono text-xs text-text-secondary">
                 站点截图 · 占位
