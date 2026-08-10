@@ -14,8 +14,8 @@
 #   make publish VERSION=v1.3.0-beta.1               # 构建推送 + 创建 GitHub Release
 #
 # 版本语义:
-#   版本号含 "-"（如 v1.3.0-beta.1 / v1.2.0-alpha）→ 发布为 prerelease，且不覆盖 latest tag
-#   其余（如 v1.2.0）                                → 正式 Release，并额外打 latest tag
+#   版本号含 "-"（如 v1.3.0-beta.1 / v1.2.0-alpha）→ 发布为 prerelease，镜像额外打 beta-latest tag
+#   其余（如 v1.2.0）                                → 正式 Release，镜像额外打 latest tag
 #
 # 前置条件: 仓库 Secrets 需配置 DOCKERHUB_USERNAME 与 DOCKERHUB_TOKEN（Docker Hub 凭据）
 # 注意: workflow_dispatch 只能从默认分支（master）触发，首次落地需先提交至 master
@@ -59,8 +59,11 @@ jobs:
           tags="$image:${{ inputs.version }}"
           prerelease="false"
           if [[ "${{ inputs.version }}" == *-* ]]; then
+            # 预览版（含 -）：额外打 beta-latest，指向最新预览镜像
             prerelease="true"
+            tags="$tags,$image:beta-latest"
           else
+            # 正式版：额外打 latest，指向最新稳定镜像
             tags="$tags,$image:latest"
           fi
           echo "tags=$tags" >> "$GITHUB_OUTPUT"

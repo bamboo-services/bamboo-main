@@ -64,7 +64,7 @@ services:
   app:
     build:
       context: .
-    image: ${DOCKER_HUB_USER:-bamboo-services}/bamboo-main:${VERSION:-latest}
+    image: xiaolfeng/bamboo-main:${VERSION:-latest}
     container_name: bamboo-main
     restart: unless-stopped
     depends_on:

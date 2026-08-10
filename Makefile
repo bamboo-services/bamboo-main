@@ -43,7 +43,7 @@ help:
 	@echo "Docker / Release（GitHub Actions 驱动，需 gh CLI 已登录）:"
 	@echo "  make docker-build VERSION=vX.X.X  - 触发 CI 构建镜像并推送 Docker Hub"
 	@echo "  make publish VERSION=vX.X.X      - 触发 CI 构建并创建 GitHub Release"
-	@echo "                                     (版本含 -beta/-alpha 等后缀 → prerelease)"
+	@echo "                                     (版本含 -beta/-alpha 等后缀 → prerelease，镜像打 beta-latest)"
 	@echo "  make watch               - 观察最近一次 workflow run 输出"
 	@echo ""
 	@echo "示例:"
