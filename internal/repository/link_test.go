@@ -186,3 +186,41 @@ func TestBuildEditResolveUpdates(t *testing.T) {
 		})
 	}
 }
+
+// TestBuildStatusUpdates 校验审核状态更新的落库字段组装：
+// 新申请审核结算（通过=1/拒绝=2）后清空 expected_*；其余状态（待审核/下架待审核/已下架）不触碰。
+func TestBuildStatusUpdates(t *testing.T) {
+	cases := []struct {
+		name         string
+		status       int
+		remark       string
+		wantExpected bool // 是否应包含 expected_* 清空键
+	}{
+		{name: "通过：清空期望值", status: constants.LinkStatusApproved, remark: "审核通过", wantExpected: true},
+		{name: "拒绝：清空期望值", status: constants.LinkStatusRejected, remark: "不符合要求", wantExpected: true},
+		{name: "待审核：不触碰", status: constants.LinkStatusPending, remark: "", wantExpected: false},
+		{name: "下架待审核：不触碰", status: constants.LinkStatusTakedownPending, remark: "用户申请下架", wantExpected: false},
+		{name: "已下架：不触碰", status: constants.LinkStatusTakenDown, remark: "", wantExpected: false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := buildStatusUpdates(tc.status, tc.remark)
+
+			if got["status"] != tc.status {
+				t.Fatalf("期望 status 为 %d，实际: %v", tc.status, got["status"])
+			}
+			if got["review_remark"] != tc.remark {
+				t.Fatalf("期望 review_remark 为 %q，实际: %v", tc.remark, got["review_remark"])
+			}
+
+			_, hasGroup := got["expected_group_id"]
+			_, hasColor := got["expected_color_id"]
+			if hasGroup != tc.wantExpected || hasColor != tc.wantExpected {
+				t.Fatalf("期望 expected_group_id/expected_color_id 键存在性为 %v/%v，实际 %v/%v", tc.wantExpected, tc.wantExpected, hasGroup, hasColor)
+			}
+			if tc.wantExpected && (got["expected_group_id"] != nil || got["expected_color_id"] != nil) {
+				t.Fatalf("期望 expected_* 键值为 nil，实际: %#v / %#v", got["expected_group_id"], got["expected_color_id"])
+			}
+		})
+	}
+}

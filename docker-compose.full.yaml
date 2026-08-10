@@ -74,6 +74,11 @@ services:
         condition: service_healthy
     # chromium 无头浏览器渲染需要较大共享内存，容器默认 /dev/shm 仅 64MB
     shm_size: 1gb
+    # 最低内存预留：应用本体约 250MB + chromium 无头渲染约 300MB，
+    # 声明至少 768MB，避免小内存服务器上与同机其他容器争抢内存导致截图 OOM/启动卡死
+    mem_reservation: 768m
+    # 硬内存上限（可选加固）：峰值约 550MB，设 1g 防止异常时吃满整机内存
+    mem_limit: 1g
     # 引入项目 .env 作为容器环境变量（DATABASE_*/NOSQL_*/EMAIL_*/SSO_*/SCREENSHOT_* 等）
     env_file:
       - path: .env
@@ -82,8 +87,9 @@ services:
       # 覆盖为 compose 内部服务名（env_file 注入的 localhost 会被此处覆盖）
       DATABASE_HOST: postgres
       NOSQL_HOST: redis
-      # 容器内固定监听地址
+      # 容器内固定监听地址与端口（映射端口由 .env XLF_PORT 决定，此处对齐保持一致）
       XLF_HOST: "0.0.0.0"
+      XLF_PORT: "${XLF_PORT:-23333}"
       # 容器内固定路径（镜像已内置，此处显式兜底）
       SCREENSHOT_CHROME_PATH: /usr/bin/chromium
       SCREENSHOT_DIR: data/screenshots

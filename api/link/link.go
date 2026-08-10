@@ -169,8 +169,10 @@ type FriendSortResponse struct {
 
 // FriendApplyRequest 访客自助申请友情链接请求
 //
-// 面向游客与登录用户的公开申请入口：仅需站点基础信息，联系邮箱必填（用于确认友链归属），
-// 分组/颜色/级别/排序等管理员专属字段不在此开放，由管理员审核时分配。
+// 面向游客与登录用户的公开申请入口：站点基础信息必填，联系邮箱用于确认友链归属。
+// link_group_id/link_color_id 为选填的「期望展示位置/颜色」：申请人可表达偏好，
+// 由管理员在审核时预填到表单、微调后生效（不选则期望值为空，审核面板显示「未指定」）。
+// 级别/排序等管理员专属字段不在此开放。
 type FriendApplyRequest struct {
 	LinkName        string              `json:"link_name" binding:"required,min=1,max=100" example:"示例网站"`
 	LinkURL         string              `json:"link_url" binding:"required,url,max=500" example:"https://example.com"`
@@ -178,8 +180,8 @@ type FriendApplyRequest struct {
 	LinkRSS         string              `json:"link_rss" binding:"omitempty,url,max=500" example:"https://example.com/rss.xml"`
 	LinkDesc        string              `json:"link_desc" binding:"omitempty,max=500" example:"这是一个示例网站"`
 	LinkEmail       string              `json:"link_email" binding:"required,email,max=100" example:"admin@example.com"`
-	LinkGroupID     NullableSnowflakeID `json:"link_group_id" binding:"omitempty" example:"1"`
-	LinkColorID     NullableSnowflakeID `json:"link_color_id" binding:"omitempty" example:"1"`
+	LinkGroupID     NullableSnowflakeID `json:"link_group_id" binding:"omitempty" example:"1"` // 期望展示位置ID（选填，审核时可微调）
+	LinkColorID     NullableSnowflakeID `json:"link_color_id" binding:"omitempty" example:"1"` // 期望展示颜色ID（选填，审核时可微调）
 	LinkApplyRemark string              `json:"link_apply_remark" binding:"omitempty,max=500" example:"申请友链"`
 }
 

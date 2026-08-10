@@ -30,6 +30,16 @@ const (
 // networkIdleDuration 连续无新请求即视为「加载完毕」的判定时长
 const networkIdleDuration = 500 * time.Millisecond
 
+// 浏览器实例生命周期上限。
+//
+// Chromium 长期复用会积累内存与渲染子进程，尤其容器内无 GPU、走软件渲染路径时，
+// 长时间运行后可能僵死（CDP 无响应）。到期主动关闭重建，避免「运行一段时间后
+// 截图失败/卡死」。
+const (
+	maxBrowserAge  = 30 * time.Minute // 单实例最长存活时长
+	maxBrowserUses = 50               // 单实例最多复用次数
+)
+
 // CaptureFunc 截图核心抽象，便于测试注入替身
 type CaptureFunc func(ctx context.Context, url string) ([]byte, error)
 
@@ -37,11 +47,16 @@ type CaptureFunc func(ctx context.Context, url string) ([]byte, error)
 //
 // 复用单个浏览器实例（启动一次 Chrome，每个目标新建 Page 截完即关），
 // 浏览器进程由 rod 作为子进程托管（或连接外部 CDP），无需独立无头服务。
+// 浏览器实例有生命周期上限（maxBrowserAge / maxBrowserUses），到期主动重建；
+// 任一截图失败路径都会丢弃当前实例，保证下次任务基于全新浏览器。
 type rodCapturer struct {
 	mu       sync.Mutex
 	cfg      Config
 	browser  *rod.Browser
 	launcher *launcher.Launcher
+
+	createdAt time.Time // 浏览器实例创建时间，用于到期重建
+	useCount  int       // 已复用次数，用于到期重建
 }
 
 // NewRodCapture 创建基于 rod 的截图函数（默认实现）
@@ -59,13 +74,20 @@ func (c *rodCapturer) Capture(ctx context.Context, url string) ([]byte, error) {
 		return nil, err
 	}
 
-	page, err := c.browser.Page(proto.TargetCreateTarget{})
+	// browser.Page 内部经 browser.ctx 发 CDP 调用，该 ctx 为 worker 长生命周期 ctx，
+	// 无 deadline。一旦 Chromium 僵死（内存耗尽/渲染线程挂死），此调用会永久阻塞，
+	// 卡死整个截图 worker。故以单次截图超时为界包装 Page 创建，超时即判定实例失效。
+	page, err := c.newPage(ctx)
 	if err != nil {
-		// 页面创建失败视为浏览器实例失效，重建后下次重试
 		c.reset()
 		return nil, err
 	}
-	defer func() { _ = page.Close() }()
+	// 关闭页面走带超时的克隆 ctx：浏览器僵死时关闭页面也需兜底，避免阻塞 worker
+	defer func() {
+		closeCtx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		_ = page.Context(closeCtx).Close()
+		cancel()
+	}()
 
 	// 单页操作统一受单次截图超时约束，不影响复用浏览器实例的后续使用
 	page = page.Timeout(c.cfg.Timeout)
@@ -76,12 +98,15 @@ func (c *rodCapturer) Capture(ctx context.Context, url string) ([]byte, error) {
 		DeviceScaleFactor: 1,
 		Mobile:            false,
 	}); err != nil {
+		c.reset()
 		return nil, err
 	}
 	if err := page.Navigate(url); err != nil {
+		c.reset()
 		return nil, err
 	}
 	if err := page.WaitLoad(); err != nil {
+		c.reset()
 		return nil, err
 	}
 	// 等待网络空闲确认「加载完毕」；超时不阻塞（长轮询/实时站点直接截图）
@@ -89,11 +114,32 @@ func (c *rodCapturer) Capture(ctx context.Context, url string) ([]byte, error) {
 		page.WaitRequestIdle(networkIdleDuration, nil, nil, nil)()
 	})
 
-	return page.Screenshot(false, nil)
+	data, err := page.Screenshot(false, nil)
+	if err != nil {
+		c.reset()
+		return nil, err
+	}
+	c.useCount++
+	return data, nil
 }
 
-// ensureBrowser 获取可用的浏览器实例，优先复用；不存在时按配置构建
+// newPage 以单次截图超时为界创建新页面，避免僵死浏览器阻塞 worker。
+//
+// browser.Page 内部经 browser.ctx（长生命周期、无 deadline）发起 CDP 调用，
+// 故通过临时克隆一个带超时 ctx 的 Browser 实例来创建页面：超时后调用返回
+// context deadline exceeded，上层据此丢弃实例。
+func (c *rodCapturer) newPage(ctx context.Context) (*rod.Page, error) {
+	pageCtx, cancel := context.WithTimeout(ctx, c.cfg.Timeout)
+	defer cancel()
+	return c.browser.Context(pageCtx).Page(proto.TargetCreateTarget{})
+}
+
+// ensureBrowser 获取可用的浏览器实例，优先复用；不存在或超期/超次时按配置重建
 func (c *rodCapturer) ensureBrowser(ctx context.Context) error {
+	// 浏览器实例达到生命周期上限：主动关闭重建，防止长期运行后的内存膨胀/僵死
+	if c.browser != nil && (c.useCount >= maxBrowserUses || time.Since(c.createdAt) > maxBrowserAge) {
+		c.reset()
+	}
 	if c.browser != nil {
 		return nil
 	}
@@ -150,17 +196,33 @@ func (c *rodCapturer) ensureBrowser(ctx context.Context) error {
 		return err
 	}
 	c.browser = browser
+	c.createdAt = time.Now()
+	c.useCount = 0
 	return nil
 }
 
-// reset 关闭并丢弃当前浏览器实例，下次 Capture 时重建
+// reset 关闭并丢弃当前浏览器实例，下次 Capture 时重建。
+//
+// 顺序关键：先 SIGKILL 进程组（不依赖 CDP 响应），再关浏览器连接（带超时克隆 ctx），
+// 最后 Cleanup 等进程退出并清理用户数据目录。全程不依赖僵死浏览器的响应，
+// 避免「浏览器已僵死 → 关闭也阻塞 → worker 永久卡死」的连锁故障。
 func (c *rodCapturer) reset() {
+	if c.launcher != nil {
+		// 强制杀掉浏览器进程组：CDP 无响应时也能立即终止僵死进程
+		c.launcher.Kill()
+	}
 	if c.browser != nil {
-		_ = c.browser.Close()
+		// 关闭浏览器连接；浏览器已死则快速返回，僵死则由超时兜底不阻塞
+		closeCtx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		_ = c.browser.Context(closeCtx).Close()
+		cancel()
 	}
 	if c.launcher != nil {
+		// 等进程退出并清理 user-data-dir；进程已被 Kill，此步不会阻塞
 		c.launcher.Cleanup()
 	}
 	c.browser = nil
 	c.launcher = nil
+	c.createdAt = time.Time{}
+	c.useCount = 0
 }

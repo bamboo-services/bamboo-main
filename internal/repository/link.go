@@ -305,10 +305,7 @@ func (r *LinkRepo) List(ctx context.Context, req *FriendQuery, tx *gorm.DB) ([]e
 func (r *LinkRepo) UpdateStatusByID(ctx context.Context, id xSnowflake.SnowflakeID, status int, reviewRemark string, tx *gorm.DB) (bool, *xError.Error) {
 	r.log.Info(ctx, "UpdateStatusByID - 更新友情链接状态")
 
-	updates := map[string]any{
-		"status":        status,
-		"review_remark": reviewRemark,
-	}
+	updates := buildStatusUpdates(status, reviewRemark)
 
 	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).Where("id = ?", id).Updates(updates)
 	if result.Error != nil {
@@ -340,6 +337,23 @@ func buildEditResolveUpdates(apply bool, reviewRemark string) map[string]any {
 	if apply {
 		updates["group_id"] = gorm.Expr("COALESCE(expected_group_id, group_id)")
 		updates["color_id"] = gorm.Expr("COALESCE(expected_color_id, color_id)")
+	}
+	return updates
+}
+
+// buildStatusUpdates 组装审核状态更新的落库字段（纯函数，便于表驱动单测）。
+//
+// 新申请审核结算（通过=1 / 拒绝=2）后清空 expected_*：通过时表单已把期望值
+// 落实为正式 group_id/color_id，拒绝则不展示；其余状态（待审核/下架待审核/已下架）
+// 不触碰 expected_*。
+func buildStatusUpdates(status int, reviewRemark string) map[string]any {
+	updates := map[string]any{
+		"status":        status,
+		"review_remark": reviewRemark,
+	}
+	if status == constants.LinkStatusApproved || status == constants.LinkStatusRejected {
+		updates["expected_group_id"] = nil
+		updates["expected_color_id"] = nil
 	}
 	return updates
 }

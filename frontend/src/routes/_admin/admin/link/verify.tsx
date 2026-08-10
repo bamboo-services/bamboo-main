@@ -22,7 +22,12 @@ import {
   Palette,
   X,
 } from 'lucide-react'
-import type { LinkFriend, SnowflakeID, UpdateLinkRequest } from '@/api/types'
+import type {
+  LinkColor,
+  LinkFriend,
+  LinkGroup,
+  SnowflakeID,
+} from '@/api/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -51,6 +56,11 @@ import {
 } from '@/hooks/use-links'
 import { useAllGroups } from '@/hooks/use-groups'
 import { useAllColors } from '@/hooks/use-colors'
+import {
+  initVerifyForm,
+  type VerifyFormState,
+  verifyFormToUpdateReq,
+} from '@/lib/verify-form'
 
 export const Route = createFileRoute('/_admin/admin/link/verify')({
   component: LinkVerifyPage,
@@ -203,47 +213,23 @@ function VerifyItem({
   )
 }
 
-/** 审核详情面板的可编辑表单状态 */
-interface VerifyFormState {
-  siteName: string
-  siteUrl: string
-  siteLogo: string
-  siteRss: string
-  webmasterEmail: string
-  siteDescription: string
-  groupId: SnowflakeID | null
-  colorId: SnowflakeID | null
-  applyRemark: string
+/** 分组/颜色名称解析：新申请期望值与修改申请对比共用，emptyLabel 可自定义空态文案 */
+function resolveGroupName(
+  groups: LinkGroup[],
+  id: SnowflakeID | null,
+  emptyLabel = '未分组',
+): string {
+  if (id == null) return emptyLabel
+  return groups.find((g) => g.id === id)?.name ?? `位置 #${id}`
 }
 
-/** 从 LinkFriend 初始化编辑表单 */
-function initVerifyForm(link: LinkFriend): VerifyFormState {
-  return {
-    siteName: link.name,
-    siteUrl: link.url,
-    siteLogo: link.avatar ?? '',
-    siteRss: link.rss ?? '',
-    webmasterEmail: link.email ?? '',
-    siteDescription: link.description ?? '',
-    groupId: link.group_id,
-    colorId: link.color_id,
-    applyRemark: link.apply_remark ?? '',
-  }
-}
-
-/** 将编辑表单转为 UpdateLinkRequest */
-function verifyFormToUpdateReq(form: VerifyFormState): UpdateLinkRequest {
-  return {
-    link_name: form.siteName.trim(),
-    link_url: form.siteUrl.trim(),
-    link_avatar: form.siteLogo.trim() || undefined,
-    link_rss: form.siteRss.trim() || undefined,
-    link_email: form.webmasterEmail.trim() || undefined,
-    link_desc: form.siteDescription.trim() || undefined,
-    link_group_id: form.groupId ?? null,
-    link_color_id: form.colorId ?? null,
-    link_apply_remark: form.applyRemark.trim() || undefined,
-  }
+function resolveColorName(
+  colors: LinkColor[],
+  id: SnowflakeID | null,
+  emptyLabel = '默认颜色',
+): string {
+  if (id == null) return emptyLabel
+  return colors.find((c) => c.id === id)?.name ?? `颜色 #${id}`
 }
 
 /** 选中后右侧的审核详情面板（可编辑站点信息 + 审核操作） */
@@ -269,12 +255,18 @@ function VerifyDetail({
   const status = linkStatus(link)
   const groups = useAllGroups().data ?? []
   const colors = useAllColors().data ?? []
+  // 期望颜色对象：新申请尚无正式颜色时，墨条提示用户申请的颜色
+  const expectedColor =
+    colors.find((c) => c.id === link.expected_color_id) ?? null
 
   return (
     <div className="space-y-4">
       {/* 申请横幅：左侧墨条 + 晨光墨晕呼应待审核状态 */}
       <div className={`${inkCard} group relative overflow-hidden p-0`}>
-        <AccentBar color={link.color_f_key} className="inset-y-0 z-10 w-1.5" />
+        <AccentBar
+          color={link.color_f_key ?? expectedColor}
+          className="inset-y-0 z-10 w-1.5"
+        />
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -306,6 +298,31 @@ function VerifyDetail({
               {form.siteUrl || link.url}
               <ExternalLink className="size-3.5" />
             </a>
+          </div>
+        </div>
+      </div>
+
+      {/* 用户期望展示：申请时选择的期望位置/颜色（只读），预填到下方表单供微调 */}
+      <div className={inkCard}>
+        <CardHead title="用户期望展示" meta="EXPECTED" />
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">
+              <MapPin className="size-3.5 text-text-secondary" />
+              期望展示位置
+            </Label>
+            <div className="rounded-md border border-leaf-deep/40 bg-leaf-deep/6 px-3 py-2 text-sm font-medium text-leaf-deep">
+              {resolveGroupName(groups, link.expected_group_id, '未指定')}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">
+              <Palette className="size-3.5 text-text-secondary" />
+              期望展示颜色
+            </Label>
+            <div className="rounded-md border border-leaf-deep/40 bg-leaf-deep/6 px-3 py-2 text-sm font-medium text-leaf-deep">
+              {resolveColorName(colors, link.expected_color_id, '未指定')}
+            </div>
           </div>
         </div>
       </div>
@@ -547,14 +564,6 @@ function EditVerifyDetail({
 }) {
   const groups = useAllGroups().data ?? []
   const colors = useAllColors().data ?? []
-  const groupName = (id: SnowflakeID | null) =>
-    id == null
-      ? '未分组'
-      : (groups.find((g) => g.id === id)?.name ?? `位置 #${id}`)
-  const colorName = (id: SnowflakeID | null) =>
-    id == null
-      ? '默认颜色'
-      : (colors.find((c) => c.id === id)?.name ?? `颜色 #${id}`)
 
   return (
     <div className="space-y-4">
@@ -601,7 +610,7 @@ function EditVerifyDetail({
           <div className="space-y-2">
             <Label>预期展示位置</Label>
             <div className="rounded-md border border-leaf-deep/40 bg-leaf-deep/6 px-3 py-2 text-sm font-medium text-leaf-deep">
-              {groupName(link.expected_group_id)}
+              {resolveGroupName(groups, link.expected_group_id)}
             </div>
           </div>
           <div className="space-y-2">
@@ -614,7 +623,7 @@ function EditVerifyDetail({
           <div className="space-y-2">
             <Label>预期展示颜色</Label>
             <div className="rounded-md border border-leaf-deep/40 bg-leaf-deep/6 px-3 py-2 text-sm font-medium text-leaf-deep">
-              {colorName(link.expected_color_id)}
+              {resolveColorName(colors, link.expected_color_id)}
             </div>
           </div>
         </div>
@@ -792,10 +801,12 @@ function LinkVerifyPage() {
     )
   }
 
-  // 次操作：先保存编辑 → 再改状态
+  // 次操作：先保存编辑 → 再改状态（拒绝时不落正式位置/颜色，避免期望值被持久化）
   const handleReject = () => {
     if (!selected || !editForm) return
-    const updateReq = verifyFormToUpdateReq(editForm)
+    const updateReq = verifyFormToUpdateReq(editForm, {
+      includeLocation: false,
+    })
 
     updateLink.mutate(
       { id: selected.id, req: updateReq },

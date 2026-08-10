@@ -484,6 +484,8 @@ func (l *LinkLogic) GetFailedLinks(ctx context.Context) (*apiLink.FriendFailedRe
 //
 // 面向游客与登录用户的公开申请入口：组装实体时固定为待审核、一般级别，
 // 若申请邮箱已对应注册用户则即时绑定归属，创建后异步通知管理员。
+// link_group_id/link_color_id 为选填的「期望展示位置/颜色」，仅写入 expected_*
+// （不写正式 group_id/color_id），审核时预填到表单、微调后经 updateLink 落实。
 func (l *LinkLogic) Apply(ctx context.Context, req *apiLink.FriendApplyRequest) (*entity.LinkFriend, *xError.Error) {
 	link := &entity.LinkFriend{
 		Name:        req.LinkName,
@@ -501,6 +503,17 @@ func (l *LinkLogic) Apply(ctx context.Context, req *apiLink.FriendApplyRequest) 
 	// 申请邮箱若已对应注册用户，则即时绑定归属（否则保持为空，待该用户注册/登录时按邮箱绑定）
 	if user, found, xErr := l.repo.user.GetByEmail(ctx, req.LinkEmail); xErr == nil && found {
 		link.UserID = &user.ID
+	}
+
+	// 期望位置/颜色（选填）：校验存在且启用；Provided 才写入 expected_*（不落正式值，审核时预填）
+	if xErr := l.validateEditTargets(ctx, req.LinkGroupID.Value(), req.LinkColorID.Value()); xErr != nil {
+		return nil, xErr
+	}
+	if req.LinkGroupID.Provided() {
+		link.ExpectedGroupID = req.LinkGroupID.Value()
+	}
+	if req.LinkColorID.Provided() {
+		link.ExpectedColorID = req.LinkColorID.Value()
 	}
 
 	_, xErr := l.repo.link.Create(ctx, link, nil)

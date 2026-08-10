@@ -41,7 +41,7 @@ interface UserLinkFormState {
  * 等管理员专属字段不在此开放。`initial` 提供时按友链详情预填（编辑），否则为空表单（申请）。
  *
  * `mode` 区分两种语义：
- * - `apply`（默认）：开放「展示位置/展示颜色」选择与「申请备注」输入（备注仅博主审核可见）。
+ * - `apply`（默认）：开放「期望展示位置/期望展示颜色」选择（选填，审核时预填到表单供博主微调）与「申请备注」输入（备注仅博主审核可见）。
  * - `edit`：展示位置/颜色改为只读展示（不可编辑），且不提供申请备注输入；
  *   提交载荷不携带位置/颜色/备注字段，仅更新站点基础信息。
  *
@@ -176,7 +176,7 @@ export function UserLinkForm({
         <div className="space-y-2">
           <Label htmlFor="groupId" className="flex items-center gap-1.5">
             <MapPin className="size-3.5 text-text-secondary" />
-            展示位置
+            {mode === 'edit' ? '展示位置' : '期望展示位置'}
           </Label>
           {mode === 'edit' ? (
             <div className="rounded-md border border-border/70 bg-muted/40 px-3 py-2 text-sm text-text-secondary">
@@ -201,7 +201,7 @@ export function UserLinkForm({
         <div className="space-y-2">
           <Label htmlFor="colorId" className="flex items-center gap-1.5">
             <Palette className="size-3.5 text-text-secondary" />
-            展示颜色
+            {mode === 'edit' ? '展示颜色' : '期望展示颜色'}
           </Label>
           {mode === 'edit' ? (
             <div className="rounded-md border border-border/70 bg-muted/40 px-3 py-2 text-sm text-text-secondary">
