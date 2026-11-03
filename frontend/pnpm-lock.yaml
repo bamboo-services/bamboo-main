@@ -3804,8 +3804,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod@4.4.3:
-    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -5443,7 +5443,7 @@ snapshots:
       jiti: 2.7.0
       magic-string: 0.30.21
       prettier: 3.9.6
-      zod: 4.4.3
+      zod: 4.6.7
     transitivePeerDependencies:
       - supports-color
 
@@ -5457,7 +5457,7 @@ snapshots:
       '@tanstack/router-utils': 1.162.2(supports-color@7.2.0)
       chokidar: 5.0.0
       unplugin: 3.3.0(esbuild@0.28.1)(rolldown@1.1.5)(rollup@4.62.2)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0))
-      zod: 4.4.3
+      zod: 4.6.7
     optionalDependencies:
       '@tanstack/react-router': 1.170.18(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       vite: 8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)
@@ -7561,6 +7561,6 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod@4.4.3: {}
+  zod@4.6.7: {}
 
   zwitch@2.0.4: {}
