@@ -19,7 +19,7 @@
 # 注意:
 #   - 邮件为必需配置（startup 邮件节点 fail-fast），.env 需含 EMAIL_HOST / EMAIL_USER /
 #     EMAIL_PASS / EMAIL_FROM，缺失则容器启动 panic 退出。
-#   - .env 中的 XLF_PORT 决定对外映射端口（默认 23333）。
+#   - .env 中的 PORT 决定对外映射端口（默认 23333）。
 #
 # 用法:
 #   docker compose -f docker-compose.full.yaml up -d --build
@@ -87,20 +87,20 @@ services:
       # 覆盖为 compose 内部服务名（env_file 注入的 localhost 会被此处覆盖）
       DATABASE_HOST: postgres
       NOSQL_HOST: redis
-      # 容器内固定监听地址与端口（映射端口由 .env XLF_PORT 决定，此处对齐保持一致）
-      XLF_HOST: "0.0.0.0"
-      XLF_PORT: "${XLF_PORT:-23333}"
+      # 容器内固定监听地址与端口（映射端口由 .env PORT 决定，此处对齐保持一致）
+      HOST: "0.0.0.0"
+      PORT: "${PORT:-23333}"
       # 容器内固定路径（镜像已内置，此处显式兜底）
       SCREENSHOT_CHROME_PATH: /usr/bin/chromium
       SCREENSHOT_DIR: data/screenshots
-      # 邮件模板已 go:embed 内嵌；显式置空，防止 .env 残留 EMAIL_TEMPLATE_DIR 触发 xEmail 加载外部目录失败
+      # 邮件模板已 go:embed 内嵌；显式置空，防止 .env 残留 EMAIL_TEMPLATE_DIR 触发 email 加载外部目录失败
       EMAIL_TEMPLATE_DIR: ""
     ports:
-      - "${XLF_PORT:-23333}:${XLF_PORT:-23333}"
+      - "${PORT:-23333}:${PORT:-23333}"
     volumes:
       - screenshots:/app/data/screenshots
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:${XLF_PORT:-23333}/api/v1/public/health"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:${PORT:-23333}/api/v1/public/health"]
       interval: 15s
       timeout: 5s
       retries: 5

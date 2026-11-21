@@ -45,19 +45,19 @@ services:
       - path: .env
         required: false
     environment:
-      # 容器内固定监听地址（.env 的 XLF_HOST 保持原样注入，此处兜底为 0.0.0.0）
-      XLF_HOST: "0.0.0.0"
+      # 容器内固定监听地址（.env 的 HOST 保持原样注入，此处兜底为 0.0.0.0）
+      HOST: "0.0.0.0"
       # 容器内固定浏览器路径（镜像已内置 chromium；显式兜底，防止 .env 空值覆盖触发 rod 自动下载不兼容浏览器）
       SCREENSHOT_CHROME_PATH: /usr/bin/chromium
       SCREENSHOT_DIR: data/screenshots
-      # 邮件模板已 go:embed 内嵌；显式置空，防止 .env 残留 EMAIL_TEMPLATE_DIR 触发 xEmail 加载外部目录失败
+      # 邮件模板已 go:embed 内嵌；显式置空，防止 .env 残留 EMAIL_TEMPLATE_DIR 触发 email 加载外部目录失败
       EMAIL_TEMPLATE_DIR: ""
     ports:
-      - "${XLF_PORT:-23333}:${XLF_PORT:-23333}"
+      - "${PORT:-23333}:${PORT:-23333}"
     volumes:
       - ./data/screenshots:/app/data/screenshots
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:${XLF_PORT:-23333}/api/v1/public/health"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:${PORT:-23333}/api/v1/public/health"]
       interval: 15s
       timeout: 5s
       retries: 5
