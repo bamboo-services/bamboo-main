@@ -299,11 +299,13 @@ definitions:
   apiInfo.BuiltinInvalidGroupResponse:
     properties:
       created_at:
+        description: CreatedAt 是记录创建时间，以毫秒级时间戳持久化。
         type: string
       description:
         description: 分组描述
         type: string
       id:
+        description: ID 是实体的雪花主键。在实体创建时若为零值将自动生成。
         type: integer
       links_f_key:
         description: |-
@@ -323,6 +325,7 @@ definitions:
         description: 分组状态
         type: boolean
       updated_at:
+        description: UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。
         type: string
     type: object
   apiInfo.BuiltinInvalidGroupUpdateRequest:
@@ -398,11 +401,13 @@ definitions:
   apiLink.ColorAddResponse:
     properties:
       created_at:
+        description: CreatedAt 是记录创建时间，以毫秒级时间戳持久化。
         type: string
       hover_color:
         description: 悬停颜色
         type: string
       id:
+        description: ID 是实体的雪花主键。在实体创建时若为零值将自动生成。
         type: integer
       links_f_key:
         description: |-
@@ -431,6 +436,7 @@ definitions:
         description: 颜色类型
         type: integer
       updated_at:
+        description: UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。
         type: string
     type: object
   apiLink.ColorDeleteConflictInfo:
@@ -466,11 +472,13 @@ definitions:
   apiLink.ColorDetailResponse:
     properties:
       created_at:
+        description: CreatedAt 是记录创建时间，以毫秒级时间戳持久化。
         type: string
       hover_color:
         description: 悬停颜色
         type: string
       id:
+        description: ID 是实体的雪花主键。在实体创建时若为零值将自动生成。
         type: integer
       links_f_key:
         description: |-
@@ -499,6 +507,7 @@ definitions:
         description: 颜色类型
         type: integer
       updated_at:
+        description: UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。
         type: string
     type: object
   apiLink.ColorPageResponse:
@@ -584,11 +593,13 @@ definitions:
   apiLink.ColorUpdateResponse:
     properties:
       created_at:
+        description: CreatedAt 是记录创建时间，以毫秒级时间戳持久化。
         type: string
       hover_color:
         description: 悬停颜色
         type: string
       id:
+        description: ID 是实体的雪花主键。在实体创建时若为零值将自动生成。
         type: integer
       links_f_key:
         description: |-
@@ -617,6 +628,7 @@ definitions:
         description: 颜色类型
         type: integer
       updated_at:
+        description: UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。
         type: string
     type: object
   apiLink.FriendAddRequest:
@@ -639,6 +651,7 @@ definitions:
         description: 友链颜色ID
         type: integer
       created_at:
+        description: CreatedAt 是记录创建时间，以毫秒级时间戳持久化。
         type: string
       description:
         description: 友链描述
@@ -666,6 +679,7 @@ definitions:
         description: 所属分组ID
         type: integer
       id:
+        description: ID 是实体的雪花主键。在实体创建时若为零值将自动生成。
         type: integer
       is_failure:
         description: 友链失效标志
@@ -695,6 +709,7 @@ definitions:
         description: 友链状态
         type: integer
       updated_at:
+        description: UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。
         type: string
       url:
         description: 友链URL地址
@@ -727,6 +742,7 @@ definitions:
         description: 友链颜色ID
         type: integer
       created_at:
+        description: CreatedAt 是记录创建时间，以毫秒级时间戳持久化。
         type: string
       description:
         description: 友链描述
@@ -754,6 +770,7 @@ definitions:
         description: 所属分组ID
         type: integer
       id:
+        description: ID 是实体的雪花主键。在实体创建时若为零值将自动生成。
         type: integer
       is_failure:
         description: 友链失效标志
@@ -783,6 +800,7 @@ definitions:
         description: 友链状态
         type: integer
       updated_at:
+        description: UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。
         type: string
       url:
         description: 友链URL地址
@@ -927,6 +945,7 @@ definitions:
         description: 友链颜色ID
         type: integer
       created_at:
+        description: CreatedAt 是记录创建时间，以毫秒级时间戳持久化。
         type: string
       description:
         description: 友链描述
@@ -954,6 +973,7 @@ definitions:
         description: 所属分组ID
         type: integer
       id:
+        description: ID 是实体的雪花主键。在实体创建时若为零值将自动生成。
         type: integer
       is_failure:
         description: 友链失效标志
@@ -983,6 +1003,7 @@ definitions:
         description: 友链状态
         type: integer
       updated_at:
+        description: UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。
         type: string
       url:
         description: 友链URL地址
@@ -1044,11 +1065,13 @@ definitions:
   apiLink.GroupAddResponse:
     properties:
       created_at:
+        description: CreatedAt 是记录创建时间，以毫秒级时间戳持久化。
         type: string
       description:
         description: 分组描述
         type: string
       id:
+        description: ID 是实体的雪花主键。在实体创建时若为零值将自动生成。
         type: integer
       links_f_key:
         description: |-
@@ -1068,6 +1091,7 @@ definitions:
         description: 分组状态
         type: boolean
       updated_at:
+        description: UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。
         type: string
     type: object
   apiLink.GroupDeleteConflictInfo:
@@ -1102,11 +1126,13 @@ definitions:
   apiLink.GroupDetailResponse:
     properties:
       created_at:
+        description: CreatedAt 是记录创建时间，以毫秒级时间戳持久化。
         type: string
       description:
         description: 分组描述
         type: string
       id:
+        description: ID 是实体的雪花主键。在实体创建时若为零值将自动生成。
         type: integer
       links_f_key:
         description: |-
@@ -1126,6 +1152,7 @@ definitions:
         description: 分组状态
         type: boolean
       updated_at:
+        description: UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。
         type: string
     type: object
   apiLink.GroupPageResponse:
@@ -1200,11 +1227,13 @@ definitions:
   apiLink.GroupUpdateResponse:
     properties:
       created_at:
+        description: CreatedAt 是记录创建时间，以毫秒级时间戳持久化。
         type: string
       description:
         description: 分组描述
         type: string
       id:
+        description: ID 是实体的雪花主键。在实体创建时若为零值将自动生成。
         type: integer
       links_f_key:
         description: |-
@@ -1224,6 +1253,7 @@ definitions:
         description: 分组状态
         type: boolean
       updated_at:
+        description: UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。
         type: string
     type: object
   apiLink.NullableSnowflakeID:
@@ -1900,11 +1930,13 @@ definitions:
   entity.LinkColor:
     properties:
       created_at:
+        description: CreatedAt 是记录创建时间，以毫秒级时间戳持久化。
         type: string
       hover_color:
         description: 悬停颜色
         type: string
       id:
+        description: ID 是实体的雪花主键。在实体创建时若为零值将自动生成。
         type: integer
       links_f_key:
         description: |-
@@ -1933,6 +1965,7 @@ definitions:
         description: 颜色类型
         type: integer
       updated_at:
+        description: UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。
         type: string
     type: object
   entity.LinkFriend:
@@ -1953,6 +1986,7 @@ definitions:
         description: 友链颜色ID
         type: integer
       created_at:
+        description: CreatedAt 是记录创建时间，以毫秒级时间戳持久化。
         type: string
       description:
         description: 友链描述
@@ -1980,6 +2014,7 @@ definitions:
         description: 所属分组ID
         type: integer
       id:
+        description: ID 是实体的雪花主键。在实体创建时若为零值将自动生成。
         type: integer
       is_failure:
         description: 友链失效标志
@@ -2009,6 +2044,7 @@ definitions:
         description: 友链状态
         type: integer
       updated_at:
+        description: UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。
         type: string
       url:
         description: 友链URL地址
@@ -2024,11 +2060,13 @@ definitions:
   entity.LinkGroup:
     properties:
       created_at:
+        description: CreatedAt 是记录创建时间，以毫秒级时间戳持久化。
         type: string
       description:
         description: 分组描述
         type: string
       id:
+        description: ID 是实体的雪花主键。在实体创建时若为零值将自动生成。
         type: integer
       links_f_key:
         description: |-
@@ -2048,6 +2086,7 @@ definitions:
         description: 分组状态
         type: boolean
       updated_at:
+        description: UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。
         type: string
     type: object
   entity.SystemUser:
@@ -2056,6 +2095,7 @@ definitions:
         description: 头像URL
         type: string
       created_at:
+        description: CreatedAt 是记录创建时间，以毫秒级时间戳持久化。
         type: string
       email:
         description: 邮箱
@@ -2064,6 +2104,7 @@ definitions:
         description: 邮箱验证状态
         type: boolean
       id:
+        description: ID 是实体的雪花主键。在实体创建时若为零值将自动生成。
         type: integer
       is_admin:
         description: 是否为系统唯一管理员（计算字段，不入库）
@@ -2078,25 +2119,47 @@ definitions:
         description: 状态
         type: integer
       updated_at:
+        description: UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。
         type: string
       username:
         description: 用户名
         type: string
     type: object
-  xBase.BaseResponse:
+  envelope.Response:
     properties:
       code:
+        description: |-
+          Code 是业务状态码，错误场景通常取自 apperr 预定义错误码的
+          Code 字段；JSON 输出恒包含该字段。
         type: integer
       context:
+        description: |-
+          Context 是请求唯一标识，由协议入口生成并透传；
+          零值时 JSON 输出省略该字段。
         type: string
-      data: {}
+      data:
+        description: |-
+          Data 是业务数据负载，具体类型由接口约定；
+          零值时 JSON 输出省略该字段。
       error_message:
+        description: |-
+          ErrorMessage 是错误详情，仅错误场景填写；
+          零值时 JSON 输出省略该字段。
         type: string
       message:
+        description: |-
+          Message 是面向调用方的状态描述，错误场景通常取自 apperr
+          预定义错误码的 Message 字段；JSON 输出恒包含该字段。
         type: string
       output:
+        description: |-
+          Output 是业务输出类型标识，错误场景通常取自 apperr 预定义
+          错误码的 Output 字段；JSON 输出恒包含该字段。
         type: string
       overhead:
+        description: |-
+          Overhead 是服务端处理耗时，单位为微秒；
+          零值时 JSON 输出省略该字段。
         type: integer
     type: object
 info:
@@ -2139,7 +2202,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.ColorPageResponse'
@@ -2147,15 +2210,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取友链颜色分页列表'
@@ -2179,7 +2242,7 @@ paths:
           description: 添加成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.ColorAddResponse'
@@ -2187,15 +2250,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 添加友链颜色'
@@ -2222,19 +2285,19 @@ paths:
         "200":
           description: 删除成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友链颜色不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "409":
           description: 存在关联数据冲突
           schema:
@@ -2242,7 +2305,7 @@ paths:
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 删除友链颜色'
@@ -2265,7 +2328,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.ColorDetailResponse'
@@ -2273,19 +2336,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友链颜色不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取友链颜色详情'
@@ -2314,7 +2377,7 @@ paths:
           description: 更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.ColorUpdateResponse'
@@ -2322,19 +2385,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友链颜色不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新友链颜色'
@@ -2364,7 +2427,7 @@ paths:
           description: 状态更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.ColorStatusResponse'
@@ -2372,19 +2435,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友链颜色不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新友链颜色状态'
@@ -2423,7 +2486,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   items:
@@ -2433,15 +2496,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取友链颜色列表'
@@ -2466,7 +2529,7 @@ paths:
           description: 排序更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.ColorSortResponse'
@@ -2474,19 +2537,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 颜色不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 批量更新友链颜色排序'
@@ -2504,7 +2567,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiDashboard.StatsResponse'
@@ -2512,11 +2575,11 @@ paths:
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取仪表盘统计数据'
@@ -2559,7 +2622,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.GroupPageResponse'
@@ -2567,15 +2630,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取友链分组分页列表'
@@ -2599,7 +2662,7 @@ paths:
           description: 添加成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.GroupAddResponse'
@@ -2607,15 +2670,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 添加友链分组'
@@ -2646,19 +2709,19 @@ paths:
         "200":
           description: 删除成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友链分组不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "409":
           description: 存在关联数据冲突
           schema:
@@ -2666,7 +2729,7 @@ paths:
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 删除友链分组'
@@ -2689,7 +2752,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.GroupDetailResponse'
@@ -2697,19 +2760,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友链分组不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取友链分组详情'
@@ -2738,7 +2801,7 @@ paths:
           description: 更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.GroupUpdateResponse'
@@ -2746,19 +2809,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友链分组不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新友链分组'
@@ -2788,7 +2851,7 @@ paths:
           description: 状态更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.GroupStatusResponse'
@@ -2796,19 +2859,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友链分组不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新友链分组状态'
@@ -2851,7 +2914,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   items:
@@ -2861,15 +2924,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取友链分组列表'
@@ -2894,7 +2957,7 @@ paths:
           description: 排序更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.GroupSortResponse'
@@ -2902,19 +2965,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 分组不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 批量更新友链分组排序'
@@ -2980,7 +3043,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.FriendListResponse'
@@ -2988,15 +3051,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取友情链接列表'
@@ -3020,7 +3083,7 @@ paths:
           description: 添加成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.FriendAddResponse'
@@ -3028,15 +3091,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 添加友情链接'
@@ -3059,23 +3122,23 @@ paths:
         "200":
           description: 删除成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友情链接不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 删除友情链接'
@@ -3098,7 +3161,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.FriendDetailResponse'
@@ -3106,19 +3169,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友情链接不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取友情链接详情'
@@ -3147,7 +3210,7 @@ paths:
           description: 更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.FriendUpdateResponse'
@@ -3155,19 +3218,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友情链接不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新友情链接'
@@ -3196,23 +3259,23 @@ paths:
         "200":
           description: 审核成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友情链接不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 通过友链修改位置/颜色申请'
@@ -3241,23 +3304,23 @@ paths:
         "200":
           description: 审核成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友情链接不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 拒绝友链修改位置/颜色申请'
@@ -3286,23 +3349,23 @@ paths:
         "200":
           description: 更新成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友情链接不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新友情链接失效状态'
@@ -3325,23 +3388,23 @@ paths:
         "200":
           description: 已加入截图队列
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友情链接不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 重新生成友链站点截图'
@@ -3370,23 +3433,23 @@ paths:
         "200":
           description: 更新成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友情链接不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新友情链接状态'
@@ -3411,7 +3474,7 @@ paths:
           description: 排序更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.FriendSortResponse'
@@ -3419,19 +3482,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友情链接或分组不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 批量更新友情链接排序与位置'
@@ -3474,7 +3537,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiSponsor.ChannelPageResponse'
@@ -3482,15 +3545,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取赞助渠道分页列表'
@@ -3514,7 +3577,7 @@ paths:
           description: 添加成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiSponsor.ChannelAddResponse'
@@ -3522,15 +3585,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 添加赞助渠道'
@@ -3553,23 +3616,23 @@ paths:
         "200":
           description: 删除成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 赞助渠道不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 删除赞助渠道'
@@ -3592,7 +3655,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiSponsor.ChannelDetailResponse'
@@ -3600,19 +3663,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 赞助渠道不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取赞助渠道详情'
@@ -3641,7 +3704,7 @@ paths:
           description: 更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiSponsor.ChannelUpdateResponse'
@@ -3649,19 +3712,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 赞助渠道不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新赞助渠道'
@@ -3691,7 +3754,7 @@ paths:
           description: 状态更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiSponsor.ChannelStatusResponse'
@@ -3699,19 +3762,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 赞助渠道不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新赞助渠道状态'
@@ -3750,7 +3813,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   items:
@@ -3760,15 +3823,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取赞助渠道列表'
@@ -3820,7 +3883,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiSponsor.RecordAdminPageResponse'
@@ -3828,15 +3891,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取赞助记录分页列表'
@@ -3860,7 +3923,7 @@ paths:
           description: 添加成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiSponsor.RecordAddResponse'
@@ -3868,15 +3931,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 添加赞助记录'
@@ -3899,23 +3962,23 @@ paths:
         "200":
           description: 删除成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 赞助记录不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 删除赞助记录'
@@ -3938,7 +4001,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiSponsor.RecordDetailResponse'
@@ -3946,19 +4009,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 赞助记录不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取赞助记录详情'
@@ -3987,7 +4050,7 @@ paths:
           description: 更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiSponsor.RecordUpdateResponse'
@@ -3995,19 +4058,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 赞助记录不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新赞助记录'
@@ -4036,23 +4099,23 @@ paths:
         "200":
           description: 状态更新成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 赞助记录不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 审核赞助记录'
@@ -4109,7 +4172,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiAuth.UserListResponse'
@@ -4117,15 +4180,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 获取系统用户列表'
@@ -4154,23 +4217,23 @@ paths:
         "200":
           description: 更新成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 用户不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 启用/禁用用户'
@@ -4195,7 +4258,7 @@ paths:
           description: 登录成功，包含用户信息、Token及时间信息
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiAuth.LoginResponse'
@@ -4203,15 +4266,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 用户名或密码错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[公开] 用户登录'
       tags:
       - 认证接口
@@ -4226,15 +4289,15 @@ paths:
         "200":
           description: 登出成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[用户] 用户登出'
@@ -4252,7 +4315,7 @@ paths:
           description: 登录成功，包含用户信息、Token及时间信息
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiAuth.LoginResponse'
@@ -4260,11 +4323,11 @@ paths:
         "401":
           description: 认证失败
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[用户] SSO OAuth 登录'
@@ -4288,19 +4351,19 @@ paths:
         "200":
           description: 修改成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证或旧密码错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[用户] 修改密码'
@@ -4324,19 +4387,19 @@ paths:
         "200":
           description: 重置链接已发送
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 邮箱不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 重置密码'
       tags:
       - 认证接口
@@ -4359,7 +4422,7 @@ paths:
           description: 注册成功，包含用户信息、Token及时间信息
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiAuth.RegisterResponse'
@@ -4367,11 +4430,11 @@ paths:
         "400":
           description: 请求参数错误（用户名或邮箱已存在）
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 用户注册'
       tags:
       - 认证接口
@@ -4393,15 +4456,15 @@ paths:
         "200":
           description: 验证码已发送
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误（邮箱已被注册）
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误或发送过于频繁
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[公开] 发送注册验证码'
       tags:
       - 认证接口
@@ -4422,15 +4485,15 @@ paths:
         "200":
           description: Token有效
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: Token无效或已过期
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 验证重置密码Token'
       tags:
       - 认证接口
@@ -4451,15 +4514,15 @@ paths:
         "200":
           description: 密码重置成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: Token无效或已过期
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 确认重置密码'
       tags:
       - 认证接口
@@ -4475,7 +4538,7 @@ paths:
           description: 用户信息
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiAuth.UserInfoResponse'
@@ -4483,11 +4546,11 @@ paths:
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[用户] 获取用户信息'
@@ -4510,15 +4573,15 @@ paths:
         "200":
           description: 验证成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: Token无效或已过期
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 验证邮箱'
       tags:
       - 认证接口
@@ -4541,7 +4604,7 @@ paths:
           description: 更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiInfo.ApplySiteResponse'
@@ -4549,15 +4612,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新申请站点展示'
@@ -4582,7 +4645,7 @@ paths:
           description: 更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiInfo.ArchiveResponse'
@@ -4590,15 +4653,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新站点档案'
@@ -4623,7 +4686,7 @@ paths:
           description: 更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiInfo.BloggerResponse'
@@ -4631,15 +4694,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新博主信息'
@@ -4664,7 +4727,7 @@ paths:
           description: 更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiInfo.BuiltinInvalidGroupResponse'
@@ -4672,15 +4735,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新内置已失效分组配置'
@@ -4705,7 +4768,7 @@ paths:
           description: 更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiInfo.SiteResponse'
@@ -4713,15 +4776,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[管理] 更新站点信息'
@@ -4739,7 +4802,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiInfo.ApplySiteResponse'
@@ -4747,7 +4810,7 @@ paths:
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 获取申请站点展示'
       tags:
       - 站点信息接口
@@ -4763,7 +4826,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiInfo.ArchiveResponse'
@@ -4771,7 +4834,7 @@ paths:
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 获取站点档案'
       tags:
       - 站点信息接口
@@ -4787,7 +4850,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiInfo.BloggerResponse'
@@ -4795,7 +4858,7 @@ paths:
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 获取博主信息'
       tags:
       - 站点信息接口
@@ -4811,7 +4874,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiInfo.BuiltinInvalidGroupResponse'
@@ -4819,7 +4882,7 @@ paths:
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 获取内置已失效分组配置'
       tags:
       - 站点信息接口
@@ -4835,7 +4898,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiInfo.SiteResponse'
@@ -4843,7 +4906,7 @@ paths:
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 获取站点信息'
       tags:
       - 站点信息接口
@@ -4866,7 +4929,7 @@ paths:
           description: 申请成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.FriendAddResponse'
@@ -4874,11 +4937,11 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[公开] 申请友情链接'
       tags:
       - 公开接口
@@ -4892,7 +4955,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   items:
@@ -4914,7 +4977,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.FriendFailedResponse'
@@ -4922,7 +4985,7 @@ paths:
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 获取公开已失效分组'
       tags:
       - 公开接口
@@ -4936,7 +4999,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   items:
@@ -4958,7 +5021,7 @@ paths:
           description: 健康检查成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiPublic.HealthResponse'
@@ -4966,7 +5029,7 @@ paths:
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 系统健康检查'
       tags:
       - 公开接口
@@ -4988,7 +5051,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.FriendPublicResponse'
@@ -4996,7 +5059,7 @@ paths:
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 获取公开友情链接'
       tags:
       - 公开接口
@@ -5012,7 +5075,7 @@ paths:
           description: 连通测试成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiPublic.PingResponse'
@@ -5020,7 +5083,7 @@ paths:
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 连通性测试'
       tags:
       - 公开接口
@@ -5043,7 +5106,7 @@ paths:
           description: 申请提交成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiSponsor.RecordAddResponse'
@@ -5051,15 +5114,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 赞助渠道不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[公开] 申请赞助展示'
       tags:
       - 赞助记录接口
@@ -5075,7 +5138,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   items:
@@ -5085,7 +5148,7 @@ paths:
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 获取公开的赞助渠道列表'
       tags:
       - 赞助渠道接口
@@ -5123,7 +5186,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiSponsor.RecordPublicPageResponse'
@@ -5131,11 +5194,11 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       summary: '[用户] 获取赞助记录公开分页列表'
       tags:
       - 赞助记录接口
@@ -5166,7 +5229,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.FriendListResponse'
@@ -5174,11 +5237,11 @@ paths:
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[用户] 获取我的友情链接列表'
@@ -5202,7 +5265,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.FriendDetailResponse'
@@ -5210,15 +5273,15 @@ paths:
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友情链接不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[用户] 获取我的友情链接详情'
@@ -5247,7 +5310,7 @@ paths:
           description: 更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiLink.FriendUpdateResponse'
@@ -5255,19 +5318,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友情链接不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[用户] 更新我的友情链接'
@@ -5296,23 +5359,23 @@ paths:
         "200":
           description: 申请成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友情链接不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[用户] 申请修改我的友链展示位置/颜色'
@@ -5335,23 +5398,23 @@ paths:
         "200":
           description: 申请成功
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "400":
           description: 状态不允许下架
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 友情链接不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[用户] 申请下架我的友情链接'
@@ -5376,7 +5439,7 @@ paths:
           description: 更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiAuth.UserInfoResponse'
@@ -5384,15 +5447,15 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[用户] 更新用户资料'
@@ -5425,7 +5488,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiSponsor.RecordPageResponse'
@@ -5433,11 +5496,11 @@ paths:
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[用户] 获取我的赞助记录列表'
@@ -5461,7 +5524,7 @@ paths:
           description: 获取成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiSponsor.RecordDetailResponse'
@@ -5469,15 +5532,15 @@ paths:
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 赞助记录不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[用户] 获取我的赞助记录详情'
@@ -5506,7 +5569,7 @@ paths:
           description: 更新成功
           schema:
             allOf:
-            - $ref: '#/definitions/xBase.BaseResponse'
+            - $ref: '#/definitions/envelope.Response'
             - properties:
                 data:
                   $ref: '#/definitions/apiSponsor.RecordUpdateResponse'
@@ -5514,19 +5577,19 @@ paths:
         "400":
           description: 请求参数错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "401":
           description: 未认证
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "404":
           description: 赞助记录不存在
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
         "500":
           description: 服务器内部错误
           schema:
-            $ref: '#/definitions/xBase.BaseResponse'
+            $ref: '#/definitions/envelope.Response'
       security:
       - Bearer: []
       summary: '[用户] 更新我的赞助记录'

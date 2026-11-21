@@ -77,7 +77,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -93,19 +93,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -144,7 +144,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -160,19 +160,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -234,7 +234,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -253,19 +253,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -306,7 +306,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -322,25 +322,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "颜色不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -379,7 +379,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -395,25 +395,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友链颜色不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -459,7 +459,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -475,25 +475,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友链颜色不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -534,25 +534,25 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友链颜色不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "409": {
@@ -564,7 +564,7 @@ const docTemplate = `{
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -612,7 +612,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -628,25 +628,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友链颜色不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -676,7 +676,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -692,13 +692,13 @@ const docTemplate = `{
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -766,7 +766,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -782,19 +782,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -833,7 +833,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -849,19 +849,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -929,7 +929,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -948,19 +948,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -1001,7 +1001,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1017,25 +1017,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "分组不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -1074,7 +1074,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1090,25 +1090,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友链分组不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -1154,7 +1154,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1170,25 +1170,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友链分组不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -1235,25 +1235,25 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友链分组不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "409": {
@@ -1265,7 +1265,7 @@ const docTemplate = `{
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -1313,7 +1313,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1329,25 +1329,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友链分组不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -1446,7 +1446,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1462,19 +1462,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -1513,7 +1513,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1529,19 +1529,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -1582,7 +1582,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1598,25 +1598,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友情链接或分组不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -1655,7 +1655,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1671,25 +1671,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -1735,7 +1735,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -1751,25 +1751,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -1804,31 +1804,31 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -1874,31 +1874,31 @@ const docTemplate = `{
                     "200": {
                         "description": "审核成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -1944,31 +1944,31 @@ const docTemplate = `{
                     "200": {
                         "description": "审核成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -2014,31 +2014,31 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -2075,31 +2075,31 @@ const docTemplate = `{
                     "200": {
                         "description": "已加入截图队列",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -2145,31 +2145,31 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -2237,7 +2237,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2253,19 +2253,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -2304,7 +2304,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2320,19 +2320,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -2394,7 +2394,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2413,19 +2413,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -2464,7 +2464,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2480,25 +2480,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "赞助渠道不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -2544,7 +2544,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2560,25 +2560,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "赞助渠道不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -2613,31 +2613,31 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "赞助渠道不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -2685,7 +2685,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2701,25 +2701,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "赞助渠道不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -2800,7 +2800,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2816,19 +2816,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -2867,7 +2867,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2883,19 +2883,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -2934,7 +2934,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -2950,25 +2950,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "赞助记录不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3014,7 +3014,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3030,25 +3030,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "赞助记录不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3083,31 +3083,31 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "赞助记录不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3153,31 +3153,31 @@ const docTemplate = `{
                     "200": {
                         "description": "状态更新成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "赞助记录不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3262,7 +3262,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3278,19 +3278,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3336,31 +3336,31 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "用户不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3396,7 +3396,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3412,19 +3412,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "用户名或密码错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3452,19 +3452,19 @@ const docTemplate = `{
                     "200": {
                         "description": "登出成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3494,7 +3494,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3510,13 +3510,13 @@ const docTemplate = `{
                     "401": {
                         "description": "认证失败",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3555,25 +3555,25 @@ const docTemplate = `{
                     "200": {
                         "description": "修改成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证或旧密码错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3607,25 +3607,25 @@ const docTemplate = `{
                     "200": {
                         "description": "重置链接已发送",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "邮箱不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3661,7 +3661,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3677,13 +3677,13 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误（用户名或邮箱已存在）",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3717,19 +3717,19 @@ const docTemplate = `{
                     "200": {
                         "description": "验证码已发送",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误（邮箱已被注册）",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误或发送过于频繁",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3761,19 +3761,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Token有效",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "Token无效或已过期",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3805,19 +3805,19 @@ const docTemplate = `{
                     "200": {
                         "description": "密码重置成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "Token无效或已过期",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3847,7 +3847,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3863,13 +3863,13 @@ const docTemplate = `{
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3901,19 +3901,19 @@ const docTemplate = `{
                     "200": {
                         "description": "验证成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "Token无效或已过期",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -3954,7 +3954,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -3970,19 +3970,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4023,7 +4023,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4039,19 +4039,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4092,7 +4092,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4108,19 +4108,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4161,7 +4161,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4177,19 +4177,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4230,7 +4230,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4246,19 +4246,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4283,7 +4283,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4299,7 +4299,7 @@ const docTemplate = `{
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4324,7 +4324,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4340,7 +4340,7 @@ const docTemplate = `{
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4365,7 +4365,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4381,7 +4381,7 @@ const docTemplate = `{
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4406,7 +4406,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4422,7 +4422,7 @@ const docTemplate = `{
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4447,7 +4447,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4463,7 +4463,7 @@ const docTemplate = `{
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4499,7 +4499,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4515,13 +4515,13 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4543,7 +4543,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4581,7 +4581,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4597,7 +4597,7 @@ const docTemplate = `{
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4619,7 +4619,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4657,7 +4657,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4673,7 +4673,7 @@ const docTemplate = `{
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4707,7 +4707,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4723,7 +4723,7 @@ const docTemplate = `{
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4748,7 +4748,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4764,7 +4764,7 @@ const docTemplate = `{
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4800,7 +4800,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4816,19 +4816,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "赞助渠道不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4853,7 +4853,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4872,7 +4872,7 @@ const docTemplate = `{
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -4930,7 +4930,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -4946,13 +4946,13 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -5004,7 +5004,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5020,13 +5020,13 @@ const docTemplate = `{
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -5065,7 +5065,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5081,19 +5081,19 @@ const docTemplate = `{
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -5139,7 +5139,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5155,25 +5155,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -5219,31 +5219,31 @@ const docTemplate = `{
                     "200": {
                         "description": "申请成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -5280,31 +5280,31 @@ const docTemplate = `{
                     "200": {
                         "description": "申请成功",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "400": {
                         "description": "状态不允许下架",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "友情链接不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -5345,7 +5345,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5361,19 +5361,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -5425,7 +5425,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5441,13 +5441,13 @@ const docTemplate = `{
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -5486,7 +5486,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5502,19 +5502,19 @@ const docTemplate = `{
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "赞助记录不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -5560,7 +5560,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/xBase.BaseResponse"
+                                    "$ref": "#/definitions/envelope.Response"
                                 },
                                 {
                                     "type": "object",
@@ -5576,25 +5576,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "401": {
                         "description": "未认证",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "404": {
                         "description": "赞助记录不存在",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/xBase.BaseResponse"
+                            "$ref": "#/definitions/envelope.Response"
                         }
                     }
                 }
@@ -6015,6 +6015,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
+                    "description": "CreatedAt 是记录创建时间，以毫秒级时间戳持久化。",
                     "type": "string"
                 },
                 "description": {
@@ -6022,6 +6023,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "description": "ID 是实体的雪花主键。在实体创建时若为零值将自动生成。",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -6044,6 +6046,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "updated_at": {
+                    "description": "UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。",
                     "type": "string"
                 }
             }
@@ -6145,6 +6148,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
+                    "description": "CreatedAt 是记录创建时间，以毫秒级时间戳持久化。",
                     "type": "string"
                 },
                 "hover_color": {
@@ -6152,6 +6156,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "description": "ID 是实体的雪花主键。在实体创建时若为零值将自动生成。",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -6186,6 +6191,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
+                    "description": "UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。",
                     "type": "string"
                 }
             }
@@ -6239,6 +6245,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
+                    "description": "CreatedAt 是记录创建时间，以毫秒级时间戳持久化。",
                     "type": "string"
                 },
                 "hover_color": {
@@ -6246,6 +6253,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "description": "ID 是实体的雪花主键。在实体创建时若为零值将自动生成。",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -6280,6 +6288,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
+                    "description": "UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。",
                     "type": "string"
                 }
             }
@@ -6400,6 +6409,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
+                    "description": "CreatedAt 是记录创建时间，以毫秒级时间戳持久化。",
                     "type": "string"
                 },
                 "hover_color": {
@@ -6407,6 +6417,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "description": "ID 是实体的雪花主键。在实体创建时若为零值将自动生成。",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -6441,6 +6452,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
+                    "description": "UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。",
                     "type": "string"
                 }
             }
@@ -6472,6 +6484,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "created_at": {
+                    "description": "CreatedAt 是记录创建时间，以毫秒级时间戳持久化。",
                     "type": "string"
                 },
                 "description": {
@@ -6507,6 +6520,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "id": {
+                    "description": "ID 是实体的雪花主键。在实体创建时若为零值将自动生成。",
                     "type": "integer"
                 },
                 "is_failure": {
@@ -6546,6 +6560,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
+                    "description": "UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。",
                     "type": "string"
                 },
                 "url": {
@@ -6593,6 +6608,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "created_at": {
+                    "description": "CreatedAt 是记录创建时间，以毫秒级时间戳持久化。",
                     "type": "string"
                 },
                 "description": {
@@ -6628,6 +6644,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "id": {
+                    "description": "ID 是实体的雪花主键。在实体创建时若为零值将自动生成。",
                     "type": "integer"
                 },
                 "is_failure": {
@@ -6667,6 +6684,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
+                    "description": "UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。",
                     "type": "string"
                 },
                 "url": {
@@ -6881,6 +6899,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "created_at": {
+                    "description": "CreatedAt 是记录创建时间，以毫秒级时间戳持久化。",
                     "type": "string"
                 },
                 "description": {
@@ -6916,6 +6935,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "id": {
+                    "description": "ID 是实体的雪花主键。在实体创建时若为零值将自动生成。",
                     "type": "integer"
                 },
                 "is_failure": {
@@ -6955,6 +6975,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
+                    "description": "UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。",
                     "type": "string"
                 },
                 "url": {
@@ -7039,6 +7060,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
+                    "description": "CreatedAt 是记录创建时间，以毫秒级时间戳持久化。",
                     "type": "string"
                 },
                 "description": {
@@ -7046,6 +7068,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "description": "ID 是实体的雪花主键。在实体创建时若为零值将自动生成。",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -7068,6 +7091,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "updated_at": {
+                    "description": "UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。",
                     "type": "string"
                 }
             }
@@ -7120,6 +7144,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
+                    "description": "CreatedAt 是记录创建时间，以毫秒级时间戳持久化。",
                     "type": "string"
                 },
                 "description": {
@@ -7127,6 +7152,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "description": "ID 是实体的雪花主键。在实体创建时若为零值将自动生成。",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -7149,6 +7175,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "updated_at": {
+                    "description": "UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。",
                     "type": "string"
                 }
             }
@@ -7256,6 +7283,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
+                    "description": "CreatedAt 是记录创建时间，以毫秒级时间戳持久化。",
                     "type": "string"
                 },
                 "description": {
@@ -7263,6 +7291,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "description": "ID 是实体的雪花主键。在实体创建时若为零值将自动生成。",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -7285,6 +7314,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "updated_at": {
+                    "description": "UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。",
                     "type": "string"
                 }
             }
@@ -8248,6 +8278,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
+                    "description": "CreatedAt 是记录创建时间，以毫秒级时间戳持久化。",
                     "type": "string"
                 },
                 "hover_color": {
@@ -8255,6 +8286,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "description": "ID 是实体的雪花主键。在实体创建时若为零值将自动生成。",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -8289,6 +8321,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
+                    "description": "UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。",
                     "type": "string"
                 }
             }
@@ -8317,6 +8350,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "created_at": {
+                    "description": "CreatedAt 是记录创建时间，以毫秒级时间戳持久化。",
                     "type": "string"
                 },
                 "description": {
@@ -8352,6 +8386,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "id": {
+                    "description": "ID 是实体的雪花主键。在实体创建时若为零值将自动生成。",
                     "type": "integer"
                 },
                 "is_failure": {
@@ -8391,6 +8426,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
+                    "description": "UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。",
                     "type": "string"
                 },
                 "url": {
@@ -8415,6 +8451,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
+                    "description": "CreatedAt 是记录创建时间，以毫秒级时间戳持久化。",
                     "type": "string"
                 },
                 "description": {
@@ -8422,6 +8459,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "description": "ID 是实体的雪花主键。在实体创建时若为零值将自动生成。",
                     "type": "integer"
                 },
                 "links_f_key": {
@@ -8444,6 +8482,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "updated_at": {
+                    "description": "UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。",
                     "type": "string"
                 }
             }
@@ -8456,6 +8495,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "created_at": {
+                    "description": "CreatedAt 是记录创建时间，以毫秒级时间戳持久化。",
                     "type": "string"
                 },
                 "email": {
@@ -8467,6 +8507,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "id": {
+                    "description": "ID 是实体的雪花主键。在实体创建时若为零值将自动生成。",
                     "type": "integer"
                 },
                 "is_admin": {
@@ -8486,6 +8527,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
+                    "description": "UpdatedAt 是记录最后更新时间，以毫秒级时间戳自动维护。",
                     "type": "string"
                 },
                 "username": {
@@ -8494,26 +8536,34 @@ const docTemplate = `{
                 }
             }
         },
-        "xBase.BaseResponse": {
+        "envelope.Response": {
             "type": "object",
             "properties": {
                 "code": {
+                    "description": "Code 是业务状态码，错误场景通常取自 apperr 预定义错误码的\nCode 字段；JSON 输出恒包含该字段。",
                     "type": "integer"
                 },
                 "context": {
+                    "description": "Context 是请求唯一标识，由协议入口生成并透传；\n零值时 JSON 输出省略该字段。",
                     "type": "string"
                 },
-                "data": {},
+                "data": {
+                    "description": "Data 是业务数据负载，具体类型由接口约定；\n零值时 JSON 输出省略该字段。"
+                },
                 "error_message": {
+                    "description": "ErrorMessage 是错误详情，仅错误场景填写；\n零值时 JSON 输出省略该字段。",
                     "type": "string"
                 },
                 "message": {
+                    "description": "Message 是面向调用方的状态描述，错误场景通常取自 apperr\n预定义错误码的 Message 字段；JSON 输出恒包含该字段。",
                     "type": "string"
                 },
                 "output": {
+                    "description": "Output 是业务输出类型标识，错误场景通常取自 apperr 预定义\n错误码的 Output 字段；JSON 输出恒包含该字段。",
                     "type": "string"
                 },
                 "overhead": {
+                    "description": "Overhead 是服务端处理耗时，单位为微秒；\n零值时 JSON 输出省略该字段。",
                     "type": "integer"
                 }
             }
