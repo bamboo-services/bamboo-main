@@ -29,20 +29,20 @@ internal/handler/
 | 公开/信息端点 | `public.go`、`info.go` | 健康/信息读写端点 |
 
 ## 约定
-- 校验流程：`ShouldBind*` → `xValid.HandleValidationError` → 返回，保证错误格式统一
-- logic 错误：`_ = c.Error(err)` 后直接 return，由中间件统一渲染错误载荷，避免 handler 自行拼装错误体
-- 成功响应优先使用 `xResult.SuccessHasData`，消息文案保持中文以贴合现有 API 风格
+- 校验流程：统一使用 `bind.Bind(c, &req).Data()` / `.Query()` / `.URI()` 触发实例级校验器与中文翻译，返回 `nil` 即已写回错误并中断请求
+- logic 错误：`_ = c.Error(err)` 后直接 return，由 `webgin` `middleware.Response()` 统一渲染 `envelope.Response`
+- 成功响应优先使用 `httpresult.Success` / `httpresult.SuccessWithData`，消息文案保持中文以贴合现有 API 风格
 - handler 不管理数据库事务、不操作缓存，事务边界归 logic 层
-- Swagger 注释必须与真实路由、响应行为一致；行为变更需同步更新注释与路由映射
+- Swagger 注释必须与真实路由、响应行为一致（统一使用 `envelope.Response`）；行为变更需同步更新注释与 `make swag`
 
 ## 反模式
 - 在 handler 中嵌入业务规则——会让逻辑分散、难以测试
 - 越过 logic 层直接调用 repository——破坏分层与事务边界
-- 自行返回临时 JSON 结构而不使用 `xResult` 约定——前端契约不一致
-- 跳过校验助手、手动格式化 bind 错误——错误响应格式漂移
+- 自行返回临时 JSON 结构而不使用 `httpresult` 约定——前端契约不一致
+- 绕过 `bind.Bind` 直接调用 `c.ShouldBind*`——会跳过 `webgin` 实例级校验与翻译
 
 ## 调试路径
-1. 请求 4xx/校验失败：检查 handler 中 `ShouldBind*` 与 `xValid.HandleValidationError` 调用顺序
-2. 响应结构异常：确认是否误用了自定义 JSON 而非 `xResult` 约定
+1. 请求 4xx/校验失败：检查 handler 中 `bind.Bind(...).Data()/Query()/URI()` 调用及指针判空
+2. 响应结构异常：确认是否误用了自定义 JSON 而非 `httpresult` 约定
 3. 接口文档与实现不一致：核对 handler 顶部 Swagger 注释与 `internal/app/route/` 中路由注册
 4. 依赖注入缺失：回到 `handler.go` 的 `NewHandler[T]`，确认所需 logic 已在 `service` 结构体装配

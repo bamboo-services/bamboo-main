@@ -2,12 +2,13 @@
 
 ## 概述
 数据访问层，封装 GORM 查询与缓存失效策略；写路径通常显式失效对应缓存键。
-缓存经 bamboo-base-go v1.2.0 的 `xCache.Manager` 统一管理，repository 通过泛型工厂
-`xCache.KeyCacheOf[string, entity.X]` 创建 `KeyCache` 实例完成 cache-aside 读写。
+缓存经 bamboo-base-go `plugins/cache/v2` 的 `cache.Manager` 统一管理，repository 通过泛型工厂
+`cache.KeyCacheOf[string, entity.X]` 创建 `KeyCache` 实例完成 cache-aside 读写。
 
 ## 目录结构
 ```text
 internal/repository/
+|- helper.go                   # resolveRepoLogger 显式日志器派生与测试静默兜底
 |- link.go                     # 友链持久化
 |- link_group.go               # 分组持久化
 |- link_color.go               # 颜色持久化
@@ -29,15 +30,15 @@ internal/repository/
 | 用户/系统持久化 | `system_user.go`、`system.go` | 用户认证查询与系统配置存储 |
 | 健康检查 | `health.go` | 数据库连通性探测，logic 不再直接 Ping |
 | 会话/令牌存取 | `session.go`、`token.go` | 纯 Redis 仓储（KeyCache），不依赖 DB |
-| 缓存接入 | 各 repo 构造器 | `xCache.KeyCacheOf[string, entity.X](m)` 创建实例存为 `kc` 字段 |
+| 缓存接入 | 各 repo 构造器 | `cache.KeyCacheOf[string, entity.X](m)` 创建实例存为 `kc` 字段 |
 
 ## 约定
-- 构造器统一为 `New*Repo(db *gorm.DB, m *xCache.Manager)`，内部用 `xCache.KeyCacheOf[string, entity.X](m)` 创建 `kc`；纯 Redis 仓储（session/token）只接收 `m`，DB 参数传 `nil`
+- 构造器统一为 `New*Repo(db *gorm.DB, m *cache.Manager, logger ...*logging.Logger)`；纯 Redis 仓储（session/token）只接收 `(m, logger...)`
 - 方法接受可选事务 `tx *gorm.DB`，内部经 `pickDB(tx)` 解析目标 DB，保证事务一致性
 - 查询上下文路径与调用方一致，使用请求 context
 - 缓存策略为 cache-aside：读穿透 + 写/删时显式失效
 - 缓存键经 `constants.RedisX.Get(id).String()` 构造（带 `NOSQL_PREFIX` 前缀），`K=string`、`V=entity.X`
-- 写入 TTL 通过 `xCache.WithTTL(...)` 显式传入（link/group/color/user 15min，sponsor 10min）
+- 写入 TTL 通过 `cache.WithTTL(...)` 显式传入（link/group/color/user 15min，sponsor 10min）
 - not-found 行为必须显式（返回 `found bool` 或检查 `RowsAffected`），不依赖 nil 推断
 
 ## 反模式
@@ -45,7 +46,7 @@ internal/repository/
 - 可变操作后跳过缓存失效——导致脏读
 - 绕过 `pickDB(tx)` 直接用 `db`——破坏事务一致性
 - 返回框架级响应载荷——数据层不应感知 HTTP 响应结构
-- 直接持有 `*redis.Client` 做实体缓存——应统一走 `xCache.Manager` 泛型接口
+- 直接持有 `*redis.Client` 做实体缓存——应统一走 `cache.Manager` 泛型接口
 - 给纯 Redis 仓储（session/token）传 DB 依赖——职责混杂
 
 ## 调试路径

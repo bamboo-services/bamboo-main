@@ -17,10 +17,10 @@ internal/logic/
 |- sponsor_record.go           # 赞助记录编排
 |- public.go                   # 公开/健康检查逻辑
 |- info.go                     # 站点信息读写逻辑
-|- mail.go                     # 邮件发送入口（框架 xEmail 插件，经 xAsync 异步触发）
+|- mail.go                     # 邮件发送入口（框架 email/v2 插件，经 async.Submit 异步触发）
 |- helper/                     # 跨域 helper（session/snowflake）
 |  |- session.go
-|  |- snowflake.go
+|  `- snowflake.go
 ```
 
 ## 导航指南
@@ -35,11 +35,11 @@ internal/logic/
 | 跨域 helper | `helper/` | session/snowflake 复用逻辑 |
 
 ## 约定
-- 构造器统一为 `New*Logic(ctx context.Context)`，在内部初始化 repo/helper
+- 构造器统一为 `New*Logic(ctx context.Context)`，从容器提取 DB、Cache 与 `*logging.Logger` 并显式透传给 repo/helper
 - 领域规则与事务边界留在 logic，不下沉到 handler/repository
 - 使用项目 typed constants 表达 status/role/context 语义，避免裸字符串
-- 异步触发（邮件/通知）经 `xAsync.Async(ctx.Request.Context(), ...)` 解耦请求上下文，为非阻塞副作用，失败不应回滚主流程；禁止裸 `go func()` 持有 gin.Context
-- 错误返回统一使用 `*xError.Error`，交由上游错误中间件渲染
+- 异步触发（邮件/通知）经 `async.Submit(ctx, ..., async.WithTaskName("MAIL"))` 提交受管协程池并自动 `Detach` 请求取消，为非阻塞副作用，失败不应回滚主流程；禁止裸 `go func()`
+- 错误返回统一使用 `*apperr.Error`，交由上游错误中间件渲染
 
 ## 反模式
 - 把 DB 查询细节从 repository 搬到 logic——破坏数据访问封装
@@ -51,4 +51,4 @@ internal/logic/
 1. 业务规则不符预期：从对应 domain 文件入手，`auth.go` 与 `link.go` 是当前复杂度热点
 2. 事务边界异常：检查 logic 中 `tx` 开启点与 repository 的 `pickDB(tx)` 调用链
 3. 邮件发送失败：定位 `mail.go` 的 `SendWithTemplate`，核对 `EMAIL_*` 配置与 `templates/mail/` 模板是否就绪
-4. 错误未渲染：确认返回类型为 `*xError.Error` 且 handler 已 `_ = c.Error(err)`
+4. 错误未渲染：确认返回类型为 `*apperr.Error` 且 handler 已 `_ = c.Error(err)`

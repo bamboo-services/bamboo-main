@@ -22,7 +22,7 @@ internal/app/route/
 ## 导航指南
 | 任务 | 位置 | 说明 |
 |---|---|---|
-| 全局中间件与 `/api/v1` 根 | `route.go` | response/cors/options/metrics 中间件顺序在此定义 |
+| 业务中间件与 `/api/v1` 根 | `route.go` | Recovery/Response/CORS/Binder 由 `webgin` 插件自动挂载，本处挂载 `metrics.Middleware()` 与业务路由 |
 | 认证端点 | `route_auth.go` | 拆分公开认证与鉴权子组 |
 | admin 端点 + 鉴权门 | `route_admin.go` | OAuth 校验 + 本地鉴权 + 角色中间件 |
 | 用户自助端点 | `route_user.go` | 友链/赞助/资料自助管理，AuthMiddleware 保护 |
@@ -31,14 +31,14 @@ internal/app/route/
 | Prometheus 埋点与端点 | `route.go` | `metrics.Middleware()` 全局埋点 + `GET /metrics`（promhttp 直写） |
 | 截图静态资源 | `route.go` | `GET /screenshots/*` 指向 `SCREENSHOT_DIR` |
 | SPA 单二进制托管 | `frontend.go` | NoRoute 阶段按路径前缀分流，未命中静态资源回退 index.html |
-| Swagger 挂载 | `route_swagger.go` | 仅 debug 模式注册 |
+| Swagger 挂载 | `route_swagger.go` | 仅 `APP_DEBUG=true` 时注册 |
 
 ## 约定
-- handler 实例化统一用 `handler.NewHandler[T](r.context, "Name")`
+- handler 实例化统一用 `handler.NewHandler[T](r.context)`
 - 路由文件只做装配，不含请求解析或业务分支
 - 受保护路由必须显式挂在 OAuth + `AuthMiddleware` + 角色中间件链之下
 - 路径命名稳定在 `/api/v1/...`，按领域分组
-- `frontend.go` 的 noRouteHandler 保持 `/api/*`、`/swagger/*` 走 JSON 404，避免污染 API 错误语义
+- `frontend.go` 的 noRouteHandler 保持 `/api/*`、`/swagger/*` 走 JSON 404（`httpresult.Error`），避免污染 API 错误语义
 - Swagger 路由仅在 debug 环境开启
 
 ## 反模式
@@ -46,11 +46,11 @@ internal/app/route/
 - admin 路由未过 OAuth + `AuthMiddleware` + 角色校验
 - 在 noRouteHandler 中把 `/api/*` 兜底到 SPA index.html——API 路径必须保持 JSON 404
 - 生产模式默认注册 Swagger 路由
-- 各路由文件构造 handler 的方式不一致
+- 重复挂载 `webgin` 内置的 `Recovery`/`Response`/`CORS` 中间件
 
 ## 调试路径
 1. 404/405：回到 `route.go` 确认 `NoRoute`/`NoMethod` 与领域子路由是否注册
 2. 鉴权漏放：核对 `route_admin.go`/`route_user.go` 的中间件链顺序（OAuth → 本地鉴权 → 角色）
-3. CORS 异常：检查 `xMiddle.ResponseMiddleware`/`ReleaseAllCors`/`AllowOptionRequest` 顺序
+3. CORS/响应异常：检查 `webgin.Plugin.Start` 中间件链与 `metrics.Middleware()` 顺序
 4. 前端页面 404：确认 `frontend.go` 的 noRouteHandler 已注册，内嵌产物 `resources/frontend/embed.go` 是否刷新
-5. Swagger 不显示：确认 `xEnv.Debug` 为真且 `swaggerRegister` 被调用
+5. Swagger 不显示：确认 `APP_DEBUG` 为真且 `swaggerRegister` 被调用
