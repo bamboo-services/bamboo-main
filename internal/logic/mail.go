@@ -15,20 +15,19 @@ import (
 	"context"
 	"fmt"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
-	xEmail "github.com/bamboo-services/bamboo-base-go/plugins/email"
+	"github.com/bamboo-services/bamboo-base-go/application/v2"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/ctxkey"
+	"github.com/bamboo-services/bamboo-base-go/plugins/email/v2"
 )
 
 // MailLogic 邮件业务逻辑
 //
-// 基于 bamboo-base-go 的 xEmail 插件同步发送邮件，邮件客户端经节点化注入上下文，
-// 模板由框架模板系统渲染（模板经 go:embed 内嵌，startup 节点注入 xEmail 客户端）。
+// 基于 bamboo-base-go email/v2 插件发送邮件，邮件客户端经容器注入上下文，
+// 模板由框架模板系统渲染（模板经 go:embed 内嵌，由 email.WithTemplateFS 注入）。
 //
-// 调用方应通过 xAsync.Async 将本方法的执行置于异步 goroutine 中，以避免
-// SMTP 拨号阻塞 HTTP 请求上下文；ctx 应为 xAsync 解耦后的独立 context（携带
-// 组件容器引用），而非 gin.Context 本身。
+// 调用方应通过 async.Submit 将本方法的执行置于受管异步任务中，以避免
+// SMTP 拨号阻塞 HTTP 请求上下文。
 type MailLogic struct{}
 
 // NewMailLogic 创建 MailLogic 实例。
@@ -37,25 +36,13 @@ func NewMailLogic() *MailLogic {
 }
 
 // SendWithTemplate 一键发送（填入模板名称、变量，直接发送）
-//
-// 这是最常用的发送方式，自动完成模板渲染与发送操作。
-//
-// 参数说明:
-//   - ctx: 上下文（建议为 xAsync 解耦后的独立 context）
-//   - templateName: 模板名称（如 "approved", "rejected"）
-//   - to: 收件人邮箱列表
-//   - subject: 邮件主题
-//   - variables: 模板变量
-//
-// 返回值:
-//   - 错误信息
-func (m *MailLogic) SendWithTemplate(ctx context.Context, templateName string, to []string, subject string, variables map[string]string) *xError.Error {
-	client, xerr := xCtxUtil.GetEmailClient(ctx)
+func (m *MailLogic) SendWithTemplate(ctx context.Context, templateName string, to []string, subject string, variables map[string]string) *apperr.Error {
+	client, xerr := application.Get[*email.Client](ctx, ctxkey.EmailClientKey)
 	if xerr != nil {
 		return xerr
 	}
 
-	msg := &xEmail.Message{
+	msg := &email.Message{
 		To:           to,
 		Subject:      subject,
 		Template:     templateName,
@@ -63,10 +50,9 @@ func (m *MailLogic) SendWithTemplate(ctx context.Context, templateName string, t
 	}
 
 	if err := client.SendTemplate(ctx, msg); err != nil {
-		return xError.NewError(ctx, xError.ServerInternalError, "发送邮件失败", false, err)
+		return apperr.New(email.EmailError, "发送邮件失败", err)
 	}
 
-	xLog.WithName(xLog.NamedLOGC, "MAIL").Info(ctx, fmt.Sprintf("邮件已发送: To=%v, Template=%s", to, templateName))
-
+	resolveLogicNamedLogger(ctx, "MAIL").Info(ctx, fmt.Sprintf("邮件已发送: To=%v, Template=%s", to, templateName))
 	return nil
 }

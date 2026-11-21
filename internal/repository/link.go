@@ -18,10 +18,12 @@ import (
 	"strings"
 	"time"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	"gorm.io/gorm"
@@ -30,12 +32,12 @@ import (
 
 // LinkRepo 友情链接数据访问层
 //
-// 收口友情链接实体的 CRUD、分页查询与缓存读写，缓存经 xCache.Manager 统一失效。
+// 收口友情链接实体的 CRUD、分页查询与缓存读写，缓存经 cache.Manager 统一失效。
 type LinkRepo struct {
 	db     *gorm.DB
-	kc     xCache.KeyCache[string, entity.LinkFriend]
+	kc     cache.KeyCache[string, entity.LinkFriend]
 	system *SystemRepo
-	log    *xLog.LogNamedLogger
+	log    *logging.LogNamedLogger
 }
 
 // FriendQuery 友情链接分页查询条件
@@ -49,8 +51,8 @@ type FriendQuery struct {
 	LinkStatus  *int
 	LinkFail    *int
 	LinkAnomaly *bool
-	LinkGroupID xSnowflake.SnowflakeID
-	UserID      xSnowflake.SnowflakeID
+	LinkGroupID snowflake.SnowflakeID
+	UserID      snowflake.SnowflakeID
 	SortBy      string
 	SortOrder   string
 }
@@ -60,18 +62,18 @@ type FriendQuery struct {
 // repository 层自有模型：承载「目标全局序号 + 目标分组」两项写入值，
 // 由 logic 层纯函数 BuildSortAssignments 计算后交由 UpdateSortAndPosition 落库。
 type SortAssignment struct {
-	ID      xSnowflake.SnowflakeID  // 友链ID
-	GroupID *xSnowflake.SnowflakeID // 目标分组ID（nil=未分组）
-	Order   int                     // 目标全局排序值
+	ID      snowflake.SnowflakeID  // 友链ID
+	GroupID *snowflake.SnowflakeID // 目标分组ID（nil=未分组）
+	Order   int                    // 目标全局排序值
 }
 
 // NewLinkRepo 创建 LinkRepo 实例
-func NewLinkRepo(db *gorm.DB, m *xCache.Manager) *LinkRepo {
+func NewLinkRepo(db *gorm.DB, m *cache.Manager, logger ...*logging.Logger) *LinkRepo {
 	return &LinkRepo{
 		db:     db,
-		kc:     xCache.KeyCacheOf[string, entity.LinkFriend](m),
-		system: NewSystemRepo(db, m),
-		log:    xLog.WithName(xLog.NamedREPO, "LinkRepo"),
+		kc:     cache.KeyCacheOf[string, entity.LinkFriend](m),
+		system: NewSystemRepo(db, m, logger...),
+		log:    resolveRepoLogger("LinkRepo", logger...),
 	}
 }
 
@@ -121,15 +123,15 @@ func (r *LinkRepo) buildBuiltinInvalid(ctx context.Context) *entity.LinkGroup {
 }
 
 // Create 创建友情链接
-func (r *LinkRepo) Create(ctx context.Context, link *entity.LinkFriend, tx *gorm.DB) (*entity.LinkFriend, *xError.Error) {
+func (r *LinkRepo) Create(ctx context.Context, link *entity.LinkFriend, tx *gorm.DB) (*entity.LinkFriend, *apperr.Error) {
 	r.log.Info(ctx, "Create - 创建友情链接")
 
 	err := r.pickDB(tx).WithContext(ctx).Create(link).Error
 	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "创建友情链接失败", false, err)
+		return nil, apperr.New(database.DatabaseError, "创建友情链接失败", err)
 	}
 
-	if cacheErr := r.kc.Set(ctx, constants.RedisLinkFriend.Get(link.ID).String(), link, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
+	if cacheErr := r.kc.Set(ctx, constants.RedisLinkFriend.Get(link.ID).String(), link, cache.WithTTL(15*time.Minute)); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -139,7 +141,7 @@ func (r *LinkRepo) Create(ctx context.Context, link *entity.LinkFriend, tx *gorm
 // BindUserByEmail 将指定邮箱名下尚未归属的友链绑定到用户
 //
 // 用于游客提交友链后注册/登录时的归属关联：把所有 user_id 为空且联系邮箱匹配的友链归属到该用户。
-func (r *LinkRepo) BindUserByEmail(ctx context.Context, userID xSnowflake.SnowflakeID, email string) *xError.Error {
+func (r *LinkRepo) BindUserByEmail(ctx context.Context, userID snowflake.SnowflakeID, email string) *apperr.Error {
 	r.log.Info(ctx, "BindUserByEmail - 按邮箱绑定友链归属")
 
 	email = strings.ToLower(strings.TrimSpace(email))
@@ -151,7 +153,7 @@ func (r *LinkRepo) BindUserByEmail(ctx context.Context, userID xSnowflake.Snowfl
 		Where("user_id IS NULL AND lower(email) = ?", email).
 		Update("user_id", userID)
 	if result.Error != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "绑定友链归属失败", false, result.Error)
+		return apperr.New(database.DatabaseError, "绑定友链归属失败", result.Error)
 	}
 	return nil
 }
@@ -160,12 +162,12 @@ func (r *LinkRepo) BindUserByEmail(ctx context.Context, userID xSnowflake.Snowfl
 //
 // 经 Omit(clause.Associations) 收敛关联写入：实体可能来自缓存快照（含 GroupFKey/ColorFKey/UserFKey），
 // 保留关联会让 GORM Save 用旧快照覆盖关联表并把外键改回旧值。关联引用不参与保存，交由外键字段落库。
-func (r *LinkRepo) Save(ctx context.Context, link *entity.LinkFriend, tx *gorm.DB) (*entity.LinkFriend, *xError.Error) {
+func (r *LinkRepo) Save(ctx context.Context, link *entity.LinkFriend, tx *gorm.DB) (*entity.LinkFriend, *apperr.Error) {
 	r.log.Info(ctx, "Save - 保存友情链接")
 
 	err := r.pickDB(tx).WithContext(ctx).Omit(clause.Associations).Save(link).Error
 	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "保存友情链接失败", false, err)
+		return nil, apperr.New(database.DatabaseError, "保存友情链接失败", err)
 	}
 
 	if cacheErr := r.kc.Delete(ctx, constants.RedisLinkFriend.Get(link.ID).String()); cacheErr != nil {
@@ -176,12 +178,12 @@ func (r *LinkRepo) Save(ctx context.Context, link *entity.LinkFriend, tx *gorm.D
 }
 
 // GetByID 根据ID获取友情链接
-func (r *LinkRepo) GetByID(ctx context.Context, id xSnowflake.SnowflakeID, withAssociations bool, tx *gorm.DB) (*entity.LinkFriend, bool, *xError.Error) {
+func (r *LinkRepo) GetByID(ctx context.Context, id snowflake.SnowflakeID, withAssociations bool, tx *gorm.DB) (*entity.LinkFriend, bool, *apperr.Error) {
 	r.log.Info(ctx, "GetByID - 获取友情链接")
 
 	if !withAssociations {
 		if link, ok, err := r.kc.Get(ctx, constants.RedisLinkFriend.Get(id).String()); err != nil {
-			return nil, false, xError.NewError(ctx, xError.CacheError, "获取友情链接缓存失败", true, err)
+			return nil, false, apperr.New(cache.CacheError, "获取友情链接缓存失败", err)
 		} else if ok {
 			return link, true, nil
 		}
@@ -198,7 +200,7 @@ func (r *LinkRepo) GetByID(ctx context.Context, id xSnowflake.SnowflakeID, withA
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, false, nil
 		}
-		return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询友情链接失败", false, err)
+		return nil, false, apperr.New(database.DatabaseError, "查询友情链接失败", err)
 	}
 
 	// 内置虚拟项（不落库）：color_id/group_id 引用保留 ID 时补齐虚拟对象，随缓存一并持久化
@@ -207,7 +209,7 @@ func (r *LinkRepo) GetByID(ctx context.Context, id xSnowflake.SnowflakeID, withA
 		ensureBuiltinGroup(&link, r.buildBuiltinInvalid(ctx))
 	}
 
-	if cacheErr := r.kc.Set(ctx, constants.RedisLinkFriend.Get(link.ID).String(), &link, xCache.WithTTL(15*time.Minute)); cacheErr != nil {
+	if cacheErr := r.kc.Set(ctx, constants.RedisLinkFriend.Get(link.ID).String(), &link, cache.WithTTL(15*time.Minute)); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -215,12 +217,12 @@ func (r *LinkRepo) GetByID(ctx context.Context, id xSnowflake.SnowflakeID, withA
 }
 
 // DeleteByID 删除友情链接
-func (r *LinkRepo) DeleteByID(ctx context.Context, id xSnowflake.SnowflakeID, tx *gorm.DB) (bool, *xError.Error) {
+func (r *LinkRepo) DeleteByID(ctx context.Context, id snowflake.SnowflakeID, tx *gorm.DB) (bool, *apperr.Error) {
 	r.log.Info(ctx, "DeleteByID - 删除友情链接")
 
 	result := r.pickDB(tx).WithContext(ctx).Where("id = ?", id).Delete(&entity.LinkFriend{})
 	if result.Error != nil {
-		return false, xError.NewError(ctx, xError.DatabaseError, "删除友情链接失败", false, result.Error)
+		return false, apperr.New(database.DatabaseError, "删除友情链接失败", result.Error)
 	}
 	if result.RowsAffected == 0 {
 		return false, nil
@@ -234,7 +236,7 @@ func (r *LinkRepo) DeleteByID(ctx context.Context, id xSnowflake.SnowflakeID, tx
 }
 
 // List 分页查询友情链接
-func (r *LinkRepo) List(ctx context.Context, req *FriendQuery, tx *gorm.DB) ([]entity.LinkFriend, int64, *xError.Error) {
+func (r *LinkRepo) List(ctx context.Context, req *FriendQuery, tx *gorm.DB) ([]entity.LinkFriend, int64, *apperr.Error) {
 	r.log.Info(ctx, "List - 查询友情链接分页列表")
 
 	query := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{})
@@ -281,14 +283,14 @@ func (r *LinkRepo) List(ctx context.Context, req *FriendQuery, tx *gorm.DB) ([]e
 	var total int64
 	err := query.Count(&total).Error
 	if err != nil {
-		return nil, 0, xError.NewError(ctx, xError.DatabaseError, "统计友情链接数量失败", true, err)
+		return nil, 0, apperr.New(database.DatabaseError, "统计友情链接数量失败", err)
 	}
 
 	offset := (req.Page - 1) * req.PageSize
 	var links []entity.LinkFriend
 	err = query.Preload("GroupFKey").Preload("ColorFKey").Offset(offset).Limit(req.PageSize).Find(&links).Error
 	if err != nil {
-		return nil, 0, xError.NewError(ctx, xError.DatabaseError, "查询友情链接列表失败", false, err)
+		return nil, 0, apperr.New(database.DatabaseError, "查询友情链接列表失败", err)
 	}
 
 	// 内置虚拟项（不落库）：color_id/group_id 引用保留 ID 时补齐虚拟对象
@@ -302,14 +304,14 @@ func (r *LinkRepo) List(ctx context.Context, req *FriendQuery, tx *gorm.DB) ([]e
 }
 
 // UpdateStatusByID 更新友情链接的审核状态
-func (r *LinkRepo) UpdateStatusByID(ctx context.Context, id xSnowflake.SnowflakeID, status int, reviewRemark string, tx *gorm.DB) (bool, *xError.Error) {
+func (r *LinkRepo) UpdateStatusByID(ctx context.Context, id snowflake.SnowflakeID, status int, reviewRemark string, tx *gorm.DB) (bool, *apperr.Error) {
 	r.log.Info(ctx, "UpdateStatusByID - 更新友情链接状态")
 
 	updates := buildStatusUpdates(status, reviewRemark)
 
 	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).Where("id = ?", id).Updates(updates)
 	if result.Error != nil {
-		return false, xError.NewError(ctx, xError.DatabaseError, "更新友情链接状态失败", false, result.Error)
+		return false, apperr.New(database.DatabaseError, "更新友情链接状态失败", result.Error)
 	}
 	if result.RowsAffected == 0 {
 		return false, nil
@@ -361,12 +363,12 @@ func buildStatusUpdates(status int, reviewRemark string) map[string]any {
 // ResolveEditRequest 结算友链的修改位置/颜色申请（通过或拒绝）
 //
 // 通过：expected_* 原子应用到正式字段；拒绝：保持原值。均清空 expected_* 并回到已通过状态。
-func (r *LinkRepo) ResolveEditRequest(ctx context.Context, id xSnowflake.SnowflakeID, apply bool, reviewRemark string, tx *gorm.DB) (bool, *xError.Error) {
+func (r *LinkRepo) ResolveEditRequest(ctx context.Context, id snowflake.SnowflakeID, apply bool, reviewRemark string, tx *gorm.DB) (bool, *apperr.Error) {
 	r.log.Info(ctx, "ResolveEditRequest - 结算修改位置/颜色申请")
 
 	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).Where("id = ?", id).Updates(buildEditResolveUpdates(apply, reviewRemark))
 	if result.Error != nil {
-		return false, xError.NewError(ctx, xError.DatabaseError, "结算修改申请失败", false, result.Error)
+		return false, apperr.New(database.DatabaseError, "结算修改申请失败", result.Error)
 	}
 	if result.RowsAffected == 0 {
 		return false, nil
@@ -383,14 +385,14 @@ func (r *LinkRepo) ResolveEditRequest(ctx context.Context, id xSnowflake.Snowfla
 //
 // invalidGroupID 为内置「已失效」分组的保留 ID：标记失效时自动归入该分组，
 // 恢复时若当前分组即已失效分组则清空（未分组），否则保持原分组不变。
-func (r *LinkRepo) UpdateFailureByID(ctx context.Context, id xSnowflake.SnowflakeID, isFailure int, failReason string, invalidGroupID *xSnowflake.SnowflakeID, tx *gorm.DB) (bool, *xError.Error) {
+func (r *LinkRepo) UpdateFailureByID(ctx context.Context, id snowflake.SnowflakeID, isFailure int, failReason string, invalidGroupID *snowflake.SnowflakeID, tx *gorm.DB) (bool, *apperr.Error) {
 	r.log.Info(ctx, "UpdateFailureByID - 更新友情链接失效状态")
 
 	updates := buildFailureUpdates(isFailure, failReason, invalidGroupID)
 
 	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).Where("id = ?", id).Updates(updates)
 	if result.Error != nil {
-		return false, xError.NewError(ctx, xError.DatabaseError, "更新友情链接失效状态失败", false, result.Error)
+		return false, apperr.New(database.DatabaseError, "更新友情链接失效状态失败", result.Error)
 	}
 	if result.RowsAffected == 0 {
 		return false, nil
@@ -408,7 +410,7 @@ func (r *LinkRepo) UpdateFailureByID(ctx context.Context, id xSnowflake.Snowflak
 // invalidGroupID 为空时不操作分组；标记失效（isFailure 为失效标志）时归入内置
 // 「已失效」分组，恢复时以单条 CASE 原子判断「当前分组为已失效分组则清空」，
 // 避免读-改-写竞态。
-func buildFailureUpdates(isFailure int, failReason string, invalidGroupID *xSnowflake.SnowflakeID) map[string]any {
+func buildFailureUpdates(isFailure int, failReason string, invalidGroupID *snowflake.SnowflakeID) map[string]any {
 	updates := map[string]any{
 		"is_failure":  isFailure,
 		"fail_reason": failReason,
@@ -433,7 +435,7 @@ func buildFailureUpdates(isFailure int, failReason string, invalidGroupID *xSnow
 // 未分组 NULL 经 NULLS LAST 置底），章内遵循友链排序值（bm_link_friend.sort_order ASC），
 // 同序回退创建时间倒序。LEFT JOIN 后 status 于两表同名，条件列一律带表限定；
 // 表名含 bm_ 前缀且为单数（xOptionDB.WithTablePrefix + SingularTable，见 main.go）。
-func (r *LinkRepo) ListPublic(ctx context.Context, groupID *xSnowflake.SnowflakeID, statuses []int, normalFail int, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
+func (r *LinkRepo) ListPublic(ctx context.Context, groupID *snowflake.SnowflakeID, statuses []int, normalFail int, tx *gorm.DB) ([]entity.LinkFriend, *apperr.Error) {
 	r.log.Info(ctx, "ListPublic - 查询公开友情链接")
 
 	query := r.pickDB(tx).WithContext(ctx).
@@ -449,7 +451,7 @@ func (r *LinkRepo) ListPublic(ctx context.Context, groupID *xSnowflake.Snowflake
 		Order("bm_link_group.sort_order ASC NULLS LAST, bm_link_friend.sort_order ASC, bm_link_friend.created_at DESC").
 		Find(&links).Error
 	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询公开友情链接失败", false, err)
+		return nil, apperr.New(database.DatabaseError, "查询公开友情链接失败", err)
 	}
 
 	// 内置虚拟项（不落库）：color_id/group_id 引用保留 ID 时补齐虚拟对象
@@ -466,7 +468,7 @@ func (r *LinkRepo) ListPublic(ctx context.Context, groupID *xSnowflake.Snowflake
 //
 // 供公开「已失效」章节独立展示，按友链排序值升序、创建时间倒序，
 // 返回前补齐内置虚拟关联，与 ListPublic 共用同一套注入逻辑。
-func (r *LinkRepo) ListFailed(ctx context.Context, approvedStatus int, brokenFail int, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
+func (r *LinkRepo) ListFailed(ctx context.Context, approvedStatus int, brokenFail int, tx *gorm.DB) ([]entity.LinkFriend, *apperr.Error) {
 	r.log.Info(ctx, "ListFailed - 查询已失效公开友链")
 
 	var links []entity.LinkFriend
@@ -476,7 +478,7 @@ func (r *LinkRepo) ListFailed(ctx context.Context, approvedStatus int, brokenFai
 		Order("sort_order ASC, created_at DESC").
 		Find(&links).Error
 	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询已失效友链失败", false, err)
+		return nil, apperr.New(database.DatabaseError, "查询已失效友链失败", err)
 	}
 
 	// 内置虚拟项（不落库）：color_id/group_id 引用保留 ID 时补齐虚拟对象
@@ -490,13 +492,13 @@ func (r *LinkRepo) ListFailed(ctx context.Context, approvedStatus int, brokenFai
 }
 
 // GetByIDs 按 ID 列表批量查询友链（无预加载、不走单条缓存，供排序前存在性校验）
-func (r *LinkRepo) GetByIDs(ctx context.Context, ids []xSnowflake.SnowflakeID, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
+func (r *LinkRepo) GetByIDs(ctx context.Context, ids []snowflake.SnowflakeID, tx *gorm.DB) ([]entity.LinkFriend, *apperr.Error) {
 	r.log.Info(ctx, "GetByIDs - 批量查询友情链接")
 
 	var links []entity.LinkFriend
 	err := r.pickDB(tx).WithContext(ctx).Where("id IN ?", ids).Find(&links).Error
 	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "批量查询友情链接失败", false, err)
+		return nil, apperr.New(database.DatabaseError, "批量查询友情链接失败", err)
 	}
 
 	return links, nil
@@ -504,7 +506,7 @@ func (r *LinkRepo) GetByIDs(ctx context.Context, ids []xSnowflake.SnowflakeID, t
 
 // linkSortRowTemplate 友链批量排序 VALUES 行模板（id, sort_order, group_id）
 //
-// 占位符逐项显式 cast 目标类型：id/group_id 为 bigint（xSnowflake.SnowflakeID=int64），
+// 占位符逐项显式 cast 目标类型：id/group_id 为 bigint（snowflake.SnowflakeID=int64），
 // sort_order 为 int；避免 PostgreSQL 将纯参数列默认推断为 text 触发 SQLSTATE 42883。
 // 占位符数量必须与 SortAssignment 字段一一对应，由 TestLinkSortRowTemplate 兜底。
 const linkSortRowTemplate = "(?::bigint, ?::int, ?::bigint)"
@@ -517,7 +519,7 @@ const linkSortRowTemplate = "(?::bigint, ?::int, ?::bigint)"
 // 作为原子存在性兜底，可同时捕获 GetByIDs 预检与写入之间的并发删除（TOCTOU）；
 // VALUES 语法与 ::cast 为 PostgreSQL 专属，勿在其他驱动下使用。
 // 写后逐条失效单条缓存。
-func (r *LinkRepo) UpdateSortAndPosition(ctx context.Context, items []SortAssignment, tx *gorm.DB) *xError.Error {
+func (r *LinkRepo) UpdateSortAndPosition(ctx context.Context, items []SortAssignment, tx *gorm.DB) *apperr.Error {
 	r.log.Info(ctx, "UpdateSortAndPosition - 批量更新友链排序与位置")
 
 	if len(items) == 0 {
@@ -540,10 +542,10 @@ func (r *LinkRepo) UpdateSortAndPosition(ctx context.Context, items []SortAssign
 		args...,
 	)
 	if result.Error != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "更新友链排序失败", false, result.Error)
+		return apperr.New(database.DatabaseError, "更新友链排序失败", result.Error)
 	}
 	if result.RowsAffected != int64(len(items)) {
-		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 
 	for _, it := range items {
@@ -556,7 +558,7 @@ func (r *LinkRepo) UpdateSortAndPosition(ctx context.Context, items []SortAssign
 }
 
 // ListApprovedForScreenshot 查询全部已通过且未失效的友链（按排序与创建时间，供截图全量入队）
-func (r *LinkRepo) ListApprovedForScreenshot(ctx context.Context, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
+func (r *LinkRepo) ListApprovedForScreenshot(ctx context.Context, tx *gorm.DB) ([]entity.LinkFriend, *apperr.Error) {
 	r.log.Info(ctx, "ListApprovedForScreenshot - 查询待截图友链")
 
 	var links []entity.LinkFriend
@@ -565,14 +567,14 @@ func (r *LinkRepo) ListApprovedForScreenshot(ctx context.Context, tx *gorm.DB) (
 		Order("sort_order ASC, created_at DESC").
 		Find(&links).Error
 	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询待截图友链失败", false, err)
+		return nil, apperr.New(database.DatabaseError, "查询待截图友链失败", err)
 	}
 
 	return links, nil
 }
 
 // UpdateScreenshot 更新友链站点截图信息（URL 与最近截图时间）
-func (r *LinkRepo) UpdateScreenshot(ctx context.Context, id xSnowflake.SnowflakeID, url string, at time.Time, tx *gorm.DB) *xError.Error {
+func (r *LinkRepo) UpdateScreenshot(ctx context.Context, id snowflake.SnowflakeID, url string, at time.Time, tx *gorm.DB) *apperr.Error {
 	r.log.Info(ctx, "UpdateScreenshot - 更新友链截图信息")
 
 	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).
@@ -582,10 +584,10 @@ func (r *LinkRepo) UpdateScreenshot(ctx context.Context, id xSnowflake.Snowflake
 			"screenshot_at":  at,
 		})
 	if result.Error != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "更新友链截图信息失败", false, result.Error)
+		return apperr.New(database.DatabaseError, "更新友链截图信息失败", result.Error)
 	}
 	if result.RowsAffected == 0 {
-		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 
 	if cacheErr := r.kc.Delete(ctx, constants.RedisLinkFriend.Get(id).String()); cacheErr != nil {
@@ -595,7 +597,7 @@ func (r *LinkRepo) UpdateScreenshot(ctx context.Context, id xSnowflake.Snowflake
 }
 
 // CountByStatus 按审核状态统计友情链接数量；status 为负数时统计全部
-func (r *LinkRepo) CountByStatus(ctx context.Context, status int, tx *gorm.DB) (int64, *xError.Error) {
+func (r *LinkRepo) CountByStatus(ctx context.Context, status int, tx *gorm.DB) (int64, *apperr.Error) {
 	query := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{})
 	if status >= 0 {
 		query = query.Where("status = ?", status)
@@ -603,45 +605,45 @@ func (r *LinkRepo) CountByStatus(ctx context.Context, status int, tx *gorm.DB) (
 
 	var count int64
 	if err := query.Count(&count).Error; err != nil {
-		return 0, xError.NewError(ctx, xError.DatabaseError, "统计友情链接数量失败", true, err)
+		return 0, apperr.New(database.DatabaseError, "统计友情链接数量失败", err)
 	}
 	return count, nil
 }
 
 // CountAnomaly 统计异常友链数量（status 非 0/1/5 或已失效）
-func (r *LinkRepo) CountAnomaly(ctx context.Context, tx *gorm.DB) (int64, *xError.Error) {
+func (r *LinkRepo) CountAnomaly(ctx context.Context, tx *gorm.DB) (int64, *apperr.Error) {
 	var count int64
 	err := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).
 		Where("(status NOT IN (0, 1, 5) OR is_failure = 1)").
 		Count(&count).Error
 	if err != nil {
-		return 0, xError.NewError(ctx, xError.DatabaseError, "统计异常友链数量失败", true, err)
+		return 0, apperr.New(database.DatabaseError, "统计异常友链数量失败", err)
 	}
 	return count, nil
 }
 
 // CountByGroupID 统计指定分组下友情链接数量
-func (r *LinkRepo) CountByGroupID(ctx context.Context, groupID xSnowflake.SnowflakeID, tx *gorm.DB) (int64, *xError.Error) {
+func (r *LinkRepo) CountByGroupID(ctx context.Context, groupID snowflake.SnowflakeID, tx *gorm.DB) (int64, *apperr.Error) {
 	var count int64
 	err := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).Where("group_id = ?", groupID).Count(&count).Error
 	if err != nil {
-		return 0, xError.NewError(ctx, xError.DatabaseError, "查询关联友链失败", false, err)
+		return 0, apperr.New(database.DatabaseError, "查询关联友链失败", err)
 	}
 	return count, nil
 }
 
 // CountByColorID 统计指定颜色下友情链接数量
-func (r *LinkRepo) CountByColorID(ctx context.Context, colorID xSnowflake.SnowflakeID, tx *gorm.DB) (int64, *xError.Error) {
+func (r *LinkRepo) CountByColorID(ctx context.Context, colorID snowflake.SnowflakeID, tx *gorm.DB) (int64, *apperr.Error) {
 	var count int64
 	err := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).Where("color_id = ?", colorID).Count(&count).Error
 	if err != nil {
-		return 0, xError.NewError(ctx, xError.DatabaseError, "查询关联友链失败", false, err)
+		return 0, apperr.New(database.DatabaseError, "查询关联友链失败", err)
 	}
 	return count, nil
 }
 
 // ListByGroupID 根据分组ID查询友情链接列表
-func (r *LinkRepo) ListByGroupID(ctx context.Context, groupID xSnowflake.SnowflakeID, limit int, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
+func (r *LinkRepo) ListByGroupID(ctx context.Context, groupID snowflake.SnowflakeID, limit int, tx *gorm.DB) ([]entity.LinkFriend, *apperr.Error) {
 	query := r.pickDB(tx).WithContext(ctx).Where("group_id = ?", groupID)
 	if limit > 0 {
 		query = query.Limit(limit)
@@ -650,14 +652,14 @@ func (r *LinkRepo) ListByGroupID(ctx context.Context, groupID xSnowflake.Snowfla
 	var links []entity.LinkFriend
 	err := query.Find(&links).Error
 	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询冲突友链失败", false, err)
+		return nil, apperr.New(database.DatabaseError, "查询冲突友链失败", err)
 	}
 
 	return links, nil
 }
 
 // ListByColorID 根据颜色ID查询友情链接列表
-func (r *LinkRepo) ListByColorID(ctx context.Context, colorID xSnowflake.SnowflakeID, limit int, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
+func (r *LinkRepo) ListByColorID(ctx context.Context, colorID snowflake.SnowflakeID, limit int, tx *gorm.DB) ([]entity.LinkFriend, *apperr.Error) {
 	query := r.pickDB(tx).WithContext(ctx).Where("color_id = ?", colorID)
 	if limit > 0 {
 		query = query.Limit(limit)
@@ -666,7 +668,7 @@ func (r *LinkRepo) ListByColorID(ctx context.Context, colorID xSnowflake.Snowfla
 	var links []entity.LinkFriend
 	err := query.Find(&links).Error
 	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询冲突友链失败", false, err)
+		return nil, apperr.New(database.DatabaseError, "查询冲突友链失败", err)
 	}
 
 	return links, nil
@@ -676,16 +678,16 @@ func (r *LinkRepo) ListByColorID(ctx context.Context, colorID xSnowflake.Snowfla
 //
 // 先查询受影响友链 ID 再批量 UPDATE，随后逐条失效单条缓存，
 // 避免友链缓存携带旧 group_id（写后失效约束，与 MoveGroupID 一致）。
-func (r *LinkRepo) ClearGroupID(ctx context.Context, groupID xSnowflake.SnowflakeID, tx *gorm.DB) *xError.Error {
+func (r *LinkRepo) ClearGroupID(ctx context.Context, groupID snowflake.SnowflakeID, tx *gorm.DB) *apperr.Error {
 	db := r.pickDB(tx).WithContext(ctx)
-	var ids []xSnowflake.SnowflakeID
+	var ids []snowflake.SnowflakeID
 	if err := db.Model(&entity.LinkFriend{}).Where("group_id = ?", groupID).Pluck("id", &ids).Error; err != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "查询待清空友链失败", false, err)
+		return apperr.New(database.DatabaseError, "查询待清空友链失败", err)
 	}
 
 	result := db.Model(&entity.LinkFriend{}).Where("group_id = ?", groupID).Update("group_id", nil)
 	if result.Error != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "清空友链分组关联失败", false, result.Error)
+		return apperr.New(database.DatabaseError, "清空友链分组关联失败", result.Error)
 	}
 
 	for _, id := range ids {
@@ -701,16 +703,16 @@ func (r *LinkRepo) ClearGroupID(ctx context.Context, groupID xSnowflake.Snowflak
 //
 // 先查询受影响友链 ID 再批量 UPDATE，随后逐条失效单条缓存，
 // 避免友链缓存携带旧 group_id（写后失效约束，与 ClearGroupID 一致）。
-func (r *LinkRepo) MoveGroupID(ctx context.Context, fromID, toID xSnowflake.SnowflakeID, tx *gorm.DB) *xError.Error {
+func (r *LinkRepo) MoveGroupID(ctx context.Context, fromID, toID snowflake.SnowflakeID, tx *gorm.DB) *apperr.Error {
 	db := r.pickDB(tx).WithContext(ctx)
-	var ids []xSnowflake.SnowflakeID
+	var ids []snowflake.SnowflakeID
 	if err := db.Model(&entity.LinkFriend{}).Where("group_id = ?", fromID).Pluck("id", &ids).Error; err != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "查询待迁移友链失败", false, err)
+		return apperr.New(database.DatabaseError, "查询待迁移友链失败", err)
 	}
 
 	result := db.Model(&entity.LinkFriend{}).Where("group_id = ?", fromID).Update("group_id", toID)
 	if result.Error != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "迁移友链分组失败", false, result.Error)
+		return apperr.New(database.DatabaseError, "迁移友链分组失败", result.Error)
 	}
 
 	for _, id := range ids {
@@ -723,10 +725,10 @@ func (r *LinkRepo) MoveGroupID(ctx context.Context, fromID, toID xSnowflake.Snow
 }
 
 // ClearColorID 清空指定颜色下友情链接的颜色关联
-func (r *LinkRepo) ClearColorID(ctx context.Context, colorID xSnowflake.SnowflakeID, tx *gorm.DB) *xError.Error {
+func (r *LinkRepo) ClearColorID(ctx context.Context, colorID snowflake.SnowflakeID, tx *gorm.DB) *apperr.Error {
 	result := r.pickDB(tx).WithContext(ctx).Model(&entity.LinkFriend{}).Where("color_id = ?", colorID).Update("color_id", nil)
 	if result.Error != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "清空友链颜色关联失败", false, result.Error)
+		return apperr.New(database.DatabaseError, "清空友链颜色关联失败", result.Error)
 	}
 	return nil
 }

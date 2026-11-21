@@ -14,16 +14,16 @@ package rediscache
 import (
 	"time"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 )
 
 // TokenSession 登录会话数据，序列化后存储于 Redis
 type TokenSession struct {
-	UserID    xSnowflake.SnowflakeID `json:"user_id"`
-	Username  string                 `json:"username"`
-	Email     string                 `json:"email"`
-	LoginIP   string                 `json:"login_ip"`
-	UserAgent string                 `json:"user_agent"`
-	CreatedAt time.Time              `json:"created_at"`
-	ExpiredAt time.Time              `json:"expired_at"`
+	UserID    snowflake.SnowflakeID `json:"user_id"`
+	Username  string                `json:"username"`
+	Email     string                `json:"email"`
+	LoginIP   string                `json:"login_ip"`
+	UserAgent string                `json:"user_agent"`
+	CreatedAt time.Time             `json:"created_at"`
+	ExpiredAt time.Time             `json:"expired_at"`
 }

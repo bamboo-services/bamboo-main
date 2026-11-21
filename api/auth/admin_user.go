@@ -12,14 +12,14 @@
 package apiAuth
 
 import (
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 )
 
 // UserIDRequest 系统用户路径参数
 type UserIDRequest struct {
-	ID xSnowflake.SnowflakeID `uri:"id" binding:"required"`
+	ID snowflake.SnowflakeID `uri:"id" binding:"required"`
 }
 
 // UserQueryRequest 系统用户分页查询请求
@@ -27,12 +27,12 @@ type UserIDRequest struct {
 // Status 使用指针类型：status=0（禁用）时 form 解码写入指针指向的 0，
 // omitempty 仅对 nil 指针放行，oneof=0 1 校验 0 通过，避免禁用筛选被零值吞掉。
 type UserQueryRequest struct {
-	Page      int    `form:"page" binding:"omitempty,min=1" example:"1"`                            // 页码，默认1
-	PageSize  int    `form:"page_size" binding:"omitempty,min=1,max=100" example:"10"`              // 每页数量，默认10
-	Keyword   string `form:"keyword" binding:"omitempty,max=100" example:"admin"`                   // 搜索关键词（用户名/邮箱/昵称模糊匹配）
-	Status    *int   `form:"status" binding:"omitempty,oneof=0 1" example:"1"`                      // 用户状态（0: 禁用, 1: 启用）
+	Page      int    `form:"page" binding:"omitempty,min=1" example:"1"`                                                                // 页码，默认1
+	PageSize  int    `form:"page_size" binding:"omitempty,min=1,max=100" example:"10"`                                                  // 每页数量，默认10
+	Keyword   string `form:"keyword" binding:"omitempty,max=100" example:"admin"`                                                       // 搜索关键词（用户名/邮箱/昵称模糊匹配）
+	Status    *int   `form:"status" binding:"omitempty,oneof=0 1" example:"1"`                                                          // 用户状态（0: 禁用, 1: 启用）
 	SortBy    string `form:"sort_by" binding:"omitempty,oneof=created_at updated_at username email last_login_at" example:"created_at"` // 排序字段
-	SortOrder string `form:"sort_order" binding:"omitempty,oneof=asc desc" example:"desc"`           // 排序方式
+	SortOrder string `form:"sort_order" binding:"omitempty,oneof=asc desc" example:"desc"`                                              // 排序方式
 }
 
 // UserListResponse 系统用户分页列表响应

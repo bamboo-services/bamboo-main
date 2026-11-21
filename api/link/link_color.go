@@ -12,7 +12,7 @@
 package apiLink
 
 import (
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 )
@@ -22,8 +22,8 @@ import (
 // 普通配色（type=0）仅需主色；高级配色（type=1）需主色、副色与悬停色三色齐备；
 // 炫彩为系统内置颜色，无需创建。
 type ColorAddRequest struct {
-	Type         int     `json:"type" binding:"omitempty,oneof=0 1" example:"0"`            // 颜色类型：0=普通, 1=高级
-	ColorName    string  `json:"color_name" binding:"required,min=1,max=50" example:"炫彩红"` // 颜色名称
+	Type         int     `json:"type" binding:"omitempty,oneof=0 1" example:"0"`               // 颜色类型：0=普通, 1=高级
+	ColorName    string  `json:"color_name" binding:"required,min=1,max=50" example:"炫彩红"`     // 颜色名称
 	PrimaryColor *string `json:"primary_color" binding:"omitempty,hexcolor" example:"#FF0000"` // 主颜色
 	SubColor     *string `json:"sub_color" binding:"omitempty,hexcolor" example:"#FF6600"`     // 副颜色（高级配色必填）
 	HoverColor   *string `json:"hover_color" binding:"omitempty,hexcolor" example:"#FF3300"`   // 悬停颜色（高级配色必填）
@@ -32,18 +32,18 @@ type ColorAddRequest struct {
 
 // ColorUpdateRequest 更新友链颜色请求
 type ColorUpdateRequest struct {
-	Type         *int    `json:"type" binding:"omitempty,oneof=0 1" example:"0"`         // 颜色类型：0=普通, 1=高级
+	Type         *int    `json:"type" binding:"omitempty,oneof=0 1" example:"0"`            // 颜色类型：0=普通, 1=高级
 	ColorName    *string `json:"color_name" binding:"omitempty,min=1,max=50" example:"炫彩红"` // 颜色名称
-	PrimaryColor *string `json:"primary_color" binding:"omitempty" example:"#FF0000"`     // 主颜色（可传空字符串清空）
-	SubColor     *string `json:"sub_color" binding:"omitempty" example:"#FF6600"`         // 副颜色（可传空字符串清空）
-	HoverColor   *string `json:"hover_color" binding:"omitempty" example:"#FF3300"`       // 悬停颜色（可传空字符串清空）
-	ColorOrder   *int    `json:"color_order" binding:"omitempty,min=0" example:"0"`       // 颜色排序
+	PrimaryColor *string `json:"primary_color" binding:"omitempty" example:"#FF0000"`       // 主颜色（可传空字符串清空）
+	SubColor     *string `json:"sub_color" binding:"omitempty" example:"#FF6600"`           // 副颜色（可传空字符串清空）
+	HoverColor   *string `json:"hover_color" binding:"omitempty" example:"#FF3300"`         // 悬停颜色（可传空字符串清空）
+	ColorOrder   *int    `json:"color_order" binding:"omitempty,min=0" example:"0"`         // 颜色排序
 }
 
 // ColorSortRequest 颜色排序请求
 type ColorSortRequest struct {
-	ColorIDs  []xSnowflake.SnowflakeID `json:"color_ids" binding:"required,min=1" validate:"required"` // 颜色ID数组，按新的排序传入
-	SortOrder *int                     `json:"sort_order" binding:"omitempty,min=0" example:"10"`      // 可选的起始排序值，不填则从0开始递增
+	ColorIDs  []snowflake.SnowflakeID `json:"color_ids" binding:"required,min=1" validate:"required"` // 颜色ID数组，按新的排序传入
+	SortOrder *int                    `json:"sort_order" binding:"omitempty,min=0" example:"10"`      // 可选的起始排序值，不填则从0开始递增
 }
 
 // ColorStatusRequest 颜色状态切换请求
@@ -58,13 +58,13 @@ type ColorDeleteRequest struct {
 
 // ColorIDRequest 友链颜色路径参数
 type ColorIDRequest struct {
-	ID xSnowflake.SnowflakeID `uri:"id" binding:"required"`
+	ID snowflake.SnowflakeID `uri:"id" binding:"required"`
 }
 
 // ColorListRequest 颜色列表查询请求
 type ColorListRequest struct {
 	Status      *int    `form:"status" binding:"omitempty,oneof=0 1" example:"1"`                                   // 状态过滤：0=禁用，1=启用，不传=全部
-	Type        *int    `form:"type" binding:"omitempty,oneof=0 1" example:"0"`                                    // 类型过滤：0=普通，1=高级，不传=按站点开关
+	Type        *int    `form:"type" binding:"omitempty,oneof=0 1" example:"0"`                                     // 类型过滤：0=普通，1=高级，不传=按站点开关
 	Name        *string `form:"name" binding:"omitempty,max=50" example:"红"`                                        // 名称模糊搜索
 	OnlyEnabled *bool   `form:"only_enabled" binding:"omitempty" example:"true"`                                    // 仅查询启用的颜色
 	OrderBy     *string `form:"order_by" binding:"omitempty,oneof=name sort_order created_at" example:"sort_order"` // 排序字段
@@ -73,7 +73,7 @@ type ColorListRequest struct {
 
 // ColorPageRequest 颜色分页查询请求
 type ColorPageRequest struct {
-	Page     int     `form:"page" binding:"omitempty,min=1" validate:"min=1" example:"1"`                       // 页码，默认1
+	Page     int     `form:"page" binding:"omitempty,min=1" validate:"min=1" example:"1"`                        // 页码，默认1
 	PageSize int     `form:"page_size" binding:"omitempty,min=1,max=100" validate:"min=1,max=100" example:"10"`  // 每页数量，默认10，最大100
 	Status   *int    `form:"status" binding:"omitempty,oneof=0 1" example:"1"`                                   // 状态过滤：0=禁用，1=启用，不传=全部
 	Type     *int    `form:"type" binding:"omitempty,oneof=0 1" example:"0"`                                     // 类型过滤：0=普通，1=高级，不传=全部
@@ -126,8 +126,8 @@ type ColorDeleteConflictResponse struct {
 
 // ColorDeleteConflictInfo 删除冲突的详细信息
 type ColorDeleteConflictInfo struct {
-	ColorID      xSnowflake.SnowflakeID `json:"color_id"`      // 颜色ID
-	ColorName    string                 `json:"color_name"`    // 颜色名称
-	TotalLinks   int                    `json:"total_links"`   // 总友链数量
-	DisplayCount int                    `json:"display_count"` // 显示的友链数量（最多10个）
+	ColorID      snowflake.SnowflakeID `json:"color_id"`      // 颜色ID
+	ColorName    string                `json:"color_name"`    // 颜色名称
+	TotalLinks   int                   `json:"total_links"`   // 总友链数量
+	DisplayCount int                   `json:"display_count"` // 显示的友链数量（最多10个）
 }

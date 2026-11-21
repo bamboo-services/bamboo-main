@@ -11,7 +11,7 @@
 
 package constants
 
-import xCtx "github.com/bamboo-services/bamboo-base-go/defined/context"
+import "github.com/bamboo-services/bamboo-base-go/foundation/v2/ctxkey"
 
 const (
 	// ContextKeyUser 用户信息上下文键
@@ -86,10 +86,19 @@ const (
 )
 
 const (
+	// PluginConfigKey 业务配置工具插件标识
+	PluginConfigKey ctxkey.Key = "plugin_bamboo_config"
+	// PluginMigrationKey 数据库迁移与种子工具插件标识
+	PluginMigrationKey ctxkey.Key = "plugin_bamboo_migration"
+	// PluginScreenshotKey 友链截图常驻 Worker 插件标识
+	PluginScreenshotKey ctxkey.Key = "plugin_bamboo_screenshot"
+	// ComponentScreenshotRefreshKey 友链全量截图定时激发组件标识
+	ComponentScreenshotRefreshKey ctxkey.Key = "component_bamboo_screenshot_refresh"
+
 	// ContextCustomConfig 自定义配置上下文键
-	ContextCustomConfig xCtx.ContextKey = "context_custom_config"
-	// ContextEmailTemplate 内嵌邮件模板注入节点上下文键
-	ContextEmailTemplate xCtx.ContextKey = "context_email_template"
+	ContextCustomConfig ctxkey.Key = "context_custom_config"
+	// ContextDatabaseMigrated 数据库迁移完成标记上下文键
+	ContextDatabaseMigrated ctxkey.Key = "context_database_migrated"
 	// ContextScreenshotManager 友链截图任务管理器上下文键
-	ContextScreenshotManager xCtx.ContextKey = "context_screenshot_manager"
+	ContextScreenshotManager ctxkey.Key = "context_screenshot_manager"
 )

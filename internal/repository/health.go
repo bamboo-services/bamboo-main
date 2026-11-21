@@ -12,9 +12,10 @@ package repository
 import (
 	"context"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2"
 	"gorm.io/gorm"
 )
 
@@ -23,30 +24,30 @@ import (
 // 收口数据库连通性探测，使 logic 层不再直接持有 *gorm.DB 并执行 Ping。
 type HealthRepo struct {
 	db  *gorm.DB
-	log *xLog.LogNamedLogger
+	log *logging.LogNamedLogger
 }
 
 // NewHealthRepo 创建 HealthRepo 实例
-func NewHealthRepo(db *gorm.DB, _ *xCache.Manager) *HealthRepo {
+func NewHealthRepo(db *gorm.DB, _ *cache.Manager, logger ...*logging.Logger) *HealthRepo {
 	return &HealthRepo{
 		db:  db,
-		log: xLog.WithName(xLog.NamedREPO, "HealthRepo"),
+		log: resolveRepoLogger("HealthRepo", logger...),
 	}
 }
 
 // DatabaseReady 探测数据库连接是否可用
-func (r *HealthRepo) DatabaseReady(ctx context.Context) (bool, *xError.Error) {
+func (r *HealthRepo) DatabaseReady(ctx context.Context) (bool, *apperr.Error) {
 	if r.db == nil {
-		return false, xError.NewError(ctx, xError.DatabaseError, "数据库连接失败", false)
+		return false, apperr.New(database.DatabaseError, "数据库连接失败")
 	}
 
 	sqlDB, err := r.db.WithContext(ctx).DB()
 	if err != nil {
-		return false, xError.NewError(ctx, xError.DatabaseError, "获取数据库连接失败", false, err)
+		return false, apperr.New(database.DatabaseError, "获取数据库连接失败", err)
 	}
 
 	if err := sqlDB.PingContext(ctx); err != nil {
-		return false, xError.NewError(ctx, xError.DatabaseError, "数据库连接测试失败", false, err)
+		return false, apperr.New(database.DatabaseError, "数据库连接测试失败", err)
 	}
 
 	return true, nil

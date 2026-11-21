@@ -17,10 +17,12 @@ import (
 	"strings"
 	"time"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	"gorm.io/gorm"
@@ -28,11 +30,11 @@ import (
 
 // SponsorRecordRepo 赞助记录数据访问层
 //
-// 收口赞助记录实体的创建、查询、更新与分页查询，缓存经 xCache.Manager 统一失效。
+// 收口赞助记录实体的创建、查询、更新与分页查询，缓存经 cache.Manager 统一失效。
 type SponsorRecordRepo struct {
 	db  *gorm.DB
-	kc  xCache.KeyCache[string, entity.SponsorRecord]
-	log *xLog.LogNamedLogger
+	kc  cache.KeyCache[string, entity.SponsorRecord]
+	log *logging.LogNamedLogger
 }
 
 // SponsorRecordPageQuery 赞助记录分页查询条件
@@ -41,12 +43,12 @@ type SponsorRecordRepo struct {
 type SponsorRecordPageQuery struct {
 	Page        int
 	PageSize    int
-	ChannelID   *xSnowflake.SnowflakeID
+	ChannelID   *snowflake.SnowflakeID
 	Nickname    string
 	IsAnonymous *bool
 	IsHidden    *bool
 	Status      *int
-	UserID      xSnowflake.SnowflakeID
+	UserID      snowflake.SnowflakeID
 	OrderBy     string
 	Order       string
 }
@@ -57,17 +59,17 @@ type SponsorRecordPageQuery struct {
 type SponsorRecordPublicPageQuery struct {
 	Page      int
 	PageSize  int
-	ChannelID *xSnowflake.SnowflakeID
+	ChannelID *snowflake.SnowflakeID
 	OrderBy   string
 	Order     string
 }
 
 // NewSponsorRecordRepo 创建 SponsorRecordRepo 实例
-func NewSponsorRecordRepo(db *gorm.DB, m *xCache.Manager) *SponsorRecordRepo {
+func NewSponsorRecordRepo(db *gorm.DB, m *cache.Manager, logger ...*logging.Logger) *SponsorRecordRepo {
 	return &SponsorRecordRepo{
 		db:  db,
-		kc:  xCache.KeyCacheOf[string, entity.SponsorRecord](m),
-		log: xLog.WithName(xLog.NamedREPO, "SponsorRecordRepo"),
+		kc:  cache.KeyCacheOf[string, entity.SponsorRecord](m),
+		log: resolveRepoLogger("SponsorRecordRepo", logger...),
 	}
 }
 
@@ -80,15 +82,15 @@ func (r *SponsorRecordRepo) pickDB(tx *gorm.DB) *gorm.DB {
 }
 
 // Create 创建赞助记录
-func (r *SponsorRecordRepo) Create(ctx context.Context, record *entity.SponsorRecord, tx *gorm.DB) (*entity.SponsorRecord, *xError.Error) {
+func (r *SponsorRecordRepo) Create(ctx context.Context, record *entity.SponsorRecord, tx *gorm.DB) (*entity.SponsorRecord, *apperr.Error) {
 	r.log.Info(ctx, "Create - 创建赞助记录")
 
 	err := r.pickDB(tx).WithContext(ctx).Create(record).Error
 	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "创建赞助记录失败", true, err)
+		return nil, apperr.New(database.DatabaseError, "创建赞助记录失败", err)
 	}
 
-	if cacheErr := r.kc.Set(ctx, constants.RedisSponsorRecord.Get(record.ID).String(), record, xCache.WithTTL(10*time.Minute)); cacheErr != nil {
+	if cacheErr := r.kc.Set(ctx, constants.RedisSponsorRecord.Get(record.ID).String(), record, cache.WithTTL(10*time.Minute)); cacheErr != nil {
 		r.log.Warn(ctx, cacheErr.Error())
 	}
 
@@ -97,17 +99,17 @@ func (r *SponsorRecordRepo) Create(ctx context.Context, record *entity.SponsorRe
 		return nil, xErr
 	}
 	if !found {
-		return nil, xError.NewError(ctx, xError.NotFound, "赞助记录不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "赞助记录不存在")
 	}
 	return detail, nil
 }
 
 // GetByID 根据ID获取赞助记录
-func (r *SponsorRecordRepo) GetByID(ctx context.Context, id xSnowflake.SnowflakeID) (*entity.SponsorRecord, bool, *xError.Error) {
+func (r *SponsorRecordRepo) GetByID(ctx context.Context, id snowflake.SnowflakeID) (*entity.SponsorRecord, bool, *apperr.Error) {
 	r.log.Info(ctx, "GetByID - 获取赞助记录")
 
 	if record, ok, err := r.kc.Get(ctx, constants.RedisSponsorRecord.Get(id).String()); err != nil {
-		return nil, false, xError.NewError(ctx, xError.CacheError, "获取赞助记录缓存失败", true, err)
+		return nil, false, apperr.New(cache.CacheError, "获取赞助记录缓存失败", err)
 	} else if ok {
 		return record, true, nil
 	}
@@ -115,7 +117,7 @@ func (r *SponsorRecordRepo) GetByID(ctx context.Context, id xSnowflake.Snowflake
 	var record entity.SponsorRecord
 	err := r.db.WithContext(ctx).Where("id = ?", id).First(&record).Error
 	if err == nil {
-		if cacheErr := r.kc.Set(ctx, constants.RedisSponsorRecord.Get(record.ID).String(), &record, xCache.WithTTL(10*time.Minute)); cacheErr != nil {
+		if cacheErr := r.kc.Set(ctx, constants.RedisSponsorRecord.Get(record.ID).String(), &record, cache.WithTTL(10*time.Minute)); cacheErr != nil {
 			r.log.Warn(ctx, cacheErr.Error())
 		}
 		return &record, true, nil
@@ -123,17 +125,17 @@ func (r *SponsorRecordRepo) GetByID(ctx context.Context, id xSnowflake.Snowflake
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, false, nil
 	}
-	return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询赞助记录失败", true, err)
+	return nil, false, apperr.New(database.DatabaseError, "查询赞助记录失败", err)
 }
 
 // GetDetailByID 根据ID获取赞助记录详情（含渠道关联）
-func (r *SponsorRecordRepo) GetDetailByID(ctx context.Context, id xSnowflake.SnowflakeID) (*entity.SponsorRecord, bool, *xError.Error) {
+func (r *SponsorRecordRepo) GetDetailByID(ctx context.Context, id snowflake.SnowflakeID) (*entity.SponsorRecord, bool, *apperr.Error) {
 	r.log.Info(ctx, "GetDetailByID - 获取赞助记录详情")
 
 	var record entity.SponsorRecord
 	err := r.db.WithContext(ctx).Preload("ChannelFKey").Where("id = ?", id).First(&record).Error
 	if err == nil {
-		if cacheErr := r.kc.Set(ctx, constants.RedisSponsorRecord.Get(record.ID).String(), &record, xCache.WithTTL(10*time.Minute)); cacheErr != nil {
+		if cacheErr := r.kc.Set(ctx, constants.RedisSponsorRecord.Get(record.ID).String(), &record, cache.WithTTL(10*time.Minute)); cacheErr != nil {
 			r.log.Warn(ctx, cacheErr.Error())
 		}
 		return &record, true, nil
@@ -141,16 +143,16 @@ func (r *SponsorRecordRepo) GetDetailByID(ctx context.Context, id xSnowflake.Sno
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, false, nil
 	}
-	return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询赞助记录失败", true, err)
+	return nil, false, apperr.New(database.DatabaseError, "查询赞助记录失败", err)
 }
 
 // UpdateByID 根据ID更新赞助记录的指定字段
-func (r *SponsorRecordRepo) UpdateByID(ctx context.Context, id xSnowflake.SnowflakeID, updates map[string]any, tx *gorm.DB) (*entity.SponsorRecord, bool, *xError.Error) {
+func (r *SponsorRecordRepo) UpdateByID(ctx context.Context, id snowflake.SnowflakeID, updates map[string]any, tx *gorm.DB) (*entity.SponsorRecord, bool, *apperr.Error) {
 	r.log.Info(ctx, "UpdateByID - 更新赞助记录")
 
 	result := r.pickDB(tx).WithContext(ctx).Model(&entity.SponsorRecord{}).Where("id = ?", id).Updates(updates)
 	if result.Error != nil {
-		return nil, false, xError.NewError(ctx, xError.DatabaseError, "更新赞助记录失败", true, result.Error)
+		return nil, false, apperr.New(database.DatabaseError, "更新赞助记录失败", result.Error)
 	}
 	if result.RowsAffected == 0 {
 		return nil, false, nil
@@ -168,12 +170,12 @@ func (r *SponsorRecordRepo) UpdateByID(ctx context.Context, id xSnowflake.Snowfl
 }
 
 // HardDeleteByID 物理删除赞助记录
-func (r *SponsorRecordRepo) HardDeleteByID(ctx context.Context, id xSnowflake.SnowflakeID, tx *gorm.DB) (bool, *xError.Error) {
+func (r *SponsorRecordRepo) HardDeleteByID(ctx context.Context, id snowflake.SnowflakeID, tx *gorm.DB) (bool, *apperr.Error) {
 	r.log.Info(ctx, "HardDeleteByID - 删除赞助记录")
 
 	result := r.pickDB(tx).WithContext(ctx).Unscoped().Where("id = ?", id).Delete(&entity.SponsorRecord{})
 	if result.Error != nil {
-		return false, xError.NewError(ctx, xError.DatabaseError, "删除赞助记录失败", true, result.Error)
+		return false, apperr.New(database.DatabaseError, "删除赞助记录失败", result.Error)
 	}
 	if result.RowsAffected == 0 {
 		return false, nil
@@ -186,7 +188,7 @@ func (r *SponsorRecordRepo) HardDeleteByID(ctx context.Context, id xSnowflake.Sn
 }
 
 // Page 分页查询赞助记录
-func (r *SponsorRecordRepo) Page(ctx context.Context, query SponsorRecordPageQuery) ([]entity.SponsorRecord, int64, *xError.Error) {
+func (r *SponsorRecordRepo) Page(ctx context.Context, query SponsorRecordPageQuery) ([]entity.SponsorRecord, int64, *apperr.Error) {
 	r.log.Info(ctx, "Page - 分页查询赞助记录")
 
 	gormQuery := r.db.WithContext(ctx).Model(&entity.SponsorRecord{})
@@ -202,7 +204,7 @@ func (r *SponsorRecordRepo) Page(ctx context.Context, query SponsorRecordPageQue
 	var total int64
 	err := gormQuery.Count(&total).Error
 	if err != nil {
-		return nil, 0, xError.NewError(ctx, xError.DatabaseError, "统计赞助记录数量失败", true, err)
+		return nil, 0, apperr.New(database.DatabaseError, "统计赞助记录数量失败", err)
 	}
 
 	offset := (query.Page - 1) * query.PageSize
@@ -211,13 +213,13 @@ func (r *SponsorRecordRepo) Page(ctx context.Context, query SponsorRecordPageQue
 	var records []entity.SponsorRecord
 	err = gormQuery.Preload("ChannelFKey").Find(&records).Error
 	if err != nil {
-		return nil, 0, xError.NewError(ctx, xError.DatabaseError, "查询赞助记录列表失败", true, err)
+		return nil, 0, apperr.New(database.DatabaseError, "查询赞助记录列表失败", err)
 	}
 	return records, total, nil
 }
 
 // PublicPage 分页查询公开的赞助记录
-func (r *SponsorRecordRepo) PublicPage(ctx context.Context, query SponsorRecordPublicPageQuery) ([]entity.SponsorRecord, int64, *xError.Error) {
+func (r *SponsorRecordRepo) PublicPage(ctx context.Context, query SponsorRecordPublicPageQuery) ([]entity.SponsorRecord, int64, *apperr.Error) {
 	r.log.Info(ctx, "PublicPage - 分页查询公开赞助记录")
 
 	// 仅展示已通过审核且未被隐藏的记录
@@ -230,7 +232,7 @@ func (r *SponsorRecordRepo) PublicPage(ctx context.Context, query SponsorRecordP
 	var total int64
 	err := gormQuery.Count(&total).Error
 	if err != nil {
-		return nil, 0, xError.NewError(ctx, xError.DatabaseError, "统计赞助记录数量失败", true, err)
+		return nil, 0, apperr.New(database.DatabaseError, "统计赞助记录数量失败", err)
 	}
 
 	offset := (query.Page - 1) * query.PageSize
@@ -239,12 +241,12 @@ func (r *SponsorRecordRepo) PublicPage(ctx context.Context, query SponsorRecordP
 	var records []entity.SponsorRecord
 	err = gormQuery.Preload("ChannelFKey").Find(&records).Error
 	if err != nil {
-		return nil, 0, xError.NewError(ctx, xError.DatabaseError, "查询赞助记录列表失败", true, err)
+		return nil, 0, apperr.New(database.DatabaseError, "查询赞助记录列表失败", err)
 	}
 	return records, total, nil
 }
 
-func (r *SponsorRecordRepo) applyAdminFilters(query *gorm.DB, channelID *xSnowflake.SnowflakeID, nickname string, isAnonymous *bool, isHidden *bool) *gorm.DB {
+func (r *SponsorRecordRepo) applyAdminFilters(query *gorm.DB, channelID *snowflake.SnowflakeID, nickname string, isAnonymous *bool, isHidden *bool) *gorm.DB {
 	if channelID != nil {
 		query = query.Where("channel_id = ?", *channelID)
 	}
@@ -261,7 +263,7 @@ func (r *SponsorRecordRepo) applyAdminFilters(query *gorm.DB, channelID *xSnowfl
 }
 
 // UpdateStatusByID 更新赞助记录的审核状态
-func (r *SponsorRecordRepo) UpdateStatusByID(ctx context.Context, id xSnowflake.SnowflakeID, status int, reviewRemark string, tx *gorm.DB) (bool, *xError.Error) {
+func (r *SponsorRecordRepo) UpdateStatusByID(ctx context.Context, id snowflake.SnowflakeID, status int, reviewRemark string, tx *gorm.DB) (bool, *apperr.Error) {
 	r.log.Info(ctx, "UpdateStatusByID - 更新赞助记录状态")
 
 	updates := map[string]any{
@@ -271,7 +273,7 @@ func (r *SponsorRecordRepo) UpdateStatusByID(ctx context.Context, id xSnowflake.
 
 	result := r.pickDB(tx).WithContext(ctx).Model(&entity.SponsorRecord{}).Where("id = ?", id).Updates(updates)
 	if result.Error != nil {
-		return false, xError.NewError(ctx, xError.DatabaseError, "更新赞助记录状态失败", true, result.Error)
+		return false, apperr.New(database.DatabaseError, "更新赞助记录状态失败", result.Error)
 	}
 	if result.RowsAffected == 0 {
 		return false, nil
@@ -287,7 +289,7 @@ func (r *SponsorRecordRepo) UpdateStatusByID(ctx context.Context, id xSnowflake.
 // BindUserByEmail 将指定邮箱名下尚未归属的赞助记录绑定到用户
 //
 // 用于游客申请赞助后注册/登录时的归属关联：把所有 user_id 为空且联系邮箱匹配的赞助记录归属到该用户。
-func (r *SponsorRecordRepo) BindUserByEmail(ctx context.Context, userID xSnowflake.SnowflakeID, email string, tx *gorm.DB) *xError.Error {
+func (r *SponsorRecordRepo) BindUserByEmail(ctx context.Context, userID snowflake.SnowflakeID, email string, tx *gorm.DB) *apperr.Error {
 	r.log.Info(ctx, "BindUserByEmail - 按邮箱绑定赞助记录归属")
 
 	email = strings.ToLower(strings.TrimSpace(email))
@@ -299,19 +301,19 @@ func (r *SponsorRecordRepo) BindUserByEmail(ctx context.Context, userID xSnowfla
 		Where("user_id IS NULL AND lower(email) = ?", email).
 		Update("user_id", userID)
 	if result.Error != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "绑定赞助记录归属失败", true, result.Error)
+		return apperr.New(database.DatabaseError, "绑定赞助记录归属失败", result.Error)
 	}
 	return nil
 }
 
 // CountByStatus 统计指定审核状态的赞助记录数量
-func (r *SponsorRecordRepo) CountByStatus(ctx context.Context, status int, tx *gorm.DB) (int64, *xError.Error) {
+func (r *SponsorRecordRepo) CountByStatus(ctx context.Context, status int, tx *gorm.DB) (int64, *apperr.Error) {
 	r.log.Info(ctx, "CountByStatus - 统计赞助记录状态数量")
 
 	var count int64
 	err := r.pickDB(tx).WithContext(ctx).Model(&entity.SponsorRecord{}).Where("status = ?", status).Count(&count).Error
 	if err != nil {
-		return 0, xError.NewError(ctx, xError.DatabaseError, "统计赞助记录数量失败", true, err)
+		return 0, apperr.New(database.DatabaseError, "统计赞助记录数量失败", err)
 	}
 	return count, nil
 }

@@ -15,8 +15,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xModels "github.com/bamboo-services/bamboo-base-go/major/models"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2/models"
 	apiLink "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
@@ -33,21 +33,21 @@ func mustItem(t *testing.T, raw string) apiLink.FriendSortItem {
 }
 
 // newLink 构造带指定 ID 与分组的友链实体
-func newLink(id int64, groupID *xSnowflake.SnowflakeID) entity.LinkFriend {
+func newLink(id int64, groupID *snowflake.SnowflakeID) entity.LinkFriend {
 	return entity.LinkFriend{
-		BaseEntity: xModels.BaseEntity{ID: xSnowflake.SnowflakeID(id)},
+		BaseEntity: models.BaseEntity{ID: snowflake.SnowflakeID(id)},
 		GroupID:    groupID,
 	}
 }
 
 // groupPtr 返回雪花 ID 指针
-func groupPtr(id int64) *xSnowflake.SnowflakeID {
-	v := xSnowflake.SnowflakeID(id)
+func groupPtr(id int64) *snowflake.SnowflakeID {
+	v := snowflake.SnowflakeID(id)
 	return &v
 }
 
 // sameGroupID 比较两个可空分组 ID（nil 与 nil 视为相等）
-func sameGroupID(a, b *xSnowflake.SnowflakeID) bool {
+func sameGroupID(a, b *snowflake.SnowflakeID) bool {
 	if a == nil || b == nil {
 		return a == b
 	}

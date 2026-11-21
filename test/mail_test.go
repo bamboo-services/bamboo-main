@@ -18,10 +18,11 @@ import (
 	"testing"
 	"time"
 
-	xEmail "github.com/bamboo-services/bamboo-base-go/plugins/email"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/ctxkey"
+	"github.com/bamboo-services/bamboo-base-go/plugins/email/v2"
 )
 
-// TestSendEmail 基于 bamboo-base-go xEmail 插件测试邮件发送
+// TestSendEmail 基于 bamboo-base-go email/v2 插件测试邮件发送
 //
 // 启用方式:
 //
@@ -42,14 +43,21 @@ func TestSendEmail(t *testing.T) {
 		t.Skip("EMAIL_HOST/EMAIL_USER/EMAIL_PASS/EMAIL_FROM/EMAIL_ADMIN_EMAIL are required")
 	}
 
-	// 经框架 InitClient 从环境变量装配邮件客户端
-	clientAny, err := xEmail.InitClient(context.Background())
-	if err != nil {
+	_, factory := email.New(email.FromEnv())
+	plugin := factory()
+	ctx := context.Background()
+	if err := plugin.Start(ctx); err != nil {
 		t.Fatalf("初始化邮件客户端失败: %v", err)
 	}
-	client, ok := clientAny.(*xEmail.EmailClient)
+	defer func() { _ = plugin.Stop(ctx) }()
+
+	exposer, ok := plugin.(ctxkey.Exposer)
 	if !ok {
-		t.Fatalf("InitClient 返回类型断言失败: %T", clientAny)
+		t.Fatalf("邮件插件未实现 ctxkey.Exposer")
+	}
+	client, ok := exposer.Expose()[ctxkey.EmailClientKey].(*email.Client)
+	if !ok || client == nil {
+		t.Fatalf("Expose 返回类型断言失败")
 	}
 
 	to := os.Getenv("EMAIL_ADMIN_EMAIL")
@@ -58,10 +66,10 @@ func TestSendEmail(t *testing.T) {
 <body style="font-family: 'Microsoft YaHei', Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
     <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
         <h2 style="color: #333; border-bottom: 2px solid #4f7cff; padding-bottom: 10px;">
-            🎉 xEmail 插件测试成功！
+            🎉 email/v2 插件测试成功！
         </h2>
         <p style="color: #555; line-height: 1.8;">
-            这是一封基于 <strong>bamboo-base-go xEmail 插件</strong> 发送的测试邮件。
+            这是一封基于 <strong>bamboo-base-go email/v2 插件</strong> 发送的测试邮件。
         </p>
         <p style="color: #555; line-height: 1.8;">
             发送时间: %s
@@ -72,9 +80,9 @@ func TestSendEmail(t *testing.T) {
 `, time.Now().Format("2006-01-02 15:04:05"))
 
 	t.Logf("正在发送邮件到: %s", to)
-	if err := client.Send(context.Background(), &xEmail.Message{
+	if err := client.Send(ctx, &email.Message{
 		To:       []string{to},
-		Subject:  "【测试】Bamboo-Main xEmail 插件测试",
+		Subject:  "【测试】Bamboo-Main email/v2 插件测试",
 		HTMLBody: html,
 	}); err != nil {
 		t.Fatalf("邮件发送失败: %v", err)

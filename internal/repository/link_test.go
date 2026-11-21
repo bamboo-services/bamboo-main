@@ -14,7 +14,7 @@ import (
 	"strings"
 	"testing"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -48,13 +48,13 @@ func TestSortRowTemplate(t *testing.T) {
 // 标记失效归入内置「已失效」分组，恢复时以单条 CASE 原子清空已失效分组，
 // 未传入内置分组 ID 时不操作分组。
 func TestBuildFailureUpdates(t *testing.T) {
-	invalidID := xSnowflake.SnowflakeID(constants.BuiltinGroupInvalidID)
+	invalidID := snowflake.SnowflakeID(constants.BuiltinGroupInvalidID)
 
 	cases := []struct {
 		name         string
 		isFailure    int
 		failReason   string
-		invalidGroup *xSnowflake.SnowflakeID
+		invalidGroup *snowflake.SnowflakeID
 		wantGroupKey bool
 		wantGroupVal any
 	}{

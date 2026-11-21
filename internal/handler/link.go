@@ -15,10 +15,9 @@ import (
 	apiLink "github.com/bamboo-services/bamboo-main/api/link"
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
-	xUtil "github.com/bamboo-services/bamboo-base-go/major/utility"
-	xValid "github.com/bamboo-services/bamboo-base-go/major/validator"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/bind"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,23 +30,19 @@ import (
 // @Produce json
 // @Security Bearer
 // @Param request body apiLink.FriendAddRequest true "添加友情链接请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendAddResponse} "添加成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLink.FriendAddResponse} "添加成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/links [POST]
 func (h *LinkHandler) Add(c *gin.Context) {
-	var req apiLink.FriendAddRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLink.FriendAddRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	link, err := h.service.linkLogic.Add(c.Request.Context(), &req)
+	link, err := h.service.linkLogic.Add(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -55,7 +50,7 @@ func (h *LinkHandler) Add(c *gin.Context) {
 
 	// 返回成功响应
 	resp := apiLink.FriendAddResponse{LinkFriend: *link}
-	xResult.SuccessHasData(c, "友情链接添加成功", resp)
+	httpresult.SuccessWithData(c, "友情链接添加成功", resp)
 }
 
 // Update 更新友情链接
@@ -68,28 +63,25 @@ func (h *LinkHandler) Add(c *gin.Context) {
 // @Security Bearer
 // @Param id path int true "友情链接ID"
 // @Param request body apiLink.FriendUpdateRequest true "更新友情链接请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendUpdateResponse} "更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLink.FriendUpdateResponse} "更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友情链接不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/links/{id} [PUT]
 func (h *LinkHandler) Update(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLink.LinkIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
 
-	var req apiLink.FriendUpdateRequest
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLink.FriendUpdateRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	link, err := h.service.linkLogic.Update(c.Request.Context(), uri.ID, &req)
+	link, err := h.service.linkLogic.Update(c.Request.Context(), uri.ID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -97,7 +89,7 @@ func (h *LinkHandler) Update(c *gin.Context) {
 
 	// 返回成功响应
 	resp := apiLink.FriendUpdateResponse{LinkFriend: *link}
-	xResult.SuccessHasData(c, "友情链接更新成功", resp)
+	httpresult.SuccessWithData(c, "友情链接更新成功", resp)
 }
 
 // Delete 删除友情链接
@@ -109,14 +101,14 @@ func (h *LinkHandler) Update(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int true "友情链接ID"
-// @Success 200 {object} xBase.BaseResponse "删除成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "删除成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友情链接不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/links/{id} [DELETE]
 func (h *LinkHandler) Delete(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLink.LinkIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
@@ -129,7 +121,7 @@ func (h *LinkHandler) Delete(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "友情链接删除成功")
+	httpresult.Success(c, "友情链接删除成功")
 }
 
 // Get 获取友情链接详情
@@ -141,14 +133,14 @@ func (h *LinkHandler) Delete(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int true "友情链接ID"
-// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendDetailResponse} "获取成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLink.FriendDetailResponse} "获取成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友情链接不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/links/{id} [GET]
 func (h *LinkHandler) Get(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLink.LinkIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
@@ -162,7 +154,7 @@ func (h *LinkHandler) Get(c *gin.Context) {
 
 	// 返回成功响应
 	resp := apiLink.FriendDetailResponse{LinkFriend: *link}
-	xResult.SuccessHasData(c, "获取成功", resp)
+	httpresult.SuccessWithData(c, "获取成功", resp)
 }
 
 // List 获取友情链接列表
@@ -182,30 +174,26 @@ func (h *LinkHandler) Get(c *gin.Context) {
 // @Param link_group_id query int64 false "分组ID"
 // @Param sort_by query string false "排序字段" Enums(created_at, updated_at, link_order, link_name)
 // @Param sort_order query string false "排序方式" Enums(asc, desc)
-// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendListResponse} "获取成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLink.FriendListResponse} "获取成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/links [GET]
 func (h *LinkHandler) List(c *gin.Context) {
-	var req apiLink.FriendQueryRequest
-
-	// 绑定查询参数
-	bindErr := c.ShouldBindQuery(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLink.FriendQueryRequest{}).Query()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	resp, err := h.service.linkLogic.List(c.Request.Context(), &req)
+	resp, err := h.service.linkLogic.List(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "获取成功", resp)
+	httpresult.SuccessWithData(c, "获取成功", resp)
 }
 
 // UpdateStatus 更新友情链接状态
@@ -218,35 +206,32 @@ func (h *LinkHandler) List(c *gin.Context) {
 // @Security Bearer
 // @Param id path int true "友情链接ID"
 // @Param request body apiLink.FriendStatusRequest true "更新状态请求"
-// @Success 200 {object} xBase.BaseResponse "更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友情链接不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/links/{id}/status [PUT]
 func (h *LinkHandler) UpdateStatus(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLink.LinkIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
 
-	var req apiLink.FriendStatusRequest
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLink.FriendStatusRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	err := h.service.linkLogic.UpdateStatus(c.Request.Context(), uri.ID, &req)
+	err := h.service.linkLogic.UpdateStatus(c.Request.Context(), uri.ID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "状态更新成功")
+	httpresult.Success(c, "状态更新成功")
 }
 
 // UpdateSort 批量更新友情链接排序与位置
@@ -258,24 +243,20 @@ func (h *LinkHandler) UpdateStatus(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param request body apiLink.FriendSortRequest true "友链排序请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendSortResponse} "排序更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友情链接或分组不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLink.FriendSortResponse} "排序更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友情链接或分组不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/links/sort [PATCH]
 func (h *LinkHandler) UpdateSort(c *gin.Context) {
-	var req apiLink.FriendSortRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLink.FriendSortRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	err := h.service.linkLogic.UpdateSort(c.Request.Context(), &req)
+	err := h.service.linkLogic.UpdateSort(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -285,7 +266,7 @@ func (h *LinkHandler) UpdateSort(c *gin.Context) {
 	resp := apiLink.FriendSortResponse{
 		Count: len(req.Items),
 	}
-	xResult.SuccessHasData(c, "友链排序更新成功", resp)
+	httpresult.SuccessWithData(c, "友链排序更新成功", resp)
 }
 
 // UpdateFailStatus 更新友情链接失效状态
@@ -298,35 +279,32 @@ func (h *LinkHandler) UpdateSort(c *gin.Context) {
 // @Security Bearer
 // @Param id path int true "友情链接ID"
 // @Param request body apiLink.FriendFailRequest true "更新失效状态请求"
-// @Success 200 {object} xBase.BaseResponse "更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友情链接不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/links/{id}/fail [PUT]
 func (h *LinkHandler) UpdateFailStatus(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLink.LinkIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
 
-	var req apiLink.FriendFailRequest
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLink.FriendFailRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	err := h.service.linkLogic.UpdateFailStatus(c.Request.Context(), uri.ID, &req)
+	err := h.service.linkLogic.UpdateFailStatus(c.Request.Context(), uri.ID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "失效状态更新成功")
+	httpresult.Success(c, "失效状态更新成功")
 }
 
 // ReScreenshot 重新生成友链站点截图
@@ -338,14 +316,14 @@ func (h *LinkHandler) UpdateFailStatus(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int true "友情链接ID"
-// @Success 200 {object} xBase.BaseResponse "已加入截图队列"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "已加入截图队列"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友情链接不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/links/{id}/screenshot [POST]
 func (h *LinkHandler) ReScreenshot(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLink.LinkIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
@@ -356,7 +334,7 @@ func (h *LinkHandler) ReScreenshot(c *gin.Context) {
 		return
 	}
 
-	xResult.Success(c, "已加入截图队列")
+	httpresult.Success(c, "已加入截图队列")
 }
 
 // GetPublicLinks 获取公开的友情链接
@@ -367,8 +345,8 @@ func (h *LinkHandler) ReScreenshot(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param group_id query int64 false "分组ID，不传则获取所有"
-// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendPublicResponse} "获取成功"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLink.FriendPublicResponse} "获取成功"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/public/links [GET]
 func (h *LinkHandler) GetPublicLinks(c *gin.Context) {
 	groupIDStr := c.Query("group_id")
@@ -382,7 +360,7 @@ func (h *LinkHandler) GetPublicLinks(c *gin.Context) {
 
 	// 返回成功响应
 	resp := apiLink.FriendPublicResponse{Links: links}
-	xResult.SuccessHasData(c, "获取成功", resp)
+	httpresult.SuccessWithData(c, "获取成功", resp)
 }
 
 // GetFailedLinks 获取公开「已失效」分组及失效友链
@@ -392,8 +370,8 @@ func (h *LinkHandler) GetPublicLinks(c *gin.Context) {
 // @Tags 公开接口
 // @Accept json
 // @Produce json
-// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendFailedResponse} "获取成功"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLink.FriendFailedResponse} "获取成功"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/links/failed [GET]
 func (h *LinkHandler) GetFailedLinks(c *gin.Context) {
 	resp, err := h.service.linkLogic.GetFailedLinks(c.Request.Context())
@@ -402,7 +380,7 @@ func (h *LinkHandler) GetFailedLinks(c *gin.Context) {
 		return
 	}
 
-	xResult.SuccessHasData(c, "获取已失效分组成功", resp)
+	httpresult.SuccessWithData(c, "获取已失效分组成功", resp)
 }
 
 // ApplyLink 访客自助申请友情链接
@@ -413,22 +391,18 @@ func (h *LinkHandler) GetFailedLinks(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body apiLink.FriendApplyRequest true "申请友情链接请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendAddResponse} "申请成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLink.FriendAddResponse} "申请成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/links/apply [POST]
 func (h *LinkHandler) ApplyLink(c *gin.Context) {
-	var req apiLink.FriendApplyRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLink.FriendApplyRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	link, err := h.service.linkLogic.Apply(c.Request.Context(), &req)
+	link, err := h.service.linkLogic.Apply(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -436,7 +410,7 @@ func (h *LinkHandler) ApplyLink(c *gin.Context) {
 
 	// 返回成功响应
 	resp := apiLink.FriendAddResponse{LinkFriend: *link}
-	xResult.SuccessHasData(c, "友链申请已提交，请等待管理员审核", resp)
+	httpresult.SuccessWithData(c, "友链申请已提交，请等待管理员审核", resp)
 }
 
 // ListMyLinks 获取当前用户的友情链接列表
@@ -450,27 +424,24 @@ func (h *LinkHandler) ApplyLink(c *gin.Context) {
 // @Param page query int false "页码" default(1)
 // @Param page_size query int false "每页数量" default(10)
 // @Param link_status query int false "友情链接状态 0:待审核 1:已通过 2:已拒绝 3:下架待审核 4:已下架"
-// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendListResponse} "获取成功"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLink.FriendListResponse} "获取成功"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/user/links [GET]
 func (h *LinkHandler) ListMyLinks(c *gin.Context) {
 	userID, exists := ctxUtil.GetUserID(c)
 	if !exists {
-		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		_ = c.Error(apperr.New(httpresult.Unauthorized, "用户信息获取失败"))
 		return
 	}
 
-	var req apiLink.FriendUserQueryRequest
-	// 绑定查询参数
-	bindErr := c.ShouldBindQuery(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLink.FriendUserQueryRequest{}).Query()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	result, err := h.service.linkLogic.ListMine(c.Request.Context(), userID, &req)
+	result, err := h.service.linkLogic.ListMine(c.Request.Context(), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -478,7 +449,7 @@ func (h *LinkHandler) ListMyLinks(c *gin.Context) {
 
 	// 返回成功响应
 	resp := apiLink.FriendListResponse{PaginationResponse: *result}
-	xResult.SuccessHasData(c, "获取成功", resp)
+	httpresult.SuccessWithData(c, "获取成功", resp)
 }
 
 // GetMyLink 获取当前用户的友情链接详情
@@ -490,19 +461,19 @@ func (h *LinkHandler) ListMyLinks(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int true "友情链接ID"
-// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendDetailResponse} "获取成功"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLink.FriendDetailResponse} "获取成功"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友情链接不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/user/links/{id} [GET]
 func (h *LinkHandler) GetMyLink(c *gin.Context) {
 	userID, exists := ctxUtil.GetUserID(c)
 	if !exists {
-		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		_ = c.Error(apperr.New(httpresult.Unauthorized, "用户信息获取失败"))
 		return
 	}
 
-	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLink.LinkIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
@@ -516,7 +487,7 @@ func (h *LinkHandler) GetMyLink(c *gin.Context) {
 
 	// 返回成功响应
 	resp := apiLink.FriendDetailResponse{LinkFriend: *link}
-	xResult.SuccessHasData(c, "获取成功", resp)
+	httpresult.SuccessWithData(c, "获取成功", resp)
 }
 
 // UpdateMyLink 更新当前用户的友情链接
@@ -529,34 +500,31 @@ func (h *LinkHandler) GetMyLink(c *gin.Context) {
 // @Security Bearer
 // @Param id path int true "友情链接ID"
 // @Param request body apiLink.FriendUserUpdateRequest true "更新友情链接请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiLink.FriendUpdateResponse} "更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLink.FriendUpdateResponse} "更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友情链接不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/user/links/{id} [PUT]
 func (h *LinkHandler) UpdateMyLink(c *gin.Context) {
 	userID, exists := ctxUtil.GetUserID(c)
 	if !exists {
-		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		_ = c.Error(apperr.New(httpresult.Unauthorized, "用户信息获取失败"))
 		return
 	}
 
-	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLink.LinkIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
 
-	var req apiLink.FriendUserUpdateRequest
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLink.FriendUserUpdateRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	link, err := h.service.linkLogic.UpdateMine(c.Request.Context(), userID, uri.ID, &req)
+	link, err := h.service.linkLogic.UpdateMine(c.Request.Context(), userID, uri.ID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -564,7 +532,7 @@ func (h *LinkHandler) UpdateMyLink(c *gin.Context) {
 
 	// 返回成功响应
 	resp := apiLink.FriendUpdateResponse{LinkFriend: *link}
-	xResult.SuccessHasData(c, "友情链接更新成功", resp)
+	httpresult.SuccessWithData(c, "友情链接更新成功", resp)
 }
 
 // RequestTakedown 当前用户申请下架自己的友情链接
@@ -576,20 +544,20 @@ func (h *LinkHandler) UpdateMyLink(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int true "友情链接ID"
-// @Success 200 {object} xBase.BaseResponse "申请成功"
-// @Failure 400 {object} xBase.BaseResponse "状态不允许下架"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "申请成功"
+// @Failure 400 {object} envelope.Response "状态不允许下架"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友情链接不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/user/links/{id}/takedown [PUT]
 func (h *LinkHandler) RequestTakedown(c *gin.Context) {
 	userID, exists := ctxUtil.GetUserID(c)
 	if !exists {
-		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		_ = c.Error(apperr.New(httpresult.Unauthorized, "用户信息获取失败"))
 		return
 	}
 
-	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLink.LinkIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
@@ -602,7 +570,7 @@ func (h *LinkHandler) RequestTakedown(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "下架申请已提交，请等待管理员审核")
+	httpresult.Success(c, "下架申请已提交，请等待管理员审核")
 }
 
 // RequestEditApply 当前用户申请修改自己友链的展示位置/颜色
@@ -615,41 +583,38 @@ func (h *LinkHandler) RequestTakedown(c *gin.Context) {
 // @Security Bearer
 // @Param id path int true "友情链接ID"
 // @Param request body apiLink.FriendEditApplyRequest true "修改申请请求"
-// @Success 200 {object} xBase.BaseResponse "申请成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "申请成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友情链接不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/user/links/{id}/edit-request [PUT]
 func (h *LinkHandler) RequestEditApply(c *gin.Context) {
 	userID, exists := ctxUtil.GetUserID(c)
 	if !exists {
-		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		_ = c.Error(apperr.New(httpresult.Unauthorized, "用户信息获取失败"))
 		return
 	}
 
-	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLink.LinkIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
 
-	var req apiLink.FriendEditApplyRequest
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLink.FriendEditApplyRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	err := h.service.linkLogic.RequestEditApply(c.Request.Context(), userID, uri.ID, &req)
+	err := h.service.linkLogic.RequestEditApply(c.Request.Context(), userID, uri.ID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "修改申请已提交，请等待管理员审核")
+	httpresult.Success(c, "修改申请已提交，请等待管理员审核")
 }
 
 // ApproveEditRequest 博主通过友链的修改位置/颜色申请
@@ -662,35 +627,32 @@ func (h *LinkHandler) RequestEditApply(c *gin.Context) {
 // @Security Bearer
 // @Param id path int true "友情链接ID"
 // @Param request body apiLink.FriendEditReviewRequest true "审核请求"
-// @Success 200 {object} xBase.BaseResponse "审核成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "审核成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友情链接不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/links/{id}/edit-request/approve [POST]
 func (h *LinkHandler) ApproveEditRequest(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLink.LinkIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
 
-	var req apiLink.FriendEditReviewRequest
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLink.FriendEditReviewRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	err := h.service.linkLogic.ApproveEditRequest(c.Request.Context(), uri.ID, &req)
+	err := h.service.linkLogic.ApproveEditRequest(c.Request.Context(), uri.ID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "修改申请已通过，新位置/颜色已生效")
+	httpresult.Success(c, "修改申请已通过，新位置/颜色已生效")
 }
 
 // RejectEditRequest 博主拒绝友链的修改位置/颜色申请
@@ -703,35 +665,32 @@ func (h *LinkHandler) ApproveEditRequest(c *gin.Context) {
 // @Security Bearer
 // @Param id path int true "友情链接ID"
 // @Param request body apiLink.FriendEditReviewRequest true "审核请求"
-// @Success 200 {object} xBase.BaseResponse "审核成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友情链接不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "审核成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友情链接不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/links/{id}/edit-request/reject [POST]
 func (h *LinkHandler) RejectEditRequest(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiLink.LinkIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLink.LinkIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
 
-	var req apiLink.FriendEditReviewRequest
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLink.FriendEditReviewRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	err := h.service.linkLogic.RejectEditRequest(c.Request.Context(), uri.ID, &req)
+	err := h.service.linkLogic.RejectEditRequest(c.Request.Context(), uri.ID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "修改申请已拒绝，友链保持原位置/颜色")
+	httpresult.Success(c, "修改申请已拒绝，友链保持原位置/颜色")
 }
 
 // GetPublicGroups 获取启用的友链分组列表（公开接口，供申请表单选择器使用）
@@ -740,7 +699,7 @@ func (h *LinkHandler) RejectEditRequest(c *gin.Context) {
 // @Description 返回所有启用的友链分组，供访客申请时预选展示位置
 // @Tags 友情链接接口
 // @Produce json
-// @Success 200 {object} xBase.BaseResponse{data=[]entity.LinkGroup} "获取成功"
+// @Success 200 {object} envelope.Response{data=[]entity.LinkGroup} "获取成功"
 // @Router /api/v1/links/groups [GET]
 func (h *LinkHandler) GetPublicGroups(c *gin.Context) {
 	onlyEnabled := true
@@ -752,7 +711,7 @@ func (h *LinkHandler) GetPublicGroups(c *gin.Context) {
 		_ = c.Error(err)
 		return
 	}
-	xResult.SuccessHasData(c, "获取友链分组列表成功", groups)
+	httpresult.SuccessWithData(c, "获取友链分组列表成功", groups)
 }
 
 // GetPublicColors 获取启用的友链颜色列表（公开接口，供申请表单选择器使用）
@@ -761,7 +720,7 @@ func (h *LinkHandler) GetPublicGroups(c *gin.Context) {
 // @Description 返回所有启用的友链颜色，供访客申请时预选展示颜色
 // @Tags 友情链接接口
 // @Produce json
-// @Success 200 {object} xBase.BaseResponse{data=[]entity.LinkColor} "获取成功"
+// @Success 200 {object} envelope.Response{data=[]entity.LinkColor} "获取成功"
 // @Router /api/v1/links/colors [GET]
 func (h *LinkHandler) GetPublicColors(c *gin.Context) {
 	onlyEnabled := true
@@ -773,5 +732,5 @@ func (h *LinkHandler) GetPublicColors(c *gin.Context) {
 		_ = c.Error(err)
 		return
 	}
-	xResult.SuccessHasData(c, "获取友链颜色列表成功", colors)
+	httpresult.SuccessWithData(c, "获取友链颜色列表成功", colors)
 }

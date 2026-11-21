@@ -12,36 +12,40 @@
 package middleware
 
 import (
+	"github.com/bamboo-services/bamboo-base-go/application/v2"
+	"github.com/bamboo-services/bamboo-base-go/application/v2/builtin"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/header"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
-
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xHttp "github.com/bamboo-services/bamboo-base-go/defined/http"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	"github.com/gin-gonic/gin"
 )
 
 // AuthMiddleware 认证中间件，基于本地 Redis 会话校验访问令牌并注入用户上下文。
-//
-// 令牌来源无关：密码登录与 SSO 登录均在登录时写入本地会话，此处统一读取会话，
-// 不再每请求回查 SSO Userinfo。
 func AuthMiddleware(c *gin.Context) {
-	accessToken := xHttp.GetToken(c, xHttp.HeaderAuthorization)
+	accessToken := header.GetToken(c, header.HeaderAuthorization)
 	if accessToken == "" {
-		_ = c.Error(xError.NewError(c, xError.Unauthorized, "未检测到访问令牌", false))
+		_ = c.Error(apperr.New(httpresult.Unauthorized, "未检测到访问令牌"))
 		c.Abort()
 		return
 	}
 
-	sessionLogic := logcHelper.NewSessionLogic(xCtxUtil.MustGetCacheManager(c))
-	session, found, xErr := sessionLogic.GetUserSession(c.Request.Context(), accessToken)
+	reqCtx := c.Request.Context()
+	m := cache.MustGet(reqCtx)
+	logger, _ := application.Get[*logging.Logger](reqCtx, builtin.LoggerKey)
+
+	sessionLogic := logcHelper.NewSessionLogic(m, logger)
+	session, found, xErr := sessionLogic.GetUserSession(reqCtx, accessToken)
 	if xErr != nil {
 		_ = c.Error(xErr)
 		c.Abort()
 		return
 	}
 	if !found {
-		_ = c.Error(xError.NewError(c, xError.Unauthorized, "登录状态无效或已过期", false))
+		_ = c.Error(apperr.New(httpresult.Unauthorized, "登录状态无效或已过期"))
 		c.Abort()
 		return
 	}

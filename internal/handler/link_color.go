@@ -12,9 +12,8 @@
 package handler
 
 import (
-	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
-	xUtil "github.com/bamboo-services/bamboo-base-go/major/utility"
-	xValid "github.com/bamboo-services/bamboo-base-go/major/validator"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/bind"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	apiLinkColor "github.com/bamboo-services/bamboo-main/api/link"
 	"github.com/gin-gonic/gin"
 )
@@ -28,27 +27,25 @@ import (
 // @Produce json
 // @Security Bearer
 // @Param request body apiLinkColor.ColorAddRequest true "添加友链颜色请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiLinkColor.ColorAddResponse} "添加成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLinkColor.ColorAddResponse} "添加成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/colors [POST]
 func (h *LinkColorHandler) Add(c *gin.Context) {
-	var req apiLinkColor.ColorAddRequest
-
-	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLinkColor.ColorAddRequest{}).Data()
+	if req == nil {
 		return
 	}
 
-	color, err := h.service.linkColorLogic.Add(c.Request.Context(), &req)
+	color, err := h.service.linkColorLogic.Add(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	resp := apiLinkColor.ColorAddResponse{LinkColor: *color}
-	xResult.SuccessHasData(c, "友链颜色添加成功", resp)
+	httpresult.SuccessWithData(c, "友链颜色添加成功", resp)
 }
 
 // Update 更新友链颜色
@@ -61,32 +58,31 @@ func (h *LinkColorHandler) Add(c *gin.Context) {
 // @Security Bearer
 // @Param id path int true "友链颜色ID"
 // @Param request body apiLinkColor.ColorUpdateRequest true "更新友链颜色请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiLinkColor.ColorUpdateResponse} "更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友链颜色不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLinkColor.ColorUpdateResponse} "更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友链颜色不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/colors/{id} [PUT]
 func (h *LinkColorHandler) Update(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiLinkColor.ColorIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLinkColor.ColorIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
 
-	var req apiLinkColor.ColorUpdateRequest
-	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLinkColor.ColorUpdateRequest{}).Data()
+	if req == nil {
 		return
 	}
 
-	color, err := h.service.linkColorLogic.Update(c.Request.Context(), uri.ID, &req)
+	color, err := h.service.linkColorLogic.Update(c.Request.Context(), uri.ID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	resp := apiLinkColor.ColorUpdateResponse{LinkColor: *color}
-	xResult.SuccessHasData(c, "友链颜色更新成功", resp)
+	httpresult.SuccessWithData(c, "友链颜色更新成功", resp)
 }
 
 // UpdateSort 批量更新友链颜色排序
@@ -98,21 +94,19 @@ func (h *LinkColorHandler) Update(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param request body apiLinkColor.ColorSortRequest true "颜色排序请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiLinkColor.ColorSortResponse} "排序更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "颜色不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLinkColor.ColorSortResponse} "排序更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "颜色不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/colors/sort [PATCH]
 func (h *LinkColorHandler) UpdateSort(c *gin.Context) {
-	var req apiLinkColor.ColorSortRequest
-
-	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLinkColor.ColorSortRequest{}).Data()
+	if req == nil {
 		return
 	}
 
-	if err := h.service.linkColorLogic.UpdateSort(c.Request.Context(), &req); err != nil {
+	if err := h.service.linkColorLogic.UpdateSort(c.Request.Context(), req); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -120,7 +114,7 @@ func (h *LinkColorHandler) UpdateSort(c *gin.Context) {
 	resp := apiLinkColor.ColorSortResponse{
 		Count: len(req.ColorIDs),
 	}
-	xResult.SuccessHasData(c, "颜色排序更新成功", resp)
+	httpresult.SuccessWithData(c, "颜色排序更新成功", resp)
 }
 
 // UpdateStatus 更新友链颜色状态
@@ -133,25 +127,24 @@ func (h *LinkColorHandler) UpdateSort(c *gin.Context) {
 // @Security Bearer
 // @Param id path int true "友链颜色ID"
 // @Param request body apiLinkColor.ColorStatusRequest true "颜色状态请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiLinkColor.ColorStatusResponse} "状态更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友链颜色不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLinkColor.ColorStatusResponse} "状态更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友链颜色不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/colors/{id}/status [PATCH]
 func (h *LinkColorHandler) UpdateStatus(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiLinkColor.ColorIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLinkColor.ColorIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
 
-	var req apiLinkColor.ColorStatusRequest
-	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLinkColor.ColorStatusRequest{}).Data()
+	if req == nil {
 		return
 	}
 
-	if err := h.service.linkColorLogic.UpdateStatus(c.Request.Context(), uri.ID, &req); err != nil {
+	if err := h.service.linkColorLogic.UpdateStatus(c.Request.Context(), uri.ID, req); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -163,7 +156,7 @@ func (h *LinkColorHandler) UpdateStatus(c *gin.Context) {
 	resp := apiLinkColor.ColorStatusResponse{
 		Status: req.Status,
 	}
-	xResult.SuccessHasData(c, "颜色已"+statusText, resp)
+	httpresult.SuccessWithData(c, "颜色已"+statusText, resp)
 }
 
 // Delete 删除友链颜色
@@ -176,15 +169,15 @@ func (h *LinkColorHandler) UpdateStatus(c *gin.Context) {
 // @Security Bearer
 // @Param id path int true "友链颜色ID"
 // @Param force query bool false "是否强制删除（默认false）"
-// @Success 200 {object} xBase.BaseResponse "删除成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友链颜色不存在"
+// @Success 200 {object} envelope.Response "删除成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友链颜色不存在"
 // @Failure 409 {object} apiLinkColor.ColorDeleteConflictResponse "存在关联数据冲突"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/colors/{id} [DELETE]
 func (h *LinkColorHandler) Delete(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiLinkColor.ColorIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLinkColor.ColorIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
@@ -197,7 +190,7 @@ func (h *LinkColorHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	xResult.Success(c, "友链颜色删除成功")
+	httpresult.Success(c, "友链颜色删除成功")
 }
 
 // Get 获取友链颜色详情
@@ -209,14 +202,14 @@ func (h *LinkColorHandler) Delete(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int true "友链颜色ID"
-// @Success 200 {object} xBase.BaseResponse{data=apiLinkColor.ColorDetailResponse} "获取成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "友链颜色不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLinkColor.ColorDetailResponse} "获取成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "友链颜色不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/colors/{id} [GET]
 func (h *LinkColorHandler) Get(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiLinkColor.ColorIDRequest{}).URI()
+	uri := bind.Bind(c, &apiLinkColor.ColorIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
@@ -228,7 +221,7 @@ func (h *LinkColorHandler) Get(c *gin.Context) {
 	}
 
 	resp := apiLinkColor.ColorDetailResponse{LinkColor: *color}
-	xResult.SuccessHasData(c, "获取友链颜色详情成功", resp)
+	httpresult.SuccessWithData(c, "获取友链颜色详情成功", resp)
 }
 
 // GetList 获取友链颜色列表
@@ -244,26 +237,24 @@ func (h *LinkColorHandler) Get(c *gin.Context) {
 // @Param only_enabled query bool false "仅查询启用的颜色"
 // @Param order_by query string false "排序字段（name, sort_order, created_at）"
 // @Param order query string false "排序方向（asc, desc）"
-// @Success 200 {object} xBase.BaseResponse{data=[]entity.LinkColor} "获取成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=[]entity.LinkColor} "获取成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/colors/all [GET]
 func (h *LinkColorHandler) GetList(c *gin.Context) {
-	var req apiLinkColor.ColorListRequest
-
-	if bindErr := c.ShouldBindQuery(&req); bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLinkColor.ColorListRequest{}).Query()
+	if req == nil {
 		return
 	}
 
-	colors, err := h.service.linkColorLogic.GetList(c.Request.Context(), &req)
+	colors, err := h.service.linkColorLogic.GetList(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	xResult.SuccessHasData(c, "获取友链颜色列表成功", colors)
+	httpresult.SuccessWithData(c, "获取友链颜色列表成功", colors)
 }
 
 // GetPage 获取友链颜色分页列表
@@ -280,25 +271,23 @@ func (h *LinkColorHandler) GetList(c *gin.Context) {
 // @Param name query string false "名称模糊搜索"
 // @Param order_by query string false "排序字段（name, sort_order, created_at）"
 // @Param order query string false "排序方向（asc, desc）"
-// @Success 200 {object} xBase.BaseResponse{data=apiLinkColor.ColorPageResponse} "获取成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiLinkColor.ColorPageResponse} "获取成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/colors [GET]
 func (h *LinkColorHandler) GetPage(c *gin.Context) {
-	var req apiLinkColor.ColorPageRequest
-
-	if bindErr := c.ShouldBindQuery(&req); bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiLinkColor.ColorPageRequest{}).Query()
+	if req == nil {
 		return
 	}
 
-	result, err := h.service.linkColorLogic.GetPage(c.Request.Context(), &req)
+	result, err := h.service.linkColorLogic.GetPage(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	resp := apiLinkColor.ColorPageResponse{PaginationResponse: *result}
-	xResult.SuccessHasData(c, "获取友链颜色分页列表成功", resp)
+	httpresult.SuccessWithData(c, "获取友链颜色分页列表成功", resp)
 }

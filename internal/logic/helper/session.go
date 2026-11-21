@@ -13,8 +13,9 @@ import (
 	"context"
 	"time"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	redisModel "github.com/bamboo-services/bamboo-main/internal/models/cache/redis"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
@@ -24,33 +25,25 @@ import (
 const SessionTTL = 24 * time.Hour
 
 // SessionMeta 会话元数据
-//
-// 承载来自传输层（HTTP 请求）的客户端信息。由 handler 提取后以纯值下传，
-// 避免 logic/repository 层耦合 gin.Context。
 type SessionMeta struct {
 	ClientIP  string
 	UserAgent string
 }
 
 // SessionLogic 会话管理服务实现
-//
-// 负责组装领域会话对象（TokenSession）并交由 SessionRepo 持久化，
-// 自身不再直接接触 Redis 命令。
 type SessionLogic struct {
 	repo *repository.SessionRepo
 }
 
 // NewSessionLogic 创建 SessionLogic 实例，基于缓存管理器初始化会话仓储依赖。
-func NewSessionLogic(m *xCache.Manager) *SessionLogic {
+func NewSessionLogic(m *cache.Manager, logger ...*logging.Logger) *SessionLogic {
 	return &SessionLogic{
-		repo: repository.NewSessionRepo(m),
+		repo: repository.NewSessionRepo(m, logger...),
 	}
 }
 
 // CreateUserSession 创建用户会话
-//
-// ttl 为会话有效期；会话对象的 ExpiredAt 与 Redis TTL 均以此为准。
-func (s *SessionLogic) CreateUserSession(ctx context.Context, user *entity.SystemUser, token string, meta SessionMeta, ttl time.Duration) *xError.Error {
+func (s *SessionLogic) CreateUserSession(ctx context.Context, user *entity.SystemUser, token string, meta SessionMeta, ttl time.Duration) *apperr.Error {
 	now := time.Now()
 	tokenSession := &redisModel.TokenSession{
 		UserID:    user.ID,
@@ -66,11 +59,11 @@ func (s *SessionLogic) CreateUserSession(ctx context.Context, user *entity.Syste
 }
 
 // GetUserSession 读取用户会话；会话不存在时 found=false（非错误）
-func (s *SessionLogic) GetUserSession(ctx context.Context, token string) (*redisModel.TokenSession, bool, *xError.Error) {
+func (s *SessionLogic) GetUserSession(ctx context.Context, token string) (*redisModel.TokenSession, bool, *apperr.Error) {
 	return s.repo.GetSession(ctx, token)
 }
 
 // DeleteUserSession 删除用户会话
-func (s *SessionLogic) DeleteUserSession(ctx context.Context, token string) *xError.Error {
+func (s *SessionLogic) DeleteUserSession(ctx context.Context, token string) *apperr.Error {
 	return s.repo.DeleteSession(ctx, token)
 }

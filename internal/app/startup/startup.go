@@ -12,44 +12,79 @@
 package startup
 
 import (
-	"context"
+	"log/slog"
+	"os"
+	"strings"
 
-	"github.com/bamboo-services/bamboo-main/pkg/constants"
-	bSdkStartup "github.com/phalanx-labs/beacon-sso-sdk/startup"
-
-	xCtx "github.com/bamboo-services/bamboo-base-go/defined/context"
-	xRegNode "github.com/bamboo-services/bamboo-base-go/major/register/node"
-	xEmail "github.com/bamboo-services/bamboo-base-go/plugins/email"
+	"github.com/bamboo-services/bamboo-base-go/application/v2/builtin"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/env"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
 )
 
-type reg struct {
-	ctx context.Context
-}
+// BuildLoggerConfig 从环境变量装配内置受管日志组件配置。
+func BuildLoggerConfig() builtin.LoggerConfig {
+	dir := "logs"
+	if val, ok := env.Lookup(env.LogPath); ok && !val.IsEmpty() {
+		dir = val.String()
+	}
 
-func newInit() *reg {
-	return &reg{
-		ctx: context.Background(),
+	maxSizeMB := 10
+	if val, ok := env.Lookup(env.LogMaxSize); ok && !val.IsEmpty() {
+		if n, err := val.Int(); err == nil && n > 0 {
+			maxSizeMB = n
+		}
+	}
+
+	debug := false
+	if val, ok := env.Lookup(env.Debug); ok && !val.IsEmpty() {
+		if b, err := val.Bool(); err == nil {
+			debug = b
+		}
+	}
+
+	level := slog.LevelInfo
+	if debug {
+		level = slog.LevelDebug
+	}
+	if val, ok := env.Lookup(env.LogLevel); ok && !val.IsEmpty() {
+		switch strings.ToLower(strings.TrimSpace(val.String())) {
+		case "debug":
+			level = slog.LevelDebug
+		case "info":
+			level = slog.LevelInfo
+		case "warn", "warning":
+			level = slog.LevelWarn
+		case "error":
+			level = slog.LevelError
+		}
+	}
+
+	return builtin.LoggerConfig{
+		Rotator: logging.RotatorConfig{
+			Dir:      dir,
+			BaseName: "bamboo-main",
+			Ext:      ".log",
+			MaxSize:  int64(maxSizeMB) * 1024 * 1024,
+		},
+		Console: os.Stdout,
+		Level:   level,
+		Debug:   debug,
 	}
 }
 
-// Init 返回 startup 自定义节点列表与根上下文。
-//
-// 自 v1.0.4 起，数据库与缓存由 main.go 的 xOption 声明式配置装配，
-// 本函数仅注册框架未覆盖的业务节点：
-//   - Email 邮件客户端（框架 xEmail 插件，SMTP 配置经 EMAIL_* 环境变量装配）
-//   - Email 业务配置（管理员邮箱等，供 logic 读取）
-//   - Email 内嵌模板注入（templates/mail 经 go:embed 内嵌，注入 xEmail 客户端）
-//   - 友链截图任务管理器（无头浏览器自动截图）
-//   - SSO SDK 依赖节点（OAuth 配置 + gRPC 客户端）
-func Init() (context.Context, []xRegNode.RegNodeList) {
-	businessReg := newInit()
-	var regNode []xRegNode.RegNodeList
-
-	regNode = append(regNode, xRegNode.RegNodeList{Key: xCtx.EmailClientKey, Node: xEmail.InitClient})
-	regNode = append(regNode, xRegNode.RegNodeList{Key: constants.ContextCustomConfig, Node: businessReg.emailConfigInit})
-	regNode = append(regNode, xRegNode.RegNodeList{Key: constants.ContextEmailTemplate, Node: businessReg.emailTemplateInit})
-	regNode = append(regNode, xRegNode.RegNodeList{Key: constants.ContextScreenshotManager, Node: businessReg.screenshotManagerInit})
-	regNode = append(regNode, bSdkStartup.NewStartupConfig()...)
-
-	return businessReg.ctx, regNode
+// ParseSnowflakeIDs 从环境变量读取雪花数据中心 ID 与节点 ID（默认 0 / 1）。
+func ParseSnowflakeIDs() (datacenterID int64, nodeID int64) {
+	datacenterID = 0
+	if val, ok := env.Lookup(env.SnowflakeDatacenterID); ok && !val.IsEmpty() {
+		if n, err := val.Int64(); err == nil {
+			datacenterID = n
+		}
+	}
+	nodeID = 1
+	if val, ok := env.Lookup(env.SnowflakeNodeID); ok && !val.IsEmpty() {
+		if n, err := val.Int64(); err == nil {
+			nodeID = n
+		}
+	}
+	return datacenterID, nodeID
 }

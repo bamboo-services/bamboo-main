@@ -17,11 +17,11 @@ import (
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
 	"github.com/bamboo-services/bamboo-main/pkg/util/netUtil"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
-	xValid "github.com/bamboo-services/bamboo-base-go/major/validator"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/bind"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	"github.com/gin-gonic/gin"
-	bSdkUtil "github.com/phalanx-labs/beacon-sso-sdk/utility"
+	bSdkUtil "github.com/phalanx-labs/beacon-sso-sdk/v2/utility"
 )
 
 // Login 用户登录（账号密码）
@@ -32,18 +32,14 @@ import (
 // @Accept json
 // @Produce json
 // @Param request body apiAuth.LoginRequest true "登录请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiAuth.LoginResponse} "登录成功，包含用户信息、Token及时间信息"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "用户名或密码错误"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiAuth.LoginResponse} "登录成功，包含用户信息、Token及时间信息"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "用户名或密码错误"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/auth/login [POST]
 func (h *AuthHandler) Login(c *gin.Context) {
-	var req apiAuth.LoginRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiAuth.LoginRequest{}).Data()
+	if req == nil {
 		return
 	}
 
@@ -52,7 +48,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		ClientIP:  netUtil.GetClientIP(c),
 		UserAgent: c.GetHeader("User-Agent"),
 	}
-	user, token, createdAt, expiredAt, err := h.service.authLogic.Login(c.Request.Context(), &req, meta)
+	user, token, createdAt, expiredAt, err := h.service.authLogic.Login(c.Request.Context(), req, meta)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -65,7 +61,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		CreatedAt: *createdAt,
 		ExpiredAt: *expiredAt,
 	}
-	xResult.SuccessHasData(c, "登录成功", resp)
+	httpresult.SuccessWithData(c, "登录成功", resp)
 }
 
 // OAuthLogin 用户登录（SSO OAuth）
@@ -76,9 +72,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} xBase.BaseResponse{data=apiAuth.LoginResponse} "登录成功，包含用户信息、Token及时间信息"
-// @Failure 401 {object} xBase.BaseResponse "认证失败"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiAuth.LoginResponse} "登录成功，包含用户信息、Token及时间信息"
+// @Failure 401 {object} envelope.Response "认证失败"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/auth/oauth/login [POST]
 func (h *AuthHandler) OAuthLogin(c *gin.Context) {
 	accessToken := bSdkUtil.GetAuthorization(c)
@@ -105,7 +101,7 @@ func (h *AuthHandler) OAuthLogin(c *gin.Context) {
 		CreatedAt: *createdAt,
 		ExpiredAt: *expiredAt,
 	}
-	xResult.SuccessHasData(c, "登录成功", resp)
+	httpresult.SuccessWithData(c, "登录成功", resp)
 }
 
 // Register 用户注册
@@ -116,17 +112,13 @@ func (h *AuthHandler) OAuthLogin(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body apiAuth.RegisterRequest true "注册请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiAuth.RegisterResponse} "注册成功，包含用户信息、Token及时间信息"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误（用户名或邮箱已存在）"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiAuth.RegisterResponse} "注册成功，包含用户信息、Token及时间信息"
+// @Failure 400 {object} envelope.Response "请求参数错误（用户名或邮箱已存在）"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/auth/register [POST]
 func (h *AuthHandler) Register(c *gin.Context) {
-	var req apiAuth.RegisterRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiAuth.RegisterRequest{}).Data()
+	if req == nil {
 		return
 	}
 
@@ -135,7 +127,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		ClientIP:  netUtil.GetClientIP(c),
 		UserAgent: c.GetHeader("User-Agent"),
 	}
-	user, token, createdAt, expiredAt, err := h.service.authLogic.Register(c.Request.Context(), &req, meta)
+	user, token, createdAt, expiredAt, err := h.service.authLogic.Register(c.Request.Context(), req, meta)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -148,7 +140,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		CreatedAt: *createdAt,
 		ExpiredAt: *expiredAt,
 	}
-	xResult.SuccessHasData(c, "注册成功", resp)
+	httpresult.SuccessWithData(c, "注册成功", resp)
 }
 
 // SendRegisterCode 发送注册邮箱验证码
@@ -159,29 +151,25 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body apiAuth.RegisterCodeRequest true "发送验证码请求"
-// @Success 200 {object} xBase.BaseResponse "验证码已发送"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误（邮箱已被注册）"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误或发送过于频繁"
+// @Success 200 {object} envelope.Response "验证码已发送"
+// @Failure 400 {object} envelope.Response "请求参数错误（邮箱已被注册）"
+// @Failure 500 {object} envelope.Response "服务器内部错误或发送过于频繁"
 // @Router /api/v1/auth/register/code [POST]
 func (h *AuthHandler) SendRegisterCode(c *gin.Context) {
-	var req apiAuth.RegisterCodeRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiAuth.RegisterCodeRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	err := h.service.authLogic.SendRegisterCode(c.Request.Context(), &req)
+	err := h.service.authLogic.SendRegisterCode(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "验证码已发送到您的邮箱，请在10分钟内完成注册")
+	httpresult.Success(c, "验证码已发送到您的邮箱，请在10分钟内完成注册")
 }
 
 // Logout 用户登出
@@ -192,9 +180,9 @@ func (h *AuthHandler) SendRegisterCode(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} xBase.BaseResponse "登出成功"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "登出成功"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/auth/logout [PATCH]
 func (h *AuthHandler) Logout(c *gin.Context) {
 	token := bSdkUtil.GetAuthorization(c)
@@ -205,7 +193,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	}
 
 	if token == "" {
-		_ = c.Error(xError.NewError(c, xError.Unauthorized, "未找到认证令牌", false))
+		_ = c.Error(apperr.New(httpresult.Unauthorized, "未找到认证令牌"))
 		return
 	}
 
@@ -216,7 +204,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "登出成功")
+	httpresult.Success(c, "登出成功")
 }
 
 // GetUserInfo 获取当前用户信息
@@ -227,14 +215,14 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} xBase.BaseResponse{data=apiAuth.UserInfoResponse} "用户信息"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiAuth.UserInfoResponse} "用户信息"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/auth/user [GET]
 func (h *AuthHandler) GetUserInfo(c *gin.Context) {
 	userUUID, exists := ctxUtil.GetUserID(c)
 	if !exists {
-		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		_ = c.Error(apperr.New(httpresult.Unauthorized, "用户信息获取失败"))
 		return
 	}
 
@@ -247,7 +235,7 @@ func (h *AuthHandler) GetUserInfo(c *gin.Context) {
 
 	// 返回成功响应
 	resp := apiAuth.UserInfoResponse{User: *userInfo}
-	xResult.SuccessHasData(c, "获取成功", resp)
+	httpresult.SuccessWithData(c, "获取成功", resp)
 }
 
 // UpdateProfile 更新用户资料
@@ -259,29 +247,25 @@ func (h *AuthHandler) GetUserInfo(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param request body apiAuth.UpdateProfileRequest true "更新资料请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiAuth.UserInfoResponse} "更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiAuth.UserInfoResponse} "更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/user/profile [PUT]
 func (h *AuthHandler) UpdateProfile(c *gin.Context) {
-	var req apiAuth.UpdateProfileRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiAuth.UpdateProfileRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	userUUID, exists := ctxUtil.GetUserID(c)
 	if !exists {
-		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		_ = c.Error(apperr.New(httpresult.Unauthorized, "用户信息获取失败"))
 		return
 	}
 
 	// 调用服务层
-	user, err := h.service.authLogic.UpdateProfile(c.Request.Context(), userUUID, &req)
+	user, err := h.service.authLogic.UpdateProfile(c.Request.Context(), userUUID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -289,7 +273,7 @@ func (h *AuthHandler) UpdateProfile(c *gin.Context) {
 
 	// 返回成功响应
 	resp := apiAuth.UserInfoResponse{User: *user}
-	xResult.SuccessHasData(c, "资料更新成功", resp)
+	httpresult.SuccessWithData(c, "资料更新成功", resp)
 }
 
 // ChangePassword 修改密码
@@ -301,36 +285,32 @@ func (h *AuthHandler) UpdateProfile(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param request body apiAuth.PasswordChangeRequest true "修改密码请求"
-// @Success 200 {object} xBase.BaseResponse "修改成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证或旧密码错误"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "修改成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证或旧密码错误"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/auth/password/change [PUT]
 func (h *AuthHandler) ChangePassword(c *gin.Context) {
-	var req apiAuth.PasswordChangeRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiAuth.PasswordChangeRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	userUUID, exists := ctxUtil.GetUserID(c)
 	if !exists {
-		_ = c.Error(xError.NewError(c, xError.Unauthorized, "用户信息获取失败", false))
+		_ = c.Error(apperr.New(httpresult.Unauthorized, "用户信息获取失败"))
 		return
 	}
 
 	// 调用服务层
-	err := h.service.authLogic.ChangePassword(c.Request.Context(), userUUID, &req)
+	err := h.service.authLogic.ChangePassword(c.Request.Context(), userUUID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "密码修改成功")
+	httpresult.Success(c, "密码修改成功")
 }
 
 // ResetPassword 重置密码
@@ -341,30 +321,26 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body apiAuth.PasswordResetRequest true "重置密码请求"
-// @Success 200 {object} xBase.BaseResponse "重置链接已发送"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 404 {object} xBase.BaseResponse "邮箱不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "重置链接已发送"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 404 {object} envelope.Response "邮箱不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/auth/password/reset [PATCH]
 func (h *AuthHandler) ResetPassword(c *gin.Context) {
-	var req apiAuth.PasswordResetRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiAuth.PasswordResetRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	err := h.service.authLogic.ResetPassword(c.Request.Context(), &req)
+	err := h.service.authLogic.ResetPassword(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "重置链接已发送到您的邮箱，请在1小时内完成密码重置")
+	httpresult.Success(c, "重置链接已发送到您的邮箱，请在1小时内完成密码重置")
 }
 
 // VerifyEmail 验证邮箱
@@ -375,29 +351,25 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param token query string true "验证Token"
-// @Success 200 {object} xBase.BaseResponse "验证成功"
-// @Failure 400 {object} xBase.BaseResponse "Token无效或已过期"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "验证成功"
+// @Failure 400 {object} envelope.Response "Token无效或已过期"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/auth/verify-email [GET]
 func (h *AuthHandler) VerifyEmail(c *gin.Context) {
-	var req apiAuth.VerifyEmailRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindQuery(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiAuth.VerifyEmailRequest{}).Query()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	err := h.service.authLogic.VerifyEmail(c.Request.Context(), &req)
+	err := h.service.authLogic.VerifyEmail(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "邮箱验证成功")
+	httpresult.Success(c, "邮箱验证成功")
 }
 
 // VerifyResetToken 验证重置密码Token
@@ -408,29 +380,25 @@ func (h *AuthHandler) VerifyEmail(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param token query string true "重置Token"
-// @Success 200 {object} xBase.BaseResponse "Token有效"
-// @Failure 400 {object} xBase.BaseResponse "Token无效或已过期"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "Token有效"
+// @Failure 400 {object} envelope.Response "Token无效或已过期"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/auth/reset-password [GET]
 func (h *AuthHandler) VerifyResetToken(c *gin.Context) {
-	var req apiAuth.VerifyResetTokenRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindQuery(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiAuth.VerifyResetTokenRequest{}).Query()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层（令牌无效或已过期时 logic 直接返回业务错误）
-	err := h.service.authLogic.VerifyResetToken(c.Request.Context(), &req)
+	err := h.service.authLogic.VerifyResetToken(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "重置链接有效，请设置新密码")
+	httpresult.Success(c, "重置链接有效，请设置新密码")
 }
 
 // ConfirmResetPassword 确认重置密码
@@ -441,27 +409,23 @@ func (h *AuthHandler) VerifyResetToken(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body apiAuth.ConfirmResetPasswordRequest true "确认重置密码请求"
-// @Success 200 {object} xBase.BaseResponse "密码重置成功"
-// @Failure 400 {object} xBase.BaseResponse "Token无效或已过期"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "密码重置成功"
+// @Failure 400 {object} envelope.Response "Token无效或已过期"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/auth/reset-password [POST]
 func (h *AuthHandler) ConfirmResetPassword(c *gin.Context) {
-	var req apiAuth.ConfirmResetPasswordRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiAuth.ConfirmResetPasswordRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	err := h.service.authLogic.ConfirmResetPassword(c.Request.Context(), &req)
+	err := h.service.authLogic.ConfirmResetPassword(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "密码重置成功，请使用新密码登录")
+	httpresult.Success(c, "密码重置成功，请使用新密码登录")
 }

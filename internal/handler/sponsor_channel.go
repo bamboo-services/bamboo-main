@@ -14,9 +14,8 @@ package handler
 import (
 	apiSponsorChannel "github.com/bamboo-services/bamboo-main/api/sponsor"
 
-	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
-	xUtil "github.com/bamboo-services/bamboo-base-go/major/utility"
-	xValid "github.com/bamboo-services/bamboo-base-go/major/validator"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/bind"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,23 +28,19 @@ import (
 // @Produce json
 // @Security Bearer
 // @Param request body apiSponsorChannel.ChannelAddRequest true "添加赞助渠道请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiSponsorChannel.ChannelAddResponse} "添加成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiSponsorChannel.ChannelAddResponse} "添加成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/sponsors/channels [POST]
 func (h *SponsorChannelHandler) Add(c *gin.Context) {
-	var req apiSponsorChannel.ChannelAddRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiSponsorChannel.ChannelAddRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	channel, err := h.service.sponsorChannelLogic.Add(c.Request.Context(), &req)
+	channel, err := h.service.sponsorChannelLogic.Add(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -53,7 +48,7 @@ func (h *SponsorChannelHandler) Add(c *gin.Context) {
 
 	// 返回成功响应
 	resp := apiSponsorChannel.ChannelAddResponse{ChannelEntityResponse: *channel}
-	xResult.SuccessHasData(c, "赞助渠道添加成功", resp)
+	httpresult.SuccessWithData(c, "赞助渠道添加成功", resp)
 }
 
 // Update 更新赞助渠道
@@ -66,29 +61,25 @@ func (h *SponsorChannelHandler) Add(c *gin.Context) {
 // @Security Bearer
 // @Param id path int true "赞助渠道ID"
 // @Param request body apiSponsorChannel.ChannelUpdateRequest true "更新赞助渠道请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiSponsorChannel.ChannelUpdateResponse} "更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "赞助渠道不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiSponsorChannel.ChannelUpdateResponse} "更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "赞助渠道不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/sponsors/channels/{id} [PUT]
 func (h *SponsorChannelHandler) Update(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiSponsorChannel.ChannelIDRequest{}).URI()
+	uri := bind.Bind(c, &apiSponsorChannel.ChannelIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
 
-	var req apiSponsorChannel.ChannelUpdateRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiSponsorChannel.ChannelUpdateRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	channel, err := h.service.sponsorChannelLogic.Update(c.Request.Context(), uri.ID, &req)
+	channel, err := h.service.sponsorChannelLogic.Update(c.Request.Context(), uri.ID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -96,7 +87,7 @@ func (h *SponsorChannelHandler) Update(c *gin.Context) {
 
 	// 返回成功响应
 	resp := apiSponsorChannel.ChannelUpdateResponse{ChannelEntityResponse: *channel}
-	xResult.SuccessHasData(c, "赞助渠道更新成功", resp)
+	httpresult.SuccessWithData(c, "赞助渠道更新成功", resp)
 }
 
 // UpdateStatus 更新赞助渠道状态
@@ -109,29 +100,25 @@ func (h *SponsorChannelHandler) Update(c *gin.Context) {
 // @Security Bearer
 // @Param id path int true "赞助渠道ID"
 // @Param request body apiSponsorChannel.ChannelStatusRequest true "渠道状态请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiSponsorChannel.ChannelStatusResponse} "状态更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "赞助渠道不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiSponsorChannel.ChannelStatusResponse} "状态更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "赞助渠道不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/sponsors/channels/{id}/status [PATCH]
 func (h *SponsorChannelHandler) UpdateStatus(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiSponsorChannel.ChannelIDRequest{}).URI()
+	uri := bind.Bind(c, &apiSponsorChannel.ChannelIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
 
-	var req apiSponsorChannel.ChannelStatusRequest
-
-	// 绑定请求数据
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiSponsorChannel.ChannelStatusRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	status, err := h.service.sponsorChannelLogic.UpdateStatus(c.Request.Context(), uri.ID, &req)
+	status, err := h.service.sponsorChannelLogic.UpdateStatus(c.Request.Context(), uri.ID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -142,7 +129,7 @@ func (h *SponsorChannelHandler) UpdateStatus(c *gin.Context) {
 	if status {
 		statusText = "启用"
 	}
-	xResult.SuccessHasData(c, "渠道已"+statusText, apiSponsorChannel.ChannelStatusResponse{
+	httpresult.SuccessWithData(c, "渠道已"+statusText, apiSponsorChannel.ChannelStatusResponse{
 		Status: status,
 	})
 }
@@ -156,14 +143,14 @@ func (h *SponsorChannelHandler) UpdateStatus(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int true "赞助渠道ID"
-// @Success 200 {object} xBase.BaseResponse "删除成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "赞助渠道不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "删除成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "赞助渠道不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/sponsors/channels/{id} [DELETE]
 func (h *SponsorChannelHandler) Delete(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiSponsorChannel.ChannelIDRequest{}).URI()
+	uri := bind.Bind(c, &apiSponsorChannel.ChannelIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
@@ -176,7 +163,7 @@ func (h *SponsorChannelHandler) Delete(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "赞助渠道删除成功")
+	httpresult.Success(c, "赞助渠道删除成功")
 }
 
 // Get 获取赞助渠道详情
@@ -188,14 +175,14 @@ func (h *SponsorChannelHandler) Delete(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int true "赞助渠道ID"
-// @Success 200 {object} xBase.BaseResponse{data=apiSponsorChannel.ChannelDetailResponse} "获取成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "赞助渠道不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiSponsorChannel.ChannelDetailResponse} "获取成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "赞助渠道不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/sponsors/channels/{id} [GET]
 func (h *SponsorChannelHandler) Get(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiSponsorChannel.ChannelIDRequest{}).URI()
+	uri := bind.Bind(c, &apiSponsorChannel.ChannelIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
@@ -209,7 +196,7 @@ func (h *SponsorChannelHandler) Get(c *gin.Context) {
 
 	// 返回成功响应
 	resp := apiSponsorChannel.ChannelDetailResponse{ChannelEntityResponse: *channel}
-	xResult.SuccessHasData(c, "获取赞助渠道详情成功", resp)
+	httpresult.SuccessWithData(c, "获取赞助渠道详情成功", resp)
 }
 
 // GetList 获取赞助渠道列表
@@ -225,30 +212,26 @@ func (h *SponsorChannelHandler) Get(c *gin.Context) {
 // @Param only_enabled query bool false "仅查询启用的渠道"
 // @Param order_by query string false "排序字段（name, sort_order, created_at）"
 // @Param order query string false "排序方向（asc, desc）"
-// @Success 200 {object} xBase.BaseResponse{data=[]apiSponsorChannel.ChannelListItemResponse} "获取成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=[]apiSponsorChannel.ChannelListItemResponse} "获取成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/sponsors/channels/all [GET]
 func (h *SponsorChannelHandler) GetList(c *gin.Context) {
-	var req apiSponsorChannel.ChannelListRequest
-
-	// 绑定查询参数
-	bindErr := c.ShouldBindQuery(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiSponsorChannel.ChannelListRequest{}).Query()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	channels, err := h.service.sponsorChannelLogic.GetList(c.Request.Context(), &req)
+	channels, err := h.service.sponsorChannelLogic.GetList(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "获取赞助渠道列表成功", channels)
+	httpresult.SuccessWithData(c, "获取赞助渠道列表成功", channels)
 }
 
 // GetPage 获取赞助渠道分页列表
@@ -265,30 +248,26 @@ func (h *SponsorChannelHandler) GetList(c *gin.Context) {
 // @Param name query string false "名称模糊搜索"
 // @Param order_by query string false "排序字段（name, sort_order, created_at）"
 // @Param order query string false "排序方向（asc, desc）"
-// @Success 200 {object} xBase.BaseResponse{data=apiSponsorChannel.ChannelPageResponse} "获取成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiSponsorChannel.ChannelPageResponse} "获取成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/sponsors/channels [GET]
 func (h *SponsorChannelHandler) GetPage(c *gin.Context) {
-	var req apiSponsorChannel.ChannelPageRequest
-
-	// 绑定查询参数
-	bindErr := c.ShouldBindQuery(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiSponsorChannel.ChannelPageRequest{}).Query()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	result, err := h.service.sponsorChannelLogic.GetPage(c.Request.Context(), &req)
+	result, err := h.service.sponsorChannelLogic.GetPage(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "获取赞助渠道分页列表成功", result)
+	httpresult.SuccessWithData(c, "获取赞助渠道分页列表成功", result)
 }
 
 // GetPublicList 获取公开的赞助渠道列表
@@ -298,8 +277,8 @@ func (h *SponsorChannelHandler) GetPage(c *gin.Context) {
 // @Tags 赞助渠道接口
 // @Accept json
 // @Produce json
-// @Success 200 {object} xBase.BaseResponse{data=[]apiSponsorChannel.ChannelListItemResponse} "获取成功"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=[]apiSponsorChannel.ChannelListItemResponse} "获取成功"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/sponsors/channels [GET]
 func (h *SponsorChannelHandler) GetPublicList(c *gin.Context) {
 	// 调用服务层
@@ -310,5 +289,5 @@ func (h *SponsorChannelHandler) GetPublicList(c *gin.Context) {
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "获取公开渠道列表成功", channels)
+	httpresult.SuccessWithData(c, "获取公开渠道列表成功", channels)
 }

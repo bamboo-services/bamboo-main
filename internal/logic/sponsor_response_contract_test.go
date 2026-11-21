@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xModels "github.com/bamboo-services/bamboo-base-go/major/models"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2/models"
 	apiSponsor "github.com/bamboo-services/bamboo-main/api/sponsor"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 )
@@ -24,7 +24,7 @@ import (
 func TestBuildRecordPublicItemResponse_Anonymous(t *testing.T) {
 	redirectURL := "https://example.com"
 	record := &entity.SponsorRecord{
-		BaseEntity:  xModels.BaseEntity{ID: xSnowflake.SnowflakeID(1001)},
+		BaseEntity:  models.BaseEntity{ID: snowflake.SnowflakeID(1001)},
 		Nickname:    "Visible Name",
 		RedirectURL: &redirectURL,
 		Amount:      199,
@@ -46,13 +46,13 @@ func TestBuildRecordEntityResponse_IncludesChannelSummary(t *testing.T) {
 	message := "thanks"
 	now := time.Now()
 	record := &entity.SponsorRecord{
-		BaseEntity: xModels.BaseEntity{ID: xSnowflake.SnowflakeID(2001)},
+		BaseEntity: models.BaseEntity{ID: snowflake.SnowflakeID(2001)},
 		Nickname:   "Sponsor",
 		Amount:     660,
 		Message:    &message,
 		SponsorAt:  &now,
 		ChannelFKey: &entity.SponsorChannel{
-			BaseEntity: xModels.BaseEntity{ID: xSnowflake.SnowflakeID(3001)},
+			BaseEntity: models.BaseEntity{ID: snowflake.SnowflakeID(3001)},
 			Name:       "Alipay",
 			Icon:       &icon,
 		},
@@ -67,7 +67,7 @@ func TestBuildRecordEntityResponse_IncludesChannelSummary(t *testing.T) {
 		t.Fatal("expected non-nil channel summary")
 		return
 	}
-	if resp.Channel.ID != xSnowflake.SnowflakeID(3001) {
+	if resp.Channel.ID != snowflake.SnowflakeID(3001) {
 		t.Fatalf("expected channel id=3001, got=%s", resp.Channel.ID)
 	}
 	if resp.Channel.Name != "Alipay" {
@@ -77,7 +77,7 @@ func TestBuildRecordEntityResponse_IncludesChannelSummary(t *testing.T) {
 
 func TestBuildChannelEntityResponse_MapsSponsorCount(t *testing.T) {
 	channel := &entity.SponsorChannel{
-		BaseEntity: xModels.BaseEntity{ID: xSnowflake.SnowflakeID(4001)},
+		BaseEntity: models.BaseEntity{ID: snowflake.SnowflakeID(4001)},
 		Name:       "WeChat",
 		Status:     true,
 	}
@@ -105,7 +105,7 @@ func TestBuildRecordChannelResponse_NilInput(t *testing.T) {
 
 func TestBuildRecordChannelResponse_MinimalFields(t *testing.T) {
 	icon := "https://example.com/icon.png"
-	channel := &entity.SponsorChannel{BaseEntity: xModels.BaseEntity{ID: xSnowflake.SnowflakeID(5001)}, Name: "Patreon", Icon: &icon}
+	channel := &entity.SponsorChannel{BaseEntity: models.BaseEntity{ID: snowflake.SnowflakeID(5001)}, Name: "Patreon", Icon: &icon}
 
 	resp := buildRecordChannelResponse(channel)
 	if resp == nil {

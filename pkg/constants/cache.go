@@ -15,7 +15,7 @@ import (
 	"fmt"
 	"strings"
 
-	xEnv "github.com/bamboo-services/bamboo-base-go/defined/env"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/env"
 )
 
 // RedisKey Redis 缓存键类型
@@ -50,7 +50,10 @@ const (
 
 // Get 构造带统一前缀的缓存键
 func (k RedisKey) Get(args ...any) RedisKey {
-	prefix := xEnv.GetEnvString(xEnv.NoSqlPrefix, "bm:")
+	prefix := "bm:"
+	if val, ok := env.Lookup(env.NoSQLPrefix); ok && !val.IsEmpty() {
+		prefix = val.String()
+	}
 	if !strings.HasSuffix(prefix, ":") {
 		prefix += ":"
 	}

@@ -12,58 +12,42 @@
 package ctxUtil
 
 import (
+	"context"
+
+	"github.com/bamboo-services/bamboo-base-go/application/v2"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/ctxkey"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
-
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	"github.com/gin-gonic/gin"
 )
 
-// GetConfig 从 Gin 的上下文中获取 `BambooConfig` 配置实例。
-//
-// 如果上下文中存在对应配置，则返回其指针；如果不存在，则返回 `nil`。
-//
-// 注意: 这是项目特定的配置获取函数，与 bamboo-base-go 的 GetConfig 不同
-//
-// 参数说明:
-//   - c: Gin 上下文指针，用于存储和传递请求相关的数据。
-//
-// 返回值:
-//   - 配置实例指针 (`*base.BambooConfig`)，如果配置不存在则为 `nil`。
-func GetConfig(c *gin.Context) *base.BambooConfig {
-	value, err := xCtxUtil.Get[*base.BambooConfig](c, constants.ContextCustomConfig)
+// GetConfig 从上下文中获取 `BambooConfig` 配置实例。
+func GetConfig(ctx context.Context) *base.BambooConfig {
+	value, err := application.Get[*base.BambooConfig](ctx, constants.ContextCustomConfig)
 	if err == nil {
 		return value
 	}
 	return nil
 }
 
-// GetSnowflake 从 gin.Context 中获取 Snowflake 节点实例。
-// 如果上下文中不存在对应的 Snowflake 节点，则返回 nil。
-// 参数 c 表示请求上下文 gin.Context。
-// 返回值为指向 Snowflake 节点的指针或 nil。
-func GetSnowflake(c *gin.Context) *xSnowflake.Node {
-	return xCtxUtil.GetSnowflakeNode(c)
+// GetSnowflake 从上下文中获取 Snowflake 节点实例。
+func GetSnowflake(ctx context.Context) *snowflake.Node {
+	node, err := application.Get[*snowflake.Node](ctx, ctxkey.SnowflakeNodeKey)
+	if err == nil {
+		return node
+	}
+	return nil
 }
 
-// GetUserID 从上下文获取用户ID
-//
-// 从Gin上下文中获取当前认证用户的ID(Snowflake ID)。
-//
-// 参数说明:
-//   - c: Gin 上下文指针，用于存储和传递请求相关的数据。
-//
-// 返回值:
-//   - 用户ID(xSnowflake.SnowflakeID)，如果用户未认证则为0。
-//   - 布尔值，表示是否成功获取到用户ID。
-func GetUserID(c *gin.Context) (xSnowflake.SnowflakeID, bool) {
+// GetUserID 从上下文获取当前认证用户的 Snowflake ID。
+func GetUserID(c *gin.Context) (snowflake.SnowflakeID, bool) {
 	userID, exists := c.Get(constants.ContextKeyUserID)
 	if !exists {
 		return 0, false
 	}
 
-	userIDSnowflake, ok := userID.(xSnowflake.SnowflakeID)
+	userIDSnowflake, ok := userID.(snowflake.SnowflakeID)
 	if !ok {
 		return 0, false
 	}

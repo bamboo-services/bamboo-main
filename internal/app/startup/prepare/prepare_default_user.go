@@ -15,21 +15,15 @@ import (
 	"context"
 	"errors"
 
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/toolkit"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
-
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
 	"gorm.io/gorm"
 )
 
-// DefaultUser 初始化默认管理员用户的 xOptionDB.PrepareFunc。
-//
-// 幂等：基于 system.admin.id 标记判定是否已初始化，已存在则直接跳过。
-// 失败时返回 error，由 xOption 启动流程中断并向上传递。
-func DefaultUser(ctx context.Context, db *gorm.DB) error {
-	log := xLog.WithName(xLog.NamedINIT)
-
+// DefaultUser 初始化默认管理员用户（基于 system.admin.id 幂等）。
+func DefaultUser(ctx context.Context, db *gorm.DB, logger *logging.Logger) error {
 	var adminSystem entity.System
 	err := db.WithContext(ctx).Model(&entity.System{}).Where("key = ?", constants.KeySystemAdminID).First(&adminSystem).Error
 	if err == nil && adminSystem.Value != nil && *adminSystem.Value != "" {
@@ -39,17 +33,17 @@ func DefaultUser(ctx context.Context, db *gorm.DB) error {
 		return err
 	}
 
-	passwordString, err := xUtil.Password().EncryptString("123456")
-	if err != nil {
-		return err
+	passwordString, appErr := toolkit.EncryptPasswordString("123456")
+	if appErr != nil {
+		return appErr
 	}
 
 	user := &entity.SystemUser{
 		Username:    "super_admin",
 		Password:    passwordString,
 		Email:       "gm@x-lf.cn",
-		Nickname:    xUtil.Ptr("筱锋"),
-		Avatar:      xUtil.Ptr("https://i-cdn.akass.cn/2024/05/664870a814c0d.png!wp60"),
+		Nickname:    toolkit.Ptr("筱锋"),
+		Avatar:      toolkit.Ptr("https://i-cdn.akass.cn/2024/05/664870a814c0d.png!wp60"),
 		Status:      constants.StatusActive,
 		EmailVerify: true,
 	}
@@ -65,6 +59,8 @@ func DefaultUser(ctx context.Context, db *gorm.DB) error {
 		return err
 	}
 
-	log.Info(ctx, "默认管理员用户初始化完成")
+	if logger != nil {
+		logger.WithName(logging.NamedINIT).Info(ctx, "默认管理员用户初始化完成")
+	}
 	return nil
 }

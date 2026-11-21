@@ -14,14 +14,14 @@ package apiLink
 import (
 	"encoding/json"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 )
 
 // LinkIDRequest 友情链接路径参数
 type LinkIDRequest struct {
-	ID xSnowflake.SnowflakeID `uri:"id" binding:"required"`
+	ID snowflake.SnowflakeID `uri:"id" binding:"required"`
 }
 
 // NullableSnowflakeID 可空雪花 ID 请求字段（三态）：
@@ -32,7 +32,7 @@ type LinkIDRequest struct {
 // 用于区分「不传」与「传 null」，避免取消选择被零值哨兵吞掉。
 type NullableSnowflakeID struct {
 	present bool
-	value   *xSnowflake.SnowflakeID
+	value   *snowflake.SnowflakeID
 }
 
 // UnmarshalJSON 解析 JSON 值；null 与省略通过 Provided 区分
@@ -42,7 +42,7 @@ func (n *NullableSnowflakeID) UnmarshalJSON(data []byte) error {
 		n.value = nil
 		return nil
 	}
-	var id xSnowflake.SnowflakeID
+	var id snowflake.SnowflakeID
 	if err := json.Unmarshal(data, &id); err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func (n *NullableSnowflakeID) UnmarshalJSON(data []byte) error {
 func (n NullableSnowflakeID) Provided() bool { return n.present }
 
 // Value 返回解析值；显式 null 时为 nil
-func (n NullableSnowflakeID) Value() *xSnowflake.SnowflakeID { return n.value }
+func (n NullableSnowflakeID) Value() *snowflake.SnowflakeID { return n.value }
 
 // FriendAddRequest 添加友情链接请求
 type FriendAddRequest struct {
@@ -88,15 +88,15 @@ type FriendUpdateRequest struct {
 
 // FriendQueryRequest 查询友情链接请求
 type FriendQueryRequest struct {
-	Page        int                    `form:"page" binding:"omitempty,min=1" example:"1"`
-	PageSize    int                    `form:"page_size" binding:"omitempty,min=1,max=100" example:"10"`
-	LinkName    string                 `form:"link_name" binding:"omitempty,max=100" example:"示例"`
-	LinkStatus  *int                   `form:"link_status" binding:"omitempty,oneof=0 1 2 3 4 5" example:"1"`
-	LinkFail    *int                   `form:"link_fail" binding:"omitempty,oneof=0 1" example:"0"`
-	LinkAnomaly *bool                  `form:"link_anomaly" binding:"omitempty" example:"true"` // 异常过滤：status 非 0/1 或已失效（true）
-	LinkGroupID xSnowflake.SnowflakeID `form:"link_group_id" binding:"omitempty,number" example:"1"`
-	SortBy      string                 `form:"sort_by" binding:"omitempty,oneof=created_at updated_at link_order link_name" example:"created_at"`
-	SortOrder   string                 `form:"sort_order" binding:"omitempty,oneof=asc desc" example:"desc"`
+	Page        int                   `form:"page" binding:"omitempty,min=1" example:"1"`
+	PageSize    int                   `form:"page_size" binding:"omitempty,min=1,max=100" example:"10"`
+	LinkName    string                `form:"link_name" binding:"omitempty,max=100" example:"示例"`
+	LinkStatus  *int                  `form:"link_status" binding:"omitempty,oneof=0 1 2 3 4 5" example:"1"`
+	LinkFail    *int                  `form:"link_fail" binding:"omitempty,oneof=0 1" example:"0"`
+	LinkAnomaly *bool                 `form:"link_anomaly" binding:"omitempty" example:"true"` // 异常过滤：status 非 0/1 或已失效（true）
+	LinkGroupID snowflake.SnowflakeID `form:"link_group_id" binding:"omitempty,number" example:"1"`
+	SortBy      string                `form:"sort_by" binding:"omitempty,oneof=created_at updated_at link_order link_name" example:"created_at"`
+	SortOrder   string                `form:"sort_order" binding:"omitempty,oneof=asc desc" example:"desc"`
 }
 
 // FriendStatusRequest 更新友情链接状态请求
@@ -153,8 +153,8 @@ type FriendFailedResponse struct {
 // items 数组顺序 = 目标全局展示顺序（后端按此序重写全局 sort_order 为 0..N-1）。
 // GroupID 三态（复用 NullableSnowflakeID）：省略=保持原分组，null=移入未分组，值=移入该分组。
 type FriendSortItem struct {
-	ID      xSnowflake.SnowflakeID `json:"id" binding:"required"`        // 友链ID
-	GroupID NullableSnowflakeID    `json:"group_id" binding:"omitempty"` // 目标分组ID（三态）
+	ID      snowflake.SnowflakeID `json:"id" binding:"required"`        // 友链ID
+	GroupID NullableSnowflakeID   `json:"group_id" binding:"omitempty"` // 目标分组ID（三态）
 }
 
 // FriendSortRequest 友链批量排序/位置请求

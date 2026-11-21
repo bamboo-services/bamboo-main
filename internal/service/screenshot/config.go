@@ -12,21 +12,21 @@ package screenshot
 import (
 	"time"
 
-	xEnv "github.com/bamboo-services/bamboo-base-go/defined/env"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/env"
 )
 
 // 截图服务环境变量键名（env-first 配置约定）
 const (
 	// EnvScreenshotEnabled 截图服务总开关
-	EnvScreenshotEnabled xEnv.EnvKey = "SCREENSHOT_ENABLED"
+	EnvScreenshotEnabled env.Key = "SCREENSHOT_ENABLED"
 	// EnvScreenshotDir 截图存储目录（相对进程工作目录）
-	EnvScreenshotDir xEnv.EnvKey = "SCREENSHOT_DIR"
+	EnvScreenshotDir env.Key = "SCREENSHOT_DIR"
 	// EnvScreenshotChromePath Chrome/Chromium 可执行文件路径（留空自动探测）
-	EnvScreenshotChromePath xEnv.EnvKey = "SCREENSHOT_CHROME_PATH"
+	EnvScreenshotChromePath env.Key = "SCREENSHOT_CHROME_PATH"
 	// EnvScreenshotCDPURL 外部 CDP 服务地址（留空则内置 spawn 浏览器子进程）
-	EnvScreenshotCDPURL xEnv.EnvKey = "SCREENSHOT_CDP_URL"
+	EnvScreenshotCDPURL env.Key = "SCREENSHOT_CDP_URL"
 	// EnvScreenshotTimeout 单次截图超时秒数
-	EnvScreenshotTimeout xEnv.EnvKey = "SCREENSHOT_TIMEOUT"
+	EnvScreenshotTimeout env.Key = "SCREENSHOT_TIMEOUT"
 )
 
 // Config 友链站点截图服务配置
@@ -40,11 +40,40 @@ type Config struct {
 
 // LoadConfig 从环境变量加载截图服务配置
 func LoadConfig() Config {
+	enabled := true
+	if val, ok := env.Lookup(EnvScreenshotEnabled); ok && !val.IsEmpty() {
+		if b, err := val.Bool(); err == nil {
+			enabled = b
+		}
+	}
+
+	dir := "data/screenshots"
+	if val, ok := env.Lookup(EnvScreenshotDir); ok && !val.IsEmpty() {
+		dir = val.String()
+	}
+
+	chromePath := ""
+	if val, ok := env.Lookup(EnvScreenshotChromePath); ok && !val.IsEmpty() {
+		chromePath = val.String()
+	}
+
+	cdpURL := ""
+	if val, ok := env.Lookup(EnvScreenshotCDPURL); ok && !val.IsEmpty() {
+		cdpURL = val.String()
+	}
+
+	timeoutSec := int64(30)
+	if val, ok := env.Lookup(EnvScreenshotTimeout); ok && !val.IsEmpty() {
+		if sec, err := val.Int64(); err == nil && sec > 0 {
+			timeoutSec = sec
+		}
+	}
+
 	return Config{
-		Enabled:    xEnv.GetEnvBool(EnvScreenshotEnabled, true),
-		Dir:        xEnv.GetEnvString(EnvScreenshotDir, "data/screenshots"),
-		ChromePath: xEnv.GetEnvString(EnvScreenshotChromePath, ""),
-		CDPURL:     xEnv.GetEnvString(EnvScreenshotCDPURL, ""),
-		Timeout:    time.Duration(xEnv.GetEnvInt64(EnvScreenshotTimeout, 30)) * time.Second,
+		Enabled:    enabled,
+		Dir:        dir,
+		ChromePath: chromePath,
+		CDPURL:     cdpURL,
+		Timeout:    time.Duration(timeoutSec) * time.Second,
 	}
 }

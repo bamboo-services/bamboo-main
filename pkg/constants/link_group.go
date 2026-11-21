@@ -10,7 +10,7 @@
 package constants
 
 import (
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 )
 
 // BuiltinGroupInvalidID 内置「已失效」分组的保留 ID。
@@ -19,4 +19,4 @@ import (
 // 名字与描述由 bm_system 配置（group.builtin.invalid.name / .description）热修改，
 // 查询返回时再由后端注入对应的虚拟分组对象。
 // 该值在雪花 ID 空间之外，数据库真实分组记录不可能占用。
-const BuiltinGroupInvalidID xSnowflake.SnowflakeID = 1
+const BuiltinGroupInvalidID snowflake.SnowflakeID = 1

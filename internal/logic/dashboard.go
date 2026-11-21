@@ -16,9 +16,12 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/repository"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
+	"github.com/bamboo-services/bamboo-base-go/application/v2"
+	"github.com/bamboo-services/bamboo-base-go/application/v2/builtin"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2"
 )
 
 type dashboardRepo struct {
@@ -33,21 +36,23 @@ type DashboardLogic struct {
 
 // NewDashboardLogic 创建 DashboardLogic 实例，从上下文获取数据库与缓存并初始化友链仓储依赖。
 func NewDashboardLogic(ctx context.Context) *DashboardLogic {
-	db := xCtxUtil.MustGetDB(ctx)
-	m := xCtxUtil.MustGetCacheManager(ctx)
+	db := database.MustGet(ctx)
+	m := cache.MustGet(ctx)
+	logger := application.MustGet[*logging.Logger](ctx, builtin.LoggerKey)
 
 	return &DashboardLogic{
 		logic: logic{
-			db:    db,
-			cache: m,
-			log:   xLog.WithName(xLog.NamedLOGC, "DashboardLogic"),
+			db:     db,
+			cache:  m,
+			logger: logger,
+			log:    logger.WithName(logging.NamedLOGC, "DashboardLogic"),
 		},
-		repo: dashboardRepo{link: repository.NewLinkRepo(db, m)},
+		repo: dashboardRepo{link: repository.NewLinkRepo(db, m, logger)},
 	}
 }
 
 // Stats 获取仪表盘统计数据：友链计数与最近待审核申请
-func (d *DashboardLogic) Stats(ctx context.Context) (*apiDashboard.StatsResponse, *xError.Error) {
+func (d *DashboardLogic) Stats(ctx context.Context) (*apiDashboard.StatsResponse, *apperr.Error) {
 	total, xErr := d.repo.link.CountByStatus(ctx, -1, nil)
 	if xErr != nil {
 		return nil, xErr

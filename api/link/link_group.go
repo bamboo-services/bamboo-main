@@ -12,14 +12,14 @@
 package apiLink
 
 import (
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 )
 
 // GroupIDRequest 友链分组路径参数
 type GroupIDRequest struct {
-	ID xSnowflake.SnowflakeID `uri:"id" binding:"required"`
+	ID snowflake.SnowflakeID `uri:"id" binding:"required"`
 }
 
 // GroupAddRequest 添加友链分组请求
@@ -39,8 +39,8 @@ type GroupUpdateRequest struct {
 
 // GroupSortRequest 分组排序请求
 type GroupSortRequest struct {
-	GroupIDs  []xSnowflake.SnowflakeID `json:"group_ids" binding:"required,min=1" validate:"required"` // 分组ID数组，按新的排序传入
-	SortOrder *int                     `json:"sort_order" binding:"omitempty,min=0" example:"10"`      // 可选的起始排序值，不填则从0开始递增
+	GroupIDs  []snowflake.SnowflakeID `json:"group_ids" binding:"required,min=1" validate:"required"` // 分组ID数组，按新的排序传入
+	SortOrder *int                    `json:"sort_order" binding:"omitempty,min=0" example:"10"`      // 可选的起始排序值，不填则从0开始递增
 }
 
 // GroupStatusRequest 分组状态切换请求
@@ -50,8 +50,8 @@ type GroupStatusRequest struct {
 
 // GroupDeleteRequest 删除分组请求
 type GroupDeleteRequest struct {
-	Force         bool                    `json:"force" binding:"omitempty" example:"false"`                  // 是否强制删除：false=检查关联，true=强制删除并清空关联
-	TargetGroupID *xSnowflake.SnowflakeID `json:"target_group_id" binding:"omitempty" example:"168297861..."` // 迁移目标分组ID：指定后将分组下友链迁移至该分组再删除，与 force 互斥
+	Force         bool                   `json:"force" binding:"omitempty" example:"false"`                  // 是否强制删除：false=检查关联，true=强制删除并清空关联
+	TargetGroupID *snowflake.SnowflakeID `json:"target_group_id" binding:"omitempty" example:"168297861..."` // 迁移目标分组ID：指定后将分组下友链迁移至该分组再删除，与 force 互斥
 }
 
 // GroupListRequest 分组列表查询请求
@@ -118,8 +118,8 @@ type GroupDeleteConflictResponse struct {
 
 // GroupDeleteConflictInfo 删除冲突的详细信息
 type GroupDeleteConflictInfo struct {
-	GroupID      xSnowflake.SnowflakeID `json:"group_id"`
-	GroupName    string                 `json:"group_name"`    // 分组名称
-	TotalLinks   int                    `json:"total_links"`   // 总友链数量
-	DisplayCount int                    `json:"display_count"` // 显示的友链数量（最多10个）
+	GroupID      snowflake.SnowflakeID `json:"group_id"`
+	GroupName    string                `json:"group_name"`    // 分组名称
+	TotalLinks   int                   `json:"total_links"`   // 总友链数量
+	DisplayCount int                   `json:"display_count"` // 显示的友链数量（最多10个）
 }

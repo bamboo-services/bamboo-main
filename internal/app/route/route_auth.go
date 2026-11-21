@@ -15,7 +15,7 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/handler"
 	"github.com/bamboo-services/bamboo-main/internal/middleware"
 	"github.com/gin-gonic/gin"
-	bSdkMiddle "github.com/phalanx-labs/beacon-sso-sdk/middleware"
+	bSdkMiddle "github.com/phalanx-labs/beacon-sso-sdk/v2/middleware"
 )
 
 func (r *route) authRouter(route gin.IRouter) {

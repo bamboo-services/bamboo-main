@@ -24,12 +24,17 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/service/screenshot"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
-	xAsync "github.com/bamboo-services/bamboo-base-go/plugins/async"
+	"github.com/bamboo-services/bamboo-base-go/application/v2"
+	"github.com/bamboo-services/bamboo-base-go/application/v2/builtin"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/toolkit"
+	"github.com/bamboo-services/bamboo-base-go/plugins/async/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/bind"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	"gorm.io/gorm"
 )
 
@@ -49,40 +54,42 @@ type LinkLogic struct {
 
 // NewLinkLogic 创建 LinkLogic 实例，从上下文获取数据库与缓存并初始化友链仓储依赖。
 func NewLinkLogic(ctx context.Context) *LinkLogic {
-	db := xCtxUtil.MustGetDB(ctx)
-	m := xCtxUtil.MustGetCacheManager(ctx)
+	db := database.MustGet(ctx)
+	m := cache.MustGet(ctx)
+	logger := application.MustGet[*logging.Logger](ctx, builtin.LoggerKey)
 
 	return &LinkLogic{
 		logic: logic{
-			db:    db,
-			cache: m,
-			log:   xLog.WithName(xLog.NamedLOGC, "LinkLogic"),
+			db:     db,
+			cache:  m,
+			logger: logger,
+			log:    logger.WithName(logging.NamedLOGC, "LinkLogic"),
 		},
 		repo: linkRepo{
-			link:   repository.NewLinkRepo(db, m),
-			user:   repository.NewSystemUserRepo(db, m),
-			group:  repository.NewLinkGroupRepo(db, m),
-			color:  repository.NewLinkColorRepo(db, m),
-			system: repository.NewSystemRepo(db, m),
+			link:   repository.NewLinkRepo(db, m, logger),
+			user:   repository.NewSystemUserRepo(db, m, logger),
+			group:  repository.NewLinkGroupRepo(db, m, logger),
+			color:  repository.NewLinkColorRepo(db, m, logger),
+			system: repository.NewSystemRepo(db, m, logger),
 		},
 	}
 }
 
 // Add 添加友情链接
-func (l *LinkLogic) Add(ctx context.Context, req *apiLink.FriendAddRequest) (*entity.LinkFriend, *xError.Error) {
+func (l *LinkLogic) Add(ctx context.Context, req *apiLink.FriendAddRequest) (*entity.LinkFriend, *apperr.Error) {
 	// 创建友情链接实体
 	link := &entity.LinkFriend{
 		Name:        req.LinkName,
 		URL:         req.LinkURL,
-		Avatar:      xUtil.Ptr(req.LinkAvatar),
-		RSS:         xUtil.Ptr(req.LinkRSS),
-		Description: xUtil.Ptr(req.LinkDesc),
-		Email:       xUtil.Ptr(req.LinkEmail),
+		Avatar:      toolkit.Ptr(req.LinkAvatar),
+		RSS:         toolkit.Ptr(req.LinkRSS),
+		Description: toolkit.Ptr(req.LinkDesc),
+		Email:       toolkit.Ptr(req.LinkEmail),
 		SortOrder:   req.LinkOrder,
 		Status:      constants.LinkStatusPending, // 默认待审核
 		IsFailure:   constants.LinkFailNormal,    // 默认正常
 		Level:       req.LinkLevel,
-		ApplyRemark: xUtil.Ptr(req.LinkApplyRemark),
+		ApplyRemark: toolkit.Ptr(req.LinkApplyRemark),
 	}
 
 	// 设置ID外键
@@ -103,25 +110,27 @@ func (l *LinkLogic) Add(ctx context.Context, req *apiLink.FriendAddRequest) (*en
 		return nil, xErr
 	}
 	if !found {
-		return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 
 	// 发送邮件通知管理员（xAsync 解耦请求上下文，不阻断主流程）
-	xAsync.Async(ctx, func(asyncCtx context.Context) {
+	if _, asyncErr := async.Submit(ctx, func(asyncCtx context.Context) {
 		l.sendApplyNotification(asyncCtx, reloaded)
-	}, xAsync.WithName("MAIL"))
+	}, async.WithTaskName("MAIL")); asyncErr != nil {
+		l.log.SugarWarn(ctx, "异步发送邮件任务提交失败", "error", asyncErr.Error())
+	}
 
 	return reloaded, nil
 }
 
 // Update 更新友情链接
-func (l *LinkLogic) Update(ctx context.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendUpdateRequest) (*entity.LinkFriend, *xError.Error) {
+func (l *LinkLogic) Update(ctx context.Context, linkID snowflake.SnowflakeID, req *apiLink.FriendUpdateRequest) (*entity.LinkFriend, *apperr.Error) {
 	link, found, xErr := l.repo.link.GetByID(ctx, linkID, false, nil)
 	if xErr != nil {
 		return nil, xErr
 	}
 	if !found {
-		return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 
 	// 直接更新实体字段
@@ -132,17 +141,17 @@ func (l *LinkLogic) Update(ctx context.Context, linkID xSnowflake.SnowflakeID, r
 		link.URL = req.LinkURL
 	}
 	if req.LinkAvatar != "" {
-		link.Avatar = xUtil.Ptr(req.LinkAvatar)
+		link.Avatar = toolkit.Ptr(req.LinkAvatar)
 	}
 	if req.LinkRSS != "" {
-		link.RSS = xUtil.Ptr(req.LinkRSS)
+		link.RSS = toolkit.Ptr(req.LinkRSS)
 	}
 	if req.LinkDesc != "" {
-		link.Description = xUtil.Ptr(req.LinkDesc)
+		link.Description = toolkit.Ptr(req.LinkDesc)
 	}
 	urlChanged := req.LinkURL != "" && req.LinkURL != link.URL
 	if req.LinkEmail != "" {
-		link.Email = xUtil.Ptr(req.LinkEmail)
+		link.Email = toolkit.Ptr(req.LinkEmail)
 	}
 	if req.LinkGroupID.Provided() {
 		link.GroupID = req.LinkGroupID.Value()
@@ -157,7 +166,7 @@ func (l *LinkLogic) Update(ctx context.Context, linkID xSnowflake.SnowflakeID, r
 		link.Level = *req.LinkLevel
 	}
 	if req.LinkApplyRemark != "" {
-		link.ApplyRemark = xUtil.Ptr(req.LinkApplyRemark)
+		link.ApplyRemark = toolkit.Ptr(req.LinkApplyRemark)
 	}
 
 	_, xErr = l.repo.link.Save(ctx, link, nil)
@@ -170,7 +179,7 @@ func (l *LinkLogic) Update(ctx context.Context, linkID xSnowflake.SnowflakeID, r
 		return nil, xErr
 	}
 	if !found {
-		return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 
 	// URL 变更：旧截图与站点不匹配，触发重新截图
@@ -184,32 +193,32 @@ func (l *LinkLogic) Update(ctx context.Context, linkID xSnowflake.SnowflakeID, r
 }
 
 // Delete 删除友情链接
-func (l *LinkLogic) Delete(ctx context.Context, linkID xSnowflake.SnowflakeID) *xError.Error {
+func (l *LinkLogic) Delete(ctx context.Context, linkID snowflake.SnowflakeID) *apperr.Error {
 	ok, xErr := l.repo.link.DeleteByID(ctx, linkID, nil)
 	if xErr != nil {
 		return xErr
 	}
 	if !ok {
-		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 	return nil
 }
 
 // Get 获取友情链接详情
-func (l *LinkLogic) Get(ctx context.Context, linkID xSnowflake.SnowflakeID) (*entity.LinkFriend, *xError.Error) {
+func (l *LinkLogic) Get(ctx context.Context, linkID snowflake.SnowflakeID) (*entity.LinkFriend, *apperr.Error) {
 	link, found, xErr := l.repo.link.GetByID(ctx, linkID, true, nil)
 	if xErr != nil {
 		return nil, xErr
 	}
 	if !found {
-		return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 
 	return link, nil
 }
 
 // List 获取友情链接列表
-func (l *LinkLogic) List(ctx context.Context, req *apiLink.FriendQueryRequest) (*apiLink.FriendListResponse, *xError.Error) {
+func (l *LinkLogic) List(ctx context.Context, req *apiLink.FriendQueryRequest) (*apiLink.FriendListResponse, *apperr.Error) {
 	// 设置默认值
 	if req.Page <= 0 {
 		req.Page = 1
@@ -257,14 +266,14 @@ func (l *LinkLogic) List(ctx context.Context, req *apiLink.FriendQueryRequest) (
 }
 
 // UpdateStatus 更新友情链接状态
-func (l *LinkLogic) UpdateStatus(ctx context.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendStatusRequest) *xError.Error {
+func (l *LinkLogic) UpdateStatus(ctx context.Context, linkID snowflake.SnowflakeID, req *apiLink.FriendStatusRequest) *apperr.Error {
 	// 先查询友链信息（用于发送邮件通知）
 	link, found, xErr := l.repo.link.GetByID(ctx, linkID, false, nil)
 	if xErr != nil {
 		return xErr
 	}
 	if !found {
-		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 
 	ok, xErr := l.repo.link.UpdateStatusByID(ctx, linkID, req.LinkStatus, req.LinkReviewRemark, nil)
@@ -272,13 +281,15 @@ func (l *LinkLogic) UpdateStatus(ctx context.Context, linkID xSnowflake.Snowflak
 		return xErr
 	}
 	if !ok {
-		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 
 	// 发送审核结果邮件通知（xAsync 解耦请求上下文，不阻断主流程）
-	xAsync.Async(ctx, func(asyncCtx context.Context) {
+	if _, asyncErr := async.Submit(ctx, func(asyncCtx context.Context) {
 		l.sendStatusNotification(asyncCtx, link, req.LinkStatus, req.LinkReviewRemark)
-	}, xAsync.WithName("MAIL"))
+	}, async.WithTaskName("MAIL")); asyncErr != nil {
+		l.log.SugarWarn(ctx, "异步发送邮件任务提交失败", "error", asyncErr.Error())
+	}
 
 	// 审核通过：触发友链首次站点截图（入队后由截图 worker 串行处理）
 	if req.LinkStatus == constants.LinkStatusApproved {
@@ -293,14 +304,14 @@ func (l *LinkLogic) UpdateStatus(ctx context.Context, linkID xSnowflake.Snowflak
 // UpdateFailStatus 更新友情链接失效状态。
 //
 // 标记失效时自动归入内置「已失效」分组（保留 ID）；恢复时若当前分组为已失效分组则清空为未分组。
-func (l *LinkLogic) UpdateFailStatus(ctx context.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendFailRequest) *xError.Error {
-	invalidGroupID := xSnowflake.SnowflakeID(constants.BuiltinGroupInvalidID)
+func (l *LinkLogic) UpdateFailStatus(ctx context.Context, linkID snowflake.SnowflakeID, req *apiLink.FriendFailRequest) *apperr.Error {
+	invalidGroupID := snowflake.SnowflakeID(constants.BuiltinGroupInvalidID)
 	ok, xErr := l.repo.link.UpdateFailureByID(ctx, linkID, req.LinkFail, req.LinkFailReason, &invalidGroupID, nil)
 	if xErr != nil {
 		return xErr
 	}
 	if !ok {
-		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 
 	return nil
@@ -312,13 +323,13 @@ func (l *LinkLogic) UpdateFailStatus(ctx context.Context, linkID xSnowflake.Snow
 // GroupID 三态：item 显式提供则取提供值（null 即置未分组），否则保持原分组。
 // 载荷含重复 ID 时返回 error，由调用方包装为参数错误。
 func BuildSortAssignments(links []entity.LinkFriend, items []apiLink.FriendSortItem) ([]repository.SortAssignment, error) {
-	existing := make(map[xSnowflake.SnowflakeID]*xSnowflake.SnowflakeID, len(links))
+	existing := make(map[snowflake.SnowflakeID]*snowflake.SnowflakeID, len(links))
 	for i := range links {
 		existing[links[i].ID] = links[i].GroupID
 	}
 
 	assignments := make([]repository.SortAssignment, 0, len(items))
-	seen := make(map[xSnowflake.SnowflakeID]struct{}, len(items))
+	seen := make(map[snowflake.SnowflakeID]struct{}, len(items))
 	for order, item := range items {
 		if _, dup := seen[item.ID]; dup {
 			return nil, errors.New("items 含重复友链ID")
@@ -344,10 +355,10 @@ func BuildSortAssignments(links []entity.LinkFriend, items []apiLink.FriendSortI
 //
 // 事务内按载荷顺序重写全局 sort_order 为 0..N-1，并随载荷携带三态 group_id
 // （省略=保持原组 / null=置未分组 / 值=移入该组），写后由 repo 逐条失效缓存。
-func (l *LinkLogic) UpdateSort(ctx context.Context, req *apiLink.FriendSortRequest) *xError.Error {
+func (l *LinkLogic) UpdateSort(ctx context.Context, req *apiLink.FriendSortRequest) *apperr.Error {
 	// 收集友链 ID 并校验全部存在
-	idSet := make(map[xSnowflake.SnowflakeID]struct{}, len(req.Items))
-	ids := make([]xSnowflake.SnowflakeID, 0, len(req.Items))
+	idSet := make(map[snowflake.SnowflakeID]struct{}, len(req.Items))
+	ids := make([]snowflake.SnowflakeID, 0, len(req.Items))
 	for _, item := range req.Items {
 		if _, ok := idSet[item.ID]; !ok {
 			idSet[item.ID] = struct{}{}
@@ -359,11 +370,11 @@ func (l *LinkLogic) UpdateSort(ctx context.Context, req *apiLink.FriendSortReque
 		return xErr
 	}
 	if len(links) != len(ids) {
-		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 
 	// 收集显式提供的目标分组 ID，校验全部存在且启用
-	groupIDSet := make(map[xSnowflake.SnowflakeID]struct{})
+	groupIDSet := make(map[snowflake.SnowflakeID]struct{})
 	for _, item := range req.Items {
 		if item.GroupID.Provided() && item.GroupID.Value() != nil {
 			// 内置分组恒存在且启用（不落库），跳过数据库存在性校验
@@ -374,7 +385,7 @@ func (l *LinkLogic) UpdateSort(ctx context.Context, req *apiLink.FriendSortReque
 		}
 	}
 	if len(groupIDSet) > 0 {
-		groupIDs := make([]xSnowflake.SnowflakeID, 0, len(groupIDSet))
+		groupIDs := make([]snowflake.SnowflakeID, 0, len(groupIDSet))
 		for gid := range groupIDSet {
 			groupIDs = append(groupIDs, gid)
 		}
@@ -383,11 +394,11 @@ func (l *LinkLogic) UpdateSort(ctx context.Context, req *apiLink.FriendSortReque
 			return xErr
 		}
 		if len(groups) != len(groupIDs) {
-			return xError.NewError(ctx, xError.NotFound, "友链分组不存在或已禁用", false)
+			return apperr.New(httpresult.NotFound, "友链分组不存在或已禁用")
 		}
 		for i := range groups {
 			if !groups[i].Status {
-				return xError.NewError(ctx, xError.NotFound, "友链分组不存在或已禁用", false)
+				return apperr.New(httpresult.NotFound, "友链分组不存在或已禁用")
 			}
 		}
 	}
@@ -395,11 +406,11 @@ func (l *LinkLogic) UpdateSort(ctx context.Context, req *apiLink.FriendSortReque
 	// 计算排序赋值（纯函数），重复 ID 等非法载荷包装为参数错误
 	assignments, err := BuildSortAssignments(links, req.Items)
 	if err != nil {
-		return xError.NewError(ctx, xError.ParameterError, xError.ErrMessage(err.Error()), false, err)
+		return apperr.New(bind.ParameterError, apperr.ErrMessage(err.Error()), err)
 	}
 
 	// 事务内批量写入（关联引用由 repo.Save 经 Omit(clause.Associations) 收敛，见 LinkRepo.Save）
-	return l.withTx(ctx, func(tx *gorm.DB) *xError.Error {
+	return l.withTx(ctx, func(tx *gorm.DB) *apperr.Error {
 		return l.repo.link.UpdateSortAndPosition(ctx, assignments, tx)
 	})
 }
@@ -407,21 +418,21 @@ func (l *LinkLogic) UpdateSort(ctx context.Context, req *apiLink.FriendSortReque
 // ReScreenshot 手动触发友链重新截图（仅已通过且未失效的友链）
 //
 // 仅将任务加入截图队列，由截图 worker 串行处理，接口本身不等待截图完成。
-func (l *LinkLogic) ReScreenshot(ctx context.Context, linkID xSnowflake.SnowflakeID) *xError.Error {
+func (l *LinkLogic) ReScreenshot(ctx context.Context, linkID snowflake.SnowflakeID) *apperr.Error {
 	link, found, xErr := l.repo.link.GetByID(ctx, linkID, false, nil)
 	if xErr != nil {
 		return xErr
 	}
 	if !found {
-		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 	if link.Status != constants.LinkStatusApproved {
-		return xError.NewError(ctx, xError.BadRequest, "仅已通过的友链支持重新截图", false)
+		return apperr.New(httpresult.BadRequest, "仅已通过的友链支持重新截图")
 	}
 
 	manager := screenshot.GetManager(ctx)
 	if manager == nil {
-		return xError.NewError(ctx, xError.ServerInternalError, "截图服务不可用", false)
+		return apperr.New(httpresult.InternalError, "截图服务不可用")
 	}
 	manager.Enqueue(linkID)
 	return nil
@@ -431,8 +442,8 @@ func (l *LinkLogic) ReScreenshot(ctx context.Context, linkID xSnowflake.Snowflak
 //
 // 纳入修改待审核(5)的友链（仍按旧位置/颜色展示，等待博主审核），
 // 返回前剥离申请备注与预期值字段（申请备注仅博主审核可见，预期值属内部审核信息）。
-func (l *LinkLogic) GetPublicLinks(ctx context.Context, groupIDStr string) ([]entity.LinkFriend, *xError.Error) {
-	var groupID *xSnowflake.SnowflakeID
+func (l *LinkLogic) GetPublicLinks(ctx context.Context, groupIDStr string) ([]entity.LinkFriend, *apperr.Error) {
+	var groupID *snowflake.SnowflakeID
 	if groupIDStr != "" {
 		parsedID, err := logcHelper.ParseSnowflakeID(groupIDStr)
 		if err == nil {
@@ -457,7 +468,7 @@ func (l *LinkLogic) GetPublicLinks(ctx context.Context, groupIDStr string) ([]en
 //
 // 与 ListPublic（仅正常友链）独立成档：内置「已失效」分组信息来自 bm_system 配置，
 // 读取失败时降级默认分组不阻断；友链限定已通过且失效，避免暴露非公开审核状态。
-func (l *LinkLogic) GetFailedLinks(ctx context.Context) (*apiLink.FriendFailedResponse, *xError.Error) {
+func (l *LinkLogic) GetFailedLinks(ctx context.Context) (*apiLink.FriendFailedResponse, *apperr.Error) {
 	invalidGroup, xErr := l.repo.system.BuildBuiltinInvalidGroup(ctx)
 	if xErr != nil {
 		invalidGroup = entity.NewDefaultBuiltinGroup()
@@ -486,18 +497,18 @@ func (l *LinkLogic) GetFailedLinks(ctx context.Context) (*apiLink.FriendFailedRe
 // 若申请邮箱已对应注册用户则即时绑定归属，创建后异步通知管理员。
 // link_group_id/link_color_id 为选填的「期望展示位置/颜色」，仅写入 expected_*
 // （不写正式 group_id/color_id），审核时预填到表单、微调后经 updateLink 落实。
-func (l *LinkLogic) Apply(ctx context.Context, req *apiLink.FriendApplyRequest) (*entity.LinkFriend, *xError.Error) {
+func (l *LinkLogic) Apply(ctx context.Context, req *apiLink.FriendApplyRequest) (*entity.LinkFriend, *apperr.Error) {
 	link := &entity.LinkFriend{
 		Name:        req.LinkName,
 		URL:         req.LinkURL,
-		Avatar:      xUtil.Ptr(req.LinkAvatar),
-		RSS:         xUtil.Ptr(req.LinkRSS),
-		Description: xUtil.Ptr(req.LinkDesc),
-		Email:       xUtil.Ptr(req.LinkEmail),
+		Avatar:      toolkit.Ptr(req.LinkAvatar),
+		RSS:         toolkit.Ptr(req.LinkRSS),
+		Description: toolkit.Ptr(req.LinkDesc),
+		Email:       toolkit.Ptr(req.LinkEmail),
 		Status:      constants.LinkStatusPending, // 默认待审核
 		IsFailure:   constants.LinkFailNormal,    // 默认正常
 		Level:       constants.LinkLevelRegular,  // 默认一般级别，由管理员审核时调整
-		ApplyRemark: xUtil.Ptr(req.LinkApplyRemark),
+		ApplyRemark: toolkit.Ptr(req.LinkApplyRemark),
 	}
 
 	// 申请邮箱若已对应注册用户，则即时绑定归属（否则保持为空，待该用户注册/登录时按邮箱绑定）
@@ -526,19 +537,21 @@ func (l *LinkLogic) Apply(ctx context.Context, req *apiLink.FriendApplyRequest) 
 		return nil, xErr
 	}
 	if !found {
-		return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 
 	// 发送邮件通知管理员（xAsync 解耦请求上下文，不阻断主流程）
-	xAsync.Async(ctx, func(asyncCtx context.Context) {
+	if _, asyncErr := async.Submit(ctx, func(asyncCtx context.Context) {
 		l.sendApplyNotification(asyncCtx, reloaded)
-	}, xAsync.WithName("MAIL"))
+	}, async.WithTaskName("MAIL")); asyncErr != nil {
+		l.log.SugarWarn(ctx, "异步发送邮件任务提交失败", "error", asyncErr.Error())
+	}
 
 	return reloaded, nil
 }
 
 // ListMine 获取当前用户名下的友情链接列表
-func (l *LinkLogic) ListMine(ctx context.Context, userID xSnowflake.SnowflakeID, req *apiLink.FriendUserQueryRequest) (*base.PaginationResponse[entity.LinkFriend], *xError.Error) {
+func (l *LinkLogic) ListMine(ctx context.Context, userID snowflake.SnowflakeID, req *apiLink.FriendUserQueryRequest) (*base.PaginationResponse[entity.LinkFriend], *apperr.Error) {
 	if req.Page <= 0 {
 		req.Page = 1
 	}
@@ -566,20 +579,20 @@ func (l *LinkLogic) ListMine(ctx context.Context, userID xSnowflake.SnowflakeID,
 }
 
 // GetMine 获取当前用户名下的友情链接详情（含归属校验）
-func (l *LinkLogic) GetMine(ctx context.Context, userID xSnowflake.SnowflakeID, linkID xSnowflake.SnowflakeID) (*entity.LinkFriend, *xError.Error) {
+func (l *LinkLogic) GetMine(ctx context.Context, userID snowflake.SnowflakeID, linkID snowflake.SnowflakeID) (*entity.LinkFriend, *apperr.Error) {
 	link, found, xErr := l.repo.link.GetByID(ctx, linkID, true, nil)
 	if xErr != nil {
 		return nil, xErr
 	}
 	// 不存在或不归属当前用户时一律返回 NotFound，避免泄露他人友链信息
 	if !found || link.UserID == nil || *link.UserID != userID {
-		return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 	return link, nil
 }
 
 // UpdateMine 更新当前用户名下的友情链接（仅站点基础信息，审核状态保持不变）
-func (l *LinkLogic) UpdateMine(ctx context.Context, userID xSnowflake.SnowflakeID, linkID xSnowflake.SnowflakeID, req *apiLink.FriendUserUpdateRequest) (*entity.LinkFriend, *xError.Error) {
+func (l *LinkLogic) UpdateMine(ctx context.Context, userID snowflake.SnowflakeID, linkID snowflake.SnowflakeID, req *apiLink.FriendUserUpdateRequest) (*entity.LinkFriend, *apperr.Error) {
 	link, xErr := l.GetMine(ctx, userID, linkID)
 	if xErr != nil {
 		return nil, xErr
@@ -589,7 +602,7 @@ func (l *LinkLogic) UpdateMine(ctx context.Context, userID xSnowflake.SnowflakeI
 	if link.Status == constants.LinkStatusEditPending ||
 		link.Status == constants.LinkStatusTakedownPending ||
 		link.Status == constants.LinkStatusTakenDown {
-		return nil, xError.NewError(ctx, xError.OperationInvalid, "友链存在待处理的申请或已下架，暂不能编辑", false)
+		return nil, apperr.New(httpresult.InvalidState, "友链存在待处理的申请或已下架，暂不能编辑")
 	}
 
 	if req.LinkName != "" {
@@ -599,16 +612,16 @@ func (l *LinkLogic) UpdateMine(ctx context.Context, userID xSnowflake.SnowflakeI
 		link.URL = req.LinkURL
 	}
 	if req.LinkAvatar != "" {
-		link.Avatar = xUtil.Ptr(req.LinkAvatar)
+		link.Avatar = toolkit.Ptr(req.LinkAvatar)
 	}
 	if req.LinkRSS != "" {
-		link.RSS = xUtil.Ptr(req.LinkRSS)
+		link.RSS = toolkit.Ptr(req.LinkRSS)
 	}
 	if req.LinkDesc != "" {
-		link.Description = xUtil.Ptr(req.LinkDesc)
+		link.Description = toolkit.Ptr(req.LinkDesc)
 	}
 	if req.LinkEmail != "" {
-		link.Email = xUtil.Ptr(req.LinkEmail)
+		link.Email = toolkit.Ptr(req.LinkEmail)
 	}
 
 	_, xErr = l.repo.link.Save(ctx, link, nil)
@@ -621,7 +634,7 @@ func (l *LinkLogic) UpdateMine(ctx context.Context, userID xSnowflake.SnowflakeI
 		return nil, xErr
 	}
 	if !found {
-		return nil, xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 	return reloaded, nil
 }
@@ -629,13 +642,13 @@ func (l *LinkLogic) UpdateMine(ctx context.Context, userID xSnowflake.SnowflakeI
 // RequestTakedown 当前用户申请下架自己名下的友情链接
 //
 // 仅已通过的友链可申请下架，置为下架待审核状态，等待管理员审核。
-func (l *LinkLogic) RequestTakedown(ctx context.Context, userID xSnowflake.SnowflakeID, linkID xSnowflake.SnowflakeID) *xError.Error {
+func (l *LinkLogic) RequestTakedown(ctx context.Context, userID snowflake.SnowflakeID, linkID snowflake.SnowflakeID) *apperr.Error {
 	link, xErr := l.GetMine(ctx, userID, linkID)
 	if xErr != nil {
 		return xErr
 	}
 	if link.Status != constants.LinkStatusApproved {
-		return xError.NewError(ctx, xError.OperationInvalid, "仅已通过的友链可申请下架", false)
+		return apperr.New(httpresult.InvalidState, "仅已通过的友链可申请下架")
 	}
 
 	ok, xErr := l.repo.link.UpdateStatusByID(ctx, linkID, constants.LinkStatusTakedownPending, "用户申请下架", nil)
@@ -643,13 +656,15 @@ func (l *LinkLogic) RequestTakedown(ctx context.Context, userID xSnowflake.Snowf
 		return xErr
 	}
 	if !ok {
-		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 
 	// 异步通知管理员处理下架申请（复用申请通知模板）
-	xAsync.Async(ctx, func(asyncCtx context.Context) {
+	if _, asyncErr := async.Submit(ctx, func(asyncCtx context.Context) {
 		l.sendApplyNotification(asyncCtx, link)
-	}, xAsync.WithName("MAIL"))
+	}, async.WithTaskName("MAIL")); asyncErr != nil {
+		l.log.SugarWarn(ctx, "异步发送邮件任务提交失败", "error", asyncErr.Error())
+	}
 
 	return nil
 }
@@ -657,7 +672,7 @@ func (l *LinkLogic) RequestTakedown(ctx context.Context, userID xSnowflake.Snowf
 // GetMineDetail 获取当前用户名下的友链详情（用户端视图）
 //
 // 在 GetMine（内部含全量字段）基础上剥离申请备注，保留预期值供用户跟踪申请进度。
-func (l *LinkLogic) GetMineDetail(ctx context.Context, userID xSnowflake.SnowflakeID, linkID xSnowflake.SnowflakeID) (*entity.LinkFriend, *xError.Error) {
+func (l *LinkLogic) GetMineDetail(ctx context.Context, userID snowflake.SnowflakeID, linkID snowflake.SnowflakeID) (*entity.LinkFriend, *apperr.Error) {
 	link, xErr := l.GetMine(ctx, userID, linkID)
 	if xErr != nil {
 		return nil, xErr
@@ -679,7 +694,7 @@ func sanitizeForUser(link *entity.LinkFriend) *entity.LinkFriend {
 // 仅已通过且未失效的友链可发起；预期位置/颜色三态写入 expected_* 字段，
 // 备注写入 ApplyRemark（仅博主审核可见），状态置为修改待审核(5)。
 // 旧 GroupID/ColorID 保持不变，审核通过前友链仍按旧值公开展示。
-func (l *LinkLogic) RequestEditApply(ctx context.Context, userID xSnowflake.SnowflakeID, linkID xSnowflake.SnowflakeID, req *apiLink.FriendEditApplyRequest) *xError.Error {
+func (l *LinkLogic) RequestEditApply(ctx context.Context, userID snowflake.SnowflakeID, linkID snowflake.SnowflakeID, req *apiLink.FriendEditApplyRequest) *apperr.Error {
 	link, xErr := l.GetMine(ctx, userID, linkID)
 	if xErr != nil {
 		return xErr
@@ -689,15 +704,15 @@ func (l *LinkLogic) RequestEditApply(ctx context.Context, userID xSnowflake.Snow
 	if link.Status == constants.LinkStatusEditPending ||
 		link.Status == constants.LinkStatusTakedownPending ||
 		link.Status == constants.LinkStatusTakenDown {
-		return xError.NewError(ctx, xError.OperationInvalid, "友链存在待处理的申请，暂不能发起新的修改申请", false)
+		return apperr.New(httpresult.InvalidState, "友链存在待处理的申请，暂不能发起新的修改申请")
 	}
 	if link.Status != constants.LinkStatusApproved || link.IsFailure == constants.LinkFailBroken {
-		return xError.NewError(ctx, xError.OperationInvalid, "仅已通过且未失效的友链可申请修改展示位置/颜色", false)
+		return apperr.New(httpresult.InvalidState, "仅已通过且未失效的友链可申请修改展示位置/颜色")
 	}
 
 	// 至少提供一项变更
 	if !req.LinkGroupID.Provided() && !req.LinkColorID.Provided() {
-		return xError.NewError(ctx, xError.ParameterError, "请选择预期展示位置或预期展示颜色", false)
+		return apperr.New(bind.ParameterError, "请选择预期展示位置或预期展示颜色")
 	}
 
 	// 校验预期位置/颜色存在且启用
@@ -713,7 +728,7 @@ func (l *LinkLogic) RequestEditApply(ctx context.Context, userID xSnowflake.Snow
 		link.ExpectedColorID = req.LinkColorID.Value()
 	}
 	if req.LinkApplyRemark != "" {
-		link.ApplyRemark = xUtil.Ptr(req.LinkApplyRemark)
+		link.ApplyRemark = toolkit.Ptr(req.LinkApplyRemark)
 	}
 	link.Status = constants.LinkStatusEditPending
 
@@ -723,9 +738,11 @@ func (l *LinkLogic) RequestEditApply(ctx context.Context, userID xSnowflake.Snow
 	}
 
 	// 异步通知管理员处理修改申请（复用申请通知模板）
-	xAsync.Async(ctx, func(asyncCtx context.Context) {
+	if _, asyncErr := async.Submit(ctx, func(asyncCtx context.Context) {
 		l.sendApplyNotification(asyncCtx, link)
-	}, xAsync.WithName("MAIL"))
+	}, async.WithTaskName("MAIL")); asyncErr != nil {
+		l.log.SugarWarn(ctx, "异步发送邮件任务提交失败", "error", asyncErr.Error())
+	}
 
 	return nil
 }
@@ -733,16 +750,16 @@ func (l *LinkLogic) RequestEditApply(ctx context.Context, userID xSnowflake.Snow
 // ApproveEditRequest 博主通过友链的修改位置/颜色申请
 //
 // 将 expected_* 应用到正式 group_id/color_id 并清空预期值，状态回已通过。
-func (l *LinkLogic) ApproveEditRequest(ctx context.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendEditReviewRequest) *xError.Error {
+func (l *LinkLogic) ApproveEditRequest(ctx context.Context, linkID snowflake.SnowflakeID, req *apiLink.FriendEditReviewRequest) *apperr.Error {
 	link, found, xErr := l.repo.link.GetByID(ctx, linkID, false, nil)
 	if xErr != nil {
 		return xErr
 	}
 	if !found {
-		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 	if link.Status != constants.LinkStatusEditPending {
-		return xError.NewError(ctx, xError.OperationInvalid, "该友链当前不在修改待审核状态", false)
+		return apperr.New(httpresult.InvalidState, "该友链当前不在修改待审核状态")
 	}
 
 	ok, xErr := l.repo.link.ResolveEditRequest(ctx, linkID, true, req.LinkReviewRemark, nil)
@@ -750,13 +767,15 @@ func (l *LinkLogic) ApproveEditRequest(ctx context.Context, linkID xSnowflake.Sn
 		return xErr
 	}
 	if !ok {
-		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 
 	// 发送审核结果邮件通知申请人（复用审核通过模板）
-	xAsync.Async(ctx, func(asyncCtx context.Context) {
+	if _, asyncErr := async.Submit(ctx, func(asyncCtx context.Context) {
 		l.sendStatusNotification(asyncCtx, link, constants.LinkStatusApproved, req.LinkReviewRemark)
-	}, xAsync.WithName("MAIL"))
+	}, async.WithTaskName("MAIL")); asyncErr != nil {
+		l.log.SugarWarn(ctx, "异步发送邮件任务提交失败", "error", asyncErr.Error())
+	}
 
 	return nil
 }
@@ -764,16 +783,16 @@ func (l *LinkLogic) ApproveEditRequest(ctx context.Context, linkID xSnowflake.Sn
 // RejectEditRequest 博主拒绝友链的修改位置/颜色申请
 //
 // 保持原 group_id/color_id 不变、清空预期值，状态回已通过，审核备注记录拒绝原因。
-func (l *LinkLogic) RejectEditRequest(ctx context.Context, linkID xSnowflake.SnowflakeID, req *apiLink.FriendEditReviewRequest) *xError.Error {
+func (l *LinkLogic) RejectEditRequest(ctx context.Context, linkID snowflake.SnowflakeID, req *apiLink.FriendEditReviewRequest) *apperr.Error {
 	link, found, xErr := l.repo.link.GetByID(ctx, linkID, false, nil)
 	if xErr != nil {
 		return xErr
 	}
 	if !found {
-		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 	if link.Status != constants.LinkStatusEditPending {
-		return xError.NewError(ctx, xError.OperationInvalid, "该友链当前不在修改待审核状态", false)
+		return apperr.New(httpresult.InvalidState, "该友链当前不在修改待审核状态")
 	}
 
 	ok, xErr := l.repo.link.ResolveEditRequest(ctx, linkID, false, req.LinkReviewRemark, nil)
@@ -781,7 +800,7 @@ func (l *LinkLogic) RejectEditRequest(ctx context.Context, linkID xSnowflake.Sno
 		return xErr
 	}
 	if !ok {
-		return xError.NewError(ctx, xError.NotFound, "友情链接不存在", false)
+		return apperr.New(httpresult.NotFound, "友情链接不存在")
 	}
 	return nil
 }
@@ -790,17 +809,17 @@ func (l *LinkLogic) RejectEditRequest(ctx context.Context, linkID xSnowflake.Sno
 //
 // groupID/colorID 为 nil 时跳过（未提供对应变更）；内置「已失效」分组不可选作预期位置，
 // 内置炫彩颜色为合法预期颜色直接放行。
-func (l *LinkLogic) validateEditTargets(ctx context.Context, groupID, colorID *xSnowflake.SnowflakeID) *xError.Error {
+func (l *LinkLogic) validateEditTargets(ctx context.Context, groupID, colorID *snowflake.SnowflakeID) *apperr.Error {
 	if groupID != nil {
 		if entity.IsBuiltinGroupID(*groupID) {
-			return xError.NewError(ctx, xError.ParameterError, "内置「已失效」分组不可选作预期展示位置", false)
+			return apperr.New(bind.ParameterError, "内置「已失效」分组不可选作预期展示位置")
 		}
-		groups, xErr := l.repo.group.GetByIDs(ctx, []xSnowflake.SnowflakeID{*groupID}, nil)
+		groups, xErr := l.repo.group.GetByIDs(ctx, []snowflake.SnowflakeID{*groupID}, nil)
 		if xErr != nil {
 			return xErr
 		}
 		if len(groups) == 0 || !groups[0].Status {
-			return xError.NewError(ctx, xError.NotFound, "预期展示位置不存在或已停用", false)
+			return apperr.New(httpresult.NotFound, "预期展示位置不存在或已停用")
 		}
 	}
 
@@ -813,7 +832,7 @@ func (l *LinkLogic) validateEditTargets(ctx context.Context, groupID, colorID *x
 			return xErr
 		}
 		if !found || !color.Status {
-			return xError.NewError(ctx, xError.NotFound, "预期展示颜色不存在或已停用", false)
+			return apperr.New(httpresult.NotFound, "预期展示颜色不存在或已停用")
 		}
 	}
 
@@ -824,10 +843,10 @@ func (l *LinkLogic) validateEditTargets(ctx context.Context, groupID, colorID *x
 //
 // 此函数应在 xAsync 异步任务中调用，ctx 为解耦后的独立上下文，不会阻断主流程
 func (l *LinkLogic) sendApplyNotification(ctx context.Context, link *entity.LinkFriend) {
-	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
+	logger := resolveLogicNamedLogger(ctx, "MAIL")
 
 	// 获取配置
-	config, xerr := xCtxUtil.Get[*base.BambooConfig](ctx, constants.ContextCustomConfig)
+	config, xerr := application.Get[*base.BambooConfig](ctx, constants.ContextCustomConfig)
 	if xerr != nil {
 		logger.Warn(ctx, "无法获取配置，跳过发送申请通知邮件")
 		return
@@ -876,7 +895,7 @@ func (l *LinkLogic) sendApplyNotification(ctx context.Context, link *entity.Link
 //
 // 此函数应在 xAsync 异步任务中调用，ctx 为解耦后的独立上下文，不会阻断主流程
 func (l *LinkLogic) sendStatusNotification(ctx context.Context, link *entity.LinkFriend, status int, reviewRemark string) {
-	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
+	logger := resolveLogicNamedLogger(ctx, "MAIL")
 
 	// 检查友链是否有邮箱
 	if link.Email == nil || *link.Email == "" {

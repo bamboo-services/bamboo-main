@@ -13,7 +13,8 @@ import (
 	"net/http"
 	"strings"
 
-	xRoute "github.com/bamboo-services/bamboo-base-go/major/route"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	"github.com/bamboo-services/bamboo-main/resources/frontend"
 	"github.com/gin-gonic/gin"
 )
@@ -22,17 +23,15 @@ import (
 var frontendFileServer = http.FileServer(http.FS(frontend.FS()))
 
 // noRouteHandler 统一接管未匹配路由的请求，按路径前缀分流：
-//   - /api/* 与 /swagger/*：交由 xRoute.NoRoute 返回标准化 JSON 404；
+//   - /api/* 与 /swagger/*：返回标准化 JSON 404；
 //   - 其余路径：优先匹配内嵌静态资源，命中则直接返回；
 //   - 未命中静态资源时回退到 index.html，以承载前端 SPA 路由（history mode）。
-//
-// 设计目的：单二进制即可同时提供后端 API 与前端页面，无需独立部署前端服务。
 func noRouteHandler(ctx *gin.Context) {
 	path := ctx.Request.URL.Path
 
 	// 接口与文档类路径仍走 JSON 404，避免污染 API 错误语义
 	if strings.HasPrefix(path, "/api/") || strings.HasPrefix(path, "/swagger/") {
-		xRoute.NoRoute(ctx)
+		httpresult.Error(ctx, apperr.New(httpresult.NotFound, "请求路径不存在"))
 		return
 	}
 

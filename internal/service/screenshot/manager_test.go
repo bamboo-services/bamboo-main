@@ -17,32 +17,32 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2/models"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
-
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xModels "github.com/bamboo-services/bamboo-base-go/major/models"
 	"gorm.io/gorm"
 )
 
 // fakeRepo 内存替身仓储，实现 LinkRepo 接口
 type fakeRepo struct {
 	mu      sync.Mutex
-	links   map[xSnowflake.SnowflakeID]entity.LinkFriend
-	updates []xSnowflake.SnowflakeID
-	update  chan xSnowflake.SnowflakeID
-	getErr  *xError.Error
+	links   map[snowflake.SnowflakeID]entity.LinkFriend
+	updates []snowflake.SnowflakeID
+	update  chan snowflake.SnowflakeID
+	getErr  *apperr.Error
 }
 
 func newFakeRepo() *fakeRepo {
 	return &fakeRepo{
-		links:  make(map[xSnowflake.SnowflakeID]entity.LinkFriend),
-		update: make(chan xSnowflake.SnowflakeID, 64),
+		links:  make(map[snowflake.SnowflakeID]entity.LinkFriend),
+		update: make(chan snowflake.SnowflakeID, 64),
 	}
 }
 
-func (f *fakeRepo) ListApprovedForScreenshot(_ context.Context, _ *gorm.DB) ([]entity.LinkFriend, *xError.Error) {
+func (f *fakeRepo) ListApprovedForScreenshot(_ context.Context, _ *gorm.DB) ([]entity.LinkFriend, *apperr.Error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
@@ -55,7 +55,7 @@ func (f *fakeRepo) ListApprovedForScreenshot(_ context.Context, _ *gorm.DB) ([]e
 	return out, nil
 }
 
-func (f *fakeRepo) GetByID(_ context.Context, id xSnowflake.SnowflakeID, _ bool, _ *gorm.DB) (*entity.LinkFriend, bool, *xError.Error) {
+func (f *fakeRepo) GetByID(_ context.Context, id snowflake.SnowflakeID, _ bool, _ *gorm.DB) (*entity.LinkFriend, bool, *apperr.Error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
@@ -69,7 +69,7 @@ func (f *fakeRepo) GetByID(_ context.Context, id xSnowflake.SnowflakeID, _ bool,
 	return &link, true, nil
 }
 
-func (f *fakeRepo) UpdateScreenshot(_ context.Context, id xSnowflake.SnowflakeID, _ string, _ time.Time, _ *gorm.DB) *xError.Error {
+func (f *fakeRepo) UpdateScreenshot(_ context.Context, id snowflake.SnowflakeID, _ string, _ time.Time, _ *gorm.DB) *apperr.Error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
@@ -78,7 +78,7 @@ func (f *fakeRepo) UpdateScreenshot(_ context.Context, id xSnowflake.SnowflakeID
 	return nil
 }
 
-func (f *fakeRepo) waitUpdate(t *testing.T) xSnowflake.SnowflakeID {
+func (f *fakeRepo) waitUpdate(t *testing.T) snowflake.SnowflakeID {
 	t.Helper()
 	select {
 	case id := <-f.update:
@@ -111,9 +111,9 @@ func testConfig(t *testing.T) Config {
 	}
 }
 
-func approvedLink(id xSnowflake.SnowflakeID, url string) entity.LinkFriend {
+func approvedLink(id snowflake.SnowflakeID, url string) entity.LinkFriend {
 	return entity.LinkFriend{
-		BaseEntity: xModels.BaseEntity{ID: id},
+		BaseEntity: models.BaseEntity{ID: id},
 		URL:        url,
 		Status:     constants.LinkStatusApproved,
 		IsFailure:  constants.LinkFailNormal,
@@ -123,7 +123,7 @@ func approvedLink(id xSnowflake.SnowflakeID, url string) entity.LinkFriend {
 // TestManager_EnqueueDedup 验证同一友链重复入队只处理一次
 func TestManager_EnqueueDedup(t *testing.T) {
 	repo := newFakeRepo()
-	const id = xSnowflake.SnowflakeID(1001)
+	const id = snowflake.SnowflakeID(1001)
 	repo.links[id] = approvedLink(id, "https://a.example")
 
 	var (
@@ -134,7 +134,6 @@ func TestManager_EnqueueDedup(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// worker 启动前连续入队，去重应只保留一条
 	m.Enqueue(id)
 	m.Enqueue(id)
 	m.Enqueue(id)
@@ -153,8 +152,8 @@ func TestManager_EnqueueDedup(t *testing.T) {
 // TestManager_FIFO 验证队列按入队顺序串行处理
 func TestManager_FIFO(t *testing.T) {
 	repo := newFakeRepo()
-	ids := []xSnowflake.SnowflakeID{2001, 2002, 2003}
-	urls := map[xSnowflake.SnowflakeID]string{
+	ids := []snowflake.SnowflakeID{2001, 2002, 2003}
+	urls := map[snowflake.SnowflakeID]string{
 		ids[0]: "https://one.example",
 		ids[1]: "https://two.example",
 		ids[2]: "https://three.example",
@@ -196,8 +195,8 @@ func TestManager_FIFO(t *testing.T) {
 func TestManager_FailureNotBlocking(t *testing.T) {
 	repo := newFakeRepo()
 	const (
-		failID = xSnowflake.SnowflakeID(3001)
-		okID   = xSnowflake.SnowflakeID(3002)
+		failID = snowflake.SnowflakeID(3001)
+		okID   = snowflake.SnowflakeID(3002)
 	)
 	repo.links[failID] = approvedLink(failID, "https://fail.example")
 	repo.links[okID] = approvedLink(okID, "https://ok.example")
@@ -207,7 +206,7 @@ func TestManager_FailureNotBlocking(t *testing.T) {
 		order []string
 	)
 	m := NewManager(testConfig(t), repo, recordCapture(&order, &mu, map[string]error{
-		"https://fail.example": xError.NewError(context.Background(), xError.DatabaseError, "mock 截图失败", false),
+		"https://fail.example": apperr.New(database.DatabaseError, "mock 截图失败"),
 	}), nil)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -219,7 +218,6 @@ func TestManager_FailureNotBlocking(t *testing.T) {
 	if got := repo.waitUpdate(t); got != okID {
 		t.Fatalf("期望只有友链 %d 更新成功，实际 %d", okID, got)
 	}
-	// 失败任务已被消费（不阻塞队列），成功任务完成更新
 	waitFor(t, func() bool {
 		mu.Lock()
 		defer mu.Unlock()
@@ -241,9 +239,9 @@ func TestManager_FailureNotBlocking(t *testing.T) {
 // TestManager_SkipNonApproved 验证非已通过状态友链跳过截图
 func TestManager_SkipNonApproved(t *testing.T) {
 	repo := newFakeRepo()
-	const id = xSnowflake.SnowflakeID(4001)
+	const id = snowflake.SnowflakeID(4001)
 	link := approvedLink(id, "https://pending.example")
-	link.Status = constants.LinkStatusPending // 待审核
+	link.Status = constants.LinkStatusPending
 	repo.links[id] = link
 
 	var (
@@ -274,10 +272,10 @@ func TestManager_SkipNonApproved(t *testing.T) {
 	}
 }
 
-// TestManager_Disabled 验证关闭截图服务后入队与消费全部失效
+// TestManager_Disabled 验证关闭截图服务后入队与消费失效，且保持待机不触发看门狗早退
 func TestManager_Disabled(t *testing.T) {
 	repo := newFakeRepo()
-	const id = xSnowflake.SnowflakeID(5001)
+	const id = snowflake.SnowflakeID(5001)
 	repo.links[id] = approvedLink(id, "https://disabled.example")
 
 	var (
@@ -288,9 +286,18 @@ func TestManager_Disabled(t *testing.T) {
 	cfg.Enabled = false
 	m := NewManager(cfg, repo, recordCapture(&order, &mu, nil), nil)
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	done := make(chan struct{})
+	go func() {
+		m.Run(ctx)
+		close(done)
+	}()
 
-	m.Run(ctx) // 同步返回：disabled 时不启动 worker
+	waitFor(t, func() bool {
+		m.mu.Lock()
+		defer m.mu.Unlock()
+		return m.closed
+	})
+
 	m.Enqueue(id)
 
 	if len(m.queue) != 0 || len(m.inflight) != 0 {
@@ -299,11 +306,18 @@ func TestManager_Disabled(t *testing.T) {
 	if len(order) != 0 {
 		t.Fatalf("disabled 后不应截图，实际 %v", order)
 	}
+
+	cancel()
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("disabled 状态下取消 ctx 后 Run 未退出")
+	}
 }
 
 // TestManager_SaveFile 验证原子写入：文件存在、内容一致、无临时文件残留
 func TestManager_SaveFile(t *testing.T) {
-	const id = xSnowflake.SnowflakeID(6001)
+	const id = snowflake.SnowflakeID(6001)
 	m := NewManager(testConfig(t), newFakeRepo(), nil, nil)
 	data := []byte("png-bytes")
 

@@ -10,8 +10,8 @@
 package entity
 
 import (
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xModels "github.com/bamboo-services/bamboo-base-go/major/models"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2/models"
 
 	bConst "github.com/bamboo-services/bamboo-main/pkg/constants"
 )
@@ -23,18 +23,18 @@ import (
 //
 // 注意: 赞助渠道通过外键关联到赞助记录表，一个渠道可以有多条赞助记录。
 type SponsorChannel struct {
-	xModels.BaseEntity         // 嵌入基础实体（SnowflakeID 主键 + timestamptz 时间戳）
-	Name               string  `json:"name" gorm:"type:varchar(50);not null;uniqueIndex;comment:渠道名称"`            // 渠道名称（如：微信赞赏、支付宝、爱发电）
-	Icon               *string `json:"icon,omitempty" gorm:"type:varchar(500);comment:渠道图标地址"`                    // 渠道图标URL
-	Description        *string `json:"description,omitempty" gorm:"type:text;comment:渠道描述"`                       // 渠道描述说明
-	SortOrder          int     `json:"sort_order" gorm:"type:int;default:0;comment:渠道排序"`                         // 排序值，数字越大越靠前
-	Status             bool    `json:"status" gorm:"type:boolean;default:true;comment:渠道状态（false: 禁用, true: 启用）"` // 渠道状态
+	models.BaseEntity         // 嵌入基础实体（SnowflakeID 主键 + timestamptz 时间戳）
+	Name              string  `json:"name" gorm:"type:varchar(50);not null;uniqueIndex;comment:渠道名称"`            // 渠道名称（如：微信赞赏、支付宝、爱发电）
+	Icon              *string `json:"icon,omitempty" gorm:"type:varchar(500);comment:渠道图标地址"`                    // 渠道图标URL
+	Description       *string `json:"description,omitempty" gorm:"type:text;comment:渠道描述"`                       // 渠道描述说明
+	SortOrder         int     `json:"sort_order" gorm:"type:int;default:0;comment:渠道排序"`                         // 排序值，数字越大越靠前
+	Status            bool    `json:"status" gorm:"type:boolean;default:true;comment:渠道状态（false: 禁用, true: 启用）"` // 渠道状态
 
 	// 关联关系
 	SponsorsFKey []*SponsorRecord `json:"sponsors_f_key,omitempty" gorm:"foreignKey:ChannelID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;comment:赞助记录外键"` // 赞助记录外键，关联 SponsorRecord 类型
 }
 
-// GetGene 返回 xSnowflake.Gene，用于标识该实体在 ID 生成时使用的基因类型。
-func (_ *SponsorChannel) GetGene() xSnowflake.Gene {
+// GetGene 返回 snowflake.Gene，用于标识该实体在 ID 生成时使用的基因类型。
+func (*SponsorChannel) GetGene() snowflake.Gene {
 	return bConst.GeneSponsorChannel
 }

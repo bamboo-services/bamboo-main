@@ -16,10 +16,11 @@ import (
 	"errors"
 	"strings"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xCache "github.com/bamboo-services/bamboo-base-go/major/cache"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	bConst "github.com/bamboo-services/bamboo-main/pkg/constants"
 	"gorm.io/gorm"
@@ -30,19 +31,19 @@ import (
 // 收口系统配置实体的按键查询与按键更新，供 logic 层读取和修改全局配置项。
 type SystemRepo struct {
 	db  *gorm.DB
-	log *xLog.LogNamedLogger
+	log *logging.LogNamedLogger
 }
 
 // NewSystemRepo 创建 SystemRepo 实例
-func NewSystemRepo(db *gorm.DB, _ *xCache.Manager) *SystemRepo {
+func NewSystemRepo(db *gorm.DB, _ *cache.Manager, logger ...*logging.Logger) *SystemRepo {
 	return &SystemRepo{
 		db:  db,
-		log: xLog.WithName(xLog.NamedREPO, "SystemRepo"),
+		log: resolveRepoLogger("SystemRepo", logger...),
 	}
 }
 
 // ListByKeys 根据键集合批量查询系统配置
-func (r *SystemRepo) ListByKeys(ctx context.Context, keys []string) ([]entity.System, *xError.Error) {
+func (r *SystemRepo) ListByKeys(ctx context.Context, keys []string) ([]entity.System, *apperr.Error) {
 	r.log.Info(ctx, "ListByKeys - 查询系统配置")
 
 	if len(keys) == 0 {
@@ -52,14 +53,14 @@ func (r *SystemRepo) ListByKeys(ctx context.Context, keys []string) ([]entity.Sy
 	var configs []entity.System
 	err := r.db.WithContext(ctx).Where("key IN ?", keys).Find(&configs).Error
 	if err != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "查询系统配置失败", true, err)
+		return nil, apperr.New(database.DatabaseError, "查询系统配置失败", err)
 	}
 
 	return configs, nil
 }
 
 // GetByKey 根据键获取单条系统配置
-func (r *SystemRepo) GetByKey(ctx context.Context, key string) (*entity.System, bool, *xError.Error) {
+func (r *SystemRepo) GetByKey(ctx context.Context, key string) (*entity.System, bool, *apperr.Error) {
 	r.log.Info(ctx, "GetByKey - 查询系统配置")
 
 	key = strings.TrimSpace(key)
@@ -76,14 +77,14 @@ func (r *SystemRepo) GetByKey(ctx context.Context, key string) (*entity.System, 
 		return nil, false, nil
 	}
 
-	return nil, false, xError.NewError(ctx, xError.DatabaseError, "查询系统配置失败", true, err)
+	return nil, false, apperr.New(database.DatabaseError, "查询系统配置失败", err)
 }
 
 // IsAdmin 判断指定用户是否为系统唯一管理员。
 //
 // 管理员身份由 bm_system 配置表的 system.admin.id 标记，比对当前用户 ID 判定；
 // 配置缺失或值为空串视为无管理员，返回 false。
-func (r *SystemRepo) IsAdmin(ctx context.Context, userID xSnowflake.SnowflakeID) (bool, *xError.Error) {
+func (r *SystemRepo) IsAdmin(ctx context.Context, userID snowflake.SnowflakeID) (bool, *apperr.Error) {
 	config, found, xErr := r.GetByKey(ctx, bConst.KeySystemAdminID)
 	if xErr != nil {
 		return false, xErr
@@ -100,7 +101,7 @@ func (r *SystemRepo) IsAdmin(ctx context.Context, userID xSnowflake.SnowflakeID)
 }
 
 // UpdateValueByKey 根据键更新系统配置的值
-func (r *SystemRepo) UpdateValueByKey(ctx context.Context, key string, value *string) *xError.Error {
+func (r *SystemRepo) UpdateValueByKey(ctx context.Context, key string, value *string) *apperr.Error {
 	r.log.Info(ctx, "UpdateValueByKey - 更新系统配置")
 
 	key = strings.TrimSpace(key)
@@ -110,7 +111,7 @@ func (r *SystemRepo) UpdateValueByKey(ctx context.Context, key string, value *st
 
 	err := r.db.WithContext(ctx).Model(&entity.System{}).Where("key = ?", key).Update("value", value).Error
 	if err != nil {
-		return xError.NewError(ctx, xError.DatabaseError, "更新系统配置失败", true, err)
+		return apperr.New(database.DatabaseError, "更新系统配置失败", err)
 	}
 
 	return nil
@@ -119,7 +120,7 @@ func (r *SystemRepo) UpdateValueByKey(ctx context.Context, key string, value *st
 // GetValuesByKeys 根据键集合批量查询系统配置，返回 key → 值映射。
 //
 // 未命中或值为空串的键不会出现在结果中，便于调用方按缺省值兜底。
-func (r *SystemRepo) GetValuesByKeys(ctx context.Context, keys []string) (map[string]string, *xError.Error) {
+func (r *SystemRepo) GetValuesByKeys(ctx context.Context, keys []string) (map[string]string, *apperr.Error) {
 	configs, xErr := r.ListByKeys(ctx, keys)
 	if xErr != nil {
 		return nil, xErr
@@ -139,7 +140,7 @@ func (r *SystemRepo) GetValuesByKeys(ctx context.Context, keys []string) (map[st
 //
 // 名称缺省回退「已失效」，描述缺省为 nil；DB 读取失败返回错误，由调用方决定降级策略
 // （公开接口建议以 entity.NewDefaultBuiltinGroup 兜底，不阻断查询）。
-func (r *SystemRepo) BuildBuiltinInvalidGroup(ctx context.Context) (*entity.LinkGroup, *xError.Error) {
+func (r *SystemRepo) BuildBuiltinInvalidGroup(ctx context.Context) (*entity.LinkGroup, *apperr.Error) {
 	values, xErr := r.GetValuesByKeys(ctx, []string{
 		bConst.KeyBuiltinInvalidGroupName,
 		bConst.KeyBuiltinInvalidGroupDesc,

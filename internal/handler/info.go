@@ -14,8 +14,8 @@ package handler
 import (
 	apiInfo "github.com/bamboo-services/bamboo-main/api/info"
 
-	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
-	xValid "github.com/bamboo-services/bamboo-base-go/major/validator"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/bind"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,8 +26,8 @@ import (
 // @Tags 站点信息接口
 // @Accept json
 // @Produce json
-// @Success 200 {object} xBase.BaseResponse{data=apiInfo.SiteResponse} "获取成功"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiInfo.SiteResponse} "获取成功"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/info/site [GET]
 func (h *InfoHandler) GetSiteInfo(c *gin.Context) {
 	result, err := h.service.infoLogic.GetSiteInfo(c.Request.Context())
@@ -36,7 +36,7 @@ func (h *InfoHandler) GetSiteInfo(c *gin.Context) {
 		return
 	}
 
-	xResult.SuccessHasData(c, "获取站点信息成功", result)
+	httpresult.SuccessWithData(c, "获取站点信息成功", result)
 }
 
 // UpdateSiteInfo 更新站点信息
@@ -48,26 +48,24 @@ func (h *InfoHandler) GetSiteInfo(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param request body apiInfo.SiteUpdateRequest true "站点信息更新请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiInfo.SiteResponse} "更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiInfo.SiteResponse} "更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/info/admin/site [PUT]
 func (h *InfoHandler) UpdateSiteInfo(c *gin.Context) {
-	var req apiInfo.SiteUpdateRequest
-
-	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiInfo.SiteUpdateRequest{}).Data()
+	if req == nil {
 		return
 	}
 
-	result, err := h.service.infoLogic.UpdateSiteInfo(c.Request.Context(), &req)
+	result, err := h.service.infoLogic.UpdateSiteInfo(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	xResult.SuccessHasData(c, "站点信息更新成功", result)
+	httpresult.SuccessWithData(c, "站点信息更新成功", result)
 }
 
 // GetArchiveInfo 获取站点档案
@@ -77,8 +75,8 @@ func (h *InfoHandler) UpdateSiteInfo(c *gin.Context) {
 // @Tags 站点信息接口
 // @Accept json
 // @Produce json
-// @Success 200 {object} xBase.BaseResponse{data=apiInfo.ArchiveResponse} "获取成功"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiInfo.ArchiveResponse} "获取成功"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/info/archive [GET]
 func (h *InfoHandler) GetArchiveInfo(c *gin.Context) {
 	result, err := h.service.infoLogic.GetArchiveInfo(c.Request.Context())
@@ -87,7 +85,7 @@ func (h *InfoHandler) GetArchiveInfo(c *gin.Context) {
 		return
 	}
 
-	xResult.SuccessHasData(c, "获取站点档案成功", result)
+	httpresult.SuccessWithData(c, "获取站点档案成功", result)
 }
 
 // GetBuiltinInvalidGroup 获取内置「已失效」分组配置
@@ -97,8 +95,8 @@ func (h *InfoHandler) GetArchiveInfo(c *gin.Context) {
 // @Tags 站点信息接口
 // @Accept json
 // @Produce json
-// @Success 200 {object} xBase.BaseResponse{data=apiInfo.BuiltinInvalidGroupResponse} "获取成功"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiInfo.BuiltinInvalidGroupResponse} "获取成功"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/info/builtin-invalid-group [GET]
 func (h *InfoHandler) GetBuiltinInvalidGroup(c *gin.Context) {
 	group, err := h.service.infoLogic.GetBuiltinInvalidGroup(c.Request.Context())
@@ -108,7 +106,7 @@ func (h *InfoHandler) GetBuiltinInvalidGroup(c *gin.Context) {
 	}
 
 	resp := apiInfo.BuiltinInvalidGroupResponse{LinkGroup: *group}
-	xResult.SuccessHasData(c, "获取内置已失效分组配置成功", resp)
+	httpresult.SuccessWithData(c, "获取内置已失效分组配置成功", resp)
 }
 
 // GetApplySiteInfo 获取申请站点展示
@@ -118,8 +116,8 @@ func (h *InfoHandler) GetBuiltinInvalidGroup(c *gin.Context) {
 // @Tags 站点信息接口
 // @Accept json
 // @Produce json
-// @Success 200 {object} xBase.BaseResponse{data=apiInfo.ApplySiteResponse} "获取成功"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiInfo.ApplySiteResponse} "获取成功"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/info/apply-site [GET]
 func (h *InfoHandler) GetApplySiteInfo(c *gin.Context) {
 	result, err := h.service.infoLogic.GetApplySiteInfo(c.Request.Context())
@@ -128,7 +126,7 @@ func (h *InfoHandler) GetApplySiteInfo(c *gin.Context) {
 		return
 	}
 
-	xResult.SuccessHasData(c, "获取申请站点展示成功", result)
+	httpresult.SuccessWithData(c, "获取申请站点展示成功", result)
 }
 
 // GetBloggerInfo 获取博主信息
@@ -138,8 +136,8 @@ func (h *InfoHandler) GetApplySiteInfo(c *gin.Context) {
 // @Tags 站点信息接口
 // @Accept json
 // @Produce json
-// @Success 200 {object} xBase.BaseResponse{data=apiInfo.BloggerResponse} "获取成功"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiInfo.BloggerResponse} "获取成功"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/info/blogger [GET]
 func (h *InfoHandler) GetBloggerInfo(c *gin.Context) {
 	result, err := h.service.infoLogic.GetBloggerInfo(c.Request.Context())
@@ -148,7 +146,7 @@ func (h *InfoHandler) GetBloggerInfo(c *gin.Context) {
 		return
 	}
 
-	xResult.SuccessHasData(c, "获取博主信息成功", result)
+	httpresult.SuccessWithData(c, "获取博主信息成功", result)
 }
 
 // UpdateApplySiteInfo 更新申请站点展示
@@ -160,26 +158,24 @@ func (h *InfoHandler) GetBloggerInfo(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param request body apiInfo.ApplySiteUpdateRequest true "申请站点展示更新请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiInfo.ApplySiteResponse} "更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiInfo.ApplySiteResponse} "更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/info/admin/apply-site [PUT]
 func (h *InfoHandler) UpdateApplySiteInfo(c *gin.Context) {
-	var req apiInfo.ApplySiteUpdateRequest
-
-	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiInfo.ApplySiteUpdateRequest{}).Data()
+	if req == nil {
 		return
 	}
 
-	result, err := h.service.infoLogic.UpdateApplySiteInfo(c.Request.Context(), &req)
+	result, err := h.service.infoLogic.UpdateApplySiteInfo(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	xResult.SuccessHasData(c, "申请站点展示更新成功", result)
+	httpresult.SuccessWithData(c, "申请站点展示更新成功", result)
 }
 
 // UpdateBloggerInfo 更新博主信息
@@ -191,26 +187,24 @@ func (h *InfoHandler) UpdateApplySiteInfo(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param request body apiInfo.BloggerUpdateRequest true "博主信息更新请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiInfo.BloggerResponse} "更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiInfo.BloggerResponse} "更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/info/admin/blogger [PUT]
 func (h *InfoHandler) UpdateBloggerInfo(c *gin.Context) {
-	var req apiInfo.BloggerUpdateRequest
-
-	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiInfo.BloggerUpdateRequest{}).Data()
+	if req == nil {
 		return
 	}
 
-	result, err := h.service.infoLogic.UpdateBloggerInfo(c.Request.Context(), &req)
+	result, err := h.service.infoLogic.UpdateBloggerInfo(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	xResult.SuccessHasData(c, "博主信息更新成功", result)
+	httpresult.SuccessWithData(c, "博主信息更新成功", result)
 }
 
 // UpdateArchiveInfo 更新站点档案
@@ -222,26 +216,24 @@ func (h *InfoHandler) UpdateBloggerInfo(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param request body apiInfo.ArchiveUpdateRequest true "站点档案更新请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiInfo.ArchiveResponse} "更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiInfo.ArchiveResponse} "更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/info/admin/archive [PUT]
 func (h *InfoHandler) UpdateArchiveInfo(c *gin.Context) {
-	var req apiInfo.ArchiveUpdateRequest
-
-	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiInfo.ArchiveUpdateRequest{}).Data()
+	if req == nil {
 		return
 	}
 
-	result, err := h.service.infoLogic.UpdateArchiveInfo(c.Request.Context(), &req)
+	result, err := h.service.infoLogic.UpdateArchiveInfo(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	xResult.SuccessHasData(c, "站点档案更新成功", result)
+	httpresult.SuccessWithData(c, "站点档案更新成功", result)
 }
 
 // UpdateBuiltinInvalidGroup 更新内置「已失效」分组配置
@@ -253,25 +245,23 @@ func (h *InfoHandler) UpdateArchiveInfo(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param request body apiInfo.BuiltinInvalidGroupUpdateRequest true "更新内置已失效分组配置请求"
-// @Success 200 {object} xBase.BaseResponse{data=apiInfo.BuiltinInvalidGroupResponse} "更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiInfo.BuiltinInvalidGroupResponse} "更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/info/admin/builtin-invalid-group [PUT]
 func (h *InfoHandler) UpdateBuiltinInvalidGroup(c *gin.Context) {
-	var req apiInfo.BuiltinInvalidGroupUpdateRequest
-
-	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiInfo.BuiltinInvalidGroupUpdateRequest{}).Data()
+	if req == nil {
 		return
 	}
 
-	group, err := h.service.infoLogic.UpdateBuiltinInvalidGroup(c.Request.Context(), &req)
+	group, err := h.service.infoLogic.UpdateBuiltinInvalidGroup(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	resp := apiInfo.BuiltinInvalidGroupResponse{LinkGroup: *group}
-	xResult.SuccessHasData(c, "内置已失效分组配置更新成功", resp)
+	httpresult.SuccessWithData(c, "内置已失效分组配置更新成功", resp)
 }

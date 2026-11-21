@@ -10,7 +10,7 @@
 package handler
 
 import (
-	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,9 +22,9 @@ import (
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} xBase.BaseResponse{data=apiDashboard.StatsResponse} "获取成功"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiDashboard.StatsResponse} "获取成功"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/dashboard/stats [GET]
 func (h *DashboardHandler) Stats(c *gin.Context) {
 	result, err := h.service.dashboardLogic.Stats(c.Request.Context())
@@ -33,5 +33,5 @@ func (h *DashboardHandler) Stats(c *gin.Context) {
 		return
 	}
 
-	xResult.SuccessHasData(c, "获取仪表盘统计成功", result)
+	httpresult.SuccessWithData(c, "获取仪表盘统计成功", result)
 }

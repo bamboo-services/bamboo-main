@@ -13,10 +13,14 @@ import (
 	"context"
 	"strings"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
+	"github.com/bamboo-services/bamboo-base-go/application/v2"
+	"github.com/bamboo-services/bamboo-base-go/application/v2/builtin"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	apiAuth "github.com/bamboo-services/bamboo-main/api/auth"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
@@ -39,18 +43,20 @@ type SystemUserLogic struct {
 
 // NewSystemUserLogic 创建 SystemUserLogic 实例，从上下文获取数据库与缓存管理器并初始化仓储依赖。
 func NewSystemUserLogic(ctx context.Context) *SystemUserLogic {
-	db := xCtxUtil.MustGetDB(ctx)
-	m := xCtxUtil.MustGetCacheManager(ctx)
+	db := database.MustGet(ctx)
+	m := cache.MustGet(ctx)
+	logger := application.MustGet[*logging.Logger](ctx, builtin.LoggerKey)
 
 	return &SystemUserLogic{
 		logic: logic{
-			db:    db,
-			cache: m,
-			log:   xLog.WithName(xLog.NamedLOGC, "SystemUserLogic"),
+			db:     db,
+			cache:  m,
+			logger: logger,
+			log:    logger.WithName(logging.NamedLOGC, "SystemUserLogic"),
 		},
 		repo: systemUserRepo{
-			user:   repository.NewSystemUserRepo(db, m),
-			system: repository.NewSystemRepo(db, m),
+			user:   repository.NewSystemUserRepo(db, m, logger),
+			system: repository.NewSystemRepo(db, m, logger),
 		},
 	}
 }
@@ -59,7 +65,7 @@ func NewSystemUserLogic(ctx context.Context) *SystemUserLogic {
 //
 // 管理员身份由 bm_system 配置表的 system.admin.id 唯一标记，一次性读取配置
 // 后逐条比对填充，避免对每名用户触发 IsAdmin 单查造成的 N+1 查询。
-func (s *SystemUserLogic) ListUsers(ctx context.Context, req *apiAuth.UserQueryRequest) (*apiAuth.UserListResponse, *xError.Error) {
+func (s *SystemUserLogic) ListUsers(ctx context.Context, req *apiAuth.UserQueryRequest) (*apiAuth.UserListResponse, *apperr.Error) {
 	if req.Page <= 0 {
 		req.Page = 1
 	}
@@ -94,18 +100,18 @@ func (s *SystemUserLogic) ListUsers(ctx context.Context, req *apiAuth.UserQueryR
 // 系统唯一管理员不可被禁用：以 bm_system 配置表的 system.admin.id 为权威判定
 // （不可依赖缓存读回的用户实体 IsAdmin 字段——该字段经 JSON 序列化后恒为 false）。
 // 状态更新复用 UpdateFieldsByID，内部已处理缓存失效与回读重建。
-func (s *SystemUserLogic) UpdateUserStatus(ctx context.Context, userID xSnowflake.SnowflakeID, req *apiAuth.UserStatusRequest) *xError.Error {
+func (s *SystemUserLogic) UpdateUserStatus(ctx context.Context, userID snowflake.SnowflakeID, req *apiAuth.UserStatusRequest) *apperr.Error {
 	user, found, xErr := s.repo.user.GetByID(ctx, userID)
 	if xErr != nil {
 		return xErr
 	}
 	if !found {
-		return xError.NewError(ctx, xError.NotFound, "用户不存在", false)
+		return apperr.New(httpresult.NotFound, "用户不存在")
 	}
 
 	// 保护系统唯一管理员（配置判定）：仅拦截「禁用」方向，「启用」管理员无害
 	if req.Status == 0 && user.ID.String() == s.adminID(ctx) {
-		return xError.NewError(ctx, xError.OperationInvalid, "不能禁用系统管理员", false)
+		return apperr.New(httpresult.InvalidState, "不能禁用系统管理员")
 	}
 
 	_, xErr = s.repo.user.UpdateFieldsByID(ctx, userID, map[string]any{"status": req.Status})

@@ -10,8 +10,8 @@
 package entity
 
 import (
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xModels "github.com/bamboo-services/bamboo-base-go/major/models"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2/models"
 
 	bConst "github.com/bamboo-services/bamboo-main/pkg/constants"
 )
@@ -21,11 +21,11 @@ import (
 // 该类型包含分组的唯一标识符、名称、描述、排序等信息。
 // 同时记录该分组的创建时间和更新时间，便于数据管理和审计。
 type LinkGroup struct {
-	xModels.BaseEntity         // 嵌入基础实体（SnowflakeID 主键 + timestamptz 时间戳）
-	Name               string  `json:"name" gorm:"type:varchar(100);not null;comment:分组名称"`                       // 分组名称
-	Description        *string `json:"description,omitempty" gorm:"type:text;comment:分组描述"`                       // 分组描述
-	SortOrder          int     `json:"sort_order" gorm:"type:int;default:0;comment:分组排序"`                         // 分组排序
-	Status             bool    `json:"status" gorm:"type:boolean;default:true;comment:分组状态（false: 禁用, true: 启用）"` // 分组状态
+	models.BaseEntity         // 嵌入基础实体（SnowflakeID 主键 + timestamptz 时间戳）
+	Name              string  `json:"name" gorm:"type:varchar(100);not null;comment:分组名称"`                       // 分组名称
+	Description       *string `json:"description,omitempty" gorm:"type:text;comment:分组描述"`                       // 分组描述
+	SortOrder         int     `json:"sort_order" gorm:"type:int;default:0;comment:分组排序"`                         // 分组排序
+	Status            bool    `json:"status" gorm:"type:boolean;default:true;comment:分组状态（false: 禁用, true: 启用）"` // 分组状态
 
 	// 关联关系
 	// 注意：constraint:"-" 跳过数据库外键约束——「已失效」为内置分组（不落库），
@@ -33,8 +33,8 @@ type LinkGroup struct {
 	LinksFKey []*LinkFriend `json:"links_f_key,omitempty" gorm:"foreignKey:GroupID;references:ID;constraint:-;comment:友链外键"` // 友链外键，关联 LinkFriend 类型
 }
 
-// GetGene 返回 xSnowflake.Gene，用于标识该实体在 ID 生成时使用的基因类型。
-func (_ *LinkGroup) GetGene() xSnowflake.Gene {
+// GetGene 返回 snowflake.Gene，用于标识该实体在 ID 生成时使用的基因类型。
+func (*LinkGroup) GetGene() snowflake.Gene {
 	return bConst.GeneLinkGroup
 }
 
@@ -44,7 +44,7 @@ func (_ *LinkGroup) GetGene() xSnowflake.Gene {
 // constants.BuiltinGroupInvalidID（雪花 ID 空间之外的保留值），排序恒为 0、状态恒为启用。
 func NewBuiltinGroup(name string, description *string) *LinkGroup {
 	return &LinkGroup{
-		BaseEntity:  xModels.BaseEntity{ID: bConst.BuiltinGroupInvalidID},
+		BaseEntity:  models.BaseEntity{ID: bConst.BuiltinGroupInvalidID},
 		Name:        name,
 		Description: description,
 		SortOrder:   0,
@@ -60,7 +60,7 @@ func NewDefaultBuiltinGroup() *LinkGroup {
 }
 
 // BuiltinGroupByID 按保留 ID 返回内置分组对象；非内置 ID 返回 nil。
-func BuiltinGroupByID(id xSnowflake.SnowflakeID) *LinkGroup {
+func BuiltinGroupByID(id snowflake.SnowflakeID) *LinkGroup {
 	if id == bConst.BuiltinGroupInvalidID {
 		return NewDefaultBuiltinGroup()
 	}
@@ -68,6 +68,6 @@ func BuiltinGroupByID(id xSnowflake.SnowflakeID) *LinkGroup {
 }
 
 // IsBuiltinGroupID 判断是否为内置「已失效」分组的保留 ID。
-func IsBuiltinGroupID(id xSnowflake.SnowflakeID) bool {
+func IsBuiltinGroupID(id snowflake.SnowflakeID) bool {
 	return id == bConst.BuiltinGroupInvalidID
 }

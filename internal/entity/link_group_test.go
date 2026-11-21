@@ -14,13 +14,13 @@ package entity
 import (
 	"testing"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 )
 
 // TestNewBuiltinGroup 验证内置「已失效」分组构造：ID 为保留值、恒启用。
 func TestNewBuiltinGroup(t *testing.T) {
 	group := NewBuiltinGroup("失联", nil)
-	if group.ID != xSnowflake.SnowflakeID(1) {
+	if group.ID != snowflake.SnowflakeID(1) {
 		t.Fatalf("内置分组 ID 应为 1，实际 %v", group.ID)
 	}
 	if group.Name != "失联" {
@@ -37,7 +37,7 @@ func TestNewBuiltinGroup(t *testing.T) {
 // TestNewDefaultBuiltinGroup 验证内置「已失效」分组默认值兜底。
 func TestNewDefaultBuiltinGroup(t *testing.T) {
 	group := NewDefaultBuiltinGroup()
-	if group.ID != xSnowflake.SnowflakeID(1) {
+	if group.ID != snowflake.SnowflakeID(1) {
 		t.Fatalf("默认内置分组 ID 应为 1，实际 %v", group.ID)
 	}
 	if group.Name != "已失效" {
@@ -59,7 +59,7 @@ func TestBuiltinGroupByID(t *testing.T) {
 	if got := BuiltinGroupByID(3); got != nil {
 		t.Fatalf("BuiltinGroupByID(3) 应为 nil，实际 %v", got)
 	}
-	if got := BuiltinGroupByID(xSnowflake.SnowflakeID(0)); got != nil {
+	if got := BuiltinGroupByID(snowflake.SnowflakeID(0)); got != nil {
 		t.Fatalf("BuiltinGroupByID(0) 应为 nil，实际 %v", got)
 	}
 }
@@ -67,14 +67,14 @@ func TestBuiltinGroupByID(t *testing.T) {
 // TestIsBuiltinGroupID 验证内置「已失效」分组保留 ID 判定。
 func TestIsBuiltinGroupID(t *testing.T) {
 	cases := []struct {
-		id   xSnowflake.SnowflakeID
+		id   snowflake.SnowflakeID
 		want bool
 	}{
 		{1, true},
 		{2, false},
 		{0, false},
 		{3, false},
-		{xSnowflake.SnowflakeID(1735689600000000000), false}, // 雪花 ID 空间的真实值
+		{snowflake.SnowflakeID(1735689600000000000), false}, // 雪花 ID 空间的真实值
 	}
 	for _, c := range cases {
 		if got := IsBuiltinGroupID(c.id); got != c.want {

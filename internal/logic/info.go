@@ -21,9 +21,13 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/repository"
 	bConst "github.com/bamboo-services/bamboo-main/pkg/constants"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
+	"github.com/bamboo-services/bamboo-base-go/application/v2"
+	"github.com/bamboo-services/bamboo-base-go/application/v2/builtin"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 )
 
 // 站点信息键名常量
@@ -62,28 +66,30 @@ type InfoLogic struct {
 
 // NewInfoLogic 创建 InfoLogic 实例，从上下文获取数据库与缓存并初始化系统配置仓储依赖。
 func NewInfoLogic(ctx context.Context) *InfoLogic {
-	db := xCtxUtil.MustGetDB(ctx)
-	m := xCtxUtil.MustGetCacheManager(ctx)
+	db := database.MustGet(ctx)
+	m := cache.MustGet(ctx)
+	logger := application.MustGet[*logging.Logger](ctx, builtin.LoggerKey)
 
 	return &InfoLogic{
 		logic: logic{
-			db:    db,
-			cache: m,
-			log:   xLog.WithName(xLog.NamedLOGC, "InfoLogic"),
+			db:     db,
+			cache:  m,
+			logger: logger,
+			log:    logger.WithName(logging.NamedLOGC, "InfoLogic"),
 		},
 		repo: infoRepo{
-			system: repository.NewSystemRepo(db, m),
+			system: repository.NewSystemRepo(db, m, logger),
 		},
 	}
 }
 
 // GetSiteInfo 获取站点信息
-func (l *InfoLogic) GetSiteInfo(ctx context.Context) (*apiInfo.SiteResponse, *xError.Error) {
+func (l *InfoLogic) GetSiteInfo(ctx context.Context) (*apiInfo.SiteResponse, *apperr.Error) {
 	// 批量查询站点相关配置
 	keys := []string{KeySiteName, KeySiteIntroduction}
 	configs, xErr := l.repo.system.ListByKeys(ctx, keys)
 	if xErr != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "获取站点信息失败", false, xErr)
+		return nil, apperr.New(database.DatabaseError, "获取站点信息失败", xErr)
 	}
 
 	// 转换为 map 便于访问
@@ -102,7 +108,7 @@ func (l *InfoLogic) GetSiteInfo(ctx context.Context) (*apiInfo.SiteResponse, *xE
 }
 
 // UpdateSiteInfo 更新站点信息
-func (l *InfoLogic) UpdateSiteInfo(ctx context.Context, req *apiInfo.SiteUpdateRequest) (*apiInfo.SiteResponse, *xError.Error) {
+func (l *InfoLogic) UpdateSiteInfo(ctx context.Context, req *apiInfo.SiteUpdateRequest) (*apiInfo.SiteResponse, *apperr.Error) {
 	// 收集需要更新的字段（仅更新非 nil 的字段）
 	updates := make(map[string]*string)
 	if req.SiteName != nil {
@@ -121,7 +127,7 @@ func (l *InfoLogic) UpdateSiteInfo(ctx context.Context, req *apiInfo.SiteUpdateR
 	for key, value := range updates {
 		xErr := l.repo.system.UpdateValueByKey(ctx, key, value)
 		if xErr != nil {
-			return nil, xError.NewError(ctx, xError.DatabaseError, "更新站点信息失败", false, xErr)
+			return nil, apperr.New(database.DatabaseError, "更新站点信息失败", xErr)
 		}
 	}
 
@@ -133,14 +139,14 @@ func (l *InfoLogic) UpdateSiteInfo(ctx context.Context, req *apiInfo.SiteUpdateR
 // 申请站点展示用于「交换友链」场景：站点名字/描述/地址/图片/订阅/邮箱，
 // 供访客申请友链前在自站添加博主友链时复制，展示于 operate/apply 申请页。
 // 与站点信息及博主个人展示语义独立，单独取数。
-func (l *InfoLogic) GetApplySiteInfo(ctx context.Context) (*apiInfo.ApplySiteResponse, *xError.Error) {
+func (l *InfoLogic) GetApplySiteInfo(ctx context.Context) (*apiInfo.ApplySiteResponse, *apperr.Error) {
 	keys := []string{
 		KeyApplySiteName, KeyApplySiteDesc, KeyApplySiteUrl,
 		KeyApplySiteImg, KeyApplySiteRss, KeyApplySiteEmail,
 	}
 	configs, xErr := l.repo.system.ListByKeys(ctx, keys)
 	if xErr != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "获取申请站点展示失败", false, xErr)
+		return nil, apperr.New(database.DatabaseError, "获取申请站点展示失败", xErr)
 	}
 
 	configMap := make(map[string]*entity.System)
@@ -162,7 +168,7 @@ func (l *InfoLogic) GetApplySiteInfo(ctx context.Context) (*apiInfo.ApplySiteRes
 }
 
 // UpdateApplySiteInfo 更新申请站点展示
-func (l *InfoLogic) UpdateApplySiteInfo(ctx context.Context, req *apiInfo.ApplySiteUpdateRequest) (*apiInfo.ApplySiteResponse, *xError.Error) {
+func (l *InfoLogic) UpdateApplySiteInfo(ctx context.Context, req *apiInfo.ApplySiteUpdateRequest) (*apiInfo.ApplySiteResponse, *apperr.Error) {
 	updates := make(map[string]*string)
 	if req.SiteName != nil {
 		updates[KeyApplySiteName] = req.SiteName
@@ -190,7 +196,7 @@ func (l *InfoLogic) UpdateApplySiteInfo(ctx context.Context, req *apiInfo.ApplyS
 	for key, value := range updates {
 		xErr := l.repo.system.UpdateValueByKey(ctx, key, value)
 		if xErr != nil {
-			return nil, xError.NewError(ctx, xError.DatabaseError, "更新申请站点展示失败", false, xErr)
+			return nil, apperr.New(database.DatabaseError, "更新申请站点展示失败", xErr)
 		}
 	}
 
@@ -201,13 +207,13 @@ func (l *InfoLogic) UpdateApplySiteInfo(ctx context.Context, req *apiInfo.ApplyS
 //
 // 博主信息用于「关于我」名士帖个人展示：昵称/个人简介/博客链接/头像。
 // 与站点信息及申请站点展示语义独立，单独取数。
-func (l *InfoLogic) GetBloggerInfo(ctx context.Context) (*apiInfo.BloggerResponse, *xError.Error) {
+func (l *InfoLogic) GetBloggerInfo(ctx context.Context) (*apiInfo.BloggerResponse, *apperr.Error) {
 	keys := []string{
 		KeyBloggerNick, KeyBloggerDesc, KeyBloggerBlogUrl, KeyBloggerAvatar,
 	}
 	configs, xErr := l.repo.system.ListByKeys(ctx, keys)
 	if xErr != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "获取博主信息失败", false, xErr)
+		return nil, apperr.New(database.DatabaseError, "获取博主信息失败", xErr)
 	}
 
 	configMap := make(map[string]*entity.System)
@@ -227,7 +233,7 @@ func (l *InfoLogic) GetBloggerInfo(ctx context.Context) (*apiInfo.BloggerRespons
 }
 
 // UpdateBloggerInfo 更新博主信息
-func (l *InfoLogic) UpdateBloggerInfo(ctx context.Context, req *apiInfo.BloggerUpdateRequest) (*apiInfo.BloggerResponse, *xError.Error) {
+func (l *InfoLogic) UpdateBloggerInfo(ctx context.Context, req *apiInfo.BloggerUpdateRequest) (*apiInfo.BloggerResponse, *apperr.Error) {
 	updates := make(map[string]*string)
 	if req.Nick != nil {
 		updates[KeyBloggerNick] = req.Nick
@@ -249,7 +255,7 @@ func (l *InfoLogic) UpdateBloggerInfo(ctx context.Context, req *apiInfo.BloggerU
 	for key, value := range updates {
 		xErr := l.repo.system.UpdateValueByKey(ctx, key, value)
 		if xErr != nil {
-			return nil, xError.NewError(ctx, xError.DatabaseError, "更新博主信息失败", false, xErr)
+			return nil, apperr.New(database.DatabaseError, "更新博主信息失败", xErr)
 		}
 	}
 
@@ -260,11 +266,11 @@ func (l *InfoLogic) UpdateBloggerInfo(ctx context.Context, req *apiInfo.BloggerU
 //
 // 站点档案聚合「站点描述」（site.description）与「自我介绍」（profile.about），
 // 均以 Markdown 书写，供设置页「站点档案」板块统一编辑与公开页 about/me 展示。
-func (l *InfoLogic) GetArchiveInfo(ctx context.Context) (*apiInfo.ArchiveResponse, *xError.Error) {
+func (l *InfoLogic) GetArchiveInfo(ctx context.Context) (*apiInfo.ArchiveResponse, *apperr.Error) {
 	keys := []string{KeySiteDescription, KeyProfileAbout}
 	configs, xErr := l.repo.system.ListByKeys(ctx, keys)
 	if xErr != nil {
-		return nil, xError.NewError(ctx, xError.DatabaseError, "获取站点档案失败", false, xErr)
+		return nil, apperr.New(database.DatabaseError, "获取站点档案失败", xErr)
 	}
 
 	configMap := make(map[string]*entity.System)
@@ -282,7 +288,7 @@ func (l *InfoLogic) GetArchiveInfo(ctx context.Context) (*apiInfo.ArchiveRespons
 }
 
 // UpdateArchiveInfo 更新站点档案
-func (l *InfoLogic) UpdateArchiveInfo(ctx context.Context, req *apiInfo.ArchiveUpdateRequest) (*apiInfo.ArchiveResponse, *xError.Error) {
+func (l *InfoLogic) UpdateArchiveInfo(ctx context.Context, req *apiInfo.ArchiveUpdateRequest) (*apiInfo.ArchiveResponse, *apperr.Error) {
 	updates := make(map[string]*string)
 	if req.SiteDescription != nil {
 		updates[KeySiteDescription] = req.SiteDescription
@@ -298,7 +304,7 @@ func (l *InfoLogic) UpdateArchiveInfo(ctx context.Context, req *apiInfo.ArchiveU
 	for key, value := range updates {
 		xErr := l.repo.system.UpdateValueByKey(ctx, key, value)
 		if xErr != nil {
-			return nil, xError.NewError(ctx, xError.DatabaseError, "更新站点档案失败", false, xErr)
+			return nil, apperr.New(database.DatabaseError, "更新站点档案失败", xErr)
 		}
 	}
 
@@ -308,17 +314,17 @@ func (l *InfoLogic) UpdateArchiveInfo(ctx context.Context, req *apiInfo.ArchiveU
 // GetBuiltinInvalidGroup 获取内置「已失效」分组配置
 //
 // 名称/描述存于 bm_system（group.builtin.invalid.*），经 BuildBuiltinInvalidGroup 组装虚拟分组。
-func (l *InfoLogic) GetBuiltinInvalidGroup(ctx context.Context) (*entity.LinkGroup, *xError.Error) {
+func (l *InfoLogic) GetBuiltinInvalidGroup(ctx context.Context) (*entity.LinkGroup, *apperr.Error) {
 	return l.repo.system.BuildBuiltinInvalidGroup(ctx)
 }
 
 // UpdateBuiltinInvalidGroup 更新内置「已失效」分组配置
-func (l *InfoLogic) UpdateBuiltinInvalidGroup(ctx context.Context, req *apiInfo.BuiltinInvalidGroupUpdateRequest) (*entity.LinkGroup, *xError.Error) {
+func (l *InfoLogic) UpdateBuiltinInvalidGroup(ctx context.Context, req *apiInfo.BuiltinInvalidGroupUpdateRequest) (*entity.LinkGroup, *apperr.Error) {
 	updates := make(map[string]*string)
 
 	if req.Name != nil {
 		if strings.TrimSpace(*req.Name) == "" {
-			return nil, xError.NewError(ctx, xError.BadRequest, "已失效分组名称不能为空", false)
+			return nil, apperr.New(httpresult.BadRequest, "已失效分组名称不能为空")
 		}
 		updates[bConst.KeyBuiltinInvalidGroupName] = req.Name
 	}

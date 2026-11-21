@@ -12,16 +12,16 @@ package apiDashboard
 import (
 	"time"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 )
 
 // RecentApplicationItem 最近友链申请条目
 type RecentApplicationItem struct {
-	ID        xSnowflake.SnowflakeID `json:"id"`         // 友链ID
-	Name      string                 `json:"name"`       // 友链名称
-	Avatar    string                 `json:"avatar"`     // 友链头像URL
-	URL       string                 `json:"url"`        // 友链URL地址
-	CreatedAt time.Time              `json:"created_at"` // 申请时间
+	ID        snowflake.SnowflakeID `json:"id"`         // 友链ID
+	Name      string                `json:"name"`       // 友链名称
+	Avatar    string                `json:"avatar"`     // 友链头像URL
+	URL       string                `json:"url"`        // 友链URL地址
+	CreatedAt time.Time             `json:"created_at"` // 申请时间
 }
 
 // StatsResponse 仪表盘统计响应

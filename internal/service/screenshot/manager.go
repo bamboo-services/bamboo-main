@@ -12,69 +12,80 @@ package screenshot
 import (
 	"context"
 	"fmt"
+	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
 
+	"github.com/bamboo-services/bamboo-base-go/application/v2"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
-
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	"gorm.io/gorm"
 )
 
 // LinkRepo 截图服务所需的友链仓储能力（由 repository.LinkRepo 实现，测试可注入替身）
 type LinkRepo interface {
 	// ListApprovedForScreenshot 查询全部已通过且未失效的友链（按队列顺序）
-	ListApprovedForScreenshot(ctx context.Context, tx *gorm.DB) ([]entity.LinkFriend, *xError.Error)
+	ListApprovedForScreenshot(ctx context.Context, tx *gorm.DB) ([]entity.LinkFriend, *apperr.Error)
 	// GetByID 查询友链详情
-	GetByID(ctx context.Context, id xSnowflake.SnowflakeID, withAssociations bool, tx *gorm.DB) (*entity.LinkFriend, bool, *xError.Error)
+	GetByID(ctx context.Context, id snowflake.SnowflakeID, withAssociations bool, tx *gorm.DB) (*entity.LinkFriend, bool, *apperr.Error)
 	// UpdateScreenshot 更新友链截图信息
-	UpdateScreenshot(ctx context.Context, id xSnowflake.SnowflakeID, url string, at time.Time, tx *gorm.DB) *xError.Error
+	UpdateScreenshot(ctx context.Context, id snowflake.SnowflakeID, url string, at time.Time, tx *gorm.DB) *apperr.Error
 }
 
 // Manager 友链站点截图任务管理器。
 //
 // 内存 FIFO 队列 + 单 worker 串行消费，天然满足「按队列顺序自动处理」；
 // 任务入队时经 inflight map 去重，避免同一友链被重复排队。
-// worker 常驻运行并随 Runner 生命周期退出；进程重启丢失的任务由每日全量入队兜底。
 type Manager struct {
 	cfg     Config
 	repo    LinkRepo
 	capture CaptureFunc
-	log     *xLog.LogNamedLogger
+	log     *logging.LogNamedLogger
 
 	mu       sync.Mutex
-	queue    []xSnowflake.SnowflakeID
-	inflight map[xSnowflake.SnowflakeID]struct{}
+	queue    []snowflake.SnowflakeID
+	inflight map[snowflake.SnowflakeID]struct{}
 	wake     chan struct{}
 	closed   bool
+	stopCh   chan struct{}
+	stopOnce sync.Once
+}
+
+func defaultNamedLogger() *logging.LogNamedLogger {
+	l, _ := logging.New(logging.NewLogHandler(logging.HandlerConfig{
+		Console: io.Discard,
+		Level:   slog.LevelInfo,
+	}))
+	return l.WithName(logging.NamedTASK, "Screenshot")
 }
 
 // NewManager 创建截图任务管理器；capture 为 nil 时使用 rod 默认实现
-func NewManager(cfg Config, repo LinkRepo, capture CaptureFunc, log *xLog.LogNamedLogger) *Manager {
+func NewManager(cfg Config, repo LinkRepo, capture CaptureFunc, log *logging.LogNamedLogger) *Manager {
 	if capture == nil {
 		capture = NewRodCapture(cfg)
 	}
 	if log == nil {
-		log = xLog.WithName(xLog.NamedTASK, "Screenshot")
+		log = defaultNamedLogger()
 	}
 	return &Manager{
 		cfg:      cfg,
 		repo:     repo,
 		capture:  capture,
 		log:      log,
-		inflight: make(map[xSnowflake.SnowflakeID]struct{}),
+		inflight: make(map[snowflake.SnowflakeID]struct{}),
 		wake:     make(chan struct{}, 1),
+		stopCh:   make(chan struct{}),
 	}
 }
 
 // Enqueue 入队单个友链截图任务（非阻塞；已在队列或处理中则忽略）
-func (m *Manager) Enqueue(id xSnowflake.SnowflakeID) {
+func (m *Manager) Enqueue(id snowflake.SnowflakeID) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -102,13 +113,28 @@ func (m *Manager) EnqueueAll(ctx context.Context) {
 	m.log.SugarInfo(ctx, "全量截图任务已入队", "count", len(links))
 }
 
-// Run 启动 worker 常驻消费队列，ctx 取消时退出
-func (m *Manager) Run(ctx context.Context) {
-	if !m.cfg.Enabled {
-		m.log.SugarInfo(ctx, "截图服务已禁用（SCREENSHOT_ENABLED=false），worker 不启动")
+// Close 关闭队列接收并通知常驻消费循环退出（幂等）。
+func (m *Manager) Close() {
+	m.stopOnce.Do(func() {
 		m.mu.Lock()
 		m.closed = true
 		m.mu.Unlock()
+		close(m.stopCh)
+		m.wakeUp()
+	})
+}
+
+// Run 启动 worker 常驻消费队列，仅在 ctx 取消或 Close 调用时退出（防止触发 v2 看门狗意外退出保护）。
+func (m *Manager) Run(ctx context.Context) {
+	if !m.cfg.Enabled {
+		m.log.SugarInfo(ctx, "截图服务已禁用（SCREENSHOT_ENABLED=false），worker 保持待机等待关机信号")
+		m.mu.Lock()
+		m.closed = true
+		m.mu.Unlock()
+		select {
+		case <-ctx.Done():
+		case <-m.stopCh:
+		}
 		return
 	}
 	if err := os.MkdirAll(m.cfg.Dir, 0o755); err != nil {
@@ -119,14 +145,18 @@ func (m *Manager) Run(ctx context.Context) {
 	for {
 		m.mu.Lock()
 		if len(m.queue) == 0 {
+			closed := m.closed
 			m.mu.Unlock()
+			if closed {
+				return
+			}
 			select {
 			case <-m.wake:
 				continue
 			case <-ctx.Done():
-				m.mu.Lock()
-				m.closed = true
-				m.mu.Unlock()
+				m.Close()
+				return
+			case <-m.stopCh:
 				return
 			}
 		}
@@ -139,11 +169,16 @@ func (m *Manager) Run(ctx context.Context) {
 		m.mu.Lock()
 		delete(m.inflight, id)
 		m.mu.Unlock()
+
+		if ctx.Err() != nil {
+			m.Close()
+			return
+		}
 	}
 }
 
 // process 处理单个友链截图任务
-func (m *Manager) process(ctx context.Context, id xSnowflake.SnowflakeID) {
+func (m *Manager) process(ctx context.Context, id snowflake.SnowflakeID) {
 	linkID := fmt.Sprintf("%d", id)
 
 	link, found, xErr := m.repo.GetByID(ctx, id, false, nil)
@@ -185,7 +220,7 @@ func (m *Manager) process(ctx context.Context, id xSnowflake.SnowflakeID) {
 }
 
 // saveFile 原子写入截图文件：先写临时文件再 rename 替换，避免半写文件被读取
-func (m *Manager) saveFile(id xSnowflake.SnowflakeID, data []byte) error {
+func (m *Manager) saveFile(id snowflake.SnowflakeID, data []byte) error {
 	if err := os.MkdirAll(m.cfg.Dir, 0o755); err != nil {
 		return err
 	}
@@ -207,7 +242,7 @@ func (m *Manager) wakeUp() {
 
 // GetManager 从上下文获取截图任务管理器实例
 func GetManager(ctx context.Context) *Manager {
-	manager, err := xCtxUtil.Get[*Manager](ctx, constants.ContextScreenshotManager)
+	manager, err := application.Get[*Manager](ctx, constants.ContextScreenshotManager)
 	if err != nil {
 		return nil
 	}

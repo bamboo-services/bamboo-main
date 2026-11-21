@@ -15,37 +15,33 @@ import (
 	"net"
 	"strings"
 
-	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/toolkit"
 	"github.com/gin-gonic/gin"
 )
 
 // GetClientIP 获取客户端真实IP地址
 func GetClientIP(c *gin.Context) string {
-	// 按优先级检查各种可能的IP头部
 	headers := []string{
 		"X-Original-Forwarded-For",
 		"X-Forwarded-For",
 		"X-Real-IP",
 		"X-Client-IP",
-		"CF-Connecting-IP", // Cloudflare
-		"True-Client-IP",   // Akamai and Cloudflare
+		"CF-Connecting-IP",
+		"True-Client-IP",
 	}
 
 	for _, header := range headers {
 		ip := c.GetHeader(header)
 		if ip != "" {
-			// X-Forwarded-For 可能包含多个IP，取第一个
 			if strings.Contains(ip, ",") {
 				ip = strings.TrimSpace(strings.Split(ip, ",")[0])
 			}
-			// 使用 bamboo-base-go 的工具验证IP是否有效
-			if xUtil.Valid().IsIP(ip) {
+			if toolkit.IsIP(ip) {
 				return ip
 			}
 		}
 	}
 
-	// 如果没有找到有效的IP头部，使用连接的远程地址
 	ip, _, err := net.SplitHostPort(c.Request.RemoteAddr)
 	if err != nil {
 		return c.Request.RemoteAddr

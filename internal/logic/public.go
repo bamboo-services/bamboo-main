@@ -19,9 +19,12 @@ import (
 	"github.com/bamboo-services/bamboo-main/internal/metrics"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
+	"github.com/bamboo-services/bamboo-base-go/application/v2"
+	"github.com/bamboo-services/bamboo-base-go/application/v2/builtin"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2"
 )
 
 type publicRepo struct {
@@ -36,23 +39,25 @@ type PublicLogic struct {
 
 // NewPublicLogic 创建 PublicLogic 实例，从上下文获取数据库与缓存并初始化健康检查仓储依赖。
 func NewPublicLogic(ctx context.Context) *PublicLogic {
-	db := xCtxUtil.MustGetDB(ctx)
-	m := xCtxUtil.MustGetCacheManager(ctx)
+	db := database.MustGet(ctx)
+	m := cache.MustGet(ctx)
+	logger := application.MustGet[*logging.Logger](ctx, builtin.LoggerKey)
 
 	return &PublicLogic{
 		logic: logic{
-			db:    db,
-			cache: m,
-			log:   xLog.WithName(xLog.NamedLOGC, "PublicLogic"),
+			db:     db,
+			cache:  m,
+			logger: logger,
+			log:    logger.WithName(logging.NamedLOGC, "PublicLogic"),
 		},
 		repo: publicRepo{
-			health: repository.NewHealthRepo(db, m),
+			health: repository.NewHealthRepo(db, m, logger),
 		},
 	}
 }
 
 // HealthCheck 健康检查
-func (p *PublicLogic) HealthCheck(ctx context.Context) (*apiPublic.HealthResponse, *xError.Error) {
+func (p *PublicLogic) HealthCheck(ctx context.Context) (*apiPublic.HealthResponse, *apperr.Error) {
 	// 检查数据库连接
 	if _, xErr := p.repo.health.DatabaseReady(ctx); xErr != nil {
 		return nil, xErr
@@ -118,7 +123,7 @@ func formatBytes(bytes uint64) string {
 }
 
 // Ping 简单连通性测试
-func (p *PublicLogic) Ping(ctx context.Context) (*apiPublic.PingResponse, *xError.Error) {
+func (p *PublicLogic) Ping(ctx context.Context) (*apiPublic.PingResponse, *apperr.Error) {
 	pingResponse := &apiPublic.PingResponse{
 		Message:   "pong",
 		Timestamp: time.Now(),

@@ -15,7 +15,7 @@ import (
 	"context"
 
 	"github.com/bamboo-services/bamboo-main/internal/logic"
-	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/logic"
+	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/v2/logic"
 )
 
 type service struct {

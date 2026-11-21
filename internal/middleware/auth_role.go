@@ -12,61 +12,60 @@
 package middleware
 
 import (
+	"github.com/bamboo-services/bamboo-base-go/application/v2"
+	"github.com/bamboo-services/bamboo-base-go/application/v2/builtin"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 	ctxUtil "github.com/bamboo-services/bamboo-main/pkg/util/ctx"
-
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
 	"github.com/gin-gonic/gin"
 )
 
 // RequireAdmin 要求当前登录用户为系统唯一管理员。
-//
-// 管理员身份由 bm_system 配置表的 system.admin.id 唯一标记：先校验用户存在且启用，
-// 再经 SystemRepo.IsAdmin 比对当前用户 ID，非管理员一律拒绝（403）。
 func RequireAdmin(c *gin.Context) {
-	// 获取当前认证用户 ID
 	userID, exists := ctxUtil.GetUserID(c)
 	if !exists {
-		_ = c.Error(xError.NewError(c, xError.Unauthorized, "未认证的用户", false))
+		_ = c.Error(apperr.New(httpresult.Unauthorized, "未认证的用户"))
 		c.Abort()
 		return
 	}
 
-	// 从上下文获取数据库与缓存管理器
-	db := xCtxUtil.MustGetDB(c)
-	m := xCtxUtil.MustGetCacheManager(c)
-	if db == nil {
-		_ = c.Error(xError.NewError(c, xError.DatabaseError, "数据库连接异常", false))
+	reqCtx := c.Request.Context()
+	db, dbErr := database.Get(reqCtx)
+	if dbErr != nil || db == nil {
+		_ = c.Error(apperr.New(database.DatabaseError, "数据库连接异常", dbErr))
 		c.Abort()
 		return
 	}
+	m := cache.MustGet(reqCtx)
+	logger, _ := application.Get[*logging.Logger](reqCtx, builtin.LoggerKey)
 
-	// 校验用户存在且处于启用状态
-	userRepo := repository.NewSystemUserRepo(db, m)
-	user, found, xErr := userRepo.GetByID(c, userID)
+	userRepo := repository.NewSystemUserRepo(db, m, logger)
+	user, found, xErr := userRepo.GetByID(reqCtx, userID)
 	if xErr != nil {
-		_ = c.Error(xError.NewError(c, xError.DatabaseError, "用户信息查询失败", false, xErr))
+		_ = c.Error(apperr.New(database.DatabaseError, "用户信息查询失败", xErr))
 		c.Abort()
 		return
 	}
 	if !found || user.Status != constants.StatusActive {
-		_ = c.Error(xError.NewError(c, xError.NotFound, "用户不存在或已被禁用", false))
+		_ = c.Error(apperr.New(httpresult.NotFound, "用户不存在或已被禁用"))
 		c.Abort()
 		return
 	}
 
-	// 校验是否为系统唯一管理员
-	systemRepo := repository.NewSystemRepo(db, m)
-	isAdmin, xErr := systemRepo.IsAdmin(c, userID)
+	systemRepo := repository.NewSystemRepo(db, m, logger)
+	isAdmin, xErr := systemRepo.IsAdmin(reqCtx, userID)
 	if xErr != nil {
-		_ = c.Error(xError.NewError(c, xError.DatabaseError, "管理员身份校验失败", false, xErr))
+		_ = c.Error(apperr.New(database.DatabaseError, "管理员身份校验失败", xErr))
 		c.Abort()
 		return
 	}
 	if !isAdmin {
-		_ = c.Error(xError.NewError(c, xError.PermissionDenied, "权限不足", false))
+		_ = c.Error(apperr.New(httpresult.PermissionDenied, "权限不足"))
 		c.Abort()
 		return
 	}

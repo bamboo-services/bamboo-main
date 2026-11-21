@@ -14,8 +14,8 @@ import (
 	"fmt"
 	"time"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/toolkit"
 	apiAuth "github.com/bamboo-services/bamboo-main/api/auth"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
@@ -23,11 +23,17 @@ import (
 
 	"crypto/rand"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
-	xAsync "github.com/bamboo-services/bamboo-base-go/plugins/async"
-	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/logic"
+	"github.com/bamboo-services/bamboo-base-go/application/v2"
+	"github.com/bamboo-services/bamboo-base-go/application/v2/builtin"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/plugins/async/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/bind"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
+	"github.com/bamboo-services/bamboo-main/pkg/constants"
+	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/v2/logic"
 )
 
 type authRepo struct {
@@ -47,48 +53,50 @@ type AuthLogic struct {
 
 // NewAuthLogic 创建 AuthLogic 实例，从上下文获取数据库与缓存管理器并初始化会话与认证仓储依赖。
 func NewAuthLogic(ctx context.Context) *AuthLogic {
-	db := xCtxUtil.MustGetDB(ctx)
-	m := xCtxUtil.MustGetCacheManager(ctx)
+	db := database.MustGet(ctx)
+	m := cache.MustGet(ctx)
+	logger := application.MustGet[*logging.Logger](ctx, builtin.LoggerKey)
 
 	return &AuthLogic{
 		logic: logic{
-			db:    db,
-			cache: m,
-			log:   xLog.WithName(xLog.NamedLOGC, "AuthLogic"),
+			db:     db,
+			cache:  m,
+			logger: logger,
+			log:    logger.WithName(logging.NamedLOGC, "AuthLogic"),
 		},
-		SessionService: logcHelper.NewSessionLogic(m),
+		SessionService: logcHelper.NewSessionLogic(m, logger),
 		repo: authRepo{
-			user:    repository.NewSystemUserRepo(db, m),
-			token:   repository.NewTokenRepo(m),
-			link:    repository.NewLinkRepo(db, m),
-			sponsor: repository.NewSponsorRecordRepo(db, m),
-			system:  repository.NewSystemRepo(db, m),
+			user:    repository.NewSystemUserRepo(db, m, logger),
+			token:   repository.NewTokenRepo(m, logger),
+			link:    repository.NewLinkRepo(db, m, logger),
+			sponsor: repository.NewSponsorRecordRepo(db, m, logger),
+			system:  repository.NewSystemRepo(db, m, logger),
 		},
 	}
 }
 
 // Login 用户登录
-func (a *AuthLogic) Login(ctx context.Context, req *apiAuth.LoginRequest, meta logcHelper.SessionMeta) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
+func (a *AuthLogic) Login(ctx context.Context, req *apiAuth.LoginRequest, meta logcHelper.SessionMeta) (*entity.SystemUser, string, *time.Time, *time.Time, *apperr.Error) {
 	user, found, xErr := a.repo.user.GetByUsernameOrEmail(ctx, req.Username)
 	if xErr != nil {
 		return nil, "", nil, nil, xErr
 	}
 	if !found {
-		return nil, "", nil, nil, xError.NewError(ctx, xError.LoginFailed, "用户名或密码错误", false)
+		return nil, "", nil, nil, apperr.New(constants.ErrCodeLoginFailed, "用户名或密码错误")
 	}
 
 	// 检查用户状态
 	if user.Status == 0 {
-		return nil, "", nil, nil, xError.NewError(ctx, xError.Forbidden, "用户已被禁用", false)
+		return nil, "", nil, nil, apperr.New(httpresult.Forbidden, "用户已被禁用")
 	}
 
 	// 验证密码
-	if !xUtil.Password().IsValid(req.Password, user.Password) {
-		return nil, "", nil, nil, xError.NewError(ctx, xError.LoginFailed, "用户名或密码错误", false)
+	if !toolkit.IsPasswordValid(req.Password, user.Password) {
+		return nil, "", nil, nil, apperr.New(constants.ErrCodeLoginFailed, "用户名或密码错误")
 	}
 
 	// 生成 token
-	token := xUtil.Security().GenerateKey()
+	token := toolkit.GenerateKey()
 
 	// 记录时间信息
 	now := time.Now()
@@ -131,13 +139,13 @@ func (a *AuthLogic) decorateUser(ctx context.Context, user *entity.SystemUser) {
 }
 
 // Register 用户注册
-func (a *AuthLogic) Register(ctx context.Context, req *apiAuth.RegisterRequest, meta logcHelper.SessionMeta) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
+func (a *AuthLogic) Register(ctx context.Context, req *apiAuth.RegisterRequest, meta logcHelper.SessionMeta) (*entity.SystemUser, string, *time.Time, *time.Time, *apperr.Error) {
 	exists, xErr := a.repo.user.ExistsByUsername(ctx, req.Username)
 	if xErr != nil {
 		return nil, "", nil, nil, xErr
 	}
 	if exists {
-		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterError, "用户名已存在", false)
+		return nil, "", nil, nil, apperr.New(bind.ParameterError, "用户名已存在")
 	}
 
 	exists, xErr = a.repo.user.ExistsByEmailExceptID(ctx, req.Email, 0)
@@ -145,7 +153,7 @@ func (a *AuthLogic) Register(ctx context.Context, req *apiAuth.RegisterRequest, 
 		return nil, "", nil, nil, xErr
 	}
 	if exists {
-		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterError, "邮箱已被注册", false)
+		return nil, "", nil, nil, apperr.New(bind.ParameterError, "邮箱已被注册")
 	}
 
 	// 校验注册邮箱验证码（OTP），校验通过后消费删除
@@ -154,12 +162,12 @@ func (a *AuthLogic) Register(ctx context.Context, req *apiAuth.RegisterRequest, 
 		return nil, "", nil, nil, xErr
 	}
 	if !matched {
-		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterError, "验证码错误或已过期", false)
+		return nil, "", nil, nil, apperr.New(bind.ParameterError, "验证码错误或已过期")
 	}
 
-	hashedPassword, err := xUtil.Password().EncryptString(req.Password)
+	hashedPassword, err := toolkit.EncryptPasswordString(req.Password)
 	if err != nil {
-		return nil, "", nil, nil, xError.NewError(ctx, xError.ServerInternalError, "密码加密失败", false, err)
+		return nil, "", nil, nil, apperr.New(httpresult.InternalError, "密码加密失败", err)
 	}
 
 	newUser := entity.SystemUser{
@@ -176,7 +184,7 @@ func (a *AuthLogic) Register(ctx context.Context, req *apiAuth.RegisterRequest, 
 		return nil, "", nil, nil, xErr
 	}
 
-	token := xUtil.Security().GenerateKey()
+	token := toolkit.GenerateKey()
 
 	now := time.Now()
 	expireAt := now.Add(logcHelper.SessionTTL) // 24小时过期
@@ -197,13 +205,13 @@ func (a *AuthLogic) Register(ctx context.Context, req *apiAuth.RegisterRequest, 
 //
 // 校验邮箱未被注册且未触发发送频率限制后，生成 6 位数字验证码存入 Redis（10min 过期），
 // 并经 xAsync 异步发送验证码邮件，不阻断主流程。
-func (a *AuthLogic) SendRegisterCode(ctx context.Context, req *apiAuth.RegisterCodeRequest) *xError.Error {
+func (a *AuthLogic) SendRegisterCode(ctx context.Context, req *apiAuth.RegisterCodeRequest) *apperr.Error {
 	exists, xErr := a.repo.user.ExistsByEmailExceptID(ctx, req.Email, 0)
 	if xErr != nil {
 		return xErr
 	}
 	if exists {
-		return xError.NewError(ctx, xError.ParameterError, "邮箱已被注册", false)
+		return apperr.New(bind.ParameterError, "邮箱已被注册")
 	}
 
 	limited, xErr := a.repo.token.ExistsRegisterCodeLimit(ctx, req.Email)
@@ -211,7 +219,7 @@ func (a *AuthLogic) SendRegisterCode(ctx context.Context, req *apiAuth.RegisterC
 		return xErr
 	}
 	if limited {
-		return xError.NewError(ctx, xError.OperationInvalid, "验证码发送过于频繁，请稍后再试", false)
+		return apperr.New(httpresult.InvalidState, "验证码发送过于频繁，请稍后再试")
 	}
 
 	code := generateRegisterCode()
@@ -224,9 +232,11 @@ func (a *AuthLogic) SendRegisterCode(ctx context.Context, req *apiAuth.RegisterC
 	}
 
 	// 异步发送验证码邮件（xAsync 解耦请求上下文，不阻断主流程）
-	xAsync.Async(ctx, func(asyncCtx context.Context) {
+	if _, asyncErr := async.Submit(ctx, func(asyncCtx context.Context) {
 		a.sendRegisterCodeEmail(asyncCtx, req.Email, code)
-	}, xAsync.WithName("MAIL"))
+	}, async.WithTaskName("MAIL")); asyncErr != nil {
+		a.log.SugarWarn(ctx, "异步发送邮件任务提交失败", "error", asyncErr.Error())
+	}
 
 	return nil
 }
@@ -235,7 +245,7 @@ func (a *AuthLogic) SendRegisterCode(ctx context.Context, req *apiAuth.RegisterC
 //
 // 将以游客身份（UserID 为空）提交、且联系邮箱与当前用户邮箱一致的友链归属到该用户。
 // 失败仅记录日志，不阻断注册/登录主流程。
-func (a *AuthLogic) bindLinksByEmail(ctx context.Context, userID xSnowflake.SnowflakeID, email string) {
+func (a *AuthLogic) bindLinksByEmail(ctx context.Context, userID snowflake.SnowflakeID, email string) {
 	if email == "" {
 		return
 	}
@@ -248,7 +258,7 @@ func (a *AuthLogic) bindLinksByEmail(ctx context.Context, userID xSnowflake.Snow
 //
 // 将以游客身份（UserID 为空）提交、且联系邮箱与当前用户邮箱一致的赞助记录归属到该用户。
 // 失败仅记录日志，不阻断注册/登录主流程。
-func (a *AuthLogic) bindSponsorsByEmail(ctx context.Context, userID xSnowflake.SnowflakeID, email string) {
+func (a *AuthLogic) bindSponsorsByEmail(ctx context.Context, userID snowflake.SnowflakeID, email string) {
 	if email == "" {
 		return
 	}
@@ -279,7 +289,7 @@ func generateRegisterCode() string {
 //
 // 此函数应在 xAsync 异步任务中调用，ctx 为解耦后的独立上下文，不会阻断主流程
 func (a *AuthLogic) sendRegisterCodeEmail(ctx context.Context, email, code string) {
-	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
+	logger := resolveLogicNamedLogger(ctx, "MAIL")
 
 	variables := map[string]string{
 		"Username":   email,
@@ -306,9 +316,9 @@ func (a *AuthLogic) sendRegisterCodeEmail(ctx context.Context, email, code strin
 //
 // 以删除本地会话为准（密码登录与 SSO 登录的令牌均存有本地会话）；
 // SSO 令牌额外best-effort 撤销，失败仅记录日志，不影响登出结果。
-func (a *AuthLogic) Logout(ctx context.Context, token string) *xError.Error {
+func (a *AuthLogic) Logout(ctx context.Context, token string) *apperr.Error {
 	if token == "" {
-		return xError.NewError(ctx, xError.ParameterEmpty, "访问令牌不能为空", false)
+		return apperr.New(httpresult.ParameterEmpty, "访问令牌不能为空")
 	}
 
 	if xErr := a.SessionService.DeleteUserSession(ctx, token); xErr != nil {
@@ -327,24 +337,24 @@ func (a *AuthLogic) Logout(ctx context.Context, token string) *xError.Error {
 //
 // 用户实体缓存序列化时 Password 字段（json:"-"）不参与读写，旧密码校验必须
 // 直查数据库获取密码哈希，避免命中缓存读到空哈希导致校验恒失败。
-func (a *AuthLogic) ChangePassword(ctx context.Context, userID xSnowflake.SnowflakeID, req *apiAuth.PasswordChangeRequest) *xError.Error {
+func (a *AuthLogic) ChangePassword(ctx context.Context, userID snowflake.SnowflakeID, req *apiAuth.PasswordChangeRequest) *apperr.Error {
 	hashedPassword, found, xErr := a.repo.user.GetPasswordByID(ctx, userID)
 	if xErr != nil {
 		return xErr
 	}
 	if !found {
-		return xError.NewError(ctx, xError.NotFound, "用户不存在", false)
+		return apperr.New(httpresult.NotFound, "用户不存在")
 	}
 
 	// 验证旧密码
-	if !xUtil.Password().IsValid(req.OldPassword, hashedPassword) {
-		return xError.NewError(ctx, xError.ParameterError, "旧密码错误", false)
+	if !toolkit.IsPasswordValid(req.OldPassword, hashedPassword) {
+		return apperr.New(bind.ParameterError, "旧密码错误")
 	}
 
 	// 加密新密码
-	newHashedPassword, err := xUtil.Password().EncryptString(req.NewPassword)
+	newHashedPassword, err := toolkit.EncryptPasswordString(req.NewPassword)
 	if err != nil {
-		return xError.NewError(ctx, xError.ServerInternalError, "密码加密失败", false, err)
+		return apperr.New(httpresult.InternalError, "密码加密失败", err)
 	}
 
 	// 更新密码
@@ -357,13 +367,13 @@ func (a *AuthLogic) ChangePassword(ctx context.Context, userID xSnowflake.Snowfl
 }
 
 // ResetPassword 重置密码（发送重置链接）
-func (a *AuthLogic) ResetPassword(ctx context.Context, req *apiAuth.PasswordResetRequest) *xError.Error {
+func (a *AuthLogic) ResetPassword(ctx context.Context, req *apiAuth.PasswordResetRequest) *apperr.Error {
 	user, found, xErr := a.repo.user.GetByEmail(ctx, req.Email)
 	if xErr != nil {
 		return xErr
 	}
 	if !found {
-		return xError.NewError(ctx, xError.NotFound, "邮箱不存在", false)
+		return apperr.New(httpresult.NotFound, "邮箱不存在")
 	}
 
 	// 生成重置 Token（32位随机字符串）并存储（1小时过期）
@@ -373,21 +383,23 @@ func (a *AuthLogic) ResetPassword(ctx context.Context, req *apiAuth.PasswordRese
 	}
 
 	// 发送重置密码邮件（xAsync 解耦请求上下文，不阻断主流程）
-	xAsync.Async(ctx, func(asyncCtx context.Context) {
+	if _, asyncErr := async.Submit(ctx, func(asyncCtx context.Context) {
 		a.sendPasswordResetEmail(asyncCtx, user, resetToken)
-	}, xAsync.WithName("MAIL"))
+	}, async.WithTaskName("MAIL")); asyncErr != nil {
+		a.log.SugarWarn(ctx, "异步发送邮件任务提交失败", "error", asyncErr.Error())
+	}
 
 	return nil
 }
 
 // GetUserInfo 获取用户信息
-func (a *AuthLogic) GetUserInfo(ctx context.Context, userID xSnowflake.SnowflakeID) (*entity.SystemUser, *xError.Error) {
+func (a *AuthLogic) GetUserInfo(ctx context.Context, userID snowflake.SnowflakeID) (*entity.SystemUser, *apperr.Error) {
 	user, found, xErr := a.repo.user.GetByID(ctx, userID)
 	if xErr != nil {
 		return nil, xErr
 	}
 	if !found {
-		return nil, xError.NewError(ctx, xError.NotFound, "用户不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "用户不存在")
 	}
 
 	a.decorateUser(ctx, user)
@@ -398,7 +410,7 @@ func (a *AuthLogic) GetUserInfo(ctx context.Context, userID xSnowflake.Snowflake
 //
 // 仅更新请求中非空的字段；用户名仅在发生变更时校验唯一性（排除自身），
 // 避免无谓的数据库写入；无任何待更新字段时直接返回当前用户信息。
-func (a *AuthLogic) UpdateProfile(ctx context.Context, userID xSnowflake.SnowflakeID, req *apiAuth.UpdateProfileRequest) (*entity.SystemUser, *xError.Error) {
+func (a *AuthLogic) UpdateProfile(ctx context.Context, userID snowflake.SnowflakeID, req *apiAuth.UpdateProfileRequest) (*entity.SystemUser, *apperr.Error) {
 	updates := map[string]any{}
 	if req.Username != "" {
 		// 仅当用户名发生变更时校验唯一性（排除自身），避免无谓的数据库写入
@@ -412,7 +424,7 @@ func (a *AuthLogic) UpdateProfile(ctx context.Context, userID xSnowflake.Snowfla
 				return nil, xErr
 			}
 			if exists {
-				return nil, xError.NewError(ctx, xError.ParameterError, "用户名已存在", false)
+				return nil, apperr.New(bind.ParameterError, "用户名已存在")
 			}
 			updates["username"] = req.Username
 		}
@@ -437,16 +449,16 @@ func (a *AuthLogic) UpdateProfile(ctx context.Context, userID xSnowflake.Snowfla
 }
 
 // UpdateLastLogin 更新最后登录时间
-func (a *AuthLogic) UpdateLastLogin(ctx context.Context, userID xSnowflake.SnowflakeID) *xError.Error {
+func (a *AuthLogic) UpdateLastLogin(ctx context.Context, userID snowflake.SnowflakeID) *apperr.Error {
 	now := time.Now()
 	return a.repo.user.UpdateLastLoginByID(ctx, userID, &now)
 }
 
 // ValidateToken 验证令牌
-func (a *AuthLogic) ValidateToken(ctx context.Context, token string) (*entity.SystemUser, *xError.Error) {
+func (a *AuthLogic) ValidateToken(ctx context.Context, token string) (*entity.SystemUser, *apperr.Error) {
 	// 这个方法主要通过中间件来处理，这里提供一个备用实现
 	// 实际项目中可以根据需要实现更复杂的验证逻辑
-	return nil, xError.NewError(ctx, xError.OperationInvalid, "请通过认证中间件验证令牌", false)
+	return nil, apperr.New(httpresult.InvalidState, "请通过认证中间件验证令牌")
 }
 
 // generateRandomString 生成随机字符串
@@ -468,14 +480,14 @@ func generateRandomString(length int) string {
 }
 
 // VerifyEmail 验证邮箱
-func (a *AuthLogic) VerifyEmail(ctx context.Context, req *apiAuth.VerifyEmailRequest) *xError.Error {
+func (a *AuthLogic) VerifyEmail(ctx context.Context, req *apiAuth.VerifyEmailRequest) *apperr.Error {
 	userID, found, xErr := a.repo.token.ConsumeEmailVerifyToken(ctx, req.Token)
 	if xErr != nil {
 		return xErr
 	}
 	if !found {
 		a.log.Warn(ctx, fmt.Sprintf("邮箱验证Token无效或已过期: %s", req.Token))
-		return xError.NewError(ctx, xError.BadRequest, "验证链接无效或已过期", false)
+		return apperr.New(httpresult.BadRequest, "验证链接无效或已过期")
 	}
 
 	// 更新用户邮箱验证状态
@@ -490,32 +502,32 @@ func (a *AuthLogic) VerifyEmail(ctx context.Context, req *apiAuth.VerifyEmailReq
 // VerifyResetToken 验证重置密码Token
 //
 // 令牌无效或已过期时直接返回业务错误，handler 无需再做有效性判断。
-func (a *AuthLogic) VerifyResetToken(ctx context.Context, req *apiAuth.VerifyResetTokenRequest) *xError.Error {
+func (a *AuthLogic) VerifyResetToken(ctx context.Context, req *apiAuth.VerifyResetTokenRequest) *apperr.Error {
 	exists, xErr := a.repo.token.ExistsPasswordResetToken(ctx, req.Token)
 	if xErr != nil {
 		return xErr
 	}
 	if !exists {
-		return xError.NewError(ctx, xError.BadRequest, "重置链接无效或已过期", false)
+		return apperr.New(httpresult.BadRequest, "重置链接无效或已过期")
 	}
 	return nil
 }
 
 // ConfirmResetPassword 确认重置密码
-func (a *AuthLogic) ConfirmResetPassword(ctx context.Context, req *apiAuth.ConfirmResetPasswordRequest) *xError.Error {
+func (a *AuthLogic) ConfirmResetPassword(ctx context.Context, req *apiAuth.ConfirmResetPasswordRequest) *apperr.Error {
 	userID, found, xErr := a.repo.token.ConsumePasswordResetToken(ctx, req.Token)
 	if xErr != nil {
 		return xErr
 	}
 	if !found {
 		a.log.Warn(ctx, fmt.Sprintf("密码重置Token无效或已过期: %s", req.Token))
-		return xError.NewError(ctx, xError.BadRequest, "重置链接无效或已过期", false)
+		return apperr.New(httpresult.BadRequest, "重置链接无效或已过期")
 	}
 
 	// 加密新密码
-	hashedPassword, err := xUtil.Password().EncryptString(req.NewPassword)
+	hashedPassword, err := toolkit.EncryptPasswordString(req.NewPassword)
 	if err != nil {
-		return xError.NewError(ctx, xError.ServerInternalError, "密码加密失败", false, err)
+		return apperr.New(httpresult.InternalError, "密码加密失败", err)
 	}
 
 	// 更新用户密码
@@ -527,56 +539,11 @@ func (a *AuthLogic) ConfirmResetPassword(ctx context.Context, req *apiAuth.Confi
 	return nil
 }
 
-// sendEmailVerification 发送邮箱验证邮件
-//
-// 此函数应在 xAsync 异步任务中调用，ctx 为解耦后的独立上下文，不会阻断主流程
-func (a *AuthLogic) sendEmailVerification(ctx context.Context, user *entity.SystemUser) {
-	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
-
-	// 生成验证 Token 并存储（24小时过期）
-	verifyToken := generateRandomString(32)
-	if xErr := a.repo.token.SaveEmailVerifyToken(ctx, verifyToken, user.ID); xErr != nil {
-		logger.Warn(ctx, fmt.Sprintf("保存验证Token失败: %v", xErr))
-		return
-	}
-
-	// 构建验证链接（TODO: 从配置读取域名前缀）
-	verifyLink := fmt.Sprintf("https://localhost/api/v1/auth/verify-email?token=%s", verifyToken)
-
-	// 获取用户昵称
-	username := user.Username
-	if user.Nickname != nil && *user.Nickname != "" {
-		username = *user.Nickname
-	}
-
-	// 构建模板变量
-	variables := map[string]string{
-		"Username":   username,
-		"VerifyLink": verifyLink,
-		"ExpireTime": "24小时",
-	}
-
-	// 发送邮件
-	mailLogic := NewMailLogic()
-	mailErr := mailLogic.SendWithTemplate(
-		ctx,
-		"email_verify",
-		[]string{user.Email},
-		"请验证您的邮箱地址",
-		variables,
-	)
-	if mailErr != nil {
-		logger.Warn(ctx, fmt.Sprintf("发送邮箱验证邮件失败: %v", mailErr))
-	} else {
-		logger.Info(ctx, fmt.Sprintf("已发送邮箱验证邮件到: %s", user.Email))
-	}
-}
-
 // sendPasswordResetEmail 发送密码重置邮件
 //
 // 此函数应在 xAsync 异步任务中调用，ctx 为解耦后的独立上下文，不会阻断主流程
 func (a *AuthLogic) sendPasswordResetEmail(ctx context.Context, user *entity.SystemUser, resetToken string) {
-	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
+	logger := resolveLogicNamedLogger(ctx, "MAIL")
 
 	// 构建重置链接（TODO: 从配置读取域名前缀）
 	resetLink := fmt.Sprintf("https://localhost/api/v1/auth/reset-password?token=%s", resetToken)

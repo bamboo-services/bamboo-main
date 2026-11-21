@@ -15,12 +15,16 @@ import (
 	"context"
 	"fmt"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
-	xCtxUtil "github.com/bamboo-services/bamboo-base-go/major/utility/context"
-	xAsync "github.com/bamboo-services/bamboo-base-go/plugins/async"
+	"github.com/bamboo-services/bamboo-base-go/application/v2"
+	"github.com/bamboo-services/bamboo-base-go/application/v2/builtin"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/toolkit"
+	"github.com/bamboo-services/bamboo-base-go/plugins/async/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	apiSponsor "github.com/bamboo-services/bamboo-main/api/sponsor"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
@@ -42,32 +46,34 @@ type SponsorRecordLogic struct {
 
 // NewSponsorRecordLogic 创建 SponsorRecordLogic 实例，从上下文获取数据库与缓存并初始化赞助记录、渠道与用户仓储依赖。
 func NewSponsorRecordLogic(ctx context.Context) *SponsorRecordLogic {
-	db := xCtxUtil.MustGetDB(ctx)
-	m := xCtxUtil.MustGetCacheManager(ctx)
+	db := database.MustGet(ctx)
+	m := cache.MustGet(ctx)
+	logger := application.MustGet[*logging.Logger](ctx, builtin.LoggerKey)
 
 	return &SponsorRecordLogic{
 		logic: logic{
-			db:    db,
-			cache: m,
-			log:   xLog.WithName(xLog.NamedLOGC, "SponsorRecordLogic"),
+			db:     db,
+			cache:  m,
+			logger: logger,
+			log:    logger.WithName(logging.NamedLOGC, "SponsorRecordLogic"),
 		},
 		repo: sponsorRecordRepo{
-			record:  repository.NewSponsorRecordRepo(db, m),
-			channel: repository.NewSponsorChannelRepo(db, m),
-			user:    repository.NewSystemUserRepo(db, m),
+			record:  repository.NewSponsorRecordRepo(db, m, logger),
+			channel: repository.NewSponsorChannelRepo(db, m, logger),
+			user:    repository.NewSystemUserRepo(db, m, logger),
 		},
 	}
 }
 
 // Add 添加赞助记录，校验指定渠道存在后创建记录。
-func (l *SponsorRecordLogic) Add(ctx context.Context, req *apiSponsor.RecordAddRequest) (*apiSponsor.RecordEntityResponse, *xError.Error) {
+func (l *SponsorRecordLogic) Add(ctx context.Context, req *apiSponsor.RecordAddRequest) (*apiSponsor.RecordEntityResponse, *apperr.Error) {
 	if req.ChannelID != nil {
 		_, found, xErr := l.repo.channel.GetByID(ctx, *req.ChannelID)
 		if xErr != nil {
 			return nil, xErr
 		}
 		if !found {
-			return nil, xError.NewError(ctx, xError.NotFound, "赞助渠道不存在", false)
+			return nil, apperr.New(httpresult.NotFound, "赞助渠道不存在")
 		}
 	}
 
@@ -90,13 +96,13 @@ func (l *SponsorRecordLogic) Add(ctx context.Context, req *apiSponsor.RecordAddR
 }
 
 // Update 更新赞助记录，校验记录与渠道存在后按字段增量更新。
-func (l *SponsorRecordLogic) Update(ctx context.Context, recordID xSnowflake.SnowflakeID, req *apiSponsor.RecordUpdateRequest) (*apiSponsor.RecordEntityResponse, *xError.Error) {
+func (l *SponsorRecordLogic) Update(ctx context.Context, recordID snowflake.SnowflakeID, req *apiSponsor.RecordUpdateRequest) (*apiSponsor.RecordEntityResponse, *apperr.Error) {
 	_, found, xErr := l.repo.record.GetByID(ctx, recordID)
 	if xErr != nil {
 		return nil, xErr
 	}
 	if !found {
-		return nil, xError.NewError(ctx, xError.NotFound, "赞助记录不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "赞助记录不存在")
 	}
 
 	if req.ChannelID != nil {
@@ -105,7 +111,7 @@ func (l *SponsorRecordLogic) Update(ctx context.Context, recordID xSnowflake.Sno
 			return nil, xErr
 		}
 		if !found {
-			return nil, xError.NewError(ctx, xError.NotFound, "赞助渠道不存在", false)
+			return nil, apperr.New(httpresult.NotFound, "赞助渠道不存在")
 		}
 	}
 
@@ -145,7 +151,7 @@ func (l *SponsorRecordLogic) Update(ctx context.Context, recordID xSnowflake.Sno
 			return nil, xErr
 		}
 		if !found {
-			return nil, xError.NewError(ctx, xError.NotFound, "赞助记录不存在", false)
+			return nil, apperr.New(httpresult.NotFound, "赞助记录不存在")
 		}
 		return buildRecordEntityResponse(record), nil
 	}
@@ -155,19 +161,19 @@ func (l *SponsorRecordLogic) Update(ctx context.Context, recordID xSnowflake.Sno
 		return nil, xErr
 	}
 	if !found {
-		return nil, xError.NewError(ctx, xError.NotFound, "赞助记录不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "赞助记录不存在")
 	}
 	return buildRecordEntityResponse(record), nil
 }
 
 // Delete 删除赞助记录，校验存在后硬删除。
-func (l *SponsorRecordLogic) Delete(ctx context.Context, recordID xSnowflake.SnowflakeID) *xError.Error {
+func (l *SponsorRecordLogic) Delete(ctx context.Context, recordID snowflake.SnowflakeID) *apperr.Error {
 	_, found, xErr := l.repo.record.GetByID(ctx, recordID)
 	if xErr != nil {
 		return xErr
 	}
 	if !found {
-		return xError.NewError(ctx, xError.NotFound, "赞助记录不存在", false)
+		return apperr.New(httpresult.NotFound, "赞助记录不存在")
 	}
 
 	deleted, xErr := l.repo.record.HardDeleteByID(ctx, recordID, nil)
@@ -175,25 +181,25 @@ func (l *SponsorRecordLogic) Delete(ctx context.Context, recordID xSnowflake.Sno
 		return xErr
 	}
 	if !deleted {
-		return xError.NewError(ctx, xError.NotFound, "赞助记录不存在", false)
+		return apperr.New(httpresult.NotFound, "赞助记录不存在")
 	}
 	return nil
 }
 
 // Get 获取赞助记录详情（含渠道信息）。
-func (l *SponsorRecordLogic) Get(ctx context.Context, recordID xSnowflake.SnowflakeID) (*apiSponsor.RecordEntityResponse, *xError.Error) {
+func (l *SponsorRecordLogic) Get(ctx context.Context, recordID snowflake.SnowflakeID) (*apiSponsor.RecordEntityResponse, *apperr.Error) {
 	record, found, xErr := l.repo.record.GetDetailByID(ctx, recordID)
 	if xErr != nil {
 		return nil, xErr
 	}
 	if !found {
-		return nil, xError.NewError(ctx, xError.NotFound, "赞助记录不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "赞助记录不存在")
 	}
 	return buildRecordEntityResponse(record), nil
 }
 
 // GetPage 分页获取赞助记录（管理端，附带待审核数量供入口徽章展示）。
-func (l *SponsorRecordLogic) GetPage(ctx context.Context, req *apiSponsor.RecordPageRequest) (*apiSponsor.RecordAdminPageResponse, *xError.Error) {
+func (l *SponsorRecordLogic) GetPage(ctx context.Context, req *apiSponsor.RecordPageRequest) (*apiSponsor.RecordAdminPageResponse, *apperr.Error) {
 	if req.Page <= 0 {
 		req.Page = 1
 	}
@@ -237,7 +243,7 @@ func (l *SponsorRecordLogic) GetPage(ctx context.Context, req *apiSponsor.Record
 }
 
 // GetPublicPage 分页获取公开的赞助记录，匿名记录隐藏昵称与跳转链接。
-func (l *SponsorRecordLogic) GetPublicPage(ctx context.Context, req *apiSponsor.RecordPublicPageRequest) (*base.PaginationResponse[apiSponsor.RecordPublicItemResponse], *xError.Error) {
+func (l *SponsorRecordLogic) GetPublicPage(ctx context.Context, req *apiSponsor.RecordPublicPageRequest) (*base.PaginationResponse[apiSponsor.RecordPublicItemResponse], *apperr.Error) {
 	if req.Page <= 0 {
 		req.Page = 1
 	}
@@ -269,7 +275,7 @@ func (l *SponsorRecordLogic) GetPublicPage(ctx context.Context, req *apiSponsor.
 //
 // 面向游客与登录用户的公开申请入口：组装实体时固定为待审核状态，
 // 若申请邮箱已对应注册用户则即时绑定归属，创建后异步通知管理员。
-func (l *SponsorRecordLogic) Apply(ctx context.Context, req *apiSponsor.SponsorApplyRequest) (*apiSponsor.RecordEntityResponse, *xError.Error) {
+func (l *SponsorRecordLogic) Apply(ctx context.Context, req *apiSponsor.SponsorApplyRequest) (*apiSponsor.RecordEntityResponse, *apperr.Error) {
 	// 校验渠道存在
 	if req.ChannelID != nil {
 		_, found, xErr := l.repo.channel.GetByID(ctx, *req.ChannelID)
@@ -277,7 +283,7 @@ func (l *SponsorRecordLogic) Apply(ctx context.Context, req *apiSponsor.SponsorA
 			return nil, xErr
 		}
 		if !found {
-			return nil, xError.NewError(ctx, xError.NotFound, "赞助渠道不存在", false)
+			return nil, apperr.New(httpresult.NotFound, "赞助渠道不存在")
 		}
 	}
 
@@ -288,7 +294,7 @@ func (l *SponsorRecordLogic) Apply(ctx context.Context, req *apiSponsor.SponsorA
 		ChannelID:   req.ChannelID,
 		Message:     req.Message,
 		SponsorAt:   req.SponsorAt,
-		Email:       xUtil.Ptr(req.Email),
+		Email:       toolkit.Ptr(req.Email),
 		IsAnonymous: req.IsAnonymous,
 		ApplyRemark: req.ApplyRemark,
 		Status:      constants.SponsorStatusPending, // 默认待审核，经管理员审核后前台展示
@@ -309,26 +315,28 @@ func (l *SponsorRecordLogic) Apply(ctx context.Context, req *apiSponsor.SponsorA
 		return nil, xErr
 	}
 	if !found {
-		return nil, xError.NewError(ctx, xError.NotFound, "赞助记录不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "赞助记录不存在")
 	}
 
 	// 发送邮件通知管理员（xAsync 解耦请求上下文，不阻断主流程）
-	xAsync.Async(ctx, func(asyncCtx context.Context) {
+	if _, asyncErr := async.Submit(ctx, func(asyncCtx context.Context) {
 		l.sendApplyNotification(asyncCtx, reloaded)
-	}, xAsync.WithName("MAIL"))
+	}, async.WithTaskName("MAIL")); asyncErr != nil {
+		l.log.SugarWarn(ctx, "异步发送邮件任务提交失败", "error", asyncErr.Error())
+	}
 
 	return buildRecordEntityResponse(reloaded), nil
 }
 
 // UpdateStatus 更新赞助记录审核状态
-func (l *SponsorRecordLogic) UpdateStatus(ctx context.Context, recordID xSnowflake.SnowflakeID, req *apiSponsor.SponsorStatusRequest) *xError.Error {
+func (l *SponsorRecordLogic) UpdateStatus(ctx context.Context, recordID snowflake.SnowflakeID, req *apiSponsor.SponsorStatusRequest) *apperr.Error {
 	// 先查询赞助记录信息（用于发送邮件通知）
 	record, found, xErr := l.repo.record.GetDetailByID(ctx, recordID)
 	if xErr != nil {
 		return xErr
 	}
 	if !found {
-		return xError.NewError(ctx, xError.NotFound, "赞助记录不存在", false)
+		return apperr.New(httpresult.NotFound, "赞助记录不存在")
 	}
 
 	ok, xErr := l.repo.record.UpdateStatusByID(ctx, recordID, req.SponsorStatus, req.SponsorReviewRemark, nil)
@@ -336,19 +344,21 @@ func (l *SponsorRecordLogic) UpdateStatus(ctx context.Context, recordID xSnowfla
 		return xErr
 	}
 	if !ok {
-		return xError.NewError(ctx, xError.NotFound, "赞助记录不存在", false)
+		return apperr.New(httpresult.NotFound, "赞助记录不存在")
 	}
 
 	// 发送审核结果邮件通知（xAsync 解耦请求上下文，不阻断主流程）
-	xAsync.Async(ctx, func(asyncCtx context.Context) {
+	if _, asyncErr := async.Submit(ctx, func(asyncCtx context.Context) {
 		l.sendStatusNotification(asyncCtx, record, req.SponsorStatus, req.SponsorReviewRemark)
-	}, xAsync.WithName("MAIL"))
+	}, async.WithTaskName("MAIL")); asyncErr != nil {
+		l.log.SugarWarn(ctx, "异步发送邮件任务提交失败", "error", asyncErr.Error())
+	}
 
 	return nil
 }
 
 // ListMine 获取当前用户名下的赞助记录列表
-func (l *SponsorRecordLogic) ListMine(ctx context.Context, userID xSnowflake.SnowflakeID, req *apiSponsor.SponsorUserQueryRequest) (*base.PaginationResponse[apiSponsor.RecordEntityResponse], *xError.Error) {
+func (l *SponsorRecordLogic) ListMine(ctx context.Context, userID snowflake.SnowflakeID, req *apiSponsor.SponsorUserQueryRequest) (*base.PaginationResponse[apiSponsor.RecordEntityResponse], *apperr.Error) {
 	if req.Page <= 0 {
 		req.Page = 1
 	}
@@ -379,20 +389,20 @@ func (l *SponsorRecordLogic) ListMine(ctx context.Context, userID xSnowflake.Sno
 }
 
 // GetMine 获取当前用户名下的赞助记录详情（含归属校验）
-func (l *SponsorRecordLogic) GetMine(ctx context.Context, userID xSnowflake.SnowflakeID, recordID xSnowflake.SnowflakeID) (*apiSponsor.RecordEntityResponse, *xError.Error) {
+func (l *SponsorRecordLogic) GetMine(ctx context.Context, userID snowflake.SnowflakeID, recordID snowflake.SnowflakeID) (*apiSponsor.RecordEntityResponse, *apperr.Error) {
 	record, found, xErr := l.repo.record.GetDetailByID(ctx, recordID)
 	if xErr != nil {
 		return nil, xErr
 	}
 	// 不存在或不归属当前用户时一律返回 NotFound，避免泄露他人赞助信息
 	if !found || record.UserID == nil || *record.UserID != userID {
-		return nil, xError.NewError(ctx, xError.NotFound, "赞助记录不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "赞助记录不存在")
 	}
 	return buildRecordEntityResponse(record), nil
 }
 
 // UpdateMine 更新当前用户名下的赞助记录（仅展示类基础字段，审核状态与金额/渠道保持不变）
-func (l *SponsorRecordLogic) UpdateMine(ctx context.Context, userID xSnowflake.SnowflakeID, recordID xSnowflake.SnowflakeID, req *apiSponsor.SponsorUserUpdateRequest) (*apiSponsor.RecordEntityResponse, *xError.Error) {
+func (l *SponsorRecordLogic) UpdateMine(ctx context.Context, userID snowflake.SnowflakeID, recordID snowflake.SnowflakeID, req *apiSponsor.SponsorUserUpdateRequest) (*apiSponsor.RecordEntityResponse, *apperr.Error) {
 	// 先做归属校验（非本人一律 NotFound）
 	origin, xErr := l.GetMine(ctx, userID, recordID)
 	if xErr != nil {
@@ -428,7 +438,7 @@ func (l *SponsorRecordLogic) UpdateMine(ctx context.Context, userID xSnowflake.S
 		return nil, xErr
 	}
 	if !found {
-		return nil, xError.NewError(ctx, xError.NotFound, "赞助记录不存在", false)
+		return nil, apperr.New(httpresult.NotFound, "赞助记录不存在")
 	}
 	return buildRecordEntityResponse(updated), nil
 }
@@ -437,10 +447,10 @@ func (l *SponsorRecordLogic) UpdateMine(ctx context.Context, userID xSnowflake.S
 //
 // 此函数应在 xAsync 异步任务中调用，ctx 为解耦后的独立上下文，不会阻断主流程
 func (l *SponsorRecordLogic) sendApplyNotification(ctx context.Context, record *entity.SponsorRecord) {
-	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
+	logger := resolveLogicNamedLogger(ctx, "MAIL")
 
 	// 获取配置
-	config, xerr := xCtxUtil.Get[*base.BambooConfig](ctx, constants.ContextCustomConfig)
+	config, xerr := application.Get[*base.BambooConfig](ctx, constants.ContextCustomConfig)
 	if xerr != nil {
 		logger.Warn(ctx, "无法获取配置，跳过发送申请通知邮件")
 		return
@@ -489,7 +499,7 @@ func (l *SponsorRecordLogic) sendApplyNotification(ctx context.Context, record *
 //
 // 此函数应在 xAsync 异步任务中调用，ctx 为解耦后的独立上下文，不会阻断主流程
 func (l *SponsorRecordLogic) sendStatusNotification(ctx context.Context, record *entity.SponsorRecord, status int, reviewRemark string) {
-	logger := xLog.WithName(xLog.NamedLOGC, "MAIL")
+	logger := resolveLogicNamedLogger(ctx, "MAIL")
 
 	// 检查赞助记录是否有邮箱
 	if record.Email == nil || *record.Email == "" {

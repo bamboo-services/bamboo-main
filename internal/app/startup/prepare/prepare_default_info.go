@@ -15,9 +15,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
 	"github.com/bamboo-services/bamboo-main/internal/entity"
-
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
 	"gorm.io/gorm"
 )
 
@@ -46,12 +45,8 @@ var defaultInfoConfigs = []struct {
 	{Key: "group.builtin.invalid.description", Value: ""},
 }
 
-// DefaultInfo 初始化默认站点信息配置的 xOptionDB.PrepareFunc。
-//
-// 幂等：按 key 跳过已存在的条目，仅写入缺失项。失败时返回 error。
-func DefaultInfo(ctx context.Context, db *gorm.DB) error {
-	log := xLog.WithName(xLog.NamedINIT)
-
+// DefaultInfo 初始化默认站点信息配置（幂等写入缺失项）。
+func DefaultInfo(ctx context.Context, db *gorm.DB, logger *logging.Logger) error {
 	for _, item := range defaultInfoConfigs {
 		var existing entity.System
 		err := db.WithContext(ctx).Where("key = ?", item.Key).First(&existing).Error
@@ -68,6 +63,8 @@ func DefaultInfo(ctx context.Context, db *gorm.DB) error {
 		}
 	}
 
-	log.Info(ctx, "默认站点信息配置初始化完成")
+	if logger != nil {
+		logger.WithName(logging.NamedINIT).Info(ctx, "默认站点信息配置初始化完成")
+	}
 	return nil
 }

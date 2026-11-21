@@ -12,7 +12,7 @@
 package apiSponsor
 
 import (
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 	"time"
 
 	"github.com/bamboo-services/bamboo-main/internal/models/base"
@@ -20,7 +20,7 @@ import (
 
 // ChannelIDRequest 赞助渠道路径参数
 type ChannelIDRequest struct {
-	ID xSnowflake.SnowflakeID `uri:"id" binding:"required"`
+	ID snowflake.SnowflakeID `uri:"id" binding:"required"`
 }
 
 // ChannelAddRequest 添加赞助渠道请求
@@ -65,25 +65,25 @@ type ChannelPageRequest struct {
 
 // ChannelEntityResponse 赞助渠道实体响应
 type ChannelEntityResponse struct {
-	ID           xSnowflake.SnowflakeID `json:"id"`
-	Name         string                 `json:"name"`
-	Icon         *string                `json:"icon"`
-	Description  *string                `json:"description"`
-	SortOrder    int                    `json:"sort_order"`
-	Status       bool                   `json:"status"`
-	SponsorCount int                    `json:"sponsor_count"`
-	CreatedAt    time.Time              `json:"created_at"`
-	UpdatedAt    time.Time              `json:"updated_at"`
+	ID           snowflake.SnowflakeID `json:"id"`
+	Name         string                `json:"name"`
+	Icon         *string               `json:"icon"`
+	Description  *string               `json:"description"`
+	SortOrder    int                   `json:"sort_order"`
+	Status       bool                  `json:"status"`
+	SponsorCount int                   `json:"sponsor_count"`
+	CreatedAt    time.Time             `json:"created_at"`
+	UpdatedAt    time.Time             `json:"updated_at"`
 }
 
 // ChannelListItemResponse 赞助渠道列表条目响应
 type ChannelListItemResponse struct {
-	ID           xSnowflake.SnowflakeID `json:"id"`
-	Name         string                 `json:"name"`
-	Icon         *string                `json:"icon"`
-	SortOrder    int                    `json:"sort_order"`
-	Status       bool                   `json:"status"`
-	SponsorCount int                    `json:"sponsor_count"`
+	ID           snowflake.SnowflakeID `json:"id"`
+	Name         string                `json:"name"`
+	Icon         *string               `json:"icon"`
+	SortOrder    int                   `json:"sort_order"`
+	Status       bool                  `json:"status"`
+	SponsorCount int                   `json:"sponsor_count"`
 }
 
 // ChannelAddResponse 添加渠道响应
@@ -125,15 +125,15 @@ type ChannelDeleteConflictResponse struct {
 
 // ChannelDeleteConflictRecordItem 删除赞助渠道时的冲突记录条目
 type ChannelDeleteConflictRecordItem struct {
-	ID       xSnowflake.SnowflakeID `json:"id"`
-	Nickname string                 `json:"nickname"`
-	Amount   int64                  `json:"amount"`
+	ID       snowflake.SnowflakeID `json:"id"`
+	Nickname string                `json:"nickname"`
+	Amount   int64                 `json:"amount"`
 }
 
 // ChannelDeleteConflictInfo 删除冲突的详细信息
 type ChannelDeleteConflictInfo struct {
-	ChannelID     xSnowflake.SnowflakeID `json:"channel_id"`     // 渠道ID
-	ChannelName   string                 `json:"channel_name"`   // 渠道名称
-	TotalSponsors int                    `json:"total_sponsors"` // 总赞助记录数量
-	DisplayCount  int                    `json:"display_count"`  // 显示的赞助记录数量（最多10个）
+	ChannelID     snowflake.SnowflakeID `json:"channel_id"`     // 渠道ID
+	ChannelName   string                `json:"channel_name"`   // 渠道名称
+	TotalSponsors int                   `json:"total_sponsors"` // 总赞助记录数量
+	DisplayCount  int                   `json:"display_count"`  // 显示的赞助记录数量（最多10个）
 }

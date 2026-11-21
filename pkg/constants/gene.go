@@ -10,18 +10,18 @@
 package constants
 
 import (
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 )
 
-// 业务级 Gene 基因常量（区间 16-63，由 xSnowflake 预留给业务自定义）。
+// 业务级 Gene 基因常量（区间 16-63，由 snowflake 预留给业务自定义）。
 //
 // 基因类型用于雪花 ID 生成时按实体类型做命名空间隔离，
 // 不同实体的 ID 不会在全局冲突，便于跨表识别 ID 归属。
-// 系统级实体（User/Config/Log）复用 xSnowflake 内置 GeneUser/GeneConfig/GeneLog。
+// 系统级实体（User/Config/Log）复用 snowflake 内置 GeneUser/GeneConfig/GeneLog。
 const (
-	GeneLink           xSnowflake.Gene = 16 // 友情链接实体
-	GeneLinkGroup      xSnowflake.Gene = 17 // 友链分组实体
-	GeneLinkColor      xSnowflake.Gene = 18 // 友链颜色实体
-	GeneSponsorChannel xSnowflake.Gene = 19 // 赞助渠道实体
-	GeneSponsorRecord  xSnowflake.Gene = 20 // 赞助记录实体
+	GeneLink           snowflake.Gene = 16 // 友情链接实体
+	GeneLinkGroup      snowflake.Gene = 17 // 友链分组实体
+	GeneLinkColor      snowflake.Gene = 18 // 友链颜色实体
+	GeneSponsorChannel snowflake.Gene = 19 // 赞助渠道实体
+	GeneSponsorRecord  snowflake.Gene = 20 // 赞助记录实体
 )

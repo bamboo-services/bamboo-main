@@ -12,17 +12,14 @@ package logcHelper
 import (
 	"strconv"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 )
 
-// ParseSnowflakeID 将字符串解析为 xSnowflake.SnowflakeID。
-//
-// 用于 handler 层路径参数到实体主键类型的统一转换，
-// 替代直接 strconv.ParseInt 返回 int64 后再做类型转换的写法。
-func ParseSnowflakeID(s string) (xSnowflake.SnowflakeID, error) {
+// ParseSnowflakeID 将字符串解析为 snowflake.SnowflakeID。
+func ParseSnowflakeID(s string) (snowflake.SnowflakeID, error) {
 	id, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		return 0, err
 	}
-	return xSnowflake.SnowflakeID(id), nil
+	return snowflake.SnowflakeID(id), nil
 }

@@ -10,8 +10,8 @@
 package entity
 
 import (
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
-	xModels "github.com/bamboo-services/bamboo-base-go/major/models"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/plugins/database/v2/models"
 
 	bConst "github.com/bamboo-services/bamboo-main/pkg/constants"
 )
@@ -22,14 +22,14 @@ import (
 // 高级配色（Type=1）需主/副/悬停三色、渐变渲染；
 // 炫彩为系统内置颜色（不落库），通过保留 ID（constants.BuiltinFancyColorID）表达。
 type LinkColor struct {
-	xModels.BaseEntity         // 嵌入基础实体（SnowflakeID 主键 + timestamptz 时间戳）
-	Type               int     `json:"type" gorm:"type:bigint;default:0;comment:颜色类型（0: 普通, 1: 高级）"`                    // 颜色类型
-	Name               string  `json:"name" gorm:"type:varchar(50);not null;comment:颜色名称"`                             // 颜色名称
-	PrimaryColor       *string `json:"primary_color,omitempty" gorm:"type:varchar(9);comment:主颜色（如#FF0000或#FF0000FF）"` // 主颜色
-	SubColor           *string `json:"sub_color,omitempty" gorm:"type:varchar(9);comment:副颜色"`                         // 副颜色
-	HoverColor         *string `json:"hover_color,omitempty" gorm:"type:varchar(9);comment:悬停颜色"`                      // 悬停颜色
-	SortOrder          int     `json:"sort_order" gorm:"type:int;default:0;comment:颜色排序"`                              // 颜色排序
-	Status             bool    `json:"status" gorm:"type:boolean;default:true;comment:颜色状态（false: 禁用, true: 启用）"`      // 颜色状态
+	models.BaseEntity         // 嵌入基础实体（SnowflakeID 主键 + timestamptz 时间戳）
+	Type              int     `json:"type" gorm:"type:bigint;default:0;comment:颜色类型（0: 普通, 1: 高级）"`                   // 颜色类型
+	Name              string  `json:"name" gorm:"type:varchar(50);not null;comment:颜色名称"`                             // 颜色名称
+	PrimaryColor      *string `json:"primary_color,omitempty" gorm:"type:varchar(9);comment:主颜色（如#FF0000或#FF0000FF）"` // 主颜色
+	SubColor          *string `json:"sub_color,omitempty" gorm:"type:varchar(9);comment:副颜色"`                         // 副颜色
+	HoverColor        *string `json:"hover_color,omitempty" gorm:"type:varchar(9);comment:悬停颜色"`                      // 悬停颜色
+	SortOrder         int     `json:"sort_order" gorm:"type:int;default:0;comment:颜色排序"`                              // 颜色排序
+	Status            bool    `json:"status" gorm:"type:boolean;default:true;comment:颜色状态（false: 禁用, true: 启用）"`      // 颜色状态
 
 	// 关联关系
 	// 注意：constraint:"-" 跳过数据库外键约束——炫彩为内置虚拟颜色（不落库），
@@ -37,8 +37,8 @@ type LinkColor struct {
 	LinksFKey []*LinkFriend `json:"links_f_key,omitempty" gorm:"foreignKey:ColorID;references:ID;constraint:-;comment:友链外键"` // 友链外键，关联 LinkFriend 类型
 }
 
-// GetGene 返回 xSnowflake.Gene，用于标识该实体在 ID 生成时使用的基因类型。
-func (_ *LinkColor) GetGene() xSnowflake.Gene {
+// GetGene 返回 snowflake.Gene，用于标识该实体在 ID 生成时使用的基因类型。
+func (*LinkColor) GetGene() snowflake.Gene {
 	return bConst.GeneLinkColor
 }
 
@@ -48,7 +48,7 @@ func (_ *LinkColor) GetGene() xSnowflake.Gene {
 // 表达炫彩选项，ID 固定为 constants.BuiltinFancyColorID（雪花 ID 空间之外的保留值）。
 func NewFancyColor() *LinkColor {
 	return &LinkColor{
-		BaseEntity: xModels.BaseEntity{ID: bConst.BuiltinFancyColorID},
+		BaseEntity: models.BaseEntity{ID: bConst.BuiltinFancyColorID},
 		Name:       "炫彩",
 		SortOrder:  0,
 		Status:     true,

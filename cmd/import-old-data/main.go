@@ -36,7 +36,7 @@ import (
 	"strings"
 	"time"
 
-	xSnowflake "github.com/bamboo-services/bamboo-base-go/common/snowflake"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/snowflake"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
 	"gorm.io/driver/postgres"
@@ -51,28 +51,28 @@ import (
 // datacenter=7 / node=3 与当前库种子数据（bm_system / bm_system_user）反推一致。
 // ----------------------------------------------------------------------------
 const (
-	snowflakeEpoch  int64 = 1690214400000
-	timestampShift        = 22
-	geneShift             = 16
-	datacenterShift       = 13
-	nodeShift             = 10
-	sequenceBits          = 10
-	maxSequence           = 1023
-	datacenterID          = 7
-	nodeID                = 3
+	snowflakeEpoch  = 1690214400000
+	timestampShift  = 22
+	geneShift       = 16
+	datacenterShift = 13
+	nodeShift       = 10
+	sequenceBits    = 10
+	maxSequence     = 1023
+	datacenterID    = 7
+	nodeID          = 3
 	// builtinGroupCount 内置分组数量（已失效分组不参与排序持久化），迁移时旧分组排序值直接沿用。
 	builtinGroupCount = 0
 )
 
-// snowflakeID 按 xSnowflake 位布局构造指定时间的雪花 ID。
-func snowflakeID(ts time.Time, gene xSnowflake.Gene, seq int64) xSnowflake.SnowflakeID {
+// snowflakeID 按 snowflake 位布局构造指定时间的雪花 ID。
+func snowflakeID(ts time.Time, gene snowflake.Gene, seq int64) snowflake.SnowflakeID {
 	ms := ts.UnixMilli()
 	v := ((ms - snowflakeEpoch) << timestampShift) |
 		(int64(gene) << geneShift) |
 		(datacenterID << datacenterShift) |
 		(nodeID << nodeShift) |
 		(seq & maxSequence)
-	return xSnowflake.SnowflakeID(v)
+	return snowflake.SnowflakeID(v)
 }
 
 // ----------------------------------------------------------------------------
@@ -341,7 +341,7 @@ func run() error {
 		}
 
 		// 5.1 颜色：旧 id -> 新雪花 ID
-		colorMap := make(map[int64]xSnowflake.SnowflakeID, len(colors))
+		colorMap := make(map[int64]snowflake.SnowflakeID, len(colors))
 		gen := &seqGen{}
 		for _, c := range colors {
 			nid := snowflakeID(c.createdAt, constants.GeneLinkColor, gen.next(c.createdAt.UnixMilli()))
@@ -359,7 +359,7 @@ func run() error {
 		}
 
 		// 5.2 分组：旧 id -> 新雪花 ID
-		groupMap := make(map[int64]xSnowflake.SnowflakeID, len(groups))
+		groupMap := make(map[int64]snowflake.SnowflakeID, len(groups))
 		gen = &seqGen{}
 		for _, g := range groups {
 			nid := snowflakeID(g.createdAt, constants.GeneLinkGroup, gen.next(g.createdAt.UnixMilli()))
@@ -380,9 +380,9 @@ func run() error {
 		}
 
 		// 5.3 查询 super_admin（作者友链归属）
-		var adminID xSnowflake.SnowflakeID
+		var adminID snowflake.SnowflakeID
 		var adminUser struct {
-			ID xSnowflake.SnowflakeID
+			ID snowflake.SnowflakeID
 		}
 		if err := tx.Raw(`SELECT id FROM bm_system_user WHERE username = 'super_admin' LIMIT 1`).Scan(&adminUser).Error; err != nil {
 			return fmt.Errorf("查询 super_admin 失败: %w", err)

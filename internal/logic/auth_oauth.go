@@ -22,20 +22,21 @@ import (
 	logcHelper "github.com/bamboo-services/bamboo-main/internal/logic/helper"
 	"github.com/bamboo-services/bamboo-main/pkg/constants"
 
-	xError "github.com/bamboo-services/bamboo-base-go/common/error"
-	xLog "github.com/bamboo-services/bamboo-base-go/common/log"
-	xUtil "github.com/bamboo-services/bamboo-base-go/common/utility"
-	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/logic"
-	bSdkModels "github.com/phalanx-labs/beacon-sso-sdk/models"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/toolkit"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/bind"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
+	bSdkLogic "github.com/phalanx-labs/beacon-sso-sdk/v2/logic"
+	bSdkModels "github.com/phalanx-labs/beacon-sso-sdk/v2/models"
 )
 
 // LoginByOAuth 通过 OAuth 登录，同步 OAuth 用户到本地账户、创建本地会话并基于 introspection 校正访问令牌过期时间。
 //
 // 与密码登录一致，SSO 登录的 access token 同样写入本地 Redis 会话，使后续鉴权
 // 中间件可统一通过会话校验，不再每请求回查 SSO Userinfo。
-func (a *AuthLogic) LoginByOAuth(ctx context.Context, userinfo *bSdkModels.OAuthUserinfo, accessToken string, meta logcHelper.SessionMeta) (*entity.SystemUser, string, *time.Time, *time.Time, *xError.Error) {
+func (a *AuthLogic) LoginByOAuth(ctx context.Context, userinfo *bSdkModels.OAuthUserinfo, accessToken string, meta logcHelper.SessionMeta) (*entity.SystemUser, string, *time.Time, *time.Time, *apperr.Error) {
 	if accessToken == "" {
-		return nil, "", nil, nil, xError.NewError(ctx, xError.ParameterEmpty, "访问令牌不能为空", false)
+		return nil, "", nil, nil, apperr.New(httpresult.ParameterEmpty, "访问令牌不能为空")
 	}
 
 	user, xErr := a.SyncOAuthUser(ctx, userinfo)
@@ -49,7 +50,7 @@ func (a *AuthLogic) LoginByOAuth(ctx context.Context, userinfo *bSdkModels.OAuth
 	oauthLogic := bSdkLogic.NewBusiness(ctx)
 	introspection, introspectionErr := oauthLogic.Introspection(ctx, "access_token", accessToken)
 	if introspectionErr != nil {
-		xLog.WithName(xLog.NamedLOGC, "AUTH").Warn(ctx, fmt.Sprintf("OAuth introspection 获取失败: %v", introspectionErr))
+		a.log.Warn(ctx, fmt.Sprintf("OAuth introspection 获取失败: %v", introspectionErr))
 	} else if introspection != nil && introspection.Exp > 0 {
 		expiredAt = time.Unix(introspection.Exp, 0)
 	}
@@ -70,9 +71,9 @@ func (a *AuthLogic) LoginByOAuth(ctx context.Context, userinfo *bSdkModels.OAuth
 }
 
 // SyncOAuthUser 同步 OAuth 用户到本地账户，按 sub/邮箱匹配既有用户或创建新账户并更新资料。
-func (a *AuthLogic) SyncOAuthUser(ctx context.Context, userinfo *bSdkModels.OAuthUserinfo) (*entity.SystemUser, *xError.Error) {
+func (a *AuthLogic) SyncOAuthUser(ctx context.Context, userinfo *bSdkModels.OAuthUserinfo) (*entity.SystemUser, *apperr.Error) {
 	if userinfo == nil || strings.TrimSpace(userinfo.Sub) == "" {
-		return nil, xError.NewError(ctx, xError.ParameterError, "OAuth 用户标识无效", false)
+		return nil, apperr.New(bind.ParameterError, "OAuth 用户标识无效")
 	}
 
 	var user *entity.SystemUser
@@ -85,7 +86,7 @@ func (a *AuthLogic) SyncOAuthUser(ctx context.Context, userinfo *bSdkModels.OAut
 
 	if found {
 		if user.Status == constants.StatusInactive {
-			return nil, xError.NewError(ctx, xError.Forbidden, "用户已被禁用", false)
+			return nil, apperr.New(httpresult.Forbidden, "用户已被禁用")
 		}
 		if xErr := a.updateOAuthProfile(ctx, user, userinfo, &now); xErr != nil {
 			return nil, xErr
@@ -101,10 +102,10 @@ func (a *AuthLogic) SyncOAuthUser(ctx context.Context, userinfo *bSdkModels.OAut
 		}
 		if found {
 			if user.Status == constants.StatusInactive {
-				return nil, xError.NewError(ctx, xError.Forbidden, "用户已被禁用", false)
+				return nil, apperr.New(httpresult.Forbidden, "用户已被禁用")
 			}
 			if user.OAuthUserID != nil && *user.OAuthUserID != "" && *user.OAuthUserID != userinfo.Sub {
-				return nil, xError.NewError(ctx, xError.Unauthorized, "该本地账户已绑定其他 OAuth 用户", false)
+				return nil, apperr.New(httpresult.Unauthorized, "该本地账户已绑定其他 OAuth 用户")
 			}
 			if xErr := a.updateOAuthProfile(ctx, user, userinfo, &now); xErr != nil {
 				return nil, xErr
@@ -114,9 +115,9 @@ func (a *AuthLogic) SyncOAuthUser(ctx context.Context, userinfo *bSdkModels.OAut
 	}
 
 	passwordRaw := fmt.Sprintf("oauth:%s:%d", userinfo.Sub, now.UnixNano())
-	hashedPassword, hashErr := xUtil.Password().EncryptString(passwordRaw)
+	hashedPassword, hashErr := toolkit.EncryptPasswordString(passwordRaw)
 	if hashErr != nil {
-		return nil, xError.NewError(ctx, xError.ServerInternalError, "初始化本地账户密码失败", false, hashErr)
+		return nil, apperr.New(httpresult.InternalError, "初始化本地账户密码失败", hashErr)
 	}
 
 	username, xErr := a.generateUniqueOAuthUsername(ctx, userinfo)
@@ -146,7 +147,7 @@ func (a *AuthLogic) SyncOAuthUser(ctx context.Context, userinfo *bSdkModels.OAut
 	return user, nil
 }
 
-func (a *AuthLogic) updateOAuthProfile(ctx context.Context, user *entity.SystemUser, userinfo *bSdkModels.OAuthUserinfo, now *time.Time) *xError.Error {
+func (a *AuthLogic) updateOAuthProfile(ctx context.Context, user *entity.SystemUser, userinfo *bSdkModels.OAuthUserinfo, now *time.Time) *apperr.Error {
 	updates := map[string]any{
 		"oauth_user_id": userinfo.Sub,
 		"last_login_at": now,
@@ -182,7 +183,7 @@ func (a *AuthLogic) updateOAuthProfile(ctx context.Context, user *entity.SystemU
 	return nil
 }
 
-func (a *AuthLogic) generateUniqueOAuthUsername(ctx context.Context, userinfo *bSdkModels.OAuthUserinfo) (string, *xError.Error) {
+func (a *AuthLogic) generateUniqueOAuthUsername(ctx context.Context, userinfo *bSdkModels.OAuthUserinfo) (string, *apperr.Error) {
 	base := sanitizeOAuthIdentifier(userinfo.PreferredUsername)
 	if base == "" {
 		base = sanitizeOAuthIdentifier(userinfo.Nickname)
@@ -217,7 +218,7 @@ func (a *AuthLogic) generateUniqueOAuthUsername(ctx context.Context, userinfo *b
 		}
 	}
 
-	return "", xError.NewError(ctx, xError.ServerInternalError, "生成唯一用户名失败", false)
+	return "", apperr.New(httpresult.InternalError, "生成唯一用户名失败")
 }
 
 func (a *AuthLogic) resolveOAuthEmail(userinfo *bSdkModels.OAuthUserinfo) string {

@@ -14,14 +14,13 @@ package route
 import (
 	"context"
 
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/apperr"
+	"github.com/bamboo-services/bamboo-base-go/foundation/v2/env"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	"github.com/bamboo-services/bamboo-main/internal/metrics"
 	"github.com/bamboo-services/bamboo-main/internal/service/screenshot"
-
-	xEnv "github.com/bamboo-services/bamboo-base-go/defined/env"
-	xMiddle "github.com/bamboo-services/bamboo-base-go/major/middleware"
-	xRoute "github.com/bamboo-services/bamboo-base-go/major/route"
 	"github.com/gin-gonic/gin"
-	bSdkRoute "github.com/phalanx-labs/beacon-sso-sdk/route"
+	bSdkRoute "github.com/phalanx-labs/beacon-sso-sdk/v2/route"
 )
 
 type route struct {
@@ -29,30 +28,35 @@ type route struct {
 	context context.Context
 }
 
-// NewRoute 路由注册器，装配中间件链与各领域子路由
+// NewRoute 路由注册器，装配业务中间件链与各领域子路由（Recovery/Response/CORS/Binder 已由 webgin 插件挂载）
 func NewRoute(ctx context.Context, serve *gin.Engine) {
 	r := &route{
 		engine:  serve,
 		context: ctx,
 	}
 
-	r.engine.NoMethod(xRoute.NoMethod)
+	r.engine.NoMethod(func(c *gin.Context) {
+		httpresult.Error(c, apperr.New(httpresult.MethodNotAllowed, "请求方法不被允许"))
+	})
 	r.engine.NoRoute(noRouteHandler)
 
-	r.engine.Use(xMiddle.ResponseMiddleware)
-	r.engine.Use(xMiddle.ReleaseAllCors)
-	r.engine.Use(xMiddle.AllowOptionRequest)
 	r.engine.Use(metrics.Middleware())
 
-	if xEnv.GetEnvBool(xEnv.Debug, false) {
-		swaggerRegister(r.engine)
+	if debugVal, ok := env.Lookup(env.Debug); ok && !debugVal.IsEmpty() {
+		if debug, err := debugVal.Bool(); err == nil && debug {
+			swaggerRegister(r.engine)
+		}
 	}
 
-	// Prometheus 指标端点（根路径，公开无鉴权；promhttp 直写，不经 BaseResponse）
+	// Prometheus 指标端点（根路径，公开无鉴权；promhttp 直写，不经 envelope.Response）
 	r.engine.GET("/metrics", metrics.Handler())
 
 	// 友链站点截图静态资源：运行时生成于 SCREENSHOT_DIR，独立于内嵌前端资源
-	r.engine.Static("/screenshots", xEnv.GetEnvString(screenshot.EnvScreenshotDir, "data/screenshots"))
+	screenshotDir := "data/screenshots"
+	if dirVal, ok := env.Lookup(screenshot.EnvScreenshotDir); ok && !dirVal.IsEmpty() {
+		screenshotDir = dirVal.String()
+	}
+	r.engine.Static("/screenshots", screenshotDir)
 
 	oauthRoute := bSdkRoute.NewRoute(r.context)
 

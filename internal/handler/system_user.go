@@ -14,9 +14,8 @@ package handler
 import (
 	apiAuth "github.com/bamboo-services/bamboo-main/api/auth"
 
-	xResult "github.com/bamboo-services/bamboo-base-go/major/result"
-	xUtil "github.com/bamboo-services/bamboo-base-go/major/utility"
-	xValid "github.com/bamboo-services/bamboo-base-go/major/validator"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/bind"
+	"github.com/bamboo-services/bamboo-base-go/plugins/web-gin/v2/httpresult"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,30 +33,26 @@ import (
 // @Param status query int false "用户状态 0:禁用 1:启用" Enums(0,1)
 // @Param sort_by query string false "排序字段" Enums(created_at, updated_at, username, email, last_login_at)
 // @Param sort_order query string false "排序方式" Enums(asc, desc)
-// @Success 200 {object} xBase.BaseResponse{data=apiAuth.UserListResponse} "获取成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response{data=apiAuth.UserListResponse} "获取成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/users [GET]
 func (h *SystemUserHandler) List(c *gin.Context) {
-	var req apiAuth.UserQueryRequest
-
-	// 绑定查询参数
-	bindErr := c.ShouldBindQuery(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiAuth.UserQueryRequest{}).Query()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	resp, err := h.service.systemUserLogic.ListUsers(c.Request.Context(), &req)
+	resp, err := h.service.systemUserLogic.ListUsers(c.Request.Context(), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.SuccessHasData(c, "获取成功", resp)
+	httpresult.SuccessWithData(c, "获取成功", resp)
 }
 
 // UpdateStatus 启用/禁用用户
@@ -70,31 +65,29 @@ func (h *SystemUserHandler) List(c *gin.Context) {
 // @Security Bearer
 // @Param id path int true "用户ID"
 // @Param request body apiAuth.UserStatusRequest true "更新用户状态请求"
-// @Success 200 {object} xBase.BaseResponse "更新成功"
-// @Failure 400 {object} xBase.BaseResponse "请求参数错误"
-// @Failure 401 {object} xBase.BaseResponse "未认证"
-// @Failure 404 {object} xBase.BaseResponse "用户不存在"
-// @Failure 500 {object} xBase.BaseResponse "服务器内部错误"
+// @Success 200 {object} envelope.Response "更新成功"
+// @Failure 400 {object} envelope.Response "请求参数错误"
+// @Failure 401 {object} envelope.Response "未认证"
+// @Failure 404 {object} envelope.Response "用户不存在"
+// @Failure 500 {object} envelope.Response "服务器内部错误"
 // @Router /api/v1/admin/users/{id}/status [PATCH]
 func (h *SystemUserHandler) UpdateStatus(c *gin.Context) {
-	uri := xUtil.Bind(c, &apiAuth.UserIDRequest{}).URI()
+	uri := bind.Bind(c, &apiAuth.UserIDRequest{}).URI()
 	if uri == nil {
 		return
 	}
 
-	var req apiAuth.UserStatusRequest
-	bindErr := c.ShouldBindJSON(&req)
-	if bindErr != nil {
-		xValid.HandleValidationError(c, bindErr)
+	req := bind.Bind(c, &apiAuth.UserStatusRequest{}).Data()
+	if req == nil {
 		return
 	}
 
 	// 调用服务层
-	if err := h.service.systemUserLogic.UpdateUserStatus(c.Request.Context(), uri.ID, &req); err != nil {
+	if err := h.service.systemUserLogic.UpdateUserStatus(c.Request.Context(), uri.ID, req); err != nil {
 		_ = c.Error(err)
 		return
 	}
 
 	// 返回成功响应
-	xResult.Success(c, "状态更新成功")
+	httpresult.Success(c, "状态更新成功")
 }
