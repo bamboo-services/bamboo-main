@@ -14,6 +14,7 @@ package route
 import (
 	"github.com/bamboo-services/bamboo-base-go/foundation/v2/env"
 	"github.com/bamboo-services/bamboo-main/docs"
+	"github.com/bamboo-services/bamboo-main/pkg/version"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -25,7 +26,7 @@ func swaggerRegister(r gin.IRouter) {
 	if val, ok := env.Lookup(env.Host); ok && !val.IsEmpty() {
 		host = val.String()
 	}
-	port := "5566"
+	port := "23333"
 	if val, ok := env.Lookup(env.Port); ok && !val.IsEmpty() {
 		port = val.String()
 	}
@@ -33,7 +34,7 @@ func swaggerRegister(r gin.IRouter) {
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	docs.SwaggerInfo.Title = "竹叶"
 	docs.SwaggerInfo.Description = "筱锋的个人主页程序"
-	docs.SwaggerInfo.Version = "v1.0.0"
+	docs.SwaggerInfo.Version = version.Resolve()
 	docs.SwaggerInfo.Host = host + ":" + port
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 

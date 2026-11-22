@@ -434,7 +434,7 @@ func buildFailureUpdates(isFailure int, failReason string, invalidGroupID *snowf
 // 排序语义「数字越小权重越大」：章节序遵循分组排序值（bm_link_group.sort_order ASC，
 // 未分组 NULL 经 NULLS LAST 置底），章内遵循友链排序值（bm_link_friend.sort_order ASC），
 // 同序回退创建时间倒序。LEFT JOIN 后 status 于两表同名，条件列一律带表限定；
-// 表名含 bm_ 前缀且为单数（xOptionDB.WithTablePrefix + SingularTable，见 main.go）。
+// 表名含 bm_ 前缀且为单数（startup.BuildGormConfig + SingularTable，见 main.go）。
 func (r *LinkRepo) ListPublic(ctx context.Context, groupID *snowflake.SnowflakeID, statuses []int, normalFail int, tx *gorm.DB) ([]entity.LinkFriend, *apperr.Error) {
 	r.log.Info(ctx, "ListPublic - 查询公开友情链接")
 

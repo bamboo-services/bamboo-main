@@ -19,7 +19,46 @@ import (
 	"github.com/bamboo-services/bamboo-base-go/application/v2/builtin"
 	"github.com/bamboo-services/bamboo-base-go/foundation/v2/env"
 	"github.com/bamboo-services/bamboo-base-go/foundation/v2/logging"
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
+
+func isAppDebug() bool {
+	if val, ok := env.Lookup(env.Debug); ok && !val.IsEmpty() {
+		if b, err := val.Bool(); err == nil {
+			return b
+		}
+	}
+	return false
+}
+
+// ConfigureGinMode 根据 APP_DEBUG 同步 Gin 全局运行模式。
+// 若已显式设置 GIN_MODE 环境变量，则尊重用户设置不予覆盖。
+func ConfigureGinMode() {
+	if raw, ok := os.LookupEnv(gin.EnvGinMode); ok && strings.TrimSpace(raw) != "" {
+		return
+	}
+	if isAppDebug() {
+		gin.SetMode(gin.DebugMode)
+		return
+	}
+	gin.SetMode(gin.ReleaseMode)
+}
+
+// BuildGormConfig 从环境变量装配 GORM 配置，固定开启单数表名策略以兼容存量数据表。
+func BuildGormConfig() *gorm.Config {
+	tablePrefix := "bm_"
+	if val, ok := env.Lookup(env.DatabasePrefix); ok && !val.IsEmpty() {
+		tablePrefix = val.String()
+	}
+	return &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			TablePrefix:   tablePrefix,
+			SingularTable: true,
+		},
+	}
+}
 
 // BuildLoggerConfig 从环境变量装配内置受管日志组件配置。
 func BuildLoggerConfig() builtin.LoggerConfig {
@@ -35,12 +74,7 @@ func BuildLoggerConfig() builtin.LoggerConfig {
 		}
 	}
 
-	debug := false
-	if val, ok := env.Lookup(env.Debug); ok && !val.IsEmpty() {
-		if b, err := val.Bool(); err == nil {
-			debug = b
-		}
-	}
+	debug := isAppDebug()
 
 	level := slog.LevelInfo
 	if debug {

@@ -6,7 +6,7 @@
 ## 目录结构
 ```text
 internal/app/startup/
-|- startup.go                  # BuildLoggerConfig / ParseSnowflakeIDs 环境变量装配辅助
+|- startup.go                  # BuildLoggerConfig / BuildGormConfig / ConfigureGinMode / ParseSnowflakeIDs 环境变量装配辅助
 |- config_tool.go              # ConfigTool（ModeTool：EMAIL_ADMIN_EMAIL 业务配置）
 |- migration_tool.go           # MigrationTool（ModeTool：AutoMigrate + prepare 种子）
 `- prepare/                    # 种子数据准备（由 MigrationTool 在 Start 阶段按序调用）

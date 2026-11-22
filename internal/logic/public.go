@@ -18,6 +18,7 @@ import (
 	apiPublic "github.com/bamboo-services/bamboo-main/api/public"
 	"github.com/bamboo-services/bamboo-main/internal/metrics"
 	"github.com/bamboo-services/bamboo-main/internal/repository"
+	"github.com/bamboo-services/bamboo-main/pkg/version"
 
 	"github.com/bamboo-services/bamboo-base-go/application/v2"
 	"github.com/bamboo-services/bamboo-base-go/application/v2/builtin"
@@ -71,8 +72,8 @@ func (p *PublicLogic) HealthCheck(ctx context.Context) (*apiPublic.HealthRespons
 		Status:    "healthy",
 		Timestamp: time.Now(),
 		System: apiPublic.SystemInfo{
-			Version:     "v1.0.0",
-			Environment: "development", // 可以从配置获取
+			Version:     version.Resolve(),
+			Environment: version.ResolveEnvironment(),
 			Platform:    runtime.GOOS,
 			GoVersion:   runtime.Version(),
 		},

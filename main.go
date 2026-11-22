@@ -27,7 +27,6 @@ import (
 	"github.com/bamboo-services/bamboo-base-go/application/v2"
 	"github.com/bamboo-services/bamboo-base-go/application/v2/builtin"
 	"github.com/bamboo-services/bamboo-base-go/foundation/v2/ctxkey"
-	"github.com/bamboo-services/bamboo-base-go/foundation/v2/env"
 	"github.com/bamboo-services/bamboo-base-go/plugins/async/v2"
 	"github.com/bamboo-services/bamboo-base-go/plugins/cache/v2"
 	"github.com/bamboo-services/bamboo-base-go/plugins/cron/v2"
@@ -38,13 +37,12 @@ import (
 	"github.com/joho/godotenv"
 	bSdkConst "github.com/phalanx-labs/beacon-sso-sdk/v2/constant"
 	bSdkStartup "github.com/phalanx-labs/beacon-sso-sdk/v2/startup"
-	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
 )
 
 func main() {
 	// v2 底座不自动加载 .env，入口显式加载（不存在时忽略，兼容容器环境注入）
 	_ = godotenv.Load()
+	startup.ConfigureGinMode()
 
 	app := application.New()
 	regTool := mustRegisterTool(app)
@@ -59,17 +57,9 @@ func main() {
 	// 2. 注册基础设施工具：配置、数据库（PostgreSQL）、缓存、邮件（内嵌模板）、异步池、SSO
 	regTool(startup.NewConfigTool())
 
-	tablePrefix := "bm_"
-	if val, ok := env.Lookup(env.DatabasePrefix); ok && !val.IsEmpty() {
-		tablePrefix = val.String()
-	}
 	regTool(database.New(
 		database.WithAdapter(postgres.FromEnv()),
-		database.WithGormConfig(&gorm.Config{
-			NamingStrategy: schema.NamingStrategy{
-				TablePrefix: tablePrefix,
-			},
-		}),
+		database.WithGormConfig(startup.BuildGormConfig()),
 	))
 
 	regTool(cache.New(cache.FromEnv()))

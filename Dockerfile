@@ -51,9 +51,13 @@ RUN if grep -q 'phalanx-labs/beacon-sso-sdk => /' go.mod; then \
 # 用前端阶段产物覆盖，确保 go:embed all:dist 内嵌最新产物
 COPY --from=frontend-builder /build/resources/frontend/dist /src/resources/frontend/dist
 
+ARG APP_VERSION=dev
+
 # CGO_ENABLED=0 静态编译（pgx / sonic 回退 / gopsutil 均纯 Go，不依赖 cgo）
 # GOOS/GOARCH 不写死，随 golang 镜像目标架构（amd64/arm64）自动匹配，配合 buildx 多平台构建
-RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/bamboo-main .
+RUN CGO_ENABLED=0 go build -trimpath \
+    -ldflags="-s -w -X github.com/bamboo-services/bamboo-main/pkg/version.Version=${APP_VERSION}" \
+    -o /out/bamboo-main .
 
 # ---------- Stage 3: 运行镜像 ----------
 FROM alpine:3.21 AS runtime
@@ -67,8 +71,10 @@ RUN apk add --no-cache \
     tini \
     tzdata
 
-# 截图服务显式指定 chromium 路径；邮件模板/截图目录为相对进程工作目录的路径，固定 WORKDIR=/app
-ENV SCREENSHOT_CHROME_PATH=/usr/bin/chromium \
+# 容器内默认监听 0.0.0.0:23333（与 EXPOSE 23333 对齐）；截图服务显式指定 chromium 路径；邮件模板/截图目录为相对进程工作目录的路径，固定 WORKDIR=/app
+ENV HOST=0.0.0.0 \
+    PORT=23333 \
+    SCREENSHOT_CHROME_PATH=/usr/bin/chromium \
     SCREENSHOT_DIR=data/screenshots \
     TZ=Asia/Shanghai
 
