@@ -13,9 +13,12 @@ import { Outlet, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { Toaster } from '@/components/ui/sonner'
+import { useSitePageTitle } from '@/hooks/use-page-title'
 
-export const Route = createRootRoute({
-  component: () => (
+function RootComponent() {
+  useSitePageTitle()
+
+  return (
     <>
       <Outlet />
       <Toaster />
@@ -31,5 +34,9 @@ export const Route = createRootRoute({
         ]}
       />
     </>
-  ),
+  )
+}
+
+export const Route = createRootRoute({
+  component: RootComponent,
 })
